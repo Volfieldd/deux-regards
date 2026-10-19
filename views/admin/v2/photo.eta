@@ -96,7 +96,8 @@
 <div class="fiche">
   <figure class="fiche-photo">
     <%~ it.picture(P, { sizes: '(min-width: 1181px) calc((100vw - 352px) * 5 / 12), (min-width: 961px) calc((100vw - 323px) * 5 / 12), (min-width: 721px) 420px, 260px', alt: '' }) %>
-    <figcaption><%= [P.place, it.read ? (time ? `${it.read}, ${time}` : it.read) : ''].filter(Boolean).join(' · ') || t('sans lieu ni date') %> · <%= P.width %> × <%= P.height %> px</figcaption>
+    <figcaption><%= [P.place, it.read ? (time ? `${it.read}, ${time}` : it.read) : ''].filter(Boolean).join(' · ') || t('sans lieu ni date') %> · <%= P.width %> × <%= P.height %> px
+      <span class="shot-ro" data-shot><%= t('Prise de vue : {shot}', { shot: it.shot || (it.shotRead ? t('aucune dans l’EXIF de l’original') : t('pas encore lue dans l’original')) }) %></span></figcaption>
   </figure>
 <% if (full || texts) { %>
   <form class="form fiche-form" id="fiche-f" method="post" action="<%= full ? base : `${base}/textes` %>" novalidate data-autosave data-url="<%= base %>/champs">
@@ -166,6 +167,13 @@
 <% if (it.exifAll) { %>    <p class="avert"><%~ ic('alerte') %><span><%~ t('Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent l’heure (et la position GPS), quel que soit ce choix.', { link: `<a href="/admin/images">${E(t('Filigrane et EXIF'))}</a>` }) %></span></p>
 <% } %><% } else if (it.exifAll) { %>    <p class="avert"><%~ ic('alerte') %><span><%~ t('Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent la position GPS de l’original.', { link: `<a href="/admin/images">${E(t('Filigrane et EXIF'))}</a>` }) %></span></p>
 <% } %>
+<% /* Prise de vue sur le site (migration 060) : seulement si l'EXIF de l'original en donne une ; cochée par défaut. Avec le
+      script, la case s'enregistre seule (data-champ) ; sans, show_shot_case dit au serveur qu'elle était là. */
+   if (it.shot) { const showShot = Number(v.show_shot ?? 1) === 1; %>
+    <input type="hidden" name="show_shot_case" value="1">
+    <div class="choix-a"><label><input type="checkbox" name="show_shot" value="1" id="show_shot"<%~ showShot ? ' checked' : '' %> aria-describedby="show_shot-a" data-champ="show_shot" data-label="<%= t('Prise de vue sur le site') %>"><span><%= t('Montrer la prise de vue sur le site') %></span><span class="sec" id="show_shot-a"><%= t('Boîtier, objectif, focale, vitesse, ouverture et ISO, lus dans l’EXIF de l’original (voir sous la photo). Ni le lieu, ni l’heure, ni le numéro de série.') %><% if (it.exifMode === 'shooting') { %> <%= t('Les images servies (métadonnées « Prise de vue ») les portent selon ce choix.') %><% } %></span></label></div>
+<% if (it.exifMode === 'all') { %>    <p class="avert"><%~ ic('alerte') %><span><%~ t('Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent la prise de vue (et la position GPS), quel que soit ce choix.', { link: `<a href="/admin/images">${E(t('Filigrane et EXIF'))}</a>` }) %></span></p>
+<% } %><% } %>
     <h2><%= t('Diffusion') %></h2>
     <div class="champ-a"><label for="watermark"><%= t('Filigrane') %></label><p class="aide" id="watermark-a"><%~ t('Celui des {link}, ou aucun sur cette photo.', { link: `<a href="/admin/images">${E(t('réglages'))}</a>` }) %></p>
       <select id="watermark" name="watermark" aria-describedby="watermark-a" data-champ="watermark" data-label="<%= t('Filigrane') %>"><option value="default"<%~ v.watermark !== 0 && v.watermark !== 'none' ? ' selected' : '' %>><%= t('Selon les réglages') %></option><option value="none"<%~ v.watermark === 0 || v.watermark === 'none' ? ' selected' : '' %>><%= t('Jamais sur cette photo') %></option></select></div>

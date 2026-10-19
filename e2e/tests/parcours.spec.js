@@ -27,7 +27,7 @@ test.describe('parcours d’une photo', () => {
   test.beforeAll(async ({ browser }) => {
     test.setTimeout(180_000);
     const page = await browser.newPage({ storageState: STATE });
-    for (const title of ['Lisière E2E', 'import test', 'Heure E2E', 'import heure']) {
+    for (const title of ['Lisière E2E', 'import test', 'Heure E2E', 'import heure', 'Prise de vue E2E', 'import prise de vue']) {
       while (await page.goto(`/admin/photos?vue=liste&q=${encodeURIComponent(title)}`).then(() => page.locator('.plist li').count())) {
         await page.locator('.plist li a.ttl').first().click();
         await page.getByText('Supprimer cette photo').click();
@@ -198,6 +198,76 @@ test.describe('parcours d’une photo', () => {
     expect(await textOf('/de/photo/heure-e2e')).toMatch(/14:32\s+Uhr/);
     // Ailleurs (la galerie), jamais.
     expect(await textOf('/')).not.toMatch(/14\s*h\s*32/);
+    await pub.close();
+
+    await page.goto(editUrl);
+    await page.getByText('Supprimer cette photo').click();
+    await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
+    await expect(page.locator('.flash[role=status]')).toHaveText('Photo supprimée.');
+  });
+
+  // Prise de vue (EXIF de import-prise-de-vue.jpg : Fujifilm X-T5, XF23mmF1.4, 23 mm, 1/1000 s, f/11, ISO 160 ; plus un GPS,
+  // des numéros de série, un propriétaire, un logiciel et un commentaire qui ne doivent jamais sortir) : import → fiche →
+  // visionneuse v1, v2 et v3 ; montrée par défaut, cachée une fois la case décochée.
+  test('prise de vue : lue à l’import, montrée par défaut dans la visionneuse (v1, v2, v3), cachée par la case', async ({ page, context }) => {
+    test.setTimeout(240_000);
+    const LINE = /Fujifilm X-T5 · XF23mmF1\.4 R LM WR · 23\s+mm · 1\/1000\s+s · f\/11 · ISO\s+160/;
+    const SECRET = /SN-4242|LENS-SN|Jean Dupont|Digital Camera|commentaire secret|Proprietaire Secret|18\s*h\s*52|18:52/;
+    await page.goto('/admin/photos');
+    const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('link', { name: '＋ Importer des photos' }).click()]);
+    await chooser.setFiles('fixtures/import-prise-de-vue.jpg');
+    await expect(page.locator('[data-sum-title]')).toHaveText('1 photo prête sur 1', { timeout: 120_000 });
+    await page.goto(`/admin/photos?statut=draft&vue=liste&q=${encodeURIComponent('import prise de vue')}`);
+    await page.locator('.plist li', { hasText: 'import prise de vue' }).locator('a.ttl').click();
+    const editUrl = page.url();
+    // La fiche : la prise de vue en lecture seule sous l'aperçu, la case cochée au départ.
+    await expect(page.locator('[data-shot]')).toHaveText(new RegExp(`Prise de vue : ${LINE.source}`));
+    const box = page.getByRole('checkbox', { name: 'Montrer la prise de vue sur le site' });
+    await expect(box).toBeChecked();
+    expect(await page.locator('main').innerText()).not.toMatch(/SN-4242|Jean Dupont|commentaire secret/);
+    await page.getByLabel('Titre').fill('Prise de vue E2E');
+    await page.getByLabel('Adresse').fill('');
+    await page.getByLabel('Publiée').check();
+    await page.getByRole('button', { name: 'Enregistrer' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Photo enregistrée.' })).toHaveText('Photo enregistrée.');
+
+    // Un visiteur (v1, le réglage du serveur de test) : une seconde ligne de méta, dans chaque langue.
+    const pub = await context.browser().newPage();
+    const textOf = async url => { await pub.goto(url); return pub.locator('main').innerText(); };
+    for (const url of ['/photo/prise-de-vue-e2e', '/en/photo/prise-de-vue-e2e', '/de/photo/prise-de-vue-e2e']) {
+      const text = await textOf(url);
+      expect(text, url).toMatch(LINE);
+      expect(text, url).not.toMatch(SECRET);
+    }
+    // L'administrateur voit la v2, puis la v3 (vue de sa session) : la ligne « Prise de vue » des données.
+    const csrf = await page.locator('body').getAttribute('data-csrf');
+    const view = vue => page.request.post('/admin/apparence/apercu-v2', { form: { _csrf: csrf, vue, back: '/photo/prise-de-vue-e2e' } });
+    try {
+      for (const vue of ['v2', 'v3']) {
+        await view(vue);
+        await page.goto('/photo/prise-de-vue-e2e');
+        const dd = page.locator('dl.def dt', { hasText: /^Prise de vue$/ }).locator('xpath=following-sibling::dd[1]');
+        await expect(dd, vue).toHaveText(LINE);
+        expect(await page.locator('main').innerText(), vue).not.toMatch(SECRET);
+        await page.goto('/en/photo/prise-de-vue-e2e');
+        await expect(page.locator('dl.def dt', { hasText: /^Camera and settings$/ }), vue).toHaveCount(1);
+        await page.goto('/de/photo/prise-de-vue-e2e');
+        await expect(page.locator('dl.def dt', { hasText: /^Aufnahmedaten$/ }), vue).toHaveCount(1);
+      }
+
+      // Décochée : plus rien, ni en v1 ni en v2.
+      await page.goto(editUrl);
+      await box.uncheck();
+      await page.getByRole('button', { name: 'Enregistrer' }).click();
+      await expect(page.getByRole('status').filter({ hasText: 'Photo enregistrée.' })).toHaveText('Photo enregistrée.');
+      await expect(box).not.toBeChecked();
+      expect(await textOf('/photo/prise-de-vue-e2e')).not.toMatch(/X-T5|ISO\s+160/);
+      await view('v2');
+      await page.goto('/photo/prise-de-vue-e2e');
+      await expect(page.locator('dl.def dt', { hasText: /^Prise de vue$/ })).toHaveCount(0);
+    } finally {
+      await view('suivre');           // la vue de la session revient au réglage, même après un échec
+    }
     await pub.close();
 
     await page.goto(editUrl);

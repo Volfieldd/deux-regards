@@ -33,7 +33,8 @@
 <div class="edit">
   <figure class="preview">
     <%~ it.picture(it.photo, { sizes: '(min-width: 900px) 40vw, 92vw', alt: '' }) %>
-    <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px · <%= it.photo.inventory ? t('inventaire {n}', { n: it.photo.inventory }) : t('numéro d’inventaire à la première publication') %><% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener"><%= t('voir sur le site') %></a><% } %></figcaption>
+    <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px · <%= it.photo.inventory ? t('inventaire {n}', { n: it.photo.inventory }) : t('numéro d’inventaire à la première publication') %><% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener"><%= t('voir sur le site') %></a><% } %>
+      <span class="shot-ro" data-shot><%= t('Prise de vue : {shot}', { shot: it.shot || (it.shotRead ? t('aucune dans l’EXIF de l’original') : t('pas encore lue dans l’original')) }) %></span></figcaption>
   </figure>
 <% if (full) { %>
   <form class="panel form" method="post" action="/admin/photos/<%= it.photo.id %>" novalidate>
@@ -69,6 +70,14 @@
     <label class="inline"><input type="checkbox" name="show_time" value="1"<%~ showTime ? ' checked' : '' %> aria-describedby="show_time-aide"> <%= t('Montrer l’heure sur le site') %> <span class="mono">(<%= fr ? it.photo.taken_time.replace(':', ' h ') : it.photo.taken_time %>)</span></label>
     <p class="hint" id="show_time-aide"><%= t('Avec le lieu, l’heure dit où se trouvaient les personnes photographiées à ce moment-là. Le site ne la montre qu’avec une date au jour.') %><% if (showTime && !/^\d{4}-\d{2}-\d{2}$/.test(it.photo.taken_on || '')) { %> <%= t('Date au mois : l’heure n’est pas montrée.') %><% } %></p>
 <% if (it.exifAll) { %>    <p class="hint warn"><%~ t('Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent l’heure (et la position GPS), quel que soit ce choix.', { link: `<a href="/admin/images">${esc(t('Filigrane & EXIF'))}</a>` }) %></p>
+<% } %><% } %>
+<% /* Prise de vue sur le site (migration 060) : proposée seulement si l'EXIF de l'original en donne une ; cochée par défaut.
+      show_shot_case dit au serveur que la case était là (décochée, le navigateur ne l'envoie pas). */
+   if (it.shot) { const showShot = Number(v.show_shot ?? 1) === 1; %>
+    <input type="hidden" name="show_shot_case" value="1">
+    <label class="inline"><input type="checkbox" name="show_shot" value="1"<%~ showShot ? ' checked' : '' %> aria-describedby="show_shot-aide"> <%= t('Montrer la prise de vue sur le site') %></label>
+    <p class="hint" id="show_shot-aide"><%= t('Boîtier, objectif, focale, vitesse, ouverture et ISO, lus dans l’EXIF de l’original (voir sous la photo). Ni le lieu, ni l’heure, ni le numéro de série.') %><% if (it.exifMode === 'shooting') { %> <%= t('Les images servies (métadonnées « Prise de vue ») les portent selon ce choix.') %><% } %></p>
+<% if (it.exifMode === 'all') { %>    <p class="hint warn"><%~ t('Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent la prise de vue (et la position GPS), quel que soit ce choix.', { link: `<a href="/admin/images">${esc(t('Filigrane & EXIF'))}</a>` }) %></p>
 <% } %><% } %>
     <label><%= t('Légende') %> <textarea name="legend" rows="3" maxlength="2000"><%= v.legend %></textarea></label>
     <%~ include('./_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'legend', label: t('Légende'), max: 2000, rows: 3 }) %>

@@ -50,7 +50,10 @@
 <% if (it.carnet) { %>          <dt><%= t.carnet.post %></dt><dd><a href="<%= it.carnet.href %>"<%~ ctxLang %>><%= it.carnet.title %></a>, <%= t.carnet.photoOf(it.position, it.count) %></dd>
 <% } %>          <dt><%= t.v2.serie %></dt><dd><a href="<%= it.galleryUrl({ serie: p.category_slug }) %>"><%= p.category %></a></dd>
           <dt><%= t.v2.photographer %></dt><dd><a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><% if (it.authorCount) { %>&nbsp;· <%= nb(t.photos(it.authorCount)) %><% } %></dd>
-<% if (kws.length) { %>
+<% /* Prise de vue (MQ-04, lexique) : boîtier, objectif, focale, vitesse, ouverture, ISO, si le photographe la montre
+      (p.shot, server/repo.js). Jamais l'heure ici : elle suit sa propre règle, avec le lieu et la date. */ if (p.shot) { %>
+          <dt><%= t.v2.shot %></dt><dd class="donnee"><%= p.shot %></dd>
+<% } %><% if (kws.length) { %>
           <dt><%= t.search.keywords %></dt><dd><ul class="vis-mots"><% kws.forEach(k => { %><li><% if (it.searchPage) { %><a href="<%= it.u('/recherche') %>?q=<%= encodeURIComponent(k) %>" rel="nofollow"><%= k %></a><% } else { %><%= k %><% } %></li><% }) %></ul></dd>
 <% } %><% /* Numéro d'inventaire (UX-T-05) : donné à la première publication, il ne bouge plus quand l'ordre change ; la
       position « 4 / 10 » sert à la navigation. */ if (p.inventory) { %>

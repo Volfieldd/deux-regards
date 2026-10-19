@@ -244,6 +244,7 @@ dialog.confirm[open]:not(:modal) { position: static; display: block; margin: 0 0
 .fiche-photo { position: sticky; top: 24px; margin: 0; }
 .fiche-photo picture, .fiche-photo img { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--photo-bg); }
 .fiche-photo figcaption { padding: 8px 2px 0; color: var(--ink2); font-size: 12px; }
+.fiche-photo figcaption .shot-ro { display: block; margin-top: 4px; overflow-wrap: anywhere; }
 .fiche-form { display: grid; gap: 18px; min-width: 0; }
 .main .fiche-form h2 { margin: 8px 0 0; font-size: var(--at-h3); font-weight: 500; color: var(--ink2); }
 .fiche-form .hint, .fiche-form .note-a { margin: 0; }

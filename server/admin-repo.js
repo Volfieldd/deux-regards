@@ -3,6 +3,7 @@ import * as cities from './geo/cities.js';
 import { slugify } from './slug.js';
 import { monthYear } from './format.js';
 import { parseFocal } from './point-focal.js';
+import { SHOT_COLUMNS } from './prise-de-vue.js';
 
 // Les deux listes d'ouverture de l'accueil (réglages) : elles suivent le renommage et la suppression d'une photo.
 const HERO_KEYS = ['hero', 'hero_tel'];
@@ -189,7 +190,7 @@ export function createAdminRepo(db) {
     },
 
     // gps : position lue dans l'original ; seule la ville la plus proche est gardée (proposée, pas sur la carte).
-    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null, takenOn = null, takenTime = null, gps = null }) {
+    addPhoto({ title, categoryId, authorId, file, width, height, sha256 = null, sourceName = null, takenOn = null, takenTime = null, gps = null, shot = null }) {
       const position = db.prepare('SELECT COALESCE(MAX(position), -1) + 1 FROM photos').pluck().get();
       const city = gps ? cities.nearest(gps.lat, gps.lon) : null;
       const { lastInsertRowid } = db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, sha256, source_name, taken_on,
@@ -197,6 +198,8 @@ export function createAdminRepo(db) {
         VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`).run(uniqueSlug('photos', title), title, categoryId, authorId, position, file, width, height, sha256, sourceName, takenOn,
         city?.id ?? null, city?.name ?? null, city?.cc ?? null, city?.lat ?? null, city?.lon ?? null, city ? 'gps' : null);
       if (takenTime !== null) db.prepare('UPDATE photos SET taken_time = ? WHERE id = ?').run(takenTime, lastInsertRowid);
+      // Prise de vue (six données de l'EXIF, déjà normalisées) : l'original est lu, le rattrapage n'y reviendra pas.
+      if (shot) db.prepare(`UPDATE photos SET ${SHOT_COLUMNS.map(k => `${k} = @${k}`).join(', ')}, shot_read = 1 WHERE id = @id`).run({ ...Object.fromEntries(SHOT_COLUMNS.map(k => [k, shot[k] ?? null])), id: lastInsertRowid });
       return Number(lastInsertRowid);
     },
 
@@ -224,6 +227,10 @@ export function createAdminRepo(db) {
       // Heure sur le site : une case (seules ses valeurs « cochée » valent 1, toute autre valeur 0), et seulement pour
       // une photo dont l'heure de prise de vue est connue. Le site exige en plus une date au jour (server/repo.js).
       const showTime = truthy(body.show_time) && /^\d{2}:\d{2}$/.test(before?.taken_time || '') ? 1 : 0;
+      // Prise de vue sur le site : une case cochée par défaut (migration 060). Envoyée, elle vaut ce qu'elle dit ; absente
+      // d'un formulaire qui la portait (show_shot_case : case décochée, que le navigateur n'envoie pas), 0 ; absente
+      // d'un formulaire sans elle (photo sans prise de vue connue, autre écran), la valeur d'avant.
+      const showShot = 'show_shot' in body ? (truthy(body.show_shot) ? 1 : 0) : body.show_shot_case === '1' ? 0 : (before?.show_shot ?? 1);
       // Traductions facultatives (site en anglais et en allemand) : gardées telles quelles si le formulaire ne les envoie pas.
       const tr = (field, max) => Object.fromEntries(['en', 'de'].map(l => [`${field}_${l}`, `${field}_${l}` in body ? text(body[`${field}_${l}`], max) : (before?.[`${field}_${l}`] ?? '')]));
       // Texte de remplacement, en trois langues, sur une ligne : gardé tel quel si le formulaire ne l'envoie pas.
@@ -234,7 +241,7 @@ export function createAdminRepo(db) {
       const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark,
         ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120), ...alt,
         keywords: 'keywords' in body ? normKeywords(body.keywords) : (before?.keywords ?? ''),
-        city_label: 'city_label' in body ? text(body.city_label, 120) : cities.labelOf(before), on_map: loc.on_map, show_time: showTime,
+        city_label: 'city_label' in body ? text(body.city_label, 120) : cities.labelOf(before), on_map: loc.on_map, show_time: showTime, show_shot: showShot,
         focal_x: focal ? focal[0] : 50, focal_y: focal ? focal[1] : 50, focal: focal ? focal.join(' ') : text(body.focal, 20) };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       db.transaction(() => {
@@ -243,7 +250,7 @@ export function createAdminRepo(db) {
           taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark,
           title_en = @title_en, title_de = @title_de, legend_en = @legend_en, legend_de = @legend_de, place_en = @place_en, place_de = @place_de,
           alt_text = @alt_text, alt_text_en = @alt_text_en, alt_text_de = @alt_text_de,
-          keywords = @keywords, show_time = @show_time, focal_x = @focal_x, focal_y = @focal_y, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
+          keywords = @keywords, show_time = @show_time, show_shot = @show_shot, focal_x = @focal_x, focal_y = @focal_y, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
         db.prepare(`UPDATE photos SET city_id = @city_id, city_name = @city_name, city_cc = @city_cc, city_lat = @city_lat, city_lon = @city_lon,
           city_source = @city_source, on_map = @on_map WHERE id = @id`).run({ ...loc, id });
         // L'ouverture désigne les photos par leur adresse : elle suit le renommage.
@@ -263,7 +270,7 @@ export function createAdminRepo(db) {
       if (!p) return null;
       const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
       // Filigrane (« default » ou « none ») et adresse : la fiche de l'admin v2 les enregistre aussi champ par champ.
-      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map', 'show_time',
+      for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map', 'show_time', 'show_shot',
         'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de', 'alt_text', 'alt_text_en', 'alt_text_de', 'watermark', 'focal']) if (k in body) merged[k] = body[k];
       // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre ; une adresse envoyée l'emporte.
       merged.slug = 'slug' in body ? body.slug : 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
