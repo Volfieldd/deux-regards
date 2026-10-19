@@ -139,6 +139,9 @@
 <% }) %>    </ul>
   </details>
   <div class="foot">
+<% /* --- Choix de l'admin v1 / v2 (server/admin-version.js) : début. Un clic, sans script (formulaire POST et jeton). --- */ %>
+    <form class="ver-choix" method="post" action="/admin/version"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><% if (it.adminVersion === 'v2') { %><input type="hidden" name="version" value="v1"><span class="ver-note"><%= t('Écran pas encore en v2.') %></span> <button type="submit"><%= t('Revenir à l’admin v1') %></button><% } else { %><input type="hidden" name="version" value="v2"><button type="submit"><%= t('Essayer l’admin v2') %></button><% } %></form>
+<% /* --- Choix de l'admin v1 / v2 : fin. --- */ %>
     <a class="job" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text><%= it.activity > 1 ? t('Traitement : {n} photos', { n: it.activity }) : t('Traitement : {n} photo', { n: it.activity }) %></span></a>
     <div class="me">
       <span class="av" aria-hidden="true"><%= (it.session.name || '?').trim().charAt(0).toUpperCase() %></span>

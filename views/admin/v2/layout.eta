@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="<%= it.lang || 'fr' %>"<%~ it.adminTheme ? ` data-theme="${it.adminTheme}"` : '' %>>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="<%= it.adminTheme || 'dark light' %>">
+  <title><%= it.pageTitle %></title>
+<% /* Admin v2 (maquettes MQ-07 à MQ-10) : admin.css de la v1, puis les jetons et les composants de la planche MQ-00, puis
+      les écrans de la v2. Aucun style ni script en ligne (CSP). */ %>
+  <link rel="stylesheet" href="<%= it.asset('admin/admin.css') %>">
+  <link rel="stylesheet" href="<%= it.asset('admin/v2/tokens.css') %>">
+  <link rel="stylesheet" href="<%= it.asset('admin/v2/admin-plus.css') %>">
+  <link rel="stylesheet" href="<%= it.asset('admin/v2/v2.css') %>">
+<% const masks = it.brand ? [it.brand.emblem, it.brand.icon, it.brand.logotype].filter(Boolean).join('.') : ''; %>
+<% if (masks) { %>
+  <link rel="stylesheet" href="/brand.css?v=<%= masks %>">
+<% } %>
+  <script src="<%= it.asset('admin/v2/admin-v2.js') %>" defer></script>
+</head>
+<body class="admin" data-csrf="<%= it.csrf %>" data-can="<%= (it.grants || []).join(' ') %>">
+<% const t = it.t; %>
+<a class="skip" href="#contenu"><%= t('Aller au contenu') %></a>
+<% if (it.local) { %>
+  <p class="testbar" role="note"><%= t('Connexion locale de test') %> — <%= it.session.name %></p>
+<% } %>
+<%
+  // Icônes au trait de la planche (MQ-00) : 24 unités, trait de 1,6, décoratives (le mot est toujours écrit ou lu).
+  const ICON = {
+    home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+    photos: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/>',
+    series: '<rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M6 6h12M8.5 3h7"/>',
+    chev: '<path d="M9 6l6 6-6 6"/>',
+    outing: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="2"/>',
+    trip: '<path d="M4 19c3-1 4-4 8-4s5 3 8 4"/><path d="M12 15V4l6 3-6 3"/>',
+    people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.6.2 4.4 2 5.3 4.8"/>',
+    flag: '<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>',
+    pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+    valider: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/>',
+    carnet: '<path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+    lock: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
+    key: '<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/>',
+    circuit: '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 3 3v6.5M6 8.5V15a3 3 0 0 0 3 3h6.5"/>',
+    journal: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    stats: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/>',
+    site: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+    langue: '<path d="M4 5h9M8.5 3v2M6 5c.8 3.5 3 6 6 7.5M11 5c-.9 3.8-3.6 6.8-7 8"/><path d="M13 21l4-10 4 10M14.5 17.5h5"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+    upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
+    moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+    logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
+    retour: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    vigie: '<path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.1-7.5 9.5-4.3-1.4-7.5-4.9-7.5-9.5V6z"/>',
+    critique: '<path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2z"/><path d="M12 7.5v5.5M12 16.5h.01"/>',
+  };
+  const ic = (k, s = 18) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICON[k]}</svg>`;
+  // Petite flèche qui sort : le lien s'ouvre dans un nouvel onglet (dit aussi au lecteur d'écran) ; la même que la v1.
+  const ext = (s = 12) => `<svg class="ic sec-ext" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON.site}</svg>`;
+  const sec = it.securite;
+  const can = it.can || (() => true);
+  const canAll = it.canAll || (() => true);
+  const S = it.section || '';
+  const tabs = it.settingsTabs || [];
+  const cur = keys => (keys.includes(S) ? ' aria-current="page"' : '');
+  const b = it.brand || {};
+  const nextTheme = it.adminTheme === 'light' ? 'dark' : 'light';
+  // Nombre lu par un texte masqué (aria-label ne nomme pas un simple span).
+  const badge = (n, sr, cls = '') => (n ? `<span class="nav-badge${cls}"><span aria-hidden="true">${cls === ' urgent' ? '✕ ' : ''}${n}</span><span class="sr-only">, ${__eta.e(sr)}</span></span>` : '');
+  const link = (href, icon, label, current, extra = '') => `<a href="${href}"${current}>${ic(icon)}${__eta.e(label)}${extra}</a>`;
+  // Groupes du menu (MQ-07, UX-A-11) : une entrée n'apparaît que si le compte a le droit d'ouvrir la page ; un groupe
+  // vide n'est pas montré.
+  const photos = [];
+  if (can('photos.voir')) photos.push(link('/admin/photos', 'photos', t('Photothèque'), cur(['photos', 'photo', 'batch', 'confirm-delete'])));
+  // (Pas de gabarit littéral dans un autre : l'analyseur d'Eta ne les suit pas ; des concaténations à la place.)
+  const E = __eta.e;
+  const serie = c => '<li><a href="/admin/photos?serie=' + E(c.slug) + '" data-series-name="' + E(c.name) + '"><span class="sw">'
+    + (c.thumb ? '<img src="' + E(c.thumb) + '" alt="" width="18" height="18" loading="lazy">' : '') + '</span><span class="t">' + E(c.name) + '</span><span class="n">' + c.count + '</span></a></li>';
+  const seriesList = it.navSeries && it.navSeries.length && can('photos.voir') ? '<ul class="ser" aria-label="' + E(t('Séries')) + '">' + it.navSeries.map(serie).join('') + '</ul>' : '';
+  const nSeries = (it.navSeries || []).length;
+  const plier = seriesList ? '<details class="ser-plier"><summary aria-label="' + E(nSeries > 1 ? t('Afficher les {n} séries', { n: nSeries }) : t('Afficher la série')) + '">' + ic('chev', 14) + nSeries + '</summary>' + seriesList + '</details>' : '';
+  if (can('series.gerer')) photos.push('<div class="nav-ser">' + link('/admin/series', 'series', t('Séries'), cur(['series'])) + plier + '</div>');
+  // Sans series.gerer (rôle Photographe), « Séries » n'est pas un lien (la page lui répondrait 403) : un intitulé qui
+  // déplie ses séries, comptées sur ses photos.
+  else if (seriesList) photos.push('<details class="ser-titre"><summary>' + ic('series') + E(t('Séries')) + '<span class="sr-only"> : ' + E(nSeries > 1 ? t('vos {n} séries', { n: nSeries }) : t('votre série')) + '</span>'
+    + ic('chev', 14).replace('class="ic"', 'class="ic chev"') + '</summary>' + seriesList + '</details>');
+  if (can('sorties.voir')) photos.push(link('/admin/sorties', 'outing', t('Sorties'), cur(['outings', 'outing'])), link('/admin/voyages', 'trip', t('Voyages'), cur(['trips', 'trip'])));
+  const people = [];
+  if (can('personnes.voir')) people.push(link('/admin/personnes', 'people', t('Personnes'), cur(['encounters', 'encounter', 'people', 'person']), badge(it.encountersNew, it.encountersNew > 1 ? t('{n} nouvelles', { n: it.encountersNew }) : t('1 nouvelle'))));
+  if (can('signalements.traiter')) people.push(link('/admin/signalements', 'flag', t('Signalements'), cur(['reports']), badge(it.reportsNew, it.reportsNew > 1 ? t('{n} nouveaux', { n: it.reportsNew }) : t('1 nouveau'))));
+  if (can('terrain.app')) people.push(link('/admin/terrain', 'pin', t('App de terrain'), cur(['terrain', 'cards'])));
+  const publish = [];
+  if (canAll('photos.publier')) publish.push(link('/admin/a-valider', 'valider', t('À valider'), cur(['review']), badge(it.toValidate, it.toValidate > 1 ? t('{n} photos', { n: it.toValidate }) : t('1 photo'))));
+  else if (can('photos.proposer')) publish.push(link('/admin/photos?manque=proposees', 'valider', t('Mes propositions'), ''));
+  if (can('site.textes')) publish.push(link('/admin/site', 'globe', t('Site public'), cur(['site'])));
+  // Carnets (billets du site, MQ-20) : « Carnets », jamais « Journal » (pris par le journal d'audit).
+  if (can('carnet.voir')) publish.push(link('/admin/carnet', 'carnet', t('Carnets'), S.startsWith('carnet') ? ' aria-current="page"' : '', badge(it.carnetsPending, it.carnetsPending > 1 ? t('{n} billets proposés', { n: it.carnetsPending }) : t('1 billet proposé'))));
+  if (can('galeries.voir')) publish.push(link('/admin/galeries', 'lock', t('Galeries privées'), /^galerie/.test(S) ? ' aria-current="page"' : ''));
+  if (can('instagram.voir')) publish.push(link('/admin/instagram', 'instagram', 'Instagram', cur(['instagram'])));
+  const team = [];
+  if (can('comptes.gerer')) team.push(link('/admin/comptes', 'key', t('Comptes et rôles'), cur(['accounts'])));
+  if (can('circuit.regler')) team.push(link('/admin/circuit', 'circuit', t('Circuit de publication'), cur(['circuit'])));
+  if (can('journal.voir')) team.push(link('/admin/journal', 'journal', t('Journal'), cur(['journal'])));
+  // La console de la Vigie (comptes securite.voir, Vigie réglée) : autre origine, nouvel onglet ; badge du résumé. Même
+  // entrée que la v1 (server/vigie-admin.js), juste après « Journal ».
+  if (sec) team.push('<a class="nav-sec" href="' + E(sec.href) + '" target="_blank" rel="noopener noreferrer">' + ic('vigie') + E(t('Sécurité')) + '<span class="sr-only"> ' + E(t('(nouvel onglet)')) + '</span>' + ext()
+    + (sec.badge ? '<span class="nav-badge' + (sec.badge.attention ? ' attention' : '') + '"><span aria-hidden="true">' + E(sec.badge.text) + '</span><span class="sr-only">, ' + E(sec.badge.sr) + '</span></span>' : '') + '</a>');
+  if (can('statistiques.voir')) team.push(link('/admin/statistiques', 'stats', t('Statistiques'), cur(['stats'])));
+  const groups = [['nav-photos', t('Photos'), photos], ['nav-personnes', t('Personnes'), people], ['nav-publier', t('Publier'), publish], ['nav-equipe', t('Équipe'), team]].filter(([, , list]) => list.length);
+  const settingsHref = tabs.length ? tabs[0].href : null;
+  const inSettings = tabs.some(x => x.key === S);
+%>
+<div class="shell">
+<aside class="side" id="admin-nav" data-side aria-label="<%= t('Menu de l’administration') %>">
+  <div class="side-haut"><a class="word" href="/admin"><% if (b.emblem) { %><span class="emblem" aria-hidden="true"></span><% } %><span><%= it.siteName %></span></a>
+<% /* Téléphone : referme le menu et rend le focus au contenu (sans script, l'ancre #contenu ; avec, admin-v2.js). */ %>
+    <a class="side-fermer" href="#contenu" data-menu-close><%~ ic('x', 18) %><%= t('Fermer') %><span class="sr-only"> <%= t('le menu') %></span></a></div>
+  <button class="cmdk js-seul" type="button" data-cmdk-open><%~ ic('search', 16) %><span><%= t('Rechercher, agir…') %></span><kbd>Ctrl K</kbd></button>
+  <nav class="nav" aria-label="<%= t('Aujourd’hui') %>">
+    <a href="/admin"<%~ cur(['home']) %>><%~ ic('home') %><%= t('Aujourd’hui') %><%~ badge(it.urgent, it.urgent > 1 ? t('{n} urgences', { n: it.urgent }) : t('1 urgence'), ' urgent') %></a>
+  </nav>
+<% groups.forEach(([id, label, list]) => { %>
+  <p class="grp" id="<%= id %>"><%= label %></p>
+  <nav class="nav" aria-labelledby="<%= id %>">
+    <%~ list.join('\n    ') %>
+  </nav>
+<% }) %>
+  <div class="foot">
+    <nav class="pied-liens" aria-label="<%= settingsHref ? t('Réglages et aide') : t('Aide et site') %>">
+<% if (settingsHref) { %>      <a href="<%= settingsHref %>"<%~ inSettings ? ' aria-current="page"' : '' %>><%~ ic('settings', 16) %><%= t('Réglages') %></a>
+<% } %>      <a href="/admin/aide"<%~ cur(['help']) %>><%~ ic('help', 16) %><%= t('Aide') %></a>
+      <a href="/" target="_blank" rel="noopener"><%~ ic('site', 16) %><%= t('Voir le site') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a>
+      <details class="lang-pick admin-lang">
+<% /* Nom lu : le code visible, puis son nom (pas d'aria-label, qui masquerait « FR » : WCAG 2.5.3). */ %>
+        <summary><%~ ic('langue', 16) %><span><%= it.lang.toUpperCase() %></span><span class="sr-only"> – <%= t('Langue de l’administration') %> : <%= it.langNames[it.lang] %></span></summary>
+        <ul aria-label="<%= t('Langue de l’administration') %>">
+<% it.adminLangs.forEach(l => { %>          <li><form method="post" action="/admin/langue"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><button type="submit" name="lang" value="<%= l %>" lang="<%= l %>"<%~ l === it.lang ? ' aria-current="true"' : '' %>><%= it.langNames[l] %></button></form></li>
+<% }) %>        </ul>
+      </details>
+      <a class="pied-large" href="/admin/nouveautes"<%~ cur(['releases']) %>><%~ ic('star', 16) %><%= t('Nouveautés') %><span class="nav-ver"><%= it.releaseCurrent %></span></a>
+    </nav>
+<% /* Retour à l'admin v1 : un clic, sans script (formulaire POST et jeton) ; le choix se règle aussi dans « Mon compte ». */ %>
+    <form class="ver-choix" method="post" action="/admin/version"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><input type="hidden" name="version" value="v1"><button type="submit"><%~ ic('retour', 16) %><%= t('Revenir à l’admin v1') %></button></form>
+    <a class="job" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text><%= it.activity > 1 ? t('Traitement : {n} photos', { n: it.activity }) : t('Traitement : {n} photo', { n: it.activity }) %></span></a>
+    <div class="me">
+      <a class="me-lien" href="/admin/compte"<%~ cur(['compte']) %>><span class="av" aria-hidden="true"><%= (it.session.name || '?').trim().charAt(0).toUpperCase() %></span><span class="who"><span class="me-nom"><%= it.session.name || t('Administrateur') %></span><span class="sr-only">, <%= t('mon compte') %></span><small><%= (it.roleNames || []).join(', ') || t('Administration') %></small></span></a>
+      <form method="post" action="/admin/theme" data-theme-form><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><button class="iconbtn btn-theme" type="submit" name="theme" value="<%= nextTheme %>" data-theme-toggle title="<%= t('Mode clair / sombre') %>"><span class="when-dark"><%~ ic('sun') %><span class="sr-only"><%= t('Passer en mode clair') %></span></span><span class="when-light"><%~ ic('moon') %><span class="sr-only"><%= t('Passer en mode sombre') %></span></span></button></form>
+      <form method="post" action="/auth/logout"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="iconbtn" type="submit" aria-label="<%= t('Se déconnecter') %>" title="<%= t('Se déconnecter') %>"><%~ ic('logout') %></button></form>
+    </div>
+  </div>
+</aside>
+
+<main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
+<% const HELP = { home: 'tableau-de-bord', batch: 'photos-3-compléter-et-publier', appearance: 'apparence', images: 'filigrane-exif', droits: 'reglages-droits-et-confidentialité', authors: 'auteurs', assistants: 'series', compte: 'premiers-pas-ladmin-v2' }; %>
+<% if (HELP[S]) { %>
+  <p class="help-link"><a href="/admin/aide#<%= HELP[S] %>"><%= t('Aide sur cette page') %></a></p>
+<% } %>
+<% if (sec && sec.banner) { const bn = sec.banner; %>
+  <div class="sec-bandeau" role="alert"><%~ ic('critique', 20) %><p><span class="t"><%= bn.title %></span><span class="sec"><%= bn.detail %></span></p><a class="btn ghost" href="<%= bn.href %>" target="_blank" rel="noopener noreferrer"><%= bn.action %><span class="sr-only"> <%= t('(nouvel onglet)') %></span><%~ ext(14) %></a></div>
+<% } %>
+<% if (it.variants.running || it.variants.errors.length) { %>
+  <div class="flash<%= it.variants.errors.length ? ' error' : '' %>" data-variants>
+<% if (it.variants.running) { %>
+    <p data-running><%= t('Mise à jour des images en cours :') %> <span data-done><%= it.variants.done %></span> / <span data-total><%= it.variants.total %></span>.</p>
+<% } %>
+    <p role="status" data-final><% if (!it.variants.running && it.variants.errors.length) { %><%= t('{n} image(s) n’ont pas pu être recalculées : {titles}.', { n: it.variants.errors.length, titles: it.variants.errors.map(e => e.title).join(', ') }) %><% } %></p>
+  </div>
+<% } %>
+<% if (it.flash) { %>
+  <div class="flash <%= it.flash.type %>" role="<%= it.flash.type === 'error' ? 'alert' : 'status' %>">
+    <p><%= it.flash.text %></p>
+<% if (it.flash.details && it.flash.details.length) { %>
+    <ul><% it.flash.details.forEach(d => { %><li><%= d %></li><% }) %></ul>
+<% } %>
+  </div>
+<% } %>
+<%~ it.body %>
+</main>
+</div>
+
+<nav class="tabbar" aria-label="<%= t('Navigation rapide') %>">
+  <a href="/admin"<%~ cur(['home']) %>><%~ ic('home', 22) %><%= t('Aujourd’hui') %></a>
+<% if (can('photos.voir')) { %>  <a href="/admin/photos"<%~ cur(['photos', 'photo', 'batch']) %>><%~ ic('photos', 22) %><%= t('Photos') %></a>
+<% } %><% if (can('photos.importer')) { %>  <a class="imp" href="/admin/photos?importer#import" aria-label="<%= t('Importer des photos') %>"><%~ ic('upload', 22) %></a>
+<% } %><% if (can('terrain.app')) { %>  <a href="/admin/rencontre/accueil"><%~ ic('pin', 22) %><%= t('Terrain') %></a>
+<% } %>
+<% /* Sans script, un lien vers la barre (ouverte par :target) ; admin-v2.js le remplace par un bouton (aria-expanded). */ %>
+  <a href="#admin-nav" data-menu><%~ ic('menu', 22) %><%= t('Menu') %></a>
+</nav>
+
+<% if (it.releasePopup) { const rp = it.releasePopup; %>
+<dialog class="release-pop" open data-release-pop aria-labelledby="rel-pop-t">
+  <form method="dialog" class="rel-pop-in">
+    <p class="eyebrow"><%= t('Version {v}', { v: it.releaseCurrent }) %></p>
+    <h2 id="rel-pop-t"><%= rp.length > 1 ? t('Nouveau depuis votre dernière visite : {n} versions', { n: rp.length }) : t('Nouveau depuis votre dernière visite') %></h2>
+    <div class="rel-pop-list">
+<% rp.forEach(r => { %>      <section><h3><span class="rel-v mono"><%= r.version %></span> <%= r.title %></h3><ul><% r.items.forEach(i => { %><li><%= i %></li><% }) %></ul></section>
+<% }) %>    </div>
+    <p class="actions"><button class="btn" type="submit" autofocus><%= t('C’est noté') %></button> <a class="more" href="/admin/nouveautes"><%= t('Toutes les nouveautés') %></a></p>
+  </form>
+</dialog>
+<% } %>
+<% /* Quitter une page où un champ n'est pas enregistré (MQ-09, état 8) : Rester d'abord, avec le focus. */ %>
+<dialog class="confirm" data-quitter aria-labelledby="q-t" aria-describedby="q-d">
+  <h2 id="q-t"><%= t('Quitter sans enregistrer ?') %></h2>
+  <p id="q-d" data-quitter-champs></p>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler data-quitter-annuler><%= t('Rester') %></button><button class="btn" type="button" data-quitter-ok><%= t('Quitter quand même') %></button></div>
+</dialog>
+<% /* Message d'action (MQ-00 § 6) : une région live toujours rendue, vide hors message. */ %>
+<div class="toast" role="status" aria-live="polite" data-toast></div>
+<dialog class="palette" data-cmdk aria-label="<%= t('Rechercher et agir') %>">
+  <div class="pal-in"><%~ ic('search', 20) %><input type="text" data-cmdk-input placeholder="<%= t('Rechercher une page, une photo ou une action') %>" aria-label="<%= t('Rechercher une page, une photo ou une action') %>" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list"><kbd><%= t('Échap') %></kbd></div>
+  <p class="pal-statut" role="status" data-cmdk-status></p>
+  <ul class="pal-list" id="cmdk-list" role="listbox" aria-label="<%= t('Résultats') %>" data-cmdk-list></ul>
+  <p class="pal-ft"><span class="touches"><kbd>↑</kbd> <kbd>↓</kbd> <%= t('choisir') %> · <kbd>↵</kbd> <%= t('ouvrir') %> · <kbd><%= t('Échap') %></kbd> <%= t('fermer') %></span></p>
+</dialog>
+<% /* Textes du script de la v2 (admin-v2.js), dans la langue de l'admin : des données, jamais exécutées (CSP). */ %>
+<%~ include('./_textes', it) %>
+</body>
+</html>
