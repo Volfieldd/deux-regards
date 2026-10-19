@@ -47,6 +47,10 @@ COPY seed ./seed
 COPY docs/aide ./docs/aide
 # Mandataire de sortie (service « sortie » de la pile Unraid, BV-10) : même image, autre commande.
 COPY deploy/unraid/reseau/mandataire.js ./reseau/mandataire.js
+# Installateur (deploy/installateur/README.md) : lancé à la main, en root, par installer.sh ; jamais par le site. Il
+# reprend les fichiers de la pile Unraid (compose et modèles des .env).
+COPY deploy/installateur ./deploy/installateur
+COPY deploy/unraid/compose.yaml deploy/unraid/env.example deploy/unraid/vigie.env.example ./deploy/unraid/
 
 # Pas d'instruction VOLUME : un oubli de montage ferait écrire les données dans un volume anonyme,
 # perdu au prochain « docker compose down -v ». Le serveur refuse au contraire de démarrer sans montage.

@@ -17,7 +17,7 @@ done
 if [ -d "$here/captures" ]; then cp -r "$here/captures" "$work/"; fi
 find "$work" -maxdepth 1 \( -name 'Aide*.md' -o -name 'Unraid.md' \) -delete
 node "$here/aide.mjs" "$work"          # pages « Aide » générées depuis docs/aide/
-node "$here/unraid.mjs" "$work"        # page « Unraid » générée depuis deploy/unraid/README.md
+node "$here/unraid.mjs" "$work"        # pages « Unraid » et « Installateur » (deploy/unraid, deploy/installateur)
 cd "$work"
 git add -A
 if git diff --cached --quiet; then echo "Wiki déjà à jour."; exit 0; fi

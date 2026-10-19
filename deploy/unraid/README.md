@@ -23,6 +23,24 @@ Internet ─HTTPS─► Cloudflare (www.nicephos.art ; autres adresses redirigé
 
 Aucun port n'est ouvert sur votre box : le tunnel sort vers Cloudflare, qui fournit le HTTPS.
 
+## Installation automatique
+
+L'**[installateur](../installateur/README.md)** fait les étapes 2 à 5 tout seul, après la connexion au registre (étape 1) :
+
+- il vérifie les prérequis et les jetons ;
+- il configure Zitadel et Cloudflare par leurs API, durcissement compris ;
+- il écrit le `.env` et démarre la pile.
+
+Il montre d'abord ce qu'il va faire. On peut le relancer sans risque.
+
+```bash
+docker run --rm --entrypoint cat ghcr.io/volfieldd/deux-regards:latest /app/deploy/installateur/installer.sh > /tmp/installer.sh
+bash /tmp/installer.sh --essai     # ce qui serait fait, sans rien changer
+bash /tmp/installer.sh
+```
+
+Les étapes ci-dessous restent la référence : elles détaillent chaque réglage que pose l'installateur, comment le vérifier, et comment le faire à la main.
+
 ## Ordre des étapes
 
 1. [Image Docker](#1-image-docker) (une fois)
