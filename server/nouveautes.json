@@ -1,5 +1,35 @@
 [
   {
+    "version": "1.174.0",
+    "date": "2026-10-19",
+    "pr": 174,
+    "title": {
+      "fr": "Admin v2 : Instagram, l’app de terrain (Mon QR, Merci), Carnets et Galeries privées",
+      "en": "Admin v2: Instagram, the field app (My QR, Thank you), Notebooks and Private galleries",
+      "de": "Verwaltung v2: Instagram, die Feld-App (Mein QR, Danke), Reisetagebücher und Private Galerien"
+    },
+    "items": [
+      {
+        "fr": "En admin v2, la page Instagram met la file, les propositions des photographes et les échecs en tête ; ↑ et ↓ changent l’ordre sans recharger la page, avec « Défaire » ; « Publier maintenant… », « Retirer… » et « Déconnecter… » demandent d’abord une confirmation. Les réglages s’enregistrent quand vous quittez un champ, avec « Défaire ».",
+        "en": "In admin v2, the Instagram page puts the queue, the photographers’ proposals and the failures first; ↑ and ↓ change the order without reloading the page, with “Undo”; “Publish now…”, “Remove…” and “Disconnect…” ask for a confirmation first. The settings are saved when you leave a field, with “Undo”.",
+        "de": "In der Verwaltung v2 stellt die Instagram-Seite die Warteschlange, die Vorschläge der Fotografen und die Fehlschläge an den Anfang; ↑ und ↓ ändern die Reihenfolge, ohne die Seite neu zu laden, mit „Rückgängig“; „Jetzt veröffentlichen…“, „Entfernen…“ und „Trennen…“ fragen zuerst nach einer Bestätigung. Die Einstellungen werden beim Verlassen eines Feldes gespeichert, mit „Rückgängig“.",
+        "perm": "instagram.voir"
+      },
+      {
+        "fr": "L’app de terrain : « Mon QR » et « Merci » passent en v2 (un titre, l’invitation en trois langues, le QR nommé, « Merci » dans la langue de la personne) ; le bandeau de vérification d’identité s’y affiche aussi.",
+        "en": "The field app: “My QR” and “Thank you” move to v2 (a title, the invitation in three languages, the QR named, “Thank you” in the person’s language); the identity check banner shows there too.",
+        "de": "Die Feld-App: „Mein QR“ und „Danke“ wechseln zur v2 (ein Titel, die Einladung in drei Sprachen, der QR-Code benannt, „Danke“ in der Sprache der Person); auch dort erscheint das Banner der Identitätsprüfung.",
+        "perm": "terrain.app"
+      },
+      {
+        "fr": "Carnets et Galeries privées s’affichent dans la mise en page de l’admin v2 (menu, en-tête, bandeaux), avec leurs formulaires et leurs boutons de toujours ; au téléphone, des cibles plus grandes et des champs jamais cachés sous la barre du bas.",
+        "en": "Notebooks and Private galleries are shown in the admin v2 layout (menu, header, banners), with their usual forms and buttons; on the phone, larger targets and fields never hidden under the bottom bar.",
+        "de": "Reisetagebücher und Private Galerien erscheinen im Layout der Verwaltung v2 (Menü, Kopf, Banner), mit ihren gewohnten Formularen und Schaltflächen; am Telefon größere Ziele und Felder, die nie unter der unteren Leiste verschwinden.",
+        "perm": "admin.acceder"
+      }
+    ]
+  },
+  {
     "version": "1.173.0",
     "date": "2026-10-19",
     "pr": 173,
