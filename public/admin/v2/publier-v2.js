@@ -145,10 +145,10 @@ $$('.v2-publier [data-copier]').forEach(b => b.addEventListener('click', async (
     try {
       const r = await post(form.action, body());
       // Les heures telles que gardées par le serveur ; une heure illisible est écartée, et dite sous le champ.
-      if (times && r.times) times.value = r.times.join(', ');
-      if (times) fieldError(times, r.rejected?.length ? T('Heures ignorées (format HH:MM attendu) : {times}.', { times: r.rejected.join(', ') }) : '');
       fieldError(field, '');
       temoin.ok(field);
+      if (times && r.times) times.value = r.times.join(', ');
+      if (times) fieldError(times, r.rejected?.length ? T('Heures ignorées (format HH:MM attendu) : {times}.', { times: r.rejected.join(', ') }) : '');
       saved = snapshot();
       if (undoing) { toast.show(Th('Réglages Instagram rétablis.', {})); field.focus(); return; }
       toast.show(Th('« {champ} » enregistré.', { champ: label }), { undo: async () => { restore(previous); await send(field, null, true); } });

@@ -96,3 +96,28 @@ test('une rencontre au toucher : décision en tête, dialogue d’effacement, fo
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   } finally { await effacerRencontre(page, r.id); }
 });
+
+// Partie B : Mon QR et Merci (MQ-10, états 19 et 20) au toucher, dans WebKit : un titre, l'évitement, le retour à 44 px ;
+// « Merci » dans la langue de la personne, le QR nommé, la suite du photographe repliée ; rien ne déborde.
+test('Mon QR et Merci au toucher : titres, évitement, QR nommé, la suite du photographe repliée', async ({ page }) => {
+  test.skip(process.env.E2E_ALLOW_WRITES !== '1', 'E2E_ALLOW_WRITES=1 : crée une rencontre');
+  const { creerRencontreCarte } = await import('./publier-donnees.js');
+  const id = await creerRencontreCarte(page);
+  try {
+    await page.goto('/admin/rencontre/qr');
+    await expect(page.locator('h1')).toHaveText('Mon QR');
+    await expect(page.locator('a.skip')).toHaveAttribute('href', '#contenu');
+    expect((await page.locator('.app-bar a').first().boundingBox()).height).toBeGreaterThanOrEqual(44);
+    await expect(page.locator('.qr-cadre img')).toHaveAttribute('alt', /^QR de /);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    await page.goto(`/admin/rencontre/${id}/merci`);
+    await expect(page.locator('h1')).toHaveText('Merci !');
+    await expect(page.locator('.app-qr[role="img"]')).toHaveAttribute('aria-label', /^QR de votre page, référence S-\d{4}$/);
+    const next = page.locator('details.app-next');
+    await expect(next).not.toHaveAttribute('open', '');
+    await next.locator('summary').tap();
+    await expect(next.getByRole('link', { name: 'Nouvelle rencontre' })).toBeVisible();
+    expect((await next.locator('summary').boundingBox()).height).toBeGreaterThanOrEqual(44);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+  } finally { await effacerRencontre(page, id); }
+});

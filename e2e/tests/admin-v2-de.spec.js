@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { creerRencontre, effacerRencontre, creerVoyage, supprimerVoyage } from './terrain-donnees.js';
+import { creerGalerie, supprimerGalerie, creerBillet, supprimerBillet, remplirFile, viderFile, creerRencontreCarte } from './publier-donnees.js';
 
 // Admin v2 en allemand (le plus long des trois) : aucun débordement à 320, 412, 1 032 × 1 250, 1 376 × 900 et 1 440 px.
 // La langue est celle du compte de test de la v2 : ce projet passe après les autres tests de la v2, et la remet en français.
@@ -20,6 +21,12 @@ test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }
   // Vague 3b : une rencontre (et sa sortie) et un voyage le temps du test.
   const r = await creerRencontre(page, { jour: '2025-10-20', nom: 'Deutsch Essai' });
   const tid = await creerVoyage(page, 'Reise Essai');
+  // Partie B : la file Instagram, une galerie privée, un billet, une rencontre avec carte (Merci), le temps du test.
+  const writes = process.env.E2E_ALLOW_WRITES === '1';
+  const posts = writes ? await remplirFile(page, 2) : [];
+  const g = writes ? await creerGalerie(page, 'Galerie Essai') : null;
+  const b = writes ? await creerBillet(page, 'Notizbuch Essai') : null;
+  const m = writes ? await creerRencontreCarte(page) : null;
   await lang(page, 'de');
   try {
     const urls = ['/admin', '/admin/reglages/assistants', '/admin/droits', '/admin/images', '/admin/auteurs', '/admin/compte', `/admin/photos/lot?ids=${ids.join(',')}`, '/admin/rencontre', '/admin/rencontre/accueil',
@@ -28,12 +35,17 @@ test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }
       // Vague 3b : Personnes, Demandes et rencontres, une rencontre, Séries, Sorties, une sortie, Voyages, un voyage.
       '/admin/personnes', '/admin/rencontres', `/admin/rencontres/${r.id}`, '/admin/series', '/admin/sorties', '/admin/sorties/sebastien/2025-10-20', '/admin/voyages', `/admin/voyages/${tid}`,
       // Vague 3a : Identité et apparence, Comptes et rôles, Site public.
-      '/admin/apparence', '/admin/comptes', '/admin/site'];
+      '/admin/apparence', '/admin/comptes', '/admin/site',
+      // Partie B : Instagram, Carnets et Galeries privées dans la coquille v2, Mon QR, Merci.
+      '/admin/instagram', '/admin/galeries', '/admin/carnet', '/admin/rencontre/qr',
+      ...(writes ? [`/admin/galeries/${g}`, `/admin/galeries/${g}/reglages`, `/admin/galeries/${g}/acces/nouveau`, `/admin/carnet/${b}`, `/admin/rencontre/${m}/merci`] : [])];
     for (const [w, h] of [[320, 640], [412, 839], [1032, 1250], [1376, 900], [1440, 900]]) {
       await page.setViewportSize({ width: w, height: h });
       for (const url of urls) {
         await page.goto(url);
-        await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+        // « Merci » est dans la langue de la personne ; la suite, pour le photographe, dans celle de l'admin.
+        if (url.endsWith('/merci')) await expect(page.locator('.app-after')).toHaveAttribute('lang', 'de');
+        else await expect(page.locator('html')).toHaveAttribute('lang', 'de');
         const out = await page.evaluate(() => {
           const vw = document.documentElement.clientWidth;
           const bad = [...document.querySelectorAll('body *')].filter(el => {
@@ -56,5 +68,6 @@ test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }
     await lang(page, 'fr');
     await effacerRencontre(page, r.id);
     await supprimerVoyage(page, tid);
+    if (writes) { await viderFile(page, posts); await supprimerGalerie(page, g); await supprimerBillet(page, b); await effacerRencontre(page, m); }
   }
 });
