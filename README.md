@@ -61,7 +61,7 @@ Le serveur refuse de démarrer sans `COOKIE_SECRET` (32 caractères ou plus) dè
 ## Mettre en production
 
 1. Une PR est fusionnée sur `main`.
-2. GitHub Actions construit l'image Docker et la publie sur `ghcr.io/volfieldd/deux-regards` (étiquettes `latest` et `sha-xxxxxxx`).
+2. GitHub Actions construit l'image Docker et la publie, privée, sur `ghcr.io/volfieldd/deux-regards` (étiquettes `latest` et `sha-xxxxxxx`).
 3. Sur le serveur Unraid : **Compose Pull** puis **Compose Up** (paquet dans [`deploy/unraid/`](deploy/unraid/README.md)).
 
 Le site est exposé par Cloudflare Tunnel ; toutes les adresses (`nicephos.art`, sous-domaines, HTTP) sont redirigées vers `https://www.nicephos.art`. Détails, sauvegardes et restauration : [Déploiement](docs/wiki/Déploiement.md).
@@ -69,3 +69,7 @@ Le site est exposé par Cloudflare Tunnel ; toutes les adresses (`nicephos.art`,
 ## Données
 
 Tout est dans `STORAGE_DIR` (par défaut `./storage`, hors Git) : la base SQLite, `originals/` (jamais servis), `variants/` (AVIF/WebP, servis sous `/media/`, recalculables), `watermarks/` (logos de filigrane), `brand/` (emblème, favicon) et, si « Proposer une série » est allumé, `models/` (modèle d'analyse d'images, ≈ 90 Mo, retéléchargeable, hors sauvegarde). Sauvegarder ce dossier suffit ; `npm run backup` le fait sans arrêter le site.
+
+## Droits
+
+Code propriétaire : © 2026 Sébastien Wojcicki, tous droits réservés, fouille de données comprise ([`LICENSE`](LICENSE)). Le dépôt et les images Docker sont privés. Les dépendances gardent leurs propres licences ; les photos et les textes du site, absents du dépôt, appartiennent à leurs auteurs.

@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Amélioration progressive : le site fonctionne sans ce script (liens et pages serveur).
 (function () {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;

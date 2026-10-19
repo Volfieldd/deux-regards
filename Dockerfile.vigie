@@ -17,7 +17,8 @@ ENV NODE_ENV=production \
 WORKDIR /app
 # Le vocabulaire des événements et le calcul des réseaux (/24, /48) sont communs au site et à la Vigie : seuls ces deux
 # fichiers du site sont repris.
-RUN echo '{ "private": true, "type": "module" }' > package.json
+RUN echo '{ "private": true, "license": "UNLICENSED", "type": "module" }' > package.json
+COPY LICENSE ./
 COPY --from=deps /app/vigie/node_modules ./vigie/node_modules
 COPY vigie ./vigie
 COPY server/securite/vocabulaire.js ./server/securite/vocabulaire.js

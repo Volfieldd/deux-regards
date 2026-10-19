@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Amélioration progressive de l'admin : tout fonctionne sans ce script (formulaires classiques).
 document.documentElement.classList.add('js');
 const CSRF = document.body.dataset.csrf;

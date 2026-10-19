@@ -39,7 +39,29 @@ Aucun port n'est ouvert sur votre box : le tunnel sort vers Cloudflare, qui four
 
 L'image est construite par GitHub à chaque mise à jour de `main` (`.github/workflows/image.yml`) et publiée sur `ghcr.io/volfieldd/deux-regards`, avec deux étiquettes : `latest` (dernière version) et `sha-xxxxxxx` (version d'un commit, pour revenir en arrière). Elle ne contient **aucune donnée** : ni photos, ni base, ni logo.
 
-**Une seule fois**, après la première publication : sur GitHub, **Profil → Packages → deux-regards → Package settings → Change visibility → Public**. Sinon, Unraid ne pourra pas la télécharger sans identifiants. Si vous préférez la garder privée : dans le terminal Unraid, `docker login ghcr.io -u Volfieldd`, avec comme mot de passe un jeton GitHub qui a le droit `read:packages`.
+Le code est propriétaire (voir `LICENSE`) : le dépôt et les deux images (`deux-regards` et `deux-regards-vigie`) restent **privés**. Ne passez jamais un paquet en *Public* : l'image contient tout le code, et GitHub ne permet plus de rendre privé un paquet devenu public (il faudrait le supprimer).
+
+Unraid doit donc se connecter au registre, **une seule fois** :
+
+1. Sur GitHub, **Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token (classic)**, avec le seul droit `read:packages` et une longue durée. Notez sa date d'expiration : à cette date, les mises à jour échouent jusqu'à ce que vous recommenciez cette étape.
+2. Dans le terminal Unraid :
+
+   ```bash
+   docker login ghcr.io -u Volfieldd          # mot de passe : le jeton
+   mkdir -p /boot/config/docker-auth
+   cp /root/.docker/config.json /boot/config/docker-auth/
+   chmod 600 /boot/config/docker-auth/config.json
+   ```
+
+3. `/root` est en mémoire sur Unraid : la connexion disparaît à chaque redémarrage. Ajoutez ces lignes à la fin de `/boot/config/go` pour la remettre au démarrage :
+
+   ```bash
+   mkdir -p /root/.docker
+   cp /boot/config/docker-auth/config.json /root/.docker/config.json
+   chmod 600 /root/.docker/config.json
+   ```
+
+Compose Manager (**Compose Pull**) et les modèles de l'onglet Docker utilisent ensuite cette connexion. Un `denied` ou `unauthorized` au téléchargement veut dire : connexion perdue ou jeton expiré.
 
 ## 2. Dossiers sur Unraid
 

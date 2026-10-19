@@ -1,0 +1,52 @@
+Nicephos (deux-regards) — logiciel propriétaire
+© 2026 Sébastien Wojcicki (« Volfieldd »). Tous droits réservés.
+
+1. Objet
+
+Ce dépôt et tout ce qui en est tiré sont des œuvres de Sébastien Wojcicki,
+protégées par le Code de la propriété intellectuelle (livre I, notamment ses
+articles L112-2 et L122-6) : code source et code objet du site et de la Vigie,
+gabarits, feuilles de style, scripts, schémas de base de données, textes d'aide
+et documentation, ainsi que les images Docker construites à partir de ce dépôt
+(ghcr.io/volfieldd/deux-regards et ghcr.io/volfieldd/deux-regards-vigie) et les
+fichiers que le site envoie aux navigateurs.
+
+2. Aucune licence
+
+Aucune licence n'est concédée. L'accès à ce dépôt, à une image ou au site, à
+quelque titre que ce soit (collaborateur, invité, visiteur), et toute copie
+obtenue quand ce dépôt était public, ne donnent aucun droit d'utilisation.
+
+Sont interdits sans l'autorisation écrite préalable de l'auteur, en tout ou en
+partie et par quelque moyen que ce soit : la reproduction, la représentation,
+la modification, l'adaptation, la traduction, l'arrangement, la diffusion, la
+mise à disposition, la vente ou la location, ainsi que la décompilation hors des
+cas permis par l'article L122-6-1 du Code de la propriété intellectuelle.
+
+3. Fouille de textes et de données
+
+L'auteur s'oppose à toute fouille de textes et de données de ce dépôt et des
+fichiers servis par le site, y compris pour entraîner ou alimenter un système
+d'intelligence artificielle (article L122-5-3, III, du Code de la propriété
+intellectuelle ; article 4, paragraphe 3, de la directive (UE) 2019/790).
+
+4. Ce que cette notice ne couvre pas
+
+- Les bibliothèques de tiers (dépendances listées dans package.json et les
+  package-lock.json, images de base Docker) restent sous leurs propres licences.
+- Les photographies et les textes publiés sur le site ne figurent pas dans ce
+  dépôt : ils appartiennent à leurs auteurs respectifs.
+
+5. Contact
+
+Toute demande d'autorisation : Volfieldd, https://github.com/Volfieldd
+
+---
+
+English summary: proprietary software, © 2026 Sébastien Wojcicki, all rights
+reserved. No licence is granted; access to this repository, its Docker images or
+the website, or any copy made while it was public, confers no right of use.
+Copying, modifying, distributing or reverse engineering it, in whole or in part,
+requires the author's prior written permission. Text and data mining, including
+for AI training, is expressly reserved (Article 4(3) of Directive (EU)
+2019/790). Third-party dependencies remain under their own licences.
