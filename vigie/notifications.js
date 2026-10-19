@@ -13,7 +13,7 @@ import { sansContacts } from './util.js';
 
 const PER_HOUR = 20;
 const REDUCED_PER_HOUR = 60;              // surveillance réduite : hors du plafond des alertes, borné à part
-const SOURCES = { site: 'site', zitadel: 'Zitadel', bordure: 'bordure Cloudflare', vigie: 'contrôles de la Vigie' };
+const SOURCES = { site: 'site', zitadel: 'Zitadel', bordure: 'bordure Cloudflare', reseau: 'réseau', vigie: 'contrôles de la Vigie' };
 const LABEL = { critique: 'Critique', haut: 'Haute', moyen: 'Moyenne', bas: 'Basse', info: 'Info' };
 const hourOf = t => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(t).replace(':', ' h ');
 

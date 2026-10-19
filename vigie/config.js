@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { nommeur } from './reseau.js';
 
 // Configuration de la Vigie (son propre .env, jamais celui du site). Refus de démarrer plutôt qu'un réglage douteux.
 const need = (env, k) => { if (!env[k]) throw new Error(`Variable manquante : ${k}`); return env[k]; };
@@ -73,6 +74,20 @@ export function loadVigieConfig(env = process.env) {
     if (!to.length || !env.VIGIE_MAIL_FROM) throw new Error('VIGIE_MAIL_FROM et VIGIE_MAIL_TO sont obligatoires avec VIGIE_SMTP_URL');
     mail = { url: env.VIGIE_SMTP_URL, from: env.VIGIE_MAIL_FROM, to };
   }
+  // Source « réseau » (phase E4, facultative) : journaux du mandataire de sortie et des rejets du pare-feu de l'hôte, sur le
+  // volume monté en lecture seule (deploy/unraid/reseau/README.md). Un chemin seul suffit ; un fichier encore absent est
+  // attendu (rsyslog ne le crée qu'à la première ligne) et signalé s'il le reste 24 h.
+  let reseau = null;
+  if (env.VIGIE_RESEAU_MANDATAIRE || env.VIGIE_RESEAU_HOTE) {
+    const chemin = k => {
+      const v = env[k];
+      if (!v) return null;
+      if (!path.isAbsolute(v) || /[\u0000-\u001f]/.test(v)) throw new Error(`${k} : chemin absolu attendu (ex. /reseau/mandataire/mandataire.log)`);
+      return path.resolve(v);
+    };
+    reseau = { mandataire: chemin('VIGIE_RESEAU_MANDATAIRE'), hote: chemin('VIGIE_RESEAU_HOTE'), noms: env.VIGIE_RESEAU_NOMS || undefined };
+    if (reseau.noms) nommeur(reseau.noms);                     // illisible : refus de démarrer
+  }
   const consoleUrl = (env.VIGIE_CONSOLE_URL || 'https://vigie.nicephos.art').replace(/\/+$/, '');
   if (!/^https:\/\//.test(consoleUrl)) throw new Error('VIGIE_CONSOLE_URL doit être en https://');
   // Console (phase D3, annexe architecture § 5) : facultative, ouverte par VIGIE_CONSOLE_CLIENT_ID. Trois verrous : jeton
@@ -108,6 +123,7 @@ export function loadVigieConfig(env = process.env) {
     console: consoleCfg,
     bordure,
     urgence,
+    reseau,
     dataDir,
     databasePath: path.resolve(env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')),
     host: env.VIGIE_HOST || '0.0.0.0',

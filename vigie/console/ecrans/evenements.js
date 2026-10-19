@@ -107,6 +107,10 @@ export const LIBELLES = {
   bordure_cache_prive: 'Page privée servie par le cache de Cloudflare',
   vigie_bordure_erreur: 'Lecture de la bordure en échec',
   vigie_bordure_silence: 'Bordure silencieuse',
+  reseau_sortie_refusee: 'Sortie du site refusée par le mandataire',
+  reseau_sortie_directe: 'Sortie directe rejetée par l’hôte',
+  reseau_flux_hors_liste: 'Flux entre conteneurs hors liste',
+  vigie_reseau_silence: 'Journal réseau muet ou illisible',
   vigie_canal_echec: 'Message non envoyé',
   vigie_surveillance_reduite: 'Surveillance réduite',
   vigie_decision: 'Décision prise ou levée',
@@ -127,6 +131,7 @@ const GROUPES = [
   ['Système du site', t => /^(sys_|crypto_|edge_)/.test(t)],
   ['Zitadel', t => t.startsWith('zitadel_')],
   ['Bordure Cloudflare', t => t.startsWith('bordure_')],
+  ['Réseau', t => t.startsWith('reseau_')],
   ['La Vigie', t => /^(vigie_|log_integrity)/.test(t)],
 ];
 const TYPES_GROUPES = (() => {
@@ -162,9 +167,11 @@ export function sourceDe(composant) {
   if (c.startsWith('site')) return 'site';
   if (c === 'zitadel') return 'zitadel';
   if (c === 'bordure' || c === 'cloudflare') return 'bordure';
+  if (c === 'réseau') return 'reseau';
   return 'vigie';
 }
-const TARD = { site: 60e3, zitadel: 120e3, bordure: 180e3, vigie: 60e3 };      // écart de réception dit tardif (lexique § 3.13, point 8)
+// Réseau : journaux lus chaque minute, regroupés par passage (l'heure de la première ligne).
+const TARD = { site: 60e3, zitadel: 120e3, bordure: 180e3, reseau: 180e3, vigie: 60e3 };      // écart de réception dit tardif (lexique § 3.13, point 8)
 
 export const KINDS = Object.keys(ENTITES_NOM);
 const INTERRUPTEURS = { detection: 'Détection', alertes: 'Alertes', blocages: 'Blocages automatiques' };

@@ -259,3 +259,4 @@ Le mode urgence fait passer chaque visiteur par une vérification de son navigat
 | Passerelle Signal ([`signal/README.md`](signal/README.md)) | maintenant | ☐ |
 | 3.1 à 3.3 Projet Vigie, Access, redirection | phase B | ☐ |
 | 3.4 Jeton d'API | phase E | ☐ |
+| Sorties réseau : mandataire, règles de l'hôte, journaux lus par la Vigie ([`reseau/README.md`](reseau/README.md)) | phase E4, instance de test d'abord | ☐ |

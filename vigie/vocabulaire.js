@@ -36,6 +36,12 @@ export const OWN = {
   bordure_cache_prive: E('haut', 'bordure'),
   vigie_bordure_erreur: E('moyen', 'vigie · contrôle'),
   vigie_bordure_silence: E('moyen', 'vigie · contrôle'),
+  // Réseau (phase E4, BV-10 et BV-11) : journaux du mandataire de sortie et des rejets du pare-feu de l'hôte, lus en
+  // lecture seule (source « réseau » du quorum, constatée hors du site).
+  reseau_sortie_refusee: E('moyen', 'réseau'),
+  reseau_sortie_directe: E('haut', 'réseau'),
+  reseau_flux_hors_liste: E('haut', 'réseau'),
+  vigie_reseau_silence: E('moyen', 'vigie · contrôle'),
   // Notifications (phase D)
   vigie_canal_echec: E('moyen', 'vigie · contrôle'),
   vigie_surveillance_reduite: E('moyen', 'vigie · contrôle'),

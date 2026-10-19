@@ -66,6 +66,11 @@ chmod 700 "$NICEPHOS/vigie" "$NICEPHOS/vigie-secrets"
 mkdir -p "$NICEPHOS/signal"
 chown 1000:1000 "$NICEPHOS/signal"
 chmod 700 "$NICEPHOS/signal"
+
+# Mandataire de sortie et journaux réseau (facultatifs, reseau/README.md)
+mkdir -p "$NICEPHOS/reseau/mandataire" "$NICEPHOS/reseau/hote"
+chown 99:100 "$NICEPHOS/reseau/mandataire"
+chmod 755 "$NICEPHOS/reseau" "$NICEPHOS/reseau/hote"
 ```
 
 Les commandes des sections suivantes reprennent `$NICEPHOS` et `$SAUVEGARDES` : dans un nouveau terminal, reposez d'abord ces deux lignes.
@@ -281,6 +286,7 @@ Pensez aussi à **l'authentification à deux facteurs** dans Zitadel (*Settings 
 - **Adresse des visiteurs :** réseau Docker dédié ; le site ne croit `X-Forwarded-For` (ni le pays de Cloudflare) que venant du tunnel (`TRUST_PROXY` = `TUNNEL_IP`, adresse que les autres conteneurs ne peuvent pas prendre), pas d'un poste du réseau local.
 - **Partages réseau :** `appdata` et `backups` non exportés (étape 2).
 - **Secrets :** le jeton du tunnel ne va qu'à `nicephos-tunnel`, jamais au site.
+- **Sorties du site** (facultatif, [reseau/README.md](reseau/README.md)) : par un mandataire à liste autorisée ; toute autre sortie, et tout flux entre conteneurs hors de la liste, rejetés et journalisés par l'hôte, lus par la Vigie.
 - **Passerelle Signal** (facultative) : aucun port publié ; son API, sans authentification, n'est joignable que par le réseau interne de la Vigie, où le site n'est pas.
 - **Effacements :** une donnée effacée est mise à zéro dans la base, et les instantanés ne gardent pas ses restes ; une restauration ne ramène pas un original effacé que la base restaurée ne connaît plus.
 - **Base vide par erreur :** les vrais instantanés sont gardés, et `nicephos-sauvegarde` passe `unhealthy`.

@@ -7,7 +7,7 @@ import { responseOf } from '../notifications.js';
 import { FINE, NBSP, dateHeure, heure, jour, nombre, paris, quand } from './format.js';
 
 // Sources d'une alerte ou d'un événement (celles du quorum, vigie/poids.js).
-export const SOURCES = { site: 'site', zitadel: 'Zitadel', bordure: 'bordure Cloudflare', vigie: 'contrôles de la Vigie' };
+export const SOURCES = { site: 'site', zitadel: 'Zitadel', bordure: 'bordure Cloudflare', reseau: 'réseau', vigie: 'contrôles de la Vigie' };
 // Modes d'une règle (vigie/poids.js, MODES).
 export const MODES = { arret: 'Arrêt', observer: 'Observer', alerter: 'Alerter', bloquer: 'Bloquer' };
 // Classes d'entités : dans une phrase (« compte »), et en tête de ligne ou de fiche (« Compte »).
