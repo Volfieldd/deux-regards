@@ -396,3 +396,27 @@ html.js .lib-v2 .drop-hint .sans-script { display: none !important; }
   .rv-liste .c-quand { color: var(--ink2); font-size: 13px; }
 }
 @media (max-width: 540px) { .rv-objet { grid-template-columns: 64px minmax(0, 1fr); } .rv-objet img, .rv-objet .ph { width: 64px; height: 43px; } }
+/* Grille (planche MQ-00) : aucun texte sous 12 px, aucun titre coupé par une ellipse, des cibles de 24 px au bureau et de
+   44 px au toucher (cases des vignettes dans un libellé de 44 px, titres des légendes). */
+.lib-v2 .tile .tile-chk { position: absolute; top: 2px; left: 2px; z-index: 3; margin: 0; }
+.lib-v2 .tile .tile-chk .chk { position: static; }
+.lib-v2 .tile .cap .ttl, .lib-v2 .tile .cap small, .plist-v2 .info .sec { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+.lib-v2 .tile .cap .ttl { display: inline-flex; align-items: center; min-height: 24px; }
+.lib-v2 .tile .cap small, .lib-v2 .tile .badge, .lib-v2 .fld > .lb, .lib-v2 kbd { font-size: 12px; }
+.lib-v2 .filters-v2 :focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.lib-v2 .seg a:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: -3px; }
+@media (max-width: 720px), (pointer: coarse) {
+  .lib-v2 .tile .cap .ttl { min-height: 44px; }
+  .lib-v2 .filters-v2 .btn { min-height: 44px; }
+}
+dialog.confirm.cible:target:not([open]) { width: auto; max-width: 560px; }
+/* La case est dans son libellé (.tile-chk) : les règles de la v1 qui visaient « .tile > .chk » le suivent. */
+@container (max-height: 150px) { .lib-v2 .tile:has(.tile-chk .chk:checked) .badges { opacity: 0; } }
+@media (max-width: 720px) {
+  .lib-v2 .tile:has(.tile-chk .chk:checked) .cap { opacity: 1; }
+  .lib-v2 .tile:has(.tile-chk .chk:checked) .cap .ttl { pointer-events: auto; text-decoration: underline; text-underline-offset: 3px; }
+}
+/* « Mon compte » ouvert : le rôle sous le nom, sur le fond de la page courante, garde 4,5:1 (grille, axe). */
+.admin .me-lien[aria-current] small { color: var(--ink2); }
+/* Vignette étroite (portrait, téléphone) : la légende garde le titre seul, qui passe à la ligne sans être rogné. */
+@container (max-width: 160px) { .lib-v2 .tile .cap small { display: none; } .lib-v2 .tile .cap { padding-top: 12px; } }

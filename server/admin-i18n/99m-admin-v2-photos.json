@@ -882,5 +882,17 @@
  "{n} garde le nom du fichier comme titre : l’adresse de sa page se fige à la publication. Corrigez-le d’abord, ou publiez quand même.": {
   "en": "{n} keeps the file name as title: its page address is fixed on publication. Correct it first, or publish anyway.",
   "de": "{n} behält den Dateinamen als Titel: Die Seitenadresse wird bei der Veröffentlichung festgelegt. Korrigieren Sie ihn zuerst oder veröffentlichen Sie trotzdem."
+ },
+ "Publier la sélection ?": {
+  "en": "Publish the selection?",
+  "de": "Auswahl veröffentlichen?"
+ },
+ "Supprimer la sélection ?": {
+  "en": "Delete the selection?",
+  "de": "Auswahl löschen?"
+ },
+ "Valider les photos cochées ?": {
+  "en": "Approve the ticked photos?",
+  "de": "Angehakte Fotos freigeben?"
  }
 }

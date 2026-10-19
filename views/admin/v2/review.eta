@@ -32,6 +32,7 @@
       <caption><%= t('Cochez les photos à valider, puis choisissez quand les publier, sous la liste.') %></caption>
       <thead><tr><th scope="col"><span class="sr-only"><%= t('Choisir') %></span></th><th scope="col"><%= t('Photo') %></th><th scope="col"><%= t('État') %></th><th scope="col"><%= t('Proposée') %></th><th scope="col"><span class="sr-only"><%= t('Actions') %></span></th></tr></thead>
       <tbody>
+        <!-- [html-validate-disable-block form-dup-name: les cases des lignes forment un groupe, name="ids" répété comme dans la v1 ; le serveur en reçoit la liste] -->
 <% P.forEach(r => { const p = r.photo; const lvl = r.ready ? 'ok' : p.site.level; %>
         <tr data-photo="<%= p.id %>"<%~ p.provisional ? ' data-provisoire' : '' %> data-titre="<%= p.title %>">
           <td class="c-chk"><% if (r.ready) { %><label class="chk-l"><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" aria-labelledby="rv-<%= p.id %>"></label><% } %></td>
@@ -117,10 +118,10 @@
 </dialog>
 <% }) %>
 <dialog class="confirm" data-dlg-valider aria-labelledby="dv-t" aria-describedby="dv-d">
-  <h2 id="dv-t" data-dlg-titre></h2>
+  <h2 id="dv-t" data-dlg-titre><%= t('Valider les photos cochées ?') %></h2>
   <p id="dv-d" data-dlg-texte></p>
   <ul class="liste-c" data-dlg-liste></ul>
-  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn" type="button" data-dlg-ok></button></div>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn" type="button" data-dlg-ok><%= t('Valider') %></button></div>
 </dialog>
 <%~ include('./_textes-review', it) %>
 <script src="<%= it.asset('admin/v2/review-v2.js') %>" defer></script>

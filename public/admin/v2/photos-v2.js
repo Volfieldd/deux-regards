@@ -55,7 +55,7 @@
   if (contact) {
     contact.addEventListener('click', e => {
       const tile = e.target.closest('.tile');
-      if (!tile || e.target.closest('input, .ttl')) return;
+      if (!tile || e.target.closest('input, label, .ttl')) return;
       e.preventDefault();
       const id = Number(tile.dataset.id);
       const box = boxOf(id);
@@ -571,7 +571,7 @@
       li.className = `tile developing ${i.w && i.h ? ratio(i.w, i.h) : 'ar-150'}`;
       li.dataset.id = i.photoId;
       li.setAttribute('data-provisional', '');
-      li.innerHTML = `<input class="chk" type="checkbox" name="ids" value="${i.photoId}" form="bulk" aria-label="${esc(T('Sélectionner « {title} »', { title: i.title }))}">
+      li.innerHTML = `<label class="chk-l tile-chk"><input class="chk" type="checkbox" name="ids" value="${i.photoId}" form="bulk" aria-label="${esc(T('Sélectionner « {title} »', { title: i.title }))}"></label>
         <a class="img" href="/admin/photos/${i.photoId}" tabindex="-1" aria-hidden="true">${i.url ? `<img src="${i.url}" alt="">` : `<span class="ph">${esc(T('Développement…'))}</span>`}</a>
         <span class="badges"><span class="badge" data-statut>${esc(T('Développement'))}</span></span><span class="dev"><i></i></span>
         <span class="cap"><a class="ttl" href="/admin/photos/${i.photoId}">${esc(i.title)}</a><small>${esc(T('brouillon'))}</small></span>`;

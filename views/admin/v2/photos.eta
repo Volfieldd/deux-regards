@@ -23,6 +23,9 @@
    const ic = (k, s = 14) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
    // Filtres d'état (lexique § 3) : le symbole dans sa couleur, le mot, le nombre ; ceux qui ne comptent rien sont tus.
    const chip = (href, label, n, sym, current) => '<a class="chip" href="' + E(href) + '"' + (current ? ' aria-current="page"' : '') + '>' + (sym ? '<span class="chip-st chip-st--' + sym + '">' + ic(sym, 12) + '</span>' : '') + E(label) + '<span class="n">' + n + '</span></a>';
+   // Largeur affichée d'une vignette de la planche : son format × la hauteur de rangée (120 px au téléphone, 190 au bureau,
+   // avec la marge des rangées justifiées), pour que le navigateur prenne la variante à la taille (RGESN, UX-A-29).
+   const tileSizes = p => { const r = p.width > 0 && p.height > 0 ? Math.min(3, Math.max(0.4, p.width / p.height)) : 1.5; return '(max-width: 720px) ' + Math.round(r * 130) + 'px, ' + Math.round(r * 240) + 'px'; };
    const STATE = p => (p.status === 'published' ? ['abouti', t('Publiée')] : p.review === 'programmee' ? ['encours', t('Programmée')] : p.review === 'proposee' ? ['encours', t('Proposée')] : p.review === 'a_reprendre' ? ['attention', t('À reprendre')] : ['afaire', t('Brouillon')]); %>
 <div class="library lib-v2" data-library<%~ it.shortcuts === false ? ' data-raccourcis="off"' : '' %>>
 <section class="lib" aria-labelledby="lib-title">
@@ -71,10 +74,11 @@
       <span class="sans-script"><%= t('Cochez des photos, puis agissez dans le panneau « Sélection ».') %></span></p>
 <% if (it.view === 'planche') { %>
     <ol class="contact"<%~ it.filtered || !order ? '' : ' data-sortable' %> data-contact aria-label="<%= t('Photos') %>">
+      <!-- [html-validate-disable-block form-dup-name: les cases des vignettes forment un groupe, name="ids" répété comme dans la v1 ; le serveur en reçoit la liste] -->
 <% it.photos.forEach(p => { const [st, stLabel] = STATE(p); %>
       <li id="photo-<%= p.id %>" class="tile <%= it.ratioClass(p) %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
-        <input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>">
-        <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '320px', alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
+        <label class="chk-l tile-chk"><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>"></label>
+        <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: tileSizes(p), alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
         <span class="badges"><% if (p.status !== 'published' || p.review) { %><span class="badge" data-statut><%~ ic(st, 10) %> <%= stLabel %></span><% } %><% if (p.provisional) { %><span class="badge warn" data-prov><%~ ic('alerte', 10) %> <%= t('Titre provisoire') %></span><% } %><% if (p.site && p.site.level !== 'ok') { %><span class="badge warn" data-accord<%~ p.seePeople ? ' title="' + E(p.site.reasons.join(' ; ')) + '"' : '' %>><%~ ic(p.site.level === 'no' ? 'arret' : 'attention', 10) %> <%= p.site.level === 'no' ? t('Accord refusé') : t('Accord à vérifier') %></span><% } %><% if (p.suggest && p.suggest.length) { %><span class="badge sug"><span aria-hidden="true">✦</span> <%= p.suggest[0].name %></span><% } %></span>
         <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · ' + t('publiée') : '' %></small></span>
       </li>
@@ -82,6 +86,7 @@
     </ol>
 <% } else { %>
     <ol class="plist plist-v2"<%~ it.filtered || !order ? '' : ' data-sortable' %>>
+      <!-- [html-validate-disable-block form-dup-name: les cases des lignes forment un groupe, name="ids" répété comme dans la v1 ; le serveur en reçoit la liste] -->
 <% it.photos.forEach((p, i) => { const [st, stLabel] = STATE(p); %>
       <li id="photo-<%= p.id %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
         <label class="chk-l"><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>"></label>
@@ -145,15 +150,15 @@
       <p class="insp-autosave hint"><%= t('Chaque champ s’enregistre quand vous le quittez ; « Défaire » revient en arrière pendant 10 secondes.') %></p>
       <div class="preview-one" data-one-preview></div>
       <div class="insp-bd">
-        <div class="fld"><label class="lb" for="one-title"><%= t('Titre') %> <span class="r" data-one-n></span></label><input id="one-title" class="big-title" data-one-field="title" maxlength="160"<%~ it.can('photos.textes') ? '' : ' readonly' %>><span class="att" data-one-prov hidden><%~ ic('alerte', 12) %><%= t('Titre provisoire (nom du fichier)') %></span></div>
-        <div class="fld"><label class="lb" for="one-legend"><%= t('Légende') %> <span class="r"><%= t('facultatif') %></span></label><textarea id="one-legend" data-one-field="legend" rows="2" maxlength="2000"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('Quelques mots pour le visiteur…') %>"></textarea></div>
-        <div class="fld"><label class="lb" for="one-alt"><%= t('Texte de remplacement') %> <span class="r"><%= t('une ligne, facultatif') %></span></label><input id="one-alt" data-one-field="alt_text" maxlength="<%= it.altMax %>"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('ce qu’on voit, en une ligne') %>"></div>
+        <div class="fld"><label class="lb" for="one-title"><%= t('Titre') %> <span class="r" data-one-n></span></label><input id="one-title" name="one_title" class="big-title" data-one-field="title" maxlength="160"<%~ it.can('photos.textes') ? '' : ' readonly' %>><span class="att" data-one-prov hidden><%~ ic('alerte', 12) %><%= t('Titre provisoire (nom du fichier)') %></span></div>
+        <div class="fld"><label class="lb" for="one-legend"><%= t('Légende') %> <span class="r"><%= t('facultatif') %></span></label><textarea id="one-legend" name="one_legend" data-one-field="legend" rows="2" maxlength="2000"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('Quelques mots pour le visiteur…') %>"></textarea></div>
+        <div class="fld"><label class="lb" for="one-alt"><%= t('Texte de remplacement') %> <span class="r"><%= t('une ligne, facultatif') %></span></label><input id="one-alt" name="one_alt_text" data-one-field="alt_text" maxlength="<%= it.altMax %>"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('ce qu’on voit, en une ligne') %>"></div>
         <div class="fld"<%~ mod ? '' : ' hidden' %>><span class="lb" id="one-serie-l"><%= t('Série') %></span><div class="sug-list" data-one-suggest hidden></div><div class="pills" data-one-series role="group" aria-labelledby="one-serie-l"><% it.categories.forEach(c => { %><button class="pill" type="button" data-category="<%= c.id %>" aria-pressed="false"><%= c.name %></button><% }) %></div></div>
-        <div class="fld" data-city<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-city"><%= t('Ville de la carte') %> <span class="r"><%= t('facultatif') %></span></label><input id="one-city" data-city-input data-one-city maxlength="120" placeholder="<%= t('Angers, Lisbonne…') %>" autocomplete="off"><input type="hidden" data-city-id>
-          <label class="chk-ligne"><input type="checkbox" data-one-onmap> <%= t('Afficher sur la carte') %></label><span class="hint" data-one-citynote hidden><%= t('Proposée d’après le GPS de la photo : vérifiez-la.') %></span></div>
-        <div class="fld"><label class="lb" for="one-place"><%= t('Lieu') %> <span class="r"><%= t('facultatif') %></span></label><input id="one-place" data-one-field="place" maxlength="120"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('Où ?') %>"></div>
-        <div class="fld"<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-date"><%= t('Date') %> <span class="r"><%= t('ex. oct. 2026, 10/2026, 2026-10-16') %></span></label><input id="one-date" data-one-field="taken_on" maxlength="40" aria-describedby="one-when"><p class="lu" id="one-when" data-one-when></p></div>
-        <div class="fld"<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-author"><%= t('Photographe') %></label><select id="one-author" data-one-field="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
+        <div class="fld" data-city<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-city"><%= t('Ville de la carte') %> <span class="r"><%= t('facultatif') %></span></label><input id="one-city" name="one_city" data-city-input data-one-city maxlength="120" placeholder="<%= t('Angers, Lisbonne…') %>" autocomplete="off"><input type="hidden" data-city-id>
+          <label class="chk-ligne"><input type="checkbox" name="one_on_map" data-one-onmap> <%= t('Afficher sur la carte') %></label><span class="hint" data-one-citynote hidden><%= t('Proposée d’après le GPS de la photo : vérifiez-la.') %></span></div>
+        <div class="fld"><label class="lb" for="one-place"><%= t('Lieu') %> <span class="r"><%= t('facultatif') %></span></label><input id="one-place" name="one_place" data-one-field="place" maxlength="120"<%~ it.can('photos.textes') ? '' : ' readonly' %> placeholder="<%= t('Où ?') %>"></div>
+        <div class="fld"<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-date"><%= t('Date') %> <span class="r"><%= t('ex. oct. 2026, 10/2026, 2026-10-16') %></span></label><input id="one-date" name="one_taken_on" data-one-field="taken_on" maxlength="40" aria-describedby="one-when"><p class="lu" id="one-when" data-one-when></p></div>
+        <div class="fld"<%~ mod ? '' : ' hidden' %>><label class="lb" for="one-author"><%= t('Photographe') %></label><select id="one-author" name="one_author" data-one-field="author_id"><% it.authors.forEach(a => { %><option value="<%= a.id %>"><%= a.name %></option><% }) %></select></div>
 <% if (it.can('statistiques.voir')) { %>        <div class="fld" data-one-audience><span class="lb"><%= t('Audience') %> <span class="r"><%= t('30 jours') %></span></span><div class="aud" data-one-aud><span class="hint">…</span></div></div>
 <% } %>        <div class="fld"><a class="btn ghost" data-one-link href="#"><%= t('Ouvrir la fiche : filigrane, accords, Instagram, preuve') %></a></div>
       </div>
@@ -203,15 +208,15 @@
       « Défaire ». Supprimer : définitif, Annuler d'abord. Remplis par photos-v2.js ; sans script, les boutons du panneau
       envoient le formulaire (et la suppression passe par sa page de confirmation, comme la v1). */ %>
 <dialog class="confirm" data-dlg-publier aria-labelledby="dpub-t" aria-describedby="dpub-d">
-  <h2 id="dpub-t" data-dlg-titre></h2>
+  <h2 id="dpub-t" data-dlg-titre><%= t('Publier la sélection ?') %></h2>
   <p id="dpub-d" data-dlg-texte></p>
   <ul class="liste-c" data-dlg-liste></ul>
-  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn" type="button" data-dlg-ok></button></div>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn" type="button" data-dlg-ok><%= t('Publier') %></button></div>
 </dialog>
 <dialog class="confirm" data-dlg-supprimer aria-labelledby="dsup-t" aria-describedby="dsup-d">
-  <h2 id="dsup-t" data-dlg-titre></h2>
+  <h2 id="dsup-t" data-dlg-titre><%= t('Supprimer la sélection ?') %></h2>
   <p id="dsup-d"><%= t('Les originaux, toutes leurs images et leurs preuves d’antériorité seront effacés. Cette action est définitive.') %></p>
-  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn danger" type="button" data-dlg-ok><%~ ic('corbeille', 16) %><span data-dlg-bouton></span></button></div>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn danger" type="button" data-dlg-ok><%~ ic('corbeille', 16) %><span data-dlg-bouton><%= t('Supprimer définitivement') %></span></button></div>
 </dialog>
 <%~ include('./_textes-photos', it) %>
 <script src="<%= it.asset('admin/v2/photos-v2.js') %>" defer></script>

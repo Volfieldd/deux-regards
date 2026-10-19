@@ -80,13 +80,13 @@
 <section class="fiche-etats" aria-labelledby="etats-t">
   <h2 class="sr-only" id="etats-t"><%= t('Accords et visages') %></h2>
   <p class="fiche-pastilles"><span class="etat etat--<%= ACC[R.site.level] %>"><%~ ic(ACC[R.site.level], 12) %><%= acc(t('Site'), R.site.level) %></span><span class="etat etat--<%= ACC[R.instagram.level] %>"><%~ ic(ACC[R.instagram.level], 12) %><%= acc('Instagram', R.instagram.level) %></span><% if (it.provisional) { %><a class="att" href="#title"><%~ ic('alerte', 12) %><%= t('Titre provisoire (nom du fichier)') %></a><% } %></p>
-  <p class="fiche-visages"><span><%= F.source === 'main' ? (F.has ? t('quelqu’un sur la photo (indiqué à la main)') : t('personne de reconnaissable (indiqué à la main)')) : F.source === 'attente' ? t('visages : examen en attente') : F.source === 'echec' ? t('visages : examen impossible') : F.n ? (F.n > 1 ? t('{n} visages détectés', { n: F.n }) : t('{n} visage détecté', { n: F.n })) : t('aucun visage détecté') %></span>
+  <div class="fiche-visages"><span><%= F.source === 'main' ? (F.has ? t('quelqu’un sur la photo (indiqué à la main)') : t('personne de reconnaissable (indiqué à la main)')) : F.source === 'attente' ? t('visages : examen en attente') : F.source === 'echec' ? t('visages : examen impossible') : F.n ? (F.n > 1 ? t('{n} visages détectés', { n: F.n }) : t('{n} visage détecté', { n: F.n })) : t('aucun visage détecté') %></span>
 <% if (can('personnes.gerer')) { %>    <form class="btns-ligne" method="post" action="<%= base %>/visages"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (!(F.source === 'main' && F.has)) { %>      <button class="lien-a" type="submit" name="valeur" value="oui"><%= t('Indiquer : il y a quelqu’un') %></button>
 <% } %><% if (!(F.source === 'main' && !F.has)) { %>      <button class="lien-a" type="submit" name="valeur" value="non"><%= t('Indiquer : personne de reconnaissable') %></button>
 <% } %><% if (F.source === 'main') { %>      <button class="lien-a" type="submit" name="valeur" value="auto"><%= t('Revenir à la détection') %></button>
 <% } %>    </form>
-<% } %></p>
+<% } %></div>
 <% const reasons = [...new Set([...R.site.reasons, ...R.instagram.reasons])]; if (reasons.length && seePeople) { %>  <ul class="fiche-raisons"><% reasons.forEach(r => { %><li><%= r %></li><% }) %></ul>
 <% } else if (reasons.length) { %>  <p class="hint"><%= t('Le détail (personnes et accords) est visible du photographe et des administrateurs.') %></p>
 <% } %><% if (it.confirmations.length) { %>  <p class="hint"><%= t('Confirmations :') %> <%= it.confirmations.map(c => t('{usage} par {name} le {date}', { usage: c.usage === 'site' ? t('site') : 'Instagram', name: c.by_name || '?', date: day(c.at) })).join(' · ') %></p>
