@@ -6,6 +6,7 @@ import { removeVariants, MAX_PIXELS, WIDTHS } from './images.js';
 import { readExif } from './exif.js';
 import { sha256File } from './proofs.js';
 import { IMPORT_CONCURRENCY } from './imports.js';
+import { shootingOf } from './prise-de-vue.js';
 
 // Garde-fous de l'import : poids du fichier, nombre de pixels, formats réellement décodés.
 // 90 Mio par fichier : chaque photo part dans sa propre requête, et Cloudflare refuse les requêtes de plus de
@@ -31,14 +32,15 @@ export async function withCheckSlot(fn) {
 
 export class ImportError extends Error {}
 
-// Dimensions telles qu'affichées, après application de l'orientation EXIF. L'EXIF n'est lu qu'une fois (lecture bornée).
+// Dimensions telles qu'affichées, après application de l'orientation EXIF. L'EXIF n'est lu qu'une fois (lecture bornée) :
+// date, heure, GPS (pour proposer la ville) et prise de vue (six données, server/prise-de-vue.js).
 export async function orientedSize(file) {
   const m = await sharp(file, { limitInputPixels: MAX_PIXELS }).metadata();
   const e = readExif(m.exif);
   return {
     format: m.format, compression: m.compression, depth: m.depth, channels: m.channels,
     width: m.autoOrient?.width ?? m.width, height: m.autoOrient?.height ?? m.height,
-    takenOn: takenOnOf(e), takenTime: takenTimeOf(e), gps: gpsOf(e),
+    takenOn: takenOnOf(e), takenTime: takenTimeOf(e), gps: gpsOf(e), shot: shootingOf(e),
   };
 }
 
@@ -121,7 +123,7 @@ export async function importOriginal(storageDir, tmpFile) {
     file = `${crypto.randomUUID()}.${ext}`;
     fs.renameSync(tmpFile, path.join(originals, file));
     // Les variantes sont rendues ensuite par le service (filigrane et métadonnées du moment).
-    return { file, width: meta.width, height: meta.height, sha256, takenOn: meta.takenOn, takenTime: meta.takenTime, gps: meta.gps };
+    return { file, width: meta.width, height: meta.height, sha256, takenOn: meta.takenOn, takenTime: meta.takenTime, gps: meta.gps, shot: meta.shot };
   } catch (err) {
     if (file) removePhotoFiles(storageDir, file);
     throw err;

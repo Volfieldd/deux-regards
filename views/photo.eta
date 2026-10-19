@@ -10,7 +10,9 @@
     <div class="vtext">
       <h1><%= p.title %></h1>
       <div class="meta mono">N°<%= it.pad(p.n) %> · <%= p.category %> · <a href="<%= it.galleryUrl({ regard: p.author_slug }) %>"><%= p.author %></a><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + (p.time ? `${it.v2.date(p.taken_on)}, ${p.time}` : p.when) : '' %></div>
-<% if (p.legend) { %>
+<% /* Prise de vue, si le photographe la montre : une seconde ligne de méta, dans la même écriture (une seule ligne serait
+      trop longue au téléphone). */ if (p.shot) { %>      <p class="meta mono shot"><span class="sr-only"><%= it.t.v2.shot %><%= it.t.v2.colon %></span> <%= p.shot %></p>
+<% } %><% if (p.legend) { %>
       <p class="legend" id="legende"><%= p.legend %></p>
 <% } %><% const kws = it.showKeywords && p.keywords ? p.keywords.split(',').map(k => k.trim()).filter(Boolean) : []; if (kws.length) { %>
       <ul class="kw mono" aria-label="<%= it.t.search.keywords %>"><% kws.forEach(k => { %><li><% if (it.searchPage) { %><a href="<%= it.u('/recherche') %>?q=<%= encodeURIComponent(k) %>" rel="nofollow"><%= k %></a><% } else { %><%= k %><% } %></li><% }) %></ul>

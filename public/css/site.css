@@ -219,6 +219,8 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .viewer .vtext { min-width: 0; }
 .viewer h1 { margin: 0; font-family: var(--serif); font-style: var(--display-style); font-weight: 400; font-size: clamp(26px, 4vw, 40px); line-height: 1.05; text-wrap: balance; overflow-wrap: anywhere; hyphens: auto; }
 .viewer .meta { margin-top: 8px; }
+/* Prise de vue (boîtier, objectif, exposition) : une seconde ligne de méta, juste sous la première. */
+.viewer .meta.shot { margin: 2px 0 0; overflow-wrap: anywhere; }
 .viewer .legend { margin: 10px 0 0; font-family: var(--serif); font-size: 17px; line-height: 1.55; color: #c9c6be; max-width: 60ch; }
 /* Légende longue : trois lignes qui s'estompent, puis « Lire la suite » (site.js) ; sans JS, le texte entier. */
 .viewer .legend.clamp:not(.open) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;

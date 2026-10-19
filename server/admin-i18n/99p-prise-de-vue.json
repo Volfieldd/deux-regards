@@ -1,0 +1,34 @@
+{
+ "Montrer la prise de vue sur le site": {
+  "en": "Show the camera and settings on the site",
+  "de": "Aufnahmedaten auf der Website zeigen"
+ },
+ "Prise de vue sur le site": {
+  "en": "Camera and settings on the site",
+  "de": "Aufnahmedaten auf der Website"
+ },
+ "Boîtier, objectif, focale, vitesse, ouverture et ISO, lus dans l’EXIF de l’original (voir sous la photo). Ni le lieu, ni l’heure, ni le numéro de série.": {
+  "en": "Camera, lens, focal length, shutter speed, aperture and ISO, read from the EXIF of the original (see under the photo). Neither the place, the time nor the serial number.",
+  "de": "Kamera, Objektiv, Brennweite, Belichtungszeit, Blende und ISO, aus den EXIF-Daten des Originals gelesen (siehe unter dem Foto). Weder der Ort noch die Uhrzeit noch die Seriennummer."
+ },
+ "Les images servies (métadonnées « Prise de vue ») les portent selon ce choix.": {
+  "en": "The images served (“Shooting data” metadata) carry them according to this choice.",
+  "de": "Die ausgelieferten Bilder (Metadaten „Aufnahmedaten“) enthalten sie je nach dieser Wahl."
+ },
+ "Métadonnées « Tout l’EXIF de l’original » ({link}) : les images servies portent la prise de vue (et la position GPS), quel que soit ce choix.": {
+  "en": "Metadata “All the EXIF of the original” ({link}): the images served carry the camera and settings (and the GPS position), whatever this choice.",
+  "de": "Metadaten „Alle EXIF-Daten des Originals“ ({link}): Die ausgelieferten Bilder enthalten die Aufnahmedaten (und die GPS-Position), unabhängig von dieser Wahl."
+ },
+ "Prise de vue : {shot}": {
+  "en": "Camera and settings: {shot}",
+  "de": "Aufnahmedaten: {shot}"
+ },
+ "aucune dans l’EXIF de l’original": {
+  "en": "none in the EXIF of the original",
+  "de": "keine in den EXIF-Daten des Originals"
+ },
+ "pas encore lue dans l’original": {
+  "en": "not yet read from the original",
+  "de": "noch nicht aus dem Original gelesen"
+ }
+}

@@ -36,6 +36,7 @@ import { createVault } from './vault.js';
 import { createInstagram } from './instagram.js';
 import { createTodo } from './todo.js';
 import { createOutings } from './outings.js';
+import { createShotBackfill } from './prise-de-vue.js';
 import { createPeople } from './people.js';
 import { createFeedback } from './feedback.js';
 import { createReadiness } from './readiness.js';
@@ -259,6 +260,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('outings', createOutings({ db, encounters: app.encounters, storageDir: config.storageDir, log: app.log }));
   app.addHook('onReady', async () => { setTimeout(() => app.outings.backfillAll(), 2000).unref(); });
   app.addHook('onClose', async () => { await app.outings.stop(); });
+  // Prise de vue des photos importées avant la migration 060 (boîtier, objectif, exposition) : lue une fois dans
+  // l'original, en arrière-plan, comme l'heure des sorties (server/prise-de-vue.js).
+  app.decorate('shotBackfill', createShotBackfill({ db, storageDir: config.storageDir, log: app.log }));
+  app.addHook('onReady', async () => { setTimeout(() => app.shotBackfill.all(), 2500).unref(); });
+  app.addHook('onClose', async () => { await app.shotBackfill.stop(); });
   // « Aujourd'hui » : ce qui demande votre attention (voir server/todo.js).
   // Circuit de publication (server/review.js) : publier une liste (et en dépublier une autre), comme un clic sur
   // « Publier » : statut, file Instagram automatique, images.

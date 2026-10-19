@@ -67,8 +67,8 @@ Dans la fiche de la photo : **Filigrane → Jamais sur cette photo**, puis **Enr
 |---|---|---|
 | **Aucune métadonnée** (par défaut) | rien | ne rien divulguer |
 | **Droits d'auteur** | auteur, « © année auteur », mentions IPTC (crédit, lien vers « Droits d'utilisation ») | signer les fichiers ; Google Images affiche alors un badge « Licence » |
-| **Prise de vue** | droits + appareil, objectif, ouverture, vitesse, ISO, focale ; la date et l'heure de l'appareil **seulement pour une photo qui montre son heure sur le site** (case de la fiche, date au jour) ; **jamais la localisation** | partager sa technique |
-| **Tout l'EXIF de l'original** | tout, **y compris la position GPS et l'heure de prise de vue**, quelle que soit la case « Montrer l'heure sur le site » (la fiche le rappelle) | rarement : révèle où et quand la photo a été prise |
+| **Prise de vue** | droits + appareil, objectif, ouverture, vitesse, ISO, focale **pour une photo qui montre sa prise de vue sur le site** (case de la fiche, cochée au départ ; décochée, les images de cette photo n'ont plus que les droits) ; la date et l'heure de l'appareil **seulement pour une photo qui montre son heure sur le site** (case de la fiche, date au jour) ; **jamais la localisation** | partager sa technique |
+| **Tout l'EXIF de l'original** | tout, **y compris la position GPS et l'heure de prise de vue**, quelles que soient les cases « Montrer l'heure sur le site » et « Montrer la prise de vue sur le site » (la fiche le rappelle) | rarement : révèle où et quand la photo a été prise |
 
 Les champs EXIF n'acceptent que des caractères simples : « © 2024 Sébastien » y devient « (C) 2024 Sebastien ». Les mentions IPTC et le filigrane gardent les accents.
 

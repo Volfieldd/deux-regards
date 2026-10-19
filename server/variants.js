@@ -12,7 +12,7 @@ const PIPELINE = 2;                // 2 : mentions IPTC (XMP) dans les modes sig
 export const EXIF_MODES = {
   none: { label: 'Aucune métadonnée', help: 'Tout est retiré (recommandé). Comportement par défaut.' },
   rights: { label: 'Droits d’auteur', help: 'Auteur, copyright (« © année auteur ») et mentions IPTC : crédit, lien vers la page « Droits d’utilisation ».' },
-  shooting: { label: 'Prise de vue', help: 'Droits d’auteur + appareil, objectif, ouverture, vitesse, ISO, focale ; la date et l’heure seulement pour une photo qui montre son heure sur le site. Jamais la localisation.' },
+  shooting: { label: 'Prise de vue', help: 'Droits d’auteur + appareil, objectif, ouverture, vitesse, ISO, focale pour une photo qui montre sa prise de vue sur le site ; la date et l’heure seulement pour une photo qui montre son heure. Jamais la localisation.' },
   all: { label: 'Tout l’EXIF de l’original', help: 'Mentions IPTC + tout l’EXIF, y compris la localisation GPS et le numéro de série éventuel. À éviter.' },
 };
 export const MIN_WIDTHS = { 0: 'Toutes les tailles', 1280: '1280 px et plus (vignettes épargnées)', 2000: '2000 px seulement' };
@@ -84,9 +84,11 @@ export function specFor(p, { watermark, exif, siteName, watermarkDir, rightsUrl,
   }
   // Mode « prise de vue » : la date et l'heure de l'appareil (DateTimeOriginal) ne partent qu'avec une photo qui montre
   // son heure sur le site (case de la fiche, date au jour) ; time entre dans l'empreinte, les images suivent la case.
+  // De même le boîtier, l'objectif et l'exposition : seulement pour une photo qui montre sa prise de vue (show_shot,
+  // cochée par défaut). shot: 0 n'entre dans l'empreinte que décochée : les images des autres photos gardent leur nom.
   const meta = exif.mode === 'none' ? null
     : { mode: exif.mode, artist: p.author, copyright: `© ${yearOf(p)} ${p.author}`, credit: siteName, webStatement: rightsUrl || null,
-      ...(exif.mode === 'shooting' ? { time: shownTime(p) ? 1 : 0 } : {}) };
+      ...(exif.mode === 'shooting' ? { time: shownTime(p) ? 1 : 0, ...(Number(p.show_shot ?? 1) === 0 ? { shot: 0 } : {}) } : {}) };
   if (!mark && !meta) return { key: '', mark: null, meta: null };
   const { imagePath, ...hashed } = mark || {};
   const key = crypto.createHash('sha256').update(JSON.stringify({ v: PIPELINE, mark: mark && hashed, meta })).digest('hex').slice(0, 8);
@@ -100,7 +102,7 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
   const watermarkDir = path.join(storageDir, 'watermarks');
   const variantsDir = path.join(storageDir, 'variants');
   fs.mkdirSync(watermarkDir, { recursive: true });
-  const SELECT = `SELECT p.id, p.file, p.width, p.height, p.title, p.taken_on, p.taken_time, p.show_time, p.created_at, p.watermark, p.variant_key, a.name AS author
+  const SELECT = `SELECT p.id, p.file, p.width, p.height, p.title, p.taken_on, p.taken_time, p.show_time, p.show_shot, p.created_at, p.watermark, p.variant_key, a.name AS author
     FROM photos p JOIN authors a ON a.id = p.author_id`;
   const q = {
     ids: db.prepare('SELECT id FROM photos ORDER BY position, id').pluck(),

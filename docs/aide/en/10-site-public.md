@@ -78,6 +78,8 @@ The next photo depends on the active filter: in “Street, by Julien”, you sta
 
 **Date and time**: the photo’s date as you entered it (to the month or to the day). The shooting time only appears if the record ticks **Show the time on the site** and the date is to the day: “1 May 2025, 2:32 pm” (“14 h 32”, “14:32 Uhr”), in the caption and the “Place, date and time” line. It is only shown on the photo’s page, never in the gallery, Nearby, the map or the sharing previews.
 
+**Camera and settings**: the camera, lens, focal length, shutter speed, aperture and sensitivity read from the EXIF of the original, in the lexicon’s order: “Fujifilm X-T5 · XF23mmF1.4 R LM WR · 23 mm · 1/1000 s · f/11 · ISO 160” (“18.3 mm” in English, “18,3 mm” in French and German). In v2 and v3, it is the **Camera and settings** line of the viewer’s data, after the photographer; in v1, a second line under the line with the number, series and place. Shown by default; the record’s **Show the camera and settings on the site** box hides it. Never the time in this place (it follows its own box), nor the exact location, nor the serial number.
+
 ## Visitor reports
 
 The **Visitor reports** page (sidebar, People group; administrators and moderators) receives what visitors send through a photo's **Report** link: the type (should not be online, suggestion for the text, something else), the message, the visitor's language, and the address left for a reply (visible to administrators only; the moderator only knows that an address was left). Message and address are encrypted and erased after 12 months. A report never unpublishes anything by itself: open the photo and decide.

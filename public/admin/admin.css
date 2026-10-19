@@ -524,6 +524,7 @@ body.dropping .canvas { outline: 2px dashed var(--accent); outline-offset: -10px
 @media (min-width: 1000px) { .edit { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } }
 .preview { margin: 0; } .preview img { width: 100%; height: auto; border-radius: 10px; background: var(--photo-bg); }
 .preview figcaption { color: var(--ink3); margin-top: 8px; font-size: 12.5px; }
+.preview figcaption .shot-ro { display: block; margin-top: 4px; overflow-wrap: anywhere; }
 .danger summary { cursor: pointer; color: var(--danger); }
 .danger[open] summary { margin-bottom: 10px; }
 .logo { max-width: 240px; max-height: 120px; width: auto; background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 0 0 / 16px 16px; padding: 8px; border-radius: 8px; }

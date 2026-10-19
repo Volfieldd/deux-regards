@@ -44,6 +44,7 @@ import { legalMissing } from '../legal.js';
 import { createAdminVersion, ADMIN_VERSIONS } from '../admin-version.js';
 import { typoHtml } from '../typo-html.js';
 import * as JOURNAL from '../journal-libelles.js';
+import { shotLine } from '../prise-de-vue.js';
 import { fileURLToPath } from 'node:url';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
@@ -1031,6 +1032,9 @@ export default async function adminRoutes(app) {
     outingUrl: app.outings.urlOf(photo.author_id, photo.taken_on, photo.taken_time),
     // Réglage des images « tout l'EXIF » : l'heure part avec les fichiers servis, quel que soit le choix de la fiche.
     exifAll: repo.settings().exif?.mode === 'all',
+    // Prise de vue lue dans l'EXIF de l'original (migration 060), en lecture seule, dans la langue de l'admin ; '' si
+    // l'original n'en a pas (ou n'a pas encore été lu : shotRead). Le mode des images dit si les fichiers servis la portent.
+    shot: shotLine(photo, t.lang), shotRead: Number(photo.shot_read) === 1, exifMode: repo.settings().exif?.mode || 'none',
     notes: app.notes.open({ photoId: photo.id }), ownPhoto: app.accounts.authorIdOf(request.session.sub) === photo.author_id,
     // Instagram : la main sur la file pour cette photo, ou seulement la proposer (circuit) ; sa proposition en cours.
     // Mots-clés suggérés par CLIP (empreinte des propositions de séries) ; null : pas encore d'empreinte.

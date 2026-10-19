@@ -67,8 +67,8 @@ In the photo’s record: **Watermark → Never on this photo**, then **Save**. T
 |---|---|---|
 | **No metadata** (default) | nothing | disclosing nothing |
 | **Copyright** | author, “© year author”, IPTC notices (credit, link to “Usage rights”) | signing the files; Google Images then shows a “Licensable” badge |
-| **Shooting data** | copyright + camera, lens, aperture, shutter speed, ISO, focal length; the camera’s date and time **only for a photo that shows its time on the site** (box in the record, date to the day); **never the location** | sharing your technique |
-| **All EXIF of the original** | everything, **including the GPS position and the shooting time**, whatever the “Show the time on the site” box (the record reminds you) | rarely: reveals where and when the photo was taken |
+| **Shooting data** | copyright + camera, lens, aperture, shutter speed, ISO, focal length **for a photo that shows its camera and settings on the site** (box in the record, ticked at first; unticked, this photo’s images only carry the copyright); the camera’s date and time **only for a photo that shows its time on the site** (box in the record, date to the day); **never the location** | sharing your technique |
+| **All EXIF of the original** | everything, **including the GPS position and the shooting time**, whatever the “Show the time on the site” and “Show the camera and settings on the site” boxes (the record reminds you) | rarely: reveals where and when the photo was taken |
 
 EXIF fields only accept plain characters: “© 2024 Sébastien” becomes “(C) 2024 Sebastien” there. IPTC notices and the watermark keep accents.
 

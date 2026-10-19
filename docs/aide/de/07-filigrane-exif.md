@@ -67,8 +67,8 @@ Im Datenblatt des Fotos: **Wasserzeichen → Nie auf diesem Foto**, dann **Speic
 |---|---|---|
 | **Keine Metadaten** (Standard) | nichts | nichts preisgeben |
 | **Urheberrecht** | Autor, „© Jahr Autor“, IPTC-Angaben (Credit, Link zu „Nutzungsrechte“) | die Dateien signieren; Google Bilder zeigt dann ein Abzeichen „Lizenzierbar“ |
-| **Aufnahmedaten** | Urheberrecht + Kamera, Objektiv, Blende, Belichtungszeit, ISO, Brennweite; Datum und Uhrzeit der Kamera **nur bei einem Foto, das seine Uhrzeit auf der Website zeigt** (Kästchen im Datenblatt, tagesgenaues Datum); **nie der Aufnahmeort** | die eigene Technik teilen |
-| **Alle EXIF-Daten des Originals** | alles, **einschließlich der GPS-Position und der Aufnahmezeit**, unabhängig vom Kästchen „Uhrzeit auf der Website zeigen“ (das Datenblatt erinnert daran) | selten: verrät, wo und wann das Foto aufgenommen wurde |
+| **Aufnahmedaten** | Urheberrecht + Kamera, Objektiv, Blende, Belichtungszeit, ISO, Brennweite **bei einem Foto, das seine Aufnahmedaten auf der Website zeigt** (Kästchen im Datenblatt, anfangs angekreuzt; nicht angekreuzt, tragen die Bilder dieses Fotos nur das Urheberrecht); Datum und Uhrzeit der Kamera **nur bei einem Foto, das seine Uhrzeit auf der Website zeigt** (Kästchen im Datenblatt, tagesgenaues Datum); **nie der Aufnahmeort** | die eigene Technik teilen |
+| **Alle EXIF-Daten des Originals** | alles, **einschließlich der GPS-Position und der Aufnahmezeit**, unabhängig von den Kästchen „Uhrzeit auf der Website zeigen“ und „Aufnahmedaten auf der Website zeigen“ (das Datenblatt erinnert daran) | selten: verrät, wo und wann das Foto aufgenommen wurde |
 
 EXIF-Felder akzeptieren nur einfache Zeichen: „© 2024 Sébastien“ wird dort zu „(C) 2024 Sebastien“. IPTC-Angaben und das Wasserzeichen behalten die Akzente.
 
