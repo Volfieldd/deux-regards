@@ -25,7 +25,6 @@
    const chip = (href, label, n, sym, current) => '<a class="chip" href="' + E(href) + '"' + (current ? ' aria-current="page"' : '') + '>' + (sym ? '<span class="chip-st chip-st--' + sym + '">' + ic(sym, 12) + '</span>' : '') + E(label) + '<span class="n">' + n + '</span></a>';
    // Largeur affichée d'une vignette de la planche : son format × la hauteur de rangée (120 px au téléphone, 190 au bureau,
    // avec la marge des rangées justifiées), pour que le navigateur prenne la variante à la taille (RGESN, UX-A-29).
-   const tileSizes = p => { const r = p.width > 0 && p.height > 0 ? Math.min(3, Math.max(0.4, p.width / p.height)) : 1.5; return '(max-width: 720px) ' + Math.round(r * 130) + 'px, ' + Math.round(r * 240) + 'px'; };
    const STATE = p => (p.status === 'published' ? ['abouti', t('Publiée')] : p.review === 'programmee' ? ['encours', t('Programmée')] : p.review === 'proposee' ? ['encours', t('Proposée')] : p.review === 'a_reprendre' ? ['attention', t('À reprendre')] : ['afaire', t('Brouillon')]); %>
 <div class="library lib-v2" data-library<%~ it.shortcuts === false ? ' data-raccourcis="off"' : '' %>>
 <section class="lib" aria-labelledby="lib-title">
@@ -78,7 +77,7 @@
 <% it.photos.forEach(p => { const [st, stLabel] = STATE(p); %>
       <li id="photo-<%= p.id %>" class="tile <%= it.ratioClass(p) %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
         <label class="chk-l tile-chk"><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>"></label>
-        <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: tileSizes(p), alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
+        <a class="img" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: it.tileSizes(p), alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
         <span class="badges"><% if (p.status !== 'published' || p.review) { %><span class="badge" data-statut><%~ ic(st, 10) %> <%= stLabel %></span><% } %><% if (p.provisional) { %><span class="badge warn" data-prov><%~ ic('alerte', 10) %> <%= t('Titre provisoire') %></span><% } %><% if (p.site && p.site.level !== 'ok') { %><span class="badge warn" data-accord<%~ p.seePeople ? ' title="' + E(p.site.reasons.join(' ; ')) + '"' : '' %>><%~ ic(p.site.level === 'no' ? 'arret' : 'attention', 10) %> <%= p.site.level === 'no' ? t('Accord refusé') : t('Accord à vérifier') %></span><% } %><% if (p.suggest && p.suggest.length) { %><span class="badge sug"><span aria-hidden="true">✦</span> <%= p.suggest[0].name %></span><% } %></span>
         <span class="cap"><a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a><small><%= p.category %><%= p.when ? ' · ' + p.when : '' %><%= p.status === 'published' ? ' · ' + t('publiée') : '' %></small></span>
       </li>
@@ -91,7 +90,7 @@
       <li id="photo-<%= p.id %>" data-id="<%= p.id %>"<%~ p.provisional ? ' data-provisional' : '' %>>
         <label class="chk-l"><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" aria-label="<%= t('Sélectionner « {title} »', { title: p.title }) %>"></label>
         <span class="handle" aria-hidden="true">N°<%= it.pad(p.n) %></span>
-        <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '96px', alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
+        <a class="thumb" href="/admin/photos/<%= p.id %>" tabindex="-1" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '(max-width: 400px) 64px, 96px', alt: '' }) %><% } else { %><span class="ph"><%= t('Traitement…') %></span><% } %></a>
         <div class="info">
           <a class="ttl" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
           <span class="sec"><%= p.category %> · <%= p.author %><%= p.place ? ' · ' + p.place : '' %><%= p.when ? ', ' + p.when : '' %></span>

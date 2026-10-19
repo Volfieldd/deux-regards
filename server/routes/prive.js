@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
 import { VARIANT_RE } from '../images.js';
+import { servedVariant } from '../repli-variantes.js';
 import { picture } from '../picture.js';
 import { sameToken } from '../auth.js';
 import { createRateLimiter } from '../ratelimit.js';
@@ -320,7 +321,7 @@ export default async function privateRoutes(app) {
   });
 
   // ---------- images (G38, G39, G40) ----------
-  const photoOfFile = app.db.prepare("SELECT p.id, p.file, p.variant_key, p.faces, p.faces_override, i.confirmed_at FROM space_items i JOIN photos p ON p.id = i.photo_id WHERE i.space_id = ? AND p.file >= ? || '.' AND p.file < ? || '/'");
+  const photoOfFile = app.db.prepare("SELECT p.id, p.file, p.width, p.variant_key, p.faces, p.faces_override, i.confirmed_at FROM space_items i JOIN photos p ON p.id = i.photo_id WHERE i.space_id = ? AND p.file >= ? || '.' AND p.file < ? || '/'");
   app.get('/prive/:pid/m/:name', async (request, reply) => {
     const m = VARIANT_RE.exec(request.params.name);
     const a = m && resolve(request, { nature: 'image privée' });
@@ -334,8 +335,12 @@ export default async function privateRoutes(app) {
       if (!photo || photo.variant_key !== (m[2] || '')) sec('token_guess', { request, reference: ref(request), emetteur: `${EMETTEUR} · images`, detail: { nature: 'image privée' } });
       return reply.code(404).header('cache-control', 'no-store').type('text/plain; charset=utf-8').send('Introuvable.');
     }
+    // Taille pas encore créée (160 ou 480 px d'une photo d'avant leur ajout) : une plus grande de la même photo
+    // (server/repli-variantes.js). Le nom demandé reste celui de la galerie : rien d'autre ne devient joignable.
+    const served = servedVariant(variantsDir, photo, request.params.name);
+    if (!served) return reply.code(404).header('cache-control', 'no-store').type('text/plain; charset=utf-8').send('Introuvable.');
     // private, no-cache avec ETag : le navigateur garde l'image mais redemande avant chaque usage (304) ; jamais public.
-    return fileHeaders(reply, 'private, no-cache').sendFile(request.params.name, variantsDir, { cacheControl: false, lastModified: false });
+    return fileHeaders(reply, 'private, no-cache').sendFile(served.name, variantsDir, { cacheControl: false, lastModified: false });
   });
 
   // ---------- téléchargements (G44, G46 ; BV-19) ----------

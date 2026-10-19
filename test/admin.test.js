@@ -143,7 +143,8 @@ test('import : brouillon, orientation EXIF appliquée, métadonnées retirées, 
 
   const stem = path.parse(photo.file).name;
   const variants = fs.readdirSync(path.join(ctx.config.storageDir, 'variants')).filter(f => f.startsWith(stem));
-  assert.deepEqual(variants.sort(), [`${stem}-640.avif`, `${stem}-640.webp`, `${stem}-900.avif`, `${stem}-900.webp`].sort());
+  // Original de 900 px de large : 160, 480, 640 et 900 px (jamais d'agrandissement), en AVIF et en WebP.
+  assert.deepEqual(variants.sort(), [160, 480, 640, 900].flatMap(w => [`${stem}-${w}.avif`, `${stem}-${w}.webp`]).sort());
   const meta = await sharp(path.join(ctx.config.storageDir, 'variants', `${stem}-900.webp`)).metadata();
   assert.equal(meta.exif, undefined);
   assert.equal(meta.width, 900);                                // pixels réellement tournés

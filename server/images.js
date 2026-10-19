@@ -6,7 +6,9 @@ import sharp from 'sharp';
 import { readExif } from './exif.js';
 import { overlayFor, resolveTone } from './watermark.js';
 
-export const WIDTHS = [640, 1280, 2000];
+// 160 et 480 px : les vignettes (planche, « À proximité », partage, carte, admin), affichées de 40 à 320 px ; sans elles,
+// le navigateur prenait au moins la variante de 640 px (constat UX-T-07, RGESN). 640, 1280, 2000 : les grandes images.
+export const WIDTHS = [160, 480, 640, 1280, 2000];
 export const FORMATS = ['avif', 'webp'];
 // Refus de décoder au-delà (bombe de décompression) ; l'import vérifie aussi avant d'arriver ici.
 export const MAX_PIXELS = 120_000_000;
@@ -17,7 +19,8 @@ const AVIF_EFFORT = Math.min(Math.max(Number(process.env.AVIF_EFFORT ?? 4) || 0,
 export const IMAGE_THREADS = Math.min(Math.max(Math.round(Number(process.env.IMAGE_THREADS) || Math.min(4, os.availableParallelism())), 1), 16);
 sharp.concurrency(IMAGE_THREADS);
 
-// Largeurs réellement produites pour une image : jamais d'agrandissement.
+// Largeurs réellement produites pour une image : jamais d'agrandissement. Les tailles de WIDTHS plus petites que
+// l'original, puis l'original lui-même s'il est plus petit que 2000 px (une photo de 600 px : 160, 480, 600).
 export function widthsFor(originalWidth) {
   const ws = WIDTHS.filter(w => w < originalWidth);
   if (ws.length < WIDTHS.length) ws.push(Math.min(originalWidth, WIDTHS.at(-1)));

@@ -72,13 +72,21 @@ export function visSizes({ r, vertical }) {
 // de la largeur W de la rangée, deux photos au plus par ligne (.v + .v + li et .c à 47 % au moins, .v à la moitié au
 // plus), lignes étirées au prorata des formats, dernière ligne à sa taille. Calculé une fois, en fraction de W (pour
 // W = 364 px, un Pixel 7 : l'écart de 8 px y pèse 2,2 %), comme outils/sizes-tel.py des maquettes.
+// Petit téléphone (moins de 360 px, --gut de 16 px) : la même composition pour W = 288 px (un écran de 320 px), où l'écart
+// de 8 px pèse plus et coupe les lignes ailleurs ; sans elle, une vignette de 140 px y était chargée en 160 px pour un écran
+// de densité 2 (floue), dès que les vignettes de 160 px ont existé.
 const shares = new WeakMap();        // liste → parts (calculées une fois par liste, et non une fois par photo)
-export function phoneShares(list) {
-  if (!shares.has(list)) shares.set(list, composeShares(list));
-  return shares.get(list);
+export function phoneShares(list, W = 364) {
+  if (!shares.has(list)) shares.set(list, new Map());
+  const memo = shares.get(list);
+  if (!memo.has(W)) memo.set(W, composeShares(list, W));
+  return memo.get(W);
 }
-function composeShares(list) {
-  const W = 364, gap = 8 / W;
+// Les deux conditions du téléphone d'un sizes : moins de 360 px (marges de 16 px), puis jusqu'à 767 px (marges de 24 px).
+const phoneConds = (list, i) => `(max-width: 359px) calc((100vw - 32px) * ${n2(phoneShares(list, 288)[i] ?? 1)}), `
+  + `(max-width: 767px) calc((100vw - 48px) * ${n2(phoneShares(list)[i] ?? 1)})`;
+function composeShares(list, W) {
+  const gap = 8 / W;
   const items = list.map((x, i) => {
     const { r } = fmt(x);
     const v = r < 1, c = r === 1, afterTwoV = i >= 2 && fmt(list[i - 1]).r < 1 && fmt(list[i - 2]).r < 1;
@@ -119,7 +127,7 @@ export function nearSizes(item, list, main) {
     : [`min(calc(100vw - 80px), calc((100vh - 267px) * ${n2(main.r)}))`, `min(calc(100vw - 112px), calc((100vh - 267px) * ${n2(main.r)}))`, `min(calc(100vw - 160px), calc((100vh - 191px) * ${n2(main.r)}), ${Math.round(900 * main.r)}px)`];
   const share = w => `calc((${w} - ${gaps}px) * ${k})`;
   return [
-    `(max-width: 767px) calc((100vw - 48px) * ${n2(phoneShares(list)[list.indexOf(item)] ?? 1)})`,
+    phoneConds(list, list.indexOf(item)),
     `(max-width: 1023px) ${share(width[0])}`,
     `(max-width: 1199px) ${share(width[1])}`,
     share(width[2]),
@@ -155,7 +163,17 @@ function rows(rs, W, h, gap = 16) {
   });
   return w;
 }
-const widest = new WeakMap();        // liste → largeur la plus grande de chaque photo, par plage (calculée une fois)
+// Tranches de 128 px au plus dans chaque plage : la plus grande largeur d'une photo sur toute une plage (1 280 à 1 599 px)
+// est souvent celle d'une autre composition des rangées que celle de l'écran ; avec les vignettes de 160 et 480 px, ce
+// surplus faisait charger la taille au-dessus (640 au lieu de 480). Même calcul, sur des tranches plus étroites ; deux
+// tranches voisines de même largeur n'en font qu'une dans le sizes.
+const TRANCHE = 128;
+const TRANCHES = PLAGES.flatMap(p => {
+  const out = [];
+  for (let from = p.from; from <= p.to; from += TRANCHE) out.push({ ...p, from, to: Math.min(p.to, from + TRANCHE - 1) });
+  return out;
+});
+const widest = new WeakMap();        // liste → largeur la plus grande de chaque photo, par tranche (calculée une fois)
 // within(vw, gut) : la largeur du bloc des rangées pour un écran de vw px (par défaut, la page moins ses marges).
 const pageWidth = (vw, gut) => vw - 2 * gut;
 function widths(list, within = pageWidth) {
@@ -163,9 +181,11 @@ function widths(list, within = pageWidth) {
   const memo = widest.get(list);
   if (!memo.has(within)) {
     const rs = list.map(x => fmt(x).r);
-    memo.set(within, PLAGES.map(({ from, to, gut, h }) => {
+    memo.set(within, TRANCHES.map(({ from, to, gut, h }) => {
       const max = rs.map(() => 0);
       for (let vw = from; vw <= to; vw += 8) rows(rs, within(vw, gut), h).forEach((x, i) => { max[i] = Math.max(max[i], x); });
+      // la dernière largeur de la tranche, si le pas de 8 px l'a sautée
+      if ((to - from) % 8) rows(rs, within(to, gut), h).forEach((x, i) => { max[i] = Math.max(max[i], x); });
       return max.map(up5);
     }));
   }
@@ -176,14 +196,16 @@ function widths(list, within = pageWidth) {
 export const billetLarge = (vw, gut) => (vw >= 1024 ? ((vw - 2 * gut - 11 * 24) / 12) * 10 + 9 * 24 : vw - 2 * gut);
 export function rowSizes(item, list, { etiree = false, within } = {}) {
   const { r } = fmt(item), i = list.indexOf(item);
-  const phone = `(max-width: 767px) calc((100vw - 48px) * ${n2(phoneShares(list)[i] ?? 1)})`;
+  const phone = phoneConds(list, i);
   if (etiree) {
     const k = n2(r / (list.reduce((s, x) => s + fmt(x).r, 0) || 1)), gaps = (list.length - 1) * 16;
     const share = gut => `calc((100vw - ${2 * gut + gaps}px) * ${k})`;
     return [phone, `(max-width: 1023px) ${share(40)}`, `(max-width: 1279px) ${share(56)}`, share(72)].join(', ');
   }
   const w = widths(list, within).map(p => p[i]);
-  return [phone, ...PLAGES.slice(0, -1).map((p, k) => `(max-width: ${p.to}px) ${w[k]}px`), `${w.at(-1)}px`].join(', ');
+  // Une condition par tranche, sauf quand la suivante a la même largeur (elle la prolonge) ; la dernière, sans condition.
+  const conds = TRANCHES.slice(0, -1).map((p, k) => (w[k] === w[k + 1] ? null : `(max-width: ${p.to}px) ${w[k]}px`)).filter(Boolean);
+  return [phone, ...conds, `${w.at(-1)}px`].join(', ');
 }
 
 // sizes de la photo de l'ouverture (css/v2/public.css § 19) : le cadre a la hauteur de l'écran moins l'en-tête et la

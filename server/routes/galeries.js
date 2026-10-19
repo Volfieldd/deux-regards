@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { SpaceError, DOWNLOADS, LANGS, DAY, PURGE_AFTER, DEVICES_SIGNAL, endOfDay, parisDayOf, parseDay } from '../spaces.js';
 import { showPassword } from '../passwords.js';
 import { variantName, widthsFor } from '../images.js';
+import { coverSet } from '../picture.js';
 import { inviteMessage, passwordMessage } from '../prive-i18n.js';
 import { insecables } from '../typographie.js';
 
@@ -121,7 +122,10 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
       expiresText: fmtDate(inv.expires_at, t), createdText: fmtDate(inv.created_at, t), lastText: inv.last_seen_at ? `${fmtDate(inv.last_seen_at, t, { day: 'numeric', month: 'short' })}, ${fmtTime(inv.last_seen_at, t)}` : t('jamais'),
       openedText: inv.first_opened_at ? t('le {date} à {time}', { date: fmtDate(inv.first_opened_at, t, { day: 'numeric', month: 'short' }), time: fmtTime(inv.first_opened_at, t) }) : null };
   }
+  // Vignettes de l'admin des galeries (56 à 120 px de large) : la plus petite variante en src, et un srcset jusqu'à 640 px
+  // (thumbSet) pour un écran à haute densité.
   const thumbOf = p => `/admin/media/${variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)}`;
+  const thumbSetOf = p => coverSet(p, { w: 0, h: 0, base: '/admin/media/' }).srcset;
   const levelText = (lvl, t) => ({ ok: t('prête'), warn: t('à vérifier'), no: t('bloquée') })[lvl];
   const eventText = (e, t) => ({
     cree: t('Accès créé.'), lien_consulte: t('Lien consulté sans mot de passe.'), mot_de_passe_ok: t('Mot de passe accepté.'), mot_de_passe_refuse: t('Mot de passe refusé.'),
@@ -191,15 +195,15 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     data.nSelections = spaces.invitesOf(s.id).filter(i => spaces.favorites(i.id).length).length;
     if (tab === 'acces') data.invites = spaces.invitesOf(s.id).map(i => inviteView(request, s, i));
     if (tab === 'photos') {
-      data.items = items.map(p => ({ ...p, thumb: thumbOf(p), level: p.prive.level, levelText: levelText(p.prive.level, t), reasons: p.prive.reasons.map(x => t.msg(x)) }));
+      data.items = items.map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p), level: p.prive.level, levelText: levelText(p.prive.level, t), reasons: p.prive.reasons.map(x => t.msg(x)) }));
       // Photos que le compte peut ajouter : celles qu'il voit (portée de photos.voir), pas encore dans la galerie.
       const inside = new Set(items.map(p => p.photo_id));
       const all = app.db.prepare('SELECT id, title, file, width, height, variant_key, author_id, status, taken_on FROM photos ORDER BY COALESCE(taken_on, \'\') DESC, id DESC LIMIT 400').all();
-      data.candidates = request.mine('photos.voir', all).filter(p => !inside.has(p.id)).slice(0, 200).map(p => ({ ...p, thumb: thumbOf(p) }));
+      data.candidates = request.mine('photos.voir', all).filter(p => !inside.has(p.id)).slice(0, 200).map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p) }));
       data.exifAll = (() => { try { return JSON.parse(app.db.prepare("SELECT value FROM settings WHERE key = 'exif'").pluck().get() || '{}').mode === 'all'; } catch { return false; } })();
     }
     if (tab === 'selections') {
-      data.selections = spaces.invitesOf(s.id).map(i => ({ ...inviteView(request, s, i), favs: spaces.favorites(i.id).map(f => items.find(p => p.item_id === f.item_id)).filter(Boolean).map(p => ({ ...p, thumb: thumbOf(p) })) })).filter(i => i.favs.length || i.selection_sent_at);
+      data.selections = spaces.invitesOf(s.id).map(i => ({ ...inviteView(request, s, i), favs: spaces.favorites(i.id).map(f => items.find(p => p.item_id === f.item_id)).filter(Boolean).map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p) })) })).filter(i => i.favs.length || i.selection_sent_at);
       if (data.selections.length) sensitiveRead(request, s, null, 'sélections');
     }
     if (tab === 'activite') {
@@ -311,7 +315,7 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     return render(request, reply, 'galerie-nouvel-acces', { title: t('Nouvel accès'), s: spaceView(request, s), values: v, errors, jeton: newFormToken(request),
       pills: [{ value: fmtDay(Math.min(day30, s.closes_at)), label: day30 < s.closes_at ? t('Dans 30 jours, le {date}', { date: fmtDate(day30, t, { day: 'numeric', month: 'short' }) }) : null },
         { value: fmtDay(s.closes_at), label: t('À la fermeture de la galerie, le {date}', { date: fmtDate(s.closes_at, t, { day: 'numeric', month: 'short' }) }) }].filter(p => p.label),
-      lu: parsed ? lu(parsed, t) : '', items: items.map(p => ({ ...p, thumb: thumbOf(p) })), toCheck: items.filter(p => p.prive.level === 'warn' && !p.confirmed_at),
+      lu: parsed ? lu(parsed, t) : '', items: items.map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p) })), toCheck: items.filter(p => p.prive.level === 'warn' && !p.confirmed_at),
       otherInvites: spaces.invitesOf(s.id).filter(i => !i.revoked_at).length,
       message: inviteMessage(LANGS.includes(v.lang) ? v.lang : 'fr', { title: spaces.titleOf(s, LANGS.includes(v.lang) ? v.lang : 'fr'), link: null, who: signOf(s), until: parsed || def, host: host() }) });
   }
@@ -374,7 +378,7 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     // Vue par l'équipe : la sélection envoyée se fige pour l'invité (MQ-18 ; « Rouvrir » la lui rend).
     if (inv.selection_sent_at && !inv.selection_seen_at && can(request, 'galeries.gerer', s)) spaces.markSeen(inv);
     sensitiveRead(request, s, inv, 'fiche d’un accès');
-    const favs = spaces.favorites(inv.id).map(f => ({ ...items.find(p => p.item_id === f.item_id), added: f.added_at })).filter(p => p.item_id).map(p => ({ ...p, thumb: thumbOf(p), when: fmtTime(p.added, t) }));
+    const favs = spaces.favorites(inv.id).map(f => ({ ...items.find(p => p.item_id === f.item_id), added: f.added_at })).filter(p => p.item_id).map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p), when: fmtTime(p.added, t) }));
     const day = parisDayOf(Math.min(inv.expires_at, s.closes_at));
     return render(request, reply, 'galerie-acces', { title: t('Accès de {name}', { name: inv.label }), s: spaceView(request, s), inv: v, favs, events: chrono(spaces.eventsOf(inv.id), t, items),
       canShare: can(request, 'galeries.partager', s), canManage: can(request, 'galeries.gerer', s), nPhotos: items.length,

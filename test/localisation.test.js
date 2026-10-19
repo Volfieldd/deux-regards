@@ -232,7 +232,7 @@ test('page Carte : photos publiées cochées, groupées par ville, à leur place
   assert.doesNotMatch(body, /Lisbon|Munich/);
   assert.match(body, /GeoNames/);
   assert.match(body, /href="\/static\/carte-terre\.svg\?v=[0-9a-f]{10}#terre"/);
-  assert.match(body, /<image href="\/media\/[^"]+-640\.webp"/);
+  assert.match(body, /<image href="\/media\/[^"]+-160\.webp"/);
   // Fonds plus détaillés au zoom : 1:50m, puis tuiles 1:10m de la zone visible (servies compressées).
   assert.match(body, /data-fine="\/static\/carte-terre-fine\.svg\?v=[0-9a-f]{10}#terre"/);
   const tiles = body.match(/data-tiles="([^"]+)"/)[1];

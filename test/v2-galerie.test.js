@@ -47,7 +47,8 @@ test('galerie v2 : vignettes au format de chaque photo (.v, .c, classes de forma
     const f = fmt({ width: Number(w), height: Number(h) });
     assert.ok(cls.split(' ').includes(f.cls), `${cls} : ${f.cls}`);
     assert.equal(cls.split(' ').includes('v'), f.r < 1);
-    assert.match(sizes, /^\(max-width: 767px\) calc\(\(100vw - 48px\) \* [\d.]+\)(, \(max-width: \d+px\) \d+px){4}, \d+px$/);
+    // Téléphone, puis une largeur par tranche de 128 px (de 1 à 15 conditions : les tranches voisines égales se fondent).
+    assert.match(sizes, /^\(max-width: 359px\) calc\(\(100vw - 32px\) \* [\d.]+\), \(max-width: 767px\) calc\(\(100vw - 48px\) \* [\d.]+\)(, \(max-width: \d+px\) \d+px){0,15}, \d+px$/);
   }
   // Une verticale 2:3 a la même hauteur qu'une 3:2 dans la rangée : sa classe est exacte.
   assert.match(ul, /class="fmt-2x3 v"/);
@@ -63,11 +64,14 @@ test('aides v2 : sizes des rangées, de l’ouverture, mots composés insécable
   const h = { width: 900, height: 600 }, v = { width: 600, height: 900 };
   // Les rangées composées comme le navigateur : deux photos qui tiennent sur une ligne restent à leur taille (dernière
   // rangée, non étirée) ; trois horizontales de 768 à 895 px : deux étirées (400 px au plus), la troisième seule.
-  assert.equal(rowSizes(h, [h, { ...h }]), '(max-width: 767px) calc((100vw - 48px) * 1), (max-width: 895px) 300px, (max-width: 1023px) 300px, (max-width: 1279px) 300px, (max-width: 1599px) 360px, 360px');
+  // Tranches de 128 px : deux tranches voisines de même largeur n'en font qu'une (300 px jusqu'à 1 279 px, puis 360).
+  assert.equal(rowSizes(h, [h, { ...h }]), '(max-width: 359px) calc((100vw - 32px) * 1), (max-width: 767px) calc((100vw - 48px) * 1), (max-width: 1279px) 300px, 360px');
   const trois = [h, { ...h }, { ...h }];
   assert.match(rowSizes(trois[0], trois), /\(max-width: 895px\) 400px/);
-  assert.match(rowSizes(trois[2], trois), /^\(max-width: 767px\) calc\(\(100vw - 48px\) \* 0\.6\), \(max-width: 895px\) 300px/);
-  assert.match(rowSizes(v, [v, { ...v }]), /^\(max-width: 767px\) calc\(\(100vw - 48px\) \* 0\.27\), \(max-width: 895px\) 135px/);
+  // De 896 à 1 151 px, les trois tiennent sur une ligne, étirées : 460 px au plus (et non 400 ou 300 sur toute la plage).
+  assert.match(rowSizes(trois[0], trois), /\(max-width: 1151px\) 460px, \(max-width: 1279px\) 300px/);
+  assert.match(rowSizes(trois[2], trois), /\(max-width: 767px\) calc\(\(100vw - 48px\) \* 0\.6\), \(max-width: 1279px\) 300px/);
+  assert.match(rowSizes(v, [v, { ...v }]), /\(max-width: 767px\) calc\(\(100vw - 48px\) \* 0\.27\), \(max-width: 1279px\) 135px/);
   // Rangée étirée : la part exacte de chaque photo dans la largeur (écran moins les marges et les écarts).
   assert.match(rowSizes(h, [h, v, h], { etiree: true }), /calc\(\(100vw - 176px\) \* 0\.41\)$/);
   // Au téléphone, deux verticales se partagent la rangée.

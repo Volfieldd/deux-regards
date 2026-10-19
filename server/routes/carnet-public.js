@@ -3,6 +3,7 @@ import { usesV2 } from '../version-publique.js';
 import { createCarnetViews, isoParis, parisDayOf } from '../carnet-vues.js';
 import { UI, PREFIX, localize } from '../i18n.js';
 import { variantName, widthsFor } from '../images.js';
+import { coverSet } from '../picture.js';
 import { shareLinks, shareQr, VIAS } from '../share.js';
 import { scanValue } from '../securite/detection.js';
 import { legalEmail } from '../legal.js';
@@ -190,7 +191,8 @@ export function registerCarnetPages(app, { lang, repo, base, ignored, gate, shar
     reply.header('x-robots-tag', 'noindex');
     return reply.render('carnet-partager', { ...base, siteName: d.s, tc, post: d.post, title: d.title, lang,
       share: { url, title: `${d.title} · ${d.s}`, host: host(), links: shareLinks({ url, title: `${d.title} · ${d.s}`, image }), qr: await shareQr(url), instagram: null,
-        thumb: d.ogPhoto ? `/media/${variantName(d.ogPhoto.file, widthsFor(d.ogPhoto.width)[0], 'webp', d.ogPhoto.variant_key)}` : '', s: t.share },
+        thumb: d.ogPhoto ? `/media/${variantName(d.ogPhoto.file, widthsFor(d.ogPhoto.width)[0], 'webp', d.ogPhoto.variant_key)}` : '',
+        thumbSet: d.ogPhoto ? coverSet(d.ogPhoto, { w: 92, h: 61 }) : null, s: t.share },
       photo: { title: d.title, author: authors },
       pageTitle: `${t.share.title} · ${d.title} · ${d.s}`, canonical: `/carnet/${d.post.slug}/partager`, description: '', carnetCss: true });
   });

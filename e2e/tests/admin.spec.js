@@ -94,6 +94,24 @@ test('aide : lien contextuel, sommaire, recherche', async ({ page }) => {
 });
 
 // Photothèque : sélection, inspecteur, loupe, raccourcis, palette ⌘K et mode clair / sombre (lecture seule).
+test('photothèque : vignettes de 160 et 480 px, sizes réécrits par le curseur « Taille »', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'curseur masqué au téléphone');
+  // Liste : vignettes de 84 px, chargées en 160 px sur un écran ordinaire (et non plus en 640).
+  await page.goto('/admin/photos?vue=liste');
+  const thumb = page.locator('.plist .thumb img').first();
+  await expect(thumb).toHaveAttribute('srcset', / 160w, .+ 480w, /);
+  await expect.poll(() => thumb.evaluate(i => i.currentSrc)).toMatch(/-160\.(avif|webp)$/);
+  // Planche : les sizes suivent la hauteur choisie au curseur (sinon les fichiers choisis pour 190 px restent).
+  await page.goto('/admin/photos');
+  const img = page.locator('.contact .tile img').first();
+  const before = await img.getAttribute('sizes');
+  const desk = s => Number(/, (\d+)px$/.exec(s)[1]);
+  await page.locator('[data-density]').evaluate(el => { el.value = '320'; el.dispatchEvent(new Event('input')); });
+  await expect.poll(async () => desk(await img.getAttribute('sizes'))).toBeGreaterThan(desk(before));
+  await page.locator('[data-density]').evaluate(el => { el.value = '190'; el.dispatchEvent(new Event('input')); });
+  await expect.poll(() => img.getAttribute('sizes')).toBe(before);
+});
+
 test('photothèque : inspecteur, loupe, palette, mode clair / sombre', async ({ page, isMobile }) => {
   test.skip(isMobile, 'souris et clavier');
   await page.goto('/admin/photos');

@@ -3,7 +3,7 @@ import { galleryUrl, photoUrl, ORDRES } from '../urls.js';
 import { widthsFor, variantName } from '../images.js';
 import { pad, shortDate } from '../format.js';
 import * as v2 from '../v2-vues.js';
-import { picture } from '../picture.js';
+import { picture, coverSet } from '../picture.js';
 import { RIGHTS, rightsText } from '../rights.js';
 import { PRIVACY, UPDATED as PRIVACY_UPDATED, UPDATED_SECURITY_LOG } from '../privacy.js';
 import { LEGAL, legalEmail, hostingOf } from '../legal.js';
@@ -527,7 +527,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const image = app.config.publicUrl + `/media/${variantName(photo.file, ws.at(-1), 'webp', photo.variant_key)}`;
     const title = `${photo.title} · ${siteName}`;
     return { url, title, host: new URL(app.config.publicUrl).host, links: shareLinks({ url, title, image }), qr: await shareQr(url),
-      instagram: repo.instagramPermalink(photo.id), thumb: `/media/${variantName(photo.file, ws[0], 'webp', photo.variant_key)}`, s: t.share };
+      instagram: repo.instagramPermalink(photo.id), thumb: `/media/${variantName(photo.file, ws[0], 'webp', photo.variant_key)}`,
+      thumbSet: coverSet(photo, { w: 92, h: 61 }), s: t.share };
   }
   // Sans JavaScript : la même fenêtre, en page.
   app.get('/photo/:slug/partager', async (request, reply) => {

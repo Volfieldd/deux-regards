@@ -32,7 +32,7 @@
 </section>
 <div class="edit">
   <figure class="preview">
-    <%~ it.picture(it.photo, { sizes: '(min-width: 900px) 40vw, 92vw', alt: '' }) %>
+    <%~ it.picture(it.photo, { sizes: '(min-width: 900px) 33vw, (min-width: 721px) 66vw, 92vw', alt: '' }) %>
     <figcaption class="mono"><%= it.photo.width %> × <%= it.photo.height %> px · <%= it.photo.inventory ? t('inventaire {n}', { n: it.photo.inventory }) : t('numéro d’inventaire à la première publication') %><% if (it.photo.status === 'published') { %> · <a href="/photo/<%= it.photo.slug %>" target="_blank" rel="noopener"><%= t('voir sur le site') %></a><% } %>
       <span class="shot-ro" data-shot><%= t('Prise de vue : {shot}', { shot: it.shot || (it.shotRead ? t('aucune dans l’EXIF de l’original') : t('pas encore lue dans l’original')) }) %></span></figcaption>
   </figure>

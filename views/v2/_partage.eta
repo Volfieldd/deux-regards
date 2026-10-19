@@ -11,7 +11,7 @@
   instagram: '<rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/>',
   more: '<circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/>',
 }; const icon = k => `<span class="ic ic-${k}" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24">${ICONS[k]}</svg></span>`; %>
-<div class="share-card"><img src="<%= sh.thumb %>" alt="" width="92" height="61" loading="lazy" decoding="async"><div><b><%= p.title %></b><small class="mono"><%= p.author %>&nbsp;· <%= sh.host %></small></div></div>
+<div class="share-card"><img src="<%= sh.thumb %>"<% if (sh.thumbSet) { %> srcset="<%= sh.thumbSet.srcset %>" sizes="<%= sh.thumbSet.sizes %>"<% } %> alt="" width="92" height="61" loading="lazy" decoding="async"><div><b><%= p.title %></b><small class="mono"><%= p.author %>&nbsp;· <%= sh.host %></small></div></div>
 <ul class="share-nets" data-share-nets>
 <% /* Réseaux et Instagram : ouverts dans un nouvel onglet, annoncé aux lecteurs d'écran. */ %>
 <% sh.links.forEach(l => { %>  <li><a class="net" href="<%= l.href %>"<%~ l.id === 'email' ? '' : ' target="_blank" rel="noopener noreferrer"' %> data-via="<%= l.id %>"><%~ icon(l.id) %><span><%= l.id === 'email' ? s.email : l.label %><% if (l.id !== 'email') { %><span class="sr-only"><%= s.newWindow %></span><% } %></span></a></li>

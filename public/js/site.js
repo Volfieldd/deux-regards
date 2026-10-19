@@ -519,7 +519,10 @@ document.querySelectorAll('[data-share]').forEach(btn => {
     e.preventDefault();
     if (canNative && phone && await native()) return;
     // Miniature chargée à l'ouverture seulement (pas de requête pour rien en passant d'une photo à l'autre).
-    dialog.querySelectorAll('img[data-src]').forEach(img => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
+    dialog.querySelectorAll('img[data-src]').forEach(img => {
+      if (img.dataset.srcset) { img.srcset = img.dataset.srcset; img.removeAttribute('data-srcset'); }
+      img.src = img.dataset.src; img.removeAttribute('data-src');
+    });
     dialog.showModal();
   });
   dialog.querySelector('[data-share-close]')?.addEventListener('click', () => dialog.close());
