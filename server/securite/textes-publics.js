@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 
 // Textes publiés (registre des besoins de la Vigie, BV-20 et BV-21) : titres, légendes et textes de remplacement des
 // photos publiées (et leurs lieux et mots-clés, affichés sous la photo et cherchables), noms et textes d'intention des séries, noms, présentations et descriptions courtes des
-// photographes, billets publiés des Carnets, textes des réglages affichés sur le site (accueil, « À propos », droits,
+// photographes, voyages en ligne, billets publiés des Carnets, textes des réglages affichés sur le site (accueil, « À propos », droits,
 // sous-titre de la marque). Instantané comparé à l'état d'avant après chaque écriture de l'admin et chaque publication
 // programmée :
 //   - BV-20 : un texte qui GAGNE un lien, une adresse e-mail ou un numéro de téléphone (vecteur d'hameçonnage, comme un
@@ -15,6 +15,8 @@ export const SOURCES = [
   { table: 'categories', where: '1', champs: ['name', 'name_en', 'name_de', 'intent', 'intent_en', 'intent_de'] },
   { table: 'authors', where: '1', champs: ['name', 'bio', 'bio_en', 'bio_de', 'short_bio', 'short_bio_en', 'short_bio_de'] },
   // Billets des Carnets publiés (un billet retiré sort de l'instantané : compté comme textes changés, BV-21).
+  // Voyages en ligne (page publique, voyage par voyage) : nom et texte ; un voyage dépublié sort de l'instantané.
+  { table: 'trips', where: 'public = 1', champs: ['name', 'name_en', 'name_de', 'intro', 'intro_en', 'intro_de'] },
   { table: 'posts', where: "state = 'publie'", champs: ['title', 'title_en', 'title_de', 'dek', 'dek_en', 'dek_de', 'body', 'body_en', 'body_de', 'mention', 'mention_en', 'mention_de', 'reply', 'reply_en', 'reply_de'] },
 ];
 
