@@ -38,6 +38,8 @@ test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }
       '/admin/apparence', '/admin/comptes', '/admin/site',
       // Partie B : Instagram, Carnets et Galeries privées dans la coquille v2, Mon QR, Merci.
       '/admin/instagram', '/admin/galeries', '/admin/carnet', '/admin/rencontre/qr',
+      // Vague 4 (suivi et aide) : Journal, Statistiques, Signalements, Circuit, Aide, Nouveautés.
+      '/admin/journal', '/admin/statistiques', '/admin/statistiques?periode=365', '/admin/signalements', '/admin/circuit', '/admin/aide', '/admin/nouveautes',
       ...(writes ? [`/admin/galeries/${g}`, `/admin/galeries/${g}/reglages`, `/admin/galeries/${g}/acces/nouveau`, `/admin/carnet/${b}`, `/admin/rencontre/${m}/merci`] : [])];
     for (const [w, h] of [[320, 640], [412, 839], [1032, 1250], [1376, 900], [1440, 900]]) {
       await page.setViewportSize({ width: w, height: h });
@@ -64,6 +66,12 @@ test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }
     await page.goto('/admin/reglages/assistants');
     await expect(page.locator('.onglets a[aria-current="page"]')).toHaveText('Analyse-Assistenten');
     await expect(page.locator('.side .grp')).toHaveText(['Fotos', 'Personen', 'Veröffentlichen', 'Team']);
+    // Vague 4 : titres et libellés du journal en allemand (aucune adresse technique).
+    await page.goto('/admin/journal');
+    await expect(page.locator('h1')).toHaveText('Protokoll');
+    await expect(page.getByRole('link', { name: 'Anmeldungen' })).toBeVisible();
+    await page.goto('/admin/signalements');
+    await expect(page.locator('h1')).toHaveText('Meldungen von Besuchern');
   } finally {
     await lang(page, 'fr');
     await effacerRencontre(page, r.id);
