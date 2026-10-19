@@ -13,6 +13,7 @@ import formbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import * as cities from './geo/cities.js';
 import { LANGS, NAMES, LOCALES, localize, splitLang } from './i18n.js';
+import { vueSite } from './vue-site.js';
 import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
 import privateRoutes from './routes/prive.js';
@@ -151,7 +152,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
     // Pages publiques seulement : l'admin et ses pages d'erreur restent ce qu'elles sont.
-    // Pages des galeries privées : toujours en v2 (elles n'ont pas de v1), sans le bandeau de l'aperçu (aucune sortie).
+    // Pages des galeries privées : toujours en v2 (elles n'ont pas de v1), sans le bouton de la vue (pages neutres).
     const only = app.publicVersion.onlyV2(template);
     const pv = only || /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
     const v2 = only || (pv?.version === 'v2' && app.publicVersion.hasV2(template));
@@ -163,9 +164,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
       authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '',
-      // Bandeau « Aperçu de la v2 · Quitter l'aperçu » (formulaire POST, jeton CSRF de la session), en v2 comme sur une
-      // page restée en v1 faute de gabarit v2 : l'administrateur sait toujours où il est.
-      apercuV2: pv?.preview ? { csrf: this.request.session.csrf, vers: this.request.url } : null };
+      // Bouton « Voir en v1 / Voir en v2 » (server/vue-site.js ; formulaire POST, jeton CSRF de la session), pour
+      // l'administrateur qui a le droit d'apparence seulement, en v2 comme sur une page restée en v1 faute de gabarit v2.
+      vueSite: pv?.switcher ? vueSite({ pv, lang: data?.lang || splitLang(this.request.url).lang, url: this.request.url, csrf: this.request.session.csrf,
+        rendu: v2 ? 'v2' : 'v1', sansV1: !app.publicVersion.hasV1(template) }) : null };
     return this.type('text/html; charset=utf-8').send(eta.render(v2 ? `./v2/${template}` : `./${template}`, { ...common, ...data }));
   });
 
@@ -332,9 +334,14 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     if (noReferrer) reply.header('referrer-policy', 'no-referrer');
     // Rien de l'admin ne se garde en cache, quel que soit le gestionnaire (fichier envoyé par sendFile compris).
     if (/^\/admin(?:[/?#]|$)/.test(request.url)) reply.header('cache-control', 'no-store');
-    // Aperçu de la v2 : rien de ce que voit l'administrateur ne peut entrer dans un cache partagé (Cloudflare) et être
-    // servi ensuite à un visiteur. Les fichiers statiques, les images et la marque, identiques pour tous, gardent leur cache.
-    else if (!/^\/(?:static|fonts|media|brand)\//.test(request.url) && app.publicVersion.previewOn(request)) reply.header('cache-control', 'private, no-store');
+    // Session ouverte (administrateur, photographe…) : rien de ce qu'elle voit ne peut entrer dans un cache partagé
+    // (Cloudflare) et être servi ensuite à un visiteur : bouton « Voir en v1 / v2 » et son jeton CSRF, vue forcée, liens
+    // de l'équipe. Réponses 304 et adresses à ETag comprises (flux des Carnets) ; les consignes propres aux CDN sont
+    // retirées (elles l'emporteraient sur Cache-Control). Les fichiers statiques, les images et la marque, identiques
+    // pour tous, gardent leur cache. Un visiteur (sans session valide, cookie forgé compris) n'est pas concerné.
+    else if (request.session && !/^\/(?:static|fonts|media|brand)\//.test(request.url)) {
+      reply.header('cache-control', 'private, no-store').removeHeader('cdn-cache-control').removeHeader('cloudflare-cdn-cache-control');
+    }
     // Seul l'écran « Rencontre » de l'admin (sur le téléphone) peut demander la position, au site lui-même.
     if (request.routeOptions?.config?.geolocation) reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=(self)');
     // Sans includeSubDomains : à ajouter quand tous les sous-domaines de nicephos.art seront servis en HTTPS (PLAN.md, feuille de route).

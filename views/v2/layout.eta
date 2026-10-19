@@ -60,8 +60,8 @@
 </head>
 <body class="<%= it.bodyClass || '' %>">
 <a class="skip" href="#contenu"><%= t.v2.skip %></a>
-<% if (it.apercuV2) { %>
-<div class="apercu-v2" role="note" lang="fr"><form method="post" action="/admin/apparence/apercu-v2"><input type="hidden" name="_csrf" value="<%= it.apercuV2.csrf %>"><input type="hidden" name="apercu" value="0"><input type="hidden" name="vers" value="<%= it.apercuV2.vers %>"><span>Aperçu de la v2 (visible par vous seul)</span> <a href="/admin/apparence">Apparence</a> <button type="submit">Quitter l’aperçu</button></form></div>
+<% if (it.vueSite) { %>
+<%~ include('../_vue-site', it.vueSite) %>
 <% } %>
 <%~ it.body %>
 </body>
