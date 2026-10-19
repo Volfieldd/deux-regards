@@ -10,6 +10,11 @@ const required = (env, key) => {
 };
 
 const DEFAULT_TSA = 'https://freetsa.org/tsr';
+// NODE_USE_ENV_PROXY (mandataire pour fetch) : Node 22.21 et suivants de la ligne 22, 24.5 et suivants, puis toutes.
+export const proxyEnvPrisEnCharge = (v = process.versions.node) => {
+  const [maj, min] = v.split('.').map(Number);
+  return (maj === 22 && min >= 21) || (maj === 24 && min >= 5) || maj >= 25;
+};
 const DEFAULT_TSA_CA = fileURLToPath(new URL('../assets/tsa/freetsa-cacert.pem', import.meta.url));
 
 // TRUST_PROXY : « false », nombre de proxys (« 1 »), ou liste d'adresses/CIDR/mots-clés.
@@ -89,6 +94,17 @@ export function loadConfig(env = process.env) {
   const mailFrom = env.MAIL_FROM || null;
   if (smtpUrl && !mailFrom) throw new Error('MAIL_FROM est obligatoire avec SMTP_URL (par exemple « Nicephos <adresse@exemple.fr> »)');
 
+  // Mandataire de sortie (registre de la Vigie, BV-10 ; profil « sortie » de la pile Unraid, facultatif) : la pile pose
+  // HTTPS_PROXY et NODE_USE_ENV_PROXY=1, que fetch de Node suit seul (connexion OIDC, Instagram, horodatage, modèles) ;
+  // nodemailer le reçoit en option. Sans ces variables, rien ne change. Node trop ancien pour NODE_USE_ENV_PROXY : refus
+  // de démarrer (le site sortirait en direct, rejeté par l'hôte : des fonctions coupées sans raison visible).
+  let sortieProxy = null;
+  if (env.NODE_USE_ENV_PROXY === '1') {
+    sortieProxy = env.HTTPS_PROXY || env.https_proxy || null;
+    if (!sortieProxy || !/^http:\/\/[A-Za-z0-9.-]+(?::\d{1,5})?\/?$/.test(sortieProxy)) throw new Error('NODE_USE_ENV_PROXY=1 demande HTTPS_PROXY=http://nom:port (mandataire de sortie, sans identifiant)');
+    if (!proxyEnvPrisEnCharge()) throw new Error(`NODE_USE_ENV_PROXY=1 : Node ${process.versions.node} ne le prend pas en charge (22.21 ou plus récent attendu) ; mettez l'image à jour`);
+  }
+
   // Propositions de traduction (admin) : serveur LibreTranslate du réseau local (http://libretranslate:5000).
   const translateUrl = env.TRANSLATE_URL || null;
   if (translateUrl && !/^https?:\/\/[^\s/]+/.test(translateUrl)) throw new Error('TRANSLATE_URL doit être une adresse http:// ou https://');
@@ -152,7 +168,7 @@ export function loadConfig(env = process.env) {
     localAuthToken,
     tsa: { url: tsaUrl, caFile: tsaCaFile },
     translate: { url: translateUrl, apiKey: env.TRANSLATE_API_KEY || null },
-    mail: { url: smtpUrl, from: mailFrom },
+    mail: { url: smtpUrl, from: mailFrom, proxy: sortieProxy },
     dataKey,
     authRateLimit: Math.max(Number.parseInt(env.AUTH_RATE_LIMIT, 10) || 30, 1),
     oidc: {

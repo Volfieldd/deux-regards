@@ -11,6 +11,7 @@ import { createSwitches } from './interrupteurs.js';
 import { createEdge } from './bordure.js';
 import { createCfList } from './cloudflare-liste.js';
 import { createUrgence } from './cloudflare-urgence.js';
+import { createReseau } from './reseau.js';
 import { createNotifier } from './notifications.js';
 import { createConsole } from './console/server.js';
 import { canoniserReseaux } from './reseaux.js';
@@ -114,6 +115,14 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     timers.push(setInterval(() => { edge.read().catch(err => log.warn({ err: err.message }, 'Vigie : bordure')); edge.push().catch(() => {}); }, 60e3));
     timers.at(-1).unref();
   }
+  // Source « réseau » (phase E4) : journaux du mandataire de sortie et des rejets de l'hôte, lus chaque minute.
+  const reseau = config.reseau ? createReseau({ store, ...config.reseau, now, log }) : null;
+  if (reseau) {
+    const lireReseau = safe('réseau', () => reseau.lire());
+    plusTard(lireReseau, 30e3);
+    timers.push(setInterval(lireReseau, 60e3));
+    timers.at(-1).unref();
+  }
   const zitadel = config.zitadel ? createZitadelReader({ ...config.zitadel, store, log, fetchImpl, now }) : null;
   zitadel?.start(config.zitadel.intervalMs);
 
@@ -133,7 +142,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     }
   }
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats, edge, cfList, urgence, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
+    store, decisions, ingest, zitadel, engine, switches, threats, edge, cfList, urgence, reseau, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
     async close() { for (const t of timers) clearInterval(t); for (const t of delais) clearTimeout(t); zitadel?.stop(); edge?.stop(); cfList?.stop(); urgence?.stop(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
   };
 }

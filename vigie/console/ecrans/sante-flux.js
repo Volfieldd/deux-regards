@@ -43,7 +43,9 @@ const GRAV = { critique: 'critique', haut: 'haute', moyen: 'moyenne', bas: 'bass
 
 // Source d'un événement dans les flux : celle du quorum (poids.js) ; les actions des intervenants (console, ligne de
 // commande), qui ne sont pas des signaux, sont comptées avec les contrôles de la Vigie, comme dans le journal (MV-03).
-export const sourceFlux = composant => sourceOf({ composant }) || 'vigie';
+// Le réseau (phase E4), constaté hors du site comme les contrôles de la Vigie, est rangé avec eux dans le dessin des flux
+// (quatre teintes) ; le journal et les alertes le nomment à part.
+export const sourceFlux = composant => { const s = sourceOf({ composant }) || 'vigie'; return s === 'reseau' ? 'vigie' : s; };
 
 // Origine d'un événement (qui), lue sur son type et son composant seuls (ce que garde la table daily) :
 //   - Zitadel : ses événements ; visiteurs du site public : le site public, la bordure, les connexions qui n'aboutissent pas ;
@@ -356,6 +358,9 @@ function qSante(db) {
     dernier: db.prepare('SELECT recu_a, severity, detail FROM events WHERE type = ? ORDER BY recu_a DESC LIMIT 1'),
     compte: db.prepare('SELECT COUNT(*) FROM events WHERE type = ? AND recu_a >= ?').pluck(),
     parType: db.prepare("SELECT type, COUNT(*) n FROM events WHERE type IN ('bordure_blocage', 'bordure_rafale', 'bordure_erreurs', 'bordure_nouvel_operateur') AND recu_a >= ? GROUP BY type"),
+    // Constats réseau sur 24 h (un événement résume les lignes d'un passage : detail.nombre en plus de la première).
+    reseau: db.prepare(`SELECT type, SUM(1 + COALESCE(json_extract(detail, '$.nombre'), 0)) n FROM events
+      WHERE type IN ('reseau_sortie_refusee', 'reseau_sortie_directe', 'reseau_flux_hors_liste') AND recu_a >= ? GROUP BY type`),
     // Deux sous-requêtes : chacune lit une extrémité de la clé (MIN et MAX ensemble parcouraient toute la table : 107 ms
     // par million de lignes, audit D3-C6).
     seqs: db.prepare('SELECT (SELECT MIN(seq) FROM events) mini, (SELECT MAX(seq) FROM events) maxi'),
@@ -544,6 +549,46 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
       seuil: [{ t: `Alerte si plus de battement depuis 20${NBSP}min, aucune requête vue depuis 6${NBSP}h, ou une copie ou une lecture en échec${D}${guillemets('Bordure injoignable ou silencieuse (jeton, quota, Worker retiré)')} ` }, { t: '(Moyenne, DS24)', r: true }, { t: '.' }],
       commande: reglee ? { k: 'bordure', hint: `une copie toutes les 2${NBSP}min au plus` } : null,
       serveur: [{ p: deuxPoints('Diagnostic complet (copie, battement, en-têtes refusés par le site, empreintes TLS)') }, cmd('node vigie/cli.js bordure')] });
+  }
+
+  // 4 bis. Réseau (phase E4, facultatif) : journaux du mandataire de sortie et des rejets de l'hôte (vigie/reseau.js).
+  {
+    const e = reg('reseau_etat', {}) || {};
+    const silence = reg('reseau_silence_signale', {}) || {};
+    const muets = Object.keys(silence);
+    const reglee = Boolean(e.mandataire || e.hote);
+    const kv = [];
+    let etat, cls = '', faits = null;
+    const NOMS_J = { mandataire: 'Mandataire de sortie', hote: 'Rejets de l’hôte' };
+    if (!reglee) {
+      etat = neutre('Non réglé');
+      kv.push({ dt: 'Réseau', t: 'non réglé', sec: 'VIGIE_RESEAU_* absentes : le réseau n’est pas une source du quorum' });
+    } else {
+      etat = muets.length ? arret('Muet') : ok('Lu'); cls = muets.length ? 'panne' : '';
+      if (muets.length) faits = `${muets.map(k => `${NOMS_J[k] || k}${D}${typo(String(silence[k]))}`).join(' ; ')}.`;
+      for (const k of ['mandataire', 'hote']) {
+        const j = e[k];
+        if (!j) { kv.push({ dt: NOMS_J[k], t: 'non lu', sec: 'chemin non réglé' }); continue; }
+        const derniere = j.derniere_ligne ? quand(j.derniere_ligne, t) : 'aucune ligne';
+        const sec = j.erreur ? `illisible${D}${typo(String(j.erreur))}` : j.absent ? 'fichier encore absent' : k === 'hote'
+          ? (j.battement ? `règles ${j.battement.etat === 'ok' ? 'en place' : j.battement.etat}, battement ${aQuand(j.battement.at, t)}` : 'aucun battement des règles')
+          : (j.dernier_battement ? `battement ${aQuand(j.dernier_battement, t)}${j.liste ? ` · ${nombre(j.liste.length)} ${pluriel(j.liste.length, 'nom autorisé', 'noms autorisés')}` : ''}` : 'aucun battement');
+        kv.push({ dt: NOMS_J[k], t: `dernière ligne ${derniere}`, sec });
+      }
+      const par = Object.fromEntries(q.reseau.all(t - 864e5).map(r => [r.type, r.n]));
+      const n = k => par[k] || 0;
+      kv.push({ dt: 'Constats (24 h)', t: `${nombre(n('reseau_sortie_refusee'))} ${pluriel(n('reseau_sortie_refusee'), 'sortie refusée', 'sorties refusées')} · ${nombre(n('reseau_sortie_directe'))} ${pluriel(n('reseau_sortie_directe'), 'sortie directe', 'sorties directes')} · ${nombre(n('reseau_flux_hors_liste'))} ${pluriel(n('reseau_flux_hors_liste'), 'flux hors liste', 'flux hors liste')}` });
+    }
+    let resume = null;
+    if (reglee) {
+      const derniere = Math.max(e.mandataire?.derniere_ligne || 0, e.hote?.derniere_ligne || 0);
+      resume = [{ t: `Réseau${D}` }];
+      if (derniere) resume.push({ t: `lu ${aQuand(derniere, t).replace(/ .*$/, '')} ` }, { t: quand(derniere, t), b: true }); else resume.push({ t: 'aucune ligne' });
+      if (muets.length) resume.push({ t: D }, { t: 'muet', b: true });
+    }
+    carte({ id: 'reseau', icone: muets.length ? 'reseau-barre' : 'reseau', titre: 'Réseau', etat, cls, kv, faits, resume,
+      seuil: [{ t: `Alerte si un journal est illisible, muet plus de 24${NBSP}h alors que le site tourne, ou si les règles de l’hôte manquent${D}${guillemets('Journal réseau illisible ou muet, ou règles de l’hôte absentes')} ` }, { t: '(Moyenne, DS24)', r: true }, { t: '. Une sortie directe ou un flux du site hors liste ouvre une alerte Haute.' }],
+      serveur: [{ p: deuxPoints('Journaux, positions, battements, noms refusés et acceptés') }, cmd('node vigie/cli.js reseau'), { p: deuxPoints('Règles de l’hôte (sur Unraid, sans rien changer)') }, cmd('deploy/unraid/reseau/regles.sh --afficher')] });
   }
 
   // 5. Contrôle des rôles (sauvegarde du site).

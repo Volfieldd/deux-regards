@@ -12,6 +12,9 @@ export const BY_TYPE = {
   // Bordure (phase C3) : notée par ses règles Sigma (70-bordure.yml), jamais deux fois.
   bordure_blocage: 0, bordure_erreurs: 0, bordure_rafale: 0, bordure_nouvel_operateur: 0, bordure_erreur_worker: 0, edge_signature_invalid: 0,
   vigie_bordure_erreur: 0, vigie_bordure_silence: 0, vigie_canal_echec: 0, vigie_surveillance_reduite: 0,
+  // Réseau (phase E4) : noté par ses règles Sigma (75-reseau.yml) ; ses événements ne portent ni adresse de visiteur ni
+  // compte (seulement des conteneurs de la pile et des destinations), donc aucune entité à noter.
+  reseau_sortie_refusee: 0, reseau_sortie_directe: 0, reseau_flux_hors_liste: 0, vigie_reseau_silence: 0,
   // Lectures : peu, beaucoup s'additionnent.
   sensitive_read: 0.2, sensitive_export: 1,
   // Signaux d'exploration ou d'attaque.
@@ -46,12 +49,14 @@ export const HALF_LIFE_MIN = 60;                 // demi-vie du score
 export const SOURCE_MIN = 0.5;                   // contribution minimale pour qu'une source compte dans le quorum
 export const QUORUM = 2;
 
-// Source d'un événement, pour le quorum : le site, la bordure Cloudflare, Zitadel, les contrôles de la Vigie.
+// Source d'un événement, pour le quorum : le site, la bordure Cloudflare, Zitadel, le réseau (mandataire de sortie et
+// pare-feu de l'hôte, phase E4), les contrôles de la Vigie.
 export function sourceOf(row) {
   const c = String(row.composant || '');
   if (c.startsWith('site')) return 'site';
   if (c === 'zitadel') return 'zitadel';
   if (c === 'bordure' || c === 'cloudflare') return 'bordure';
+  if (c === 'réseau') return 'reseau';
   if (c === 'vigie · contrôle') return 'vigie';
   return null;                                  // actions des intervenants : jamais des signaux
 }

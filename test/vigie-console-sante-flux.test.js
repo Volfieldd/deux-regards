@@ -407,7 +407,7 @@ test('GET /sante : 200 en Administrateur et en Lecteur, composants dans l’ordr
   const html = r.body;
   assert.match(html, /<h1>Santé et intégrité<\/h1>/);
   const ordre = [...html.matchAll(/<section class="vg-compo[^"]*" id="([a-z]+)"/g)].map(m => m[1]);
-  assert.deepEqual(ordre, ['chaine', 'site', 'zitadel', 'bordure', 'roles', 'menaces', 'analyse', 'disque', 'canaux', 'version']);
+  assert.deepEqual(ordre, ['chaine', 'site', 'zitadel', 'bordure', 'reseau', 'roles', 'menaces', 'analyse', 'disque', 'canaux', 'version']);
   assert.match(html, /id="zitadel" aria-labelledby="t-zitadel">[\s\S]*?Injoignable/);
   assert.match(html, /class="vg-compo panne" id="zitadel"/);
   assert.match(html, /class="vg-compo ecart" id="menaces"/);
@@ -435,6 +435,7 @@ test('vueSante : chaîne rompue en tête, bordure non réglée, Zitadel jamais l
   assert.equal(s.cartes[0].etat.mot, 'Rompue');
   assert.equal(s.cartes.find(c => c.id === 'bordure').etat.mot, 'Non réglée');
   assert.equal(s.cartes.find(c => c.id === 'zitadel').etat.mot, 'Non réglé');
+  assert.equal(s.cartes.find(c => c.id === 'reseau').etat.mot, 'Non réglé');
   const eta = new Eta({ views: VIEWS, autoEscape: true });
   const html = eta.render('sante', { sante: s, titre: 'Santé et intégrité · Vigie', moi: { nom: 'Sébastien', role: 'admin' }, compteurs: {}, csrf: 'x' });
   verifierPage(html);

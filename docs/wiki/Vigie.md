@@ -13,6 +13,7 @@ La Vigie est un composant **à part** du site : son propre conteneur, sa propre 
 | C3 | Capteur en bordure (Cloudflare Worker) | à venir |
 | D | Notifications (e-mail, Signal) ; console `vigie.nicephos.art` (Cloudflare Access + Zitadel) et affichage dans l'admin | notifications faites ; console et affichage à venir |
 | E2 | Jeu d'attaques rejouable (`npm run attaques`) : scénarios joués contre un site et une Vigie neufs, alertes attendues vérifiées | fait |
+| E4 | Source « réseau » : mandataire de sortie à liste autorisée, sorties directes et flux entre conteneurs hors liste rejetés et journalisés par l'hôte, journaux lus par la Vigie (BV-10, BV-11) | fait côté code ; à appliquer sur l'instance de test |
 
 ---
 
@@ -172,6 +173,41 @@ Avec `VIGIE_CF_ZONE_ID` et un jeton à part (*Zone Settings : Edit* sur la seule
 
 **Retirer** : supprimer la route (ou le Worker), retirer `VIGIE_BORDURE_KEY` du site et `VIGIE_CF_*` de la Vigie. Le site retire les empreintes de bordure de ses sessions avec le reste du contexte quand la Vigie est retirée.
 
+## Réseau (phase E4, facultatif)
+
+Une **source « réseau »** du quorum, constatée **hors du site** (registre des briques, BV-10 et BV-11 ; décisions D24 et D25) :
+un site compromis ne peut ni la provoquer ni la taire. Mise en place, vérification et retour en arrière :
+[`deploy/unraid/reseau/README.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/reseau/README.md).
+
+- **Mandataire de sortie** (service `sortie`, profil « sortie ») : le site ne joint Internet que par lui (`HTTPS_PROXY`,
+  `NODE_USE_ENV_PROXY=1` pour `fetch`, option `proxy` de nodemailer). Il n'accepte que les noms dont le site a besoin, tirés
+  de son `.env` (Zitadel, horodatage, SMTP, Instagram, Hugging Face au premier téléchargement des modèles) et `SORTIE_NOMS` ;
+  il refuse une adresse IP écrite telle quelle, un nom qui mène au réseau local et le HTTP en clair. Une ligne JSON par
+  demande, sans chemin ni contenu.
+- **Règles de l'hôte** (`regles.sh`, chaîne `DOCKER-USER`, lancées au démarrage par « User Scripts ») : toute autre sortie
+  du site, et tout flux entre conteneurs hors de la matrice (tunnel → site et console ; site → réception, traducteur,
+  mandataire), est rejeté et journalisé (`NICEPHOS-SORTIE`, `NICEPHOS-FLUX`, 20 lignes par minute au plus), rangé par
+  rsyslog dans un fichier à part ; un battement horaire dit si les règles sont en place.
+- **La Vigie** lit les deux journaux (montés en lecture seule sur `/reseau`, `VIGIE_RESEAU_MANDATAIRE` et
+  `VIGIE_RESEAU_HOTE` dans `vigie.env`) chaque minute, en suivant (position gardée avec les événements, rotation et
+  troncature reconnues, 1 Mo par passage, lignes de même nature regroupées en un événement qui les compte).
+
+| Événement | Quand | Règle (`vigie/regles/75-reseau.yml`) |
+|---|---|---|
+| `reseau_sortie_refusee` | nom hors liste demandé au mandataire | **Moyenne**, source unique (MV11) ; **Haute** au-delà de 3 noms différents en 1 h |
+| `reseau_sortie_directe` | conteneur de la pile vers Internet sans le mandataire, rejeté par l'hôte | **Haute**, source unique, mode Alerter (MV11) |
+| `reseau_flux_hors_liste` | paquet entre conteneurs hors de la matrice | depuis le site : **Haute**, source unique, mode Alerter (MV16) ; d'un autre conteneur : **Haute** à partir de 3 en 1 h |
+| `vigie_reseau_silence` | journal illisible ; aucune ligne depuis 24 h alors que le site tourne ; règles de l'hôte absentes ou incomplètes | **Moyenne** (DS24) |
+| chaîne DS23 | saisie malveillante (moyenne ou plus) ou fichier piégé, et sortie refusée ou directe, dans la même heure | **Critique**, mode Alerter |
+
+Ces événements ne portent ni adresse de visiteur ni compte (seulement des conteneurs et des destinations) : ils ne
+déposent pas de points, leurs règles ouvrent l'alerte elles-mêmes ; la chaîne DS23 réunit les sources « site » et
+« réseau ». Console : carte **Réseau** de la page Santé (journaux, battements, constats sur 24 h). Ligne de commande :
+`reseau` (et `reseau --lire` pour un passage tout de suite).
+
+**Limites** : une fuite par requêtes DNS reste possible (le résolveur de Docker est hors de `DOCKER-USER`) ; le découpage
+du réseau `nicephos` en réseaux par flux est l'étape suivante (proposé dans le guide).
+
 ## Notifications (phase D)
 
 - **Quand** : à l'ouverture d'une alerte **haute ou critique**, et quand une alerte s'aggrave jusque-là ; seulement pour une règle en mode `alerter` ou `bloquer` (jamais `observer`, le mois d'observation) et interrupteur `alertes` en marche.
@@ -196,6 +232,7 @@ Avec `VIGIE_CF_ZONE_ID` et un jeton à part (*Zone Settings : Edit* sur la seule
 |---|---|
 | `notifier essai <signal\|email>` | message d'essai sur le canal |
 | `bordure` | état de la bordure : copie des blocages, battement du Worker, constats, en-têtes refusés par le site (et leur motif), part des sessions dont l'empreinte TLS change (grille de lecture de l'essai) |
+| `reseau`, `reseau --lire` | source « réseau » (phase E4) : journaux lus, positions, battements du mandataire et des règles de l'hôte, constats sur 24 h, noms refusés et acceptés ; `--lire` : un passage de lecture tout de suite |
 
 ## Console (phase D3)
 

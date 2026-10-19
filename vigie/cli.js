@@ -11,6 +11,7 @@ import { testChannel } from './notifications.js';
 import { setTrust, runRolesCheck } from './reglages.js';
 import { createUrgence } from './cloudflare-urgence.js';
 import { createRights, LABELS } from './console/droits.js';
+import { createReseau } from './reseau.js';
 
 // Secours en ligne de commande (annexe architecture, section 6.4), dans le conteneur :
 //   docker exec nicephos-vigie node vigie/cli.js <commande>
@@ -44,6 +45,8 @@ const HELP = `Commandes :
                                            --accepter : l'instantané devient la référence
   bordure                                  état de la bordure Cloudflare : copie des blocages, battement, en-têtes
                                            refusés par le site, stabilité des empreintes TLS (essai, phase C3)
+  reseau [--lire]                          source « réseau » (phase E4) : journaux lus, positions, battements, constats
+                                           sur 24 h, noms refusés et acceptés ; --lire : un passage de lecture tout de suite
   notifier essai <signal|email>            envoie un message d'essai sur le canal
   urgence [marche --duree 2h --motif "…" | arret]   mode urgence de Cloudflare (« I'm Under Attack ») ; sans argument : état
   console                                  droits de la console (plafond, attribution, effectif), sessions ouvertes,
@@ -209,6 +212,37 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
           `Constats de la bordure (24 h) : ${seen.map(r => `${r.type} ${r.n}`).join(', ') || 'aucun'}`,
           `En-têtes refusés par le site (24 h) : ${refused.map(r => `${r.r} ${r.n}`).join(', ') || 'aucun'}${refused.some(r => r.r === 'adresse différente') ? ' → vérifier TRUST_PROXY (adresse vue par le site)' : ''}`,
           `Empreinte TLS (7 jours) : ${withEdge} session(s) avec la bordure, ${tlsChanged} dont l'empreinte a changé${withEdge ? ` (${Math.round((100 * tlsChanged) / withEdge)} %)` : ''}`,
+        ].join('\n');
+      }
+      case 'reseau': {
+        // Grille de lecture de l'essai sur l'instance de test (deploy/unraid/reseau/README.md).
+        const iso = t => (t ? `${new Date(t).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais');
+        if (!config.reseau) return 'Source réseau non réglée (VIGIE_RESEAU_MANDATAIRE et VIGIE_RESEAU_HOTE absents de vigie.env).';
+        let lus = null;
+        if (opt.lire) lus = createReseau({ store, ...config.reseau, now }).lire();
+        const etat = store.setting.get('reseau_etat', {});
+        const silence = store.setting.get('reseau_silence_signale', {});
+        const day = now() - 864e5;
+        const ligne = (nom, k) => {
+          const e = etat[k] || {};
+          if (!config.reseau[k]) return `${nom} : non réglé`;
+          return `${nom} : ${config.reseau[k]}${e.erreur ? ` — ILLISIBLE (${e.erreur})` : e.absent ? ' — absent' : ''}\n  dernière ligne ${iso(e.derniere_ligne)} ; `
+            + (k === 'hote' ? `battement des règles ${e.battement ? `${iso(e.battement.at)} (etat=${e.battement.etat}, ${e.battement.regles ?? '?'}/${e.battement.attendues ?? '?'} règles)` : 'jamais'}`
+              : `battement ${iso(e.dernier_battement)}${e.liste ? `\n  liste autorisée au démarrage : ${e.liste.join(', ')}` : ''}`)
+            + `\n  position ${e.position ? `${e.position.pos} octets (inode ${e.position.ino})` : '—'} ; lu ${iso(e.lu_a)}${e.rotations ? ` ; ${e.rotations} rotation(s)` : ''}${e.troncatures ? ` ; ${e.troncatures} troncature(s)` : ''}${e.illisibles ? ` ; ${e.illisibles} ligne(s) illisible(s)` : ''}${e.echecs ? ` ; ${e.echecs} demande(s) permise(s) en échec (serveur injoignable…)` : ''}`
+            + (silence[k] ? `\n  SILENCE SIGNALÉ : ${silence[k]}` : '');
+        };
+        const par = db.prepare("SELECT type, COUNT(*) n FROM events WHERE composant = 'réseau' AND recu_a > ? GROUP BY type").all(day);
+        const refus = db.prepare("SELECT json_extract(detail, '$.hote') h, json_extract(detail, '$.port') p, json_extract(detail, '$.raison') r, SUM(1 + COALESCE(json_extract(detail, '$.nombre'), 0)) n FROM events WHERE type = 'reseau_sortie_refusee' AND recu_a > ? GROUP BY h, p, r ORDER BY n DESC LIMIT 15").all(day);
+        const directes = db.prepare("SELECT json_extract(detail, '$.source_nom') s, json_extract(detail, '$.destination') d, json_extract(detail, '$.port') p, SUM(1 + COALESCE(json_extract(detail, '$.nombre'), 0)) n FROM events WHERE type IN ('reseau_sortie_directe', 'reseau_flux_hors_liste') AND recu_a > ? GROUP BY s, d, p ORDER BY n DESC LIMIT 15").all(day);
+        const acceptes = Object.entries(store.setting.get('reseau_noms_acceptes', {})).sort((a, b) => b[1].at - a[1].at).slice(0, 15);
+        return [
+          ...(lus != null ? [`Passage de lecture : ${lus} événement(s) écrit(s).`] : []),
+          ligne('Mandataire de sortie', 'mandataire'), ligne('Rejets de l’hôte', 'hote'),
+          `Constats (24 h) : ${par.map(r => `${r.type} ${r.n}`).join(', ') || 'aucun'}`,
+          `Noms refusés (24 h) : ${refus.map(r => `${r.h ?? '—'}:${r.p ?? '—'} (${r.r}) ×${r.n}`).join(', ') || 'aucun'}`,
+          `Rejets de l’hôte (24 h) : ${directes.map(r => `${r.s} → ${r.d}:${r.p ?? '—'} ×${r.n}`).join(', ') || 'aucun'}`,
+          `Noms acceptés (derniers) : ${acceptes.map(([k, v]) => `${k} ×${v.n} (${iso(v.at)})`).join(', ') || 'aucun'}`,
         ].join('\n');
       }
       case 'menaces': {

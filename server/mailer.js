@@ -10,18 +10,21 @@ export class MailError extends Error {}
 // (TLS dès la connexion), ou smtp:// avec STARTTLS obligatoire (un intermédiaire ne peut pas le retirer pour lire le
 // mot de passe et les messages), sauf vers un relais sur cette machine. Un relais sans TLS sur le réseau local
 // s'écrit explicitement : smtp://relais:25?requireTLS=false.
+// proxy : mandataire de sortie de la pile (BV-10, profil « sortie » ; HTTP CONNECT, que nodemailer sait faire), jamais
+// pour un relais sur cette machine.
 const LOCAL = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
-export const transportOptions = url => {
+export const transportOptions = (url, { proxy = null } = {}) => {
   let host = '';
   try { host = new URL(url).hostname; } catch { /* adresse illisible : nodemailer le dira */ }
-  return { url, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 15000, requireTLS: !/^smtps:/i.test(url) && !LOCAL.has(host), tls: { minVersion: 'TLSv1.2' } };
+  return { url, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 15000, requireTLS: !/^smtps:/i.test(url) && !LOCAL.has(host), tls: { minVersion: 'TLSv1.2' },
+    ...(proxy && !LOCAL.has(host) ? { proxy } : {}) };
 };
 // Réponse du serveur de messagerie pour les journaux : sans les adresses qu'elle répète souvent (« 550 <alice@…> »).
 export const maskAddresses = v => (v == null ? v : String(v).replace(/[^\s<>()"',;:]+@[^\s<>()"',;:]+/g, '…@…'));
 
-export function createMailer({ url, from, log, transport = null } = {}) {
+export function createMailer({ url, from, log, transport = null, proxy = null } = {}) {
   // Options passées dans l'objet (le second argument de createTransport ne vaut que pour les messages).
-  const t = transport || (url ? nodemailer.createTransport(transportOptions(url)) : null);
+  const t = transport || (url ? nodemailer.createTransport(transportOptions(url, { proxy })) : null);
   return {
     enabled: Boolean(t),
     from: from || '',
