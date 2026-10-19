@@ -188,10 +188,14 @@ test('sans JavaScript : les formulaires de la v1 et les dialogues par leur ancre
   await expect(page.locator('#dlg-retirer-embleme')).toBeVisible();
   // Site public : « Enregistrer le site public » ; l'ouverture par ses boutons (la page revient à #ouverture).
   await page.goto('/admin/site');
-  await page.getByRole('button', { name: 'Enregistrer le site public' }).click();
-  await expect(page.locator('.flash')).toContainText('Réglages enregistrés.');
   const titles = () => page.locator('[data-hero-chosen] li .t').allTextContents();
   const order = await titles();
+  // Entrée dans un champ : le bouton par défaut (caché) enregistre la page, jamais une flèche de l'ouverture.
+  await page.locator('#site_name').press('Enter');
+  await expect(page.locator('.flash')).toContainText('Réglages enregistrés.');
+  expect(await titles()).toEqual(order);
+  await page.getByRole('button', { name: 'Enregistrer le site public' }).click();
+  await expect(page.locator('.flash')).toContainText('Réglages enregistrés.');
   if (order.length > 1) {
     await page.locator('[data-hero-chosen] li').first().locator('[data-hero-op="right"]').click();
     await expect(page).toHaveURL(/#ouverture$/);

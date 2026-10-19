@@ -62,6 +62,7 @@
 <% if (fresh) { %>        <p class="avert"><%~ alerte %><span><%= t('Compte créé le {date}.', { date: when(a.created_at) }) %> <%= t('Nom et adresse viennent du fournisseur d’identité : avant de donner un rôle, vérifiez cet identifiant avec la personne (sa page « Compte en attente » l’affiche).') %></span></p>
 <% } %>        <p class="rg-sub"><span><%= t('Identifiant (sub)') %> :</span> <code class="sub-nolang"><%= a.sub %></code></p>
         <fieldset class="choix-a"><legend><%= t('Rôles') %></legend>
+          <!-- [html-validate-disable-block form-dup-name: les cases des rôles forment un groupe, name="roles" répété comme dans la v1 ; le serveur en reçoit la liste] -->
 <% it.roles.forEach(r => { const on = a.roles.includes(r.key); const lock = a.locked && r.key === 'admin'; %>          <label<%~ lock ? ' class="inactif"' : '' %>><input type="checkbox" name="roles" value="<%= r.key %>"<%~ on ? ' checked' : '' %><%~ lock ? ' disabled' : '' %>><span><%= t(r.label) %></span><span class="sec"><%= ROLE_DESC[r.key] || '' %><%= lock ? ` · ${t('protégé par ADMIN_SUBS')}` : '' %></span></label>
 <% }) %>        </fieldset>
         <div class="champ-a"><label for="au-<%= a.id %>"><%= t('Photographe lié') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="au-<%= a.id %>-a"><%= t('Valeurs par défaut de l’import et de l’app de terrain ; un compte Photographe ne voit que ce qui est à ce photographe.') %></p>

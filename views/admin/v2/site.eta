@@ -38,7 +38,8 @@
 <form class="form rg-form" id="site-f" method="post" action="/admin/reglages" novalidate data-site>
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
   <input type="hidden" name="part" value="site">
-  <button class="sr-only" type="submit" tabindex="-1" aria-hidden="true" data-envoi-defaut><%= t('Enregistrer') %></button>
+  <!-- [html-validate-disable-block form-dup-name: l’ouverture est une liste ordonnée, name="hero" répété comme dans la v1 ; le serveur en reçoit les adresses dans l’ordre] -->
+  <button type="submit" hidden data-envoi-defaut><%= t('Enregistrer') %></button>
   <section class="panel" id="textes" aria-labelledby="textes-t">
     <h2 id="textes-t"><%= t('Textes') %></h2>
     <%~ field('site_name', t('Nom du site'), { max: 60, placeholder: it.defaultName, aide: t('Dans l’en-tête, le titre des pages, les partages et le filigrane ({site}). Vide : « {name} ».', { name: it.defaultName }) }) %>

@@ -98,3 +98,16 @@
 .rg-lien-ext, .ep-meta .rg-lien-ext { display: inline-flex; align-items: center; gap: 4px; min-height: 24px; white-space: nowrap; color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 720px), (pointer: coarse) { .ep-meta .rg-lien-ext { min-height: 44px; } }
 .rg details.panel { display: block; }
+/* Cibles de 44 × 44 px au toucher (grille du skill) : les ancres courtes (« Logos ») et le lien du Journal. */
+@media (max-width: 720px), (pointer: coarse) {
+  .sur-page a { min-width: 44px; justify-content: center; }
+  .rg .hint .more { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+}
+.rg-chosen .it .n { font-size: 12px; }
+@media (max-width: 720px), (pointer: coarse) {
+  .rg-chosen .it { width: 148px; }
+  .rg-chosen .it img { width: 148px; height: 99px; }
+  .rg-chosen .mv button { flex: none; }
+  /* Un champ atteint au clavier n'est jamais caché, même en partie, par la barre d'onglets du bas. */
+  .rg :is(input, textarea, select, button, a, summary) { scroll-margin-bottom: calc(var(--barre-basse, 74px) + 16px); }
+}

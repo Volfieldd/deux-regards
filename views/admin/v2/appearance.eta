@@ -131,7 +131,7 @@
 </dialog>
 <% }) %>
 <dialog class="confirm" id="dlg-remplacer" aria-labelledby="drp-t" aria-describedby="drp-d">
-  <h2 id="drp-t" data-remplacer-titre></h2>
+  <h2 id="drp-t" data-remplacer-titre><%= t('Remplacer le fichier') %></h2>
   <p id="drp-d"><%= t('Le fichier actuel est effacé et remplacé par celui-ci ; cela ne se défait pas.') %></p>
   <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn" type="button" data-confirmer-ok><%= t('Remplacer le fichier') %></button></div>
 </dialog>

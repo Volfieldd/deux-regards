@@ -364,3 +364,15 @@ $$('form[data-compte-form]').forEach(form => {
   });
   sync();
 })();
+
+// ----- focus jamais caché, même en partie, par la barre d'onglets du téléphone (WCAG 2.4.11 et 2.4.12) : un champ haut
+// (« À propos ») atteint par la tabulation et resté à moitié sous la barre remonte juste assez -----
+document.addEventListener('focusin', e => {
+  const el = e.target;
+  if (!el.closest?.('.rg') || el.closest('dialog')) return;
+  const bar = $('.tabbar');
+  if (!bar || getComputedStyle(bar).display === 'none' || getComputedStyle(bar).position !== 'fixed') return;
+  const top = bar.getBoundingClientRect().top;
+  const r = el.getBoundingClientRect();
+  if (r.bottom > top - 8 && r.top < top) window.scrollBy({ top: Math.min(r.bottom - top + 16, r.top - 16), behavior: 'instant' });
+});
