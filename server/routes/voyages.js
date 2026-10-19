@@ -4,7 +4,7 @@ import { outingUrl } from './sorties.js';
 // Admin « Voyages » : des sorties regroupées (journées entières). Un voyage est celui d'un photographe, ou commun aux
 // deux (réglé par qui gère toutes les sorties). Portée « les miennes » : ses voyages, ses journées.
 // Enregistré dans le plugin d'administration (session d'admin exigée, comme le reste de /admin).
-export function registerTrips(app, { repo, render, done, failed, P, W, withReady }) {
+export function registerTrips(app, { repo, render, done, failed, P, W, withReady, noteChanges = () => {} }) {
   const trips = app.trips;
   // Date d'une journée ; impossible à écrire (enregistrée avant le contrôle des dates) : telle quelle, jamais d'erreur.
   const fmtDay = (day, t, opts = { day: 'numeric', month: 'long', year: 'numeric' }) => (isDay(day) ? new Intl.DateTimeFormat(t.locale, { ...opts, timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`)) : String(day));
@@ -89,6 +89,8 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
       // Le bouton compte ce que sa route enverra : publier (hors programmées et renvoyées), ou proposer (hors circuit).
       readyDrafts: photos.filter(p => p.status === 'draft' && p.level === 'ok' && (publishing ? !HELD.includes(p.review) : !p.review)).length,
       pagePublish: canPublish(request, tr),
+      // Traducteur réglé : « Proposer une traduction » des textes de la page (admin v2).
+      translate: app.translator.enabled,
     });
   });
 
@@ -108,15 +110,24 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
     // Mettre la page en ligne, ou changer les textes d'une page en ligne : le circuit de publication s'applique (un
     // photographe sans « publier sans validation » ne met rien en ligne seul). La retirer du site reste possible.
     const t = request.t;
-    if (body.public === true && !tr.public && !canPublish(request, tr)) return failed(reply, back(tr.id), t('Mettre la page du voyage en ligne demande le droit de publier sur le site : demandez-le à un administrateur.'));
+    // Admin v2 : chaque champ s'enregistre quand on le quitte (fetch JSON, un champ à la fois) ; la réponse est alors en
+    // JSON, avec l'erreur sous le champ. Sans script (v1 et v2), le formulaire entier et la redirection, comme avant.
+    const json = Boolean(request.headers.accept) && !request.headers.accept.includes('text/html');
+    const refuse = text => (json ? reply.code(422).send({ error: text }) : failed(reply, back(tr.id), text));
+    if (body.public === true && !tr.public && !canPublish(request, tr)) return refuse(t('Mettre la page du voyage en ligne demande le droit de publier sur le site : demandez-le à un administrateur.'));
     const changes = TEXTS.some(k => k in body && String(body[k] ?? '').replace(/\r\n/g, '\n').trim() !== String(tr[k] ?? ''));
-    if (tr.public && body.public !== false && changes && !canEditPublic(request, tr)) return failed(reply, back(tr.id), t('La page du voyage est en ligne : ses textes ne se modifient qu’avec le droit de modifier les photos publiées.'));
+    if (tr.public && body.public !== false && changes && !canEditPublic(request, tr)) return refuse(t('La page du voyage est en ligne : ses textes ne se modifient qu’avec le droit de modifier les photos publiées.'));
+    let after;
     try {
-      trips.update(tr.id, body);
+      after = trips.update(tr.id, body);
     } catch (err) {
       if (!(err instanceof TripError)) throw err;
-      return failed(reply, back(tr.id), request.t.msg(err.message));
+      return refuse(request.t.msg(err.message));
     }
+    // Journal : les noms des champs changés, jamais leurs valeurs (comme une série ou une photo).
+    const COLS = ['name', 'slug', 'name_en', 'name_de', 'intro', 'intro_en', 'intro_de', 'public', 'author_id'];
+    noteChanges(request, Object.fromEntries(COLS.map(k => [k, tr[k]])), Object.fromEntries(COLS.map(k => [k, after?.[k]])));
+    if (json) return { ok: true, voyage: { name: after.name, slug: after.slug, public: Boolean(after.public) } };
     return done(reply, back(tr.id), request.t('Voyage enregistré.'));
   });
 

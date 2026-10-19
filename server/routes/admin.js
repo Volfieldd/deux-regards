@@ -2003,13 +2003,18 @@ export default async function adminRoutes(app) {
     const id = byId(request.params.id);
     const before = repo.categories().find(c => c.id === id);
     if (!before) return reply.callNotFound();
+    // Admin v2 : la carte d'une série s'enregistre au champ quitté (le formulaire entier, envoyé en JSON par
+    // public/admin/v2/contenus-v2.js) ; la réponse est alors en JSON. Le formulaire envoyé sans script reste celui de la v1.
+    const json = Boolean(request.headers.accept) && !request.headers.accept.includes('text/html');
     try {
       repo.saveCategory(id, request.body || {});
       noteChanges(request, before, repo.categories().find(c => c.id === id));
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
+      if (json) return reply.code(422).send({ errors: translateDeep(request.t, err.errors) });
       return seriesPage(request, reply.code(422), { editErrors: { id, errors: err.errors, values: err.values } });
     }
+    if (json) { const c = repo.categories().find(x => x.id === id); return { ok: true, serie: { name: c.name, slug: c.slug } }; }
     return done(reply, `/admin/series#serie-${id}`, request.t('Série enregistrée.'));
   });
 
@@ -2331,7 +2336,7 @@ export default async function adminRoutes(app) {
   // ---------- rencontres (page /bonjour, cartes) ----------
   registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion, identity: identityOf });
   registerOutings(app, { repo, render, P, W, done, failed, withReady });
-  registerTrips(app, { repo, render, P, W, done, failed, withReady });
+  registerTrips(app, { repo, render, P, W, done, failed, withReady, noteChanges });
   registerGaleries(app, { repo, render, P, W, done, failed });
   registerCarnet(app, { repo, render, P, W, done, failed, withReady });
 
