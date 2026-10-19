@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { creerRencontre, effacerRencontre } from './terrain-donnees.js';
 
 // App de terrain de la v2 (MQ-10) au toucher, dans WebKit (moteur de Safari), écran d'iPhone, avec le compte de la v2.
 const STATE = 'results/.auth/admin-v2.json';
@@ -70,4 +71,28 @@ test('le lot au toucher : chaque champ touchable, la barre des cochées repliée
   await expect(page.locator('#b-lieu')).toBeHidden();
   await page.locator('[data-bulk-toggle]').tap();
   await expect(page.locator('#b-lieu')).toBeVisible();
+});
+
+// Vague 3b : une rencontre (données personnelles, accord, carte) dans WebKit au toucher : la fiche tient dans l'écran,
+// la décision est en tête, « Effacer les données… » ouvre son dialogue (Annuler d'abord), le formulaire de la carte au doigt.
+test('une rencontre au toucher : décision en tête, dialogue d’effacement, formulaire de la carte, rien ne déborde', async ({ page }) => {
+  const r = await creerRencontre(page, { jour: '2025-10-19', nom: 'iPhone Essai' });
+  try {
+    await page.goto(`/admin/rencontres/${r.id}`);
+    await expect(page.locator('link[href*="admin/v2/contenus-v2.css"]')).toHaveCount(1);
+    await expect(page.locator('.fiche-pastilles')).toContainText('Accord signé : site');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+    await page.getByRole('link', { name: 'Effacer les données…' }).tap();
+    const d = page.locator('#dlg-effacer');
+    await expect(d).toBeVisible();
+    await d.getByRole('link', { name: 'Annuler' }).tap();
+    await expect(d).toBeHidden();
+    await page.getByText('Corriger la rencontre et la carte').tap();
+    const email = page.locator('#rc-email');
+    await expect(email).toBeVisible();
+    expect((await email.boundingBox()).height).toBeGreaterThanOrEqual(44);
+    await page.goto('/admin/personnes');
+    await expect(page.getByRole('link', { name: 'iPhone Essai' })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  } finally { await effacerRencontre(page, r.id); }
 });
