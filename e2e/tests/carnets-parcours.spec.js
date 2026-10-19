@@ -33,7 +33,24 @@ test('écrire, publier, voir : un billet de bout en bout', async ({ page, browse
   // L'aperçu, rendu par le serveur, suit le texte (avec le script).
   await expect(page.locator('[data-apercu] h2.jour')).toHaveText('Une partie', { timeout: 10_000 });
   await expect(page.locator('[data-enreg]')).toContainText(/Enregistré à/, { timeout: 10_000 });
-  await page.locator('.ep-actions').getByRole('button', { name: 'Publier' }).click();
+  const publier = page.locator('.ep-actions').getByRole('button', { name: 'Publier' });
+  await publier.click();
+  // Chaque photo d'un billet demande un texte de remplacement (B37) ; celles du jeu de démonstration n'en ont pas. Comme
+  // un auteur : « Publier » enregistre le texte du billet puis refuse ; le résumé mène à la photo, « Décrire la photo… »
+  // donne ce texte au billet (la photo elle-même ne change pas), et l'on publie de nouveau.
+  await expect(page.locator('.flash')).toBeVisible();
+  const altPoint = page.locator('#resume').getByRole('link', { name: /écrivez son texte de remplacement/ });
+  if (await altPoint.count()) {
+    await expect(page.locator('.flash.error')).toContainText('Pas encore publié');
+    const item = page.locator(String(await altPoint.getAttribute('href')));
+    await altPoint.click();
+    await item.getByRole('link', { name: 'Décrire la photo…' }).click();
+    await page.getByRole('textbox', { name: 'Texte de remplacement' }).fill('Une photo décrite par le parcours de bout en bout.');
+    await page.getByRole('button', { name: 'Mettre à jour la photo' }).click();
+    await expect(page.locator('.flash.ok')).toContainText('Photo mise à jour');
+    await expect(item).toContainText('texte de remplacement écrit');
+    await publier.click();
+  }
   await expect(page.locator('.flash.ok')).toContainText('Billet publié');
   await expect(page.locator('.ep-titre .etat')).toContainText('Publié');
   const slug = (await page.locator('#publication .donnee').innerText()).replace('/carnet/', '');

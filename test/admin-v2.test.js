@@ -2,7 +2,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
-import { execFileSync } from 'node:child_process';
 import { setup, VIGIE_KEYS } from './helpers.js';
 import { createSessionStore } from '../server/sessions.js';
 
@@ -104,12 +103,27 @@ test('repli : un écran sans gabarit v2 s’affiche en v1, entier, identique à 
     assert.equal(res.statusCode, 200, url);
     assert.ok(isV2(res.body), `${url} en v2`);
   }
-  // Le gabarit de la v1 : celui de main (origin/main), hors du seul bloc du choix (marqué), que main l'ait ou non.
-  let base = null;
-  try { base = execFileSync('git', ['show', 'origin/main:views/admin/layout.eta'], { cwd: new URL('..', import.meta.url), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { /* sans git : sauté */ }
-  if (base) {
-    const block = s => s.replace(/<% \/\* --- Choix de l'admin v1 \/ v2[^]*?: fin\. --- \*\/ %>\n/, '');
-    assert.equal(block(fs.readFileSync(new URL('../views/admin/layout.eta', import.meta.url), 'utf8')), block(base));
+  // Le gabarit de la v1 pour un compte en v1, sur tous ces écrans : sa mise en page (repères propres à
+  // views/admin/layout.eta, absents de la v2), son script et sa feuille, rien de la v2, et le seul bloc du choix en plus.
+  const layout = f => fs.readFileSync(new URL(`../views/admin/${f}`, import.meta.url), 'utf8');
+  const marks = ['<button class="cmdk"', '<p class="grp" id="nav-work">', '<span class="nav-ver mono">'];
+  for (const m of marks) {
+    assert.ok(layout('layout.eta').includes(m), `repère de la mise en page v1 introuvable : ${m}`);
+    assert.ok(!layout('v2/layout.eta').includes(m), `repère partagé avec la mise en page v2 : ${m}`);
+  }
+  await a.version('v1');
+  for (const url of ['/admin/series', '/admin/journal', '/admin', '/admin/droits', '/admin/photos', '/admin/photos/1', '/admin/a-valider']) {
+    const res = await a.get(url);
+    assert.equal(res.statusCode, 200, url);
+    for (const m of marks) assert.ok(res.body.includes(m), `${url} : mise en page v1 (${m})`);
+    assert.match(res.body, /<link rel="stylesheet" href="\/static\/admin\/admin\.css[?"]/, `${url} : feuille de la v1`);
+    assert.match(res.body, /<script src="\/static\/admin\/admin\.js[?"]/, `${url} : script de la v1`);
+    assert.doesNotMatch(res.body, /\/static\/admin\/v2\//, `${url} : aucune feuille ni aucun script de la v2`);
+    // Le bloc du choix : une fois, « Essayer l'admin v2 » ; hors de lui, rien ne mène à la v2.
+    const choix = res.body.match(/<form class="ver-choix"[\s\S]*?<\/form>/g) || [];
+    assert.equal(choix.length, 1, `${url} : un seul bloc du choix`);
+    assert.match(choix[0], /name="version" value="v2"><button type="submit">Essayer l’admin v2<\/button>/, url);
+    assert.doesNotMatch(res.body.replace(choix[0], ''), /action="\/admin\/version"|class="ver-/, `${url} : rien d'autre du choix`);
   }
 });
 
