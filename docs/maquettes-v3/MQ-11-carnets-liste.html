@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-nuit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Carnets · Nicephos (maquette MQ-11, v3)</title>
+<meta name="description" content="Les carnets de Sébastien et Julien : récits de voyage et notes d’atelier, à deux voix. Quatre billets, datés et signés.">
+<link rel="canonical" href="https://www.nicephos.art/carnet">
+<link rel="alternate" hreflang="fr" href="https://www.nicephos.art/carnet">
+<link rel="alternate" hreflang="en" href="https://www.nicephos.art/en/carnet">
+<link rel="alternate" hreflang="de" href="https://www.nicephos.art/de/carnet">
+<link rel="alternate" hreflang="x-default" href="https://www.nicephos.art/carnet">
+<link rel="alternate" type="application/atom+xml" title="Carnets de Nicephos (flux RSS)" href="/carnet/flux.xml">
+<link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/public.css">
+<link rel="stylesheet" href="_commun/v3.css">
+<link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* MQ-11 · liste des carnets. Composants de la planche (_commun/public.css : tête de page § 15, filtres § 17, planche de billets
+   .billets et carte .billet-e, sa variante .billet-e--cote en liste, abonnement .abo, pagination .pages § 21). Ci-dessous, la
+   mise en page de la page seulement. */
+.compte { margin: var(--esp-3) 0 0; font-size: var(--t-petit); color: var(--mute); }
+/* Autres états (maquette) */
+.etat-in { padding: var(--esp-4) var(--gut) var(--esp-5); }
+.etat-in .billets { margin-top: var(--esp-4); }
+.etat-in .titre-page { margin: 0; }
+.etat-in .chapo { margin-top: var(--esp-2); }
+.nur-fr { margin: var(--esp-1) 0 0; font-size: var(--t-meta); color: var(--mute); }
+.compte .lien { display: inline; min-height: 0; }
+</style>
+</head>
+<body>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+
+<header class="sh sh--site">
+  <div class="sh-bar"><span class="mq-pin" aria-hidden="true">1</span>
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Navigation">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet" aria-current="page">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – Langue : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Langue">
+          <li><a href="/langue/fr?vers=%2Fcarnet" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+          <li><a href="/langue/en?vers=%2Fcarnet" hreflang="en" lang="en">English</a></li>
+          <li><a href="/langue/de?vers=%2Fcarnet" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Navigation (téléphone)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet" aria-current="page">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<main id="contenu" class="wrap">
+  <div class="tete-page">
+    <h1 class="titre-page"><span class="mq-pin" aria-hidden="true">2</span>Carnets</h1>
+    <p class="chapo">Nos voyages et nos notes d’atelier, à deux voix : Sébastien cherche la mer, Julien les gens. <a href="/a-propos">Qui sommes-nous ?</a></p>
+  </div>
+
+  <nav class="filtres" aria-label="Filtrer les billets"><span class="mq-pin" aria-hidden="true">3</span>
+    <div class="filtres-groupe">
+      <p class="etiquette" id="f-rub">Rubrique</p>
+      <ul aria-labelledby="f-rub">
+        <li><a class="filtre" href="/carnet" aria-current="page"><span class="filtre-nom">Toutes</span> <span class="filtre-n">4</span></a></li>
+        <li><a class="filtre" href="/carnet?rubrique=voyages"><span class="filtre-nom">Voyages</span> <span class="filtre-n">1</span></a></li>
+        <li><a class="filtre" href="/carnet?rubrique=atelier"><span class="filtre-nom">Notes d’atelier</span> <span class="filtre-n">3</span></a></li>
+      </ul>
+    </div>
+    <div class="filtres-groupe">
+      <p class="etiquette" id="f-reg">Regard</p>
+      <ul aria-labelledby="f-reg">
+        <li><a class="filtre" href="/carnet" aria-current="page"><span class="filtre-nom">Les deux</span> <span class="filtre-n">4</span></a></li>
+        <li><a class="filtre" href="/carnet?par=sebastien"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">3</span></a></li>
+        <li><a class="filtre" href="/carnet?par=julien"><span class="filtre-nom">Julien</span> <span class="filtre-n">2</span></a></li>
+      </ul>
+    </div>
+  </nav>
+  <p class="compte"><span class="mq-pin" aria-hidden="true">4</span>4 billets, du plus récent au plus ancien.</p>
+
+  <ol class="billets" aria-label="Billets">
+    <li><span class="mq-pin" aria-hidden="true">5</span>
+      <article class="billet-e billet-e--cote" aria-labelledby="b1">
+        <div class="billet-e-txt">
+          <p class="etiquette">Notes d’atelier</p>
+          <h2 class="billet-e-titre" id="b1"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></h2>
+          <p class="billet-e-chapo">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu, et ce que nous en avons appris.</p>
+          <p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p>
+        </div>
+        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 42px), (min-width: 768px) calc(40vw - 45px), calc(42vw - 27px)" width="320" height="480" alt="" fetchpriority="high" decoding="async"></figure>
+      </article>
+    </li>
+    <li>
+      <article class="billet-e billet-e--cote" aria-labelledby="b2">
+        <div class="billet-e-txt">
+          <p class="etiquette">Voyages</p>
+          <h2 class="billet-e-titre" id="b2"><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a></h2>
+          <p class="billet-e-chapo">Deux jours, deux regards, un même océan. Sébastien a cherché la mer, Julien les gens : du premier tram de l’Alfama à la barre de Foz, là où le Douro rencontre l’Atlantique.</p>
+          <p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p>
+        </div>
+        <figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 42px), (min-width: 768px) calc(40vw - 45px), calc(42vw - 27px)" width="320" height="480" alt="" fetchpriority="high" decoding="async"></figure>
+      </article>
+    </li>
+    <li><span class="mq-pin" aria-hidden="true">6</span>
+      <article class="billet-e" aria-labelledby="b3">
+        <div class="billet-e-txt">
+          <p class="etiquette">Notes d’atelier</p>
+          <h2 class="billet-e-titre" id="b3"><a href="/carnet/pourquoi-nous-ne-recadrons-pas">Pourquoi nous ne recadrons pas</a></h2>
+          <p class="billet-e-chapo">Le cadre se décide au viseur, pas à l’écran. Deux photographes, une même règle, et les rares fois où nous y avons dérogé.</p>
+          <p class="billet-e-meta"><b>Sébastien</b> · <time datetime="2026-10-02">2 oct. 2026</time> · 2 photos · 4 min de lecture</p>
+        </div>
+        <figure class="billet-e-img" style="--r:1.5"><img src="_commun/photos/480/mer.webp" srcset="_commun/photos/480/mer.webp 480w, _commun/photos/mer.webp 900w" sizes="(min-width: 1280px) min(570px, calc(50vw - 104px)), (min-width: 900px) calc(50vw - 72px), (min-width: 768px) calc(100vw - 80px), min(450px, calc(100vw - 48px))" width="480" height="320" alt="" loading="lazy" decoding="async"></figure>
+      </article>
+    </li>
+    <li>
+      <article class="billet-e" aria-labelledby="b4">
+        <div class="billet-e-txt">
+          <p class="etiquette">Notes d’atelier</p>
+          <h2 class="billet-e-titre" id="b4"><a href="/carnet/tirer-sur-photo-rag">Tirer sur Photo Rag</a></h2>
+          <p class="billet-e-chapo">Un papier coton mat de 308 g, une marge blanche de 3 cm et trois essais avant le bon : ce que nos premières épreuves nous ont appris.</p>
+          <p class="billet-e-meta"><b>Sébastien</b> · <time datetime="2026-09-25">25 sept. 2026</time> · 1 photo · 4 min de lecture</p>
+        </div>
+        <figure class="billet-e-img" style="--r:1.5"><img src="_commun/photos/480/neige.webp" srcset="_commun/photos/480/neige.webp 480w, _commun/photos/neige.webp 900w" sizes="(min-width: 1280px) min(570px, calc(50vw - 104px)), (min-width: 900px) calc(50vw - 72px), (min-width: 768px) calc(100vw - 80px), min(450px, calc(100vw - 48px))" width="480" height="320" alt="" loading="lazy" decoding="async"></figure>
+      </article>
+    </li>
+  </ol>
+
+  <div class="abo"><span class="mq-pin" aria-hidden="true">7</span>
+    <p>Pour lire le prochain billet sans revenir ici, ajoutez ce flux à votre lecteur : il vous prévient à chaque publication. Ni compte, ni adresse e-mail.</p>
+    <a class="lien" href="/carnet/flux.xml" type="application/atom+xml"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg>S’abonner au flux RSS des carnets</a>
+  </div>
+</main>
+
+<footer class="sf sf--complet wrap">
+  <div class="sf-in"><span class="mq-pin" aria-hidden="true">8</span>
+    <div>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
+    </div>
+    <nav class="sf-groupes" aria-label="Pied de page">
+      <div>
+        <h2 id="sf-site">Le site</h2>
+        <ul aria-labelledby="sf-site">
+          <li><a href="/a-propos#contact">Contact</a></li>
+          <li><a href="/droits">Droits et licences</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
+          <li><a href="/confidentialite">Confidentialité</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</footer>
+
+<!-- ================= Autres états (maquette) : des écrans réels, inertes, chacun nommé par son étiquette ================= -->
+<aside class="mq-etats wrap" aria-label="Autres états de l’écran (maquette)">
+
+  <section class="mq-ecran mq-fond" inert aria-labelledby="e-julien"><p class="mq-etat" id="e-julien"><span class="mq-pin" aria-hidden="true">9</span>État · filtre « Julien » (/carnet?par=julien), focus au clavier sur le premier billet</p>
+    <div class="etat-in">
+      <nav class="filtres" aria-label="Filtrer les billets (état)">
+        <div class="filtres-groupe"><p class="etiquette" id="e1-rub">Rubrique</p><ul aria-labelledby="e1-rub"><li><a class="filtre" href="/carnet?par=julien" aria-current="page"><span class="filtre-nom">Toutes</span> <span class="filtre-n">2</span></a></li><li><a class="filtre" href="/carnet?rubrique=voyages&amp;par=julien"><span class="filtre-nom">Voyages</span> <span class="filtre-n">1</span></a></li><li><a class="filtre" href="/carnet?rubrique=atelier&amp;par=julien"><span class="filtre-nom">Notes d’atelier</span> <span class="filtre-n">1</span></a></li></ul></div>
+        <div class="filtres-groupe"><p class="etiquette" id="e1-reg">Regard</p><ul aria-labelledby="e1-reg"><li><a class="filtre" href="/carnet"><span class="filtre-nom">Les deux</span> <span class="filtre-n">4</span></a></li><li><a class="filtre" href="/carnet?par=sebastien"><span class="filtre-nom">Sébastien</span> <span class="filtre-n">3</span></a></li><li><a class="filtre" href="/carnet?par=julien" aria-current="page"><span class="filtre-nom">Julien</span> <span class="filtre-n">2</span></a></li></ul></div>
+      </nav>
+      <p class="compte">2 billets signés par Julien, dont un à deux voix. <a class="lien" href="/carnet">Voir les 4 billets</a></p>
+      <ol class="billets" aria-label="Billets de Julien">
+        <li><article class="billet-e billet-e--cote is-focus" aria-labelledby="e1-b1"><div class="billet-e-txt"><p class="etiquette">Notes d’atelier</p><p class="billet-e-titre" id="e1-b1"><a href="/carnet/ines-ou-comment-demander-une-photo">Inês, ou comment demander une photo</a></p><p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15 oct. 2026</time> · 1 photo · 3 min de lecture</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 58px), (min-width: 768px) calc(40vw - 77px), calc(42vw - 47px)" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+        <li><article class="billet-e billet-e--cote" aria-labelledby="e1-b2"><div class="billet-e-txt"><p class="etiquette">Voyages</p><p class="billet-e-titre" id="e1-b2"><a href="/carnet/lisbonne-et-porto">Lisbonne et Porto</a></p><p class="billet-e-meta"><b>Sébastien et Julien</b> · <time datetime="2026-10-14">14 oct. 2026</time> · 10 photos · 4 min de lecture</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 58px), (min-width: 768px) calc(40vw - 77px), calc(42vw - 47px)" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="mq-ecran mq-fond" inert lang="de" aria-labelledby="e-de"><p class="mq-etat" id="e-de" lang="fr"><span class="mq-pin" aria-hidden="true">10</span>État · la page en allemand (/de/carnet), un billet pas encore traduit</p>
+    <header class="sh sh--site">
+      <div class="sh-bar">
+        <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+        <nav class="sh-nav" aria-label="Navigation (Beispiel)">
+          <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet" aria-current="page">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li></ul>
+        </nav>
+        <div class="sh-outils">
+          <a class="sh-outil sh-recherche" href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suchen</span></a>
+          <details class="lang-pick"><summary><span>DE</span><span class="sr-only"> – Sprache: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary><ul aria-label="Sprache"><li><a href="/langue/fr?vers=%2Fcarnet" hreflang="fr" lang="fr">Français</a></li><li><a href="/langue/en?vers=%2Fcarnet" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Fcarnet" hreflang="de" aria-current="true">Deutsch</a></li></ul></details>
+          <details class="sh-menu"><summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary><nav class="sh-panneau" aria-label="Navigation (Telefon, Beispiel)"><ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet" aria-current="page">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li></ul></nav></details>
+        </div>
+      </div>
+    </header>
+    <div class="etat-in">
+      <p class="titre-page">Reisetagebücher</p>
+      <p class="chapo">Unsere Reisen und Werkstattnotizen, mit zwei Stimmen: Sébastien sucht das Meer, Julien die Menschen.</p>
+      <ol class="billets" aria-label="Beiträge">
+        <li><article class="billet-e billet-e--cote" aria-labelledby="e2-b1"><div class="billet-e-txt"><p class="etiquette">Werkstattnotizen</p><p class="billet-e-titre" id="e2-b1" lang="fr"><a href="/de/carnet/ines-ou-comment-demander-une-photo" hreflang="fr">Inês, ou comment demander une photo</a></p><p class="billet-e-chapo" lang="fr">Elle vend des fleurs depuis trente ans au même coin de rue. Avant de déclencher, Julien lui a tendu la carte « Bonjour » : voici ce qu’elle a répondu.</p><p class="billet-e-meta"><b>Julien</b> · <time datetime="2026-10-15">15. Okt. 2026</time> · 1 Foto · 3 Min. Lesezeit</p><p class="nur-fr">Nur auf Französisch</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/ines.webp" srcset="_commun/photos/480/ines.webp 320w, _commun/photos/ines.webp 600w, _commun/photos/1600/ines.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 58px), (min-width: 768px) calc(40vw - 77px), calc(42vw - 47px)" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+        <li><article class="billet-e billet-e--cote" aria-labelledby="e2-b2"><div class="billet-e-txt"><p class="etiquette">Reisen</p><p class="billet-e-titre" id="e2-b2"><a href="/de/carnet/lisbonne-et-porto">Lissabon und Porto</a></p><p class="billet-e-chapo">Zwei Tage, zwei Blicke, ein Ozean. Sébastien suchte das Meer, Julien die Menschen: von der ersten Straßenbahn der Alfama bis zur Brandung von Foz, wo der Douro auf den Atlantik trifft.</p><p class="billet-e-meta"><b>Sébastien und Julien</b> · <time datetime="2026-10-14">14. Okt. 2026</time> · 10 Fotos · 4 Min. Lesezeit</p></div><figure class="billet-e-img" style="--r:0.6667"><img src="_commun/photos/480/tram.webp" srcset="_commun/photos/480/tram.webp 320w, _commun/photos/tram.webp 600w, _commun/photos/1600/tram.webp 1067w" sizes="(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 58px), (min-width: 768px) calc(40vw - 77px), calc(42vw - 47px)" width="320" height="480" alt="" loading="lazy" decoding="async"></figure></article></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="mq-ecran mq-fond" inert aria-labelledby="e-pages"><p class="mq-etat" id="e-pages"><span class="mq-pin" aria-hidden="true">11</span>État · plus tard, au-delà de 12 billets : la page 1 sur 2</p>
+    <div class="etat-in">
+      <nav class="pages" aria-label="Pages des billets">
+        <p>Page 1 sur 2 · billets 1 à 12 sur 15</p>
+        <a class="lien" href="/carnet?page=2">Billets plus anciens<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </nav>
+    </div>
+  </section>
+</aside>
+
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-11 · Carnets, la liste des billets · site public, thème Nicephos nuit · v2, passe 5 du 17 oct. 2026, sur la planche MQ-00</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead"><b>v3 (19 oct. 2026) :</b> sans boutique (ni prix, ni bouton d’achat, ni « Tirages », ni panier : plus tard). même écran, mêmes mots et mêmes règles d’accessibilité que la v2, redessiné par <code>_commun/v3.css</code> : titres plus grands, méta du cartel en Plex Mono, étiquettes en sable, bascules et « Menu » sans cadre, en-tête sans filet, plus d’air entre les parties et les rangées. Les repères ci-dessous sont ceux de la v2 ; leurs mesures ne valent plus, la passe unique de la v3 est dans <code>CONTROLE.md</code>.</p>
+  <p class="mq-lead">En production, /voyages répond 404 ; sur la démo, la liste des voyages n’a ni signature, ni date, ni moyen d’être suivie. « Carnets » réunit les récits de voyage et les notes d’atelier : quatre billets, datés et signés, dans l’ordre de publication, chacun avec sa couverture au format de la photo. La page reprend tels quels l’en-tête Site, le pied complet, les filtres et la carte de billet de la planche ; ses données sont celles de LEXIQUE-ET-DONNEES.md (§ 4.3).</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>« Carnets » dans le menu cible</b><p>En-tête Site de la planche, « Carnets » actif (aria-current et soulignement sable) ; pas de panier tant qu’il est vide ; au téléphone, Menu en &lt;details&gt;, sans script.</p><span class="mq-ref">UX-T-16 · jury T1, T2 · étude B52 · RGAA 12.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>Qui écrit, en une phrase</b><p>Un seul H1, une promesse qui nomme les deux voix, et « Qui sommes-nous ? » vers À propos : le nom de la rubrique n’est plus inexpliqué.</p><span class="mq-ref">UX-F-33 · UX-F-45 · Nielsen n° 2</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Des filtres qui sont des liens, et qui comptent</b><p>« Rubrique : Toutes · Voyages · Notes d’atelier » puis « Regard : Les deux · Sébastien · Julien », les mots du lexique. Chaque choix dit son nombre de billets : aucune combinaison ne mène à une liste vide. Pages filtrées en noindex.</p><span class="mq-ref">Étude B53 · B&amp;S 1.1.1 · WCAG 2.5.8</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Des données vraies</b><p>4 billets publiés, page 1 sur 1 : pas de pagination à vide. Elle n’apparaît qu’au-delà de 12 billets, avec une adresse par page (dernier état).</p><span class="mq-ref">UX-T-16 · RGESN 4.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Une couverture verticale se pose à côté du texte</b><p>Inês et Lisbonne ont une couverture verticale : elle prend les deux cinquièmes de la colonne, et le texte se cale en bas de la photo, comme une légende de livre (variante <code>.billet-e--cote</code> de la planche, titre gardé à la taille des autres billets). Plus de photo collée à gauche d’une colonne vide. Au téléphone, le titre se pose à droite de la photo, le chapô dessous. Le titre est le seul lien, étendu à toute la carte : un arrêt de tabulation, un focus qui entoure le billet (premier état).</p><span class="mq-ref">Jury v1 MQ-11 crit. 11 (« une suite de trous ») · UX-T-18 · étude B56 · RGAA 6.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Une couverture horizontale prend la colonne</b><p>Hauteur commune (380 px au bureau), largeur selon le format : ni passe-partout gris, ni recadrage, et la colonne est pleine. Image décorative (alt="") : le titre nomme déjà le billet. Couverture : celle fixée par le billet (lexique § 4.3), par défaut sa première photo ; « Pourquoi nous ne recadrons pas » s’ouvre sur sa seconde, Ligne d’eau : la mer bleu nuit à côté du blanc du Vercors, plus deux ciels gris voisins.</p><span class="mq-ref">Étude B8 · RGAA 1.2 · planche § 21</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>S’abonner sans compte</b><p>Un flux Atom par langue, nommé « flux RSS » (le mot connu, lexique § 1), expliqué en une phrase, déclaré par &lt;link rel="alternate"&gt; et repris au pied de page.</p><span class="mq-ref">UX-F-34 · étude B58, B84 · Opquast 1</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Le pied de page complet de la planche</b><p>Deux groupes nommés, « Flux RSS des carnets » à sa place fixe.</p><span class="mq-ref">Planche MQ-00 § 5 · UX-T-03</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Filtrer par regard</b><p>« Julien » : 2 billets, le nombre de chaque rubrique recalculé, une phrase qui dit pourquoi « Lisbonne et Porto » y figure (deux voix), et le retour à la liste entière. Focus au clavier : un cadre de 2 px autour de toute la carte.</p><span class="mq-ref">B&amp;S 1.1.2 · WCAG 2.4.7, 2.4.11</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>En allemand</b><p>« Reisetagebücher » tient dans l’en-tête de 320 à 1 440 px ; le billet traduit est en allemand, l’autre garde son titre et son chapô en français, balisés lang="fr", et le dit : « Nur auf Französisch ». L’adresse garde le slug français.</p><span class="mq-ref">Étude B54, B73 · RGAA 8.7 · critère 4</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Une pagination qui dit où l’on est</b><p>« Page 1 sur 2 · billets 1 à 12 sur 15 », un lien « Billets plus anciens » à adresse propre (?page=2) ; jamais de défilement infini.</p><span class="mq-ref">UX-T-16 · RGESN 4.2 · Opquast 131</span></li>
+  </ol>
+  <h3>Ce que les passes 2 à 4 ont corrigé (jurys v1 et v2)</h3>
+  <p><b>Direction artistique</b> : les deux couvertures verticales ne laissent plus de vide de 350 px à leur droite (repère 5) ; la deuxième rangée ne met plus côte à côte deux dégradés gris de collines : « Pourquoi nous ne recadrons pas » prend pour couverture Ligne d’eau, sa seconde photo (lexique § 0.24 et § 4.3, passe 4), à côté de Silence blanc. <b>Fidélité</b> : « Suchen » dans l’en-tête allemand, comme <code>server/i18n.js</code> ; les noms lus par les lecteurs d’écran en allemand sont ceux du code (« Navigation », « Sprache: Deutsch », « Sprache ») ; le menu du téléphone s’appelle « Navigation (téléphone) », comme dans MQ-01 à MQ-06 (un nom par repère). <b>Sobriété</b> : <code>srcset</code> et <code>sizes</code> justes sur toutes les couvertures, états compris. <b>Homogénéité</b> : espaces fines insécables avant « : ; ! ? » et dans les guillemets (outil insecables.py). <b>Lisibilité de la maquette</b> : étiquettes d’état sur deux lignes au besoin, jamais coupées ; cadres d’état <code>inert</code> et nommés ; pied de page avant les états ; mesures refaites à la passe 4.</p>
+  <h3>Composants de la planche</h3>
+  <p>Tous dans <code>_commun/public.css</code> et montrés dans MQ-00 : <code>.tete-page</code> (§ 15) · <code>.filtres</code> et <code>.filtre</code> (§ 17), les mêmes que la Galerie (MQ-02) · <code>.billets</code>, <code>.billet-e</code> et <code>.billet-e--cote</code> (§ 21), repris de l’accueil (MQ-01) · <code>.abo</code> et <code>.pages</code> (§ 21). La disposition de la carte <code>--cote</code> en liste (titre 2 ; au téléphone, le titre à côté de la photo et le chapô dessous), proposée par cette page à la passe 2, est versée dans la planche (§ 21) à la passe 3 : la page n’ajoute plus que sa mise en page.</p>
+  <h3>Adresses et données</h3>
+  <p><b>À créer</b> (lexique § 2, « Évolutions à créer ») : tout le carnet, ses adresses <code>/carnet</code>, <code>/carnet/:slug</code>, <code>/carnet/flux.xml</code>, <code>?rubrique=</code>, <code>?par=</code>, <code>?page=</code> ; « Carnets » et « Tirages » dans le menu (DE « Reisetagebücher », « Kunstdrucke ») et l’en-tête Site de la planche ; <code>/galerie</code> et <code>/series</code>, cibles du menu (la démo répond 404) ; le slug reste français dans toutes les langues (<code>/de/carnet/lisbonne-et-porto</code>). Temps de lecture (Inês 3 min, les trois autres 4 min) et dates : lexique § 4.3.</p>
+  <p style="margin-top:12px"><b>Passe 5 (jury final, 17 oct. 2026)</b> : les noms lus de l’en-tête sont ceux du code en français aussi (<code>server/i18n.js</code>) : la navigation « Navigation », le bouton de langue « FR – Langue : français », sa liste « Langue » ; le panneau du téléphone « Navigation (téléphone) » ; dans un cadre d’état allemand, « Navigation (Beispiel) », pour un nom par repère sur la page de maquette (la page réelle dit « Navigation »).</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures" id="mesures"><b>Mesures</b> (passe 4, 16 oct. 2026 ; Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, p3-images.mjs, focus-colle.mjs, radios-cadres.py, insecables.py ; html-validate 11 et contrôle d’espacement du texte du jury v2) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7, et 0 « sans inert » (la page dont on a retiré tous les inert et les .is-focus : chaque état est sans défaut une fois actif) · débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête allemand du code (« Suchen ») : aucun ; aucune ellipse ; aucune ligne qui défile sans suite visible · espacement du texte (WCAG 1.4.12) à 1 440, 412 et 320 px : rien ne sort ni n’est coupé · annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états ; un seul bloc de mesures ; sans annotations, 0 élément déplacé) · sans annotations : 0 pixel changé hors du magenta, au bureau comme sur Pixel 7 · images : toutes à la taille d’affichage, avec ou sans srcset, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px · clavier : 32 arrêts au bureau, 26 sur Pixel 7 et à 320 × 640, aucun caché, même en partie, par un élément collant (focus-colle.mjs, Tab et Maj+Tab, en continu et au bord) · html-validate : 0 erreur (chaque repère a un nom unique, cadres d’état compris) · radios : un nom de groupe par cadre · insécables : 0 à poser · poids après défilement complet : 223 ko au bureau, 223 ko au téléphone ; aucun script, aucune ressource tierce · textes sous 13 px, ceux des SVG mesurés à leur taille rendue (échelle du viewBox) : aucun, au bureau, sur Pixel 7 et de 320 à 1 440 px · listes en rangées mesurées sur Pixel 7 (<code>sizes-tel-ecrire.py</code>) : toutes à la largeur de la page, aucun sizes à réécrire.</p>
+</aside>
+</body>
+</html>
