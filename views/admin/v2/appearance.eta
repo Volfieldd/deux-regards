@@ -1,0 +1,139 @@
+<% layout('./layout') %>
+<% const t = it.t; const b = it.brand; const can = it.can || (() => true); %>
+<% /* Réglages › Identité et apparence (MQ-07, état 14 ; UX-A-25, UX-A-26) : l'identité du site (nom, sous-titre, marque), le
+      thème, les logos, puis la version du site public. Mêmes champs et mêmes routes que la v1 (POST /admin/apparence,
+      /admin/apparence/marque/:slot, /admin/apparence/apercu-v2).
+      - Sous-titre, marque et thème s'enregistrent au geste (champ quitté, choix fait), avec « Défaire » 10 s ; sans
+        script, « Enregistrer l'identité ».
+      - Un logo s'enregistre au choix du fichier ; dans un emplacement vide, « Défaire » le retire. Remplacer ou retirer un
+        logo efface l'ancien fichier : cela ne se défait pas, un dialogue le dit d'abord (Annuler d'abord).
+      - La version du site public (v1, v2, v3) change ce que voient tous les visiteurs : elle garde son bouton, et la vue de
+        la session ses boutons (server/version-publique.js, server/vue-site.js : logique et routes inchangées). */ %>
+<% const ic = (d, s = 14) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + d + '</svg>';
+   const ext = ic('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>', 12);
+   const noEmblem = !b.emblem && !b.icon; %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/reglages-v2.css') %>">
+<%~ include('./_reglages', { ...it, courant: 'appearance' }) %>
+<div class="rg">
+<nav class="sur-page" aria-label="<%= t('Sur cet onglet') %>"><%= t('Sur cet onglet :') %> <a href="#identite"><%= t('Identité') %></a><a href="#theme"><%= t('Thème') %></a><a href="#logos"><%= t('Logos') %></a><a href="#site-public"><%= t('Version du site public') %></a></nav>
+
+<form class="form rg-form" method="post" action="/admin/apparence" data-apparence novalidate>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <section class="panel" id="identite" aria-labelledby="identite-t">
+    <h2 id="identite-t"><%= t('Identité') %></h2>
+    <div class="champ-a"><span class="lb"><%= t('Nom du site') %></span>
+      <p class="rg-lu"><b><%= it.siteName %></b><% if (can('site.textes')) { %> · <a href="/admin/site#textes"><%= t('se règle dans Site public') %></a><% } else { %> · <%= t('se règle dans Site public') %><% } %></p></div>
+    <div class="champ-a"><label for="subtitle"><%= t('Sous-titre sous le nom') %> <span class="facultatif"><%= t('(facultatif)') %></span></label>
+      <p class="aide" id="subtitle-a"><%= t('Dans l’en-tête du site, sous le nom, quand la marque montre l’emblème ; par exemple « Photography gallery ». 60 signes au plus.') %></p>
+      <input type="text" id="subtitle" name="subtitle" value="<%= b.subtitle || '' %>" maxlength="60" aria-describedby="subtitle-a" data-rg-champ data-label="<%= t('Sous-titre') %>"></div>
+    <fieldset class="choix-a" id="marque" data-rg-choix data-label="<%= t('Marque') %>"><legend><%= t('Marque dans l’en-tête du site') %></legend>
+<% Object.entries(it.BRAND_MODES).forEach(([k, label]) => { const off = k === 'embleme' && noEmblem; %>
+      <label<%~ off ? ' class="inactif"' : '' %>><input type="radio" name="brand_mode" value="<%= k %>"<%~ b.mode === k ? ' checked' : '' %><%~ off ? ' disabled' : '' %> data-mot="<%= t(label) %>"><span><%= t(label) %></span><% if (k === 'embleme') { %><span class="sec" data-embleme-manque<%~ off ? '' : ' hidden' %>><%= t('Envoyez d’abord un emblème ou une icône (Logos, ci-dessous).') %></span><% } %></label>
+<% }) %>
+    </fieldset>
+  </section>
+
+  <section class="panel" id="theme" aria-labelledby="theme-t">
+    <h2 id="theme-t"><%= t('Thème du site public') %></h2>
+    <p class="hint"><%= t('Le thème change les couleurs et la typographie du site public ; l’admin garde son apparence. « Aperçu » ouvre le site avec un thème sans l’appliquer : vous seul le voyez, pendant une heure ou jusqu’à « Quitter l’aperçu ».') %></p>
+    <fieldset class="rg-themes" data-rg-choix data-label="<%= t('Thème') %>"><legend class="sr-only"><%= t('Thème du site public') %></legend>
+<% Object.entries(it.THEMES).forEach(([id, th]) => { %>
+      <div class="rg-theme">
+        <label><input type="radio" name="theme" value="<%= id %>"<%~ id === it.themeId ? ' checked' : '' %> data-mot="<%= t(th.label) %>" aria-describedby="th-<%= id %>-d"><span><b><%= t(th.label) %></b></span></label>
+        <span class="swatch swatch-<%= id %>" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="sec" id="th-<%= id %>-d"><%= t(th.description) %></span>
+        <a class="rg-apercu" href="/?theme=<%= id %>" target="_blank" rel="noopener"><%= t('Aperçu') %><span class="sr-only"> <%= t('du thème {name} (nouvel onglet)', { name: t(th.label) }) %></span><%~ ext %></a>
+      </div>
+<% }) %>
+    </fieldset>
+  </section>
+  <p class="sans-script form-pied"><button class="btn" type="submit"><%= t('Enregistrer l’identité et le thème') %></button></p>
+</form>
+
+<section class="panel" id="logos" aria-labelledby="logos-t">
+  <h2 id="logos-t"><%= t('Logos') %></h2>
+  <p class="hint"><%= t('PNG, WebP ou JPEG, 5 Mo au plus. Le fichier choisi s’enregistre tout de suite ; dans un emplacement vide, « Défaire » le retire pendant 10 secondes. Remplacer ou retirer un logo efface l’ancien fichier : un dialogue le demande d’abord.') %></p>
+  <div class="rg-marque">
+<% Object.entries(it.BRAND_SLOTS).forEach(([slot, def]) => { const file = b[def.field]; const label = t(def.label); %>
+    <div class="rg-slot" id="marque-<%= slot %>" data-slot="<%= slot %>" data-label="<%= label %>"<%~ file ? ' data-plein' : '' %>>
+      <h3 id="m-<%= slot %>"><%= label %></h3>
+      <p class="aide" id="m-<%= slot %>-a"><%= t(def.help) %></p>
+      <div class="rg-apercu-m<%= def.kind === 'share' ? ' partage' : '' %>" data-apercu>
+<% if (file) { %>        <img src="/brand/<%= file %>" alt="<%= t('{name} actuel', { name: label }) %>"><% if (def.kind !== 'share' && (def.field === 'icon' || (def.field === 'emblem' && !b.icon)) && b.favicon180) { %><img class="rg-favicon" src="/brand/<%= b.favicon180 %>" alt="<%= t('Icône d’onglet générée') %>" width="48" height="48"><% } %>
+<% } else { %>        <span class="vide"><%= t('Aucun fichier') %></span>
+<% } %>      </div>
+      <form class="rg-envoi" method="post" action="/admin/apparence/marque/<%= slot %>" enctype="multipart/form-data" data-logo>
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+        <div class="champ-a"><label for="f-<%= slot %>" data-plein-mot="<%= t('Remplacer le fichier') %>" data-vide-mot="<%= t('Choisir un fichier') %>"><%= file ? t('Remplacer le fichier') : t('Choisir un fichier') %><span class="sr-only"> : <%= label %></span></label>
+          <input type="file" id="f-<%= slot %>" name="fichier" accept="image/png,image/webp,image/jpeg" required aria-describedby="m-<%= slot %>-a"></div>
+        <p class="sans-script"><button class="btn ghost" type="submit"><%= t('Envoyer le fichier') %></button></p>
+      </form>
+      <p class="rg-retirer"<%~ file ? '' : ' hidden' %>><a class="btn ghost" href="#dlg-retirer-<%= slot %>" data-ouvre="dlg-retirer-<%= slot %>" id="ouvre-retirer-<%= slot %>"><%= t('Retirer…') %><span class="sr-only"> <%= label %></span></a></p>
+    </div>
+<% }) %>
+  </div>
+</section>
+
+<section class="panel" id="site-public" aria-labelledby="site-public-t">
+  <h2 id="site-public-t"><%= t('Site public : v1, v2 ou v3') %></h2>
+  <p class="hint"><%= t('La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion, qui gardent la présentation v1. L’administration ne change pas.') %></p>
+  <p class="hint"><%= t('La v3 reprend les pages de la v2 et leur accessibilité, avec un autre dessin : la photo en plein cadre à l’accueil, l’en-tête posé dessus, des titres plus grands, des boutons sans cadre. Une page sans v2 s’affiche en v1, en v3 comme en v2.') %></p>
+  <form class="form" method="post" action="/admin/apparence">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <fieldset class="choix-a">
+      <legend><%= t('Version vue par les visiteurs') %></legend>
+      <label><input type="radio" name="site_public" value="v1"<%~ it.publicVersion === 'v1' ? ' checked' : '' %>><span><b>v1</b> <%= t('la présentation d’origine') %></span></label>
+      <label><input type="radio" name="site_public" value="v2"<%~ it.publicVersion === 'v2' ? ' checked' : '' %>><span><b>v2</b> <%= t('la nouvelle présentation') %></span></label>
+      <label><input type="radio" name="site_public" value="v3"<%~ it.publicVersion === 'v3' ? ' checked' : '' %>><span><b>v3</b> <%= t('la v2 redessinée, photo en plein cadre') %></span></label>
+    </fieldset>
+    <p class="form-pied"><button class="btn" type="submit"><%= t('Enregistrer la version') %></button></p>
+  </form>
+<% const ORDRE = { v1: ['v2', 'v3'], v2: ['v1', 'v3'], v3: ['v2', 'v1'] }; const autres = ORDRE[it.publicVersion] || ['v2', 'v3'];
+   const forcee = it.vueSession && it.vueSession !== it.publicVersion;
+   const APPLIQUEE = { v1: 'La v1 est appliquée : tous les visiteurs la voient.', v2: 'La v2 est appliquée : tous les visiteurs la voient.', v3: 'La v3 est appliquée : tous les visiteurs la voient.' }; %>
+  <p class="rg-applique"><%= t(APPLIQUEE[it.publicVersion] || APPLIQUEE.v1) %></p>
+  <p class="hint"><%= t('Sur chaque page du site public, de petits boutons « Voir en v1 », « Voir en v2 » ou « Voir en v3 », visibles par vous seul, changent la version que vous voyez, sur cette session : pour comparer, ou voir une version avant de l’appliquer. Les visiteurs voient toujours la version choisie ici. Les Carnets et les galeries privées n’existent qu’en v2 et en v3.') %></p>
+<% if (forcee) { %>
+  <form class="rg-vue" method="post" action="/admin/apparence/apercu-v2">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <input type="hidden" name="vue" value="suivre">
+    <input type="hidden" name="vers" value="/admin/apparence">
+    <p><%= t('Votre vue : la {v}, pour vous seul, sur cette session.', { v: it.vueSession }) %></p>
+    <button class="btn ghost" type="submit"><%= t('Revenir à la version des visiteurs') %></button>
+  </form>
+<% } else { %>
+  <p><%= t('Votre vue suit ce réglage, comme les visiteurs.') %></p>
+  <div class="rg-vues">
+<% autres.forEach(autre => { %>
+  <form method="post" action="/admin/apparence/apercu-v2">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <input type="hidden" name="vue" value="<%= autre %>">
+    <input type="hidden" name="vers" value="/">
+    <button class="btn ghost" type="submit"><%= t('Voir le site en {v}', { v: autre }) %></button>
+  </form>
+<% }) %>
+  </div>
+<% } %>
+</section>
+</div>
+
+<% /* Ce qui ne se défait pas (MQ-09) : retirer un logo efface son fichier. Avec le script, un dialogue modal (Annuler
+      d'abord) ; sans script, le lien mène à l'ancre et le dialogue s'affiche dans la page (dialog:target). Remplacer un logo
+      passe par le dialogue « Remplacer », ouvert par le script au choix du fichier. */ %>
+<% Object.entries(it.BRAND_SLOTS).forEach(([slot, def]) => { const label = t(def.label); %>
+<dialog class="confirm cible" id="dlg-retirer-<%= slot %>" aria-labelledby="dr-<%= slot %>-t" aria-describedby="dr-<%= slot %>-d">
+  <form method="post" action="/admin/apparence/marque/<%= slot %>/delete">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="dr-<%= slot %>-t"><%= t('Retirer « {name} » ?', { name: label }) %></h2>
+    <p id="dr-<%= slot %>-d"><%= t('Le fichier est effacé du serveur : pour le remettre, il faudra l’envoyer de nouveau. Le site s’en passe tout de suite.') %></p>
+    <div class="actions"><a class="btn ghost" href="#marque-<%= slot %>" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%= t('Retirer le fichier') %></button></div>
+  </form>
+</dialog>
+<% }) %>
+<dialog class="confirm" id="dlg-remplacer" aria-labelledby="drp-t" aria-describedby="drp-d">
+  <h2 id="drp-t" data-remplacer-titre></h2>
+  <p id="drp-d"><%= t('Le fichier actuel est effacé et remplacé par celui-ci ; cela ne se défait pas.') %></p>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn" type="button" data-confirmer-ok><%= t('Remplacer le fichier') %></button></div>
+</dialog>
+<%~ include('./_textes-reglages', it) %>
+<script src="<%= it.asset('admin/v2/reglages-v2.js') %>" defer></script>

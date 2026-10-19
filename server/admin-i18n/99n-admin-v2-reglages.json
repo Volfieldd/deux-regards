@@ -1,0 +1,246 @@
+{
+ "Actif": {
+  "en": "Active",
+  "de": "Aktiv"
+ },
+ "En attente d’un rôle": {
+  "en": "Awaiting a role",
+  "de": "Wartet auf eine Rolle"
+ },
+ "Désactivé": {
+  "en": "Deactivated",
+  "de": "Deaktiviert"
+ },
+ "Comptes actifs": {
+  "en": "Active accounts",
+  "de": "Aktive Konten"
+ },
+ "Comptes désactivés": {
+  "en": "Deactivated accounts",
+  "de": "Deaktivierte Konten"
+ },
+ "{n} comptes": {
+  "en": "{n} accounts",
+  "de": "{n} Konten"
+ },
+ "{n} compte": {
+  "en": "{n} account",
+  "de": "{n} Konto"
+ },
+ "{n} en attente d’un rôle": {
+  "en": "{n} awaiting a role",
+  "de": "{n} warten auf eine Rolle"
+ },
+ "Ce que permet chaque rôle": {
+  "en": "What each role allows",
+  "de": "Was jede Rolle erlaubt"
+ },
+ "aucun rôle": {
+  "en": "no role",
+  "de": "keine Rolle"
+ },
+ "Photographe lié : {name}": {
+  "en": "Linked photographer: {name}",
+  "de": "Verknüpfter Fotograf: {name}"
+ },
+ "Aucun photographe lié": {
+  "en": "No linked photographer",
+  "de": "Kein Fotograf verknüpft"
+ },
+ "Donner un rôle": {
+  "en": "Give a role",
+  "de": "Eine Rolle vergeben"
+ },
+ "protégé par ADMIN_SUBS": {
+  "en": "protected by ADMIN_SUBS",
+  "de": "durch ADMIN_SUBS geschützt"
+ },
+ "Valeurs par défaut de l’import et de l’app de terrain ; un compte Photographe ne voit que ce qui est à ce photographe.": {
+  "en": "Defaults for imports and the field app; a Photographer account only sees what belongs to this photographer.",
+  "de": "Standardwerte für Import und Feld-App; ein Fotografen-Konto sieht nur, was zu dieser Person gehört."
+ },
+ "Sa session en cours est fermée aussitôt ; le compte et sa trace restent. Décochez pour le réactiver.": {
+  "en": "Their current session is closed at once; the account and its record remain. Untick to reactivate it.",
+  "de": "Die laufende Sitzung wird sofort beendet; das Konto und seine Spur bleiben. Zum Reaktivieren das Häkchen entfernen."
+ },
+ "Supprimer ce compte…": {
+  "en": "Delete this account…",
+  "de": "Dieses Konto löschen…"
+ },
+ "Pour supprimer ce compte, désactivez-le d’abord : il ne pourra plus se connecter, et sa trace reste.": {
+  "en": "To delete this account, deactivate it first: it can no longer sign in, and its record remains.",
+  "de": "Um dieses Konto zu löschen, deaktivieren Sie es zuerst: Es kann sich nicht mehr anmelden, und seine Spur bleibt."
+ },
+ "Supprimer le compte « {name} » ?": {
+  "en": "Delete the account “{name}”?",
+  "de": "Das Konto „{name}“ löschen?"
+ },
+ "Ses rôles, son photographe lié et ses réglages sont effacés ; s’il se reconnecte, il repart « en attente ». Cela ne se défait pas ; la trace reste au journal.": {
+  "en": "Its roles, linked photographer and settings are erased; if it signs in again, it starts over “pending”. This cannot be undone; the log keeps a record.",
+  "de": "Rollen, verknüpfter Fotograf und Einstellungen werden gelöscht; meldet es sich wieder an, beginnt es erneut als „wartend“. Das lässt sich nicht rückgängig machen; das Protokoll behält die Spur."
+ },
+ "Supprimer le compte": {
+  "en": "Delete the account",
+  "de": "Konto löschen"
+ },
+ "Identité": {
+  "en": "Identity",
+  "de": "Identität"
+ },
+ "Logos": {
+  "en": "Logos",
+  "de": "Logos"
+ },
+ "Version du site public": {
+  "en": "Public site version",
+  "de": "Version der öffentlichen Website"
+ },
+ "se règle dans Site public": {
+  "en": "set in Public site",
+  "de": "wird unter Öffentliche Website eingestellt"
+ },
+ "Dans l’en-tête du site, sous le nom, quand la marque montre l’emblème ; par exemple « Photography gallery ». 60 signes au plus.": {
+  "en": "In the site header, under the name, when the brand shows the emblem; for example “Photography gallery”. 60 characters at most.",
+  "de": "In der Kopfzeile der Website, unter dem Namen, wenn die Marke das Emblem zeigt; zum Beispiel „Photography gallery“. Höchstens 60 Zeichen."
+ },
+ "Sous-titre": {
+  "en": "Subtitle",
+  "de": "Untertitel"
+ },
+ "Marque dans l’en-tête du site": {
+  "en": "Brand in the site header",
+  "de": "Marke in der Kopfzeile der Website"
+ },
+ "Envoyez d’abord un emblème ou une icône (Logos, ci-dessous).": {
+  "en": "Upload an emblem or an icon first (Logos, below).",
+  "de": "Laden Sie zuerst ein Emblem oder ein Symbol hoch (Logos, unten)."
+ },
+ "Thème du site public": {
+  "en": "Public site theme",
+  "de": "Theme der öffentlichen Website"
+ },
+ "Enregistrer l’identité et le thème": {
+  "en": "Save identity and theme",
+  "de": "Identität und Theme speichern"
+ },
+ "PNG, WebP ou JPEG, 5 Mo au plus. Le fichier choisi s’enregistre tout de suite ; dans un emplacement vide, « Défaire » le retire pendant 10 secondes. Remplacer ou retirer un logo efface l’ancien fichier : un dialogue le demande d’abord.": {
+  "en": "PNG, WebP or JPEG, 5 MB at most. The chosen file is saved at once; in an empty slot, “Undo” removes it for 10 seconds. Replacing or removing a logo erases the old file: a dialog asks first.",
+  "de": "PNG, WebP oder JPEG, höchstens 5 MB. Die gewählte Datei wird sofort gespeichert; in einem leeren Platz entfernt „Rückgängig“ sie 10 Sekunden lang. Ein Logo zu ersetzen oder zu entfernen löscht die alte Datei: Ein Dialog fragt zuerst nach."
+ },
+ "Aucun fichier": {
+  "en": "No file",
+  "de": "Keine Datei"
+ },
+ "Remplacer le fichier": {
+  "en": "Replace the file",
+  "de": "Datei ersetzen"
+ },
+ "Choisir un fichier": {
+  "en": "Choose a file",
+  "de": "Datei wählen"
+ },
+ "Retirer…": {
+  "en": "Remove…",
+  "de": "Entfernen…"
+ },
+ "Retirer « {name} » ?": {
+  "en": "Remove “{name}”?",
+  "de": "„{name}“ entfernen?"
+ },
+ "Le fichier est effacé du serveur : pour le remettre, il faudra l’envoyer de nouveau. Le site s’en passe tout de suite.": {
+  "en": "The file is erased from the server: to put it back, you will have to upload it again. The site does without it at once.",
+  "de": "Die Datei wird vom Server gelöscht: Um sie zurückzubringen, müssen Sie sie erneut hochladen. Die Website verzichtet sofort darauf."
+ },
+ "Retirer le fichier": {
+  "en": "Remove the file",
+  "de": "Datei entfernen"
+ },
+ "Le fichier actuel est effacé et remplacé par celui-ci ; cela ne se défait pas.": {
+  "en": "The current file is erased and replaced by this one; this cannot be undone.",
+  "de": "Die aktuelle Datei wird gelöscht und durch diese ersetzt; das lässt sich nicht rückgängig machen."
+ },
+ "Ce que voient les visiteurs": {
+  "en": "What visitors see",
+  "de": "Was Besucher sehen"
+ },
+ "Les textes, l’ouverture de l’accueil, la carte du monde et la recherche. L’allure du site (thème, logos, sous-titre) se règle dans Réglages › Identité et apparence ; les thèmes des photos, dans Séries.": {
+  "en": "The texts, the opening slideshow, the world map and search. The look of the site (theme, logos, subtitle) is set in Settings › Identity and appearance; photo subjects, in Series.",
+  "de": "Die Texte, die Start-Diashow, die Weltkarte und die Suche. Das Aussehen der Website (Theme, Logos, Untertitel) wird unter Einstellungen › Identität und Erscheinungsbild eingestellt; die Themen der Fotos unter Serien."
+ },
+ "Sur cette page": {
+  "en": "On this page",
+  "de": "Auf dieser Seite"
+ },
+ "Sur cette page :": {
+  "en": "On this page:",
+  "de": "Auf dieser Seite:"
+ },
+ "Ouverture de l’accueil": {
+  "en": "Opening slideshow",
+  "de": "Start-Diashow"
+ },
+ "Dans l’en-tête, le titre des pages, les partages et le filigrane ({site}). Vide : « {name} ».": {
+  "en": "In the header, page titles, shares and the watermark ({site}). Empty: “{name}”.",
+  "de": "In der Kopfzeile, im Seitentitel, beim Teilen und im Wasserzeichen ({site}). Leer: „{name}“."
+ },
+ "Titre de la section « regards » de l’accueil, titre d’« À propos », description pour les moteurs de recherche.": {
+  "en": "Title of the home page “views” section, title of “About”, description for search engines.",
+  "de": "Titel des Abschnitts „Blicke“ auf der Startseite, Titel von „Über“, Beschreibung für Suchmaschinen."
+ },
+ "Sous l’accroche, à l’accueil.": {
+  "en": "Under the tagline, on the home page.",
+  "de": "Unter dem Slogan, auf der Startseite."
+ },
+ "La page « À propos » ; paragraphes séparés par une ligne vide.": {
+  "en": "The “About” page; paragraphs separated by an empty line.",
+  "de": "Die Seite „Über“; Absätze durch eine Leerzeile getrennt."
+ },
+ "← et → changent l’ordre, ✕ retire la photo ; chaque geste s’enregistre, avec « Défaire ».": {
+  "en": "← and → change the order, ✕ removes the photo; each gesture is saved, with “Undo”.",
+  "de": "← und → ändern die Reihenfolge, ✕ entfernt das Foto; jede Geste wird gespeichert, mit „Rückgängig“."
+ },
+ "Mots-clés sur la page de la photo": {
+  "en": "Keywords on the photo page",
+  "de": "Schlagwörter auf der Fotoseite"
+ },
+ "« {champ} » enregistré : {valeur}.": {
+  "en": "“{champ}” saved: {valeur}.",
+  "de": "„{champ}“ gespeichert: {valeur}."
+ },
+ "« {champ} » rétabli : {valeur}.": {
+  "en": "“{champ}” restored: {valeur}.",
+  "de": "„{champ}“ wiederhergestellt: {valeur}."
+ },
+ "Remplacer « {name} » ?": {
+  "en": "Replace “{name}”?",
+  "de": "„{name}“ ersetzen?"
+ },
+ "Compte « {name} » rétabli.": {
+  "en": "Account “{name}” restored.",
+  "de": "Konto „{name}“ wiederhergestellt."
+ },
+ "Ouverture : « {title} » ajoutée.": {
+  "en": "Slideshow: “{title}” added.",
+  "de": "Start-Diashow: „{title}“ hinzugefügt."
+ },
+ "Ouverture : « {title} » retirée.": {
+  "en": "Slideshow: “{title}” removed.",
+  "de": "Start-Diashow: „{title}“ entfernt."
+ },
+ "Ouverture : « {title} » en place {n}.": {
+  "en": "Slideshow: “{title}” now in position {n}.",
+  "de": "Start-Diashow: „{title}“ jetzt an Stelle {n}."
+ },
+ "Ouverture rétablie.": {
+  "en": "Slideshow restored.",
+  "de": "Start-Diashow wiederhergestellt."
+ },
+ "Traduction proposée, pas encore enregistrée : relisez-la, puis « Enregistrer la traduction ».": {
+  "en": "Suggested translation, not saved yet: read it over, then “Save the translation”.",
+  "de": "Vorgeschlagene Übersetzung, noch nicht gespeichert: Lesen Sie sie, dann „Übersetzung speichern“."
+ },
+ "Enregistrer la traduction": {
+  "en": "Save the translation",
+  "de": "Übersetzung speichern"
+ }
+}

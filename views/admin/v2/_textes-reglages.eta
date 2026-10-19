@@ -1,0 +1,16 @@
+<%
+  // Textes de reglages-v2.js (Identité et apparence, Comptes et rôles, Site public), traduits par le serveur : un bloc de
+  // données, jamais exécuté (CSP), réuni par admin-v2.js à ceux de views/admin/v2/_textes.eta. La clé est le texte français.
+  const t = it.t;
+  const tk = k => [k, t(k)];
+  const out = Object.fromEntries([
+    tk('« {champ} » enregistré : {valeur}.'), tk('« {champ} » rétabli : {valeur}.'), tk('Erreur :'),
+    tk('Remplacer « {name} » ?'), tk('{name} actuel'), tk('Aucun fichier'), tk('Remplacer le fichier'), tk('Choisir un fichier'),
+    tk('Compte « {name} » rétabli.'),
+    tk('Ouverture : « {title} » ajoutée.'), tk('Ouverture : « {title} » retirée.'), tk('Ouverture : « {title} » en place {n}.'), tk('Ouverture rétablie.'),
+    tk('{n} / {max} choisies'), tk('{n} / {max} choisie'), tk('Avancer « {title} »'), tk('Reculer « {title} »'), tk('Retirer « {title} » de l’ouverture'),
+    tk('Traduction en cours…'), tk('Rien à traduire : remplissez d’abord le texte français.'),
+    tk('Traduction proposée, pas encore enregistrée : relisez-la, puis « Enregistrer la traduction ».'), tk('Enregistrer la traduction'),
+  ]);
+%>
+<script type="application/json" id="v2-textes-page"><%~ JSON.stringify({ t: out }).replace(/</g, '\\u003c') %></script>

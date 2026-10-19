@@ -1,0 +1,111 @@
+<% layout('./layout') %>
+<% const t = it.t; %>
+<% /* Comptes et rôles (UX-A-25, UX-A-07 ; règle de MQ-09) : une carte résumée par compte (nom, état, rôles, photographe lié,
+      dernière connexion), « Modifier » qui déplie son formulaire. Mêmes champs, même route et mêmes garde-fous que la v1
+      (POST /admin/comptes/:id → app.accounts.update : ticket, account_changes, journal « compte modifié ») ; le bouton reste,
+      parce qu'un rôle ouvre un accès : on vérifie l'identifiant d'abord. Avec le script, l'envoi se fait sur place et
+      « Défaire » renvoie l'état d'avant par la même route pendant 10 s.
+      Supprimer ne se défait pas (UX-A-07) : réservé aux comptes désactivés ou en attente, et précédé d'un dialogue qui
+      nomme le compte et dit les conséquences (Annuler d'abord ; sans script, dialog:target). */ %>
+<% const STATUS = { actif: t('Actif'), en_attente: t('En attente d’un rôle'), desactive: t('Désactivé') };
+   const ETAT = { actif: 'abouti', en_attente: 'attention', desactive: 'arret' };
+   const SYM = {
+     abouti: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>',
+     attention: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>',
+     arret: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19"/></svg>',
+   };
+   const chev = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
+   const alerte = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>';
+   const when = ms => (ms ? new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(ms) : t('jamais'));
+   const ROLE_DESC = { admin: t('tout, y compris les comptes et le journal'), moderateur: t('valide et publie, signalements, remarques au photographe ; ne retouche pas, aucune donnée personnelle'), relecteur: t('relit et traduit les textes'), photographe: t('ses photos, ses sorties, ses personnes ; ne publie pas') };
+   const label = r => t((it.roles.find(x => x.key === r) || { label: r }).label);
+   const authorName = id => (it.authors.find(x => x.id === id) || {}).name;
+   const nameOf = a => a.name || a.sub;
+   const groups = [
+     ['attente', t('En attente d’un rôle'), it.accounts.filter(a => a.status === 'en_attente')],
+     ['actifs', t('Comptes actifs'), it.accounts.filter(a => a.status === 'actif')],
+     ['desactives', t('Comptes désactivés'), it.accounts.filter(a => a.status === 'desactive')],
+   ].filter(([, , list]) => list.length);
+   const deletable = a => a.sub !== it.me && !a.locked && a.status !== 'actif';
+   const pending = it.accounts.filter(a => a.status === 'en_attente').length; %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/reglages-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#reglages-comptes-et-rôles"><%= t('Aide sur cette page') %></a></p>
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Comptes et rôles') %></h1></div>
+  <p class="ep-meta"><span><%= it.accounts.length > 1 ? t('{n} comptes', { n: it.accounts.length }) : t('{n} compte', { n: it.accounts.length }) %></span><% if (pending) { %><span><%= t('{n} en attente d’un rôle', { n: pending }) %></span><% } %><span role="status" data-temoin></span></p>
+</header>
+<div class="rg">
+<p class="rub-intro"><%= t('Un compte est créé à la première connexion. Il reste « en attente » tant qu’aucun rôle ne lui est donné ; un rôle s’applique tout de suite, et le retirer aussi.') %> <%= t('Le photographe lié sert aux valeurs par défaut (import, app Terrain) et décide de ce que voit un compte Photographe : seulement ses photos, ses sorties et ses personnes.') %></p>
+<details class="panel plier rg-roles"><summary><%~ chev %><%= t('Ce que permet chaque rôle') %></summary>
+  <dl><% it.roles.forEach(r => { %><dt><%= t(r.label) %></dt><dd><%= ROLE_DESC[r.key] || '' %></dd><% }) %></dl>
+</details>
+<% if (it.guarded) { %><p class="hint"><%= t('Garde-fou ADMIN_SUBS : les comptes marqués « protégé » restent toujours administrateurs.') %></p><% } %>
+
+<% groups.forEach(([key, title, list]) => { %>
+<section class="rg-groupe" aria-labelledby="g-<%= key %>">
+<h2 class="rub-titre" id="g-<%= key %>"><%= title %> <span class="rg-n">(<%= list.length %>)</span></h2>
+<div class="rg-comptes">
+<% list.forEach(a => { const self = a.sub === it.me; const fresh = a.status === 'en_attente'; const e = ETAT[a.status]; %>
+  <article class="panel rg-compte" id="compte-<%= a.id %>" aria-labelledby="c-<%= a.id %>" data-compte="<%= a.id %>">
+    <div class="rg-resume" data-resume>
+      <span class="av" aria-hidden="true"><%= (a.name || '?').trim().charAt(0).toUpperCase() %></span>
+      <div class="rg-qui">
+        <h3 id="c-<%= a.id %>"><%= a.name || t('sans nom') %><% if (self) { %> <span class="enc-tag"><%= t('vous') %></span><% } %><% if (a.locked) { %> <span class="enc-tag ok"><%= t('protégé') %></span><% } %></h3>
+        <p><span class="etat etat--<%= e %>"><%~ SYM[e] %><%= STATUS[a.status] %></span> <span class="rg-roles-l"><%= a.roles.length ? a.roles.map(label).join(', ') : t('aucun rôle') %></span></p>
+        <p class="sec"><%= a.author_id ? t('Photographe lié : {name}', { name: authorName(a.author_id) || '—' }) : t('Aucun photographe lié') %> · <% if (a.email) { %><%= a.email %> · <% } %><%= t('dernière connexion : {date}', { date: when(a.last_login_at) }) %></p>
+<% if (a.roles.includes('photographe') && !a.author_id && !a.roles.includes('admin')) { %>        <p class="avert"><%~ alerte %><span><%= t('Photographe sans photographe lié : il ne voit rien tant qu’un photographe ne lui est pas relié.') %></span></p>
+<% } %>      </div>
+    </div>
+    <details class="plier modif"<%~ fresh ? ' open' : '' %>><summary><%~ chev %><%= fresh ? t('Donner un rôle') : t('Modifier') %><span class="sr-only"> : <%= nameOf(a) %></span></summary>
+      <form class="form" method="post" action="/admin/comptes/<%= a.id %>" data-compte-form data-nom="<%= nameOf(a) %>">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (fresh) { %>        <p class="avert"><%~ alerte %><span><%= t('Compte créé le {date}.', { date: when(a.created_at) }) %> <%= t('Nom et adresse viennent du fournisseur d’identité : avant de donner un rôle, vérifiez cet identifiant avec la personne (sa page « Compte en attente » l’affiche).') %></span></p>
+<% } %>        <p class="rg-sub"><span><%= t('Identifiant (sub)') %> :</span> <code class="sub-nolang"><%= a.sub %></code></p>
+        <fieldset class="choix-a"><legend><%= t('Rôles') %></legend>
+<% it.roles.forEach(r => { const on = a.roles.includes(r.key); const lock = a.locked && r.key === 'admin'; %>          <label<%~ lock ? ' class="inactif"' : '' %>><input type="checkbox" name="roles" value="<%= r.key %>"<%~ on ? ' checked' : '' %><%~ lock ? ' disabled' : '' %>><span><%= t(r.label) %></span><span class="sec"><%= ROLE_DESC[r.key] || '' %><%= lock ? ` · ${t('protégé par ADMIN_SUBS')}` : '' %></span></label>
+<% }) %>        </fieldset>
+        <div class="champ-a"><label for="au-<%= a.id %>"><%= t('Photographe lié') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="au-<%= a.id %>-a"><%= t('Valeurs par défaut de l’import et de l’app de terrain ; un compte Photographe ne voit que ce qui est à ce photographe.') %></p>
+          <select id="au-<%= a.id %>" name="author_id" aria-describedby="au-<%= a.id %>-a"><option value=""><%= t('aucun') %></option><% it.authors.forEach(au => { %><option value="<%= au.id %>"<%~ au.id === a.author_id ? ' selected' : '' %>><%= au.name %></option><% }) %></select></div>
+<% if (!self && !a.locked) { %>        <div class="choix-a"><label><input type="checkbox" name="status" value="desactive"<%~ a.status === 'desactive' ? ' checked' : '' %>><span><%= t('Désactivé (ne peut plus se connecter)') %></span><span class="sec"><%= t('Sa session en cours est fermée aussitôt ; le compte et sa trace restent. Décochez pour le réactiver.') %></span></label></div>
+<% } %>        <p class="err" role="alert" data-compte-err hidden></p>
+        <p class="form-pied"><button class="btn" type="submit"><%= fresh ? t('Donner ce rôle') : t('Enregistrer « {name} »', { name: nameOf(a) }) %></button></p>
+      </form>
+<% if (deletable(a)) { %>      <p class="rg-suppr"><a class="btn danger-c" href="#dlg-suppr-<%= a.id %>" data-ouvre="dlg-suppr-<%= a.id %>" id="ouvre-suppr-<%= a.id %>"><%= t('Supprimer ce compte…') %><span class="sr-only"> <%= nameOf(a) %></span></a></p>
+<% } else if (!self && !a.locked) { %>      <p class="hint"><%= t('Pour supprimer ce compte, désactivez-le d’abord : il ne pourra plus se connecter, et sa trace reste.') %></p>
+<% } %>    </details>
+  </article>
+<% }) %>
+</div>
+</section>
+<% }) %>
+<p class="hint"><%= t('Un compte supprimé qui se reconnecte revient « en attente », sans rôle, même avec le rôle « admin » de Zitadel. Pour couper l’accès en gardant la trace du compte, cochez plutôt « Désactivé ».') %></p>
+<p class="hint"><%= t('Qui a fait quoi :') %> <a class="more" href="/admin/journal"><%= t('Journal') %></a></p>
+
+<section class="panel" id="email" aria-labelledby="email-title">
+  <h2 id="email-title"><%= t('E-mails') %> <% if (it.mail.enabled) { %><span class="enc-tag ok"><%= t('configurés') %></span><% } else { %><span class="enc-tag no"><%= t('non configurés') %></span><% } %></h2>
+<% if (it.mail.enabled) { %>
+  <p><%= t('Le serveur envoie les e-mails de l’admin (propositions, décisions, remarques, récapitulatifs, demandes RGPD et leurs relances) depuis {from}.', { from: it.mail.from || t('l’adresse de SMTP_URL') }) %></p>
+  <form method="post" action="/admin/comptes/test-email" class="form rg-test">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <div class="champ-a"><label for="test-adresse"><%= t('Envoyer un e-mail de test à') %></label><input type="email" id="test-adresse" name="adresse" value="<%= it.mail.mine %>" maxlength="200" required autocomplete="email"></div>
+    <p class="form-pied"><button class="btn ghost" type="submit"><%= t('Envoyer le test') %></button></p>
+  </form>
+<% } else { %>
+  <p><%= t('Renseignez SMTP_URL et MAIL_FROM dans la configuration du serveur : sans eux, seul « Aujourd’hui » prévient, et les relances RGPD ne partent pas.') %></p>
+<% } %>
+  <p class="hint"><%= t('Demandes RGPD : e-mail au photographe concerné dès l’arrivée, rappel au quart du délai d’un mois, puis à la moitié avec l’administrateur en copie, et un dernier e-mail prioritaire aux trois quarts. Sans photographe joignable, l’administrateur les reçoit directement.') %></p>
+</section>
+</div>
+
+<% it.accounts.filter(deletable).forEach(a => { %>
+<dialog class="confirm cible" id="dlg-suppr-<%= a.id %>" aria-labelledby="ds-<%= a.id %>-t" aria-describedby="ds-<%= a.id %>-d">
+  <form method="post" action="/admin/comptes/<%= a.id %>/supprimer">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="ds-<%= a.id %>-t"><%= t('Supprimer le compte « {name} » ?', { name: nameOf(a) }) %></h2>
+    <p id="ds-<%= a.id %>-d"><%= t('Ses rôles, son photographe lié et ses réglages sont effacés ; s’il se reconnecte, il repart « en attente ». Cela ne se défait pas ; la trace reste au journal.') %></p>
+    <div class="actions"><a class="btn ghost" href="#compte-<%= a.id %>" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%= t('Supprimer le compte') %></button></div>
+  </form>
+</dialog>
+<% }) %>
+<%~ include('./_textes-reglages', it) %>
+<script src="<%= it.asset('admin/v2/reglages-v2.js') %>" defer></script>
