@@ -1,0 +1,36 @@
+<% /* v3 · choisir un regard, par l'image (docs/maquettes-v3, MQ-01 repère 7 ; css/v3/v3.css § 7) : trois cartes, « Les
+      deux » puis chaque photographe, chacune avec deux de ses photos horizontales dans l'ordre choisi (« Les deux » : la
+      première de chacun). Toute la carte est le lien (son nom l'est, étendu). Mêmes adresses que la liste de la v2. Faute
+      de deux photographes ayant chacun trois horizontales publiées, la liste à filets de la v2. */ %>
+<% const t = it.t, v = it.v2, ic = v.ic, authors = it.regards.slice(1).filter(r => r.count);
+   const hz = slug => it.photos.filter(p => p.author_slug === slug && v.fmt(p).r >= 1.2);
+   const lists = authors.map(r => hz(r.slug));
+   const cartes = authors.length === 2 && lists.every(l => l.length >= 3);
+   const sizes = '(min-width: 1280px) calc(33.3vw - 69px), (min-width: 1024px) calc(33.3vw - 59px), (min-width: 768px) calc(50vw - 56px), calc(50vw - 40px)';
+   const img = p => it.picture(p, { sizes, alt: '' }); %>
+  <section class="wrap partie" id="regards" aria-labelledby="acc-regards-t">
+    <div class="partie-tete"><div><h2 class="titre-2" id="acc-regards-t"><%= t.v2.regards(authors.length) %></h2>
+<% if (it.intro) { %>      <p><%= it.intro %></p>
+<% } %>    </div></div>
+<% if (cartes) { %>
+    <ul class="regards">
+      <li class="regard">
+        <div class="regard-img regard-img--deux"><%~ img(lists[0][0]) %><%~ img(lists[1][0]) %></div>
+        <h3 class="regard-n"><a href="<%= it.u('/') %>#galerie"><%= it.regards[0].name %></a></h3>
+        <p class="regard-d"><%= t.v2.bothDesc(it.total) %></p>
+      </li>
+<% authors.forEach((r, k) => { %>
+      <li class="regard">
+        <div class="regard-img"><%~ img(lists[k][1]) %><%~ img(lists[k][2]) %></div>
+        <h3 class="regard-n"><a href="<%= it.galleryUrl({ regard: r.slug }) %>#filtres"><%= r.name %></a></h3>
+        <p class="regard-d"><%= t.photos(r.count) %><% if (r.short_bio) { %>&nbsp;· <%= v.typo(r.short_bio) %><% } %></p>
+      </li>
+<% }) %>
+    </ul>
+<% } else { %>
+    <ul class="liste-liens" aria-label="<%= t.v2.seeGallery %>">
+      <li><a href="<%= it.u('/') %>#galerie"><span class="liste-liens-n"><%= it.regards[0].name %></span><span class="liste-liens-d"><%= t.v2.bothDesc(it.total) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+<% authors.forEach(r => { %>      <li><a href="<%= it.galleryUrl({ regard: r.slug }) %>#filtres"><span class="liste-liens-n"><%= r.name %></span><span class="liste-liens-d"><%= t.photos(r.count) %><% if (r.short_bio) { %>&nbsp;· <%= v.typo(r.short_bio) %><% } %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+<% }) %>    </ul>
+<% } %>
+  </section>

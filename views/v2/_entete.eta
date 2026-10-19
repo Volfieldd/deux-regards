@@ -1,8 +1,9 @@
 <% /* En-tête « Site » (MQ-00 § 1, accueil, galerie, séries) : la marque, le menu (une ligne dès 1 280 px, deux de 768 à
       1 279 px), Rechercher, la langue ; au téléphone, la marque, la langue et Menu. Ni Tirages ni panier : la boutique
-      n'est pas de ce lot. it.courant : l'entrée active du menu (« recherche » : l'outil Rechercher). */ %>
+      n'est pas de ce lot. it.courant : l'entrée active du menu (« recherche » : l'outil Rechercher) ; it.surPhoto : en v3, posé sur la photo de
+      l'accueil (css/v3/v3.css § 2). */ %>
 <% const t = it.t, ic = it.v2.ic; %>
-<header class="sh sh--site">
+<header class="sh sh--site<%= it.surPhoto ? ' sh--sur-photo' : '' %>">
   <div class="sh-bar">
     <a class="sh-marque" href="<%= it.u('/') %>" aria-label="<%= t.v2.homeOf(it.siteName) %>"><%= it.siteName %></a>
     <nav class="sh-nav" aria-label="<%= t.nav.label %>">

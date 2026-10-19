@@ -149,7 +149,7 @@ test('repli : une page sans gabarit v2 reste en v1 (aperçu comme réglage v2) ;
 test('réglage v2 : tout le monde voit la v2 (sans no-store ni bouton) ; noté au journal ; valeur inconnue ignorée', async t => {
   const c = await site(t);
   const a = c.as('admin');
-  assert.equal((await a.post('/admin/apparence', { site_public: 'v3' })).statusCode, 303);
+  assert.equal((await a.post('/admin/apparence', { site_public: 'v4' })).statusCode, 303);
   assert.equal(c.app.publicVersion.setting(), 'v1');
   assert.equal((await a.post('/admin/apparence', { site_public: 'v2' })).statusCode, 303);
   assert.equal(c.app.publicVersion.setting(), 'v2');

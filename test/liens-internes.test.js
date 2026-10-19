@@ -7,7 +7,7 @@ import { billet } from './carnet-helpers.js';
 
 // Aucun lien interne vers une page introuvable (registre docs/etudes/vigie-besoins-des-briques.md, BV-5) : la Vigie
 // compte les 404 par adresse (malicious_excess_404, score d'adresse DS22) ; un lien cassé du site en ferait compter à des
-// visiteurs ordinaires. Depuis l'accueil, en français, en anglais et en allemand, en v1 puis en v2 (réglage
+// visiteurs ordinaires. Depuis l'accueil, en français, en anglais et en allemand, en v1, en v2 puis en v3 (réglage
 // public_version), on suit chaque lien interne des pages (href, src, srcset, action des formulaires GET, adresses
 // absolues du site : canonique, hreflang, og:image ; url() des feuilles de style), et aucune réponse n'est une 404 ni
 // une erreur. Le lien piège de la Vigie (it.trapLink, TRAP_PATH) n'est jamais suivi : il doit rester une 404.
@@ -131,7 +131,7 @@ async function world(t, version) {
   return c;
 }
 
-for (const version of ['v1', 'v2']) {
+for (const version of ['v1', 'v2', 'v3']) {
   test(`${version} : aucun lien interne vers une 404 ni une erreur (fr, en, de, depuis l'accueil)`, async t => {
     const c = await world(t, version);
     const origin = new URL(c.config.publicUrl).origin;
@@ -145,17 +145,18 @@ for (const version of ['v1', 'v2']) {
     }
     assert.ok([...r.seen.keys()].some(u => u.startsWith('/media/')), 'images suivies');
     assert.ok([...r.seen.keys()].some(u => u.startsWith('/voyage/')), 'voyage suivi');
-    // Les Carnets : parcourus en v2 (liste, filtres, billets, traduction, visionneuse ?carnet=, flux), jamais en v1.
+    // Les Carnets : parcourus en v2 et en v3 (liste, filtres, billets, traduction, visionneuse ?carnet=, flux), jamais en v1.
     const carnet = [...r.seen.keys()].filter(u => /^(?:\/en|\/de)?\/carnet|[?&]carnet=/.test(u));
-    if (version === 'v2') {
+    if (version !== 'v1') {
       for (const u of ['/carnet', '/en/carnet', '/de/carnet', '/carnet/lisbonne-et-porto', '/en/carnet/lisbonne-et-porto', '/carnet/notes-d-atelier', '/carnet?rubrique=atelier', '/carnet?par=julien', '/carnet/flux.xml', '/carnet/lisbonne-et-porto/partager'])
         assert.ok(r.seen.has(u), `${u} parcourue`);
       assert.ok(carnet.some(u => u.startsWith('/photo/') && u.includes('?carnet=lisbonne-et-porto')), 'visionneuse dans le contexte du billet');
       assert.ok(!carnet.some(u => /billet-retire|\/carnet\/brouillon/.test(u)), 'aucun lien vers un billet retiré ou un brouillon');
     } else assert.deepEqual(carnet, [], 'v1 : aucun lien vers les Carnets');
     assert.ok(r.pages > 50, `${r.pages} pages lues`);
-    // Bien la version demandée (feuilles de style de la v2 seulement en v2).
-    assert.equal([...r.seen.keys()].some(u => u.startsWith('/static/css/v2/')), version === 'v2');
+    // Bien la version demandée (feuilles de style de la v2 en v2 et en v3, celle de la v3 en v3 seulement).
+    assert.equal([...r.seen.keys()].some(u => u.startsWith('/static/css/v2/')), version !== 'v1');
+    assert.equal([...r.seen.keys()].some(u => u.startsWith('/static/css/v3/')), version === 'v3');
     // Le lien piège (avec la Vigie) n'a jamais été suivi, et reste introuvable.
     if (c.app.securite.enabled) assert.ok(r.trapSeen.length > 0, 'lien piège vu dans les pages');
     assert.ok(![...r.seen.keys()].some(u => u.startsWith(TRAP_PATH)));

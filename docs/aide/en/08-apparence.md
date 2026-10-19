@@ -1,23 +1,25 @@
 # Appearance
 
-The appearance of the **public site**: version (v1 or v2), theme, logo and icon. The admin always keeps its own.
+The appearance of the **public site**: version (v1, v2 or v3), theme, logo and icon. The admin always keeps its own.
 
 ## Public site: v1 or v2
 
 At the top of the page. **v2** is the new design of the public site, from the usability audit of October 2026. It covers every public page (see [The site as visitors see it](site-public)) except the error and sign-in pages, which keep the v1 design. The administration does not change.
 
-**v1 is kept**, for good: it remains a way back at any time, and receives security and accessibility fixes. New features (Notebooks, private galleries) only exist in v2.
+**v1 is kept**, for good: it remains a way back at any time, and receives security and accessibility fixes. New features (Notebooks, private galleries) only exist in v2 and v3.
 
-1. **Switch from one version to the other, for you only:** at the top of every page of the public site, a small **View in v2** (or **View in v1**) button changes the version you see; one click, and the same page shows in the other version.
+**v3** keeps the pages of v2 and their accessibility rules, with a different design: on the home page, the photo full-bleed (edge to edge, cropped by 10 % at most; on a computer, the header and the photo's title are laid over it, on a phone the title comes below), the photographers shown by their photos, larger headings, photo data in a monospaced type, buttons without frames. A page without a v2 is shown in v1, in v3 as in v2. No shop: neither “Prints” nor a buy button.
+
+1. **Switch from one version to the other, for you only:** at the top of every page of the public site, two small buttons, **View in v1**, **View in v2** or **View in v3** (the two versions you are not seeing), change the version you see; one click, and the same page shows in the other version.
    - Next to it, a sentence reminds you what visitors see: “You see v1, like visitors” or “Only you see v2; visitors see v1”.
    - **Only you** see this button and this view, in this session (this device, this browser), until another click, sign-out or the end of the session. It needs the appearance permission.
    - Visitors always see the version chosen here, whatever they send (cookie, address): your view is kept on the server, never in the browser.
    - While you are signed in, your pages are kept in no cache (Cloudflare included): a visitor cannot receive the page you see, nor the button.
    - In the v1 view, the Notebooks cannot be found, as for a visitor in v1: on a Notebooks page, the button says **View the home page in v1** and opens the home page.
    - The button does not appear on the guest pages of private galleries.
-   - From this section, **View the site in v2** (or **in v1**) does the same and opens the home page; **Back to the visitors’ version** forgets your view.
+   - From this section, **View the site in v2** (or **in v1**, **in v3**) does the same and opens the home page; **Back to the visitors’ version** forgets your view.
 2. **Before applying v2 to everyone:** follow the [switch-over checklist](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (tries on iPad, computer and phone, recent backup, what to watch during the first week; in French).
-3. **Apply it to everyone:** tick **v2**, then **Save the version**. Going back to v1 works the same way, at any time.
+3. **Apply it to everyone:** tick **v2** (or **v3**), then **Save the version**. Going back to v1 works the same way, at any time.
 
 Every click on the button, and every change of version, is recorded in the [Log](reglages#journal).
 

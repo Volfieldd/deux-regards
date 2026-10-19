@@ -1,4 +1,5 @@
 import { RUBRIQUES, RUBRIQUE_NAMES, LANGS } from '../carnet.js';
+import { usesV2 } from '../version-publique.js';
 import { createCarnetViews, isoParis, parisDayOf } from '../carnet-vues.js';
 import { UI, PREFIX, localize } from '../i18n.js';
 import { variantName, widthsFor } from '../images.js';
@@ -11,7 +12,7 @@ import { typo } from '../v2-vues.js';
 
 // Carnets, côté public (étude § 1.7 et § 1.8 ; maquettes MQ-11 et MQ-12) : la liste (/carnet, ?rubrique=, ?par=, ?page=),
 // un billet (/carnet/<slug> ; ancienne adresse : 301 ; retiré : 410), sa page « Partager » et le flux (/carnet/flux.xml).
-// En v2 seulement : avec la v1 (réglage public_version) et hors aperçu des administrateurs, ces adresses répondent 404 et
+// En v2 et en v3 seulement : avec la v1 (réglage public_version) et hors aperçu des administrateurs, ces adresses répondent 404 et
 // aucun lien n'y mène. Enregistré dans le plugin pages (trois langues), sauf le flux, hors des pages (B58 : un lecteur de
 // flux qui envoie Accept-Language: de ne doit pas être redirigé).
 const PAGE_SIZE = 12;
@@ -20,8 +21,8 @@ const xml = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 // JSON-LD inséré par <%~ %> (B68) : « < » échappé, un </script> du contenu ne ferme jamais le bloc.
 const jsonLd = obj => JSON.stringify(obj).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 
-// Les Carnets sont-ils ouverts pour cette requête ? v2 appliquée, ou aperçu d'un administrateur.
-export const carnetOpen = (app, request) => app.publicVersion.forRequest(request).version === 'v2';
+// Les Carnets sont-ils ouverts pour cette requête ? v2 ou v3 appliquée, ou aperçu d'un administrateur.
+export const carnetOpen = (app, request) => usesV2(app.publicVersion.forRequest(request).version);
 
 export function registerCarnetPages(app, { lang, repo, base, ignored, gate, shareLimit }) {
   const c = app.carnet;
@@ -280,10 +281,10 @@ ${entries}
   }
 }
 
-// Plan du site (B69) : /carnet et chaque billet publié, seulement en v2 appliquée (en v1, ces pages n'existent pas), lastmod
+// Plan du site (B69) : /carnet et chaque billet publié, seulement en v2 ou v3 appliquée (en v1, ces pages n'existent pas), lastmod
 // = mise à jour signalée ou publication, langues publiées seulement.
 export function carnetSitemap(app) {
-  if (app.publicVersion.setting() !== 'v2') return [];
+  if (!usesV2(app.publicVersion.setting())) return [];
   const posts = app.carnet.published();
   if (!posts.length) return [];
   const day = ms => new Date(ms).toISOString().slice(0, 10);

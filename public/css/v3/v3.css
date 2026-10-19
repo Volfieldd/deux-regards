@@ -1,0 +1,185 @@
+/* =====================================================================================================
+   Site public v3 (19 oct. 2026) : la v2 redessinée, d'après les maquettes de docs/maquettes-v3/ (_commun/v3.css, dont ce
+   fichier est la copie adaptée aux gabarits). Chargé en dernier par views/v2/layout.eta quand la version servie est la v3
+   (server/version-publique.js, it.v3) : les pages, leurs noms et leurs règles d'accessibilité restent ceux de la v2 ;
+   ce fichier change leur dessin. L'accueil a deux morceaux à lui, views/v3/_ouverture.eta et views/v3/_regards.eta.
+   Ni bouton d'achat ni « Tirages » : la boutique n'est pas de ce lot.
+   Ce que la v3 reproche à la v2 : la photo tenue dans une boîte, une typographie sans relief (tout entre 13 et 16 px),
+   chaque règle d'accessibilité dessinée (cadres d'un pixel autour des boutons, gros points, filets partout), aucune chaleur.
+   Ce qu'elle garde : contrastes, cibles de 44 px, focus visible, rien sans geste, rien sans script, les mêmes mots.
+   Sommaire :  1 échelle et voix · 2 en-tête · 3 boutons sans cadre · 4 rythme des pages · 5 cartel et vignettes
+               6 ouverture plein cadre · 7 deux regards · 8 visionneuse · 9 pied de page
+   ===================================================================================================== */
+
+/* ---------- 1. Échelle et voix ----------
+   Plus d'écart entre les titres et le texte : le titre de page monte à 64 px, celui d'une partie à 44 px ; le texte ne bouge
+   pas (16 et 18 px). Les métadonnées reprennent la voix de la v1, Plex Mono, mais en casse normale et à 13 px (la v1 les
+   écrivait en capitales de 11 px : UX-F-29). Les étiquettes courtes passent en sable, la couleur de la maison. */
+:root {
+  --t-titre-2: clamp(28px, 1.8vw + 18px, 44px);
+  --t-titre-1: clamp(36px, 3vw + 22px, 64px);
+  --t-affiche: clamp(40px, 4vw + 22px, 80px);
+}
+.etiquette { color: var(--safelight); }
+.cartel-m, .billet-e-meta, .vis-compte, .vis-pos { font-family: var(--mono); font-size: var(--t-meta); letter-spacing: 0; }
+.billet-e-meta b { font-family: var(--sans); }
+/* Une phrase reste en Jost, même en méta : la légende d'un diptyque (« Deux regards sur Lisbonne, … »). */
+.diptyque-t .cartel-m { font-family: var(--sans); }
+.titre-page { letter-spacing: -.012em; }
+.titre-2 { letter-spacing: -.008em; }
+
+/* ---------- 2. En-tête : sans filet, le menu en bouton nu ----------
+   Le filet du bas disparaît : l'en-tête se pose sur le fond, comme la marque sur un tirage. « Menu » perd son cadre ;
+   l'icône et le mot suffisent (WCAG 1.4.11 ne demande pas de bord à un bouton qui a un libellé). */
+.sh { border-bottom-color: transparent; }
+.sh-menu > summary { border-color: transparent; padding-inline: var(--esp-1); }
+.sh-menu > summary:hover { border-color: transparent; }
+.sh-menu > summary:hover .sh-menu-t { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+
+/* En-tête posé sur la photo d'ouverture (accueil, au bureau) : les couleurs du noir, quel que soit le thème, sur une bande
+   dont l'opacité est fixée en pixels (UX-F-01) : 82 % en haut, 64 % au bas de l'en-tête (une ou deux lignes), puis un
+   fondu de 72 px. 64 % de noir sur la photo la plus claire (un blanc pur) laisse #5c5c5c au pire : le menu y garde 5,8:1.
+   En position absolue sans « top » : il reste à sa place (sous la barre « Voir en v1 / v2 » d'un administrateur), mais ne
+   prend plus de hauteur, et la photo monte dessous. Au téléphone, il reste dans le flux. */
+@media (min-width: 768px) {
+  .sh--sur-photo { position: absolute; left: 0; right: 0; z-index: 20; border-bottom: 0;
+    --paper: var(--dark); --ink: var(--dark-ink); --mute: var(--dark-mute); --rule: #2c2c2b; --field: #6e6c67; --safelight: #cbb68b;
+    background: linear-gradient(to bottom, rgba(5, 5, 5, .82), rgba(5, 5, 5, .64)); color: var(--ink); color-scheme: dark; }
+  .sh--sur-photo::after { content: ''; position: absolute; inset: 100% 0 auto 0; height: 72px; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(5, 5, 5, .64), rgba(5, 5, 5, 0)); }
+  .sh--sur-photo .sh-panneau, .sh--sur-photo .lang-pick ul { background: var(--dark); }
+}
+
+/* ---------- 3. Boutons sans cadre ----------
+   Les bascules (J'aime, Lire, Favori) et les liens d'action ne portent plus de cadre : une icône et un verbe, 44 px de haut.
+   L'état se lit à l'icône pleine (la forme change, pas seulement la couleur) et à aria-pressed ; le cœur plein est sable.
+   Le bouton plein (.btn) et le bouton à filet (.btn--filet) ne changent pas : ce sont les actions d'un formulaire. */
+.bascule { border-color: transparent; padding-inline: var(--esp-1); }
+.bascule:hover { border-color: transparent; }
+.bascule:hover > :not(.ic):not(.sr-only) { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.bascule[aria-pressed="true"] { background: transparent; color: var(--ink); border-color: transparent; }
+.bascule[aria-pressed="true"] .ic-plein { color: var(--safelight); }
+.actif { border-color: var(--rule); }
+
+/* ---------- 4. Rythme des pages ----------
+   Plus d'air entre les parties (128 px au bureau), et un filet seulement au-dessus du titre d'une partie : le filet
+   annonce, il ne range pas. */
+@media (min-width: 1024px) { .partie { padding-top: var(--esp-16); } }
+.partie > .partie-tete { margin-bottom: var(--esp-4); padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.tete-page { padding-block: var(--esp-8) var(--esp-6); }
+.tete-page .chapo { font-size: 19px; }
+@media (max-width: 767px) { .tete-page { padding-block: var(--esp-5) var(--esp-4); } }
+
+/* ---------- 5. Cartel et vignettes ----------
+   Plus d'air sous les photos et entre les rangées : la vignette respire. Au survol, la photo s'éclaire un peu. */
+.cartel { padding-top: 12px; gap: var(--esp-demi); }
+.cartel--grand { padding-top: var(--esp-3); }
+.cartel--grand .cartel-t { font: 300 clamp(26px, 1.2vw + 16px, 34px)/1.15 var(--sans); }
+.rangees { row-gap: var(--esp-4); }
+@media (min-width: 768px) { .rangees { column-gap: var(--esp-3); row-gap: var(--esp-6); } }
+.vignette img, .billet-e-img img { transition: filter .2s; }
+.vignette:hover img { filter: brightness(1.08); }
+@media (prefers-reduced-motion: reduce) { .vignette img, .billet-e-img img { transition: none; } }
+.liste-liens-n { font-weight: 300; font-size: 24px; }
+
+/* ---------- 6. Ouverture plein cadre (views/v3/_ouverture.eta) ----------
+   La photo d'abord, bord à bord, à la hauteur de l'écran ; l'en-tête posé dessus (au bureau). Décidé le 19 oct. 2026, et
+   contraire à la lettre d'UX-F-17 (« sans recadrage ni voile ») : l'image perd au plus 10 % d'un côté, jamais plus, et le
+   voile ne couvre que la bande du texte.
+   Le cadre prend le format le plus large de la liste d'ouverture (--r, posé par le gabarit), à 10 % près :
+   largeur = min(écran, hauteur d'écran × r ÷ 0,9) ; hauteur = min(hauteur d'écran, largeur d'écran ÷ (r × 0,9)).
+   1 440 × 900 et une liste d'horizontales 3:2 : cadre de 1 440 × 900, 96 % de la hauteur gardée ; 1 920 × 1 080 : 1 800 × 1 080,
+   et le noir de part et d'autre. Une photo de ce format à 10 % près remplit le cadre (.plein-pic, recadrée au centre) ;
+   une photo d'un autre format y est entière, sur le noir (.plein-pic--entiere) : jamais plus de 10 % de perdu.
+   Le voile du bas monte jusqu'au haut du texte (--plein-texte : 216 px) à 70 % au moins, puis s'efface en 120 px : au pire,
+   sur un blanc pur, le titre garde 7,4:1 et la méta (#d9d6cf) 5,9:1. Au-dessus, la photo est intacte.
+   Au téléphone (sous 768 px), rien n'est posé sur la photo : elle prend la largeur, au format du cadre, et le cartel et les
+   commandes viennent dessous, sur le noir ; l'en-tête reste à sa place. */
+.plein-zone { background: var(--dark); color-scheme: dark; }
+.plein { --r: 1.5; --plein-texte: 216px; position: relative; margin: 0 auto; overflow: hidden; background: var(--dark);
+  width: min(100%, calc(100svh * var(--r) / .9)); height: min(100svh, calc(100vw / (var(--r) * .9)));
+  color-scheme: dark; --paper: var(--dark); --ink: var(--dark-ink); --mute: var(--dark-mute); --rule: #2c2c2b; --field: #6e6c67;
+  --safelight: #cbb68b; color: var(--ink); }
+.plein-cadre, .plein-cadre picture { display: block; width: 100%; height: 100%; }
+.plein-cadre img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.plein-pic--entiere img { object-fit: contain; }
+.plein::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top, rgba(5, 5, 5, .9) 0, rgba(5, 5, 5, .7) var(--plein-texte), rgba(5, 5, 5, 0) calc(var(--plein-texte) + 120px)); }
+.plein-bas { position: absolute; inset: auto 0 0 0; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--esp-3); align-items: end;
+  padding: 0 max(var(--gut), env(safe-area-inset-right)) var(--esp-6) max(var(--gut), env(safe-area-inset-left)); }
+@media (max-width: 767px) {
+  .plein { width: 100%; height: auto; }
+  .plein-cadre { height: auto; aspect-ratio: var(--r); }
+  .plein::after { content: none; }
+  .plein-bas { position: static; grid-template-columns: minmax(0, 1fr); padding-top: var(--esp-3); padding-bottom: var(--esp-3); }
+}
+.plein-cartel { margin: 0; padding: 0; min-width: 0; }
+.plein-cartel a { display: grid; gap: var(--esp-1); color: var(--ink); }
+.plein-cartel .cartel-t { font: 300 clamp(30px, 2.8vw + 14px, 60px)/1.06 var(--sans); letter-spacing: -.012em; text-wrap: balance; color: var(--ink); }
+.plein-cartel .cartel-m { font-size: var(--t-meta); color: #d9d6cf; }
+.plein-cartel a:hover .cartel-t { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1px; }
+.plein-voir { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--safelight); }
+.plein-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-2); }
+.plein-pos { margin: 0; font: 400 var(--t-meta)/1 var(--mono); color: #d9d6cf; font-variant-numeric: tabular-nums; }
+/* Au téléphone : « Lire » et la position sur une ligne, les traits sur la suivante (sept photos ne tiennent pas avec eux). */
+@media (max-width: 767px) {
+  .plein-ctl { justify-content: space-between; border-top: 1px solid rgba(240, 239, 235, .22); }
+  .plein-ctl .ouverture-pause { order: 1; padding-left: 0; }
+  .plein-pos { order: 2; }
+  .plein .ouverture-points { order: 3; flex: 1 0 100%; flex-wrap: wrap; margin-left: -8px; }
+}
+/* Les points deviennent des traits : 44 × 44 px de cible, un trait de 28 px dessiné ; la photo affichée a un trait plus
+   épais ET plus clair (l'état ne tient pas à la seule couleur). Trait au repos : #b4b2ac, 3:1 au moins sur le voile. */
+.plein .ouverture-points { display: flex; list-style: none; margin: 0; padding: 0; }
+.plein .ouverture-point { display: grid; place-items: center; width: var(--cible); height: var(--cible); padding: 0; border: 0; background: none; cursor: pointer; }
+.plein .ouverture-point::before { content: ''; display: block; width: 28px; height: 2px; border: 0; border-radius: 0; background: var(--mute); }
+.plein .ouverture-point[aria-pressed="true"]::before { width: 28px; height: 4px; background: var(--ink); }
+.plein .ouverture-point:hover::before { background: var(--ink); }
+.plein .ouverture-point:focus-visible { outline-offset: -6px; }
+/* La promesse, sous la photo : un grand titre, une sous-ligne. */
+.promesse { display: grid; gap: var(--esp-2); padding-block: var(--esp-12) 0; }
+.promesse-h1 { margin: 0; max-width: 16ch; font: 300 var(--t-affiche)/1.04 var(--sans); letter-spacing: -.015em; text-wrap: balance; }
+.promesse-sous { margin: 0; max-width: 46ch; font-size: 19px; line-height: 1.55; color: var(--prose); text-wrap: pretty; }
+@media (max-width: 767px) { .promesse { padding-block: var(--esp-8) 0; } .promesse-sous { font-size: 17px; } }
+
+/* ---------- 7. Deux regards (views/v3/_regards.eta) ----------
+   Le choix du regard se fait une fois, par l'image : trois cartes, « Les deux », puis chaque photographe. Toute la carte est le lien (le nom l'est, étendu) ; le compte en données. Pas de recadrage : chaque photo garde
+   son format, deux horizontales par carte, les cartes alignées par le haut. Au téléphone : « Les deux » sur toute la largeur, puis les deux regards
+   côte à côte. */
+.regards { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-6) var(--esp-4); grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.regards > li:first-child { grid-column: 1 / -1; }
+@media (min-width: 1024px) { .regards { grid-template-columns: repeat(3, minmax(0, 1fr)); } .regards > li:first-child { grid-column: auto; } }
+.regard { position: relative; display: grid; gap: 12px; }
+.regard-img { display: grid; gap: var(--esp-demi); }
+.regard-img--deux { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 1024px) { .regard-img--deux { grid-template-columns: minmax(0, 1fr); } }
+.regard-img picture { display: block; }
+.regard-img img { display: block; width: 100%; height: auto; background: var(--frame); transition: filter .2s; }
+.regard:hover img { filter: brightness(1.08); }
+.regard-n { margin: 0; font: 300 clamp(24px, 1vw + 16px, 32px)/1.15 var(--sans); }
+.regard-n a { color: var(--ink); }
+.regard-n a::after { content: ''; position: absolute; inset: 0; }
+.regard:hover .regard-n a { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.regard-n a:focus-visible { outline: 0; }
+.regard:has(.regard-n a:focus-visible) { outline: var(--focus-l) solid var(--ink); outline-offset: 8px; }
+.regard-d { margin: 0; font: 400 var(--t-meta)/1.45 var(--mono); color: var(--mute); }
+@media (prefers-reduced-motion: reduce) { .regard-img picture { display: block; }
+.regard-img img { transition: none; } }
+
+/* ---------- 8. Visionneuse ----------
+   La photo garde la scène de la v2 ; ce qui l'entoure s'allège. Le titre en grand, la position en sable ; Partager sans
+   soulignement (une action, pas un lien de texte) ; les flèches plus fines ; les blocs du côté droit sans filet entre eux. */
+.vis-pos { color: var(--safelight); }
+.vis-actions .lien { text-decoration: none; }
+.vis-actions .lien:hover { text-decoration: underline; text-underline-offset: 6px; }
+.vis-fleche { color: var(--mute); }
+.vis-fleche:hover { color: var(--ink); }
+.vis-cote > div { border-top: 0; padding-top: 0; }
+.vis-cote { gap: var(--esp-4); }
+.vis-legende { font-size: 21px; font-weight: 300; line-height: 1.55; color: var(--ink); }
+
+/* ---------- 9. Pied de page ----------
+   Plus de place, la marque en plus grand ; les liens restent soulignés (UX-F-23), d'un trait plus discret. */
+footer.sf { margin-top: var(--esp-16); padding-top: var(--esp-8); }
+.sf-marque b { font-size: 15px; }
+.sf a { text-decoration-color: color-mix(in srgb, var(--field) 70%, transparent); }

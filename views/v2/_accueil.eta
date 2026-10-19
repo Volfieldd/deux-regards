@@ -1,13 +1,18 @@
-<% /* Accueil (MQ-01) : l'ouverture, puis où aller ensuite : les regards (la galerie de chacun), les séries (une rangée de
+<% /* Accueil (MQ-01 ; en v3, it.v3 : l'ouverture et les regards de views/v3/) : l'ouverture, puis où aller ensuite : les regards (la galerie de chacun), les séries (une rangée de
       couvertures), et la galerie elle-même (MQ-02), à l'ancre #galerie que gardent les anciens liens. Les ancres
       #regards, #series et #galerie mènent toujours quelque part. Pas de Carnets : la rubrique n'existe pas encore. */ %>
 <% const t = it.t, v = it.v2, ic = v.ic, authors = it.regards.slice(1).filter(r => r.count);
    const series = it.seriesAll.filter(c => c.count && c.cover); %>
-<% if (it.hero.length) { %>
+<% if (it.hero.length && it.v3) { /* v3 : plein cadre, puis la promesse (views/v3/_ouverture.eta) */ %>
+<%~ include('../v3/_ouverture', it) %>
+<% } else if (it.hero.length) { %>
 <%~ include('./_ouverture', it) %>
 <% } else { %>
   <div class="wrap tete-page"><h1 class="titre-page"><%= it.promise %></h1><p class="chapo"><%= it.promiseSub %></p></div>
 <% } %>
+<% if (it.v3) { /* v3 : les regards par l'image (views/v3/_regards.eta) */ %>
+<%~ include('../v3/_regards', it) %>
+<% } else { %>
   <section class="wrap partie" id="regards" aria-labelledby="acc-regards-t">
     <div class="acc-regards">
       <div class="acc-regards-txt">
@@ -22,6 +27,7 @@
 <% }) %>      </ul>
     </div>
   </section>
+<% } %>
 <% if (series.length) { %>
   <section class="wrap partie" id="series" aria-labelledby="acc-series-t">
     <div class="partie-tete"><h2 class="titre-2" id="acc-series-t"><%= t.nav.series %></h2></div>

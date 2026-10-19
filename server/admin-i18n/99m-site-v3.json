@@ -1,0 +1,22 @@
+{
+ "Site public : v1, v2 ou v3": {
+  "en": "Public site: v1, v2 or v3",
+  "de": "Öffentliche Website: v1, v2 oder v3"
+ },
+ "La v3 reprend les pages de la v2 et leur accessibilité, avec un autre dessin : la photo en plein cadre à l’accueil, l’en-tête posé dessus, des titres plus grands, des boutons sans cadre. Une page sans v2 s’affiche en v1, en v3 comme en v2.": {
+  "en": "v3 keeps the pages of v2 and their accessibility, with a different design: the photo full-bleed on the home page, the header laid over it, larger headings, buttons without frames. A page without a v2 is shown in v1, in v3 as in v2.",
+  "de": "Die v3 übernimmt die Seiten der v2 und ihre Barrierefreiheit, mit einer anderen Gestaltung: das Foto randlos auf der Startseite, die Kopfzeile darüber, größere Überschriften, Schaltflächen ohne Rahmen. Eine Seite ohne v2 wird in v1 angezeigt, in der v3 wie in der v2."
+ },
+ "la v2 redessinée, photo en plein cadre": {
+  "en": "v2 redesigned, full-bleed photo",
+  "de": "die neu gestaltete v2, Foto randlos"
+ },
+ "La v3 est appliquée : tous les visiteurs la voient.": {
+  "en": "v3 is applied: all visitors see it.",
+  "de": "Die v3 ist aktiv: alle Besucher sehen sie."
+ },
+ "Sur chaque page du site public, de petits boutons « Voir en v1 », « Voir en v2 » ou « Voir en v3 », visibles par vous seul, changent la version que vous voyez, sur cette session : pour comparer, ou voir une version avant de l’appliquer. Les visiteurs voient toujours la version choisie ici. Les Carnets et les galeries privées n’existent qu’en v2 et en v3.": {
+  "en": "On every page of the public site, small “View in v1”, “View in v2” or “View in v3” buttons, visible to you only, change the version you see, for this session: to compare, or to see a version before applying it. Visitors always see the version chosen here. Notebooks and private galleries only exist in v2 and v3.",
+  "de": "Auf jeder Seite der öffentlichen Website ändern kleine Schaltflächen „In v1 ansehen“, „In v2 ansehen“ oder „In v3 ansehen“, nur für Sie sichtbar, die Version, die Sie in dieser Sitzung sehen: zum Vergleichen oder um eine Version vor dem Aktivieren anzusehen. Besucher sehen immer die hier gewählte Version. Reisetagebücher und private Galerien gibt es nur in v2 und v3."
+ }
+}
