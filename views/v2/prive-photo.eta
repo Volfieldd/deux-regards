@@ -1,0 +1,22 @@
+<% /* Une photo d'une galerie privée (/prive/<id>/photo/<n>, MQ-17 repère 9) : la visionneuse compacte .vu ; on reste dans la
+      galerie (retour, précédente et suivante nommées, « 4 / 11 ») ; ni Partager, ni J'aime, ni lien vers la page publique
+      (G34). Favori avec son mot ; téléchargement s'il est permis. */ %>
+<% const P = it.P, ty = it.v2.typo, ic = it.v2.ic, v = it.v2, r = it.rights, pid = it.pid, p = it.photo, who = it.who;
+   const canFav = !it.team && r.favoris, dl = !it.team && r.telechargement !== 'non' ? r.telechargement : null;
+   const px = dl === 'grande' ? 4000 : 2048, nsp = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+   const g = v.fmt(p); %>
+<% layout('./layout', { pageTitle: ty(`${p.title} · ${it.title} · ${P.label} · ${it.siteName}`) }) %>
+<%~ include('./_prive-entete', { ...it, mode: 'retour' }) %>
+<main id="contenu" class="wrap">
+  <div class="vu">
+<% if (it.list.length > 1) { %>    <nav class="vu-nav" aria-label="<%= P.photosNav %>">
+      <a class="lien" href="/prive/<%= pid %>/photo/<%= it.prev.n %>"><%~ ic('retour') %><span><span class="sr-only"><%= ty(P.prev) %></span><%= it.prev.title %></span></a>
+      <span class="pos"><%= p.n %> / <%= it.list.length %></span>
+      <a class="lien" href="/prive/<%= pid %>/photo/<%= it.next.n %>"><span><span class="sr-only"><%= ty(P.next) %></span><%= it.next.title %></span><%~ ic('fleche') %></a>
+    </nav>
+<% } %>    <figure class="photo" aria-labelledby="vu-t"><%~ it.picture(p, { sizes: `(max-width: 767px) calc(100vw - 48px), min(calc(100vw - 160px), calc(70vh * ${g.r.toFixed(2)}))`, eager: true, alt: p.alt || p.title, base: `/prive/${pid}/m/` }) %>
+      <figcaption class="cartel cartel--grand"><h1 class="cartel-t" id="vu-t"><%~ v.nobr(p.title) %></h1><span class="cartel-m"><%= [p.author, p.place, v.date(p.taken_on)].filter(Boolean).join(' · ') %></span><% if (p.legend) { %><span class="cartel-l"><%= p.legend %></span><% } %></figcaption></figure>
+    <div class="vu-actions"><% if (canFav) { %><%~ include('./_prive-etoile', { ...it, p, retour: 'photo', mot: true }) %><% } %><% if (dl) { %><p class="dl-une"><a class="lien" href="/prive/<%= pid %>/telecharger/<%= p.n %>/<%= dl %>" download><%= P.download %><span class="sr-only"><%= ty(P.dlSr(p.title, nsp(px))) %></span></a><span class="donnee" aria-hidden="true"><%= P.dlData(nsp(px)) %></span></p><% } else if (!it.team) { %><p><%= ty(P.noDownload(who)) %></p><% } %></div>
+  </div>
+</main>
+<%~ include('./_prive-pied', it) %>

@@ -8,6 +8,18 @@ document.documentElement.classList.add('js');
 (function () {
   document.querySelectorAll('[data-js-only]').forEach(el => { el.hidden = false; });
 
+  // ----- galerie privée (MQ-16) : « Afficher » le mot de passe, une vraie bascule (aria-pressed) ; sans script, absente -----
+  document.querySelectorAll('[data-montrer]').forEach(b => {
+    const input = document.getElementById(b.getAttribute('aria-controls'));
+    if (!input) return;
+    b.addEventListener('click', () => {
+      const on = input.type === 'password';
+      input.type = on ? 'text' : 'password';
+      b.setAttribute('aria-pressed', String(on));
+      input.focus();
+    });
+  });
+
   // ----- langue et menu (<details>) : se referment au clic ailleurs et avec Échap, le focus revient au bouton -----
   const pops = document.querySelectorAll('[data-lang-pick], [data-menu]');
   document.addEventListener('click', e => pops.forEach(d => { if (d.open && !d.contains(e.target)) d.open = false; }));

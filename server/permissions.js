@@ -38,6 +38,12 @@ export const PERMISSIONS = {
   'instagram.compte': {},
   'signalements.traiter': {},
   'statistiques.voir': { scoped: true },
+  // Galeries privées (étude G55, registre de la Vigie BV-14 et BV-23) : voir (liste, fiche, suivi des accès, vue équipe de
+  // /prive/…), gérer (galerie, photos, ouverture, fermeture, sélections), partager (créer, prolonger, débloquer, révoquer,
+  // effacer un accès). Portée « les miennes » : les galeries du photographe lié ; une galerie commune, portée « tout ».
+  'galeries.voir': { scoped: true },
+  'galeries.gerer': { scoped: true },
+  'galeries.partager': { scoped: true },
   'taches.adresser': {},               // faire remonter un élément à traiter à un photographe
   'circuit.regler': {},                // régler, photographe par photographe, « publier sans validation » et « modifier ses photos publiées »
   'site.textes': {},
@@ -67,11 +73,13 @@ export const ROLES = {
       'sorties.voir': OWN, 'sorties.gerer': OWN,
       'personnes.voir': OWN, 'personnes.gerer': OWN, 'personnes.refus': OWN, 'personnes.demandes': OWN, 'personnes.offrir': OWN,
       'statistiques.voir': OWN,
+      'galeries.voir': OWN, 'galeries.gerer': OWN, 'galeries.partager': OWN,
     },
   },
   moderateur: {
     label: 'Modérateur',
-    // Le modérateur ne retouche pas les photos : il valide, programme, dépublie, ou renvoie avec une remarque.
+    // Le modérateur ne retouche pas les photos : il valide, programme, dépublie, ou renvoie avec une remarque. Ni lui ni le
+  // relecteur n'ont accès aux galeries privées (décision D16 de l'étude).
     perms: all(['admin.acceder', 'photos.voir', 'photos.publier', 'series.gerer', 'instagram.voir', 'instagram.file',
       'instagram.publier', 'signalements.traiter', 'statistiques.voir', 'taches.adresser', 'circuit.regler', 'site.textes']),
   },

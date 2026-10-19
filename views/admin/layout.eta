@@ -91,6 +91,7 @@
 <% if (it.canAll && it.canAll('photos.publier')) { %>    <a href="/admin/a-valider"<%~ it.section === 'review' ? ' aria-current="page"' : '' %>><%~ ic('photos') %><%= t('À valider') %><% if (it.toValidate) { %><span class="nav-badge"><%= it.toValidate %></span><% } %></a>
 <% } %>    <%~ item(['site', '/admin/site', 'Site public', 'globe', null, 'site.textes']) %>
     <%~ item(['series', '/admin/series', 'Séries', 'series', null, 'series.gerer']) %>
+    <%~ item(['galeries', '/admin/galeries', 'Galeries privées', 'key', /^galerie/.test(it.section || ''), 'galeries.voir']) %>
   </nav>
 <% if (it.navSeries && it.navSeries.length && can('photos.voir')) { %>
   <ul class="ser" aria-label="<%= t('Séries') %>">

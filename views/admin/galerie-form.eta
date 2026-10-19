@@ -1,0 +1,19 @@
+<% layout('./layout') %>
+<% /* Nouvelle galerie privée (étude § 2.4, parcours de l'équipe, 1) : titre, mot d'accueil (trois langues), photographe
+      (portée « tout » : un photographe, ou commune), fermeture. Puis les photos, puis les accès. */ %>
+<% const t = it.t, v = it.values || {}; %>
+<div class="gp">
+<p class="help-link"><a href="/admin/aide#galeries-privees"><%= t('Aide sur cette page') %></a></p>
+<header class="ep">
+  <a class="ep-retour" href="/admin/galeries"><%= t('Galeries privées') %></a>
+  <div class="ep-titre"><h1><%= t('Nouvelle galerie') %></h1></div>
+</header>
+<form class="panel form gp-form" method="post" action="/admin/galeries" novalidate>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (it.errors) { %>  <section class="resume-a" tabindex="-1" aria-labelledby="resume-t"><h2 id="resume-t"><%= t('La galerie n’est pas créée : à corriger') %></h2><ul><% Object.keys(it.errors).forEach(k => { %><li><a href="#g-<%= k %>"><%= it.errors[k] %></a></li><% }) %></ul></section>
+<% } %>  <p class="hint"><%= t('Tous les champs sont obligatoires, sauf mention « facultatif ».') %></p>
+<% if (it.allScope) { %>  <div class="champ-a"><label for="g-author"><%= t('Photographe') %></label><p class="aide" id="g-author-aide"><%= t('Une galerie commune n’est visible que des comptes qui voient toutes les galeries.') %></p><select id="g-author" name="author_id" aria-describedby="g-author-aide"><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ String(v.author_id) === String(a.id) ? ' selected' : '' %>><%= a.name %></option><% }) %><option value=""<%~ v.author_id === '' ? ' selected' : '' %>><%= t('Commune (les deux photographes)') %></option></select></div>
+<% } %><%~ include('./_galerie-champs', it) %>
+  <div class="form-pied"><a class="btn ghost" href="/admin/galeries"><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Créer la galerie') %></button></div>
+</form>
+</div>

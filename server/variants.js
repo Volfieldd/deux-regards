@@ -199,6 +199,9 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
   return {
     context,
     watermarkDir,
+    // Réglages effectifs d'une photo (filigrane, métadonnées) et leur empreinte : les téléchargements des galeries privées
+    // portent le même filigrane que les variantes, et leur rendu gardé est nommé d'après cette empreinte.
+    specOf(id) { const p = q.photo.get(id); return p ? specFor(p, context()) : null; },
     status: () => ({ ...state, errors: [...state.errors] }),
 
     // Rendu immédiat d'une photo (import), hors de la file : il n'attend pas un passage en cours.

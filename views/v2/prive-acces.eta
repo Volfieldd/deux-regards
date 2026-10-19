@@ -1,0 +1,37 @@
+<% /* Page du lien d'une galerie privée (/g/<jeton>, MQ-16) : neutre jusqu'au mot de passe (G33) : ni titre de galerie, ni
+      nom de l'invité, ni photo ; seul le photographe est nommé (à qui écrire, G23). Un seul champ, saisie tolérante (G15),
+      collage permis, « Afficher » avec le script seulement (.js-seul). Erreur reliée au champ, essais restants (G21) ;
+      pause : l'heure de reprise. Le champ n'est jamais prérempli (le mot de passe ne revient jamais dans la page). */ %>
+<% const P = it.P, ty = it.v2.typo, ic = it.v2.ic, who = it.who, inv = it.inv;
+   const err = it.error, pause = it.pause;
+   const titre = err || pause ? `${P.errorTitle} · ${P.label} · ${it.siteName}` : `${P.label} · ${it.siteName}`;
+   const until = Math.min(inv.expires_at, it.space.closes_at);
+   const eye = '<svg class="ic ic-vide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="ic ic-plein" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.4" fill="currentColor"/></svg>';
+   const lost = P.lost(who);
+   const described = [pause ? 'mdp-pause' : null, err ? 'mdp-err' : null, 'mdp-aide'].filter(Boolean).join(' '); %>
+<% layout('./layout', { pageTitle: ty(titre) }) %>
+<%~ include('./_prive-entete', { ...it, mode: 'tunnel' }) %>
+<main id="contenu" class="wrap">
+  <div class="acces">
+    <div class="acces-t">
+      <p class="etiquette"><%= P.invitation %></p>
+      <h1 class="titre-page"><%= P.label %></h1>
+      <p class="chapo"><%= ty(P.prepared(who)) %></p>
+      <p class="echeance"><%= P.until %> <time datetime="<%= it.isoDay(until) %>"><%= it.dateOf(until) %></time></p>
+    </div>
+    <form class="form" action="/g/<%= it.token %>" method="post" novalidate>
+<% if (it.csrf) { %>      <input type="hidden" name="csrf" value="<%= it.csrf %>">
+<% } %><% if (pause) { %>      <div class="msg" role="status" id="mdp-pause"><%~ ic('horloge', { size: 18 }) %><p><b><%= ty(P.pause(pause.count, it.timeOf(pause.until))) %></b> <%= ty(pause.count >= 10 ? P.pauseMore15 : P.pauseMore1) %></p></div>
+<% } %>      <div class="champ"><label for="mdp"><%= P.password %></label><p class="champ-aide" id="mdp-aide"><%= ty(P.passwordHelp(who)) %></p>
+        <div class="mdp"><input id="mdp" name="password" type="password" autocomplete="current-password" spellcheck="false" maxlength="40" aria-describedby="<%= described %>"<%~ err ? ' aria-invalid="true" autofocus' : '' %>>
+          <button class="bascule js-seul" type="button" aria-pressed="false" aria-controls="mdp" data-montrer><%~ eye %><% if (P.show[0]) { %><span class="sr-only"><%= P.show[0] %></span><% } %><%= P.show[1] %><% if (P.show[2]) { %><span class="sr-only"><%= P.show[2] %></span><% } %></button></div>
+<% if (err) { %>        <p class="champ-err" id="mdp-err"><%~ ic('alerte', { size: 16 }) %><span><b><%= ty(P.error) %></b> <%= ty(err.last ? P.wrongLast(who, err.last) : P.wrong(who, err.n, err.pause)) %></span></p>
+<% } %>      </div>
+      <label class="choix"><input type="checkbox" name="remember" value="1"><span><%= P.remember %><span class="choix-d"><%= ty(P.rememberHelp) %></span></span></label>
+      <button class="btn" type="submit"><%= P.open %></button>
+      <p class="secours"><%= ty(lost[0]) %><% if (it.contact) { %><a href="<%= it.contact %>"><%= lost[1] %></a><% } else { %><%= lost[1] %><% } %><%= ty(lost[2]) %></p>
+      <p class="note-donnees"><%= ty(P.data(who)) %> <a href="<%= it.u('/confidentialite') %>"><%= P.privacy %></a></p>
+    </form>
+  </div>
+</main>
+<%~ include('./_prive-pied', it) %>

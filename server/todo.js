@@ -15,7 +15,7 @@ export const LEVELS = ['urgent', 'bientot', 'plus-tard'];
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
-export function createTodo({ db, encounters, instagram, proofs, readiness, feedback, seriesSuggest, accounts, notes, review, now = () => Date.now() }) {
+export function createTodo({ db, spaces = null, encounters, instagram, proofs, readiness, feedback, seriesSuggest, accounts, notes, review, now = () => Date.now() }) {
   const q = {
     rights: db.prepare(`SELECT id FROM encounters WHERE rights_request IS NOT NULL AND rights_done_at IS NULL ORDER BY rights_requested_at`).pluck(),
     // Refus dont des photos liées sont encore publiées.
@@ -155,6 +155,18 @@ export function createTodo({ db, encounters, instagram, proofs, readiness, feedb
     const igUsage = a.all('instagram.voir') && instagram?.usage(), paused = igUsage?.paused;
     // Heure de reprise et motif dans la langue de l'admin.
     if (paused) items.push({ level: 'bientot', title: t('Instagram en pause'), detail: t('reprise {when} : {reason}', { when: t.lang === 'fr' ? paused.when : igUsage.whenText(paused.until, t.locale), reason: t.msg(paused.reason) }), href: '/admin/instagram', action: t('Voir') });
+    // Galeries privées (G62) : sélection envoyée, accès suspendu, lien ouvert sur plus de 3 appareils, galerie qui ferme
+    // dans 7 jours. Portée « les miennes » : ses galeries ; une galerie commune, pour qui voit tout.
+    if (spaces && a.author('galeries.voir') !== undefined) {
+      const name = s => s.title;
+      for (const g of spaces.signals(s => a.can('galeries.voir', s.author_id ?? -2) || a.all('galeries.voir'))) {
+        const href = `/admin/galeries/${g.space.id}`;
+        if (g.kind === 'selection') items.push({ level: 'bientot', title: t('Sélection envoyée : « {title} »', { title: name(g.space) }), detail: t('par l’accès de {label}', { label: g.invite.label }), href: `${href}/acces/${g.invite.id}`, action: t('Voir') });
+        else if (g.kind === 'suspendu') items.push({ level: 'bientot', title: t('Accès suspendu : « {title} »', { title: name(g.space) }), detail: t('trop de mots de passe refusés pour l’accès de {label} : débloquez-le ou donnez un nouveau mot de passe', { label: g.invite.label }), href: `${href}/acces/${g.invite.id}`, action: t('Voir') });
+        else if (g.kind === 'appareils') items.push({ level: 'bientot', title: t('Lien peut-être transféré : « {title} »', { title: name(g.space) }), detail: t('l’accès de {label} a été ouvert sur {n} appareils', { label: g.invite.label, n: g.devices }), href: `${href}/acces/${g.invite.id}`, action: t('Voir') });
+        else if (g.kind === 'ferme_bientot') items.push({ level: 'plus-tard', title: g.days > 1 ? t('« {title} » ferme dans {n} jours', { title: name(g.space), n: g.days }) : t('« {title} » ferme demain', { title: name(g.space) }), detail: t('galerie privée : prolongez-la ou prévenez les invités'), href: `${href}/reglages`, action: t('Voir') });
+      }
+    }
     const pa = a.author('photos.voir'), ma = a.author('photos.modifier'), ta = a.author('photos.textes');
     const toFinish = pa === undefined ? 0 : q.toFinish.all({ author: pa }).filter(p => p.status === 'draft' || isProvisional(p)).length;
     const proposed = seriesSuggest?.enabled() && ma !== undefined ? seriesSuggest.forPhotos(db.prepare("SELECT id, category_id, status, series_checked FROM photos WHERE status = 'draft' AND series_checked = 0 AND (@author IS NULL OR author_id = @author)").all({ author: ma })).size : 0;

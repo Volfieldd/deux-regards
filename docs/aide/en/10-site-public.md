@@ -11,7 +11,7 @@ The site exists in **French** (usual addresses, `/photo/…`), **English** (`/en
   - German page: German, otherwise French, otherwise English;
   - English page: English, otherwise French, otherwise German;
   - French page: French, otherwise English, otherwise German.
-- **Selector:** at the end of the menu (and at the top of a photo’s page), the flag and language code (🇫🇷 FR). It opens the **same page** in another language, filters included. The choice is remembered (the site’s only cookie, set only at that moment).
+- **Selector:** at the end of the menu (and at the top of a photo’s page), the flag and language code (🇫🇷 FR). It opens the **same page** in another language, filters included. The choice is remembered (the site’s language cookie, set only at that moment; the only other cookie of the public website is that of a private gallery opened with its password).
 - **Language on arrival** on a French page, if the visitor has not chosen anything:
   - French-speaking countries (France, Monaco, overseas territories, French-speaking Africa…): French;
   - Germany, Austria, Liechtenstein: German;

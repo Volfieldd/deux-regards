@@ -56,7 +56,9 @@ function internal(raw, from, origin) {
   return { path: u.pathname, url: `${u.pathname}${u.search}` };
 }
 
-async function crawl(app, { origin }) {
+// starts : adresses de départ ; cookie : la session d'un visiteur ; follow : pages dont on lit les liens (les autres sont
+// seulement vérifiées).
+async function crawl(app, { origin, starts = ['/', '/en', '/de'], cookie = null, follow = () => true }) {
   const seen = new Map();                 // adresse → première page qui y mène
   const broken = [];
   const trapSeen = [];
@@ -71,18 +73,18 @@ async function crawl(app, { origin }) {
     seen.set(i.url, from);
     queue.push({ url: i.url, path: i.path, from, depth, kind });
   };
-  for (const start of ['/', '/en', '/de']) add(start, '/', 0, 'départ');
+  for (const start of starts) add(start, '/', 0, 'départ');
   while (queue.length) {
     assert.ok(seen.size <= MAX_URLS, `parcours borné : plus de ${MAX_URLS} adresses`);
     const { url, path, from, depth, kind } = queue.shift();
     const resource = RESOURCE.test(path) && !path.endsWith('.css');
-    const res = await app.inject({ method: resource ? 'HEAD' : 'GET', url, headers: { 'user-agent': UA, accept: 'text/html,*/*' } });
+    const res = await app.inject({ method: resource ? 'HEAD' : 'GET', url, headers: { 'user-agent': UA, accept: 'text/html,*/*', ...(cookie ? { cookie } : {}) } });
     if (res.statusCode >= 400) {                                       // 404, erreur, ou tout autre refus
       broken.push({ url, from, kind, status: res.statusCode });
       continue;
     }
     if (res.statusCode >= 300 && res.statusCode < 400) { if (res.headers.location) add(res.headers.location, url, depth, 'redirection'); continue; }
-    if (resource || OUTSIDE.test(path) || depth >= MAX_DEPTH) continue;
+    if (resource || OUTSIDE.test(path) || depth >= MAX_DEPTH || !follow(path)) continue;
     const type = String(res.headers['content-type'] || '');
     if (type.startsWith('text/css')) { for (const l of cssLinks(res.body)) add(l.url, url, depth + 1, l.kind); continue; }
     if (!type.startsWith('text/html')) continue;
@@ -111,6 +113,12 @@ async function world(t, version) {
   c.app.trips.addDays(trip, [{ author_id: ids[0].author_id, day: '2026-09-01' }, { author_id: ids[1].author_id, day: '2026-09-02' }]);
   c.db.prepare('UPDATE trips SET public = 1 WHERE id = ?').run(trip);
   c.app.publicVersion.save(version);
+  // Une galerie privée ouverte, avec un accès : aucune page publique n'y mène (G35).
+  const space = c.app.spaces.createSpace({ title: 'Galerie privée de test', closes: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10) }, { authorId: ids[0].author_id, by: 'test' });
+  c.app.spaces.addPhotos(space, ids.slice(0, 3).map(p => p.id));
+  c.app.spaces.setState(space, 'ouverte', null);
+  c.privateAccess = await c.app.spaces.createInvite(space, { label: 'Invitée', expires: new Date(Date.now() + 20 * 864e5).toISOString().slice(0, 10), favoris: '1', telecharger: '1' }, { by: 'test', request: null });
+  c.privateSpace = c.app.spaces.get(space);
   return c;
 }
 
@@ -135,6 +143,27 @@ for (const version of ['v1', 'v2']) {
     if (c.app.securite.enabled) assert.ok(r.trapSeen.length > 0, 'lien piège vu dans les pages');
     assert.ok(![...r.seen.keys()].some(u => u.startsWith(TRAP_PATH)));
     assert.equal((await c.app.inject(TRAP_PATH)).statusCode, 404);
+    // Les pages des galeries privées ne sont atteintes depuis aucune page publique (G35, BV-5).
+    assert.ok(![...r.seen.keys()].some(u => /^\/(?:g|prive)\//.test(u)), 'aucun lien public vers /g/ ni /prive/');
     t.diagnostic(`${version} : ${r.pages} pages, ${r.urls} adresses`);
   });
 }
+
+// BV-5 étendu (registre de la Vigie, prérequis des galeries privées) : avec une session d'invité, chaque lien des pages
+// /g/ et /prive/ (vues, photos, téléchargements permis, pied de page) répond sans 404 ; le lien piège n'est pas suivi.
+test('galerie privée : avec la session d’un invité, aucun lien de ses pages vers une 404 (BV-5 étendu)', async t => {
+  const c = await world(t, 'v1');
+  const origin = new URL(c.config.publicUrl).origin;
+  const { token, password } = c.privateAccess;
+  const enter = await c.app.inject({ method: 'POST', url: `/g/${token}`, headers: { 'content-type': 'application/x-www-form-urlencoded', origin }, payload: `password=${password}` });
+  assert.equal(enter.statusCode, 303);
+  const cookie = [].concat(enter.headers['set-cookie']).map(x => x.split(';')[0]).find(x => x.includes('visiteur='));
+  const pid = c.privateSpace.public_id;
+  const r = await crawl(c.app, { origin, starts: [`/prive/${pid}`, `/prive/${pid}?vue=favoris`, `/g/${token}`], cookie, follow: p => /^\/(?:g|prive)\//.test(p) });
+  assert.equal(r.broken.length, 0, r.broken.map(b => `${b.status} ${b.url} (${b.kind}, depuis ${b.from})`).join('\n'));
+  const seen = [...r.seen.keys()];
+  for (const re of [new RegExp(`^/prive/${pid}/photo/3$`), new RegExp(`^/prive/${pid}/m/`), new RegExp(`^/prive/${pid}/telecharger/1/web$`), /^\/confidentialite$/, /^\/mentions-legales$/])
+    assert.ok(seen.some(u => re.test(u)), `${re} suivie`);
+  assert.ok(!seen.some(u => u.startsWith(TRAP_PATH)));
+  assert.ok(!seen.some(u => u.startsWith('/langue/')), 'aucun sélecteur /langue/ sur ces pages (G37)');
+});

@@ -10,6 +10,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="<%= it.bodyClass === 'dark' ? 'dark' : theme.scheme || 'light' %>">
   <title><%= it.pageTitle %></title>
+<% if (it.neutral) { /* Galeries privées (G33) : ni description, ni Open Graph, ni canonical, ni hreflang ; jamais indexées. */ %>
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+<% } else { %>
 <% if (it.description) { %>
   <meta name="description" content="<%= it.description %>">
 <% } %>
@@ -32,10 +36,12 @@
   <meta property="og:image" content="<%= ogImage %>">
   <meta name="twitter:card" content="summary_large_image">
 <% } %>
+<% } %>
   <link rel="stylesheet" href="<%= it.asset('css/v2/tokens.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/public.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/pages.css') %>">
-<% if (it.formulaires) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/formulaires.css') %>">
+<% if (it.formulaires || it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/formulaires.css') %>">
+<% } %><% if (it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/prive.css') %>">
 <% } %><% if (brand.favicon64) { %>
   <link rel="icon" type="image/png" href="/brand/<%= brand.favicon64 %>">
   <link rel="apple-touch-icon" href="/brand/<%= brand.favicon180 %>">

@@ -15,6 +15,8 @@ import * as cities from './geo/cities.js';
 import { LANGS, NAMES, LOCALES, localize, splitLang } from './i18n.js';
 import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
+import privateRoutes from './routes/prive.js';
+import { createSpaces } from './spaces.js';
 import adminRoutes from './routes/admin.js';
 import mediaRoutes from './routes/media.js';
 import brandRoutes, { createAppearance } from './routes/brand.js';
@@ -77,6 +79,10 @@ export function redactUrl(url) {
   try { u = decodeURIComponent(u); } catch { /* URL mal encodée : telle quelle */ }
   return u.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]').replace(/(\/partage\/instagram\/)[^/?#]+/, '$1[masqué]')
     .replace(/(\/pour-vous\/)[^/?#]+/, '$1[masqué]')
+    // Lien d'une galerie privée (/g/<jeton>) : toute suite de 20 caractères [\w-] ou plus après « /g/ », quelle que soit la
+    // casse et ce qui précède (« //g/… », « /fr/g/… », « /./g/… », « /G/… », « vers=/g/… », « next=https://site/g/… ») :
+    // annexe de sécurité, G13, M14 ; revue de sécurité de la PR #149.
+    .replace(/(\/g\/)[\w-]{20,}/gi, '$1[masqué]')
     .replace(/(\/bonjour\/)([^/?#]+)/, (m, p, seg) => { const r = parseRef(seg); return r?.code ? `${p}${r.ref}-[masqué]` : m; });
 }
 const loggerOptions = logger => logger && {
@@ -143,8 +149,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
     // Pages publiques seulement : l'admin et ses pages d'erreur restent ce qu'elles sont.
-    const pv = /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
-    const v2 = pv?.version === 'v2' && app.publicVersion.hasV2(template);
+    // Pages des galeries privées : toujours en v2 (elles n'ont pas de v1), sans le bandeau de l'aperçu (aucune sortie).
+    const only = app.publicVersion.onlyV2(template);
+    const pv = only || /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
+    const v2 = only || (pv?.version === 'v2' && app.publicVersion.hasV2(template));
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
@@ -256,6 +264,13 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.addHook('onReady', async () => { reviewTimer = setInterval(() => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée')), 60 * 1000); reviewTimer.unref(); });
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('trips', createTrips({ db }));
+  // Galeries privées (server/spaces.js) : galeries, photos, accès, autorisations des invités ; purges chaque heure.
+  app.decorate('spaces', createSpaces({ db, vault: createVault(config.dataKey), readiness: app.readiness, encounters: app.encounters, storageDir: config.storageDir,
+    securite: () => app.securite, variants: () => app.variants, trustCountry: Boolean(config.trustProxy) }));
+  let spacesTimer = null;
+  const purgeSpaces = () => { try { app.spaces.purge(); app.purgeVisitors?.(); } catch (err) { app.log.error({ err }, 'galeries privées : purge'); } };
+  app.addHook('onReady', async () => { purgeSpaces(); spacesTimer = setInterval(purgeSpaces, 3600 * 1000); spacesTimer.unref(); });
+  app.addHook('onClose', async () => clearInterval(spacesTimer));
   app.decorate('keywordSuggest', createKeywordSuggester({ db, log: app.log }));
   // Descriptions suggérées (Florence-2, désactivées par défaut) : demandes depuis la fiche tout de suite, file de nuit
   // vérifiée toutes les 10 minutes. describeOptions.model (tests) remplace le modèle ; manual : rien ne démarre seul.
@@ -265,7 +280,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Au démarrage, les photos en échec sont reprises une fois (réseau rétabli, modèle réparé…).
   if (!describeOptions.manual) app.addHook('onReady', async () => { app.describer.retryFailed(); describeTimer = setInterval(() => app.describer.run(), 10 * 60 * 1000); describeTimer.unref(); });
   app.addHook('onClose', async () => { clearInterval(describeTimer); await app.describer.close(); });
-  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
+  app.decorate('todo', createTodo({ db, spaces: app.spaces, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
   // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.
   app.decorate('reminders', createReminders({ db, accounts: app.accounts, todo: app.todo, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
@@ -333,6 +348,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   await app.register(mediaRoutes);
   await app.register(brandRoutes);
   await app.register(adminRoutes);
+  await app.register(privateRoutes);
   await app.register(publicRoutes);
 
   return app;

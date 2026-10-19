@@ -105,7 +105,7 @@ test('sélecteur de langue : retient le choix (cookie) et ouvre la même page da
   assert.equal(cookie.sameSite, 'Lax');
   assert.equal((await app.inject('/langue/fr?vers=%2F%2Fexemple.org')).headers.location, '/');   // jamais ailleurs
   assert.equal((await app.inject('/langue/es?vers=%2F')).statusCode, 404);
-  assert.match((await app.inject('/droits')).body, /Le seul cookie du site retient la langue/);
+  assert.match((await app.inject('/droits')).body, /Un cookie du site retient la langue/);
 });
 
 test('admin : traductions des photos, séries, biographies et textes du site ; vides, repli sur le français', async t => {

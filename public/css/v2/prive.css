@@ -1,0 +1,88 @@
+/* =====================================================================================================
+   Galeries privées (MQ-16 : la page du lien, /g/<jeton> ; MQ-17 : la galerie, /prive/<id>), site public v2.
+   Composants de la planche (maquettes, _commun/public.css § 22 et § 23 ; § 20 pour la visionneuse compacte .vu),
+   repris tels quels, puis la mise en page des deux maquettes (leurs styles de page, .pv-*). L'en-tête .sh--prive et le pied
+   réduit .sf--reduit sont déjà dans public.css (§ 1 et § 4). Aucun style en ligne : la CSP l'interdit.
+   Rien n'exige JavaScript ; « Afficher » le mot de passe est .js-seul (public.css § 0).
+   ===================================================================================================== */
+
+/* ---------- 22. Mot de passe : champ et bascule « Afficher » sur une ligne ; cases expliquées ---------- */
+.mdp { display: flex; gap: var(--esp-1); align-items: stretch; }
+.mdp input { flex: 1; min-width: 0; letter-spacing: .06em; }
+.mdp .bascule { min-height: var(--esp-6); flex: none; }
+.choix-d { display: block; color: var(--mute); font-size: var(--t-meta); }
+.choix-d a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- 23. Galerie privée ----------
+   .acces : la page du lien, à deux temps (ce qui vous attend · le mot de passe) ; .secours : que faire sans mot de passe.
+   .favorisable : une vignette avec son étoile (.fav, 44 px, nom lu « Favori : titre »), toujours sous le cartel, à gauche,
+   posée sur le bas de sa rangée. .selection : la barre de la sélection, une seule action principale. .telecharger : tout, ou
+   une photo (.dl-une) avec son format en données. */
+.acces { display: grid; gap: var(--esp-6); padding-block: var(--esp-8) var(--esp-4); }
+.acces-t { display: grid; gap: var(--esp-2); align-content: start; }
+.acces-t .titre-page { font-size: var(--t-affiche); line-height: 1.05; }
+.acces-t .echeance { margin: var(--esp-1) 0 0; color: var(--mute); }
+.acces-t .echeance time { color: var(--ink); }
+@media (min-width: 1024px) {
+  .acces { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: var(--esp-10); padding-block: var(--esp-16) var(--esp-8); align-items: start; }
+}
+.acces .form { max-width: 480px; gap: var(--esp-3); }
+.acces .form .btn { justify-self: start; }
+@media (max-width: 767px) { .acces .form .btn { justify-self: stretch; } }
+.acces .note-donnees { padding-top: var(--esp-2); border-top: 1px solid var(--rule); }
+.secours { margin: 0; color: var(--prose); font-size: var(--t-petit); line-height: 1.6; }
+.secours a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.rangees > li.favorisable { position: relative; display: flex; flex-direction: column; scroll-margin-top: var(--esp-3); }
+.favorisable .fav, .favorisable .dl-une { position: static; margin: auto 0 0; padding-top: var(--esp-1); }
+.fav { margin: 0; }
+.fav .bascule { width: var(--cible); padding: 0; justify-content: center; }
+.selection { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--esp-1) var(--esp-3);
+  margin-top: var(--esp-6); padding: var(--esp-2) 0 calc(var(--esp-2) + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 1px solid var(--field); }
+.selection-n { display: inline-flex; align-items: center; gap: var(--esp-1); margin: 0; }
+.selection-n .ic { color: var(--ink); }
+.selection-n a { display: inline-flex; align-items: center; min-height: var(--cible); color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.selection form { margin: 0; }
+@media (max-width: 559px) { .selection form, .selection .btn { width: 100%; } }
+.telecharger { display: grid; gap: var(--esp-1); }
+.telecharger form { margin: 0; }
+@media (min-width: 560px) { .telecharger .btn { justify-self: start; } }
+.dl-une { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--esp-2); margin: 0; }
+.dl-une .lien { display: inline-flex; align-items: center; min-height: var(--cible); }
+.dl-une .donnee { color: var(--mute); }
+
+/* ---------- 20. Visionneuse compacte, réservée à la galerie privée (/prive/<id>/photo/<n>) ---------- */
+.vu { display: grid; gap: var(--esp-3); padding: var(--esp-3) 0 var(--esp-4); }
+.vu-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--esp-1) var(--esp-3); }
+.vu-nav .pos { color: var(--mute); font-variant-numeric: tabular-nums; }
+.vu-nav .lien { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); max-width: 100%; color: var(--ink); }
+.vu .photo { justify-self: center; max-width: 100%; }
+.vu .photo img { max-height: 70vh; width: auto; max-width: 100%; margin-inline: auto; }
+.vu .cartel-t { font-size: var(--t-titre-3); }
+.vu h1.cartel-t { margin: 0; }   /* le titre de la photo est celui de la page */
+.vu-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2) var(--esp-3); }
+.vu-actions p { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+
+/* ---------- Mise en page des deux maquettes (leurs styles de page) ---------- */
+.pv-tete { display: grid; gap: var(--esp-2); padding-block: var(--esp-6) var(--esp-4); max-width: 900px; }
+.pv-meta { margin: 0; color: var(--mute); }
+.pv-meta b { font-weight: 400; color: var(--ink); }
+.pv-mot { margin: var(--esp-1) 0 0; max-width: 62ch; font-size: var(--t-prose); line-height: 1.6; color: var(--prose); white-space: pre-line; }
+.pv-mot span { display: block; margin-top: var(--esp-1); color: var(--mute); font-size: var(--t-texte); white-space: normal; }
+.pv-droits { display: flex; gap: var(--esp-1); align-items: flex-start; margin: 0; max-width: 72ch; color: var(--prose); font-size: var(--t-petit); }
+.pv-droits .ic { margin-top: 2px; color: var(--mute); }
+@media (max-width: 767px) { .pv-mot { font-size: var(--t-texte); } .pv-tete { padding-block: var(--esp-4) var(--esp-2); } }
+.vues { margin-top: var(--esp-3); padding-block: var(--esp-2); border-bottom: 0; }
+.pv-info { margin: var(--esp-4) 0 0; max-width: 72ch; color: var(--mute); font-size: var(--t-meta); line-height: 1.55; }
+.pv-info a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.pv-p { margin: 0; color: var(--prose); }
+.ic-texte { display: inline; vertical-align: -3px; }
+.pv-vide { display: grid; gap: var(--esp-2); padding-block: var(--esp-4); }
+.pv-vide h2, .pv-msg h1 { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
+.pv-msg { display: grid; gap: var(--esp-3); padding-block: var(--esp-8) var(--esp-4); max-width: 72ch; }
+.pv-msg h1[tabindex]:focus:not(:focus-visible) { outline: none; }
+.pv-msg .msg { margin: 0; }
+.pv-etat { margin-top: var(--esp-3); }
+.pv-etat .msg { margin: 0; }
+/* Vue équipe (« Voir comme un invité ») : un bandeau, et le retour à l'administration à la place de « Quitter ». */
+.pv-equipe { margin: 0; padding: var(--esp-2) var(--gut); background: color-mix(in srgb, var(--safelight) 18%, var(--paper)); color: var(--ink); font-size: var(--t-petit); }
+.pv-equipe a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
