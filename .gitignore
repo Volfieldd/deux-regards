@@ -7,6 +7,7 @@ storage/
 *.tar.gz
 vigie.env
 bordure/wrangler.toml
+bordure/wrangler.toml.bak
 bordure/.wrangler/
 cloudflare-token
 **/vigie.env
