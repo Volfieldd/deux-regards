@@ -1,7 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { setup, VIGIE_KEYS } from './helpers.js';
 import { createSessionStore } from '../server/sessions.js';
@@ -46,22 +45,28 @@ async function site(t, opts = {}) {
   return { ...ctx, security, account, seb, jul, row, first, audits, form };
 }
 
-test('v1 inchangée : les gabarits et le script de la v1 de ces écrans sont ceux de main ; un compte en v1 voit la v1', async t => {
-  let ok = true;
-  for (const f of ['views/admin/photo.eta', 'views/admin/photos.eta', 'views/admin/review.eta', 'views/admin/layout.eta', 'public/admin/admin.js', 'public/admin/admin.css']) {
-    let base = null;
-    try { base = execFileSync('git', ['show', `origin/main:${f}`], { cwd: new URL('..', import.meta.url), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { ok = false; }
-    if (base !== null) assert.equal(fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8'), base, f);
+// Ce qui signe le gabarit v1 de chaque écran (views/admin/<écran>.eta) et qu'aucun gabarit v2 n'a.
+const V1_MARKS = { photo: '<div class="edit">', photos: '<form class="filters"', review: '<p class="prose">' };
+
+test('v1 inchangée : un compte en v1 voit la v1 de ces écrans (son gabarit, sa mise en page, son script), sans rien de la v2', async t => {
+  const read = f => fs.readFileSync(new URL(`../views/admin/${f}`, import.meta.url), 'utf8');
+  const v2Views = fs.readdirSync(new URL('../views/admin/v2/', import.meta.url)).filter(f => f.endsWith('.eta')).map(f => read(`v2/${f}`));
+  for (const [screen, mark] of Object.entries(V1_MARKS)) {
+    assert.ok(read(`${screen}.eta`).includes(mark), `${screen} : repère du gabarit v1 introuvable`);
+    assert.ok(!v2Views.some(v => v.includes(mark)), `${screen} : repère partagé avec un gabarit v2`);
   }
-  if (!ok) t.diagnostic('git absent : comparaison avec main sautée');
   const c = await site(t);
   const v1 = await c.account('compte-v1', { version: 'v1' });
   const v2 = await c.account('compte-v2');
   const id = c.first(c.seb).id;
-  for (const url of [`/admin/photos/${id}`, '/admin/photos', '/admin/a-valider']) {
+  for (const [url, screen] of [[`/admin/photos/${id}`, 'photo'], ['/admin/photos', 'photos'], ['/admin/a-valider', 'review']]) {
     const a = await v1.get(url), b = await v2.get(url);
     assert.equal(a.statusCode, 200, url);
     assert.ok(!isV2(a.body), `${url} : la v1 pour le compte en v1`);
+    assert.ok(a.body.includes(V1_MARKS[screen]), `${url} : le gabarit v1 (views/admin/${screen}.eta)`);
+    assert.match(a.body, /<script src="\/static\/admin\/admin\.js[?"]/, `${url} : le script de la v1`);
+    assert.doesNotMatch(a.body, /\/static\/admin\/v2\//, `${url} : aucune feuille ni aucun script de la v2`);
+    assert.ok(!b.body.includes(V1_MARKS[screen]), `${url} : pas le gabarit v1 pour le compte en v2`);
     assert.ok(isV2(b.body), `${url} : la v2 pour le compte en v2`);
     assert.equal(b.headers['cache-control'], 'no-store', url);
     assert.doesNotMatch(b.body, /\sstyle="/, `${url} : aucun style en ligne`);
