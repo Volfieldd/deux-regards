@@ -383,7 +383,7 @@ Lecture par la Vigie :
 
 Ce que la lecture apporte : DS25 à DS28 ; le **voyage impossible** (`DS3`) enrichi des connexions Zitadel même quand le site n'est pas ouvert ; la mémoire des rôles (section 4.4) recoupée avec les attributions faites dans Zitadel.
 
-Option plus rapide (phase E) : les **Actions v2** de Zitadel (incluses dans l'offre gratuite, « custom workflows ») poussent les événements choisis vers une adresse, signés par HMAC. Il faudrait ouvrir sur `vigie.nicephos.art` une route d'entrée exemptée d'Access, vérifiée par la signature de Zitadel. Gain : quelques secondes au lieu d'une minute. La lecture par l'API reste nécessaire pour combler les trous.
+Option plus rapide (phase E) : les **Actions v2** de Zitadel (disponibilité dans l'offre gratuite à vérifier ; voir `vigie-crowdsec-et-actions-zitadel.md`) poussent les événements choisis vers une adresse, signés par HMAC. Il faudrait ouvrir sur `vigie.nicephos.art` une route d'entrée exemptée d'Access, vérifiée par la signature de Zitadel. Gain : quelques secondes au lieu d'une minute. La lecture par l'API reste nécessaire pour combler les trous.
 
 À garder en tête : `IAM_OWNER_VIEWER` voit **tous** les utilisateurs et réglages de l'instance (noms, e-mails). La clé est donc sensible (MV29).
 

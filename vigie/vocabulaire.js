@@ -14,6 +14,7 @@ export const OWN = {
   zitadel_politique: E('haut', 'zitadel'),
   vigie_zitadel_trou: E('haut', 'vigie · contrôle'),
   vigie_zitadel_erreur: E('moyen', 'vigie · contrôle'),
+  vigie_zitadel_quota: E('moyen', 'vigie · contrôle'),          // quota mensuel de l'API de Zitadel Cloud (80 % puis 95 %)
   // Vigie elle-même
   vigie_demarrage: E('info', 'vigie · contrôle'),
   vigie_ingestion_refusee: E('haut', 'vigie · contrôle'),

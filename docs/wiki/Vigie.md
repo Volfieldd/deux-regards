@@ -282,10 +282,20 @@ Attentes possibles : `alerte`, `pasAlerte`, `aucuneAlerte`, `signal`, `pasSignal
 - **Dernier recours** : `VIGIE_APPLIQUER=0` dans le `.env` du site puis redémarrage : les décisions sont lues mais jamais appliquées (un avertissement le dit dans les journaux du site).
 - **Signature** : le site n'applique qu'une liste signée par la clé privée de la Vigie (Ed25519), et jamais une liste plus ancienne que celle en place. La Vigie n'accepte que des lots signés par le site (HMAC), datés à 60 s près, jamais rejoués.
 
+## Quota de l'API de Zitadel Cloud
+
+L'offre gratuite de Zitadel Cloud compte **5 000 requêtes par mois** à son API de gestion (toute requête autorisée sur `/admin`, `/management`, `/v2`… ; jamais l'obtention d'un jeton). La Vigie en fait deux usages : la lecture des événements (une requête par passage, toutes les 30 minutes : environ 1 450 par mois, plus une par page de 500 événements au-delà) et la relecture des droits de la console (deux requêtes par relecture : toutes les 5 minutes pour chaque session ouverte, et avant chaque action ; une heure de console par jour : environ 720 par mois). Usage ordinaire : de l'ordre de 2 200 requêtes par mois.
+
+- **Compté** par mois et par usage (`vigie/cli.js etat`, carte Zitadel de la page Santé).
+- **Alerte** moyenne à 80 % du quota, haute à 95 % (`vigie_zitadel_quota`, règle `zitadel_quota`).
+- **Au-delà de 95 %**, la lecture des événements passe d'elle-même à une toutes les 4 heures jusqu'au mois suivant (l'historique gratuit de Zitadel est d'un jour : la marge reste suffisante).
+- **Réglages** (`vigie.env`) : `VIGIE_ZITADEL_INTERVAL_S` (1800 par défaut), `VIGIE_ZITADEL_QUOTA` (5000 ; 0 : pas de quota, offre payante).
+- **Plus tard** : recevoir les événements par les Actions v2 de Zitadel (étude `docs/etudes/vigie-crowdsec-et-actions-zitadel.md`), qui ne comptent pas comme des requêtes.
+
 ## Ce que garde la Vigie
 
 - **Événements** : 6 mois (`VIGIE_RETENTION_DAYS`), chaînés (une ligne modifiée, insérée à la main ou effacée se voit à la vérification quotidienne, critique) ; compteurs par jour 25 mois. Chaque nuit, la tête de la chaîne (numéro, maillon, signature) est écrite dans le journal du conteneur (`docker logs nicephos-vigie | grep tete_chaine`) : la comparer d'un jour à l'autre montre une base revenue en arrière.
-- **Zitadel** : 210 types d'événements suivis (`vigie/zitadel/types-suivis.json`, tirés de la liste de l'instance), lus toutes les minutes ; seuls quelques champs sans donnée personnelle sont gardés (rôles, projet, réglages de connexion, adresse IP de l'agent quand Zitadel la donne) ; plus de 20 h sans lecture : signalé.
+- **Zitadel** : 210 types d'événements suivis (`vigie/zitadel/types-suivis.json`, tirés de la liste de l'instance), lus toutes les 30 minutes (`VIGIE_ZITADEL_INTERVAL_S`, de 5 minutes à 6 heures), **en une requête par passage** (tous les événements, triés par la Vigie ; repli par lots de 30 types si Zitadel refusait) ; seuls quelques champs sans donnée personnelle sont gardés (rôles, projet, réglages de connexion, adresse IP de l'agent quand Zitadel la donne) ; plus de 20 h sans lecture : signalé.
 - **Sauvegardes** : conteneur `nicephos-vigie-sauvegarde`, un instantané contrôlé par jour, 14 gardés, dans `BACKUP_DIR-vigie` (par exemple `/mnt/user/backups/nicephos-vigie`).
 
 ## Retirer la Vigie

@@ -494,6 +494,12 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
     const resume = !z ? [{ t: `Zitadel${D}jamais lu (ou non configuré)` }]
       : cls ? [{ t: `Zitadel${D}dernière lecture${err && err.recu_a > z ? ' réussie' : ''} ` }, { t: quand(z, t), b: true }, { t: ` (${ilYa(z, t)})` }]
         : [{ t: `Zitadel lu ${aQuand(z, t).replace(/ .*$/, '')} ` }, { t: quand(z, t), b: true }];
+    // Quota mensuel de l'API de Zitadel Cloud (requêtes de ce mois, par usage).
+    const zq = reg('zitadel_quota');
+    if (zq && zq.mois === new Date(t).toISOString().slice(0, 7)) {
+      const par = Object.entries(zq.par || {}).map(([k, n]) => `${({ evenements: 'événements', plafond: 'droits de la console', console: 'console' })[k] || k} ${nombre(n)}`).join(' · ');
+      kv.push({ dt: 'Requêtes ce mois', t: `${nombre(zq.n)} sur le quota`, sec: par || null });
+    }
     carte({ id: 'zitadel', icone: 'zitadel', titre: 'Zitadel', etat, cls, kv, faits, resume,
       seuil: [{ t: `Alerte si plus de 20${NBSP}h sans lecture réussie${D}${guillemets(`Événements de Zitadel perdus (plus de 20${NBSP}h sans lecture)`)} ` }, { t: '(Moyenne, DS24)', r: true }, { t: '. Avant, chaque échec est noté, sans alerte.' }] });
   }

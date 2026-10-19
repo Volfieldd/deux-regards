@@ -116,7 +116,10 @@ export function loadVigieConfig(env = process.env) {
     logKey,
     decisionsKey: decisionsKey(need(env, 'VIGIE_DECISIONS_PRIVATE_KEY')),
     retentionDays: int(env.VIGIE_RETENTION_DAYS, 183, 30, 400),
-    zitadel: issuer ? { issuer, keyFile: env.VIGIE_ZITADEL_KEY_FILE, intervalMs: int(env.VIGIE_ZITADEL_INTERVAL_S, 60, 30, 3600) * 1000 } : null,
+    // Lecture des événements toutes les 30 minutes par défaut (quota mensuel de l'API de Zitadel Cloud, offre gratuite :
+    // 5 000 requêtes ; l'historique gratuit est d'un jour, la marge reste large), de 5 minutes à 6 heures.
+    zitadel: issuer ? { issuer, keyFile: env.VIGIE_ZITADEL_KEY_FILE, intervalMs: int(env.VIGIE_ZITADEL_INTERVAL_S, 1800, 300, 21600) * 1000,
+      quota: int(env.VIGIE_ZITADEL_QUOTA, 5000, 0, 10_000_000) } : null,
     backupDir: env.VIGIE_BACKUP_DIR ? path.resolve(env.VIGIE_BACKUP_DIR) : null,
     // Sauvegardes du site, montées en lecture seule : contrôle des rôles (annexe architecture 4.4), obligatoire.
     siteBackupDir,
