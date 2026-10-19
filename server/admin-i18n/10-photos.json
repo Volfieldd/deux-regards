@@ -1147,9 +1147,9 @@
   "en": "Save and publish all",
   "de": "Speichern und alle veröffentlichen"
  },
- "Légende, filigrane et preuve d’antériorité : depuis la fiche de chaque photo (Photos › titre).": {
-  "en": "Caption, watermark and proof of prior existence: from each photo’s details (Photos › title).",
-  "de": "Bildunterschrift, Wasserzeichen und Prioritätsnachweis: in den Details jedes Fotos (Fotos › Titel)."
+ "Légende, traductions, description suggérée, filigrane et preuve d’antériorité : depuis la fiche de chaque photo (Photos › titre).": {
+  "en": "Caption, translations, suggested description, watermark and proof of prior existence: from each photo’s details (Photos › title).",
+  "de": "Bildunterschrift, Übersetzungen, vorgeschlagene Beschreibung, Wasserzeichen und Prioritätsnachweis: in den Details jedes Fotos (Fotos › Titel)."
  },
  "Les photos partent dès que vous les choisissez et arrivent en brouillon : rien n’est publié sans vous. Les fichiers invalides sont écartés avant l’envoi.": {
   "en": "Photos upload as soon as you choose them and arrive as drafts: nothing is published without you. Invalid files are set aside before upload.",

@@ -39,13 +39,14 @@ Au traitement, le site applique l'orientation de l'appareil, calcule les images 
 
 ### 3. Compléter et publier
 
-Toutes les photos du lot sont réunies sur un seul écran : titre, série, lieu et date. Un écran en montre 200 au plus : au-delà (une grosse carte mémoire), il l'indique en haut et mène aux suivantes.
+Toutes les photos du lot sont réunies sur un seul écran : titre et texte de remplacement, série, lieu et date. Un écran en montre 200 au plus : au-delà (une grosse carte mémoire), il l'indique en haut et mène aux suivantes.
 
 - **Sur ordinateur :** un tableau, une ligne par photo.
-- **Sur téléphone :** une **carte par photo**, avec sa case, sa vignette, son état, puis les champs Titre, Série, Lieu et Date les uns sous les autres.
+- **Sur téléphone :** une **carte par photo**, avec sa case, sa vignette, son état, puis les champs Titre, Texte de remplacement, Série, Lieu et Date les uns sous les autres.
 
 - **Chaque champ s'enregistre quand vous le quittez** (Tab, clic ailleurs ou Entrée). La colonne **État** affiche « Enregistrement… » puis « ✓ Enregistré ». Le message en bas de l'écran propose **Annuler** pendant quelques secondes.
 - **Titre provisoire :** tant que le titre est celui du nom de fichier, il est signalé sous le champ.
+- **Texte de remplacement :** sous le titre, ce qu'on voit sur la photo, en une ligne (250 signes au plus ; un retour à la ligne devient une espace). Il est lu à la place de la photo par les personnes aveugles. Vide, il n'est jamais rempli tout seul : la description suggérée se reprend dans la fiche.
 - **Date :** déjà remplie quand l'appareil l'a enregistrée. Sinon, en langage courant : « oct. 2026 », « octobre 2026 », « 10/2026 », « 5/10/2026 » ou « 2026-10 ». Le site affiche ce qu'il a compris (« compris : oct. 2026 »).
 - **Pour les photos cochées** (toutes, au départ), la barre du haut applique une **série** (y compris une nouvelle), un **lieu** ou une **date** **dès que vous les changez** — sans bouton à cliquer, avec **Annuler** dans le message. Puis **Publier**.
   - Sur ordinateur, la barre reste visible quand vous faites défiler le tableau.
@@ -54,7 +55,7 @@ Toutes les photos du lot sont réunies sur un seul écran : titre, série, lieu 
 En pratique, pour un lot : tapez les titres, le lieu une fois dans la barre, puis **Publier**.
 - **Publier des photos à titre provisoire :** un seul clic suffit. Le titre provisoire est signalé avant (« Titre provisoire (nom du fichier) » sous le titre) et rappelé dans le message qui suit, avec **Annuler** pour revenir en arrière.
 
-Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir plus bas).
+Légende, traductions, description suggérée, filigrane et preuve se règlent dans la fiche de chaque photo (voir plus bas).
 
 ## La planche contact
 
@@ -72,7 +73,7 @@ Légende, filigrane et preuve se règlent dans la fiche de chaque photo (voir pl
 Il change selon la sélection :
 
 - **Rien de sélectionné** : les chiffres de la photothèque et les raccourcis.
-- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours (pour les comptes qui voient les statistiques). Chaque champ s’enregistre tout seul quand vous le quittez (ou Entrée), comme le rappelle le panneau — la fiche complète, elle, s’enregistre avec **Enregistrer** ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
+- **Une photo** (un clic dessus) : en tête du panneau, le bouton **Ouvrir la fiche** ; puis l’image en grand, **titre**, **légende**, **texte de remplacement** (en français, une ligne ; ses traductions et la description suggérée sont dans la fiche), **série** (pastilles), **lieu**, **date**, **photographe** et son **audience** sur 30 jours (pour les comptes qui voient les statistiques). Chaque champ s’enregistre tout seul quand vous le quittez (ou Entrée), comme le rappelle le panneau — la fiche complète, elle, s’enregistre avec **Enregistrer** ; le message en bas propose **Annuler**. **Ouvrir la fiche**, ou le lien **Fiche complète** en bas du panneau, mène à la fiche (filigrane, Instagram, preuve d’antériorité, suppression).
 - **Plusieurs photos** : voir ci-dessous.
 
 En bas, toujours : **Publier**, **Dépublier**, **Supprimer…**.
@@ -114,7 +115,7 @@ Si l’enregistrement échoue (session expirée…), l’ordre précédent revie
 | **Montrer l'heure sur le site** | proposée seulement si l'heure de prise de vue est connue, **décochée au départ**. Cochée, la page de la photo affiche l'heure après la date (« 1 mai 2025, 14 h 32 » ; « 2:32 pm » en anglais, « 14:32 Uhr » en allemand), et seulement si la date est au jour (pas « mars 2024 »). Avec le lieu, l'heure dit où se trouvaient les personnes photographiées à ce moment-là : ne la cochez qu'en connaissance de cause. Nulle part ailleurs sur le site (galerie, À proximité, carte, partage, plan du site) ; en métadonnées « Prise de vue », la date et l'heure des images servies suivent la case (voir [Filigrane et EXIF](filigrane-exif)). Même droit que la date : le photographe la règle pour ses photos. |
 | **Légende** | affichée sous la photo, 2000 caractères |
 | **Texte de remplacement** | ce qu'on voit sur la photo, en une phrase : il est lu par les personnes aveugles (lecteur d'écran) à la place de la photo, sur la page de la photo et, en v2 du site, sous chaque vignette. Une seule ligne (les retours à la ligne deviennent des espaces), **250 signes au plus** : une ou deux phrases, la place de l'allemand comprise ; au-delà, c'est la légende. Vide : le titre est lu. Décrivez ce qu'on voit, sans nommer une personne photographiée : le texte est public, comme la légende. Une description suggérée (plus bas) n'y est jamais recopiée seule : **Reprendre comme texte de remplacement** remplit le champ, vous relisez et vous enregistrez. Même droit que la légende : le photographe pour ses photos, le relecteur pour toutes. |
-| **Numéro d'inventaire** | sous l'aperçu (« inventaire J26-003 ») : l'initiale du photographe (sa lettre des cartes), les deux chiffres de l'année de première publication et son rang dans l'année. Donné **automatiquement à la première publication**, il ne change plus (dépublication, réordonnancement, autre photographe) et n'est jamais redonné, même si la photo est supprimée. Il n'a pas de champ : on ne le modifie pas. La visionneuse v2 l'affiche dans les données de la photo. |
+| **Numéro d'inventaire** | sous l'aperçu (« inventaire J26-003 ») : l'initiale du photographe (sa lettre des cartes), les deux chiffres de l'année de première publication (à l'heure de Paris : une photo publiée le 1er janvier à 0 h 30 compte pour l'année nouvelle) et son rang dans l'année. Donné **automatiquement à la première publication**, il ne change plus (dépublication, réordonnancement, autre photographe) et n'est jamais redonné, même si la photo est supprimée. Il n'a pas de champ : on ne le modifie pas. La visionneuse v2 l'affiche dans les données de la photo. |
 | **Statut** | Brouillon ou Publiée |
 | **Filigrane** | « Selon les réglages », ou « Jamais sur cette photo » (voir [Filigrane et EXIF](filigrane-exif)) |
 | **… en anglais et en allemand** | sous le titre, le lieu, la légende et le texte de remplacement : leur version anglaise et allemande, facultative. Vide : la page anglaise ou allemande montre le texte français (une photo décrite seulement en anglais s'affiche en anglais partout ; voir [Le site vu par les visiteurs](site-public)). |

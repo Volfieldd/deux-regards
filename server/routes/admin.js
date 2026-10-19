@@ -326,7 +326,7 @@ export default async function adminRoutes(app) {
   const hourOf = (time, lang) => (lang === 'fr' ? time.replace(':', ' h ') : time);
   // Données d'une photo pour l'inspecteur de la photothèque.
   const dataOf = (p, lang = 'fr') => ({
-    id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, status: p.status, provisional: p.provisional,
+    id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, alt_text: p.alt_text || '', status: p.status, provisional: p.provisional,
     category_id: p.category_id, category: p.category, author_id: p.author_id, author: p.author, place: p.place,
     taken_on: p.taken_on, when: p.when, time: p.taken_time ? hourOf(p.taken_time, lang) : '', width: p.width, height: p.height, ready: p.ready,
     city_id: p.city_id ?? null, city: cities.labelOf(p, lang), city_source: p.city_source ?? null, on_map: Boolean(p.on_map),
@@ -410,7 +410,7 @@ export default async function adminRoutes(app) {
     // Données de l'inspecteur (une photo choisie) : lues par admin.js, jamais exécutées.
     const data = photos.map(p => dataOf(p, request.t.lang));
     return render(request, reply, 'photos', {
-      title: request.t('Photothèque'), photos, filter, authors, categories: repo.categories(), ratioClass,
+      title: request.t('Photothèque'), photos, filter, authors, categories: repo.categories(), ratioClass, altMax: LIMITS.alt_text,
       json: JSON.stringify(data).replace(/</g, '\\u003c'),
       filtered: Boolean(filter.q || filter.author || filter.category || filter.status || todo || missing), todo,
       missing: missing ? { key: missing, label: MISSING[missing].label } : null,
@@ -1185,7 +1185,7 @@ export default async function adminRoutes(app) {
     const byIdMap = new Map(repo.photos().map(p => [p.id, withReady(p)]));
     const photos = ids.map(id => byIdMap.get(id)).filter(Boolean);
     return render(request, reply, 'batch', {
-      title: request.t('Compléter et publier'), photos, ids: photos.map(p => p.id), categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'),
+      title: request.t('Compléter et publier'), photos, ids: photos.map(p => p.id), categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'), altMax: LIMITS.alt_text,
       errors: {}, values: {}, ...extra,
     });
   };
@@ -1198,7 +1198,8 @@ export default async function adminRoutes(app) {
     return lotPage(request, reply, ids, { rest: all.slice(200), total: all.length });
   });
 
-  // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…).
+  // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…). Le texte de remplacement
+  // (alt_text_<id>, en français) est un texte comme le titre : photos.textes suffit.
   app.post('/admin/photos/lot', W('photos.textes'), async (request, reply) => {
     const body = request.body || {};
     const ids = repo.existingIds(lotIds(body.ids)).filter(id => request.owns('photos.textes', repo.photo(id)?.author_id) && editable(request, repo.photo(id)));
@@ -1207,7 +1208,7 @@ export default async function adminRoutes(app) {
     const errors = {};
     const values = {};
     for (const id of ids) {
-      const fields = { title: body[`title_${id}`], category_id: body[`category_id_${id}`], place: body[`place_${id}`], taken_on: body[`taken_on_${id}`] };
+      const fields = { title: body[`title_${id}`], alt_text: body[`alt_text_${id}`], category_id: body[`category_id_${id}`], place: body[`place_${id}`], taken_on: body[`taken_on_${id}`] };
       for (const k of Object.keys(fields)) if (fields[k] === undefined) delete fields[k];
       try {
         const before = snapshot(id);
@@ -1250,7 +1251,7 @@ export default async function adminRoutes(app) {
       editedIfChanged(request, before);
       app.variants.schedule();
       const shown = repo.photoView(id);
-      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false,
+      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, alt_text: p.alt_text, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false,
         city_id: p.city_id ?? null, city: cities.labelOf(p, request.t.lang), city_source: p.city_source ?? null, on_map: Boolean(p.on_map) } };
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;

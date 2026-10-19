@@ -903,6 +903,8 @@ const activity = (() => {
       const { photo } = await postJson(`/admin/photos/${id}/champs`, { [key]: value });
       field.removeAttribute('aria-invalid');
       field.dataset.saved = key === 'taken_on' ? (photo.taken_on || '') : value;
+      // Texte de remplacement : la version enregistrée (une ligne, bornée côté serveur).
+      if (key === 'alt_text' && typeof photo.alt_text === 'string') { field.value = photo.alt_text; field.dataset.saved = photo.alt_text; }
       // L'heure de prise de vue (data-time) reste à côté de la date comprise.
       if (note) { note.classList.remove('err'); note.textContent = [photo.when && tr('compris : {when}', { when: photo.when }), note.dataset.time].filter(Boolean).join(' · '); }
       if (key === 'title') {
@@ -1393,6 +1395,7 @@ const activity = (() => {
     const put = (k, v) => { const f = one.field(k); if (f !== document.activeElement) f.value = v; };
     put('title', p.title);
     put('legend', p.legend || '');
+    put('alt_text', p.alt_text || '');
     put('place', p.place || '');
     put('taken_on', p.taken_on || '');
     put('author_id', p.author_id ? String(p.author_id) : '');
@@ -1504,7 +1507,7 @@ const activity = (() => {
       toast.show(msg, { error: true });
     }
   }
-  ['title', 'legend', 'place', 'taken_on', 'author_id'].forEach(k => {
+  ['title', 'legend', 'alt_text', 'place', 'taken_on', 'author_id'].forEach(k => {
     const f = one.field(k);
     f.addEventListener('focus', () => { f.dataset.before = f.value; });
     if (f.matches('select')) onPick(f, () => saveOne(k, f.value, f.dataset.before));

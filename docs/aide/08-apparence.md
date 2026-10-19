@@ -1,6 +1,20 @@
 # Apparence
 
-L'apparence du **site public** : thème, logo et icône. L'admin garde toujours la sienne.
+L'apparence du **site public** : version (v1 ou v2), thème, logo et icône. L'admin garde toujours la sienne.
+
+## Site public : v1 ou v2
+
+En tête de la page. La **v2** est la nouvelle présentation du site public, issue de l'audit d'ergonomie d'octobre 2026. Elle couvre toutes les pages publiques (voir [Le site vu par les visiteurs](site-public)), sauf les pages d'erreur et de connexion, qui gardent la présentation v1. L'administration ne change pas.
+
+1. **Voir la v2 avant tout le monde :** cliquez sur **Ouvrir l'aperçu de la v2**.
+   - **Vous seul** la voyez, sur cette session (cet appareil, ce navigateur), jusqu'à **Quitter l'aperçu**, la déconnexion ou la fin de la session.
+   - Un bandeau sable le rappelle en haut de chaque page du site, même d'une page restée en v1 ; il porte **Quitter l'aperçu**.
+   - Les visiteurs gardent la v1, quoi qu'ils envoient (cookie, adresse) : le choix est gardé sur le serveur, jamais dans le navigateur.
+   - Pendant l'aperçu, vos pages ne sont gardées dans aucun cache (Cloudflare compris) : un visiteur ne peut pas recevoir la page que vous voyez.
+2. **Avant de l'appliquer à tous :** suivez la [liste de contrôle de la bascule](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (essais sur iPad, ordinateur et téléphone, sauvegarde récente, ce qu'il faut surveiller la première semaine).
+3. **L'appliquer à tous :** cochez **v2**, puis **Enregistrer la version**. Revenir à la v1 se fait de la même façon, à tout moment.
+
+L'ouverture et la fermeture de l'aperçu, et chaque changement de version, sont notés au [Journal](reglages#journal).
 
 ## Choisir un thème
 
@@ -17,19 +31,6 @@ Chaque thème est présenté avec ses trois couleurs (fond, encre, accent) et un
 | **Atelier** | papier chaud, titres en italique |
 | **Nicephos — nuit** | galerie noire, trait blanc, capitales espacées, accent sable |
 | **Nicephos — jour** | la même identité sur fond blanc |
-
-## Site public : v1 ou v2
-
-La **v2** est la nouvelle présentation du site public, issue de l'audit d'ergonomie d'octobre 2026. Ses pages arrivent une à une ; aujourd'hui : **la page d'une photo** (la visionneuse), **l'accueil et sa galerie** (avec les vues d'un photographe et des filtres) **la page d'une série**, les pages à formulaire (« Je vous ai photographié », Signaler, Partager sans script, la photo offerte), et les autres pages publiques : À propos, Droits d'utilisation, Mentions légales, Confidentialité, Rechercher, Carte, Voyages, page introuvable (voir [Le site vu par les visiteurs](site-public)). Une page qui n'a pas encore sa version v2 s'affiche en v1. L'administration ne change pas.
-
-1. **Voir la v2 avant tout le monde :** cliquez sur **Ouvrir l'aperçu de la v2**.
-   - **Vous seul** la voyez, sur cette session (cet appareil, ce navigateur), jusqu'à **Quitter l'aperçu**, la déconnexion ou la fin de la session.
-   - Un bandeau sable le rappelle en haut de chaque page du site, même d'une page restée en v1 ; il porte **Quitter l'aperçu**.
-   - Les visiteurs gardent la v1, quoi qu'ils envoient (cookie, adresse) : le choix est gardé sur le serveur, jamais dans le navigateur.
-   - Pendant l'aperçu, vos pages ne sont gardées dans aucun cache (Cloudflare compris) : un visiteur ne peut pas recevoir la page que vous voyez.
-2. **L'appliquer à tous :** cochez **v2**, puis **Enregistrer la version**. Revenir à la v1 se fait de la même façon, à tout moment.
-
-L'ouverture et la fermeture de l'aperçu, et chaque changement de version, sont notés au [Journal](reglages#journal).
 
 ## Marque
 

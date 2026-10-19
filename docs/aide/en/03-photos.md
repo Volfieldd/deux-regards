@@ -39,13 +39,14 @@ During processing, the site applies the camera orientation, computes the served 
 
 ### 3. Complete and publish
 
-All the photos in the batch are gathered on a single screen: title, series, place and date. A screen shows 200 at most: beyond that (a large memory card), it says so at the top and leads to the next ones.
+All the photos in the batch are gathered on a single screen: title and alternative text, series, place and date. A screen shows 200 at most: beyond that (a large memory card), it says so at the top and leads to the next ones.
 
 - **On a computer:** a table, one row per photo.
-- **On a phone:** **one card per photo**, with its checkbox, thumbnail and state, then the Title, Series, Place and Date fields one below the other.
+- **On a phone:** **one card per photo**, with its checkbox, thumbnail and state, then the Title, Alternative text, Series, Place and Date fields one below the other.
 
 - **Each field is saved when you leave it** (Tab, click elsewhere or Enter). The **State** column shows “Saving…” then “✓ Saved”. The message at the bottom of the screen offers **Undo** for a few seconds.
 - **Provisional title:** as long as the title is the one from the file name, this is flagged under the field.
+- **Alternative text:** under the title, what can be seen in the photo, in one line (250 characters at most; a line break becomes a space). Blind people hear it instead of the photo. When empty, it is never filled in automatically: the suggested description is taken up in the details.
 - **Date:** already filled in when the camera recorded it. Otherwise, in everyday language: “oct. 2026”, “octobre 2026”, “10/2026”, “5/10/2026” or “2026-10”. The site shows what it understood (“understood: oct. 2026”).
 - **For the ticked photos** (all of them, at first), the top bar applies a **series** (including a new one), a **place** or a **date** **as soon as you change them** — no button to click, with **Undo** in the message. Then **Publish**.
   - On a computer, the bar stays visible when you scroll the table.
@@ -54,7 +55,7 @@ All the photos in the batch are gathered on a single screen: title, series, plac
 In practice, for a batch: type the titles, the place once in the bar, then **Publish**.
 - **Publishing photos with a provisional title:** a single click is enough. The provisional title is flagged beforehand (“Provisional title (file name)” under the title) and recalled in the message that follows, with **Undo** to go back.
 
-Caption, watermark and proof are set in each photo's details (see below).
+Caption, translations, suggested description, watermark and proof are set in each photo's details (see below).
 
 ## The contact sheet
 
@@ -72,7 +73,7 @@ Caption, watermark and proof are set in each photo's details (see below).
 It changes with the selection:
 
 - **Nothing selected**: the photo library figures and the shortcuts.
-- **One photo** (a click on it): at the top of the panel, the **Open details** button; then the large image, **title**, **caption**, **series** (chips), **place**, **date**, **photographer** and its **audience** over 30 days (for accounts that see statistics). Each field is saved when you leave it (or Enter); the message at the bottom offers **Undo**. **Open details**, or the **Full details** link at the bottom of the panel, leads to the details page (watermark, Instagram, proof of prior existence, deletion).
+- **One photo** (a click on it): at the top of the panel, the **Open details** button; then the large image, **title**, **caption**, **alternative text** (in French, one line; its translations and the suggested description are in the details), **series** (chips), **place**, **date**, **photographer** and its **audience** over 30 days (for accounts that see statistics). Each field is saved when you leave it (or Enter); the message at the bottom offers **Undo**. **Open details**, or the **Full details** link at the bottom of the panel, leads to the details page (watermark, Instagram, proof of prior existence, deletion).
 - **Several photos**: see below.
 
 At the bottom, always: **Publish**, **Unpublish**, **Delete…**.
@@ -114,7 +115,7 @@ If saving fails (session expired…), the previous order comes back and a messag
 | **Show the time on the site** | offered only if the shooting time is known, **unticked at first**. Ticked, the photo’s page shows the time after the date (“1 May 2025, 2:32 pm”; “14 h 32” in French, “14:32 Uhr” in German), and only if the date is to the day (not “mars 2024”). Together with the place, the time tells where the people photographed were at that moment: only tick it knowingly. Nowhere else on the site (gallery, Nearby, map, sharing, sitemap); with “Shooting data” metadata, the date and time of the images served follow the box (see [Watermark and EXIF](filigrane-exif)). Same right as the date: photographers set it for their own photos. |
 | **Caption** | shown under the photo, 2000 characters |
 | **Alternative text** | what can be seen in the photo, in one sentence: blind people (screen readers) hear it instead of the photo, on the photo’s page and, in v2 of the site, on each thumbnail. One line (line breaks become spaces), **250 characters at most**: one or two sentences, with room for German; anything longer belongs in the caption. Empty: the title is read. Describe what can be seen without naming a person photographed: the text is public, like the caption. A suggested description (below) is never copied into it by itself: **Use as alternative text** fills the field, you review it and save. Same right as the caption: the photographer for their photos, the proofreader for all of them. |
-| **Inventory number** | under the preview (“inventory J26-003”): the photographer’s initial (their card letter), the two digits of the year of first publication and its rank in that year. Given **automatically at first publication**, it never changes afterwards (unpublishing, reordering, another photographer) and is never given again, even if the photo is deleted. It has no field: it cannot be edited. The v2 viewer shows it in the photo’s details. |
+| **Inventory number** | under the preview (“inventory J26-003”): the photographer’s initial (their card letter), the two digits of the year of first publication (Paris time: a photo published on 1 January at 12:30 am counts for the new year) and its rank in that year. Given **automatically at first publication**, it never changes afterwards (unpublishing, reordering, another photographer) and is never given again, even if the photo is deleted. It has no field: it cannot be edited. The v2 viewer shows it in the photo’s details. |
 | **Status** | Draft or Published |
 | **Watermark** | “As per settings”, or “Never on this photo” (see [Watermark and EXIF](filigrane-exif)) |
 | **… in English and German** | under the title, the place, the caption and the alternative text: their English and German version, optional. Empty: the English or German page shows the French text (a photo described only in English is shown in English everywhere; see [The site as visitors see it](site-public)). |
