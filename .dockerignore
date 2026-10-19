@@ -15,5 +15,9 @@ compose*.yaml
 vigie/node_modules
 **/vigie.env
 vigie.env
-bordure/
+# Worker de bordure : seuls ses fichiers suivis par Git entrent (image de la Vigie) ; jamais sa configuration remplie.
+bordure/wrangler.toml
+bordure/wrangler.toml.bak
+bordure/.wrangler/
+bordure/node_modules/
 cloudflare-token

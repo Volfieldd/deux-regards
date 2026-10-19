@@ -73,6 +73,9 @@ networks:
           ip_range: ${SORTIE_NET_IP_RANGE:-172.29.44.128/25}
   sortie-internet:
     name: nicephos-sortie-internet
+  # Déploiement du Worker de bordure (service « bordure », lancé à la main) : sortie vers npm et Cloudflare seulement.
+  bordure-deploiement:
+    name: nicephos-bordure
 
 services:
   site:
@@ -392,6 +395,52 @@ services:
     mem_limit: 128m
     pids_limit: 64
     <<: *hardening
+
+  # Déploiement du Worker de bordure chez Cloudflare (phase C3, facultatif ; vigie-phase-0.md, étape 3.7). Le Worker
+  # tourne chez Cloudflare, devant le tunnel (bloquer avant le site, voir l'opérateur et l'empreinte TLS) : ce service
+  # n'est qu'une tâche lancée à la main, qui s'arrête une fois le Worker envoyé. Jamais démarré par « up » (profil
+  # « bordure » à ne pas mettre dans COMPOSE_PROFILES) :
+  #   docker compose --profile bordure run --rm bordure [--essai | --desactiver | --reactiver]
+  # Même image que la Vigie (bordure/ y est copié) ; Wrangler, en version fixée, est téléchargé dans /tmp à chaque fois.
+  # Jeton à part de celui de la Vigie (modèle « Edit Cloudflare Workers ») : BORDURE_SECRETS_DIR/cloudflare-deploiement.
+  # Réseau à lui, hors des règles de l'hôte (reseau/regles.sh) : il ne joint que npm et l'API de Cloudflare, le temps
+  # d'un déploiement, et aucun conteneur de la pile.
+  bordure:
+    image: ${VIGIE_IMAGE:-ghcr.io/volfieldd/deux-regards-vigie:latest}
+    container_name: nicephos-bordure
+    profiles: [bordure]
+    restart: "no"
+    entrypoint: ["node", "bordure/deployer.mjs"]
+    command: []
+    env_file:
+      - path: vigie.env
+        required: false
+    environment:
+      VIGIE_DECISIONS_PUBKEY: ${VIGIE_DECISIONS_PUBKEY:-}
+      VIGIE_BORDURE_KEY: ${VIGIE_BORDURE_KEY:-}
+      BORDURE_TOKEN_FILE: /secrets/cloudflare-deploiement
+    user: "${PUID:-99}:${PGID:-100}"
+    networks:
+      bordure-deploiement: {}
+    healthcheck:
+      disable: true
+    volumes:
+      - type: bind
+        source: ${BORDURE_SECRETS_DIR:-${NICEPHOS_DIR:?NICEPHOS_DIR obligatoire (voir env.example)}/bordure-secrets}
+        target: /secrets
+        read_only: true
+        bind:
+          create_host_path: false
+    logging: *logging
+    mem_limit: 1g
+    pids_limit: 256
+    read_only: true
+    # /tmp exécutable : Wrangler y installe esbuild et workerd (binaires).
+    tmpfs:
+      - /tmp:exec,size=1g
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
 
 volumes:
   traduction-modeles:

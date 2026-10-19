@@ -148,24 +148,18 @@ Avec `VIGIE_CF_ZONE_ID` et un jeton à part (*Zone Settings : Edit* sur la seule
 
 ### Installer (instance de test d'abord, D19)
 
-1. **Clé partagée** : `openssl rand -base64 32` → `VIGIE_BORDURE_KEY` dans le `.env` du site (différente de `VIGIE_INGEST_KEY`).
-2. **Espace KV** : `npx wrangler@4 kv namespace create vigie-blocages` (noter l'identifiant).
-3. **Worker** : copier `bordure/wrangler.toml.example` en `bordure/wrangler.toml` (ignoré par Git), remplir `DECISIONS_PUBKEY` (= `VIGIE_DECISIONS_PUBKEY`), l'identifiant KV et la zone ; puis, dans `bordure/` :
+Marche à suivre pas à pas, dans un ordre qui ne coupe jamais le site : [`vigie-phase-0.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/vigie-phase-0.md), **étape 3.7** (espace KV, clé partagée, jetons, `vigie.env`, déploiement par le service `bordure` du compose, routes, vérification, retour en arrière). Le Worker tourne **chez Cloudflare**, devant le tunnel (c'est ce qui lui fait bloquer avant le site et voir l'opérateur et l'empreinte TLS) ; le service `bordure` (profil du même nom, jamais démarré par `up`) ne fait que l'envoyer : `docker compose --profile bordure run --rm bordure [--essai | --desactiver | --reactiver]`, avec un jeton à part (« Edit Cloudflare Workers ») dans `NICEPHOS_DIR/bordure-secrets/cloudflare-deploiement`. En bref :
 
-   ```bash
-   npx wrangler@4 secret put BORDURE_KEY   # la valeur de VIGIE_BORDURE_KEY
-   npx wrangler@4 deploy
-   ```
-
-4. **Routes** (tableau de bord → Workers Routes) : la route `nicephos.art/*` vers `vigie-bordure` en mode **« Fail open »** (au-delà du quota, les requêtes passent) ; routes **sans Worker** (« None ») pour `nicephos.art/media/*`, `/static/*`, `/fonts/*`, `/partage/*`, `/admin/media/*` (images et fichiers : jamais comptés dans le quota). Le Worker les laisse aussi passer s'il les reçoit.
-5. **Jeton pour la Vigie** (Mon profil → API Tokens → Create custom token) : *Account → Account Analytics → Read* et *Account → Workers KV Storage → Edit*, sur ce compte seulement ; le poser dans `VIGIE_SECRETS_DIR/cloudflare-token` (`chmod 600`, `99:100`).
-6. **`vigie.env`** : `VIGIE_CF_ACCOUNT_ID`, `VIGIE_CF_KV_NAMESPACE` (et `VIGIE_CF_DATASET` si autre que `vigie_bordure`). Redémarrer le site et la Vigie.
+- **Espace KV `vigie-blocages`** (Vigie → Worker) : son **identifiant** dans `VIGIE_CF_KV_NAMESPACE` et dans `wrangler.toml` ;
+- **jeu de données Analytics Engine `vigie_bordure`** (Worker → Vigie) : un **nom**, le même des deux côtés, créé par Cloudflare au premier point ; `VIGIE_CF_DATASET` n'est à mettre que pour un autre nom ;
+- **`VIGIE_BORDURE_KEY`** du site = secret `BORDURE_KEY` du Worker ; **`VIGIE_DECISIONS_PUBKEY`** du site = `DECISIONS_PUBKEY` du Worker ;
+- **jeton** de la Vigie dans `VIGIE_SECRETS_DIR/cloudflare-token` : *Account Analytics : Read* et *Workers KV Storage : Edit* (plus *Account Filter Lists : Edit* pour la liste de la phase E3).
 
 **Vérifier** : `docker exec nicephos-vigie node vigie/cli.js regles | grep bordure` ; après quelques minutes de trafic, des événements `bordure_*` dans `alertes --toutes` ou la base ; une adresse bloquée par `bloquer` reçoit la page « Accès refusé » de Cloudflare, sans que la requête n'atteigne le site (journal du site muet).
 
 **Délais** : une décision (ou une levée) atteint la bordure en 4 à 5 minutes au plus (copie dans KV au plus toutes les 2 minutes, propagation de KV, cache du Worker d'une minute). Le site, lui, l'applique tout de suite.
 
-**Dernier recours** (adresse d'un administrateur bloquée par erreur, Worker qui dérange) : `DESACTIVE = "1"` dans `bordure/wrangler.toml` puis `npx wrangler@4 deploy` (tout passe, rien n'est compté), ou supprimer la route du Worker dans le tableau de bord. `VIGIE_APPLIQUER=0` ne concerne que le site.
+**Dernier recours** (adresse d'un administrateur bloquée par erreur, Worker qui dérange) : `docker compose --profile bordure run --rm bordure --desactiver` (tout passe, rien n'est compté), ou supprimer la route du Worker dans le tableau de bord. `VIGIE_APPLIQUER=0` ne concerne que le site.
 
 **En-têtes refusés par le site** (`edge_signature_invalid`) : motif « adresse différente » → l'adresse que voit le site n'est pas celle que voit Cloudflare (vérifier `TRUST_PROXY`, l'adresse de cloudflared) ; « signature fausse » → clé différente entre le Worker et le site, ou chemin transformé en route ; « en-têtes périmés » → horloge du serveur décalée. La règle (DS32) reste en mode « observer » tant que l'instance de test n'a pas validé.
 
