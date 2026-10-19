@@ -1,0 +1,107 @@
+<% layout('./layout') %>
+<% const t = it.t; const s = it.settings; const E = __eta.e; %>
+<% /* Site public (UX-A-06, UX-A-25 ; règle de MQ-09) : les textes, l'ouverture de l'accueil, la carte du monde et la
+      recherche. Mêmes champs et même route que la v1 (POST /admin/reglages, part=site : un envoi enregistre toute la
+      page). Avec le script, chaque champ s'enregistre quand on le quitte, chaque case et chaque geste de l'ouverture tout
+      de suite (le formulaire entier part, comme sans script), avec « Défaire » 10 s ; une traduction proposée remplit le
+      champ sans rien enregistrer. Sans script : les boutons ← → ✕ de l'ouverture et « Enregistrer le site public ». */ %>
+<% const hero = Array.isArray(s.hero) ? s.hero : []; const chosen = hero.map(slug => it.published.find(p => p.slug === slug)).filter(Boolean);
+   const ic = (d, sz = 14) => '<svg class="ic" width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + d + '</svg>';
+   const chev = ic('<path d="M9 6l6 6-6 6"/>');
+   const ext = ic('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>', 12);
+   // Un champ (MQ-00 § 7) : libellé, aide, champ ; data-label : son nom dans le témoin et le message d'action.
+   const field = (k, label, { aide = '', optional = true, rows = 0, max = 200, lang = '', placeholder = '' } = {}) => {
+     const by = aide ? ' aria-describedby="' + k + '-a"' : '';
+     const attrs = ' id="' + k + '" name="' + k + '" maxlength="' + max + '"' + (lang ? ' lang="' + lang + '"' : '') + (placeholder ? ' placeholder="' + E(placeholder) + '"' : '') + by + ' data-label="' + E(label) + '"';
+     return '<div class="champ-a"><label for="' + k + '">' + E(label) + (optional ? ' <span class="facultatif">' + E(t('(facultatif)')) + '</span>' : '') + '</label>'
+       + (aide ? '<p class="aide" id="' + k + '-a">' + E(aide) + '</p>' : '')
+       + (rows ? '<textarea' + attrs + ' rows="' + rows + '">' + E(s[k] || '') + '</textarea>' : '<input type="text"' + attrs + ' value="' + E(s[k] || '') + '">') + '</div>';
+   };
+   // Traductions d'un champ, repliées, avec ce qui manque ; « Proposer une traduction » (script, traducteur réglé) remplit le
+   // champ sans l'enregistrer.
+   const trans = (k, label, { rows = 0, max = 200 } = {}) => {
+     const n = ['en', 'de'].filter(l => String(s[k + '_' + l] || '').trim()).length;
+     const one = l => field(k + '_' + l, l === 'en' ? t('{label} en anglais', { label }) : t('{label} en allemand', { label }), { rows, max, lang: l })
+       + (it.translate ? '<p class="tr-act js-seul"><button class="btn ghost" type="button" data-proposer-trad="' + k + '" data-vers="' + l + '">' + E(t('Proposer une traduction')) + '</button></p><p class="hint" role="status" data-trad-statut="' + k + '_' + l + '"></p>' : '');
+     return '<details class="tr-f"><summary>' + chev + E(t('{label} en anglais et en allemand', { label })) + ' <span class="sec">· ' + E(n === 2 ? t('2 sur 2') : n === 1 ? t('1 sur 2') : t('à traduire')) + '</span></summary>'
+       + '<div class="tr-corps">' + one('en') + one('de') + '<p class="hint">' + E(t('Vide : la version française s’affiche (sur la page allemande comme sur la page anglaise).')) + '</p></div></details>';
+   }; %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/reglages-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#reglages-site-public"><%= t('Aide sur cette page') %></a></p>
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Site public') %></h1></div>
+  <p class="ep-meta"><span><%= t('Ce que voient les visiteurs') %></span><span><a class="rg-lien-ext" href="/" target="_blank" rel="noopener"><%= t('Voir le site') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span><%~ ext %></a></span><span role="status" data-temoin></span></p>
+</header>
+<div class="rg">
+<p class="rub-intro"><%= t('Les textes, l’ouverture de l’accueil, la carte du monde et la recherche. L’allure du site (thème, logos, sous-titre) se règle dans Réglages › Identité et apparence ; les thèmes des photos, dans Séries.') %></p>
+<nav class="sur-page" aria-label="<%= t('Sur cette page') %>"><%= t('Sur cette page :') %> <a href="#textes"><%= t('Textes') %></a><a href="#ouverture"><%= t('Ouverture de l’accueil') %></a><a href="#carte"><%= t('Carte du monde') %></a><a href="#recherche"><%= t('Recherche') %></a></nav>
+<form class="form rg-form" id="site-f" method="post" action="/admin/reglages" novalidate data-site>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <input type="hidden" name="part" value="site">
+  <!-- [html-validate-disable-block form-dup-name: l’ouverture est une liste ordonnée, name="hero" répété comme dans la v1 ; le serveur en reçoit les adresses dans l’ordre] -->
+  <button type="submit" hidden data-envoi-defaut><%= t('Enregistrer') %></button>
+  <section class="panel" id="textes" aria-labelledby="textes-t">
+    <h2 id="textes-t"><%= t('Textes') %></h2>
+    <%~ field('site_name', t('Nom du site'), { max: 60, placeholder: it.defaultName, aide: t('Dans l’en-tête, le titre des pages, les partages et le filigrane ({site}). Vide : « {name} ».', { name: it.defaultName }) }) %>
+    <p class="hint"><%= t('Le site est en français, anglais et allemand : chaque texte a sa version anglaise et allemande, facultative (vide : la version française s’affiche).') %></p>
+    <%~ field('tagline', t('Accroche'), { aide: t('Titre de la section « regards » de l’accueil, titre d’« À propos », description pour les moteurs de recherche.') }) %>
+    <%~ trans('tagline', t('Accroche')) %>
+    <%~ field('intro', t('Introduction (accueil)'), { rows: 3, max: 1000, aide: t('Sous l’accroche, à l’accueil.') }) %>
+    <%~ trans('intro', t('Introduction'), { rows: 3, max: 1000 }) %>
+    <%~ field('about', t('À propos'), { rows: 8, max: 10000, aide: t('La page « À propos » ; paragraphes séparés par une ligne vide.') }) %>
+    <%~ trans('about', t('À propos'), { rows: 8, max: 10000 }) %>
+  </section>
+
+  <section class="panel rg-ouverture" id="ouverture" aria-labelledby="ouverture-t" data-hero data-max="<%= it.heroMax %>">
+    <h2 id="ouverture-t"><%= t('Photos de l’ouverture') %></h2>
+    <p class="hint"><%= t('Le diaporama plein écran de l’accueil, dans cet ordre.') %> <%= t('{n} photos au plus ; sans choix, les 5 premières de la galerie.', { n: it.heroMax }) %></p>
+    <p class="rg-compte-h" role="status" data-hero-count><%= chosen.length > 1 ? t('{n} / {max} choisies', { n: chosen.length, max: it.heroMax }) : t('{n} / {max} choisie', { n: chosen.length, max: it.heroMax }) %></p>
+    <h3 id="ordre-t"><%= t('Ordre du diaporama') %></h3>
+    <p class="hint"><span class="js-seul"><%= t('← et → changent l’ordre, ✕ retire la photo ; chaque geste s’enregistre, avec « Défaire ».') %></span><span class="sans-script"><%= t('← → changent l’ordre, ✕ retire la photo (les réglages sont enregistrés en même temps).') %></span></p>
+    <ol class="chosen rg-chosen" aria-labelledby="ordre-t" data-hero-chosen>
+<% chosen.forEach((p, i) => { %>
+      <li class="it" data-slug="<%= p.slug %>" data-title="<%= p.title %>">
+        <input type="hidden" name="hero" value="<%= p.slug %>">
+        <span class="n mono" aria-hidden="true"><%= i + 1 %></span>
+        <%~ it.picture(p, { sizes: '120px', alt: '' }) %>
+        <span class="t"><%= p.title %></span>
+        <span class="mv">
+          <button type="submit" name="hero_op" value="left:<%= p.slug %>" aria-label="<%= t('Avancer « {title} »', { title: p.title }) %>" data-hero-op="left"<%~ i === 0 ? ' disabled' : '' %>>←</button>
+          <button type="submit" name="hero_op" value="right:<%= p.slug %>" aria-label="<%= t('Reculer « {title} »', { title: p.title }) %>" data-hero-op="right"<%~ i === chosen.length - 1 ? ' disabled' : '' %>>→</button>
+          <button type="submit" name="hero_op" value="remove:<%= p.slug %>" aria-label="<%= t('Retirer « {title} » de l’ouverture', { title: p.title }) %>" data-hero-op="remove">✕</button>
+        </span>
+      </li>
+<% }) %>
+    </ol>
+    <p class="hint" data-hero-empty<%~ chosen.length ? ' hidden' : '' %>><%= t('Aucune photo choisie : l’ouverture montre les 5 premières photos de la galerie.') %></p>
+    <fieldset class="rg-pool">
+      <legend><%= t('Ajouter des photos publiées') %></legend>
+      <p class="hint"><%= t('Une case cochée ajoute la photo en fin de diaporama.') %> <span data-hero-full<%~ chosen.length >= it.heroMax ? '' : ' hidden' %>><strong><%= t('Le diaporama est complet ({n} photos) : retirez-en une pour en ajouter une autre.', { n: it.heroMax }) %></strong></span></p>
+      <div class="herogrid" data-hero-pool>
+<% it.published.forEach(p => { const on = hero.includes(p.slug); %>
+        <label class="pick" data-slug="<%= p.slug %>" data-title="<%= p.title %>"<%~ on ? ' hidden' : '' %>><input type="checkbox" name="hero" value="<%= p.slug %>"<%~ on ? ' disabled' : '' %><%~ !on && chosen.length >= it.heroMax ? ' disabled' : '' %>>
+          <%~ it.picture(p, { sizes: '160px', alt: '' }) %><span><%= p.title %></span></label>
+<% }) %>
+      </div>
+<% if (!it.published.length) { %>      <p><%= t('Aucune photo publiée pour l’instant.') %></p><% } %>
+    </fieldset>
+  </section>
+
+  <section class="panel" id="carte" aria-labelledby="carte-t">
+    <h2 id="carte-t"><%= t('Carte du monde') %></h2>
+    <p class="hint"><%= t('Une carte du monde avec la vignette des photos à l’emplacement de leur ville, et la liste des lieux. Seules les photos publiées dont la fiche coche « Afficher sur la carte du monde » y figurent') %> (<%= t('{n} aujourd’hui', { n: it.mapCount }) %><%= it.mapCount ? (it.mapCities > 1 ? t(', {n} villes', { n: it.mapCities }) : t(', {n} ville', { n: it.mapCities })) : '' %>).</p>
+    <div class="choix-a"><label><input type="checkbox" name="map_page"<%~ s.map_page ? ' checked' : '' %> data-label="<%= t('Carte du monde') %>"><span><%= t('Publier la carte du monde') %></span><span class="sec"><%= t('lien « Carte » dans le menu du site') %> · <a href="/carte" target="_blank" rel="noopener">/carte<span class="sr-only"> <%= t('(nouvel onglet)') %></span></a><%= s.map_page ? '' : ` · ${t('aperçu réservé aux photographes')}` %></span></label></div>
+  </section>
+  <section class="panel" id="recherche" aria-labelledby="recherche-t">
+    <h2 id="recherche-t"><%= t('Recherche') %></h2>
+    <p class="hint"><%= t('Les visiteurs cherchent parmi les photos publiées par mots-clés : titre, légende, lieu, ville et région, série, photographe et mots-clés de la fiche, dans les trois langues.') %></p>
+    <div class="choix-a">
+      <label><input type="checkbox" name="search_page"<%~ s.search_page !== false ? ' checked' : '' %> data-label="<%= t('Recherche') %>"><span><%= t('Proposer la recherche') %></span><span class="sec"><%= t('lien « Rechercher » dans le menu du site') %> · <a href="/recherche" target="_blank" rel="noopener">/recherche<span class="sr-only"> <%= t('(nouvel onglet)') %></span></a></span></label>
+      <label><input type="checkbox" name="keywords_shown"<%~ s.keywords_shown ? ' checked' : '' %> data-label="<%= t('Mots-clés sur la page de la photo') %>"><span><%= t('Afficher les mots-clés sur la page de la photo') %></span><span class="sec"><%= t('sinon, ils servent seulement à la recherche') %></span></label>
+    </div>
+  </section>
+  <p class="sans-script form-pied"><button class="btn" type="submit"><%= t('Enregistrer le site public') %></button></p>
+</form>
+</div>
+<%~ include('./_textes-reglages', it) %>
+<script src="<%= it.asset('admin/v2/reglages-v2.js') %>" defer></script>

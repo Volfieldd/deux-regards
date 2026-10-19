@@ -231,6 +231,10 @@ export default async function adminRoutes(app) {
   // Photo absente (supprimée entre-temps, dans un autre onglet) : 404, en page ou en JSON selon l'appel — jamais une
   // erreur 500 (le contrôle de portée laisse passer une photo absente : à chaque route de le dire).
   const noPhoto = (request, reply) => (request.headers.accept?.includes('text/html') ? reply.callNotFound() : reply.code(404).send({ error: request.t('Photo introuvable.') }));
+  // Réponse en JSON demandée exprès (admin v2 : enregistrement au geste, « Défaire ») ; un formulaire, ou une requête sans
+  // en-tête Accept, garde la redirection et son message. Même route, mêmes contrôles, même journal.
+  const asJson = request => /application\/json/.test(request.headers.accept || '') && !request.headers.accept.includes('text/html');
+  const refusedJson = (request, reply, error, code = 422) => { request.refused = true; return reply.code(code).send({ error }); };
   // La ville et la carte comptent toujours comme « plus que du texte » (city_label n'est pas une colonne : la comparer
   // ne voudrait rien dire, et la vider effacerait la ville).
   const CITY_FIELDS = new Set(['city_label', 'city_id', 'on_map']);
@@ -1169,9 +1173,13 @@ export default async function adminRoutes(app) {
         before.author_id !== after.author_id && `photographe : ${repo.authors().find(x => x.id === before.author_id)?.name || '—'} → ${repo.authors().find(x => x.id === after.author_id)?.name || '—'}`].filter(Boolean);
       if (changes.length) app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'compte modifié', target: after.name || after.sub, status: 303, detail: changes.join(' ; ') });
       request.audited = true;
-      return done(reply, '/admin/comptes', request.t('Compte « {name} » enregistré.', { name: after.name || after.sub }));
+      const message = request.t('Compte « {name} » enregistré.', { name: after.name || after.sub });
+      // Admin v2 : l'état enregistré, pour la carte du compte et « Défaire » (qui renvoie l'état d'avant par cette route).
+      if (asJson(request)) return { ok: true, message, account: { id: after.id, roles: after.roles, status: after.status, author_id: after.author_id ?? null } };
+      return done(reply, '/admin/comptes', message);
     } catch (err) {
       if (!(err instanceof AccountError)) throw err;
+      if (asJson(request)) return refusedJson(request, reply, request.t.msg(err.message));
       return failed(reply, '/admin/comptes', request.t.msg(err.message));
     }
   });
@@ -2203,6 +2211,8 @@ export default async function adminRoutes(app) {
 
   app.post('/admin/apparence', W('site.apparence'), async (request, reply) => {
     const body = request.body || {};
+    // Champs changés, notés au journal (noms seulement) : thème, mode de la marque, sous-titre.
+    const was = { theme: app.appearance.themeId(), brand_mode: app.appearance.brand().mode, subtitle: app.appearance.brand().subtitle || '' };
     if (ownKey(THEMES, body.theme)) repo.saveSetting('theme', body.theme);
     // Site public v1 ou v2 : pour tous les visiteurs. Le changement est noté au journal avec son sens.
     const before = app.publicVersion.setting();
@@ -2216,6 +2226,10 @@ export default async function adminRoutes(app) {
       mode: ownKey(BRAND_MODES, body.brand_mode) ? body.brand_mode : brand.mode,
       subtitle: typeof body.subtitle === 'string' ? body.subtitle.replace(/[\x00-\x1f\x7f]/g, '').trim().slice(0, 60) : brand.subtitle,
     });
+    const now = { theme: app.appearance.themeId(), brand_mode: app.appearance.brand().mode, subtitle: app.appearance.brand().subtitle || '' };
+    noteChanges(request, was, now);
+    // Admin v2 : ce qui est enregistré (le sous-titre tel que gardé), pour le champ et « Défaire ».
+    if (asJson(request)) return { ok: true, ...now, site_public: app.publicVersion.setting() };
     return done(reply, '/admin/apparence', request.t('Apparence enregistrée.'));
   });
 
@@ -2276,7 +2290,7 @@ export default async function adminRoutes(app) {
       if (!err.code?.startsWith('FST_')) throw err;
       error = request.t('Envoi invalide.');
     }
-    if (!checked) return reply.code(403).send(request.t('Jeton CSRF invalide.'));
+    if (!checked) return asJson(request) ? reply.code(403).send({ error: request.t('Jeton CSRF invalide.') }) : reply.code(403).send(request.t('Jeton CSRF invalide.'));
     let made = null;
     if (upload) {
       try {
@@ -2286,14 +2300,15 @@ export default async function adminRoutes(app) {
         error = request.t('{label} refusé : {error}.', { label: request.t(slot.label), error: request.t.msg(err.message) });
       }
     }
-    if (!made) return failed(reply, '/admin/apparence', error || request.t('Aucun fichier reçu.'));
+    if (!made) return asJson(request) ? refusedJson(request, reply, error || request.t('Aucun fichier reçu.')) : failed(reply, '/admin/apparence', error || request.t('Aucun fichier reçu.'));
 
     const id = crypto.randomUUID().slice(0, 8);
     const file = `${request.params.slot}-${id}.${slot.kind === 'share' ? 'jpg' : 'png'}`;
     fs.writeFileSync(path.join(brandDir, file), slot.kind === 'share' ? made.image : made.mask);
     // Original conservé (privé, jamais servi) pour régénérer les icônes d'onglet.
     if (slot.kind !== 'share') fs.writeFileSync(path.join(brandDir, `${file}.source`), upload);
-    let brand = { ...app.appearance.brand(), [slot.field]: file };
+    const was = app.appearance.brand();
+    let brand = { ...was, [slot.field]: file };
     if (slot.ratio) brand[slot.ratio] = Math.round((made.width / made.height) * 1000) / 1000;
     if (slot.field === 'emblem' || slot.field === 'icon') {
       brand = { ...brand, ...(await faviconsFrom(brand, id)), mode: 'embleme' };
@@ -2301,13 +2316,18 @@ export default async function adminRoutes(app) {
     saveBrand(brand);
     sweepBrand(brand);
     app.variants.schedule();            // le dessin peut servir de filigrane
-    return done(reply, '/admin/apparence', request.t('{label} enregistré.', { label: request.t(slot.label) }));
+    noteChanges(request, was, brand);
+    const message = request.t('{label} enregistré.', { label: request.t(slot.label) });
+    // Admin v2 : le fichier enregistré (aperçu sans recharger) et le mode d'avant (« Défaire » d'un emplacement vide).
+    if (asJson(request)) return { ok: true, message, slot: request.params.slot, file, mode: brand.mode, modeBefore: was.mode, favicon180: brand.favicon180 || null };
+    return done(reply, '/admin/apparence', message);
   });
 
   app.post('/admin/apparence/marque/:slot/delete', W('site.apparence'), async (request, reply) => {
     const slot = ownKey(BRAND_SLOTS, request.params.slot) ? BRAND_SLOTS[request.params.slot] : null;
     if (!slot) return reply.callNotFound();
-    let brand = { ...app.appearance.brand(), [slot.field]: null };
+    const was = app.appearance.brand();
+    let brand = { ...was, [slot.field]: null };
     if (slot.ratio) brand[slot.ratio] = null;
     if (slot.field === 'emblem' || slot.field === 'icon') {
       brand = { ...brand, ...(await faviconsFrom(brand, crypto.randomUUID().slice(0, 8))) };
@@ -2316,7 +2336,10 @@ export default async function adminRoutes(app) {
     saveBrand(brand);
     sweepBrand(brand);
     app.variants.schedule();
-    return done(reply, '/admin/apparence', request.t('{label} retiré.', { label: request.t(slot.label) }));
+    noteChanges(request, was, brand);
+    const message = request.t('{label} retiré.', { label: request.t(slot.label) });
+    if (asJson(request)) return { ok: true, message, slot: request.params.slot, file: null, mode: brand.mode };
+    return done(reply, '/admin/apparence', message);
   });
 
   // ---------- aide en ligne ----------
@@ -2358,7 +2381,7 @@ export default async function adminRoutes(app) {
   // Deux pages, un seul enregistrement : « Site public » (textes, ouverture, carte du monde) et « Droits &
   // confidentialité ». Chaque formulaire n'enregistre que ses propres champs (part).
   const settingsPage = (request, reply, part) => render(request, reply, 'settings', {
-    heroMax: 8, part, section: part, v2: part === 'droits' ? 'droits' : undefined,
+    heroMax: 8, part, section: part, v2: part,
     title: part === 'site' ? request.t('Site public') : request.t('Droits & confidentialité'), settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
     rights: LANGS.map(l => ({ lang: l, ...RIGHTS[l] })), rightsDefaults: defaultsNow(),
     ...mapCounts.get(), encrypted: app.encounters.encrypted, legalMissing: legalMissing(repo.settings()),
@@ -2379,8 +2402,13 @@ export default async function adminRoutes(app) {
       const bad = ['rights_contact', 'privacy_contact'].find(k => String(request.body?.[k] ?? '').trim() && !SAFE.test(String(request.body[k]).trim()));
       if (bad) return failed(reply, '/admin/droits', request.t('Contact refusé : écrivez une adresse e-mail (nom@exemple.fr) ou une adresse de page en https://, sans guillemet, chevron, apostrophe ni esperluette.'));
     }
+    // Champs changés, notés au journal (noms seulement : un texte peut porter une donnée personnelle).
+    const was = repo.settings();
     repo.saveSettings(withoutDefaults(request.body || {}, defaultsNow()), part);
+    noteChanges(request, was, repo.settings());
     app.variants.schedule();            // {site} peut figurer dans le filigrane
+    // Admin v2 : enregistrement au geste (le formulaire entier, comme sans script) ; l'ouverture telle qu'enregistrée.
+    if (asJson(request)) return { ok: true, hero: repo.settings().hero || [] };
     if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/site#ouverture', request.t('Ordre de l’ouverture enregistré.'));
     return done(reply, part === 'droits' ? '/admin/droits' : '/admin/site', request.t('Réglages enregistrés.'));
   });

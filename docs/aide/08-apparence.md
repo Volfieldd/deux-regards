@@ -2,6 +2,8 @@
 
 L'apparence du **site public** : version (v1, v2 ou v3), thème, logo et icône. L'admin garde toujours la sienne.
 
+En **admin v2**, cette page est l'onglet **Identité et apparence** des Réglages : mêmes champs, mais le sous-titre, la marque et le thème s'enregistrent au geste (avec **Défaire**), et un logo dès le fichier choisi ; remplacer ou retirer un logo passe par un dialogue (voir [L'admin v2](premiers-pas#ladmin-v2)).
+
 ## Site public : v1 ou v2
 
 En tête de la page. La **v2** est la nouvelle présentation du site public, issue de l'audit d'ergonomie d'octobre 2026. Elle couvre toutes les pages publiques (voir [Le site vu par les visiteurs](site-public)), sauf les pages d'erreur et de connexion, qui gardent la présentation v1. L'administration ne change pas.

@@ -87,7 +87,7 @@ test('repli : un écran sans gabarit v2 s’affiche en v1, entier, identique à 
   const a = account(c, { sub: 'compte-a' });
   await a.get('/admin');
   const strip = html => html.replace(/\s*<form class="ver-choix"[\s\S]*?<\/form>/, '');
-  for (const url of ['/admin/signalements', '/admin/statistiques', '/admin/journal', '/admin/aide', '/admin/apparence', '/admin/site', '/admin/terrain', '/admin/carnet', '/admin/galeries']) {
+  for (const url of ['/admin/signalements', '/admin/statistiques', '/admin/journal', '/admin/aide', '/admin/instagram', '/admin/circuit', '/admin/terrain', '/admin/carnet', '/admin/galeries']) {
     await a.version('v1');
     const v1 = (await a.get(url)).body;
     await a.version('v2');

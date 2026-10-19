@@ -1,5 +1,41 @@
 [
   {
+    "version": "1.170.0",
+    "date": "2026-10-19",
+    "pr": 170,
+    "title": {
+      "fr": "Admin v2 : Identité et apparence, Comptes et rôles, Site public",
+      "en": "Admin v2: Identity and appearance, Accounts and roles, Public site",
+      "de": "Verwaltung v2: Identität und Erscheinungsbild, Konten und Rollen, Öffentliche Website"
+    },
+    "items": [
+      {
+        "fr": "En admin v2, « Identité et apparence » rejoint les onglets des Réglages : le sous-titre, la marque et le thème s’enregistrent au geste, avec « Défaire » ; un logo s’enregistre dès le fichier choisi, et le remplacer ou le retirer passe d’abord par un dialogue. La version du site public (v1, v2, v3) ne change pas.",
+        "en": "In admin v2, “Identity and appearance” joins the Settings tabs: the subtitle, the brand and the theme are saved as you go, with “Undo”; a logo is saved as soon as the file is chosen, and replacing or removing it goes through a dialog first. The public site version (v1, v2, v3) does not change.",
+        "de": "In der Verwaltung v2 kommt „Identität und Erscheinungsbild“ zu den Reitern der Einstellungen: Untertitel, Marke und Theme werden bei jeder Geste gespeichert, mit „Rückgängig“; ein Logo wird gespeichert, sobald die Datei gewählt ist, und es zu ersetzen oder zu entfernen geht zuerst über einen Dialog. Die Fassung der öffentlichen Website (v1, v2, v3) ändert sich nicht.",
+        "perm": "site.apparence"
+      },
+      {
+        "fr": "« Comptes et rôles » en cartes : les comptes en attente d’abord, « Modifier » qui déplie les rôles, enregistrés sur place avec « Défaire ». Un compte ne se supprime plus qu’une fois désactivé (ou encore en attente), après un dialogue qui le nomme.",
+        "en": "“Accounts and roles” as cards: pending accounts first, “Edit” unfolding the roles, saved in place with “Undo”. An account can now only be deleted once deactivated (or still pending), after a dialog that names it.",
+        "de": "„Konten und Rollen“ als Karten: wartende Konten zuerst, „Ändern“ klappt die Rollen auf, gespeichert an Ort und Stelle mit „Rückgängig“. Ein Konto lässt sich nur noch löschen, wenn es deaktiviert ist (oder noch wartet), nach einem Dialog, der es nennt.",
+        "perm": "comptes.gerer"
+      },
+      {
+        "fr": "« Site public » s’enregistre champ par champ, avec « Défaire » ; l’ouverture de l’accueil se range sur place avec ← → ✕. Sans JavaScript, un seul bouton enregistre la page.",
+        "en": "“Public site” is saved field by field, with “Undo”; the opening slideshow is ordered in place with ← → ✕. Without JavaScript, a single button saves the page.",
+        "de": "„Öffentliche Website“ wird Feld für Feld gespeichert, mit „Rückgängig“; die Start-Diashow wird an Ort und Stelle mit ← → ✕ geordnet. Ohne JavaScript speichert eine einzige Schaltfläche die Seite.",
+        "perm": "site.textes"
+      },
+      {
+        "fr": "Le journal note aussi le nom des réglages changés dans Apparence et Site public (jamais leur contenu).",
+        "en": "The log also records the names of the settings changed in Appearance and Public site (never their content).",
+        "de": "Das Protokoll vermerkt auch die Namen der in Erscheinungsbild und Öffentlicher Website geänderten Einstellungen (nie ihren Inhalt).",
+        "perm": "journal.voir"
+      }
+    ]
+  },
+  {
     "version": "1.169.0",
     "date": "2026-10-19",
     "pr": 169,

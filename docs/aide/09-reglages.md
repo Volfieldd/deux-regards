@@ -6,6 +6,8 @@ Deux pages du groupe **Publier** et **Réglages** de la barre latérale ; chacun
 
 Ce que voient les visiteurs. Accroche, introduction et « À propos » ont chacun leur version **anglaise et allemande**, facultative, repliée sous le champ français (« … en anglais et en allemand » ; l'état indique *facultatif*, *1 langue sur 2* ou *traduit*). Vide : les visiteurs anglais et allemands lisent le texte français (voir [Le site vu par les visiteurs](site-public)). Le bouton **Proposer une traduction** pré-remplit un champ (voir [Photos](photos), « La fiche d'une photo »).
 
+En **admin v2**, chaque champ s'enregistre quand vous le quittez (le formulaire entier part, comme avec le bouton), avec **Défaire** ; l'ouverture se range sur place ; sans JavaScript, **Enregistrer le site public** (un seul bouton).
+
 | Champ | Où il apparaît |
 |---|---|
 | **Nom du site** | logo texte, titre des pages, variable `{site}` du filigrane. Vide : nom par défaut du serveur. |
@@ -65,6 +67,8 @@ Tant qu'il manque une rubrique obligatoire (noms, adresse, e-mail, téléphone, 
 ## Comptes et rôles
 
 **Comptes et rôles** (groupe Réglages, administrateurs seulement) liste les comptes qui se sont connectés.
+
+En **admin v2** : une carte par compte, les comptes en attente d'abord ; **Modifier** déplie le formulaire, enregistré sur place avec **Défaire** ; **Supprimer ce compte…** n'apparaît que pour un compte **désactivé ou en attente**, et passe par un dialogue qui le nomme (Annuler d'abord) : désactivez d'abord un compte actif.
 
 - **Première connexion :** le compte est créé. Si Zitadel lui donne le rôle « admin », il est administrateur ; sinon il reste **en attente**, sans accès, et « Aujourd'hui » l'indique. Nom et adresse viennent du fournisseur d'identité (l'adresse seulement s'il l'a vérifiée) : avant de donner un rôle, vérifiez avec la personne l'**identifiant (sub)** affiché sous le compte, qu'elle voit aussi sur sa page « Compte en attente ». Un compte jamais traité, resté en attente 90 jours, est effacé (un compte dont un administrateur a retiré les rôles est gardé, et l’IdP ne peut pas lui redonner le rôle « admin »).
 - **Donner un rôle :** cochez-le, puis **Donner ce rôle** (ou **Enregistrer**). Il s'applique tout de suite, sans nouvelle connexion ; le retirer aussi.

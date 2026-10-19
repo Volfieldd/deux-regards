@@ -1,0 +1,113 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
+/* Admin v2, vague 3 : Identité et apparence, Comptes et rôles, Site public.
+   Feuille propre à ces trois écrans (chargée par leurs gabarits, après v2.css) : rien de commun n'y est redéfini. Jetons de
+   la planche MQ-00 (tokens.css), composants d'admin-plus.css (champ-a, choix-a, plier, etat, confirm). */
+
+.rg { display: grid; gap: 20px; max-width: 920px; min-width: 0; }
+.rg > * { margin: 0; min-width: 0; }
+.rg .panel { margin: 0; display: grid; gap: 14px; min-width: 0; }
+.rg .panel > :is(h2, h3, p, fieldset) { margin: 0; }
+.main .rg .rub-titre { margin: 0 0 10px; }
+.rg .rub-intro { margin: 0; }
+.rg-form { display: grid; gap: 20px; }
+.rg-form .form-pied { margin: 0; }
+
+/* « Sur cet onglet / cette page » : des ancres, à la ligne si besoin ; cibles de 24 px, 44 au toucher. */
+.sur-page { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; color: var(--ink3); font-size: var(--at-petit); }
+.sur-page a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
+.sur-page a:hover { color: var(--ink); }
+@media (max-width: 720px), (pointer: coarse) { .sur-page a { min-height: 44px; } }
+/* Une ancre atteinte n'est pas cachée sous un bord : un peu d'air au-dessus. */
+.rg :is(section, .rg-slot, article)[id] { scroll-margin-top: 16px; }
+
+/* ---------- Identité et apparence ---------- */
+.rg-lu { margin: 0; color: var(--ink2); overflow-wrap: anywhere; }
+.rg-lu b { color: var(--ink); font-weight: 500; }
+.rg-lu a { color: inherit; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
+@media (max-width: 720px), (pointer: coarse) { .rg-lu a { min-height: 44px; } }
+.rg .champ-a input[type="text"], .rg .champ-a input[type="email"], .rg .champ-a textarea, .rg .champ-a select { width: 100%; max-width: 100%; }
+.rg .champ-a input[type="file"] { max-width: 100%; min-height: 32px; font: inherit; font-size: var(--at-petit); }
+@media (max-width: 720px), (pointer: coarse) { .rg .champ-a input[type="file"] { min-height: 44px; } }
+
+.rg-themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 14px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.rg-theme { display: grid; gap: 8px; align-content: start; padding: 12px 14px; border-radius: var(--r-admin-panneau); box-shadow: inset 0 0 0 1px var(--line2); min-width: 0; }
+.rg-theme:has(input:checked) { box-shadow: inset 0 0 0 2px var(--accent-ink); }
+.rg-theme > label { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 0 8px; align-items: center; min-height: 32px; cursor: pointer; }
+.rg-theme > label b { font-weight: 500; }
+.rg-theme > .sec { color: var(--ink3); font-size: 12.5px; line-height: 1.45; }
+.rg-apercu { display: inline-flex; align-items: center; gap: 6px; justify-self: start; min-height: 24px; color: var(--ink2); font-size: var(--at-petit); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .rg-theme > label, .rg-apercu { min-height: 44px; } }
+
+.rg-marque { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.rg-slot { display: grid; gap: 8px; align-content: start; padding: 12px 14px; border-radius: var(--r-admin-panneau); box-shadow: inset 0 0 0 1px var(--line); min-width: 0; }
+.main .rg-slot > h3 { margin: 0; font-size: var(--at-h3); font-weight: 500; }
+.rg-slot > .aide { margin: 0; color: var(--ink3); font-size: 12px; line-height: 1.45; }
+.rg-apercu-m { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 72px; padding: 8px; border-radius: var(--r-admin); background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 0 0 / 14px 14px; }
+.rg-apercu-m img { display: block; max-width: 100%; max-height: 96px; width: auto; height: auto; }
+.rg-apercu-m.partage img { max-height: 120px; }
+.rg-apercu-m img.rg-favicon { width: 48px; height: 48px; }
+.rg-apercu-m:has(.vide) { background: transparent; box-shadow: inset 0 0 0 1px var(--line2); }
+.rg-apercu-m .vide { color: var(--ink2); font-size: var(--at-petit); }
+.rg-envoi { display: grid; gap: 8px; margin: 0; }
+.rg-envoi .sans-script { margin: 0; }
+.rg-retirer { margin: 0; }
+.rg-applique { margin: 0; font-weight: 500; }
+.rg-vue, .rg-vues { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; }
+.rg-vue p { margin: 0; }
+
+/* ---------- Comptes et rôles ---------- */
+.rg-roles dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 12px 0 0; }
+.rg-roles dt { font-weight: 500; }
+.rg-roles dd { margin: 0; color: var(--ink2); }
+@media (max-width: 520px) { .rg-roles dl { grid-template-columns: minmax(0, 1fr); } .rg-roles dd { margin-bottom: 6px; } }
+.rg-groupe { display: grid; gap: 0; }
+.rg-n { color: var(--ink3); font-size: .8em; }
+.rg-comptes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 16px; align-items: start; }
+.rg-compte { gap: 8px; }
+.rg-resume { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px 14px; align-items: start; }
+.rg-resume .av { width: 40px; height: 40px; }
+.rg-qui { display: grid; gap: 4px; min-width: 0; }
+.main .rg-qui h3 { margin: 0; font-size: 17px; font-weight: 500; overflow-wrap: anywhere; }
+.rg-qui p { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; overflow-wrap: anywhere; }
+.rg-qui p.sec { color: var(--ink2); font-size: var(--at-petit); }
+.rg-qui .avert { display: flex; flex-wrap: nowrap; }
+.rg-roles-l { color: var(--ink); }
+.rg-compte .modif .form { display: grid; gap: 14px; margin-top: 10px; }
+.rg-compte .modif .form-pied { padding-top: 12px; }
+.rg-sub { margin: 0; color: var(--ink2); font-size: var(--at-petit); overflow-wrap: anywhere; }
+.rg-sub code { font-size: 12px; user-select: all; }
+.rg-suppr { margin: 12px 0 0; }
+.rg-compte .modif > .hint { margin: 12px 0 0; }
+.rg-test { display: grid; gap: 12px; max-width: 520px; }
+
+/* ---------- Site public ---------- */
+.rg .tr-f { margin-top: -6px; }
+.rg-compte-h { font-weight: 500; }
+.main .rg-ouverture h3 { margin: 4px 0 0; font-size: var(--at-h3); font-weight: 500; }
+.rg-chosen { margin: 0; }
+.rg-chosen .it { cursor: default; }
+.rg-chosen .it .t { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+.rg-chosen .mv button { min-width: 32px; min-height: 32px; }
+@media (max-width: 720px), (pointer: coarse) { .rg-chosen .mv button { width: 44px; height: 44px; } }
+.rg-pool { display: grid; gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.rg-pool > legend { padding: 0; margin: 0 0 6px; font-size: var(--at-h3); font-weight: 500; }
+.rg-pool .pick span { overflow-wrap: anywhere; }
+.rg-pool .pick { min-height: 44px; }
+.tr-act .btn + .btn, .hint .btn { margin-left: 8px; }
+[data-trad-statut]:not(:empty) { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rg-lien-ext, .ep-meta .rg-lien-ext { display: inline-flex; align-items: center; gap: 4px; min-height: 24px; white-space: nowrap; color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .ep-meta .rg-lien-ext { min-height: 44px; } }
+.rg details.panel { display: block; }
+/* Cibles de 44 × 44 px au toucher (grille du skill) : les ancres courtes (« Logos ») et le lien du Journal. */
+@media (max-width: 720px), (pointer: coarse) {
+  .sur-page a { min-width: 44px; justify-content: center; }
+  .rg .hint .more { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+}
+.rg-chosen .it .n { font-size: 12px; }
+@media (max-width: 720px), (pointer: coarse) {
+  .rg-chosen .it { width: 148px; }
+  .rg-chosen .it img { width: 148px; height: 99px; }
+  .rg-chosen .mv button { flex: none; }
+  /* Un champ atteint au clavier n'est jamais caché, même en partie, par la barre d'onglets du bas. */
+  .rg :is(input, textarea, select, button, a, summary) { scroll-margin-bottom: calc(var(--barre-basse, 74px) + 16px); }
+}

@@ -2,6 +2,8 @@
 
 The appearance of the **public site**: version (v1, v2 or v3), theme, logo and icon. The admin always keeps its own.
 
+In **admin v2**, this page is the **Identity and appearance** tab of Settings: same fields, but the subtitle, the brand and the theme are saved as you go (with **Undo**), and a logo as soon as the file is chosen; replacing or removing a logo goes through a dialog (see [Admin v2](premiers-pas#ladmin-v2)).
+
 ## Public site: v1 or v2
 
 At the top of the page. **v2** is the new design of the public site, from the usability audit of October 2026. It covers every public page (see [The site as visitors see it](site-public)) except the error and sign-in pages, which keep the v1 design. The administration does not change.

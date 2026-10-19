@@ -6,6 +6,8 @@ Zwei Seiten der Gruppen **Veröffentlichen** und **Einstellungen** in der Seiten
 
 Was die Besucher sehen. Slogan, Einleitung und „Über“ haben jeweils eine optionale **englische und deutsche** Fassung, unter dem französischen Feld eingeklappt („… auf Englisch und Deutsch“; der Status zeigt *optional*, *1 von 2 Sprachen* oder *übersetzt*). Leer: Englisch- und deutschsprachige Besucher lesen den französischen Text (siehe [Die Website aus Sicht der Besucher](site-public)). Die Schaltfläche **Übersetzung vorschlagen** füllt ein Feld vor (siehe [Fotos](photos), „Das Datenblatt eines Fotos“).
 
+In der **Verwaltung v2** wird jedes Feld beim Verlassen gespeichert (das ganze Formular wird gesendet, wie mit der Schaltfläche), mit **Rückgängig**; die Start-Diashow wird an Ort und Stelle geordnet; ohne JavaScript **Öffentliche Website speichern** (eine einzige Schaltfläche).
+
 | Feld | Wo es erscheint |
 |---|---|
 | **Name der Website** | Text-Logo, Seitentitel, Variable `{site}` des Wasserzeichens. Leer: Standardname des Servers. |
@@ -65,6 +67,8 @@ Solange eine Pflichtangabe fehlt (Namen, Adresse, E-Mail, Telefon, Verantwortlic
 ## Konten und Rollen
 
 **Konten und Rollen** (Gruppe Einstellungen, nur für Administratoren) listet die Konten auf, die sich angemeldet haben.
+
+In der **Verwaltung v2**: eine Karte pro Konto, wartende Konten zuerst; **Ändern** klappt das Formular auf, gespeichert an Ort und Stelle mit **Rückgängig**; **Dieses Konto löschen…** erscheint nur für ein **deaktiviertes oder wartendes** Konto, über einen Dialog, der es nennt (zuerst Abbrechen): ein aktives Konto zuerst deaktivieren.
 
 - **Erste Anmeldung:** Das Konto wird angelegt. Gibt Zitadel ihm die Rolle „admin“, ist es Administrator; sonst bleibt es **wartend**, ohne Zugriff, und „Heute“ weist darauf hin. Name und Adresse stammen vom Identitätsanbieter (die Adresse nur, wenn er sie bestätigt hat): Prüfen Sie vor der Vergabe einer Rolle mit der Person die unter dem Konto angezeigte **Kennung (sub)**, die sie auch auf ihrer Seite „Konto wartend“ sieht. Ein nie bearbeitetes Konto, das 90 Tage wartend bleibt, wird gelöscht (ein Konto, dem ein Administrator die Rollen entzogen hat, bleibt erhalten, und der IdP kann ihm die Rolle „admin“ nicht zurückgeben).
 - **Eine Rolle vergeben:** Ankreuzen, dann **Diese Rolle vergeben** (oder **Speichern**). Sie gilt sofort, ohne neue Anmeldung; ihr Entzug ebenso.

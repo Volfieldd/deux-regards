@@ -2,6 +2,8 @@
 
 Das Erscheinungsbild der **öffentlichen Website**: Fassung (v1, v2 oder v3), Theme, Logo und Symbol. Die Verwaltung behält immer ihr eigenes.
 
+In der **Verwaltung v2** ist diese Seite der Reiter **Identität und Erscheinungsbild** der Einstellungen: dieselben Felder, aber Untertitel, Marke und Theme werden bei jeder Geste gespeichert (mit **Rückgängig**), ein Logo, sobald die Datei gewählt ist; ein Logo zu ersetzen oder zu entfernen geht über einen Dialog (siehe [Verwaltung v2](premiers-pas#ladmin-v2)).
+
 ## Öffentliche Website: v1 oder v2
 
 Oben auf der Seite. **v2** ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit vom Oktober 2026. Sie umfasst alle öffentlichen Seiten (siehe [Die Website aus Sicht der Besucher](site-public)) außer den Fehler- und Anmeldeseiten, die die Gestaltung von v1 behalten. Die Verwaltung ändert sich nicht.

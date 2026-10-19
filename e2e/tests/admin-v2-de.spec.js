@@ -26,7 +26,9 @@ test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }
       // Vague 2 : la fiche d'une photo, la photothèque (planche et liste), À valider.
       `/admin/photos/${ids[0]}`, '/admin/photos', '/admin/photos?vue=liste', '/admin/a-valider',
       // Vague 3b : Personnes, Demandes et rencontres, une rencontre, Séries, Sorties, une sortie, Voyages, un voyage.
-      '/admin/personnes', '/admin/rencontres', `/admin/rencontres/${r.id}`, '/admin/series', '/admin/sorties', '/admin/sorties/sebastien/2025-10-20', '/admin/voyages', `/admin/voyages/${tid}`];
+      '/admin/personnes', '/admin/rencontres', `/admin/rencontres/${r.id}`, '/admin/series', '/admin/sorties', '/admin/sorties/sebastien/2025-10-20', '/admin/voyages', `/admin/voyages/${tid}`,
+      // Vague 3a : Identité et apparence, Comptes et rôles, Site public.
+      '/admin/apparence', '/admin/comptes', '/admin/site'];
     for (const [w, h] of [[320, 640], [412, 839], [1032, 1250], [1376, 900], [1440, 900]]) {
       await page.setViewportSize({ width: w, height: h });
       for (const url of urls) {
