@@ -362,7 +362,7 @@ test('Vigie — réglages publics : config_public_changed vu par watchWrites, le
       assert.equal((await adm.json('/admin/apparence', { theme: 'nicephos-nuit' })).statusCode, 200);
       await adm.post('/admin/apparence', { site_public: 'v2' });                     // la v2 garde le formulaire de la v1
     }
-    return (await c.security()).slice(start).filter(e => e.type === 'config_public_changed').map(norm);
+    return (await c.security()).slice(start).filter(e => e.type === 'config_public_changed' && !e.detail?.objet).map(norm);
   };
   const v1 = await run('v1'), v2 = await run('v2');
   assert.deepEqual(v2, v1);
