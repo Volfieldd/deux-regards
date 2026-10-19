@@ -6,6 +6,8 @@ Two pages in the **Publish** and **Settings** groups of the sidebar; each one on
 
 What visitors see. Tagline, introduction and “About” each have an optional **English and German** version, folded below the French field (“… in English and German”; the status shows *optional*, *1 language of 2* or *translated*). Empty: English and German visitors read the French text (see [The site as visitors see it](site-public)). The **Suggest a translation** button pre-fills a field (see [Photos](photos), “A photo’s record”).
 
+In **admin v2**, each field is saved when you leave it (the whole form is sent, as with the button), with **Undo**; the opening slideshow is ordered in place; without JavaScript, **Save the public site** (a single button).
+
 | Field | Where it appears |
 |---|---|
 | **Site name** | text logo, page titles, the watermark’s `{site}` variable. Empty: the server’s default name. |
@@ -65,6 +67,8 @@ As long as a required item is missing (names, address, email, phone, person resp
 ## Accounts and roles
 
 **Accounts and roles** (Settings group, administrators only) lists the accounts that have signed in.
+
+In **admin v2**: one card per account, pending accounts first; **Edit** unfolds the form, saved in place with **Undo**; **Delete this account…** only appears for a **deactivated or pending** account, through a dialog that names it (Cancel first): deactivate an active account first.
 
 - **First sign-in:** the account is created. If Zitadel gives it the “admin” role, it is an administrator; otherwise it stays **pending**, with no access, and “Today” says so. Name and address come from the identity provider (the address only if it verified it): before giving a role, check with the person the **identifier (sub)** shown under the account, which they also see on their “Account pending” page. An account never dealt with and left pending for 90 days is deleted (an account whose roles an administrator removed is kept, and the IdP cannot give it the “admin” role back).
 - **Give a role:** tick it, then **Give this role** (or **Save**). It takes effect at once, without signing in again; removing it too.
