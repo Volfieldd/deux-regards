@@ -65,14 +65,25 @@ export function checkRoles({ store, siteBackupDir, now = Date.now }) {
   }
   store.setting.set('controle_roles_vu', { fichier: name, taille: stat.size, modifie: stat.mtimeMs, at: t });
 
-  let admins, triggers, migration;
+  let admins, triggers, migration, comptes, acces = null;
   try {
     const snap = new Database(file, { readonly: true, fileMustExist: true });
     try {
       snap.pragma('query_only = ON');
       if (!snap.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'accounts'").get()) throw new Error('table accounts absente');
-      admins = snap.prepare("SELECT sub, roles FROM accounts WHERE status = 'actif'").all()
-        .filter(a => { try { const r = JSON.parse(a.roles); return Array.isArray(r) && r.includes('admin'); } catch { return false; } }).map(a => String(a.sub)).sort();
+      const actifs = snap.prepare("SELECT * FROM accounts WHERE status = 'actif'").all();
+      const json = (v, d) => { try { const x = JSON.parse(v); return x ?? d; } catch { return d; } };
+      admins = actifs.filter(a => { const r = json(a.roles, []); return Array.isArray(r) && r.includes('admin'); }).map(a => String(a.sub)).sort();
+      // Rôles, réglages du circuit et photographe lié de chaque compte actif : la référence du détecteur role_incoherent
+      // (galeries privées et Carnets, vigie/detecteurs.js), lue ici plutôt que dans les déclarations du site.
+      comptes = Object.fromEntries(actifs.map(a => {
+        const roles = json(a.roles, []), adjust = json(a.adjust, {});
+        return [String(a.sub), { roles: Array.isArray(roles) ? roles.map(String) : [], adjust: adjust && typeof adjust === 'object' ? { add: [].concat(adjust.add || []).map(String), remove: [].concat(adjust.remove || []).map(String) } : {}, auteur: a.author_id ?? null }];
+      }));
+      // Accès ouverts des galeries privées (registre BV-23, second temps), si la table existe (PR #149).
+      if (snap.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'space_invites'").get()) {
+        acces = snap.prepare('SELECT id FROM space_invites WHERE revoked_at IS NULL AND expires_at > ?').pluck().all(stamp).map(Number);
+      }
       triggers = Object.fromEntries(snap.prepare("SELECT name, sql FROM sqlite_master WHERE type = 'trigger'").all().map(r => [r.name, hash(r.sql)]));
       try { migration = snap.prepare('SELECT MAX(name) FROM migrations').pluck().get() || ''; } catch { migration = ''; }
     } finally { snap.close(); }
@@ -102,6 +113,20 @@ export function checkRoles({ store, siteBackupDir, now = Date.now }) {
     for (const a of admins) if (!before.has(a) && !granted.has(a)) unexplained.push(a);
   }
 
+  // Accès ouverts apparus depuis l'instantané précédent : chacun doit avoir été annoncé par le site (privacy_exposure_changed,
+  // action « cree ») ; un accès écrit hors de l'application (base modifiée à la main) ne l'est pas (DS8 transposé).
+  // Premier instantané qui contient la table : référence seulement (des accès peuvent dater d'avant la Vigie).
+  const accesSans = [];
+  const accesAvant = store.setting.get('controle_roles_acces', null);
+  if (acces && accesAvant && Array.isArray(accesAvant.ids)) {
+    const before = new Set(accesAvant.ids);
+    const annonces = new Set();
+    for (const d of store.db.prepare("SELECT detail FROM events WHERE type = 'privacy_exposure_changed' AND recu_a > ?").pluck().iterate((accesAvant.instantane_a ?? stamp - 864e5) - 3600e3)) {
+      try { const x = JSON.parse(d); if (x.objet === 'acces_prive' && x.action === 'cree' && x.acces != null) annonces.add(Number(x.acces)); } catch { /* ligne illisible */ }
+    }
+    for (const id of acces) if (!before.has(id) && !annonces.has(id)) accesSans.push(id);
+  }
+
   // Déclencheurs : présents, et même texte que dans l'instantané précédent (sauf migration du site entre les deux).
   const missing = TRIGGERS.filter(n => !triggers[n]);
   const ref = store.setting.get('controle_roles_declencheurs', null);
@@ -109,16 +134,19 @@ export function checkRoles({ store, siteBackupDir, now = Date.now }) {
   const migrated = Boolean(ref) && ref.migration !== migration;
   const altered = migrated ? [] : differs;
 
-  const critical = unknownAdmins.length || unexplained.length || missing.length || altered.length;
+  const critical = unknownAdmins.length || unexplained.length || missing.length || altered.length || accesSans.length;
   const severity = critical ? 'critique' : (!declarations || (migrated && differs.length) || t - stamp > STALE) ? 'haut' : 'info';
   report(severity, {
     instantane: name, administrateurs: admins.length, administrateurs_non_declares: unknownAdmins, administrateurs_sans_changement: unexplained,
     declencheurs_absents: missing, declencheurs_modifies: altered, declencheurs_modifies_par_migration: migrated && differs.length ? differs : undefined,
     declare: declarations > 0, age_heures: Math.round((t - stamp) / 3600e3),
+    acces_ouverts: acces ? acces.length : undefined, acces_sans_evenement: accesSans.length ? accesSans.slice(0, 50) : undefined,
   });
+  store.setting.set('controle_roles_comptes', { comptes, instantane_a: stamp });
+  if (acces && !accesSans.length) store.setting.set('controle_roles_acces', { ids: acces, instantane_a: stamp });
   // Références pour le prochain contrôle. Sur un écart, l'ancienne est gardée : l'écart ressort tant qu'il n'est pas
   // expliqué (ou que la ligne de commande ne l'a pas accepté).
   if (!unexplained.length && !unknownAdmins.length) store.setting.set('controle_roles_admins', { administrateurs: admins, instantane_a: stamp });
   if (!altered.length && !missing.length) store.setting.set('controle_roles_declencheurs', { migration, sql: Object.fromEntries(TRIGGERS.map(n => [n, triggers[n]])) });
-  return { ok: !critical, unknownAdmins, unexplained, missing, altered, severity };
+  return { ok: !critical, unknownAdmins, unexplained, missing, altered, accesSans, severity };
 }

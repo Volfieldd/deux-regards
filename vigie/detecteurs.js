@@ -58,6 +58,46 @@ export function lru(max) {
   };
 }
 
+// Rôle incohérent étendu aux galeries privées et aux Carnets (registre des briques, « Permissions et contrôle des
+// rôles », BV-23 ; PR #149 et #151) : ce que chaque rôle de départ donne de ces permissions, et leur portée (« tout » ou
+// « les miennes »). Copie voulue de server/permissions.js : la Vigie ne lit pas le code du site qu'elle surveille ;
+// test/vigie-galeries-carnets.test.js vérifie l'accord avec le catalogue du site dès qu'il contient ces permissions.
+const TOUT = 'tout', MIENNES = 'les miennes';
+export const PERMISSIONS_SURVEILLEES = ['galeries.voir', 'galeries.gerer', 'galeries.partager', 'carnet.voir', 'carnet.ecrire', 'carnet.textes', 'carnet.publier', 'carnet.publies.modifier'];
+export const ROLES_SURVEILLES = {
+  admin: Object.fromEntries(PERMISSIONS_SURVEILLEES.map(p => [p, TOUT])),
+  photographe: { 'galeries.voir': MIENNES, 'galeries.gerer': MIENNES, 'galeries.partager': MIENNES, 'carnet.voir': MIENNES, 'carnet.ecrire': MIENNES, 'carnet.publies.modifier': MIENNES },
+  moderateur: { 'carnet.voir': TOUT, 'carnet.publier': TOUT },
+  relecteur: { 'carnet.voir': TOUT, 'carnet.textes': TOUT, 'carnet.publies.modifier': TOUT },
+};
+// Réglables photographe par photographe (ADJUSTABLE du site, page « Circuit de publication »), sur ses billets seulement.
+export const REGLABLES_SURVEILLES = ['carnet.publier', 'carnet.publies.modifier'];
+// Droits surveillés d'un compte (mêmes règles que grantsOf du site) ; null si un rôle est inconnu (rôle créé plus tard :
+// la Vigie ne juge pas ce qu'elle ne connaît pas).
+export function droitsSurveilles(roles = [], adjust = {}) {
+  if (roles.some(r => !Object.hasOwn(ROLES_SURVEILLES, r))) return null;
+  const out = new Map();
+  for (const r of roles) for (const [p, portee] of Object.entries(ROLES_SURVEILLES[r])) if (out.get(p) !== TOUT) out.set(p, portee);
+  if (roles.includes('admin') || !roles.includes('photographe')) return out;
+  const autres = p => roles.some(r => r !== 'photographe' && ROLES_SURVEILLES[r][p]);
+  for (const p of adjust?.remove || []) if (REGLABLES_SURVEILLES.includes(p) && !autres(p)) out.delete(p);
+  for (const p of adjust?.add || []) if (REGLABLES_SURVEILLES.includes(p) && !out.has(p)) out.set(p, MIENNES);
+  return out;
+}
+// Ce qu'un événement prouve qu'un compte a fait : permissions exigées (toutes), dont l'une au moins (une_de), et, pour un
+// accès de galerie, le photographe de la galerie (null : galerie commune, portée « tout » seulement, G1).
+function exige(row, d) {
+  const champs = Array.isArray(d.champs) ? d.champs : [];
+  if (row.type === 'privacy_exposure_changed' && d.objet === 'acces_prive') {
+    return { toutes: ['galeries.voir'], une_de: [d.action === 'espace_ouvert' ? 'galeries.gerer' : 'galeries.partager'], auteur: d.auteur_espace ?? null, portee: true, objet: 'galerie' };
+  }
+  if (row.type === 'sensitive_read' && /^server\/routes\/galeries\.js/.test(row.emetteur || '')) return { toutes: ['galeries.voir'], objet: 'galerie' };
+  if (row.type === 'sensitive_export' && (/^\/admin\/galeries\//.test(String(d.cible || '')) || (d.portail === 'galerie_privee' && d.nature === 'telechargement'))) return { toutes: ['galeries.voir'], objet: 'galerie' };
+  if (row.type === 'malicious_input' && d.objet === 'billet') return { toutes: ['carnet.voir'], une_de: ['carnet.ecrire', 'carnet.textes', 'carnet.publier', 'carnet.publies.modifier'], objet: 'billet' };
+  if (row.type === 'config_public_changed' && d.objet === 'textes_publics' && champs.some(c => String(c).startsWith('posts.'))) return { toutes: ['carnet.voir'], une_de: ['carnet.publier', 'carnet.publies.modifier'], objet: 'billet' };
+  return null;
+}
+
 export function createDetectors({ store, now = Date.now }) {
   const { db } = store;
   const q = {
@@ -71,6 +111,9 @@ export function createDetectors({ store, now = Date.now }) {
     posOfIp: db.prepare(`SELECT lat, lon FROM events WHERE ip = ? AND lat IS NOT NULL AND recu_a > ? ORDER BY seq DESC LIMIT 1`),
     fails: db.prepare(`SELECT COUNT(*) FROM events WHERE sub = ? AND type IN ('authn_login_fail', 'zitadel_echec') AND recu_a > ? AND seq < ?`).pluck(),
     roles: db.prepare("SELECT detail FROM events WHERE type = 'sys_state' ORDER BY seq DESC LIMIT 1").pluck(),
+    // Rôles d'un compte changés depuis l'instantané (le site le dit) : la Vigie ne juge pas sur des rôles périmés.
+    changedSince: db.prepare(`SELECT 1 FROM events WHERE type IN ('privilege_permissions_changed', 'user_created', 'user_rescued', 'user_deleted') AND recu_a > ?
+      AND json_valid(detail) AND json_extract(detail, '$.compte') = ? LIMIT 1`).pluck(),
   };
   const done = lru(50_000);               // détecteur|clé → fenêtre déjà signalée
   const first = (k, window) => { if (done.get(k) === window) return false; done.set(k, window); return true; };
@@ -150,6 +193,25 @@ export function createDetectors({ store, now = Date.now }) {
       const st = parse(q.roles.get());
       if (Array.isArray(st.administrateurs) && !st.administrateurs.includes(row.sub)) {
         out.push({ ...signal('role_incoherent'), entite: compte, tags: ['attack.privilege_escalation', 'attack.t1068'], detail: { cible: d.cible } });
+      }
+    }
+    // Rôle incohérent (DS10), galeries privées et Carnets : un geste qui exige une permission que les rôles du compte ne
+    // donnent pas, ou un accès sur la galerie commune ou celle d'un autre photographe par un compte de portée « les
+    // miennes ». Rôles, réglages et photographe lié lus dans le dernier instantané contrôlé (vigie/controle-roles.js),
+    // jamais dans une déclaration du site (arbitrage NC2) ; compte absent de l'instantané, ou changé depuis : pas jugé.
+    const need = compte ? exige(row, d) : null;
+    if (need) {
+      const snap = store.setting.get('controle_roles_comptes', null);
+      const c = snap?.comptes?.[row.sub];
+      const droits = c ? droitsSurveilles(c.roles, c.adjust) : null;
+      if (droits && !q.changedSince.get(snap.instantane_a ?? 0, row.sub)) {
+        const manque = [...need.toutes.filter(p => !droits.has(p)), ...(need.une_de && !need.une_de.some(p => droits.has(p)) ? [need.une_de.join(' | ')] : [])];
+        const perm = need.une_de?.find(p => droits.has(p)) || need.toutes[0];
+        const horsPortee = !manque.length && need.portee && droits.get(perm) !== TOUT && (need.auteur == null || need.auteur !== c.auteur);
+        if ((manque.length || horsPortee) && first(`role|${row.sub}|${row.type}|${manque.join()}|${horsPortee}`, Math.floor(t / 3600e3))) {
+          out.push({ ...signal('role_incoherent'), entite: compte, tags: ['attack.privilege_escalation', 'attack.t1068'],
+            detail: { objet: need.objet, permissions_manquantes: manque.length ? manque : undefined, hors_portee: horsPortee || undefined, galerie_commune: horsPortee && need.auteur == null ? true : undefined, roles: c.roles } });
+        }
       }
     }
     return out;

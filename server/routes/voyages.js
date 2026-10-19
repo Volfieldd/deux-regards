@@ -14,12 +14,15 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
   // Le voyage d'un autre photographe, hors de la portée du compte : introuvable comme un voyage qui n'existe pas, mais
   // signalé à la Vigie (« hors portée », cas DS10 ; registre docs/etudes/vigie-besoins-des-briques.md, BV-14), comme les
   // photos et les fiches (server/routes/admin.js). Un identifiant inconnu n'est pas signalé.
-  const outOfScope = (request, perm = 'sorties.voir') => app.securite.emit('authz_fail', { request, emetteur: 'server/routes/voyages.js · portée', detail: { raison: 'hors portée', permission: perm } });
+  // Détail commun des objets à plusieurs auteurs (BV-14 : billets, galeries, accès, voyages) : objet, numéro, et si la
+  // requête écrivait (règle ecriture_hors_portee de la Vigie, vigie/regles/85-galeries-carnets.yml).
+  const outOfScope = (request, perm = 'sorties.voir', id = null) => app.securite.emit('authz_fail', { request, emetteur: 'server/routes/voyages.js · portée',
+    detail: { raison: 'hors portée', permission: perm, objet: 'voyage', id: Number.isSafeInteger(id) ? id : null, ecriture: request.method !== 'GET' && request.method !== 'HEAD' } });
   const load = request => {
     const tr = trips.get(Number(request.params.id));
     if (!tr) return null;
     if (sees(request, tr)) return tr;
-    outOfScope(request);
+    outOfScope(request, 'sorties.voir', tr.id);
     return null;
   };
   const back = id => `/admin/voyages/${id}`;
@@ -173,7 +176,7 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
       return done(reply, to, request.t('Sortie détachée de son voyage.'));
     }
     const tr = trips.get(id);
-    if (tr && !sees(request, tr)) outOfScope(request, 'sorties.gerer');
+    if (tr && !sees(request, tr)) outOfScope(request, 'sorties.gerer', tr.id);
     if (!tr || !sees(request, tr) || !manages(request, tr) || (tr.author_id != null && tr.author_id !== a.id)) return failed(reply, to, request.t('Ce voyage ne peut pas recevoir cette sortie.'));
     trips.addDays(tr.id, [{ author_id: a.id, day: request.params.day }]);
     return done(reply, to, request.t('Sortie rattachée au voyage « {name} ».', { name: tr.name }));

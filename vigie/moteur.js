@@ -152,7 +152,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     const e = def.entite;
     if (e.valeur) return { kind: e.kind, key: String(e.valeur) };
     const v = fieldOf(row, e.champ || 'sub');
-    if (v != null && v !== '') return { kind: e.kind, key: e.kind === 'reseau' ? cleReseau(String(v)) || String(v) : String(v) };
+    if (v != null && v !== '') return { kind: e.kind, key: e.kind === 'reseau' ? cleReseau(String(v)) || String(v) : `${e.prefixe || ''}${v}` };
     return e.sinon ? { kind: 'site', key: String(e.sinon) } : null;
   }
 
@@ -195,6 +195,9 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     const what = reponse || (regle === 'entite.score' && entite.kind === 'ip' ? 'bloquer_ip' : null);
     if (what === 'revoquer_compte' && entite.kind === 'compte') make('revoquer_compte', entite.key, '48h');
     else if (what === 'geler_et_revoquer' && entite.kind === 'compte') { make('geler', entite.key, '24h'); make('revoquer_compte', entite.key, '48h'); }
+    // Accès d'une galerie privée qui fuit (registre des briques, BV-18 ; « Tranché » 5) : le site le suspend comme après
+    // 30 refus (autorisations retirées ; l'équipe débloque ou donne un nouveau mot de passe). Mode « bloquer » seulement.
+    else if (what === 'suspendre_acces' && entite.kind === 'site' && /^acces:[1-9]\d{0,14}$/.test(entite.key)) make('suspendre_acces', entite.key.slice(6), '7j');
     else if (what === 'bloquer_ip' && entite.kind === 'ip') {
       // Jamais une adresse privée (réseau Docker, proxy), de confiance, ni une adresse vue avec un administrateur (30
       // jours) : on ne s'enferme pas dehors. Un compte ordinaire ne protège pas son adresse (sinon un attaquant qui ouvre

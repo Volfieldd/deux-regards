@@ -7,14 +7,16 @@ import path from 'node:path';
 // vérifie la signature Ed25519 avec la clé publique (VIGIE_DECISIONS_PUBKEY) et les applique :
 //   - adresse ou réseau bloqué : 403 (tout le site, l'admin, ou la connexion seulement) ;
 //   - session révoquée, sessions d'un compte ouvertes avant une date, compte gelé (traité comme désactivé) ;
-//   - verrouillage de l'admin : seuls les comptes et adresses listés entrent.
+//   - verrouillage de l'admin : seuls les comptes et adresses listés entrent ;
+//   - accès d'une galerie privée suspendu (registre des briques, BV-18) : par app.spaces.suspend(acces), une fois par
+//     décision ; sans galeries privées (spaces absent, ou sans suspend), la liste est acceptée et ces entrées ignorées.
 // Garde-fous : signature fausse, liste plus ancienne que la précédente, réseau trop large (/0 à /7 en IPv4, moins de
 // /32 en IPv6) ou plus de 10 000 entrées : la liste entière est refusée ; toute décision expire (30 jours au plus,
 // verrouillage 24 h). Vigie injoignable : la dernière liste valide (gardée sur disque) s'applique jusqu'à ses fins.
 // VIGIE_APPLIQUER=0 : rien n'est appliqué (dernier recours).
 
 const DAY = 864e5;
-const MAX = { bloquer: 30 * DAY, session: 2 * DAY, compte: 2 * DAY, gel: 30 * DAY, verrou: DAY + 3600e3 };
+const MAX = { bloquer: 30 * DAY, session: 2 * DAY, compte: 2 * DAY, gel: 30 * DAY, verrou: DAY + 3600e3, acces: 30 * DAY };
 const SCOPES = new Set(['tout', 'admin', 'auth']);
 
 export function pubkeyOf(b64) {
@@ -66,11 +68,15 @@ async function readLimited(res, max) {
 const ipType = ip => (net.isIPv4(ip) ? 'ipv4' : net.isIPv6(ip) ? 'ipv6' : null);
 const plainIp = ip => (String(ip).startsWith('::ffff:') && net.isIPv4(String(ip).slice(7)) ? String(ip).slice(7) : String(ip));
 
-export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply = true, adminSubs = [], fetchImpl = fetch, now = Date.now, onApplied = () => {} }) {
+// spaces : () => app.spaces (galeries privées), lu au moment d'appliquer ; facultatif.
+export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply = true, adminSubs = [], fetchImpl = fetch, now = Date.now, onApplied = () => {}, spaces = () => null }) {
   const owners = new Set(adminSubs);                // ADMIN_SUBS : jamais gelés ni tenus dehors par un verrouillage
   const cacheFile = path.join(storageDir, 'securite-decisions.json');
   let state = null;                    // { version, emis_a, lists… }
   let running = false, timer = null, controller = null;
+  // Suspensions d'accès déjà appliquées (« accès|depuis ») : une suspension levée par l'équipe dans l'admin n'est jamais
+  // reposée par la même décision. Celles de la liste gardée sur le disque l'ont été avant le redémarrage.
+  const suspended = new Set();
 
   // Liste reçue : vérifiée, contrôlée, puis appliquée en entier (ou pas du tout).
   function accept(signed, { fromCache = false } = {}) {
@@ -88,7 +94,7 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     if (state && p.emis_a < state.emis_a && t - p.emis_a > 5 * 60e3) throw new Error('liste plus ancienne que celle en place');
     if (state && signed.payload === state.payload) return state;               // même liste (attente longue écoulée)
     const cap = (fin, max) => Math.min(Number(fin) || 0, t + max);
-    const all = [...(p.blocages || []), ...(p.sessions || []), ...(p.comptes || []), ...(p.gels || [])];
+    const all = [...(p.blocages || []), ...(p.sessions || []), ...(p.comptes || []), ...(p.gels || []), ...(p.acces || [])];
     if (all.length > 10_000) throw new Error('trop de décisions (10 000 au plus)');
     const raw = [];
     let ipv4 = 0;
@@ -101,6 +107,8 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     }
     if (ipv4 > MAX_IPV4) throw new Error('trop d’adresses IPv4 bloquées au total');
     for (const s of p.sessions || []) if (!SESSION_PREFIX.test(String(s.prefixe))) throw new Error('empreinte de session invalide');
+    for (const a of p.acces || []) if (!Number.isSafeInteger(a?.id) || a.id < 1 || !Number.isFinite(a.depuis)) throw new Error('accès de galerie privée invalide');
+    const acces = (p.acces || []).filter(a => cap(a.fin, MAX.acces) > t).map(a => ({ id: a.id, depuis: a.depuis, fin: cap(a.fin, MAX.acces) }));
     const lock = p.verrouillage && cap(p.verrouillage.fin, MAX.verrou) > t ? {
       fin: cap(p.verrouillage.fin, MAX.verrou),
       comptes: new Set((p.verrouillage.comptes || []).map(String)),
@@ -115,8 +123,11 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
       comptes: (() => { const m = new Map(); for (const c of p.comptes || []) { const fin = cap(c.fin, MAX.compte), k = String(c.sub), prev = m.get(k); if (fin > t) m.set(k, { avant: Math.max(Number(c.avant) || 0, prev?.avant || 0), fin: Math.max(fin, prev?.fin || 0) }); } return m; })(),
       gels: live((p.gels || []).map(g => ({ key: String(g.sub), fin: g.fin })), MAX.gel),
       lock,
-      counts: { blocages: (p.blocages || []).length, sessions: (p.sessions || []).length, comptes: (p.comptes || []).length, gels: (p.gels || []).length, verrouillage: Boolean(lock) },
+      acces,
+      counts: { blocages: (p.blocages || []).length, sessions: (p.sessions || []).length, comptes: (p.comptes || []).length, gels: (p.gels || []).length, verrouillage: Boolean(lock), acces: acces.length },
     };
+    if (fromCache) for (const a of acces) suspended.add(`${a.id}|${a.depuis}`);
+    else if (apply) suspendAccesses(acces);
     if (!fromCache) {
       try {
         const tmp = `${cacheFile}.tmp`;
@@ -127,6 +138,22 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     build(t);
     onApplied(state);
     return state;
+  }
+  // Accès à suspendre : chacun une fois. Galeries privées absentes (avant leur mise en service, ou sans app.spaces) :
+  // rien, sans erreur ; un échec du site est noté au journal et retenté à la liste suivante.
+  function suspendAccesses(list) {
+    let s = null;
+    try { s = spaces(); } catch { s = null; }
+    if (!list.length || typeof s?.suspend !== 'function') return;
+    for (const a of list) {
+      const k = `${a.id}|${a.depuis}`;
+      if (suspended.has(k)) continue;
+      try {
+        s.suspend(a.id, 'vigie');
+        suspended.add(k);
+        log?.info({ acces: a.id }, 'Vigie : accès de galerie privée suspendu');
+      } catch (err) { log?.warn({ err: err.message, acces: a.id }, 'Vigie : suspension d’un accès impossible'); }
+    }
   }
   // Listes de blocage reconstruites sans les entrées échues (une BlockList ne se vide pas entrée par entrée).
   function build(t) {

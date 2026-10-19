@@ -22,7 +22,14 @@ export const BY_TYPE = {
   token_guess: 0.5, authn_login_fail: 1, authz_fail: 1, authz_csrf_fail: 1.5, authz_blocked: 0.5, upload_rejected: 2,
   zitadel_echec: 1.5, excess_rate_limit_exceeded: 1,
 };
-export const pointsOf = row => (Object.hasOwn(BY_TYPE, row.type) ? BY_TYPE[row.type] : BY_SEVERITY[row.severity] ?? 0);
+// Propres au canal : l'échec d'un mot de passe de galerie privée (composant public) n'est pas une force brute sur la
+// connexion de l'admin ; ses propres règles (BV-16 : échecs par adresse, essais répartis, suspension) le comptent.
+const BY_CANAL = { 'authn_login_fail|site · public': 0 };
+export const pointsOf = row => {
+  const k = `${row.type}|${row.composant}`;
+  if (Object.hasOwn(BY_CANAL, k)) return BY_CANAL[k];
+  return Object.hasOwn(BY_TYPE, row.type) ? BY_TYPE[row.type] : BY_SEVERITY[row.severity] ?? 0;
+};
 
 // Seuils d'alerte par classe d'entité (points, après décroissance).
 export const THRESHOLDS = { ip: 7, reseau: 12, compte: 7, session: 5, appareil: 7 };

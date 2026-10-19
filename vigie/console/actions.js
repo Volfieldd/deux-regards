@@ -133,7 +133,7 @@ export function register(app, ctx) {
     if (n && !q.alerte.get(n)) throw new ActionError(`alerte #${n} inconnue`, 'alerte');
     if (n) motif = (motif ? `alerte #${n} · ${motif}` : `alerte #${n}`).slice(0, 300);
     if (!motif) throw new ActionError('motif obligatoire : il dit aux autres pourquoi', 'motif');
-    const d = duree(body) || { bloquer: '24h', revoquer_session: '48h', revoquer_compte: '48h', geler: '24h', verrouiller: '12h' }[kind];
+    const d = duree(body) || { bloquer: '24h', revoquer_session: '48h', revoquer_compte: '48h', geler: '24h', verrouiller: '12h', suspendre_acces: '7j' }[kind];
     const cible = texte(body.cible, 200);
     const ici = req.ip2 && net.isIP(req.ip2) ? req.ip2 : null;
     let details = null;
@@ -162,7 +162,7 @@ export function register(app, ctx) {
       const id = decisions.create({ kind, cible: 'admin', portee: 'admin', duree: d, motif, par: par(req), details, alerte: n || undefined });
       return `Décision #${id} : admin verrouillée (${comptes.length} compte${comptes.length > 1 ? 's' : ''}, ${adresses.length} adresse${adresses.length > 1 ? 's' : ''} admis).`;
     }
-    if (!cible) throw new ActionError(kind === 'revoquer_session' ? 'empreinte de session attendue' : 'compte (sub) attendu', 'cible');
+    if (!cible) throw new ActionError(kind === 'revoquer_session' ? 'empreinte de session attendue' : kind === 'suspendre_acces' ? 'numéro d’accès attendu' : 'compte (sub) attendu', 'cible');
     // Son propre compte, un Administrateur de la console ou un administrateur du site : seulement en le confirmant
     // (audit D3-B5).
     if (['geler', 'revoquer_compte'].includes(kind) && body.confirme !== 'oui') {

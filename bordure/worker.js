@@ -31,6 +31,23 @@ const classOf = path => (/^\/admin(?:[/?#]|$)/.test(path) ? 'admin' : /^\/auth\/
 const firstSegment = path => `/${(/^\/([a-z0-9-]{1,30})/i.exec(path) || ['', ''])[1]}`;
 const clean = (v, max) => String(v ?? '').replace(/[^\x20-\x7e]/g, '?').slice(0, max);
 
+// Réponse privée servie par le cache de Cloudflare (registre des briques, BV-26 ; règle « Ignore cache-control »,
+// Always Online) : le site ne la voit jamais passer. Pages et images des galeries privées (/g/…, /prive/…), et toute
+// réponse que le site a marquée privée (cache-control private ou no-store, comme l'admin et les pages à jeton). Seuls
+// DYNAMIC et BYPASS disent que Cloudflare ne l'a ni gardée ni resservie ; un statut absent : rien à dire.
+const PRIVATE_PATH = /^\/(?:g|prive)\//;
+const CACHE_OK = new Set(['DYNAMIC', 'BYPASS']);
+export function privateCacheClass(path, res) {
+  const status = String(res.headers.get('cf-cache-status') || '').trim().toUpperCase();
+  if (!status || CACHE_OK.has(status) || !/^[A-Z]{3,12}$/.test(status)) return null;
+  const marked = /\b(?:private|no-store)\b/i.test(res.headers.get('cache-control') || '');
+  if (!PRIVATE_PATH.test(path) && !marked) return null;
+  // Jamais le chemin (le jeton du lien y est) : sa nature seulement.
+  const classe = /^\/g\//.test(path) ? 'lien' : /^\/prive\/[^/]+\/m\//.test(path) ? 'image'
+    : /^\/prive\/[^/]+\/(?:telecharger|archive)\b/.test(path) ? 'fichier' : 'page';
+  return { classe, statut_cache: status };
+}
+
 // Texte signé : le site recompose le même à partir de ce qu'il reçoit (server/securite/bordure.js).
 export const canonical = h => ['v1', h.ts, h.ip, h.method, h.host, h.path, h.asn, h.org, h.pays, h.tls, h.tlsBrut, h.rtt].join('\n');
 
@@ -107,6 +124,11 @@ export default {
     }
     const res = await plain();
     point(env, { indexes: [ip.slice(0, 96)], blobs: [classe, String(res.status), ctx.pays, ctx.asn, decodeURIComponent(ctx.org), ctx.tls, request.method, firstSegment(path), ''], doubles: [1, Number(ctx.rtt)] });
+    // BV-26 : un point de plus, « cache_prive », lu par la Vigie (vigie/bordure.js) ; la réponse part telle quelle.
+    try {
+      const c = privateCacheClass(path, res);
+      if (c) point(env, { indexes: [ip.slice(0, 96)], blobs: ['cache_prive', String(res.status), ctx.pays, ctx.asn, decodeURIComponent(ctx.org), ctx.tls, request.method, '', `${c.classe}|${c.statut_cache}`], doubles: [1, Number(ctx.rtt)] });
+    } catch { /* jamais au détriment de la réponse */ }
     return res;
   },
 };

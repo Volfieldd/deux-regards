@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { createSecurite } from './index.js';
 import { createDecisionsClient } from './decisions.js';
+import { createPublicTexts } from './textes-publics.js';
 import { scanObject, isAttackTool } from './detection.js';
 import { onDecryptFail } from '../vault.js';
 import { clientKey } from '../ratelimit.js';
@@ -255,7 +256,9 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     const hits = [
       ...scanObject('params', request.params),
       ...scanObject('query', request.query),
-      ...(request.body && typeof request.body === 'object' && !Buffer.isBuffer(request.body) ? scanObject('body', request.body) : []),
+      // Corps rendu et contrôlé ailleurs (billet des Carnets : aperçu, brouillon ; option de route vigie.corps = 'rendu') :
+      // pas scanné comme une saisie brute (le rendu émet ses propres constats, BV-12). Adresse et en-têtes, si.
+      ...(request.body && typeof request.body === 'object' && !Buffer.isBuffer(request.body) && request.routeOptions?.config?.vigie?.corps !== 'rendu' ? scanObject('body', request.body) : []),
       ...scanObject('header', { 'user-agent': ua, referer: request.headers.referer }),
     ].slice(0, 5);
     const tool = isAttackTool(ua);
@@ -293,7 +296,38 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   const exifMode = v => parseJson(v)?.mode ?? null;
   const snapshot = () => ({ settings: Object.fromEntries(settingsRows.all().filter(r => WATCHED.test(r.key)).map(r => [r.key, r.value])), heure: shownTimes.get() });
   let lastSnapshot = null;
+  // Textes publiés (BV-20, BV-21) : instantané comparé comme les réglages. Liens vers le site lui-même exclus.
+  const ownHosts = [...new Set(['nicephos.art', (() => { try { return new URL(config.publicUrl).hostname.replace(/^www\./, ''); } catch { return null; } })()].filter(Boolean))];
+  const textes = createPublicTexts({ db, ownHosts });
+  let lastTexts = null;
+  // Rien d'écrit dans la base depuis l'instantané précédent (compteur de SQLite pour cette connexion) : rien à relire.
+  const totalChanges = db.prepare('SELECT total_changes()').pluck();
+  let lastChanges = -1;
+  const watchTexts = (request, emetteur) => {
+    const changesNow = totalChanges.get();
+    if (lastTexts && changesNow === lastChanges) return;
+    lastChanges = changesNow;
+    const now = textes.snapshot();
+    const before = lastTexts;
+    lastTexts = now;
+    if (!before) return;
+    const { changes, ajouts } = textes.diff(before, now);
+    if (!changes.length) return;
+    // BV-20 : un texte qui gagne un lien, un e-mail ou un téléphone ; ni le texte ni le contact, 10 au plus par geste.
+    for (const a of ajouts.slice(0, 10)) {
+      sec.emit('config_public_changed', { request, severity: 'moyen', emetteur: `${emetteur} · textes publiés`,
+        detail: { objet: 'texte_public', champ: a.champ, id: a.id, ajout: a.ajout, domaine: a.domaine || undefined } });
+    }
+    // BV-21 : combien de textes publiés ce geste a changés (défacement : beaucoup, d'un coup ou en série).
+    sec.emit('config_public_changed', { request, emetteur: `${emetteur} · textes publiés`,
+      detail: { objet: 'textes_publics', nombre: changes.length, champs: [...new Set(changes.map(k => k.split('#')[0]))].slice(0, 20), contacts_ajoutes: ajouts.length || undefined } });
+  };
+  // Aussi appelé par les publications programmées (sans compte : request null, sub null), qui mettent des textes en
+  // ligne sans écriture de l'admin (photos du circuit ; billets des Carnets à leur arrivée).
+  sec.watchPublication = (emetteur = 'publication programmée') => { try { watchTexts(null, emetteur); } catch (err) { app.log.error({ err: err.message }, 'Vigie : textes publiés'); } };
+
   const watchWrites = request => {
+    watchTexts(request, 'server/securite');
     const now = snapshot();
     const before = lastSnapshot;
     lastSnapshot = now;
@@ -310,7 +344,7 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
       sec.emit('privacy_exposure_changed', { request, severity: exifAll ? 'moyen' : undefined, emetteur: 'server/securite · données exposées', detail: { heure_visible_ajoutees: Math.max(more, 0), heure_visible_total: now.heure, exif_complet: exifAll || undefined } });
     }
   };
-  app.addHook('onReady', async () => { step('réglages publics', () => { lastSnapshot = snapshot(); }); });
+  app.addHook('onReady', async () => { step('réglages publics', () => { lastSnapshot = snapshot(); lastTexts = textes.snapshot(); lastChanges = totalChanges.get(); }); });
 
   // Rafales de 404 par adresse (exploration), lectures sensibles de l'admin.
   const notFound = new Map();

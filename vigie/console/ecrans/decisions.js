@@ -21,40 +21,44 @@ const EN_COURS_MAX = 200;                 // décisions en cours montrées (10 0
 
 // Mots du lexique (§ 1, § 3.11).
 export const TYPES = DECISIONS;
-export const NOUVELLES = ['bloquer', 'revoquer_compte', 'geler', 'revoquer_session'];
-const VERBE = { bloquer: 'Bloquer', geler: 'Geler', revoquer_compte: 'Fermer les sessions', revoquer_session: 'Fermer la session', verrouiller: 'Verrouiller' };
-const LEVER = { bloquer: 'Lever le blocage', revoquer_compte: 'Lever la fermeture des sessions', geler: 'Lever le gel', revoquer_session: 'Lever la fermeture de la session', verrouiller: 'Lever le verrouillage' };
-const LEVER_TITRE = { bloquer: 'Lever ce blocage ?', revoquer_compte: 'Lever la fermeture des sessions de ce compte ?', geler: 'Lever le gel de ce compte ?', revoquer_session: 'Lever la fermeture de cette session ?', verrouiller: 'Lever le verrouillage de l’admin ?' };
+export const NOUVELLES = ['bloquer', 'revoquer_compte', 'geler', 'revoquer_session', 'suspendre_acces'];
+const VERBE = { bloquer: 'Bloquer', geler: 'Geler', revoquer_compte: 'Fermer les sessions', revoquer_session: 'Fermer la session', verrouiller: 'Verrouiller', suspendre_acces: 'Suspendre l’accès' };
+const LEVER = { bloquer: 'Lever le blocage', revoquer_compte: 'Lever la fermeture des sessions', geler: 'Lever le gel', revoquer_session: 'Lever la fermeture de la session', verrouiller: 'Lever le verrouillage', suspendre_acces: 'Lever la décision de suspension' };
+const LEVER_TITRE = { bloquer: 'Lever ce blocage ?', revoquer_compte: 'Lever la fermeture des sessions de ce compte ?', geler: 'Lever le gel de ce compte ?', revoquer_session: 'Lever la fermeture de cette session ?', verrouiller: 'Lever le verrouillage de l’admin ?', suspendre_acces: 'Lever la décision de suspendre cet accès ?' };
 const EFFET_LEVER = {
   bloquer: 'L’adresse retrouve l’accès au site dans les secondes qui suivent ; la bordure Cloudflare la libère en 4 à 5 min.',
   geler: 'Le compte retrouve l’accès au site dans les secondes qui suivent : il peut se connecter et ouvrir une session neuve.',
   revoquer_compte: 'Les sessions du compte ouvertes avant la décision redeviennent valables, si elles n’ont pas expiré.',
   revoquer_session: 'La session redevient valable, si elle n’a pas expiré.',
   verrouiller: 'L’admin et la connexion se rouvrent à tous les comptes que le site admet.',
+  suspendre_acces: 'L’accès reste suspendu : seule l’équipe le rouvre, dans l’admin du site (Débloquer, ou Nouveau mot de passe…). Lever la décision empêche seulement de la reprendre.',
 };
 const EFFET = {
   geler: 'traité comme désactivé : aucune session, connexion refusée',
   revoquer_session: 'cette session est refusée',
+  suspendre_acces: 'accès suspendu par le site, autorisations des invités retirées ; l’équipe le rouvre',
 };
 const PORTEES = {
   tout: { t: PORTEES_MOT.tout, sec: 'réponse 403 sur toutes les pages' },
   admin: { t: PORTEES_MOT.admin, sec: 'le site public reste ouvert à cette adresse' },
   auth: { t: PORTEES_MOT.auth, sec: 'la connexion par Zitadel lui est refusée' },
 };
-export const DUREES = { bloquer: ['1h', '24h', '7j', '30j'], geler: ['1h', '24h', '7j', '30j'], revoquer_compte: ['24h', '48h'], revoquer_session: ['24h', '48h'], verrouiller: ['1h', '12h', '24h'] };
-const MAX_TEXTE = { bloquer: '30\u00a0jours', geler: '30\u00a0jours', revoquer_compte: '48\u00a0h', revoquer_session: '48\u00a0h', verrouiller: '24\u00a0h' };
+export const DUREES = { bloquer: ['1h', '24h', '7j', '30j'], geler: ['1h', '24h', '7j', '30j'], revoquer_compte: ['24h', '48h'], revoquer_session: ['24h', '48h'], verrouiller: ['1h', '12h', '24h'], suspendre_acces: ['7j', '30j'] };
+const MAX_TEXTE = { bloquer: '30\u00a0jours', geler: '30\u00a0jours', revoquer_compte: '48\u00a0h', revoquer_session: '48\u00a0h', verrouiller: '24\u00a0h', suspendre_acces: '30\u00a0jours' };
 const LIBRE = { bloquer: true, geler: true };      // « Autre durée » : pour les décisions longues seulement
 const CIBLE = {
   bloquer: { label: 'Adresse ou réseau', aide: 'Une adresse (198.51.100.23) ou un réseau (198.51.100.0/24) ; en IPv4 de /8 à /32, en IPv6 de /32 à /128.' },
   revoquer_compte: { label: 'Compte', aide: 'Son identifiant Zitadel (sub), tel que le journal l’écrit.' },
   geler: { label: 'Compte', aide: 'Son identifiant Zitadel (sub), tel que le journal l’écrit.' },
   revoquer_session: { label: 'Empreinte de la session', aide: '12 caractères hexadécimaux au moins (0 à 9, a à f), tels que le journal les écrit.' },
+  suspendre_acces: { label: 'Numéro de l’accès', aide: 'Le numéro de l’accès de la galerie privée, tel que le journal l’écrit (detail.acces, ou l’entité « acces:12 »).' },
 };
 const HINT = {
   bloquer: 'Le blocage se lève seul à la fin ; 30 jours au plus. Le site l’applique en quelques secondes, la bordure Cloudflare en 4 à 5 min.',
   geler: 'Le gel se lève seul à la fin ; 30 jours au plus. Le site l’applique en quelques secondes.',
   revoquer_compte: 'Toute session du compte ouverte avant maintenant est refusée ; il peut se reconnecter. 48 h au plus.',
   revoquer_session: 'Cette session est refusée ; 48 h au plus.',
+  suspendre_acces: 'Le site suspend l’accès une fois, comme après 30 mots de passe refusés : les invités sortent, l’équipe le rouvre dans l’admin. 30 jours au plus.',
 };
 
 export const dureeTexte = d => String(d).replace(/^(\d+)(h|min)$/, `$1${NBSP}$2`).replace(/^(\d+)j$/, (m, n) => `${n}${NBSP}jour${Number(n) > 1 ? 's' : ''}`);
@@ -183,6 +187,7 @@ function cibleDe(q, d, role, t) {
     const admis = [...comptes, ...adresses];
     return { k: 'admin', texte: 'l’admin et la connexion', mono: null, sec: admis.length ? `seuls admis${FINE}: ${admis.join(', ')}` : '' };
   }
+  if (d.kind === 'suspendre_acces') return { k: 'accès', texte: `accès n°${NBSP}${propre(d.cible, 20)}`, mono: null, sec: typo(EFFET.suspendre_acces) };
   const nom = d.kind !== 'revoquer_session' ? q.nom.get(String(d.cible)) : null;
   return { k: d.kind === 'revoquer_session' ? 'session' : 'compte', texte: propre(d.cible, 200), mono: 'sub', nom: nom ? propre(nom, 60) : null,
     sec: typo(d.kind === 'revoquer_compte' ? `toute session ouverte avant ${quand(d.cree_a, t)} est refusée` : EFFET[d.kind] || '') };
@@ -277,6 +282,12 @@ export function actionsForcees({ db, kind, key, req, t, retour, alerte = null, m
       items.push({ h: 'Fermer la session', p: 'Cette session est refusée par le site ; son compte peut se reconnecter.',
         fait: rs ? faitTexte(rs) : null, form: rs ? null : form('revoquer_session', { cible: cle, durees: ['24h', '48h'], libre: false }) });
     } else items.push({ h: 'Fermer la session', sans: 'Empreinte de session illisible (12 caractères hexadécimaux au moins attendus).' });
+  } else if (kind === 'site' && /^acces:[1-9]\d{0,14}$/.test(cle)) {
+    // Accès d'une galerie privée (entité « acces:<n°> », vigie/regles/85-galeries-carnets.yml).
+    const n = cle.slice(6);
+    const su = q.surCible.all(t, n, n, n).find(d => d.kind === 'suspendre_acces');
+    items.push({ h: 'Suspendre l’accès', p: 'Le site le suspend une fois, comme après 30 mots de passe refusés : les invités sortent ; l’équipe le rouvre dans l’admin du site.',
+      fait: su ? faitTexte(su) : null, form: su ? null : form('suspendre_acces', { cible: n, cibleVue: { texte: `accès n°${NBSP}${n}` }, durees: ['7j'], libre: false }) });
   } else items.push({ h: 'Aucune action forcée', sans: 'Cette entité ne se bloque ni ne se gèle : agissez sur son adresse ou son compte.' });
   items.push({ h: 'Verrouiller l’admin', p: 'Seuls les comptes et adresses choisis entrent dans l’admin, 24 h au plus ; le site public reste ouvert.',
     lien: { href: '/decisions#verrouiller', texte: 'Verrouiller l’admin…' } });
