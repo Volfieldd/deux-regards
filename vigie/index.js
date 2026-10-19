@@ -9,6 +9,7 @@ import { createThreats } from './menaces.js';
 import { checkRoles } from './controle-roles.js';
 import { createSwitches } from './interrupteurs.js';
 import { createEdge } from './bordure.js';
+import { createCfList } from './cloudflare-liste.js';
 import { createNotifier } from './notifications.js';
 import { createConsole } from './console/server.js';
 import { canoniserReseaux } from './reseaux.js';
@@ -99,7 +100,11 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   timers.push(setInterval(roles, 3600e3));
   for (const t of timers) t.unref();
   // Bordure Cloudflare (phase C3) : blocages copiés dans KV, lecture d'Analytics Engine chaque minute.
-  const edge = config.bordure ? createEdge({ store, decisions, ...config.bordure, fetchImpl, now, log }) : null;
+  const { liste: listeName, ...bordureCfg } = config.bordure || {};
+  const edge = config.bordure ? createEdge({ store, decisions, ...bordureCfg, fetchImpl, now, log }) : null;
+  // Liste d'adresses bloquées chez Cloudflare (phase E3, facultative).
+  const cfList = config.bordure && listeName ? createCfList({ store, decisions, accountId: bordureCfg.accountId, tokenFile: bordureCfg.tokenFile, name: listeName, fetchImpl, now, log }) : null;
+  cfList?.start();
   if (edge) {
     plusTard(() => { edge.push({ force: true }).catch(() => {}); }, 5e3);
     timers.push(setInterval(() => { edge.read().catch(err => log.warn({ err: err.message }, 'Vigie : bordure')); edge.push().catch(() => {}); }, 60e3));
@@ -124,8 +129,8 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     }
   }
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats, edge, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
-    async close() { for (const t of timers) clearInterval(t); for (const t of delais) clearTimeout(t); zitadel?.stop(); edge?.stop(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
+    store, decisions, ingest, zitadel, engine, switches, threats, edge, cfList, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
+    async close() { for (const t of timers) clearInterval(t); for (const t of delais) clearTimeout(t); zitadel?.stop(); edge?.stop(); cfList?.stop(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
   };
 }
 

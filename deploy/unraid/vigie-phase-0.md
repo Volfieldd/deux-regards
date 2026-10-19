@@ -222,17 +222,19 @@ au lieu de `(http.host ne "www.nicephos.art")`. Le reste de la règle ne change 
 
 Vérifier : `curl -sI https://nicephos.art/` → `301` vers `www` ; `curl -sI https://vigie.nicephos.art/` → `302` vers la connexion Cloudflare Access.
 
-### 3.4 Jeton d'API pour la liste (phase E)
+### 3.4 Liste des adresses bloquées chez Cloudflare (phase E3, facultative)
 
-**My Profile → API Tokens → Create Token → Custom token** :
+La Vigie recopie ses blocages de tout le site de 24 h et plus dans une liste d'adresses de votre compte Cloudflare ; une règle du pare-feu bloque cette liste avant tout le reste (le Worker de bordure n'est même pas appelé : son quota gratuit est épargné, et le blocage tient si le Worker est coupé).
 
-- nom : « Vigie : liste des adresses bloquées » ;
-- *Permissions* : **Account → Account Filter Lists → Edit**, rien d'autre ;
-- *Account Resources* : votre compte seulement ;
-- *Client IP Address Filtering* : l'adresse publique d'Unraid, si elle est fixe ;
-- *TTL* : un an.
+1. **Le jeton de la bordure** (celui de `VIGIE_SECRETS_DIR/cloudflare-token`, phase C3) : **My Profile → API Tokens →** le jeton « Vigie » **→ Edit**, ajouter la permission **Account → Account Filter Lists → Edit** (votre compte seulement). Rien d'autre ne change.
+2. **`vigie.env`** : `VIGIE_CF_LISTE=vigie_bloquees`, puis redémarrer la Vigie. Elle crée la liste si elle n'existe pas (**Manage Account → Configurations → Lists**), puis la remplit dans les 5 minutes.
+3. **La règle** : **Security → WAF → Custom rules → Create rule** sur la zone `nicephos.art` :
+   - nom : « Vigie : adresses bloquées » ;
+   - *Field* : **IP Source Address**, *Operator* : **is in list**, *Value* : `vigie_bloquees` (expression : `(ip.src in $vigie_bloquees)`) ;
+   - *Action* : **Block** ; placer la règle **en premier**.
+4. Vérifier : `docker exec nicephos-vigie node vigie/cli.js bordure` affiche « Liste chez Cloudflare (vigie_bloquees) : N adresse(s), rapprochée le … ». La page **Santé** de la console le montre aussi.
 
-Le jeton va dans le `.env` de la Vigie (`VIGIE_CLOUDFLARE_TOKEN`) avec l'identifiant du compte et celui de la liste `vigie_bloquees`. Jamais ailleurs.
+Ce que la Vigie ne touche jamais : une entrée ajoutée à la main dans la liste (sans commentaire « Vigie #… »). Pour arrêter : retirer `VIGIE_CF_LISTE` (les entrées de la Vigie restent jusqu'à ce que vous vidiez la liste) ou désactiver la règle.
 
 ---
 

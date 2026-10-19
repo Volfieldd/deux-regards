@@ -136,6 +136,10 @@ Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, l
 
 **Offre gratuite** : 100 000 requêtes de Worker par jour (routes en « laisser passer » au-delà), 10 ms de calcul par requête ; KV : 100 000 lectures et 1 000 écritures par jour (la Vigie écrit au plus toutes les 2 minutes) ; Analytics Engine : 100 000 points écrits et 10 000 lectures par jour (la Vigie lit une fois par minute), données gardées 3 mois.
 
+### Liste des adresses bloquées chez Cloudflare (phase E3, facultative)
+
+Avec `VIGIE_CF_LISTE=vigie_bloquees`, la Vigie recopie dans une liste d'adresses du compte Cloudflare ses blocages **de tout le site, de 24 h et plus** (adresse IPv4 seule ou réseau /8 à /32 ; IPv6 ramenée à son /64 au plus fin) ; une règle du pare-feu de Cloudflare (`ip.src in $vigie_bloquees` → Block) les arrête avant le Worker, dont le quota gratuit est ainsi épargné, et le blocage tient si le Worker est coupé. Les blocages plus courts ou d'une partie du site restent au Worker et au site. Rapprochement toutes les 5 minutes et 30 s après chaque décision : ce que la Vigie ne connaît plus est retiré, mais seulement ses entrées (commentaire « Vigie #… ») ; une entrée ajoutée à la main n'est jamais touchée. Échec (droit manquant, liste pleine) : visible sur la page Santé, signalé une fois par heure (`vigie_bordure_erreur`, opération « liste »). Mise en place : [`vigie-phase-0.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/vigie-phase-0.md), étape 3.4.
+
 ### Installer (instance de test d'abord, D19)
 
 1. **Clé partagée** : `openssl rand -base64 32` → `VIGIE_BORDURE_KEY` dans le `.env` du site (différente de `VIGIE_INGEST_KEY`).
