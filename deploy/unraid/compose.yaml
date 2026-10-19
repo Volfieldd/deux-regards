@@ -2,7 +2,7 @@
 # Quatre conteneurs : le site, la sauvegarde quotidienne, le tunnel Cloudflare (HTTPS, aucun port ouvert) et le
 # traducteur LibreTranslate (propositions de traduction dans l'admin, sur place : aucun texte ne sort du serveur).
 # Facultatifs, par profil (COMPOSE_PROFILES dans le .env) : « vigie » (la Vigie et sa sauvegarde), « signal » (la
-# passerelle Signal de ses alertes).
+# passerelle Signal de ses alertes), « sortie » (le mandataire de sortie du site, BV-10 : reseau/README.md).
 # Réglages dans le fichier .env de la pile (modèle : env.example). Guide : README.md.
 #
 # DOSSIERS : tout se déduit de deux réglages du .env.
@@ -62,6 +62,17 @@ networks:
     internal: true
   # Sortie vers les serveurs de Signal, pour la passerelle seule (ni le site ni la Vigie n'y sont).
   signal-sortie: {}
+  # Mandataire de sortie (profil « sortie », BV-10) : réseau sans sortie vers Internet entre le site et le mandataire ;
+  # seul le mandataire a, en plus, sortie-internet. Sans le profil, il existe mais personne n'y écoute.
+  sortie-interne:
+    name: nicephos-sortie
+    internal: true
+    ipam:
+      config:
+        - subnet: ${SORTIE_NET_SUBNET:-172.29.44.0/24}
+          ip_range: ${SORTIE_NET_IP_RANGE:-172.29.44.128/25}
+  sortie-internet:
+    name: nicephos-sortie-internet
 
 services:
   site:
@@ -81,8 +92,21 @@ services:
       TUNNEL_TOKEN: ""
       # Traducteur de la pile (vide dans le .env pour retirer le bouton « Proposer une traduction »).
       TRANSLATE_URL: ${TRANSLATE_URL-http://libretranslate:5000}
+      # Mandataire de sortie (BV-10, facultatif : profil « sortie » ET SORTIE_MANDATAIRE=http://sortie:3128 dans le .env ;
+      # reseau/README.md). Sans SORTIE_MANDATAIRE, ces variables restent vides et le site sort comme avant. Avec : fetch
+      # (OIDC, Instagram, horodatage, modèles) et les e-mails passent par le mandataire ; les services de la pile, en direct.
+      HTTPS_PROXY: ${SORTIE_MANDATAIRE:-}
+      HTTP_PROXY: ${SORTIE_MANDATAIRE:-}
+      NO_PROXY: ${SORTIE_MANDATAIRE:+localhost,127.0.0.1,::1,vigie-reception,libretranslate}
+      NODE_USE_ENV_PROXY: ${SORTIE_MANDATAIRE:+1}
     user: "${PUID:-99}:${PGID:-100}"
-    networks: [nicephos, vigie-ingest]
+    # Adresse fixe sur le réseau de la pile (hors de la plage des adresses données automatiquement) : les règles de l'hôte
+    # (reseau/regles.sh) et la Vigie reconnaissent le site à elle.
+    networks:
+      nicephos:
+        ipv4_address: ${SITE_IP:-172.29.42.30}
+      vigie-ingest: {}
+      sortie-interne: {}
     logging: *logging
     # Mémoire du site : un original de 120 Mpx décodé pèse ~0,5 Go. Descriptions « Précis » (Florence-2 large,
     # ~4 Go pendant le calcul, dans ce conteneur) : SITE_MEM_LIMIT=6g dans le .env ; « Léger » tient dans 3g.
@@ -166,7 +190,10 @@ services:
     environment:
       LT_LOAD_ONLY: fr,en,de
       LT_DISABLE_WEB_UI: "true"
-    networks: [nicephos]
+    # Adresse fixe : seul flux vers lui, le site sur le port 5000 (reseau/regles.sh).
+    networks:
+      nicephos:
+        ipv4_address: ${TRADUCTION_IP:-172.29.42.40}
     logging: *logging
     mem_limit: 2g
     pids_limit: 256
@@ -231,6 +258,16 @@ services:
         read_only: true
         bind:
           create_host_path: false
+      # Journaux réseau (phase E4, BV-10 et BV-11), en lecture seule : mandataire de sortie (reseau/mandataire/) et rejets
+      # du pare-feu de l'hôte (reseau/hote/, écrits par rsyslog). Lus seulement si VIGIE_RESEAU_* est dans vigie.env.
+      # Seule exception à « jamais de dossier créé en silence » : un dossier de journaux vide, en lecture seule, ne fait
+      # rien croire à personne (la Vigie dit « Non réglé » tant que vigie.env ne le nomme pas).
+      - type: bind
+        source: ${RESEAU_DIR:-${NICEPHOS_DIR:?NICEPHOS_DIR obligatoire (voir env.example)}/reseau}
+        target: /reseau
+        read_only: true
+        bind:
+          create_host_path: true
     logging: *logging
     mem_limit: 256m
     pids_limit: 128
@@ -307,6 +344,54 @@ services:
     security_opt:
       - no-new-privileges:true
     cap_drop: [ALL]
+
+  # Mandataire de sortie du site (BV-10, facultatif ; reseau/README.md). Ne démarre qu'avec le profil « sortie »
+  # (COMPOSE_PROFILES=sortie, ou vigie,sortie…) ; le site ne l'utilise qu'avec SORTIE_MANDATAIRE=http://sortie:3128 dans le
+  # .env. Liste des noms autorisés construite au démarrage depuis les réglages du site ci-dessous et SORTIE_NOMS ; refus
+  # et sorties acceptées journalisés (sans chemin ni contenu) dans NICEPHOS_DIR/reseau/mandataire/, lu en lecture seule
+  # par la Vigie. Seul secret possible : SMTP_URL, dont il ne garde que le nom et le port (la variable reste lisible par
+  # « docker inspect », comme celle du site) ; SORTIE_SMTP_URL=smtps://hôte:port, sans identifiant, l'évite.
+  # DONNÉES : NICEPHOS_DIR/reseau/mandataire doit exister avant et appartenir à PUID:PGID (99:100).
+  sortie:
+    image: ${IMAGE:-ghcr.io/volfieldd/deux-regards:latest}
+    container_name: nicephos-sortie
+    profiles: [sortie]
+    restart: unless-stopped
+    command: ["node", "reseau/mandataire.js"]
+    environment:
+      NODE_ENV: production
+      SORTIE_PORT: 3128
+      SORTIE_JOURNAL: /journal/mandataire.log
+      OIDC_ISSUER: ${OIDC_ISSUER:-}
+      TSA_URL: ${TSA_URL:-}
+      SMTP_URL: ${SORTIE_SMTP_URL-${SMTP_URL:-}}
+      INSTAGRAM_APP_ID: ${INSTAGRAM_APP_ID:-}
+      TRANSLATE_URL: ${TRANSLATE_URL-http://libretranslate:5000}
+      # Modèles des descriptions et des séries : 0 une fois téléchargés (Hugging Face retiré de la liste).
+      SORTIE_HUGGINGFACE: ${SORTIE_HUGGINGFACE:-1}
+      # Noms de plus, séparés par des virgules (nom, nom:port ou *.domaine ; port 443 par défaut).
+      SORTIE_NOMS: ${SORTIE_NOMS:-}
+    user: "${PUID:-99}:${PGID:-100}"
+    healthcheck:
+      test: ["CMD", "node", "reseau/mandataire.js", "--sante"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    # sortie-interne : seul le site le joint (adresse fixe, celle des règles de l'hôte) ; sortie-internet : sa sortie.
+    networks:
+      sortie-interne:
+        ipv4_address: ${SORTIE_IP:-172.29.44.10}
+      sortie-internet: {}
+    volumes:
+      - type: bind
+        source: ${RESEAU_DIR:-${NICEPHOS_DIR:?NICEPHOS_DIR obligatoire (voir env.example)}/reseau}/mandataire
+        target: /journal
+        bind:
+          create_host_path: false
+    logging: *logging
+    mem_limit: 128m
+    pids_limit: 64
+    <<: *hardening
 
 volumes:
   traduction-modeles:

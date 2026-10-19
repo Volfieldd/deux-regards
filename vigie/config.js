@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { nommeur } from './reseau.js';
 
 // Configuration de la Vigie (son propre .env, jamais celui du site). Refus de démarrer plutôt qu'un réglage douteux.
 const need = (env, k) => { if (!env[k]) throw new Error(`Variable manquante : ${k}`); return env[k]; };
@@ -39,7 +40,24 @@ export function loadVigieConfig(env = process.env) {
     if (!fs.existsSync(tokenFile)) throw new Error(`VIGIE_CF_TOKEN_FILE : jeton Cloudflare introuvable (${tokenFile})`);
     const dataset = env.VIGIE_CF_DATASET || 'vigie_bordure';
     if (!/^[a-z_][a-z0-9_]{0,63}$/.test(dataset)) throw new Error('VIGIE_CF_DATASET : nom de jeu de données invalide');
-    bordure = { accountId: env.VIGIE_CF_ACCOUNT_ID, kvNamespace: env.VIGIE_CF_KV_NAMESPACE, dataset, tokenFile };
+    // Liste d'adresses bloquées chez Cloudflare (phase E3) : facultative, ouverte par VIGIE_CF_LISTE (nom de la liste,
+    // « vigie_bloquees » conseillé) ; le jeton doit avoir en plus « Account Filter Lists : Edit ».
+    const liste = env.VIGIE_CF_LISTE && env.VIGIE_CF_LISTE !== '0' ? env.VIGIE_CF_LISTE : null;
+    if (liste && !/^[a-z0-9_]{1,50}$/.test(liste)) throw new Error('VIGIE_CF_LISTE : nom de liste en minuscules, chiffres et _ (vigie_bloquees)');
+    bordure = { accountId: env.VIGIE_CF_ACCOUNT_ID, kvNamespace: env.VIGIE_CF_KV_NAMESPACE, dataset, tokenFile, liste };
+  }
+  // Mode urgence de Cloudflare (« I'm Under Attack », phase E) : facultatif, jeton à part (Zone Settings : Edit, sur la
+  // seule zone), ouvert par VIGIE_CF_ZONE_ID ; durée maximale réglable (VIGIE_CF_URGENCE_MAX, 24h par défaut, 7j au plus).
+  let urgence = null;
+  if (env.VIGIE_CF_ZONE_ID) {
+    if (!/^[0-9a-f]{32}$/.test(env.VIGIE_CF_ZONE_ID)) throw new Error('VIGIE_CF_ZONE_ID : identifiant de zone Cloudflare (32 caractères hexadécimaux)');
+    const tokenFile = path.resolve(env.VIGIE_CF_URGENCE_TOKEN_FILE || '/secrets/cloudflare-urgence');
+    if (!fs.existsSync(tokenFile)) throw new Error(`VIGIE_CF_URGENCE_TOKEN_FILE : jeton du mode urgence introuvable (${tokenFile})`);
+    const max = env.VIGIE_CF_URGENCE_MAX || '24h';
+    const m = /^(\d{1,3})(h|j)$/.exec(max);
+    if (!m) throw new Error('VIGIE_CF_URGENCE_MAX : durée en heures ou en jours (24h, 3j)');
+    const maxMs = Math.min(Number(m[1]) * (m[2] === 'h' ? 3600e3 : 864e5), 7 * 864e5);
+    urgence = { zoneId: env.VIGIE_CF_ZONE_ID, tokenFile, maxMs };
   }
   // Notifications (phase D) : Signal (passerelle du réseau interne nicephos-vigie-signal), e-mail en secours.
   let signal = null, mail = null;
@@ -55,6 +73,20 @@ export function loadVigieConfig(env = process.env) {
     const to = String(env.VIGIE_MAIL_TO || '').split(',').map(s => s.trim()).filter(Boolean);
     if (!to.length || !env.VIGIE_MAIL_FROM) throw new Error('VIGIE_MAIL_FROM et VIGIE_MAIL_TO sont obligatoires avec VIGIE_SMTP_URL');
     mail = { url: env.VIGIE_SMTP_URL, from: env.VIGIE_MAIL_FROM, to };
+  }
+  // Source « réseau » (phase E4, facultative) : journaux du mandataire de sortie et des rejets du pare-feu de l'hôte, sur le
+  // volume monté en lecture seule (deploy/unraid/reseau/README.md). Un chemin seul suffit ; un fichier encore absent est
+  // attendu (rsyslog ne le crée qu'à la première ligne) et signalé s'il le reste 24 h.
+  let reseau = null;
+  if (env.VIGIE_RESEAU_MANDATAIRE || env.VIGIE_RESEAU_HOTE) {
+    const chemin = k => {
+      const v = env[k];
+      if (!v) return null;
+      if (!path.isAbsolute(v) || /[\u0000-\u001f]/.test(v)) throw new Error(`${k} : chemin absolu attendu (ex. /reseau/mandataire/mandataire.log)`);
+      return path.resolve(v);
+    };
+    reseau = { mandataire: chemin('VIGIE_RESEAU_MANDATAIRE'), hote: chemin('VIGIE_RESEAU_HOTE'), noms: env.VIGIE_RESEAU_NOMS || undefined };
+    if (reseau.noms) nommeur(reseau.noms);                     // illisible : refus de démarrer
   }
   const consoleUrl = (env.VIGIE_CONSOLE_URL || 'https://vigie.nicephos.art').replace(/\/+$/, '');
   if (!/^https:\/\//.test(consoleUrl)) throw new Error('VIGIE_CONSOLE_URL doit être en https://');
@@ -90,6 +122,8 @@ export function loadVigieConfig(env = process.env) {
     notifications: { signal, mail, consoleUrl },
     console: consoleCfg,
     bordure,
+    urgence,
+    reseau,
     dataDir,
     databasePath: path.resolve(env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')),
     host: env.VIGIE_HOST || '0.0.0.0',
@@ -98,7 +132,10 @@ export function loadVigieConfig(env = process.env) {
     logKey,
     decisionsKey: decisionsKey(need(env, 'VIGIE_DECISIONS_PRIVATE_KEY')),
     retentionDays: int(env.VIGIE_RETENTION_DAYS, 183, 30, 400),
-    zitadel: issuer ? { issuer, keyFile: env.VIGIE_ZITADEL_KEY_FILE, intervalMs: int(env.VIGIE_ZITADEL_INTERVAL_S, 60, 30, 3600) * 1000 } : null,
+    // Lecture des événements toutes les 30 minutes par défaut (quota mensuel de l'API de Zitadel Cloud, offre gratuite :
+    // 5 000 requêtes ; l'historique gratuit est d'un jour, la marge reste large), de 5 minutes à 6 heures.
+    zitadel: issuer ? { issuer, keyFile: env.VIGIE_ZITADEL_KEY_FILE, intervalMs: int(env.VIGIE_ZITADEL_INTERVAL_S, 1800, 300, 21600) * 1000,
+      quota: int(env.VIGIE_ZITADEL_QUOTA, 5000, 0, 10_000_000) } : null,
     backupDir: env.VIGIE_BACKUP_DIR ? path.resolve(env.VIGIE_BACKUP_DIR) : null,
     // Sauvegardes du site, montées en lecture seule : contrôle des rôles (annexe architecture 4.4), obligatoire.
     siteBackupDir,

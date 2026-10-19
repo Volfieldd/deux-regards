@@ -15,7 +15,11 @@ Gravité : **H** haute, **M** moyenne, **B** basse, **I** information.
 | D3-B1 | H | Une règle arrêtée valait « arret », le mode le plus bas : la passer ensuite en Observer était vue comme une hausse (sans motif, sans avis de surveillance réduite), et l'abaissement restait pour toujours ; un second arrêt sans motif était accepté et perdait le mode à reprendre. Commun à la console et à la ligne de commande. | Pendant un arrêt, le mode de référence est celui que la règle reprendra (`avant`, ou son mode de départ) : descendre ou prolonger l'arrêt demande un motif et émet `vigie_surveillance_reduite` ; le mode d'avant le premier arrêt est gardé. Test de non-régression dans `test/vigie-moteur.test.js`. |
 | D3-D7 | M → **H** | La console, facultative, faisait tomber tout le service si elle ne pouvait pas écouter (adresse absente du conteneur, port pris) : `startVigie` rejeté, processus arrêté, redémarrage en boucle sans réception, sans moteur, sans décisions ni résumé servis au site. **Remontée en haute** : une erreur de réglage d'une option éteint la surveillance elle-même. | L'échec d'écoute de la console est rattrapé : écrit dans le journal du conteneur, événement `vigie_console_indisponible` et alerte haute (règle `console_indisponible`, mode alerter) ; réception, moteur et décisions continuent. Test dans `test/vigie-service.test.js`. |
 
-## À arbitrer (non corrigé)
+## Arbitrage du 18 octobre 2026
+
+Toutes les moyennes et les basses peu coûteuses sont corrigées (PR de suite), avec une précision pour D3-B2 : l'auteur d'un geste garde aussi son nom lisible (« console · Sébastien (sub) », `par_sub` dans le détail). Écart volontaire à une correction proposée : pas de `Clear-Site-Data: "cookies"` à la sortie (il effacerait les cookies de tout `nicephos.art`, donc la session de l'admin du site). Restent ouverts : D3-D12 fait (banc), D3-A7 (annexe à corriger), et les écrans « exceptions » et « destinataires des canaux » de l'annexe § 5.4, qui n'existent pas encore.
+
+## Constats arbitrés (tous corrigés, sauf mention)
 
 Regroupés par sujet ; les doublons entre relecteurs sont fusionnés.
 
@@ -79,7 +83,7 @@ Regroupés par sujet ; les doublons entre relecteurs sont fusionnés.
 | D3-D15 | B | Conservation affichée en dur (183 jours) sur `/sante`. | `store.retentionDays`. |
 | D3-D16 | B | Minuteries de démarrage non annulées par `close()` (antérieur à D3). | Les garder et les annuler. |
 | D3-D17 | B | Chemins des gabarits par `new URL(…).pathname` (espace ou accent dans le chemin d'installation). | `fileURLToPath`. |
-| D3-A7 | I | Annexe (MV4) : `SameSite=Strict` annoncé, Lax en vrai ; commentaire de `oidc.js` qui dit la signature du jeton d'identité vérifiée (elle ne l'est pas, ce que la norme admet sous TLS avec authentification du client). | Textes à corriger. |
+| D3-A7 | I | (corrigé dans oidc.js ; annexe à reprendre) Annexe (MV4) : `SameSite=Strict` annoncé, Lax en vrai ; commentaire de `oidc.js` qui dit la signature du jeton d'identité vérifiée (elle ne l'est pas, ce que la norme admet sous TLS avec authentification du client). | Textes à corriger. |
 
 ## Vérifié et écarté (extraits)
 

@@ -3,7 +3,7 @@
 // le code fait réellement : toute évolution d'un traitement ou d'une durée se reporte ici dans la même modification.
 // Responsables conjoints : les auteurs du site ; contact réglable dans l'admin (privacy_contact).
 
-export const UPDATED = '2026-10-18';
+export const UPDATED = '2026-10-19';
 // Date du paragraphe « Journal de sécurité », affiché seulement avec la Vigie (facultative).
 export const UPDATED_SECURITY_LOG = '2026-10-17';
 
@@ -38,6 +38,13 @@ export const PRIVACY = {
         'Le bouton « Partager » ouvre le menu de partage de votre téléphone, ou de simples liens vers WhatsApp, Facebook, Bluesky, X, Pinterest ou votre messagerie : aucun script de ces services n’est chargé sur notre site, et rien n’est transmis avant que vous ne choisissiez. Nous comptons seulement le nombre de partages par photo et par moyen, chaque jour, sans rien garder sur vous.',
         'Le lien « Signaler » nous envoie votre message et, si vous le souhaitez, votre adresse e-mail pour vous répondre : ils ne servent qu’à traiter le signalement et sont effacés au bout de 12 mois.',
       ]],
+      ['Galeries privées', [
+        'Nous pouvons montrer des photos à des personnes choisies, dans une galerie privée : chacune reçoit de nous un lien personnel et, par un autre moyen, un mot de passe. Pour cela, nous gardons le nom de la personne invitée (chiffré, visible de nous seuls), la langue et la durée de son accès, et une empreinte du lien et du mot de passe (jamais le lien ni le mot de passe eux-mêmes).',
+        'Quand vous ouvrez une galerie privée, nous notons la date de vos visites, les mots de passe refusés, vos favoris, la sélection que vous nous envoyez et vos téléchargements, avec le réseau d’où vous venez (votre adresse IP tronquée) et le pays estimé par Cloudflare ; jamais votre navigateur. Cela nous dit si les photos vous sont parvenues, et protège la galerie contre un lien qui aurait été transmis à d’autres.',
+        'Un cookie, nécessaire, garde la galerie ouverte sur votre navigateur : 12 heures sans visite et 7 jours au plus, ou 30 jours si vous cochez « Se souvenir de cet appareil » ; jamais au-delà de la fin de votre accès. « Quitter la galerie » le referme aussitôt.',
+        ...(securityLog ? ['Le journal de sécurité (voir plus bas) reçoit, pour chaque mot de passe accepté, le réseau et le pays seulement ; pour un mot de passe refusé, un lien inconnu ou un accès tenté après son retrait, l’adresse IP complète. Jamais votre nom, le lien ni le mot de passe.'] : []),
+        'Tout ce qui concerne un accès est effacé six mois après sa fin (échéance ou retrait) ; vous pouvez nous demander de l’effacer plus tôt. Base légale : l’exécution du contrat pour une séance commandée, notre intérêt légitime pour les autres invités et pour la sécurité de la galerie (RGPD, articles 6-1-b et 6-1-f).',
+      ]],
       ['Combien de temps', [
         'Demande sans accord ni refus : effacée après 12 mois sans nouvelle.',
         'Photo de vous jointe à votre accord : conservée avec l’accord ; sans accord, effacée après 6 mois (si vous refusez après avoir accepté : 6 mois après votre refus).',
@@ -53,7 +60,7 @@ export const PRIVACY = {
       ]],
       ['Mesure d’audience et cookies', [
         'Le site compte ses visites de façon anonyme, sans cookie ni service extérieur : aucune adresse IP ni identifiant n’est conservé, les compteurs sont effacés après 25 mois.',
-        'Le seul cookie du site public retient la langue que vous choisissez avec le sélecteur de langue. Nos journaux techniques, destinés à la sécurité, ne gardent que des adresses IP tronquées.',
+        'Un cookie du site public retient la langue que vous choisissez avec le sélecteur de langue ; un autre, seulement si vous ouvrez une galerie privée avec son mot de passe, garde la galerie ouverte sur votre navigateur (voir « Galeries privées »). Tous deux sont nécessaires au service que vous demandez. Nos journaux techniques, destinés à la sécurité, ne gardent que des adresses IP tronquées.',
         ...(securityLog ? ['Journal de sécurité : lorsqu’une requête paraît malveillante (tentative d’intrusion, saisie piégée, envois en rafale, lien inexistant cherché en série) et à chaque connexion à l’administration, nous enregistrons l’adresse IP complète, la ville et le pays estimés par Cloudflare, le type de navigateur et la page demandée, dans un journal séparé du site, consultable par nous seuls. Une visite ordinaire n’y laisse en principe rien ; une erreur ponctuelle (lien mal tapé, page restée ouverte après une déconnexion) peut y laisser une ligne. Ce journal est effacé au bout de 6 mois. Base légale : notre intérêt légitime à protéger le site et les données qu’il contient (RGPD, articles 6-1-f et 32).'] : []),
         ...(securityLog && edge ? ['Ce journal est complété par un filtre que nous faisons tourner chez Cloudflare, qui achemine déjà le site : pour chaque page demandée (hors images), Cloudflare enregistre pour nous l’adresse IP, l’opérateur réseau, le pays, une empreinte technique de la connexion chiffrée (jamais son contenu) et le code de réponse, sans le détail de l’adresse de la page. Notre journal de sécurité lit ces relevés chaque minute ; Cloudflare les efface au bout de 3 mois au plus. Ce filtre bloque aussi, avant le site, les adresses que nous avons bloquées.'] : []),
       ]],
@@ -94,6 +101,13 @@ export const PRIVACY = {
         'The “Share” button opens your phone’s share menu, or plain links to WhatsApp, Facebook, Bluesky, X, Pinterest or your email: no script from these services is loaded on our site, and nothing is sent before you choose. We only count the number of shares per photo and per channel, each day, keeping nothing about you.',
         'The “Report” link sends us your message and, if you wish, your email address so that we can reply: they are only used to deal with the report and are deleted after 12 months.',
       ]],
+      ['Private galleries', [
+        'We may show photographs to chosen people, in a private gallery: each receives from us a personal link and, by another channel, a password. For this, we keep the name of the invited person (encrypted, visible to us only), the language and the duration of their access, and a fingerprint of the link and of the password (never the link or the password themselves).',
+        'When you open a private gallery, we record the dates of your visits, refused passwords, your favourites, the selection you send us and your downloads, with the network you come from (your truncated IP address) and the country estimated by Cloudflare; never your browser. This tells us whether the photographs reached you, and protects the gallery against a link passed on to others.',
+        'A necessary cookie keeps the gallery open in your browser: 12 hours without a visit and 7 days at most, or 30 days if you tick “Remember this device”; never beyond the end of your access. “Leave the gallery” closes it at once.',
+        ...(securityLog ? ['The security log (see below) receives, for each accepted password, the network and country only; for a refused password, an unknown link or an access attempted after its withdrawal, the full IP address. Never your name, the link or the password.'] : []),
+        'Everything about an access is deleted six months after it ends (expiry or withdrawal); you can ask us to delete it earlier. Legal basis: performance of the contract for a commissioned session, our legitimate interest for other guests and for the security of the gallery (GDPR, Articles 6(1)(b) and 6(1)(f)).',
+      ]],
       ['For how long', [
         'Request without consent or refusal: deleted after 12 months without news.',
         'Photo of you attached to your consent: kept with the consent; without consent, deleted after 6 months (if you refuse after agreeing: 6 months after your refusal).',
@@ -109,7 +123,7 @@ export const PRIVACY = {
       ]],
       ['Audience measurement and cookies', [
         'The website counts its visits anonymously, without cookies or third-party services: no IP address or identifier is stored, and the counters are deleted after 25 months.',
-        'The only cookie on the public website remembers the language you choose with the language selector. Our technical logs, used for security, only keep truncated IP addresses.',
+        'One cookie on the public website remembers the language you choose with the language selector; another, only if you open a private gallery with its password, keeps the gallery open in your browser (see “Private galleries”). Both are necessary for the service you ask for. Our technical logs, used for security, only keep truncated IP addresses.',
         ...(securityLog ? ['Security log: when a request looks malicious (intrusion attempt, booby-trapped input, bursts of requests, non-existent links requested in series) and at each sign-in to the administration area, we record the full IP address, the city and country estimated by Cloudflare, the type of browser and the page requested, in a log kept separately from the website and accessible only to us. An ordinary visit normally leaves nothing in it; a one-off mistake (a mistyped link, a page left open after signing out) may leave a line. This log is deleted after 6 months. Legal basis: our legitimate interest in protecting the website and the data it holds (GDPR, Articles 6(1)(f) and 32).'] : []),
         ...(securityLog && edge ? ['This log is supplemented by a filter we run at Cloudflare, which already carries the website: for each page requested (images excluded), Cloudflare records on our behalf the IP address, the network operator, the country, a technical fingerprint of the encrypted connection (never its content) and the response code, without the detail of the page address. Our security log reads these records every minute; Cloudflare deletes them after 3 months at most. This filter also blocks, before the website, the addresses we have blocked.'] : []),
       ]],
@@ -150,6 +164,13 @@ export const PRIVACY = {
         'Die Schaltfläche „Teilen“ öffnet das Teilen-Menü Ihres Telefons oder einfache Links zu WhatsApp, Facebook, Bluesky, X, Pinterest oder Ihrem E-Mail-Programm: kein Skript dieser Dienste wird auf unserer Website geladen, und nichts wird übertragen, bevor Sie wählen. Wir zählen nur die Anzahl der Teilungen pro Foto und Kanal und Tag, ohne etwas über Sie zu speichern.',
         'Der Link „Melden“ schickt uns Ihre Nachricht und, wenn Sie möchten, Ihre E-Mail-Adresse für eine Antwort: Sie dienen nur der Bearbeitung der Meldung und werden nach 12 Monaten gelöscht.',
       ]],
+      ['Private Galerien', [
+        'Wir können ausgewählten Personen Fotos in einer privaten Galerie zeigen: Jede erhält von uns einen persönlichen Link und auf anderem Weg ein Passwort. Dazu speichern wir den Namen der eingeladenen Person (verschlüsselt, nur für uns sichtbar), die Sprache und die Dauer ihres Zugangs sowie einen Fingerabdruck des Links und des Passworts (nie den Link oder das Passwort selbst).',
+        'Wenn Sie eine private Galerie öffnen, speichern wir die Daten Ihrer Besuche, abgelehnte Passwörter, Ihre Favoriten, die Auswahl, die Sie uns senden, und Ihre Downloads, mit dem Netz, aus dem Sie kommen (Ihre gekürzte IP-Adresse), und dem von Cloudflare geschätzten Land; nie Ihren Browser. So wissen wir, ob die Fotos angekommen sind, und schützen die Galerie vor einem an andere weitergegebenen Link.',
+        'Ein notwendiges Cookie hält die Galerie in Ihrem Browser geöffnet: 12 Stunden ohne Besuch und höchstens 7 Tage, oder 30 Tage, wenn Sie „Auf diesem Gerät angemeldet bleiben“ ankreuzen; nie über das Ende Ihres Zugangs hinaus. „Galerie verlassen“ schließt sie sofort.',
+        ...(securityLog ? ['Das Sicherheitsprotokoll (siehe unten) erhält für jedes akzeptierte Passwort nur das Netz und das Land; für ein abgelehntes Passwort, einen unbekannten Link oder einen nach dem Widerruf versuchten Zugang die vollständige IP-Adresse. Nie Ihren Namen, den Link oder das Passwort.'] : []),
+        'Alles, was einen Zugang betrifft, wird sechs Monate nach seinem Ende (Ablauf oder Widerruf) gelöscht; Sie können eine frühere Löschung verlangen. Rechtsgrundlage: die Erfüllung des Vertrags bei einem beauftragten Shooting, unser berechtigtes Interesse bei anderen Gästen und für die Sicherheit der Galerie (DSGVO, Art. 6 Abs. 1 lit. b und f).',
+      ]],
       ['Wie lange', [
         'Anfrage ohne Einwilligung oder Ablehnung: nach 12 Monaten ohne Nachricht gelöscht.',
         'Foto von Ihnen zu Ihrer Einwilligung: zusammen mit der Einwilligung aufbewahrt; ohne Einwilligung nach 6 Monaten gelöscht (wenn Sie nach einer Einwilligung ablehnen: 6 Monate nach Ihrer Ablehnung).',
@@ -165,7 +186,7 @@ export const PRIVACY = {
       ]],
       ['Reichweitenmessung und Cookies', [
         'Die Website zählt ihre Besuche anonym, ohne Cookies und ohne externe Dienste: Es werden weder IP-Adressen noch Kennungen gespeichert, die Zähler werden nach 25 Monaten gelöscht.',
-        'Das einzige Cookie der öffentlichen Website speichert die Sprache, die Sie mit der Sprachauswahl wählen. Unsere technischen Protokolle dienen der Sicherheit und enthalten nur gekürzte IP-Adressen.',
+        'Ein Cookie der öffentlichen Website speichert die Sprache, die Sie mit der Sprachauswahl wählen; ein weiteres, nur wenn Sie eine private Galerie mit ihrem Passwort öffnen, hält die Galerie in Ihrem Browser geöffnet (siehe „Private Galerien“). Beide sind für den von Ihnen gewünschten Dienst notwendig. Unsere technischen Protokolle dienen der Sicherheit und enthalten nur gekürzte IP-Adressen.',
         ...(securityLog ? ['Sicherheitsprotokoll: Wenn eine Anfrage bösartig erscheint (Einbruchsversuch, manipulierte Eingabe, Anfragen in schneller Folge, serienweise abgefragte nicht vorhandene Links) und bei jeder Anmeldung im Verwaltungsbereich speichern wir die vollständige IP-Adresse, die von Cloudflare geschätzte Stadt und das Land, den Browsertyp und die aufgerufene Seite in einem von der Website getrennten Protokoll, das nur wir einsehen können. Ein gewöhnlicher Besuch hinterlässt dort in der Regel nichts; ein einzelner Fehler (falsch eingegebener Link, nach der Abmeldung offen gelassene Seite) kann eine Zeile hinterlassen. Dieses Protokoll wird nach 6 Monaten gelöscht. Rechtsgrundlage: unser berechtigtes Interesse am Schutz der Website und der darin enthaltenen Daten (DSGVO, Art. 6 Abs. 1 lit. f und Art. 32).'] : []),
         ...(securityLog && edge ? ['Dieses Protokoll wird durch einen Filter ergänzt, den wir bei Cloudflare betreiben, das die Website bereits ausliefert: Für jede aufgerufene Seite (ohne Bilder) erfasst Cloudflare für uns die IP-Adresse, den Netzbetreiber, das Land, einen technischen Fingerabdruck der verschlüsselten Verbindung (nie deren Inhalt) und den Antwortcode, ohne die genaue Seitenadresse. Unser Sicherheitsprotokoll liest diese Aufzeichnungen jede Minute; Cloudflare löscht sie spätestens nach 3 Monaten. Dieser Filter sperrt außerdem, noch vor der Website, die von uns gesperrten Adressen.'] : []),
       ]],

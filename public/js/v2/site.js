@@ -8,6 +8,18 @@ document.documentElement.classList.add('js');
 (function () {
   document.querySelectorAll('[data-js-only]').forEach(el => { el.hidden = false; });
 
+  // ----- galerie privée (MQ-16) : « Afficher » le mot de passe, une vraie bascule (aria-pressed) ; sans script, absente -----
+  document.querySelectorAll('[data-montrer]').forEach(b => {
+    const input = document.getElementById(b.getAttribute('aria-controls'));
+    if (!input) return;
+    b.addEventListener('click', () => {
+      const on = input.type === 'password';
+      input.type = on ? 'text' : 'password';
+      b.setAttribute('aria-pressed', String(on));
+      input.focus();
+    });
+  });
+
   // ----- langue et menu (<details>) : se referment au clic ailleurs et avec Échap, le focus revient au bouton -----
   const pops = document.querySelectorAll('[data-lang-pick], [data-menu]');
   document.addEventListener('click', e => pops.forEach(d => { if (d.open && !d.contains(e.target)) d.open = false; }));
@@ -53,7 +65,8 @@ document.documentElement.classList.add('js');
       const r = readRetour();
       if (!r || r.gallery !== keyOf(location) || !r.slug) return;
       writeRetour({ ...r, slug: null, armed: false });
-      const tile = [...document.querySelectorAll('.rangees a.vignette')].find(a => decodeURIComponent(new URL(a.href).pathname).endsWith(`/photo/${r.slug}`));
+      // Un billet des Carnets : la photo dans le texte d'abord (ordre du document), avant sa vignette de la planche.
+      const tile = [...document.querySelectorAll('.billet-ouv-photo a, .billet a[href*="/photo/"], .rangees a.vignette')].find(a => decodeURIComponent(new URL(a.href).pathname).endsWith(`/photo/${r.slug}`));
       if (!tile) return;
       const b = tile.getBoundingClientRect();
       if (b.top < 0 || b.bottom > innerHeight) tile.scrollIntoView({ block: 'center' });

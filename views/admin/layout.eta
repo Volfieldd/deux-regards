@@ -7,11 +7,16 @@
   <meta name="color-scheme" content="<%= it.adminTheme || 'dark light' %>">
   <title><%= it.pageTitle %></title>
   <link rel="stylesheet" href="<%= it.asset('admin/admin.css') %>">
+<% if (it.carnetAssets) { /* Carnets : composants de la planche MQ-00 et éditeur de billet (MQ-20). */ %>
+  <link rel="stylesheet" href="<%= it.asset('admin/carnet.css') %>">
+<% } %>
 <% const masks = it.brand ? [it.brand.emblem, it.brand.icon, it.brand.logotype].filter(Boolean).join('.') : ''; %>
 <% if (masks) { %>
   <link rel="stylesheet" href="/brand.css?v=<%= masks %>">
 <% } %>
   <script src="<%= it.asset('admin/admin.js') %>" defer></script>
+<% if (it.carnetAssets) { %>  <script src="<%= it.asset('admin/carnet.js') %>" defer></script>
+<% } %>
 </head>
 <body class="admin" data-csrf="<%= it.csrf %>" data-can="<%= (it.grants || []).join(' ') %>">
 <% const t = it.t; %>
@@ -47,6 +52,7 @@
     flag: '<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/>',
     journal: '<path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+    carnet: '<path d="M6 3h8.5L19 7.5V21H6z"/><path d="M14 3v5h5M9 12.5h7M9 16.5h5"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
     moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
     logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
@@ -89,8 +95,10 @@
   <p class="grp" id="nav-publish"><%= t('Publier') %></p>
   <nav class="nav" aria-labelledby="nav-publish">
 <% if (it.canAll && it.canAll('photos.publier')) { %>    <a href="/admin/a-valider"<%~ it.section === 'review' ? ' aria-current="page"' : '' %>><%~ ic('photos') %><%= t('À valider') %><% if (it.toValidate) { %><span class="nav-badge"><%= it.toValidate %></span><% } %></a>
+<% } %><% if (can('carnet.voir')) { /* Carnets (billets du site, MQ-20) : « Carnets », jamais « Journal » (pris par le journal d'audit). */ %>    <a href="/admin/carnet"<%~ String(it.section).startsWith('carnet') ? ' aria-current="page"' : '' %>><%~ ic('carnet') %><%= t('Carnets') %><% if (it.carnetsPending) { %><span class="nav-badge"><span aria-hidden="true"><%= it.carnetsPending %></span><span class="sr-only"><%= it.carnetsPending > 1 ? t('{n} billets proposés', { n: it.carnetsPending }) : t('1 billet proposé') %></span></span><% } %></a>
 <% } %>    <%~ item(['site', '/admin/site', 'Site public', 'globe', null, 'site.textes']) %>
     <%~ item(['series', '/admin/series', 'Séries', 'series', null, 'series.gerer']) %>
+    <%~ item(['galeries', '/admin/galeries', 'Galeries privées', 'key', /^galerie/.test(it.section || ''), 'galeries.voir']) %>
   </nav>
 <% if (it.navSeries && it.navSeries.length && can('photos.voir')) { %>
   <ul class="ser" aria-label="<%= t('Séries') %>">
@@ -131,6 +139,9 @@
 <% }) %>    </ul>
   </details>
   <div class="foot">
+<% /* --- Choix de l'admin v1 / v2 (server/admin-version.js) : début. Un clic, sans script (formulaire POST et jeton). --- */ %>
+    <form class="ver-choix" method="post" action="/admin/version"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><% if (it.adminVersion === 'v2') { %><input type="hidden" name="version" value="v1"><span class="ver-note"><%= t('Écran pas encore en v2.') %></span> <button type="submit"><%= t('Revenir à l’admin v1') %></button><% } else { %><input type="hidden" name="version" value="v2"><button type="submit"><%= t('Essayer l’admin v2') %></button><% } %></form>
+<% /* --- Choix de l'admin v1 / v2 : fin. --- */ %>
     <a class="job" href="/admin/photos?statut=draft" data-activity<%~ it.activity ? '' : ' hidden' %>><span class="spin" aria-hidden="true"></span><span data-activity-text><%= it.activity > 1 ? t('Traitement : {n} photos', { n: it.activity }) : t('Traitement : {n} photo', { n: it.activity }) %></span></a>
     <div class="me">
       <span class="av" aria-hidden="true"><%= (it.session.name || '?').trim().charAt(0).toUpperCase() %></span>
@@ -149,7 +160,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', releases: 'tableau-de-bord', reports: 'site-public-visionneuse-page-dune-photo', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', releases: 'tableau-de-bord', carnets: 'carnets', carnet: 'carnets-écrire-un-billet', 'carnet-photo': 'carnets-écrire-un-billet', 'carnet-photo-reglages': 'carnets-les-photos-dun-billet', 'carnet-confirmer': 'carnets-le-circuit-de-publication', 'carnet-versions': 'carnets-écrire-un-billet', reports: 'site-public-visionneuse-page-dune-photo', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>

@@ -1,0 +1,52 @@
+<% layout('./layout') %>
+<% const t = it.t; %>
+<% /* Réglages › Photographes (MQ-07, état 21 ; UX-A-25) : une carte résumée par auteur (nom, lettre des cartes, nombre de
+      photos), et « Modifier » qui déplie son formulaire (les champs et la route de la v1). Supprimer : un repli de plus,
+      qui dit ce qui l'empêche ; le bouton final nomme le photographe. */ %>
+<% const chev = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
+   const fields = (v, errs, key) => { const id = k => `${k}-${key}`; const bad = k => (errs && errs[k] ? ` aria-invalid="true" aria-describedby="err-auteur-${key}"` : ''); %>
+      <div class="row">
+        <div class="champ-a"><label for="<%= id('nom') %>"><%= t('Nom') %></label><input type="text" id="<%= id('nom') %>" name="name" value="<%= v.name || '' %>" required maxlength="80"<%~ bad('name') %>></div>
+<% if (v.id) { %>        <div class="champ-a"><label for="<%= id('slug') %>"><%= t('Adresse') %></label><p class="aide" id="<%= id('slug') %>-a"><%= t('Sa page : /auteur/{slug}', { slug: v.slug }) %></p><input type="text" id="<%= id('slug') %>" name="slug" value="<%= v.slug %>" maxlength="80" aria-describedby="<%= id('slug') %>-a"<%~ bad('slug') %>></div><% } %>
+      </div>
+      <div class="champ-a"><label for="<%= id('court') %>"><%= t('Description courte') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="<%= id('court') %>-a"><%= t('Son regard, une phrase sous son nom sur l’accueil du site ; {n} signes au plus.', { n: it.limits.short_bio }) %></p><input type="text" id="<%= id('court') %>" name="short_bio" value="<%= v.short_bio || '' %>" maxlength="<%= it.limits.short_bio %>" aria-describedby="<%= id('court') %>-a"></div>
+      <%~ include('../_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'short_bio', label: t('Description courte'), max: it.limits.short_bio }) %>
+      <div class="champ-a"><label for="<%= id('bio') %>"><%= t('Biographie') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><textarea id="<%= id('bio') %>" name="bio" rows="3" maxlength="2000"><%= v.bio || '' %></textarea></div>
+      <%~ include('../_tr', { asset: it.asset, translate: it.translate, t: it.t, v, name: 'bio', label: t('Biographie'), max: 2000, rows: 3 }) %>
+      <div class="row">
+        <div class="champ-a"><label for="<%= id('lettre') %>"><%= t('Lettre des cartes d’accord') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="<%= id('lettre') %>-a"><%= t('J-0142 ; vide : {letter}', { letter: v.slug ? v.slug.charAt(0).toUpperCase() : t('première lettre de l’adresse') }) %></p><input type="text" id="<%= id('lettre') %>" name="card_prefix" value="<%= v.card_prefix || '' %>" maxlength="1" autocapitalize="characters" class="lettre" aria-describedby="<%= id('lettre') %>-a"<%~ bad('card_prefix') %>></div>
+        <div class="champ-a"><label for="<%= id('ig') %>"><%= t('Signature des posts Instagram') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="<%= id('ig') %>-a"><%= t('Sous la légende des photos qui en ont une, retirable photo par photo.') %></p><input type="text" id="<%= id('ig') %>" name="ig_signature" value="<%= v.ig_signature || '' %>" maxlength="200" aria-describedby="<%= id('ig') %>-a"></div>
+      </div>
+<% if (errs) { %>      <p class="err" role="alert" id="err-auteur-<%= key %>"><span><b><%= t('Erreur :') %></b> <%= Object.values(errs).join(' ') %></span></p><% } %>
+<% } %>
+<%~ include('./_reglages', { ...it, courant: 'authors' }) %>
+<p class="rub-intro"><%= t('Le compte de connexion de chaque photographe et ses droits se règlent dans « Comptes et rôles » ; ses cartes d’accord et son QR, dans l’app de terrain.') %></p>
+<div class="cartes-p">
+<% it.authors.forEach(a => { const ed = it.editErrors && it.editErrors.id === a.id ? it.editErrors : null; %>
+  <article class="panel" aria-labelledby="au-<%= a.id %>">
+    <span class="av" aria-hidden="true"><%= (a.name || '?').trim().charAt(0).toUpperCase() %></span>
+    <h2 id="au-<%= a.id %>"><%= a.name %></h2>
+    <p><%= t('Lettre {l}', { l: a.card_prefix || a.slug.charAt(0).toUpperCase() }) %> · <%= a.count > 1 ? t('{n} photos', { n: a.count }) : t('{n} photo', { n: a.count || 0 }) %></p>
+    <details class="plier modif"<%~ ed ? ' open' : '' %>><summary><%~ chev %><%= t('Modifier') %><span class="sr-only"> <%= a.name %></span></summary>
+      <form class="form" method="post" action="/admin/auteurs/<%= a.id %>">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% fields(ed ? { ...a, ...ed.values } : a, ed && ed.errors, a.id) %>
+        <p class="form-pied"><button class="btn ghost" type="submit"><%= t('Enregistrer « {name} »', { name: a.name }) %></button></p>
+      </form>
+      <details class="plier"><summary><%~ chev %><%= t('Supprimer…') %></summary>
+<% if (a.holds.length) { %>        <p class="hint"><%= t('Impossible pour l’instant :') %> <%= a.holds.join(' ') %></p>
+<% } else { %>        <form method="post" action="/admin/auteurs/<%= a.id %>/delete"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
+          <p class="hint"><%= t('Le photographe n’a plus de photo ni de rencontre : sa fiche est effacée, et ne pourra pas être rétablie.') %></p>
+          <button class="btn danger" type="submit"><%= t('Supprimer « {name} »', { name: a.name }) %></button></form>
+<% } %>      </details>
+    </details>
+  </article>
+<% }) %>
+</div>
+<details class="panel plier nouveau"<%~ Object.keys(it.errors || {}).length ? ' open' : '' %>><summary><%~ chev %><%= t('Nouveau photographe') %></summary>
+  <form class="form" method="post" action="/admin/auteurs">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% fields(it.values || {}, Object.keys(it.errors || {}).length ? it.errors : null, 'nouveau') %>
+    <p class="form-pied"><button class="btn" type="submit"><%= t('Ajouter le photographe') %></button></p>
+  </form>
+</details>

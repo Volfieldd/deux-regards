@@ -1,0 +1,60 @@
+<% layout('./layout') %>
+<% /* Nouvel accès (MQ-18, état principal) : pour qui (le nom ne sert qu'à l'équipe ; personnel ou de groupe, G5), langue,
+      fin (30 jours par défaut, 6 mois au plus, jamais après la fermeture ; saisie libre, relue en toutes lettres ; deux choix
+      rapides en boutons d'envoi, qui marchent sans script), droits (favoris, téléchargement 2 048 px ou jusqu'à 4 000 px),
+      les photos et leurs accords (signalés, sans bloquer). Le mot de passe est généré à l'étape suivante, jamais choisi
+      (G14). Aucun e-mail n'est envoyé par le site : le message à transmettre est montré à droite, puis prêt à copier.
+      Jeton de formulaire à usage unique (G57). */ %>
+<% const t = it.t, s = it.s, v = it.values || {}, e = it.errors || {};
+   const csrf = `<input type="hidden" name="_csrf" value="${it.csrf}">`;
+   const errP = k => e[k] ? `<p class="err" id="${k}-err"><span><b>${t('Erreur :')}</b> ${String(e[k]).replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span></p>` : '';
+   const on = k => v[k] === '1' || v[k] === 'on' || v[k] === true; %>
+<div class="gp">
+<p class="help-link"><a href="/admin/aide#galeries-privees"><%= t('Aide sur cette page') %></a></p>
+<header class="ep">
+  <a class="ep-retour" href="/admin/galeries/<%= s.id %>"><%= s.title %></a>
+  <div class="ep-titre"><h1><%= t('Nouvel accès') %></h1></div>
+  <p class="ep-meta"><span><%= s.author_id ? t('Galerie de {name}', { name: s.who }) : t('Galerie commune') %></span><span><%= s.nPhotos > 1 ? t('{n} photos', { n: s.nPhotos }) : t('{n} photo', { n: s.nPhotos }) %></span><span><%= t('ouverte jusqu’au {date}', { date: s.closesText }) %></span><span><%= it.otherInvites ? (it.otherInvites > 1 ? t('{n} autres accès', { n: it.otherInvites }) : t('1 autre accès')) : t('aucun autre accès') %></span></p>
+</header>
+<% if (s.state === 'brouillon') { %><div class="signal" role="note"><p class="signal-t"><span aria-hidden="true">○</span> <%= t('La galerie est en brouillon') %></p><p><%= t('L’accès sera prêt, mais son lien ne s’ouvrira qu’une fois la galerie ouverte (onglet Réglages).') %></p></div><% } %>
+<div class="deux-col">
+<form class="panel form" id="f-acces" action="/admin/galeries/<%= s.id %>/acces" method="post" novalidate aria-labelledby="f-t"><%~ csrf %><input type="hidden" name="jeton" value="<%= it.jeton %>">
+<% if (it.errors) { %>  <section class="resume-a" tabindex="-1" aria-labelledby="resume-t"><h3 id="resume-t"><%= Object.keys(e).length > 1 ? t('L’accès n’est pas créé : {n} points à corriger', { n: Object.keys(e).length }) : t('L’accès n’est pas créé : 1 point à corriger') %></h3><ul><% Object.keys(e).forEach(k => { %><li><a href="#<%= k === 'expires' ? 'fin' : k === 'label' ? 'nom' : 'nom' %>"><%= e[k] %></a></li><% }) %></ul></section>
+<% } %>  <h2 class="panel-t" id="f-t"><%= t('Pour qui') %></h2>
+  <p class="hint"><%= t('Tous les champs sont obligatoires, sauf mention « facultatif ».') %></p>
+  <div class="champ-a"><label for="nom"><%= t('Nom de la personne') %></label><p class="aide" id="nom-aide"><%= t('Seule l’équipe le voit (chiffré, effacé six mois après la fin de l’accès). L’invité verra le titre de la galerie.') %></p><input type="text" id="nom" name="label" maxlength="120" value="<%= v.label || '' %>" autocomplete="off" aria-describedby="nom-aide<%= e.label ? ' label-err' : '' %>"<%~ e.label ? ' aria-invalid="true"' : '' %>><%~ errP('label') %></div>
+  <fieldset class="choix-a"><legend><%= t('Un accès pour') %></legend>
+    <label><input type="radio" name="groupe" value="0"<%~ v.groupe !== '1' ? ' checked' : '' %>><span><%= t('Une personne (lien personnel)') %></span><span class="sec"><%= t('On sait qui a ouvert, et l’on peut révoquer cette seule personne.') %></span></label>
+    <label><input type="radio" name="groupe" value="1"<%~ v.groupe === '1' ? ' checked' : '' %>><span><%= t('Un groupe (le même lien pour plusieurs personnes)') %></span><span class="sec"><%= t('Un couple, une rédaction. La liste des accès le signale.') %></span></label>
+  </fieldset>
+  <div class="champ-a"><label for="langue"><%= t('Langue de la galerie pour cette personne') %></label><select id="langue" name="lang"><% [['fr', 'Français'], ['en', 'English'], ['de', 'Deutsch']].forEach(([l, n]) => { %><option value="<%= l %>" lang="<%= l %>"<%~ v.lang === l ? ' selected' : '' %>><%= n %></option><% }) %></select></div>
+  <h2 class="panel-t gp-sous-t"><%= t('Durée et droits') %></h2>
+  <div class="champ-a"><label for="fin"><%= t('Fin de l’accès') %></label><p class="aide" id="fin-aide"><%= t('Écrivez-la comme vous voulez : « 30/11/2026 », « 30 nov. ». 30 jours par défaut, 6 mois au plus ; au plus tard le jour où la galerie ferme. Prolonger garde le même lien.') %></p>
+    <div class="pills" role="group" aria-label="<%= t('Choix rapides de la fin') %>"><% it.pills.forEach(p => { %><button class="pill" type="submit" name="fin_rapide" value="<%= p.value %>" formnovalidate aria-pressed="<%= p.value === v.expires ? 'true' : 'false' %>"><%= p.label %></button><% }) %></div>
+    <input type="text" id="fin" name="expires" maxlength="40" value="<%= v.expires || '' %>" aria-describedby="fin-aide<%= it.lu ? ' fin-lu' : '' %><%= e.expires ? ' expires-err' : '' %>"<%~ e.expires ? ' aria-invalid="true"' : '' %>><% if (it.lu && !e.expires) { %><p class="lu" id="fin-lu"><%= it.lu %></p><% } %><%~ errP('expires') %></div>
+  <fieldset class="choix-a"><legend><%= t('Ce que la personne peut faire') %></legend><p class="aide"><%= t('Elle voit les photos prêtes ou confirmées de la galerie, avec le filigrane du site, téléchargements compris. Jamais l’original, jamais le GPS.') %></p>
+    <label><input type="checkbox" name="favoris" value="1"<%~ on('favoris') ? ' checked' : '' %>><span><%= t('Choisir ses favoris') %></span><span class="sec"><%= t('Une étoile sur chaque photo ; vous voyez sa sélection ici.') %></span></label>
+    <label><input type="checkbox" name="telecharger" value="1"<%~ on('telecharger') ? ' checked' : '' %>><span><%= t('Télécharger les photos en 2 048 px') %></span><span class="sec"><%= t('JPEG marqué « usage personnel », sans GPS.') %></span></label>
+    <label><input type="checkbox" name="grande" value="1"<%~ on('grande') ? ' checked' : '' %>><span><%= t('Et en grande taille, jusqu’à 4 000 px') %></span><span class="sec"><%= t('Seulement avec le téléchargement ; signalé à la sécurité.') %></span></label>
+  </fieldset>
+  <div class="galerie-resume"><div class="lb-l"><span class="lb"><%= t('Photos de la galerie : {n}', { n: it.items.length }) %></span><a href="/admin/galeries/<%= s.id %>/photos"><%= t('Modifier les photos de la galerie') %></a></div>
+<% if (it.items.length) { %>    <ul class="vignettes-a" aria-label="<%= t('Photos de la galerie, dans l’ordre') %>"><% it.items.forEach(p => { %><li><img src="<%= p.thumb %>" alt="<%= p.title %>" height="56" width="<%= Math.round(56 * p.width / p.height) %>" loading="lazy"></li><% }) %></ul>
+<% } %><% if (it.toCheck.length) { %>    <div class="signal" role="note"><p class="signal-t"><span aria-hidden="true">▲</span> <%= it.toCheck.length > 1 ? t('{n} photos cachées aux invités tant que vous ne les confirmez pas', { n: it.toCheck.length }) : t('1 photo cachée aux invités tant que vous ne la confirmez pas') %></p>
+<% it.toCheck.forEach(p => { %>      <p>« <%= p.title %> » : <%= p.prive.reasons.map(r => t.msg(r)).join(' ; ') %>. <%= t('Les invités ne la voient pas tant qu’elle n’est pas confirmée ; l’accès peut être créé quand même.') %></p>
+      <div class="actions"><a class="btn ghost" href="/admin/photos/<%= p.photo_id %>"><%= t('Ouvrir la fiche de la photo') %></a><button class="btn ghost" type="submit" form="f-confirmer-<%= p.item_id %>"><%= t('Confirmer l’usage privé') %></button><button class="btn ghost" type="submit" form="f-retirer-<%= p.item_id %>"><%= t('Retirer de la galerie') %></button></div>
+<% }) %>    </div>
+<% } %>  </div>
+  <div class="note-a"><p><b><%= t('Mot de passe : créé à l’étape suivante.') %></b> <%= t('12 caractères faciles à dicter, en trois groupes de quatre, sans 0, O, 1, I ni L. Il s’affiche une seule fois, pour que vous le donniez par un autre moyen (SMS, appel). Il n’est jamais écrit dans le message du lien.') %></p></div>
+  <div class="form-pied"><a class="btn ghost" href="/admin/galeries/<%= s.id %>"><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Créer l’accès') %></button></div>
+</form>
+<% it.toCheck.forEach(p => { %><form class="form-cache" id="f-retirer-<%= p.item_id %>" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/retirer" method="post"><%~ csrf %><input type="hidden" name="retour" value="nouvel-acces"></form><form class="form-cache" id="f-confirmer-<%= p.item_id %>" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/confirmer" method="post"><%~ csrf %><input type="hidden" name="retour" value="nouvel-acces"></form>
+<% }) %>
+<section class="panel" aria-labelledby="apercu-t">
+  <h2 class="panel-t" id="apercu-t"><%= t('Le message à transmettre') %></h2>
+  <p class="aide-panel"><%= t('Le site n’envoie pas d’e-mail : à l’étape suivante, vous copiez ce message, avec le lien, et l’envoyez vous-même. Le mot de passe part à part, par un autre moyen. Texte seul, dans la langue choisie pour la personne.') %></p>
+  <div class="courriel" lang="<%= v.lang || 'fr' %>"><% it.message.forEach((m, k) => { %><p<%~ k === 2 ? ' class="donnee"' : k === it.message.length - 1 ? ' class="bas"' : '' %>><%= m %></p><% }) %>
+  </div>
+  <div class="btns-ligne gp-marge"><a class="btn ghost" href="/admin/galeries/<%= s.id %>/apercu"><%= t('Voir la galerie comme un invité') %></a></div>
+</section>
+</div>
+</div>

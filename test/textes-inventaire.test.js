@@ -12,7 +12,10 @@ import { intentParts } from '../server/v2-vues.js';
 // description courte d'un photographe (MQ-01), texte de remplacement d'une photo (UX-F-44) et numéro d'inventaire
 // (UX-T-05, MQ-04). Écrits dans l'admin avec les droits de leurs voisins, notés au journal, échappés et bornés ; la v1
 // ne change que par l'attribut alt de la photo de la visionneuse.
-const YY = String(new Date().getUTCFullYear()).slice(2);
+// Année du numéro : celle de Paris (migration 054), soit l'UTC plus une heure au passage d'année ; la migration 053
+// seule comptait en UTC.
+const YY = String(new Date(Date.now() + 3600e3).getUTCFullYear()).slice(2);
+const YY_UTC = String(new Date().getUTCFullYear()).slice(2);
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
 // Vigie simulée : les événements de sécurité reçus (« hors portée », droit refusé).
@@ -94,7 +97,7 @@ test('migration 053 sur une base en service : photos déjà publiées numéroté
     [{ prefix: 'J25', last: 2 }, { prefix: 'J26', last: 1 }, { prefix: 'Q26', last: 1 }, { prefix: 'S25', last: 1 }]);
   // Le brouillon publié ensuite prend le rang suivant de l'année en cours.
   db.prepare("UPDATE photos SET status = 'published' WHERE id = 5").run();
-  assert.equal(db.prepare('SELECT inventory FROM photos WHERE id = 5').pluck().get(), YY === '26' ? 'J26-002' : `J${YY}-001`);
+  assert.equal(db.prepare('SELECT inventory FROM photos WHERE id = 5').pluck().get(), YY_UTC === '26' ? 'J26-002' : `J${YY_UTC}-001`);
 });
 
 // ---------- numéro d'inventaire ----------
@@ -151,6 +154,70 @@ test('numéro d’inventaire : rien de privé (ni l’heure, ni l’identifiant 
     assert.doesNotMatch(p.inventory, new RegExp(p.published_at.slice(11, 13) + p.published_at.slice(14, 16)), 'pas l’heure');
     assert.ok(Number(rank) <= 6, `rang de l’auteur, pas l’identifiant ${p.id}`);
   }
+});
+
+test('numéro d’inventaire : l’année de Paris (migration 054) ; le 1er janvier à 0 h 30 compte pour l’année nouvelle', async t => {
+  const c = await site(t);
+  assert.ok(c.db.prepare('SELECT 1 FROM migrations WHERE name = ?').get('054_inventaire_annee_paris.sql'));
+  // L'expression des déclencheurs : l'UTC plus une heure au passage d'année (toujours en heure d'hiver), sans effet
+  // sur l'année le reste du temps.
+  const year = at => c.db.prepare("SELECT strftime('%Y', ?, '+1 hour')").pluck().get(at);
+  assert.equal(year('2026-12-31 23:30:00'), '2027');                 // 1er janvier, 0 h 30 à Paris
+  assert.equal(year('2026-12-31 22:30:00'), '2026');                 // 31 décembre, 23 h 30 à Paris
+  assert.equal(year('2027-01-01 00:30:00'), '2027');
+  assert.equal(year('2026-06-30 22:30:00'), '2026');                 // été : 1er juillet, 0 h 30, même année
+  for (const name of ['photos_inventory_insert', 'photos_inventory_update']) {
+    const sql = c.db.prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?").pluck().get(name);
+    assert.equal(sql.match(/strftime\('%Y', COALESCE\(\(SELECT published_at FROM photos WHERE id = NEW\.id\), 'now'\), '\+1 hour'\)/g)?.length, 2, name);
+  }
+  // Les déclencheurs lisent published_at : une date posée par l'écriture tient lieu d'horloge.
+  const src = c.first(c.seb);
+  const insert = (slug, status, at) => Number(c.db.prepare(`INSERT INTO photos (slug, title, category_id, author_id, status, position, file, width, height, published_at)
+    SELECT ?, ?, category_id, author_id, ?, 200, ? || '.jpg', width, height, ? FROM photos WHERE id = ?`).run(slug, slug, status, slug, at, src.id).lastInsertRowid);
+  // Publiée à l'insertion : le 31 décembre à 23 h 30 UTC, c'est le 1er janvier à Paris.
+  assert.equal(c.row(insert('nouvel-an', 'published', '2026-12-31 23:30:00')).inventory, 'S27-001');
+  assert.equal(c.row(insert('reveillon', 'published', '2026-12-31 22:30:00')).inventory, `S26-${String(YY === '26' ? 7 : 1).padStart(3, '0')}`);
+  // Publiée plus tard (changement de statut) : même règle.
+  const draft = insert('brouillon', 'draft', null);
+  assert.equal(c.row(draft).inventory, null);
+  c.db.prepare("UPDATE photos SET status = 'published', published_at = '2026-12-31 23:59:00' WHERE id = ?").run(draft);
+  assert.equal(c.row(draft).inventory, 'S27-002');
+  const late = insert('veille', 'draft', null);
+  c.db.prepare("UPDATE photos SET status = 'published', published_at = '2027-12-31 22:59:59' WHERE id = ?").run(late);
+  assert.equal(c.row(late).inventory, 'S27-003');
+  // Toujours unique et stable.
+  c.db.prepare("UPDATE photos SET status = 'draft' WHERE id = ?").run(draft);
+  c.db.prepare("UPDATE photos SET status = 'published', published_at = '2028-06-01 10:00:00' WHERE id = ?").run(draft);
+  assert.equal(c.row(draft).inventory, 'S27-002');
+  assert.throws(() => c.db.prepare("UPDATE photos SET inventory = 'S28-001' WHERE id = ?").run(draft), /il ne change jamais/);
+  const all = c.db.prepare('SELECT inventory FROM photos WHERE inventory IS NOT NULL').pluck().all();
+  assert.equal(new Set(all).size, all.length);
+});
+
+test('migration 054 sur une base en service : les numéros déjà donnés et les compteurs ne bougent pas', async t => {
+  const c = await site(t);
+  const file = `${c.dir}/avant-054.db`;
+  const db = openDb(file);
+  t.after(() => db.close());
+  const read = name => fs.readFileSync(new URL(`../server/db/migrations/${name}`, import.meta.url), 'utf8');
+  db.exec(`CREATE TABLE authors (id INTEGER PRIMARY KEY, slug TEXT, name TEXT, card_prefix TEXT NOT NULL DEFAULT '');
+    CREATE TABLE categories (id INTEGER PRIMARY KEY, slug TEXT, name TEXT);
+    CREATE TABLE photos (id INTEGER PRIMARY KEY, author_id INTEGER, status TEXT, published_at TEXT);
+    INSERT INTO authors VALUES (1, 'julien', 'Julien', '');
+    INSERT INTO photos VALUES (1, 1, 'published', '2025-12-31 23:30:00'), (2, 1, 'published', '2026-01-02 10:00:00');`);
+  db.exec(read('053_textes_inventaire.sql'));
+  // Numérotée en UTC par 053 : 2025, gardé tel quel.
+  const before = db.prepare('SELECT id, inventory FROM photos ORDER BY id').all();
+  const counters = db.prepare('SELECT prefix, last FROM inventory_counters ORDER BY prefix').all();
+  assert.deepEqual(before.map(r => r.inventory), ['J25-001', 'J26-001']);
+  db.exec(read('054_inventaire_annee_paris.sql'));
+  assert.deepEqual(db.prepare('SELECT id, inventory FROM photos ORDER BY id').all(), before);
+  assert.deepEqual(db.prepare('SELECT prefix, last FROM inventory_counters ORDER BY prefix').all(), counters);
+  assert.deepEqual(db.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' ORDER BY name").pluck().all(),
+    ['inventory_counters_conserve', 'inventory_counters_monotone', 'photos_inventory_insert', 'photos_inventory_stable', 'photos_inventory_update']);
+  // La suite reprend au rang suivant, à l'heure de Paris.
+  db.exec("INSERT INTO photos (id, author_id, status, published_at) VALUES (3, 1, 'published', '2026-12-31 23:30:00'), (4, 1, 'published', '2026-03-01 10:00:00')");
+  assert.deepEqual(db.prepare('SELECT inventory FROM photos WHERE id IN (3, 4) ORDER BY id').pluck().all(), ['J27-001', 'J26-002']);
 });
 
 // ---------- droits ----------
@@ -323,6 +390,58 @@ test('description suggérée : jamais publiée ni enregistrée sans une personne
   await admin.post(`/admin/photos/${p.id}`, c.form(c.row(p.id), { alt_text_en: 'A quay at dawn, two mooring posts.' }));
   c.app.publicVersion.save('v2');
   assert.ok((await c.visit(`/en/photo/${p.slug}`)).body.includes('alt="A quay at dawn, two mooring posts."'));
+});
+
+// ---------- « Compléter et publier » et inspecteur ----------
+
+test('« Compléter et publier » et inspecteur : texte de remplacement écrit par une personne, mêmes droits, bornes et journal', async t => {
+  const c = await site(t, { describeOptions: { manual: true, model: { describe: async () => 'A quay at dawn.', unload: async () => {}, remove: async () => {} } } });
+  const admin = c.as('admin'), relu = c.as('relecteur'), ph = c.photographer();
+  const mine = c.first(c.seb), other = c.first(c.jul);
+  // Une description suggérée existe : ni l'écran du lot ni l'inspecteur ne la proposent ni ne la recopient.
+  c.app.describer.save({ on: true, model: 'base', from: 1, to: 6 });
+  await admin.post(`/admin/photos/${mine.id}/description`);
+  await c.app.describer.idle();
+  assert.equal(c.app.describer.forPhoto(mine.id).en, 'A quay at dawn.');
+  const lot = (await admin.get(`/admin/photos/lot?ids=${mine.id},${other.id}`)).body;
+  for (const p of [mine, other]) {
+    assert.match(lot, new RegExp(`<label>Texte de remplacement<input name="alt_text_${p.id}" value="" maxlength="250" placeholder="[^"]+" aria-label="Texte de remplacement de la photo ${p.id}" data-field="alt_text"></label>`));
+  }
+  const lib = (await admin.get('/admin/photos')).body;
+  assert.match(lib, /<input data-one-field="alt_text" maxlength="250" aria-label="Texte de remplacement"/);
+  const data = JSON.parse(lib.match(/<script type="application\/json" id="photos-data">([\s\S]*?)<\/script>/)[1]);
+  assert.equal(data.find(p => p.id === mine.id).alt_text, '');
+  for (const body of [lot, lib, JSON.stringify(await (await admin.get(`/admin/photos/${mine.id}/donnees`)).json())]) assert.doesNotMatch(body, /A quay at dawn/);
+  // Sans script : le tableau entier ; une ligne, 250 signes au plus, côté serveur.
+  const long = `Un quai,\nà l’aube.${'x'.repeat(300)}`;
+  assert.equal((await admin.post('/admin/photos/lot', { ids: `${mine.id}`, [`title_${mine.id}`]: mine.title, [`alt_text_${mine.id}`]: long })).statusCode, 303);
+  const saved = c.row(mine.id).alt_text;
+  assert.equal(saved.length, 250);
+  assert.match(saved, /^Un quai, à l’aube\.x+$/);
+  assert.equal(c.row(mine.id).alt_text_en, '', 'la suggestion n’est jamais enregistrée seule');
+  // Un champ absent garde sa valeur (formulaire d'une version précédente, autre ligne).
+  await admin.post('/admin/photos/lot', { ids: `${mine.id}`, [`title_${mine.id}`]: mine.title });
+  assert.equal(c.row(mine.id).alt_text, saved);
+  // Avec script : champ par champ (le lot comme l'inspecteur) ; la réponse et les données de l'inspecteur le portent.
+  const r = await admin.json(`/admin/photos/${mine.id}/champs`, { alt_text: 'Deux bittes\r\nd’amarrage.' });
+  assert.equal(r.statusCode, 200);
+  assert.equal(r.json().photo.alt_text, 'Deux bittes d’amarrage.');
+  assert.equal((await (await admin.get(`/admin/photos/${mine.id}/donnees`)).json()).alt_text, 'Deux bittes d’amarrage.');
+  // Relecteur (photos.textes) : par le lot aussi.
+  assert.equal((await relu.post('/admin/photos/lot', { ids: `${other.id}`, [`title_${other.id}`]: other.title, [`alt_text_${other.id}`]: 'Une ruelle.' })).statusCode, 303);
+  assert.equal(c.row(other.id).alt_text, 'Une ruelle.');
+  // Photographe : les siennes seulement ; une photo d'un autre glissée dans le lot n'est pas écrite.
+  assert.equal((await ph.post('/admin/photos/lot', { ids: `${mine.id},${other.id}`, [`title_${mine.id}`]: mine.title, [`alt_text_${mine.id}`]: 'Le quai.', [`alt_text_${other.id}`]: 'piraté' })).statusCode, 303);
+  assert.equal(c.row(mine.id).alt_text, 'Le quai.');
+  assert.equal(c.row(other.id).alt_text, 'Une ruelle.');
+  assert.equal((await ph.json(`/admin/photos/${other.id}/champs`, { alt_text: 'piraté' })).statusCode, 404);
+  assert.equal(c.row(other.id).alt_text, 'Une ruelle.');
+  // Journal : le nom du champ, jamais sa valeur.
+  const log = c.db.prepare("SELECT action, detail FROM audit_log WHERE action IN ('POST /admin/photos/lot', 'POST /admin/photos/:id/champs') AND detail LIKE '%alt_text%' ORDER BY id").all();
+  assert.deepEqual(log.map(x => x.action), ['POST /admin/photos/lot', 'POST /admin/photos/:id/champs', 'POST /admin/photos/lot', 'POST /admin/photos/lot']);
+  assert.ok(log.every(x => /^champs : (photo \d+ : )?alt_text$/.test(x.detail)), JSON.stringify(log));
+  const all = c.db.prepare('SELECT detail FROM audit_log').pluck().all().join('\n');
+  assert.doesNotMatch(all, /quai|ruelle|bittes|piraté|A quay/i);
 });
 
 // ---------- texte de remplacement sur le site ----------

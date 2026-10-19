@@ -1,6 +1,38 @@
 <% layout('./layout') %>
 <% const b = it.brand; const t = it.t; %>
 <h1><%= t('Apparence') %></h1>
+
+<section class="panel" id="site-public" aria-labelledby="site-public-t">
+  <h2 id="site-public-t"><%= t('Site public : v1 ou v2') %></h2>
+  <p class="mono"><%= t('La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion, qui gardent la présentation v1. L’administration ne change pas.') %></p>
+  <form class="form" method="post" action="/admin/apparence">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <fieldset>
+      <legend><%= t('Version vue par les visiteurs') %></legend>
+      <label class="inline"><input type="radio" name="site_public" value="v1"<%~ it.publicVersion === 'v1' ? ' checked' : '' %>> <strong>v1</strong> <span class="mono"><%= t('la présentation d’origine') %></span></label>
+      <label class="inline"><input type="radio" name="site_public" value="v2"<%~ it.publicVersion === 'v2' ? ' checked' : '' %>> <strong>v2</strong> <span class="mono"><%= t('la nouvelle présentation') %></span></label>
+    </fieldset>
+    <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer la version') %></button></p>
+  </form>
+<% const autre = it.publicVersion === 'v2' ? 'v1' : 'v2'; const forcee = it.vueSession && it.vueSession !== it.publicVersion; %>
+  <p class="mono"><%= it.publicVersion === 'v2' ? t('La v2 est appliquée : tous les visiteurs la voient.') : t('La v1 est appliquée : tous les visiteurs la voient.') %></p>
+  <p class="mono"><%= t('Sur chaque page du site public, un petit bouton « Voir en v1 » ou « Voir en v2 », visible par vous seul, change la version que vous voyez, sur cette session : pour comparer, ou voir la v2 avant de l’appliquer. Les visiteurs voient toujours la version choisie ici. Les Carnets et les galeries privées n’existent qu’en v2.') %></p>
+  <form class="row" method="post" action="/admin/apparence/apercu-v2">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (forcee) { %>
+    <input type="hidden" name="vue" value="suivre">
+    <input type="hidden" name="vers" value="/admin/apparence">
+    <p class="mono"><%= t('Votre vue : la {v}, pour vous seul, sur cette session.', { v: it.vueSession }) %></p>
+    <button class="btn ghost" type="submit"><%= t('Revenir à la version des visiteurs') %></button>
+<% } else { %>
+    <input type="hidden" name="vue" value="<%= autre %>">
+    <input type="hidden" name="vers" value="/">
+    <p class="mono"><%= t('Votre vue suit ce réglage, comme les visiteurs.') %></p>
+    <button class="btn ghost" type="submit"><%= t('Voir le site en {v}', { v: autre }) %></button>
+<% } %>
+  </form>
+</section>
+
 <p class="prose"><%= t('Le thème change les couleurs et la typographie du site public ; l’admin garde son apparence. « Aperçu » ouvre le site avec un thème sans l’appliquer : vous seul le voyez, pendant une heure ou jusqu’à « Quitter l’aperçu ».') %></p>
 
 <form class="form" method="post" action="/admin/apparence">
@@ -29,38 +61,6 @@
   </fieldset>
   <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer l’apparence') %></button></p>
 </form>
-
-<section class="panel" id="site-public" aria-labelledby="site-public-t">
-  <h2 id="site-public-t"><%= t('Site public : v1 ou v2') %></h2>
-  <p class="mono"><%= t('La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Ses pages arrivent une à une : une page qui n’a pas encore sa version v2 reste en v1. L’administration ne change pas.') %></p>
-  <form class="form" method="post" action="/admin/apparence">
-    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <fieldset>
-      <legend><%= t('Version vue par les visiteurs') %></legend>
-      <label class="inline"><input type="radio" name="site_public" value="v1"<%~ it.publicVersion === 'v1' ? ' checked' : '' %>> <strong>v1</strong> <span class="mono"><%= t('le site actuel') %></span></label>
-      <label class="inline"><input type="radio" name="site_public" value="v2"<%~ it.publicVersion === 'v2' ? ' checked' : '' %>> <strong>v2</strong> <span class="mono"><%= t('la nouvelle présentation (aujourd’hui : la page d’une photo)') %></span></label>
-    </fieldset>
-    <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer la version') %></button></p>
-  </form>
-<% if (it.publicVersion === 'v2') { %>
-  <p class="mono"><%= t('La v2 est appliquée : tous les visiteurs la voient.') %></p>
-<% } else if (it.previewV2) { %>
-  <form class="row" method="post" action="/admin/apparence/apercu-v2">
-    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <input type="hidden" name="apercu" value="0">
-    <p class="mono"><%= t('Aperçu de la v2 ouvert : vous seul voyez la v2, sur cette session.') %></p>
-    <a class="btn ghost" href="/"><%= t('Voir le site en v2') %></a>
-    <button class="btn ghost" type="submit"><%= t('Quitter l’aperçu') %></button>
-  </form>
-<% } else { %>
-  <form class="row" method="post" action="/admin/apparence/apercu-v2">
-    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
-    <input type="hidden" name="apercu" value="1">
-    <p class="mono"><%= t('Avant d’appliquer la v2, voyez-la : l’aperçu ne montre la v2 qu’à vous, le temps de votre session ou jusqu’à « Quitter l’aperçu ». Les visiteurs gardent la v1.') %></p>
-    <button class="btn ghost" type="submit"><%= t('Ouvrir l’aperçu de la v2') %></button>
-  </form>
-<% } %>
-</section>
 
 <% Object.entries(it.BRAND_SLOTS).forEach(([slot, def]) => { const file = b[def.field]; %>
 <section class="panel brand-slot" id="marque-<%= slot %>">

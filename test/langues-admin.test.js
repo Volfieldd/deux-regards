@@ -9,17 +9,19 @@ import { dictionary, translator } from '../server/admin-i18n.js';
 const TOKEN = 'jeton-de-test-0123456789';
 const cookiesOf = res => Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
 
-// Clés littérales t('…') des vues de l'admin et du code serveur.
+// Clés littérales t('…') des vues de l'admin (v1 et v2) et du code serveur ; tk('…') : textes du script de la v2
+// (views/admin/v2/_textes.eta) ; TL[l]('…') : textes de l'app de terrain v2 dans la langue de la personne.
 function keys() {
   const files = [
-    ...fs.readdirSync(new URL('../views/admin/', import.meta.url)).map(f => new URL(`../views/admin/${f}`, import.meta.url)),
+    ...fs.readdirSync(new URL('../views/admin/', import.meta.url)).filter(f => f.endsWith('.eta')).map(f => new URL(`../views/admin/${f}`, import.meta.url)),
+    ...fs.readdirSync(new URL('../views/admin/v2/', import.meta.url)).filter(f => f.endsWith('.eta')).map(f => new URL(`../views/admin/v2/${f}`, import.meta.url)),
     ...fs.readdirSync(new URL('../server/', import.meta.url)).filter(f => f.endsWith('.js') && f !== 'admin-i18n.js').map(f => new URL(`../server/${f}`, import.meta.url)),
     ...fs.readdirSync(new URL('../server/routes/', import.meta.url)).map(f => new URL(`../server/routes/${f}`, import.meta.url)),
   ];
   const found = new Map();
   for (const f of files) {
     const src = fs.readFileSync(f, 'utf8');
-    for (const m of src.matchAll(/\bt\(\s*'((?:[^'\\]|\\.)+)'/g)) found.set(m[1].replace(/\\'/g, "'"), f.pathname.split('/').slice(-2).join('/'));
+    for (const m of src.matchAll(/(?:\btk?|\bTL\[l\])\(\s*'((?:[^'\\]|\\.)+)'/g)) found.set(m[1].replace(/\\'/g, "'"), f.pathname.split('/').slice(-2).join('/'));
   }
   return found;
 }

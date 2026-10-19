@@ -1,0 +1,13 @@
+<%
+  // Textes de photo-v2.js (la fiche d’une photo), traduits par le serveur : un bloc de données, jamais exécuté (CSP), réuni par admin-v2.js à ceux de
+  // views/admin/v2/_textes.eta. La clé est le texte français.
+  const t = it.t;
+  const tk = k => [k, t(k)];
+  const out = Object.fromEntries([
+    tk('Suggestion à relire : rien n’est enregistré avant « Enregistrer ».'), tk('Enregistrer'), tk('Défaire'), tk('Suggestion retirée.'),
+    tk('Rien à traduire : remplissez d’abord le texte français.'), tk('Traduction en cours…'), tk('en cours de calcul…'),
+    tk('Dernier essai sans succès : {error}'), tk('Reprendre ce texte'), tk('Reprendre comme texte de remplacement anglais'),
+    tk('Villes proposées'), tk('Erreur : {msg}')
+  ]);
+%>
+<script type="application/json" id="v2-textes-page"><%~ JSON.stringify({ t: out }).replace(/</g, '\\u003c') %></script>

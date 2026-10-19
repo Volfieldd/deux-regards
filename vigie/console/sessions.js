@@ -21,7 +21,7 @@ export function createSessions({ db, now = Date.now }) {
     touch: db.prepare('UPDATE console_sessions SET vu_a = ? WHERE id = ?'),
     close: db.prepare('UPDATE console_sessions SET ferme_a = ?, ferme_raison = ? WHERE id = ? AND ferme_a IS NULL'),
     closeSub: db.prepare('UPDATE console_sessions SET ferme_a = ?, ferme_raison = ? WHERE sub = ? AND ferme_a IS NULL'),
-    ceiling: db.prepare('UPDATE console_sessions SET plafond = ?, plafond_lu = ? WHERE id = ?'),
+    ceilingSub: db.prepare('UPDATE console_sessions SET plafond = ?, plafond_lu = ? WHERE sub = ? AND ferme_a IS NULL'),
     auth: db.prepare('UPDATE console_sessions SET auth_a = ? WHERE id = ?'),
     purge: db.prepare('DELETE FROM console_sessions WHERE cree_a < ?'),
     setMessage: db.prepare('UPDATE console_sessions SET message = ? WHERE id = ?'),
@@ -47,7 +47,8 @@ export function createSessions({ db, now = Date.now }) {
     touch: id => q.touch.run(now(), id),
     close: (id, raison) => q.close.run(now(), raison, id).changes,
     closeSub: (sub, raison) => q.closeSub.run(now(), raison, sub).changes,
-    setCeiling: (id, plafond) => q.ceiling.run(plafond, now(), id),
+    // Plafond relu chez Zitadel : noté sur toutes les sessions ouvertes du compte.
+    setCeilingSub: (sub, plafond) => q.ceilingSub.run(plafond, now(), sub).changes,
     setAuth: (id, at) => q.auth.run(Math.min(at, now()), id),
     // Message d'une action pour la page suivante (une fois).
     // Jamais coupé au milieu (un JSON coupé serait perdu) : trop long, les valeurs saisies sont laissées de côté.

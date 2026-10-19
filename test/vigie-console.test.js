@@ -240,7 +240,9 @@ test('formulaires : jeton CSRF de la session et même origine ; sortie : session
   assert.equal((await post({ _csrf: s.csrf }, { 'sec-fetch-site': 'cross-site' })).statusCode, 403);
   assert.equal((await post({ _csrf: s.csrf }, { origin: 'https://evil.example' })).statusCode, 403);
   assert.equal((await post({ _csrf: s.csrf }, { origin: 'https://vigie.example', 'sec-fetch-site': 'same-site' })).statusCode, 403);
-  assert.equal(v.events('vigie_console_refus').filter(e => e.detail.raison === 'csrf').length, 5);
+  // Jeton absent ou faux, Origin étrangère : refus CSRF ; Sec-Fetch-Site d'un autre site : arrêté avant, par la provenance.
+  assert.equal(v.events('vigie_console_refus').filter(e => e.detail.raison === 'csrf').length, 3);
+  assert.equal(v.events('vigie_console_refus').filter(e => e.detail.raison === 'provenance').length, 1);
   assert.equal(v.sessionOf(cookie).ferme_a, null);
   // Chromium, avec « no-referrer » : Origin « null », Sec-Fetch-Site « same-origin ».
   const out = await post({ _csrf: s.csrf }, { origin: 'null', 'sec-fetch-site': 'same-origin' });
@@ -361,4 +363,87 @@ test('bandeau des critiques : en tête des pages en session (pas sur la vue d’
   assert.match(page, /1 alerte critique sans intervenant/);
   assert.match(page, /href="\/alertes\/1"/);
   assert.doesNotMatch((await get('/')).body, /class="vg-bandeau"/);
+});
+
+test('provenance (audit D3-A1) : une image ou une feuille chargée depuis le site frère est refusée, sans prolonger la session ; l’export seulement depuis la console', async t => {
+  const v = setup(t);
+  const { cookie } = await v.login();
+  const get = (url, extra) => v.app.inject({ url, headers: { ...v.h(), ...extra }, cookies: { '__Host-vigie': cookie } });
+  const avant = v.sessionOf(cookie).vu_a;
+  v.clock.t += 60e3;
+  for (const dest of ['image', 'style', 'script', 'empty']) {
+    const r = await get('/', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'no-cors', 'sec-fetch-dest': dest });
+    assert.equal(r.statusCode, 403, dest);
+  }
+  assert.equal(v.sessionOf(cookie).vu_a, avant, 'session non prolongée');
+  assert.equal(v.events('vigie_console_refus').filter(e => e.detail.raison === 'provenance').length, 1, 'noté une fois par 10 minutes');
+  // Navigation de page depuis l'admin du site (« Ouvrir la Vigie ») : acceptée ; adresse tapée : acceptée.
+  assert.equal((await get('/', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'navigate', 'sec-fetch-dest': 'document' })).statusCode, 200);
+  assert.equal((await get('/', { 'sec-fetch-site': 'none', 'sec-fetch-mode': 'navigate', 'sec-fetch-dest': 'document' })).statusCode, 200);
+  // Export : même une navigation depuis le site frère est refusée.
+  assert.equal((await get('/evenements.csv', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'navigate', 'sec-fetch-dest': 'document' })).statusCode, 403);
+  assert.equal((await get('/evenements.csv', { 'sec-fetch-site': 'none', 'sec-fetch-mode': 'navigate', 'sec-fetch-dest': 'document' })).statusCode, 403);
+  assert.equal((await get('/evenements.csv', { 'sec-fetch-site': 'same-origin', 'sec-fetch-mode': 'navigate', 'sec-fetch-dest': 'document' })).statusCode, 200);
+});
+
+test('clés Access (audit D3-A2/D3-D1) : une lecture à la fois, en tâche de fond après une heure ; relecture en échec : clés connues gardées 24 h', async () => {
+  const clock = { t: START };
+  let fetches = 0, panne = false;
+  const v = createAccessVerifier({ team: TEAM, aud: AUD, now: () => clock.t, fetchImpl: async () => {
+    fetches += 1; await new Promise(r => setTimeout(r, 5));
+    if (panne) throw new Error('getaddrinfo EAI_AGAIN');
+    return new Response(JSON.stringify(CERTS));
+  } });
+  // Première lecture partagée par des requêtes simultanées.
+  const r = await Promise.allSettled(Array.from({ length: 10 }, () => v.verify(accessJwt(clock))));
+  assert.ok(r.every(x => x.status === 'fulfilled'));
+  assert.equal(fetches, 1);
+  // Deux heures plus tard, Cloudflare injoignable : les jetons signés par les clés connues passent, une seule relecture
+  // par minute est tentée, sans faire attendre la requête.
+  panne = true;
+  clock.t += 2 * 3600e3;
+  const r2 = await Promise.allSettled(Array.from({ length: 10 }, () => v.verify(accessJwt(clock))));
+  assert.ok(r2.every(x => x.status === 'fulfilled'), 'clés connues gardées');
+  await new Promise(res => setTimeout(res, 20));
+  assert.equal(fetches, 2);
+  await v.verify(accessJwt(clock));
+  assert.equal(fetches, 2, 'au plus une relecture par minute');
+  // Au-delà de 24 h sans relecture réussie : refus.
+  clock.t += 23 * 3600e3;
+  await assert.rejects(v.verify(accessJwt(clock)), /EAI_AGAIN/);
+});
+
+test('Zitadel en échec (audit D3-D6) : pas de nouvel essai avant une minute, la lecture continue sur le dernier plafond, aucune action', async t => {
+  const v = setup(t);
+  const { cookie } = await v.login();
+  const get = () => v.app.inject({ url: '/alertes', headers: v.h(), cookies: { '__Host-vigie': cookie } });
+  v.zitadel.fail = true;
+  v.clock.t += 6 * 60e3;
+  const c0 = v.zitadel.calls;
+  for (let i = 0; i < 5; i++) { assert.equal((await get()).statusCode, 200); v.clock.t += 5e3; }
+  assert.equal(v.zitadel.calls, c0 + 1, 'un seul essai dans la minute');
+  v.clock.t += 60e3;
+  await get();
+  assert.equal(v.zitadel.calls, c0 + 2, 'nouvel essai passée la minute');
+});
+
+test('session (audit D3-A3 à A6) : jeton CSRF multi-octets refusé et noté, cookies effacés avec Secure, ré-authentification sans auth_time refusée, compte supprimé chez Zitadel', async t => {
+  const v = setup(t);
+  const { cookie } = await v.login();
+  const r = await v.app.inject({ method: 'POST', url: '/auth/logout', headers: { ...v.h(), 'content-type': 'application/x-www-form-urlencoded' }, cookies: { '__Host-vigie': cookie }, payload: `_csrf=${encodeURIComponent('é'.repeat(32))}` });
+  assert.equal(r.statusCode, 403);
+  assert.equal(v.events('vigie_console_refus').at(-1).detail.raison, 'csrf');
+  const s = v.sessionOf(cookie);
+  const out = await v.app.inject({ method: 'POST', url: '/auth/logout', headers: { ...v.h(), 'content-type': 'application/x-www-form-urlencoded' }, cookies: { '__Host-vigie': cookie }, payload: `_csrf=${s.csrf}` });
+  const efface = out.cookies.find(c => c.name === '__Host-vigie');
+  assert.ok(efface.secure && efface.maxAge === 0, 'effacement avec Secure');
+  // Ré-authentification dont le jeton n'a pas auth_time : refusée.
+  const { cookie: c2 } = await v.login();
+  const s2 = v.sessionOf(c2);
+  const go = await v.app.inject({ method: 'POST', url: '/reauth', headers: { ...v.h(), 'content-type': 'application/x-www-form-urlencoded' }, cookies: { '__Host-vigie': c2 }, payload: `_csrf=${s2.csrf}&retour=/decisions` });
+  const st = go.cookies.find(x => x.name === '__Host-vigie-tx').value;
+  v.oidc.claims = { sub: 'sub-seb', nom: 'Sébastien', amr: ['user', 'mfa'], authTime: null, roles: ['vigie.admin'] };
+  const back = await v.app.inject({ url: `/auth/callback?code=c&state=${st}`, headers: v.h(), cookies: { '__Host-vigie-tx': st } });
+  assert.equal(back.statusCode, 403);
+  assert.equal(v.events('vigie_console_refus').at(-1).detail.raison, 'reauth_ancienne');
 });

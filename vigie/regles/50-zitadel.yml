@@ -68,3 +68,17 @@ detection:
   condition: selection
 level: high
 vigie: { cas: DS28, entite: { kind: site, valeur: zitadel }, source_unique: true }
+---
+title: Quota mensuel de l'API de Zitadel presque épuisé
+name: zitadel_quota
+id: 56840930-d911-413f-b164-96908f086767
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.impact, attack.t1499]
+description: Au-delà du quota de l'offre gratuite, la lecture des événements de Zitadel et la relecture des droits de la console risquent de s'arrêter ; à 95 %, la Vigie ralentit déjà sa lecture.
+detection:
+  selection:
+    type: vigie_zitadel_quota
+  condition: selection
+level: medium
+vigie: { cas: DS24, entite: { kind: vigie, valeur: zitadel_quota }, source_unique: true, gravite: evenement, mode: alerter }

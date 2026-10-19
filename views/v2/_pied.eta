@@ -13,6 +13,8 @@
         <ul aria-labelledby="sf-site">
           <li><a href="<%= it.u('/a-propos') %>"><%= t.nav.about %></a></li>
           <li><a href="<%= it.u('/droits') %>"><%= t.v2.rights %></a></li>
+<% if (it.carnetPage) { %>          <li><a href="<%= it.u('/carnet/flux.xml') %>" type="application/atom+xml"><%= t.carnet.feed %></a></li>
+<% } %>
           <li><a href="<%= it.u('/confidentialite') %>"><%= t.footer.privacy %></a></li>
           <li><a href="<%= it.u('/mentions-legales') %>"><%= t.footer.legal %></a></li>
         </ul>

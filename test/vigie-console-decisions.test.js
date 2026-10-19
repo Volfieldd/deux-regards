@@ -347,7 +347,7 @@ test('fiche d’une alerte : prendre en charge, classer, noter, décider avec al
   assert.equal(champ(formDe(h, `/alertes/${id}/note`), 'note')['aria-invalid'], 'true');
   assert.match(h, /id="h-note-err">.*note vide/);
   r = await v.envoyer(cookie, formDe(h, `/alertes/${id}/note`), { tape: { note: `vu avec Julien ${PIEGE}` } });
-  assert.deepEqual(v.events('vigie_alerte').at(-1).detail, { action: 'note', id, note: `vu avec Julien ${PIEGE}` });
+  assert.deepEqual(v.events('vigie_alerte').at(-1).detail, { action: 'note', id, note: `vu avec Julien ${PIEGE}`, par_sub: 'sub-seb' });
 
   // Actions forcées sur le compte : geler depuis la fiche, alerte=<n°> ; la décision revient dans « Réponse » avec « Lever… ».
   h = await fiche();

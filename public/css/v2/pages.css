@@ -195,7 +195,7 @@
   @page { margin: 16mm 18mm; }
   :root:has(.lecture) { --paper: #fff; --ink: #111; --prose: #222; --mute: #555; --rule: #ccc; --field: #888; }
   body:has(.lecture) { background: #fff; color: #111; }
-  body:has(.lecture) :is(.sh, .skip, .apercu-v2, .lecture-som, .lecture-haut, .apropos-gens .lien, footer.sf) { display: none !important; }
+  body:has(.lecture) :is(.sh, .skip, .vue-site, .lecture-som, .lecture-haut, .apropos-gens .lien, footer.sf) { display: none !important; }
   .lecture { display: block; padding: 0; }
   .lecture-texte { max-width: none; font-size: 11pt; line-height: 1.55; }
   .lecture-partie { break-inside: avoid-page; }

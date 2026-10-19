@@ -1,0 +1,667 @@
+/* =====================================================================================================
+   Admin v2 : composants communs de la planche MQ-00 (section Administration), repris tels quels, sections 1 à 11, de
+   docs/audit-ergonomie-2026-10-16/maquettes/_commun/admin-plus.css. Chargé après admin.css (v1) et admin/v2/tokens.css :
+   n'ajoute que ce qui manque à admin.css, avec ses jetons. Les sections 12 et 13 (éditeur et aperçu d'un billet) sont
+   dans admin/carnet.css (Carnets, MQ-20) ; la section 14 ne sert qu'aux maquettes. Les écrans de la v2 ont leurs styles
+   propres dans admin/v2/v2.css. Aucun style en ligne (CSP).
+   ===================================================================================================== */
+
+/* Texte lu seulement : admin.css (main) le masque par clip, qui est déprécié ; clip-path est la forme actuelle (celle de
+   site.css et public.css), et les outils de contrôle la reconnaissent. */
+.sr-only { clip-path: inset(50%); }
+/* Contenu d'un <details> fermé : rien à mettre en page. Le navigateur ne le montre pas, mais Chromium le garde en page
+   (content-visibility), ce qui fausse les mesures ; !important l'emporte sur les listes du pied (.admin-lang ul en grille). */
+.admin details:not([open]) > :not(summary) { display: none !important; }
+
+/* ---------- 1. Barre latérale unique ----------
+   Structure de views/admin/layout.eta : une <nav> par groupe, nommée par son intitulé (aria-labelledby).
+   Quatre groupes nommés par tâche (UX-A-11) : Photos · Personnes · Publier · Équipe ; « Aujourd'hui » en tête.
+   Places fixes : Signalements (Personnes), Réglages et Aide (pied), Voir le site, langue, thème, compte (pied).
+   Lignes de 32 px au bureau, 44 px au toucher. Tient dans 900 px avec Carnets, Galeries privées et Boutique.
+   Les séries sont repliées sous « Séries » (<details>) : la liste reste une cible de glisser-déposer. */
+.admin .side { padding: 16px 12px 12px; }
+.admin .word { min-height: 40px; padding: 0 10px 8px; }
+.admin .cmdk { height: 32px; margin-bottom: 8px; font-size: 13px; }
+.admin .cmdk kbd { font-size: 12px; }
+@media (max-width: 720px), (pointer: coarse) { .admin .word { min-height: 44px; } .admin .cmdk { height: 44px; } .admin .cmdk kbd { display: none; } }
+.admin .nav { gap: 0; }
+.admin .nav a { min-height: var(--ligne-menu); gap: 10px; font-size: 14px; }
+.admin .nav .ic { width: 18px; height: 18px; }
+.admin .grp { margin: 0; padding: 8px 10px 2px; min-height: 24px; font-size: 12px; line-height: 14px; letter-spacing: .14em; }
+.admin .nav-badge { font-size: 12px; }
+/* Compteur de l'interface : pastille pleine, ronde, ambre, sans cercle noir. (Les repères de maquette sont carrés et magenta.) */
+.admin .nav-badge.urgent { background: var(--danger); color: var(--on-danger); }
+/* Séries : le lien mène à la page Séries ; le bouton replie la liste (fermée par défaut). */
+.admin .nav-ser { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.admin .ser-plier > summary { list-style: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: var(--ligne-menu);
+  min-height: var(--ligne-menu); padding: 0 6px; border-radius: 8px; color: var(--ink3); font-size: 12px; cursor: pointer; }
+.admin .ser-plier > summary::-webkit-details-marker { display: none; }
+.admin .ser-plier > summary:hover { background: var(--s2); color: var(--ink); }
+.admin .ser-plier > summary .ic { transition: transform .15s; }
+.admin .ser-plier[open] > summary .ic { transform: rotate(90deg); }
+.admin .nav-ser > .ser-plier[open] { display: contents; }
+.admin .nav-ser .ser { grid-column: 1 / -1; padding-left: 28px; }
+.admin .ser a { min-height: var(--ligne-menu); }
+/* Pied, à parité avec views/admin/layout.eta : Réglages et Aide ; Voir le site et la langue ; Nouveautés et le numéro de
+   version (une ligne) ; « Traitement : n photos » quand des images sont en cours (sinon hidden) ; puis le compte, le thème
+   et la déconnexion. Langue et thème sont des formulaires POST avec jeton CSRF, comme dans main : ils marchent sans script. */
+.admin .side .foot { padding-top: 8px; gap: 4px; }
+.admin .pied-liens { display: grid; grid-template-columns: 1fr 1fr; gap: 0 4px; }
+.admin .pied-liens a { display: flex; align-items: center; gap: 8px; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink2); font-size: 13px; white-space: nowrap; }
+.admin .pied-liens a:hover { background: var(--s2); color: var(--ink); }
+.admin .pied-liens a[aria-current] { background: var(--s3); color: var(--ink); font-weight: 500; }
+.admin .pied-liens .admin-lang > summary { display: flex; align-items: center; gap: 8px; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink2); font-size: 13px; cursor: pointer; list-style: none; }
+.admin .pied-liens .admin-lang > summary::-webkit-details-marker { display: none; }
+.admin .pied-liens .admin-lang > summary:hover { background: var(--s2); color: var(--ink); }
+.admin .pied-liens .admin-lang { position: relative; margin: 0; }
+.admin .pied-liens .admin-lang ul { position: absolute; bottom: calc(100% + 4px); left: 0; z-index: 30; min-width: 180px; margin: 0; padding: 6px; list-style: none; display: grid; gap: 0;
+  background: var(--s1); border-radius: 12px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.admin .pied-liens .admin-lang li button, .admin .pied-liens .admin-lang li a { display: flex; width: 100%; align-items: center; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink); text-align: left; }
+.admin .pied-liens .admin-lang li [aria-current] { font-weight: 500; }
+.admin .me { min-height: 40px; }
+/* Nouveautés : l'entrée et le numéro de version (package.json) sur une ligne ; .nav-ver d'admin.css passe de 10 à 12 px. */
+.admin .pied-liens .pied-large { grid-column: 1 / -1; }
+.admin .nav-ver { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink3); letter-spacing: 0; }
+/* « Traitement : 3 photos » (a.job d'admin.css, data-activity) : une ligne de menu, au-dessus du compte ; hidden sans traitement. */
+.admin .side .job { min-height: var(--ligne-menu); padding: 0 10px; border: 0; border-radius: 8px; background: var(--s2); color: var(--ink2); font-size: 13px; gap: 8px; }
+.admin .side .job:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Langue et thème : formulaires POST (main) ; le formulaire ne prend pas de place. */
+.admin .pied-liens .admin-lang form, .admin .me form { margin: 0; }
+.admin .pied-liens .admin-lang li button { border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
+.admin .pied-liens .admin-lang li button:hover { background: var(--s2); }
+.admin .me .who small { font-size: 12px; }
+/* Haut de la barre : le nom du site et, au téléphone, « Fermer » (44 px) : le panneau se ferme sans chercher l'onglet Menu. */
+.admin .side-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.admin .side-fermer { display: none; }
+/* Menu du téléphone SANS JavaScript (passe 4, jury v2, défaut A, hérité de main) : admin.css cache la barre sous 720 px
+   (visibility: hidden) et seule la classe .open, posée par le script, la montrait ; sans script, Réglages, Personnes, Boutique,
+   Carnets ou Galeries privées n'étaient joignables qu'en tapant l'adresse. Désormais, « Menu » (barre d'onglets) est un lien
+   <a href="#admin-nav"> : sans script, il ouvre la barre par :target ; « Fermer » est un lien <a href="#contenu"> qui la
+   referme et rend le focus au contenu. Avec le script, rien ne change : il remplace le lien par un vrai bouton
+   (<button type="button" aria-expanded aria-controls="admin-nav">, le bouton de main ; passe 5 : plus de role="button" sur un
+   lien), pose .open et aria-expanded. */
+@media (max-width: 720px) { .admin .side:target { transform: none; visibility: visible; transition: transform .2s; } }
+/* Menu ouvert, le clavier reste dans le panneau (passe 5, jury final, défaut D2 ; WCAG 2.4.11, RGAA 10.7 et 12.8). Le panneau
+   (280 px, fixe) couvre la page sans la retirer : la tabulation passait du dernier lien du menu aux onglets des Réglages, puis à
+   la barre d'onglets, sous lui. SANS script, menu ouvert par :target : la page (.shell > .main) et ce qui suit .shell dans le
+   <body> (barre d'onglets, message d'action ; dans une maquette, ses autres états et l'encart) sont masqués par visibility, qui
+   les retire aussi de la tabulation ; le lien d'évitement reste, et « Fermer », dans le panneau, rend la page. AVEC le script,
+   qui pose .open au lieu de :target, les mêmes éléments reçoivent l'attribut inert à l'ouverture et le perdent à la fermeture
+   (à créer dans main : public/admin/admin.js, mq2-correctifs-main.md § 8) ; la page reste visible sous son voile.
+   Contrôle : outils/focus-colle.mjs, passe « menu ouvert » (adresse #admin-nav, et l'échantillon MQ-00 menu ouvert). */
+@media (max-width: 720px) {
+  body.admin:has(> .shell > .side:target) > .shell > .main,
+  body.admin:has(> .shell > .side:target) > :not(.shell, .skip) { visibility: hidden; }
+}
+@media (max-width: 720px) { .admin .side-fermer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; margin: -6px 0 0;
+  border-radius: var(--r-admin); color: var(--ink); font-size: 14px; box-shadow: inset 0 0 0 1px var(--line2); } }
+/* Le nom du compte ouvre « Mon compte » (langue, thème, raccourcis, e-mail des avis) : souligné, sa ligne entière est la cible. */
+.admin .me-lien { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; min-height: 40px; padding: 0 4px; border-radius: 8px; }
+.admin .me-lien:hover { background: var(--s2); }
+.admin .me-lien[aria-current] { background: var(--s3); }
+.admin .me-lien .me-nom { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field-line); }
+@media (max-width: 720px), (pointer: coarse) { .admin .me-lien { min-height: 44px; } }
+/* Bouton de thème : une icône par mode (admin.css .when-dark / .when-light), le nom lu suit le mode affiché. */
+.admin .btn-theme > span { display: none; } .admin .btn-theme > .when-dark { display: contents; }
+[data-theme="light"] .admin .btn-theme > .when-dark { display: none; } [data-theme="light"] .admin .btn-theme > .when-light { display: contents; }
+.admin[data-theme="light"] .btn-theme > .when-dark { display: none; } .admin[data-theme="light"] .btn-theme > .when-light { display: contents; }
+@media (prefers-color-scheme: light) { :root:not([data-theme]) .admin .btn-theme > .when-dark { display: none; } :root:not([data-theme]) .admin .btn-theme > .when-light { display: contents; } }
+/* Barre de 220 px (tablette, 721 à 1 180 px) : « Ctrl K » se masque au lieu de passer à la ligne. Le bouton de thème reste,
+   comme dans main (passe 5, jury final, défaut D1 : masqué, il ne se réglait plus nulle part à la tablette, et « Mon compte »
+   renvoie au pied du menu) : c'est l'avatar, décoratif (aria-hidden), qui s'efface, pour que le nom et le rôle restent entiers
+   à côté du thème et de la déconnexion (44 px chacun au toucher). Essai : consol-admin.mjs, barre française et allemande. */
+.admin .cmdk span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin .cmdk kbd { white-space: nowrap; }
+/* Palette Ctrl K (admin.css) : intitulés de groupe et touches à 12 px. */
+.admin .pal-list .sec, .admin .palette kbd { font-size: 12px; }
+@media (max-width: 1180px) and (min-width: 721px) { .admin .cmdk kbd, .admin .me .av { display: none; } .admin .me { gap: 4px; } }
+/* Passe 6 : au toucher, thème et déconnexion à 44 px partout ; l'avatar s'efface dès 721 px (essai : p6-coarse-me.mjs). */
+@media (pointer: coarse) { .admin .me .iconbtn { width: 44px; height: 44px; } }
+@media (pointer: coarse) and (min-width: 721px) { .admin .me .av { display: none; } .admin .me { gap: 4px; } }
+/* Pied de la barre de 220 px (passe 4, jury v2, défaut B) : la grille à deux colonnes rognait, en allemand, « Hilfe », le
+   sélecteur « DE » et « 1.90.0 » de 4 à 5 px (« Einstellungen » prend la première colonne). Dans la barre étroite, les
+   entrées se serrent (6 px de marge au lieu de 10) et passent à la ligne quand elles ne tiennent pas côte à côte : rien ne
+   sort de la barre, dans aucune langue ; en français, le pied garde ses trois lignes. Essai : outils/consol-admin.mjs, la
+   barre allemande de l'échantillon MQ-00 à 820 et 1 024 px. */
+@media (max-width: 1180px) and (min-width: 721px) {
+  .admin .pied-liens { display: flex; flex-wrap: wrap; gap: 0 4px; }
+  .admin .pied-liens > * { flex: 1 1 auto; min-width: 0; }
+  .admin .pied-liens > .pied-large { flex-basis: 100%; }
+  .admin .pied-liens a, .admin .pied-liens .admin-lang > summary { gap: 6px; padding: 0 6px; }
+  .admin .pied-liens a { white-space: normal; }
+}
+/* Variante du rôle Photographe (MQ-00) : les mêmes groupes, filtrés par les permissions (server/permissions.js) ; aucun
+   groupe vide, aucun lien vers une page interdite. Photos : Photothèque, puis « Séries » qui n'est PAS un lien (pas de
+   series.gerer : /admin/series lui répondrait 403) mais un intitulé repliant (.ser-titre) dont les sous-entrées
+   /admin/photos?serie=… sont des liens (photos.voir, comptées sur ses photos, tous statuts : navSeries de admin.js) ; Sorties
+   et Voyages (sorties.voir) · Personnes : Personnes, App de terrain (sans Signalements) · Publier : Mes propositions
+   (/admin/photos?statut=proposee), et les modules à venir s'ils lui sont ouverts (permissions à créer : carnet.ecrire,
+   galeries.gerer, boutique.voir, portée « les miennes ») · Équipe : Statistiques seules ; au pied, Aide, Voir le site,
+   Nouveautés et la langue, sans Réglages. Icônes : Carnets, une page ; Journal, une horloge (UX-A-11). */
+.admin .ser-titre > summary { display: flex; align-items: center; gap: 10px; min-height: var(--ligne-menu); padding: 0 10px; border-radius: 8px; color: var(--ink2); cursor: pointer; list-style: none; }
+.admin .ser-titre > summary::-webkit-details-marker { display: none; }
+.admin .ser-titre > summary:hover { background: var(--s2); color: var(--ink); }
+.admin .ser-titre > summary .ic { width: 18px; height: 18px; }
+.admin .ser-titre > summary .chev { margin-left: auto; width: 14px; height: 14px; color: var(--ink3); transition: transform .15s; }
+.admin .ser-titre[open] > summary .chev { transform: rotate(90deg); }
+.admin .ser-titre .ser { padding-left: 28px; }
+@media (prefers-reduced-motion: reduce) { .admin .ser-titre > summary .chev { transition: none; } }
+
+/* ---------- 2. En-tête de page type ----------
+   Retour (« ← Photothèque » sur une fiche) · H1 Jost 300 · pastille d'état · une ligne de méta (dont l'enregistrement)
+   · actions à droite, le seul bouton plein en dernier. Au téléphone, les actions passent dans une barre basse,
+   au-dessus des onglets : l'action principale y prend la place, les autres vont dans « Plus ». */
+.ep { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "retour retour" "titre actions" "meta actions"; gap: 4px 24px; align-items: end; margin: 0 0 24px; }
+.ep-retour { grid-area: retour; display: inline-flex; align-items: center; gap: 6px; justify-self: start; min-height: 32px; color: var(--ink2); font-size: 13px; }
+.ep-retour:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .ep-retour { min-height: 44px; } }
+@media (min-width: 721px) and (pointer: fine) { .admin .help-link a { display: inline-flex; align-items: center; min-height: 24px; } }
+.ep-titre { grid-area: titre; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-width: 0; }
+.main .ep h1 { margin: 0; font-size: var(--at-h1); font-weight: 300; line-height: 1.12; overflow-wrap: anywhere; }
+.ep-meta { grid-area: meta; margin: 0; color: var(--ink3); font-size: 13px; }
+.ep-meta { display: flex; flex-wrap: wrap; align-items: center; row-gap: 2px; }
+.ep-meta > * { display: inline-flex; align-items: center; }
+.ep-meta > * + *::before { content: '·'; margin: 0 8px; color: var(--ink3); }
+.ep-actions { grid-area: actions; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; align-self: end; }
+@media (max-width: 720px) {
+  .ep { grid-template-columns: minmax(0, 1fr); grid-template-areas: "retour" "titre" "meta"; }
+  .main .ep h1 { font-size: 28px; }
+  .ep-actions { position: fixed; left: 0; right: 0; bottom: var(--barre-basse); z-index: 39; justify-content: stretch; flex-wrap: nowrap;
+    padding: 10px 16px; background: var(--s1); border-top: 1px solid var(--line2); }
+  .ep-actions > * { flex: 1 1 0; }
+  .ep-actions .ep-secondaire { display: none; }
+  .ep-actions .menu { flex: 0 0 auto; }
+}
+@media (min-width: 721px) { .ep-actions .ep-plus { display: none; } }
+/* Focus jamais caché par une barre collante ou fixe (passe 4, WCAG 2.4.11, RGAA 10.7 ; contrôle outils/focus-colle.mjs) :
+   la page réserve la hauteur des barres au défilement. Au téléphone, la barre d'onglets (74 px) et, sur une fiche, la barre
+   d'actions au-dessus (65 px) ; au bureau, la barre « Pour les photos cochées » d'un lot (.bulk, collante en haut). */
+@media (max-width: 720px) {
+  html:has(> body.admin .tabbar) { scroll-padding-bottom: 90px; }
+  html:has(> body.admin .ep-actions) { scroll-padding-bottom: 155px; }
+}
+@media (min-width: 721px) { html:has(> body.admin .main:not(.wide) .bulk) { scroll-padding-top: 136px; } }
+/* Et la page se termine au-dessus des deux barres (passe 5, recommandation du jury final, WCAG 2.4.12) : la marge du bas
+   d'admin.css (120 px) passe à 74 + 65 px et un peu plus sur une fiche, pour que le dernier champ puisse toujours défiler
+   au-dessus de la barre d'actions, au lieu d'y laisser deux coins. */
+@media (max-width: 720px) { .admin .shell > .main:has(.ep-actions) { padding-bottom: 160px; } }
+/* Un message d'action affiché (.toast non vide, au-dessus des barres) s'ajoute à la réserve du défilement : le champ atteint au
+   clavier ne passe pas dessous (passe 5, WCAG 2.4.12 ; l'échantillon de la fiche de MQ-00 le montre affiché en permanence). */
+@media (max-width: 720px) {
+  html:has(> body.admin > .toast:not(:empty)) { scroll-padding-bottom: 160px; }
+  html:has(> body.admin .ep-actions):has(> body.admin > .toast:not(:empty)) { scroll-padding-bottom: 230px; }
+  .admin:has(> .toast:not(:empty)) .shell > .main:has(.ep-actions) { padding-bottom: 240px; }
+}
+/* Palette Ctrl K : admin.css (main) retire tout dessin au champ (box-shadow: none !important) ; le focus se voit sur sa
+   ligne, un trait ambre de 2 px (passe 4 ; à reporter dans main, mq2-correctifs-main.md § 9). */
+.admin .pal-in:focus-within { box-shadow: inset 0 -2px 0 var(--accent-ink); }
+/* Barre d'onglets du téléphone (admin.css) : ses libellés à 12 px, comme tout le texte de l'admin. */
+@media (max-width: 720px) { .admin .tabbar a, .admin .tabbar button { font-size: 12px; } }
+/* Titre d'un autre écran montré dans la même page : le dessin du H1, au niveau 2 du plan. */
+.main .ep .h1 { margin: 0; font-size: var(--at-h1); font-weight: 300; line-height: 1.12; overflow-wrap: anywhere; }
+@media (max-width: 720px) { .main .ep .h1 { font-size: 28px; } }
+/* Méta au téléphone : un élément par ligne, sans « · » orphelin en début de ligne. */
+@media (max-width: 720px) { .ep-meta { display: grid; justify-items: start; gap: 2px; } .ep-meta > * + *::before { content: none; } }
+/* « Aide sur cette page » : le texte est souligné, pas le bas de sa cible de 44 px (admin.css). */
+.admin .help-link a { border-bottom: 0; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- 3. Trois boutons : plein (une fois par écran, toujours le dernier), contour, danger ----------
+   Danger : en contour dans les pages ; plein seulement pour l'action finale d'un dialogue de confirmation.
+   Plus de bouton gris plein (.btn.sec). 40 px au bureau, 44 au toucher. */
+.admin .btn { min-height: 40px; padding: 0 16px; font-size: 14px; border-radius: var(--r-admin); }
+.admin .btn.danger-c { background: transparent; color: var(--danger); box-shadow: inset 0 0 0 1px currentColor; filter: none; }
+.admin .btn.danger-c:hover { background: var(--danger-soft); }
+.admin .btn.danger { background: var(--danger); color: var(--on-danger); }
+.admin .btn .ic { width: 16px; height: 16px; }
+@media (max-width: 720px), (pointer: coarse) { .admin .btn { min-height: 44px; } }
+/* Un libellé long (l'allemand : « Julien zur Veröffentlichung vorschlagen ») passe à la ligne au lieu d'être coupé par le bord :
+   au téléphone partout (barre basse comprise), et à toutes les largeurs dans les cartes et les colonnes étroites. */
+@media (max-width: 720px) { .admin .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; } }
+.admin :is(.objets-a, .signal, .sugg-bloc, .liste-a, .cote, .assist) .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; }
+/* Danger plein (action finale d'un dialogue) : toujours avec son icône (✕ ou corbeille) devant le verbe ; la teinte ne suffit pas. */
+.admin .btn.danger .ic { color: currentColor; }
+
+/* ---------- 4. Pastille d'état : symbole + mot, couleur fixe par symbole ----------
+   ○ à faire · ◐ en cours, attend quelqu'un · ● abouti · ▲ demande votre attention · ✕ arrêté. */
+.etat { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 10px 2px 8px; border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--line2); font-size: 13px; font-weight: 500; line-height: 1.2; white-space: nowrap; color: var(--ink2); }
+.etat .ic { width: 12px; height: 12px; }
+.etat--afaire { color: var(--st-afaire); }
+.etat--encours { color: var(--st-encours); }
+.etat--abouti { color: var(--st-abouti); }
+.etat--attention { color: var(--st-attention); }
+.etat--arret { color: var(--st-arret); }
+/* Légende sous une liste : une ligne, les symboles et les mots du domaine. */
+.etats-legende { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 12px 0 0; padding: 0; list-style: none; color: var(--ink3); font-size: 12px; }
+.etats-legende li { display: inline-flex; align-items: center; gap: 6px; color: var(--ink3); }
+/* Le symbole garde la couleur de son état, le mot reste en --ink3 : <li class="etat--encours">. */
+.etats-legende li.etat--afaire .ic { color: var(--st-afaire); } .etats-legende li.etat--encours .ic { color: var(--st-encours); }
+.etats-legende li.etat--abouti .ic { color: var(--st-abouti); } .etats-legende li.etat--attention .ic { color: var(--st-attention); }
+.etats-legende li.etat--arret .ic { color: var(--st-arret); }
+/* Tableau des états (référence, page Aide) */
+.etats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.etats-table th, .etats-table td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.etats-table thead th { color: var(--ink2); font-weight: 500; }
+.etats-table tbody th { color: var(--ink); font-weight: 500; white-space: nowrap; }
+/* Le même tableau sert aux mots de l'administration (« Un mot, un seul sens », page Aide) ; sous 540 px, une ligne par entrée. */
+.etats-table caption { padding-bottom: 8px; text-align: left; color: var(--ink); font-size: var(--at-h3); font-weight: 500; }
+@media (max-width: 540px) { .etats-table, .etats-table tbody, .etats-table tr, .etats-table td, .etats-table th { display: block; } .etats-table thead { display: none; }
+  .etats-table tr { padding: 8px 0; border-bottom: 1px solid var(--line); } .etats-table th, .etats-table td { padding: 2px 0; border: 0; } .etats-table tbody th { white-space: normal; } }
+
+/* ---------- 5. Enregistrement : une règle, un témoin ----------
+   Ce qui se défait s'enregistre seul, champ par champ, à la sortie du champ ; le témoin le dit dans la méta
+   de l'en-tête (role="status") et le message d'action propose « Défaire ». Ce qui a un effet public, légal ou
+   financier passe par un bouton qui nomme cet effet (Publier, Mettre en ligne, Rembourser 290,00 €). */
+.enreg { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; color: var(--ink3); }
+a.enreg { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2); }
+@media (max-width: 720px), (pointer: coarse) { a.enreg { min-height: 44px; } }
+.enreg .ic { width: 14px; height: 14px; }
+.enreg--ok { color: var(--ink2); }
+.enreg--ok .ic { color: var(--ok); }
+.enreg--attente .ic { color: var(--warn); }
+
+/* ---------- 6. Message d'action (toast) : en bas au centre, inversé, une seule forme ----------
+   « [Objet] [verbe]. · Défaire » ; barre de temps de 10 s, en pause au survol et au focus ; 44 px au toucher.
+   Variante d'erreur : role="alert", fond danger, sans minuteur (elle reste jusqu'à « Fermer »). */
+.admin .toast { min-height: 48px; padding: 6px 6px 6px 16px; gap: 12px; border-radius: 12px; font-size: 14px; overflow: hidden; }
+.admin .toast p { margin: 0; }
+.admin .toast b { font-weight: 500; }
+/* Variante d'erreur : texte --on-danger (main écrit #fff sur --danger, 3,0:1 en sombre ; ici 6,3:1 et 5,8:1). */
+.admin .toast.error { color: var(--on-danger); }
+.admin .toast button { min-height: 36px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+.admin .toast .toast-temps { position: absolute; left: 0; bottom: 0; height: 3px; width: var(--reste, 100%); background: var(--accent); }
+.admin .toast { position: fixed; }
+.admin .toast:hover .toast-temps, .admin .toast:focus-within .toast-temps { animation-play-state: paused; }
+@media (max-width: 720px) {
+  .admin .toast { bottom: calc(var(--barre-basse) + 12px); } .admin .toast button { min-height: 44px; }
+  /* Au-dessus de la barre basse d'actions quand la page en a une. */
+  .admin:has(.ep-actions) .toast { bottom: calc(var(--barre-basse) + 76px); }
+}
+
+/* ---------- 7. Formulaire type ----------
+   Libellé au-dessus · aide entre libellé et champ · « (facultatif) » sur les seuls champs facultatifs
+   · erreur sous le champ : ⚠ « Erreur : » + comment corriger ; résumé en tête au-delà de trois champs. */
+.champ-a { display: grid; gap: 6px; min-width: 0; }
+.champ-a > label, .champ-a > .lb { display: block; color: var(--ink); font-size: 13px; font-weight: 500; }
+.champ-a .facultatif { color: var(--ink3); font-weight: 400; }
+.champ-a .aide { margin: 0; color: var(--ink3); font-size: 12px; line-height: 1.45; }
+/* Erreur : sous le champ, et de même dessin hors d'un champ (groupe de choix, dialogue, photo d'un billet, choix de fichier). */
+.err { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
+.err .ic { flex: none; width: 14px; height: 14px; margin-top: 2px; }
+.err b { font-weight: 600; }
+.confirm p.err, .dialog p.err { color: var(--danger); margin: 0 0 8px; }
+.err-l { display: grid; gap: 6px; justify-items: start; }
+.champ-a [aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--danger) !important; }
+/* Erreur ET focus, visibles ensemble (RGAA 10.7, WCAG 2.4.7) : admin.css (main) écrit [aria-invalid="true"] { box-shadow …
+   !important }, qui écrasait l'anneau du focus (input:focus { outline: none; box-shadow … }) : le champ vers lequel le résumé
+   envoie n'avait plus de focus visible. Le filet d'erreur (2 px, dedans, --danger) reste ; le focus s'y ajoute dehors : contour
+   --accent-ink de 2 px à 2 px du bord (≥ 3:1 sur --bg, --s1 et --s2 dans les deux thèmes) et halo --accent-soft. Même règle pour
+   les cases et boutons radio en erreur, et pour .is-focus (focus figé d'une capture). Correctif à reporter dans main :
+   dr-work/mq2-correctifs-main.md. */
+:is(input, select, textarea, button)[aria-invalid="true"]:is(:focus, :focus-visible, .is-focus) {
+  outline: 2px solid var(--accent-ink) !important; outline-offset: 2px !important;
+  box-shadow: inset 0 0 0 2px var(--danger), 0 0 0 4px var(--accent-soft) !important; }
+:is(input[type="checkbox"], input[type="radio"])[aria-invalid="true"] { outline: 2px solid var(--danger); outline-offset: 1px; }
+/* Résumé d'erreurs : <section class="resume-a" tabindex="-1" aria-labelledby="…"> titrée par son <h2> (un élément générique
+   ne se nomme pas : ARIA 1.2) ; le focus y est posé au rechargement ; un lien par point, vers le champ. */
+.resume-a { display: grid; gap: 6px; margin: 0 0 18px; padding: 12px 16px; border-radius: var(--r); background: var(--danger-soft); box-shadow: inset 3px 0 0 var(--danger); }
+.resume-a :is(h2, h3) { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; font-weight: 500; }
+.resume-a :is(h2, h3) .ic { color: var(--danger); }
+/* (Dans un état montré sous un titre de niveau 2, le résumé prend un <h3> : même dessin.) */
+.resume-a ul { margin: 0; padding-left: 20px; }
+.resume-a a { display: inline-flex; align-items: center; min-height: 24px; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .resume-a a { min-height: 44px; } }
+/* Sans JavaScript, chaque formulaire à enregistrement automatique garde son bouton « Enregistrer » (.sans-script) : présent
+   dans le HTML, il se cache dès que le script a posé la classe js sur <html> (une maquette pose class="js" pour montrer la page
+   avec script, et .sans-js sur un cadre d'état pour la montrer sans). */
+html.js .sans-script { display: none !important; }
+html .sans-js .sans-script { display: block !important; }
+/* Commandes qui exigent un script (Ctrl K, Copier, Afficher, barre de mise en forme) : .js-seul, cachées sans la classe js
+   sur <html>, comme public.css § 0 et comme main (data-cmdk-open hidden). */
+html:not(.js) .js-seul, .sans-js .js-seul { display: none !important; }
+/* Formulaire sans place, cible d'un bouton placé ailleurs (<button form="f-…">) : un formulaire ne s'imbrique pas dans un
+   autre ; le bouton reste à sa place dans la ligne, le formulaire (jeton CSRF, champs cachés) est posé à part. */
+.form-cache { display: none; }
+/* Choix rapides d'une date (« Dans 30 jours, le 15 nov. », « À la fermeture de la galerie, le 30 nov. ») : des boutons d'envoi (.pill d'admin.css) qui remplissent
+   le champ côté serveur, sans script ; 32 px au bureau, 44 au toucher, et le libellé passe à la ligne au téléphone. */
+.champ-a .pills { margin-top: 2px; }
+.champ-a .pills .pill { min-height: 32px; font: inherit; font-size: 13px; cursor: pointer; }
+@media (max-width: 720px), (pointer: coarse) { .champ-a .pills .pill { min-height: 44px; white-space: normal; text-align: left; } }
+/* Champs : 16 px au téléphone (pas de zoom forcé sur iOS). */
+@media (max-width: 720px) { .admin input:not([type="checkbox"]):not([type="radio"]), .admin select, .admin textarea { font-size: 16px; } }
+/* Relecture d'une saisie libre (date, ville d'après le GPS) : la machine dit ce qu'elle a compris, sous le champ. */
+.lu { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.lu .ic { flex: none; color: var(--ok); }
+/* Point d'attention dans une ligne (▲ Accord à vérifier, titre provisoire) : symbole et mot, en --warn. */
+.att { display: inline-flex; align-items: center; gap: 4px; color: var(--warn); font-size: 12px; font-weight: 500; }
+a.att { min-height: 24px; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { a.att { min-height: 44px; } }
+/* Symboles d'état dans une phrase : alignés sur le texte. */
+.confirm p .ic, .att .ic, .enreg .ic, .ecran-a p > .ic { display: inline-block; vertical-align: -1px; }
+/* Libellé avec, à droite, un compteur ou un choix d'affichage ; compteur de signes ; signalement d'un champ (▲ sans erreur). */
+.champ-a .lb-l { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.champ-a .lb-l label { color: var(--ink); font-size: 13px; font-weight: 500; }
+.compteur { color: var(--ink3); font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 400; }
+.compteur.trop { color: var(--warn); }
+.avert { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.avert .ic { flex: none; color: var(--warn); margin-top: 3px; }
+/* Choix (cases et boutons radio) avec leur explication : 32 px au bureau, 44 au toucher ; --ligne : côte à côte. */
+.choix-a { display: grid; gap: 4px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.choix-a > legend { padding: 0; margin: 0 0 6px; color: var(--ink); font-size: var(--at-petit); font-weight: 500; }
+.choix-a > .aide { margin: -2px 0 6px; color: var(--ink3); font-size: 12px; }
+.choix-a > .err { margin: 0 0 4px; }
+.choix-a label { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 0 8px; align-items: start; min-height: 32px; padding: 4px 0; color: var(--ink); font-size: var(--at-texte); font-weight: 400; cursor: pointer; }
+.choix-a label input { margin: 1px 3px 0; }
+.choix-a label .sec { grid-column: 2; color: var(--ink3); font-size: 12px; line-height: 1.45; }
+.choix-a label.inactif { color: var(--ink3); cursor: default; }
+.choix-a--ligne { display: flex; flex-wrap: wrap; gap: 0 24px; }
+.choix-a--ligne > legend { flex-basis: 100%; }
+.choix-a--ligne > :is(.aide, .hint, .err) { flex-basis: 100%; }
+@media (max-width: 720px), (pointer: coarse) { .choix-a label { min-height: 44px; padding: 10px 0; } .choix-a label input { width: 22px; height: 22px; margin: 0 1px; } }
+/* Pied de formulaire : ce qui n'est pas encore enregistré à gauche, puis [Annuler] et l'action, le seul bouton plein, en dernier. */
+.form-pied { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px 12px; padding-top: 16px; border-top: 1px solid var(--line); }
+.form-pied .hint, .form-pied .mod { margin-right: auto; }
+.mod { display: inline-flex; align-items: center; gap: 6px; color: var(--ink2); font-size: 13px; }
+.mod::before { content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-ink); }
+@media (max-width: 720px) { .form-pied { flex-direction: column; align-items: stretch; } .form-pied .hint, .form-pied .mod { margin: 0; } }
+/* Choix de fichier : un bouton en contour qui dit ce qu'il fait ; le champ natif le recouvre (clavier, lecteur d'écran) ;
+   refusé, le bouton prend le filet de l'erreur et l'erreur s'écrit dessous. */
+.fichier-w { position: relative; display: inline-flex; }
+.fichier { display: inline-flex; align-items: center; gap: 8px; }
+.fichier-i { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; }
+.fichier-w:has(.fichier-i:focus-visible) .fichier { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.fichier-w:has([aria-invalid="true"]) .fichier { box-shadow: inset 0 0 0 1.5px var(--danger); }
+/* Case d'une ligne de tableau : son libellé fait la cible, 32 px au bureau, 44 au toucher. */
+.chk-l { display: inline-grid; place-items: center; width: 32px; height: 32px; margin: 4px 0 0 -7px; cursor: pointer; }
+@media (max-width: 720px), (pointer: coarse) { .chk-l { width: 44px; height: 44px; margin: 0; } }
+
+/* ---------- 8. Dialogue de confirmation ----------
+   Titre = la question avec l'objet ; une phrase qui dit les conséquences ; [Annuler] puis [action qui répète
+   l'objet] ; focus sur Annuler quand l'action ne se défait pas ; Échap = Annuler ; le focus revient au déclencheur. */
+.confirm { width: min(560px, calc(100vw - 32px)); padding: 24px; border: 0; border-radius: var(--r-admin-panneau); background: var(--s1); color: var(--ink);
+  box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.confirm::backdrop { background: var(--scrim); }
+.confirm h2 { margin: 0 0 8px; font-size: 20px; font-weight: 500; line-height: 1.3; }
+.confirm p { margin: 0 0 12px; color: var(--ink2); }
+.confirm .actions { justify-content: flex-end; margin-top: 20px; }
+@media (max-width: 720px) { .confirm .actions { flex-direction: column; align-items: stretch; } }
+
+/* ---------- 9. Listes et objets ----------
+   Une liste de l'admin est un tableau (.liste-a), en cartes sous 1 100 px ; un objet avec sa vignette et son état
+   (.objets-a : photo d'un billet, favori) ; les lignes d'une commande (.lignes-a, .total-a) ; des paires clé-valeur (.kv-a) ;
+   une chronologie (.chrono, du plus récent au plus ancien) ; des étapes (.etapes-a, ✓ fait · ● maintenant · ○ ensuite) ;
+   le registre d'une édition (.registre, une case par numéro). Les filtres au-dessus d'une liste : .filtres-l. */
+.tablewrap, .onglets ul { position: relative; }
+@media (max-width: 720px), (pointer: coarse) { .chips .chip { min-height: 44px; } }
+/* Filtre d'état (lexique § 3 ; finalisation, d'après MQ-08, MQ-09, MQ-18, MQ-19) : le symbole dans la couleur de son état,
+   puis le mot et le nombre, comme une pastille (« ◐ Proposées 1 ») ; la même forme dans la Photothèque, le lot, les accès et
+   les commandes. Sur le filtre courant (aplat --ink), le symbole garde sa couleur sur un disque --s1.
+   <a class="chip" href="…"><span class="chip-st chip-st--encours"><svg class="ic">…</svg></span>Proposées<span class="n">1</span></a> */
+.chip .chip-st { display: inline-grid; place-items: center; flex: none; width: 18px; height: 18px; margin-left: -4px; border-radius: 50%; }
+.chip .chip-st .ic { width: 12px; height: 12px; }
+.chip .chip-st--afaire { color: var(--st-afaire); } .chip .chip-st--encours { color: var(--st-encours); } .chip .chip-st--abouti { color: var(--st-abouti); }
+.chip .chip-st--attention { color: var(--st-attention); } .chip .chip-st--arret { color: var(--st-arret); }
+.chip[aria-current] .chip-st { background: var(--s1); }
+.filtres-l { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 0 0 14px; }
+.btns-ligne { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.lien-a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink2); font-size: var(--at-petit); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .lien-a { min-height: 44px; } }
+.liste-a { width: 100%; border-collapse: collapse; background: var(--s1); font-size: var(--at-texte); }
+.liste-a caption { padding: 12px 14px; text-align: left; color: var(--ink2); font-size: var(--at-petit); caption-side: top; }
+.liste-a th, .liste-a td { padding: 12px 14px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.liste-a thead th { color: var(--ink2); font-size: var(--at-min); font-weight: 500; letter-spacing: .04em; white-space: nowrap; }
+.liste-a tbody th { font-weight: 500; }
+.liste-a .sec { display: block; margin-top: 2px; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
+.liste-a .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.liste-a tr.choisie { background: var(--accent-soft); }
+.liste-a a.ligne-lien { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
+.liste-a a.ligne-lien:hover { text-decoration-color: currentColor; }
+.ref { font-family: var(--mono); font-size: 13px; font-weight: 400; letter-spacing: 0; white-space: nowrap; }
+.liste-a .langue { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line2); color: var(--ink2); font-size: 12px; font-weight: 500; line-height: 18px; text-decoration: none; }
+@media (max-width: 1100px) {
+  .liste-wrap { overflow: visible; box-shadow: none; border-radius: 0; }
+  .liste-a, .liste-a tbody { display: block; background: transparent; }
+  .liste-a caption { display: block; padding: 0 0 10px; }
+  .liste-a thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* Une carte par ligne : en tête l'objet (et le montant), puis l'état, puis le reste ; les données courtes vont par deux. */
+  .liste-a tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 16px; margin: 0 0 12px; padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+  .liste-a td, .liste-a th { display: block; padding: 0; border: 0; min-width: 0; grid-column: 1 / -1; }
+  .liste-a th[scope="row"] { grid-column: 1; }
+  .liste-a .c-haut { grid-column: 2; grid-row: 1; text-align: right; }
+  .liste-a .c-etat { grid-row: 2; }
+  .liste-a .c-demi { grid-column: auto; }
+  .liste-a .c-demi[data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: var(--at-min); }
+  .liste-a .num { text-align: right; }
+}
+@media (max-width: 1100px) and (min-width: 721px) { .liste-a tbody { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; } .liste-a tr { margin: 0; } }
+@media (max-width: 720px), (pointer: coarse) { .liste-a a.ligne-lien { min-height: 44px; } }
+/* Sous une liste : sa légende, une phrase, un lien. */
+.pied-liste { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; margin: 12px 0 0; color: var(--ink3); font-size: 12px; }
+.pied-liste .etats-legende { margin: 0; }
+/* Pastilles de photos d'une galerie ou d'un billet (160 px), dans l'ordre. */
+.vignettes-a { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.vignettes-a li { margin: 0; }
+.vignettes-a img { display: block; height: 56px; width: auto; border-radius: 4px; background: var(--photo-bg); }
+/* Objet avec sa vignette, son état, sa phrase et ses issues. */
+.objets-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.objets-a > li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.objets-a > li:first-child { border-top: 0; padding-top: 0; }
+.objets-a img { width: 64px; height: auto; border-radius: 4px; background: var(--photo-bg); grid-row: span 3; }
+.objets-a .t { font-weight: 500; }
+.objets-a .t .sec { display: block; color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
+.objets-a .n { margin-right: 4px; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.objets-a .etat { justify-self: start; }
+.objets-a > li > :is(.detail, .err, .actions) { grid-column: 2; }
+.objets-a .detail { margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.objets-a .actions { gap: 6px 8px; }
+.objets-a .actions .btn, .signal .actions .btn, .sugg-bloc .btn { min-height: 32px; padding: 0 12px; font-size: 13px; }
+@media (max-width: 720px), (pointer: coarse) { .objets-a .actions .btn, .signal .actions .btn, .sugg-bloc .btn { min-height: 44px; } }
+/* Lignes d'une commande : vignette, tirage, prix ; total sous un filet. */
+.lignes-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.lignes-a li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 2px 14px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.lignes-a li:first-child { border-top: 0; padding-top: 0; }
+.lignes-a li.sans-img { grid-template-columns: minmax(0, 1fr) auto; }
+.lignes-a img { width: 64px; height: auto; border-radius: 4px; background: var(--photo-bg); }
+.lignes-a .t { font-weight: 500; } .lignes-a .sec { display: block; color: var(--ink3); font-size: var(--at-petit); }
+.lignes-a .prix { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.lignes-a .ex { font-family: var(--mono); font-size: 13px; color: var(--ink2); letter-spacing: 0; }
+.total-a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 4px 0 0; padding-top: 12px; border-top: 1px solid var(--line2); font-size: var(--at-h3); font-weight: 500; }
+.total-a + .hint { margin: 6px 0 0; }
+.kv-a { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 0; font-size: var(--at-texte); }
+.kv-a dt { color: var(--ink3); } .kv-a dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.kv-a .sec { display: block; color: var(--ink3); font-size: var(--at-petit); }
+.chrono { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; font-size: var(--at-texte); }
+.chrono li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 2px 14px; padding: 9px 0; border-top: 1px solid var(--line); }
+.chrono li:first-child { border-top: 0; }
+.chrono time { color: var(--ink3); font-size: var(--at-petit); font-variant-numeric: tabular-nums; }
+.chrono .sec { color: var(--ink3); font-size: var(--at-petit); }
+@media (max-width: 720px) { .chrono li { grid-template-columns: 1fr; } }
+.etapes-a { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.etapes-a li { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 10px; padding: 0 0 16px; }
+.etapes-a li::before { content: ''; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--line2); }
+.etapes-a li:last-child { padding-bottom: 0; } .etapes-a li:last-child::before { display: none; }
+.etapes-a .m { position: relative; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--line2); color: var(--ink3); background: var(--s1); }
+.etapes-a .fait .m { box-shadow: none; background: var(--s3); color: var(--ok); }
+.etapes-a .maintenant .m { box-shadow: inset 0 0 0 2px var(--accent-ink); color: var(--accent-ink); }
+.etapes-a .t { font-weight: 500; } .etapes-a .ensuite .t { color: var(--ink2); font-weight: 400; }
+.etapes-a .sec { grid-column: 2; color: var(--ink3); font-size: var(--at-petit); }
+.etapes-a .maintenant .t::before { content: 'Maintenant · '; color: var(--accent-ink); }
+.etapes-a .maintenant .t:lang(de)::before { content: 'Jetzt · '; } .etapes-a .maintenant .t:lang(en)::before { content: 'Now · '; }
+.registre { display: grid; grid-template-columns: repeat(15, minmax(0, 18px)); gap: 3px; margin: 0; }
+.registre span { height: 18px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--line2); }
+.registre span.v { background: var(--ink3); box-shadow: none; }
+.registre span.ici { background: var(--accent); box-shadow: none; }
+/* Point d'attention sous l'objet d'une ligne de liste (« ▲ Sélection envoyée par Lucie ») : sur sa propre ligne. */
+.liste-a .att { display: flex; margin-top: 4px; }
+/* Lot (.lot d'admin.css, une ligne par photo) : l'erreur d'une ligne prend toute la largeur, dans une ligne à elle
+   (<tr class="err-ligne"><td colspan>), sous la ligne fautive (tr.a-erreur), au lieu de quatre lignes dans une demi-colonne ;
+   son retrait aligne le texte sur la colonne du titre (--lot-retrait, posé par la page selon ses colonnes). Au téléphone, la
+   ligne d'erreur ferme la carte de la photo. */
+.lot tr.a-erreur > td, .lot tr.a-erreur > th { border-bottom: 0; }
+.lot tr.err-ligne td { padding: 0 10px 12px var(--lot-retrait, 10px); }
+.lot tr.err-ligne .err { margin: 0; }
+@media (max-width: 720px) {
+  .lot tr.a-erreur { margin-bottom: 0; border-radius: 14px 14px 0 0; padding-bottom: 4px; }
+  .lot tr.err-ligne { display: block; margin: 0 0 12px; padding: 0 12px 12px; border-radius: 0 0 14px 14px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); clip-path: inset(0 0 -1px 0); }
+  .lot tr.err-ligne td { padding: 0; }
+}
+/* Chiffres d'un objet (le suivi d'un accès : ouverture, dernière visite, appareils, favoris) : une valeur en Jost 300, son
+   intitulé au-dessus, une phrase dessous qui dit ce qu'elle veut dire. */
+.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 12px; margin: 0 0 18px; }
+.chiffres > div { padding: 14px 16px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.chiffres dt { color: var(--ink3); font-size: var(--at-petit); }
+.chiffres dd { margin: 4px 0 0; font-size: 22px; font-weight: 300; line-height: 1.2; }
+.chiffres dd .sec { display: block; margin-top: 2px; color: var(--ink3); font-size: 12px; font-weight: 400; line-height: 1.4; }
+/* Sélection d'une invitée (galerie privée) : ses favoris dans l'ordre où elle les a posés, vignette à la taille d'affichage
+   (80 px de haut), titre avec l'étoile, heure et note. Deux par rangée au téléphone. */
+.favoris-a { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 124px), 1fr)); gap: 16px 14px; margin: 0 0 14px; padding: 0; list-style: none; }
+.favoris-a li { display: grid; gap: 4px; align-content: start; min-width: 0; font-size: 13px; }
+.favoris-a img { display: block; height: 80px; width: auto; max-width: 100%; border-radius: 4px; background: var(--photo-bg); }
+.favoris-a .t { color: var(--ink); font-weight: 500; }
+.favoris-a .t .ic { color: var(--accent-ink); vertical-align: -1px; }
+.favoris-a .sec { color: var(--ink3); font-size: 12px; }
+@media (max-width: 720px) { .favoris-a { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Photos d'une galerie dans un formulaire : l'intitulé et son nombre, le lien « Modifier les photos de la galerie » sur la
+   même ligne, puis les pastilles (.vignettes-a). */
+.galerie-resume { display: grid; gap: 10px; }
+.galerie-resume .lb-l { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; align-items: baseline; }
+.galerie-resume .lb-l .lb { color: var(--ink); font-size: 13px; font-weight: 500; }
+.galerie-resume .lb-l a { color: var(--ink2); font-size: var(--at-petit); text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 24px; }
+@media (max-width: 720px), (pointer: coarse) { .galerie-resume .lb-l a { min-height: 44px; } }
+
+/* ---------- 10. Panneaux, signalements, secrets, suggestions ----------
+   .deux-col : le formulaire, puis sa colonne d'appui (une colonne sous 1 180 px). .signal : non bloquant, ▲, une phrase,
+   deux issues. .note-a : une note grise avec son icône (ce que fait un bouton, ce que permet votre rôle). .secret : affiché
+   une seule fois, en Plex Mono. .courriel : un e-mail en texte seul. .sugg : la pastille « ✦ Suggestion : Rue », qu'un clic
+   accepte ; .sugg-bloc : une suggestion longue (description, traduction), toujours à relire. .plier : des réglages repliés
+   dont la ligne dit le contenu. .bar.jauge : une jauge (poids d'une page), la barre de progression d'admin.css. */
+.deux-col { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px; align-items: start; }
+@media (max-width: 1180px) { .deux-col { grid-template-columns: minmax(0, 1fr); } }
+.cote { display: grid; gap: 0; min-width: 0; }
+.main .panel > h2, .main .panel > h3, .main .panel > .panel-t { margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.panel > .aide-panel { margin: -6px 0 14px; color: var(--ink3); font-size: var(--at-petit); }
+/* Panneau qui est un groupe de champs (<fieldset class="panel titre-dedans">) : sa légende se pose DANS le panneau, comme le
+   titre d'un panneau ordinaire, et non sur son filet ; flottante sur toute la largeur, le contenu repart dessous. */
+fieldset.panel.titre-dedans { display: block; }
+fieldset.panel.titre-dedans > legend { float: left; width: 100%; margin: 0 0 10px; padding: 0; font-size: 17px; }
+fieldset.panel.titre-dedans > legend + * { clear: both; }
+.signal { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 3px 0 0 var(--warn); }
+.signal p { margin: 0; color: var(--ink2); font-size: var(--at-petit); }
+.signal .signal-t { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: var(--at-texte); font-weight: 500; }
+.signal .signal-t .ic { flex: none; color: var(--warn); }
+.note-a { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 0 10px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s2); color: var(--ink2); font-size: var(--at-petit); }
+.note-a > .ic { color: var(--ink2); margin-top: 2px; }
+.note-a p { margin: 0; } .note-a b { color: var(--ink); font-weight: 500; }
+.secrets { display: grid; gap: 12px; }
+.secret { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 14px 16px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line2); }
+.secret .lb { grid-column: 1 / -1; color: var(--ink2); font-size: var(--at-petit); font-weight: 500; }
+.secret output { font-family: var(--mono); font-size: 15px; letter-spacing: .02em; color: var(--ink); overflow-wrap: anywhere; }
+.secret output.mdp { font-size: 26px; letter-spacing: .08em; }
+.secret .aide { grid-column: 1 / -1; margin: 0; color: var(--ink3); font-size: 12px; }
+@media (max-width: 720px) { .secret { grid-template-columns: 1fr; } .secret output.mdp { font-size: 22px; } }
+.courriel { margin: 0; padding: 18px 20px; border-radius: var(--r-admin); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); font-size: var(--at-texte); line-height: 1.6; }
+.courriel dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 12px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line2); font-size: var(--at-petit); }
+.courriel dt { color: var(--ink3); } .courriel dd { margin: 0; overflow-wrap: anywhere; }
+.courriel p { margin: 0 0 10px; max-width: 64ch; } .courriel p:last-child { margin-bottom: 0; }
+.courriel .bas { color: var(--ink3); font-size: var(--at-petit); }
+.donnee { font-family: var(--mono); font-size: 13px; letter-spacing: 0; overflow-wrap: anywhere; }
+.sugg { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 12px 0 10px; border: 0; border-radius: 999px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2);
+  color: var(--ink); font: inherit; font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.sugg .s, .sugg-bloc .s { color: var(--accent-ink); }
+.sugg .acc { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; font-weight: 500; }
+.sugg:hover { background: var(--s2); }
+@media (max-width: 720px), (pointer: coarse) { .sugg { min-height: 44px; } }
+.sugg-bloc { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r-admin); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line2); color: var(--ink); font-size: var(--at-petit); }
+.sugg-bloc p { margin: 0; }
+.sugg-bloc .t { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.sugg-bloc .hint { color: var(--ink2); }
+.sugg-bloc .actions, .sugg-bloc > .btn { justify-self: start; }
+.plier > summary { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; list-style: none; font-weight: 500; }
+.plier > summary::-webkit-details-marker { display: none; }
+.plier > summary .ic { flex: none; transition: transform .15s; }
+.plier[open] > summary .ic { transform: rotate(90deg); }
+.plier > summary .sec { display: block; color: var(--ink3); font-size: 12px; font-weight: 400; }
+@media (max-width: 720px), (pointer: coarse) { .plier > summary { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .plier > summary .ic { transition: none; } }
+.bar.jauge { margin: 6px 0 4px; }
+.bar.jauge i { background: var(--ok); }
+/* Barre de progression d'un téléchargement : l'élément natif <progress class="bar" max value> (passe 5, html-validate,
+   prefer-native-element : plus de <div role="progressbar">), au dessin de .bar d'admin.css (6 px, piste --s3, valeur ambre).
+   Son nom vient d'aria-label ; la phrase au-dessus dit la quantité (« 120 Mo sur 270 »). */
+progress.bar { -webkit-appearance: none; appearance: none; display: block; height: 6px; border: 0; border-radius: 6px; background: var(--s3); color: var(--accent); }
+progress.bar::-webkit-progress-bar { background: var(--s3); border-radius: 6px; }
+progress.bar::-webkit-progress-value { background: var(--accent); border-radius: 6px; }
+progress.bar::-moz-progress-bar { background: var(--accent); border-radius: 6px; }
+.dlg-cons { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: var(--at-petit); }
+.dlg-cons li { margin: 3px 0; }
+
+/* ---------- 11. Réglages : onglets, interrupteur, carte d'assistant ----------
+   Onglets : des liens vers des sous-pages (/admin/reglages/assistants), utilisables sans JavaScript ; l'onglet courant
+   porte aria-current et un trait ; 44 px de large au moins (« Accès 1 ») ; un compteur gris après le mot (.n). Au bureau,
+   une rangée soulignée (qui défile si elle ne tient pas). Au téléphone (passe 3), la rangée passe à la ligne : chaque
+   onglet est une case à filet aux coins de 9 px (pas une pastille ronde : les filtres .chip le sont), le courant cerclé
+   d'ambre ; tous les onglets se voient, sans défilement caché ni script (scroll-initial-target, qui ouvrait la rangée
+   défilante sur l'onglet courant, n'existe que dans Chromium). Sous les onglets, une <nav class="sur-onglet"> dit ce que
+   contient un onglet long et y mène (« Sur cet onglet : Mentions légales · Droits et licences · Confidentialité »).
+   Interrupteur : <input type="checkbox" role="switch">, le mot (Allumé, Éteint) à côté, 44 px de cible ; il s'enregistre au geste ;
+   les deux mots sont écrits et le bon se montre sans script (ci-dessous, .inter-oui, .inter-non).
+   Carte d'assistant : titre et interrupteur sur une ligne, une phrase d'effet, son état ; le jargon replié pour l'administrateur. */
+.onglets { margin: 0 -16px 32px; }
+.onglets ul { display: flex; gap: 0 28px; margin: 0; list-style: none; overflow-x: auto; scrollbar-width: none; box-shadow: inset 0 -1px 0 var(--line2); scroll-padding-inline: 32px; padding-inline: 16px;
+  mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent); }
+.onglets ul::-webkit-scrollbar { display: none; }
+.onglets li { flex: none; }
+.onglets a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; border-bottom: 2px solid transparent; color: var(--ink2); font-size: 14px; white-space: nowrap; }
+.onglets a:hover { color: var(--ink); }
+.onglets a[aria-current] { color: var(--ink); font-weight: 500; border-bottom-color: var(--accent-ink); scroll-initial-target: nearest; }
+.onglet-alerte { display: inline-flex; align-items: center; gap: 4px; color: var(--warn); font-size: 12px; font-weight: 500; }
+.onglets a { min-width: 44px; justify-content: center; }
+.onglets .n { color: var(--ink3); font-size: 12px; font-weight: 400; }
+/* Passe 4 (jury v2) : la rangée passe à la ligne jusqu'à 1 100 px (tablette comprise), et non plus seulement au téléphone :
+   à 820 px, l'onglet courant (« Assistants d'analyse », le dernier) était hors de vue sous Firefox et Safari. */
+@media (max-width: 1100px) {
+  .onglets { margin: 0 0 24px; }
+  .onglets ul { flex-wrap: wrap; gap: 8px; overflow: visible; padding-inline: 0; box-shadow: none; mask-image: none; }
+  .onglets a { padding: 0 14px; border: 1px solid var(--line2); border-radius: var(--r-admin); white-space: normal; }
+  .onglets a[aria-current] { border-color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent-ink); scroll-initial-target: none; }
+}
+/* (scroll-initial-target ne sert qu'à la rangée qui défile : sur une rangée qui passe à la ligne, il ferait défiler la page
+   entière jusqu'aux onglets à l'ouverture.) */
+.sur-onglet { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; margin: 0 0 20px; color: var(--ink2); font-size: 13px; }
+.sur-onglet a { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2); }
+@media (max-width: 720px), (pointer: coarse) { .sur-onglet a { min-height: 44px; } }
+.inter { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer; flex: none; }
+.inter input { position: absolute; right: 0; top: 50%; translate: 0 -50%; width: 44px; height: 24px; margin: 0; opacity: 0; cursor: pointer; }
+.inter-piste { position: relative; flex: none; width: 44px; height: 24px; border-radius: 999px; background: var(--s2); box-shadow: inset 0 0 0 1.5px var(--field-line); }
+.inter-piste::after { content: ''; position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--field-line); transition: transform .15s; }
+.inter input:checked + .inter-piste { background: var(--accent-ink); box-shadow: none; }
+.inter input:checked + .inter-piste::after { transform: translateX(20px); background: var(--s1); }
+.inter input:focus-visible + .inter-piste { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .inter-piste::after { transition: none; } }
+/* Interrupteur à deux mots (finalisation, d'après MQ-07 ; jury v2) : le mot suit la case SANS script. Les deux mots sont
+   écrits, :has() montre le bon (« Allumé » coché, « Éteint » sinon) ; de même pour la phrase d'état d'un formulaire sans
+   script (.si-coche, .si-decoche), écrite deux fois par le serveur : l'écran ne se contredit pas avant l'envoi.
+   <span class="inter-mot" aria-hidden="true"><span class="inter-oui">Allumé</span><span class="inter-non">Éteint</span></span> */
+.inter .inter-oui, .assist .si-coche { display: none; }
+.inter:has(input:checked) .inter-oui { display: inline; }
+.inter:has(input:checked) .inter-non { display: none; }
+.assist:has(.inter input:checked) .si-coche { display: block; }
+.assist:has(.inter input:checked) .si-decoche { display: none; }
+.assist { display: grid; gap: 10px; }
+.assist-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 44px; }
+.assist-tete h3 { margin: 0; font-size: 17px; font-weight: 500; }
+.assist p { margin: 0; }
+.assist-effet { color: var(--ink2); max-width: 62ch; }
+.assist-etat { color: var(--ink2); font-size: 13px; }
+.assist-etat .ic { display: inline-block; vertical-align: -1px; margin-right: 6px; }
+.assist-etat b { color: var(--ink); font-weight: 500; }
+.assist-etat .ok { color: var(--ok); } .assist-etat .cours { color: var(--accent-ink); } .assist-etat .af { color: var(--ink2); }
+.assist-serveur > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--ink2); font-size: 13px; cursor: pointer; list-style: none; }
+.assist-serveur > summary::-webkit-details-marker { display: none; }
+.assist-serveur > summary .ic { transition: transform .15s; } .assist-serveur[open] > summary .ic { transform: rotate(90deg); }
+@media (max-width: 720px), (pointer: coarse) { .assist-serveur > summary { min-height: 44px; } }
+.assist-serveur dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 8px 0 12px; padding: 12px 16px; border-radius: var(--r); background: var(--s2); font-size: 13px; }
+.assist-serveur dt { color: var(--ink2); } .assist-serveur dd { margin: 0; color: var(--ink); }
+.assist-serveur code { font: 400 12px var(--mono); }
+@media (max-width: 540px) { .assist-serveur dl { grid-template-columns: minmax(0, 1fr); } .assist-serveur dd { margin-bottom: 6px; } }
+

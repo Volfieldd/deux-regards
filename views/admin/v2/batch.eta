@@ -1,0 +1,126 @@
+<% layout('./layout') %>
+<% const t = it.t; const E = it.errors || {}, V = it.values || {}; %>
+<% /* Le lot (MQ-08 ; UX-A-03, 04, 06, 10, 14, 21) : compléter les photos d'un import et les proposer (photographe) ou les
+      publier (qui publie tout), sans quitter la page. Chaque champ s'enregistre en le quittant (POST /admin/photos/:id/champs),
+      le témoin de l'en-tête dit ce qui ne l'est pas ; « Pour les photos cochées » ne change rien avant « Appliquer » ;
+      « Proposer » et « Publier » montrent d'abord ce qui reste à revoir (dialogue rendu par le serveur). Sans script, le
+      même tableau part en un envoi (POST /admin/photos/lot, les noms de champs de la v1). */ %>
+<% const all = it.all || it.photos; const N = all.length; const publish = it.canPublishAll; const propose = !publish && it.can('photos.proposer');
+   const lotUrl = `/admin/photos/lot?ids=${it.ids.join(',')}`;
+   const IC = {
+     retour: '<path d="M19 12H5M11 6l-6 6 6 6"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>', chev: '<path d="M9 6l6 6-6 6"/>',
+     bas: '<path d="M6 9l6 6 6-6"/>', afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', encours: '<path d="M12 2.7a9.3 9.3 0 0 1 0 18.6z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>',
+     abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>', attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>',
+   };
+   const ic = (k, s = 14) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${IC[k]}</svg>`;
+   const ETAT = p => (p.status === 'published' ? ['abouti', t('Publiée')] : p.review === 'programmee' ? ['encours', t('Programmée')] : p.review === 'proposee' ? ['encours', t('Proposée')] : ['afaire', t('Brouillon')]);
+   const mainLabel = publish ? (N > 1 ? t('Publier les {n} photos', { n: N }) : t('Publier la photo')) : (N > 1 ? t('Proposer les {n} photos', { n: N }) : t('Proposer la photo'));
+   const imported = all.length && all.every(p => p.created_at && String(p.created_at).slice(0, 10) === String(all[0].created_at).slice(0, 10)) ? new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', timeZone: 'Europe/Paris' }).format(new Date(String(all[0].created_at).replace(' ', 'T') + 'Z')) : '';
+   const D = it.dialog; %>
+<header class="ep">
+  <a class="ep-retour" href="/admin/photos"><%~ ic('retour') %><%= t('Photothèque') %></a>
+  <div class="ep-titre"><h1><%= it.title %></h1></div>
+  <p class="ep-meta"><span><%= imported ? (N > 1 ? t('{n} photos importées le {date}', { n: N, date: imported }) : t('{n} photo importée le {date}', { n: N, date: imported })) : (N > 1 ? t('{n} photos', { n: N }) : t('{n} photo', { n: N })) %></span><span role="status" data-temoin><% if (Object.keys(E).length) { const n = Object.values(E).reduce((a, e) => a + Object.keys(e).length, 0); %><a class="enreg enreg--attente" href="#resume-lot"><%~ ic('alerte') %><%= n > 1 ? t('{n} champs non enregistrés', { n }) : t('1 champ non enregistré') %></a><% } %></span></p>
+<% if (publish || propose) { %>  <div class="ep-actions"><button class="btn" type="submit" form="lot-f" name="<%= publish ? 'publish' : 'proposer' %>" value="1"><%= mainLabel %></button></div>
+<% } %></header>
+
+<% if (D) { const P = D.kind === 'publier'; const nOk = N - D.review.filter(r => r.issues.blocked || (r.issues.verify && P)).length; %>
+<dialog class="confirm lot-dlg" open data-modal aria-labelledby="dlg-t" aria-describedby="dlg-d">
+  <form method="post" action="/admin/photos/lot" novalidate>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="ids" value="<%= it.ids.join(',') %>"><input type="hidden" name="<%= P ? 'publish' : 'proposer' %>" value="1"><input type="hidden" name="forcer" value="1">
+<% if (P) { %>
+    <h2 id="dlg-t"><%= nOk === N ? (N > 1 ? t('Publier les {n} photos ?', { n: N }) : t('Publier la photo ?')) : t('Publier {ok} des {n} photos ?', { ok: nOk, n: N }) %></h2>
+    <p id="dlg-d"><%= nOk === N ? t('Elles seront en ligne tout de suite. Avant, un point à revoir :') : t('Celles dont l’accord est à vérifier ou refusé restent en brouillon. À revoir :') %></p>
+<% } else { const who = it.moderators.length && it.moderators.length < 3 ? it.moderators.join(` ${t('et')} `) : ''; %>
+    <h2 id="dlg-t"><%= who ? (N > 1 ? t('Proposer les {n} photos à {who} ?', { n: N, who }) : t('Proposer la photo à {who} ?', { who })) : (N > 1 ? t('Proposer les {n} photos à la modération ?', { n: N }) : t('Proposer la photo à la modération ?')) %></h2>
+    <p id="dlg-d"><%= who ? t('{who} les publie ou vous les renvoie avec une remarque. À revoir d’abord, ici :', { who }) : t('La modération les publie ou vous les renvoie avec une remarque. À revoir d’abord, ici :') %></p>
+<% } %>
+    <ul class="liste-c">
+<% D.review.forEach(r => { const e = r.errors || {}; const v = r.values || {}; %>
+      <li><% if (r.thumb) { %><img src="<%= r.thumb %>" alt="" width="64" height="43"><% } else { %><span class="ph" aria-hidden="true"></span><% } %><div>
+        <p><span class="att"><%~ ic('alerte') %></span> <b><%= r.title %></b> : <%= [r.issues.provisional && t('titre provisoire'), e.taken_on && t('date refusée'), e.title && t('titre refusé'), r.issues.verify && !r.confirmed && t('accord à vérifier'), r.issues.blocked && t('refusée par une personne photographiée : elle ne partira pas')].filter(Boolean).join(', ') %>.</p>
+<% if (r.issues.provisional || e.title) { %>        <div class="champ-a"><label for="dlg-titre-<%= r.id %>"><%= t('Titre') %></label><input type="text" id="dlg-titre-<%= r.id %>" name="title_<%= r.id %>" value="<%= v.title ?? r.title %>" maxlength="160"<%~ e.title ? ` aria-invalid="true" aria-describedby="dlg-titre-${r.id}-e"` : '' %>><% if (e.title) { %><p class="err" id="dlg-titre-<%= r.id %>-e"><%~ ic('alerte') %><span><b><%= t('Erreur :') %></b> <%= e.title %></span></p><% } %></div>
+<% } %><% if (e.taken_on) { %>        <div class="champ-a"><label for="dlg-date-<%= r.id %>"><%= t('Date') %></label><input type="text" id="dlg-date-<%= r.id %>" name="taken_on_<%= r.id %>" value="<%= v.taken_on ?? '' %>" maxlength="40" aria-invalid="true" aria-describedby="dlg-date-<%= r.id %>-e"><p class="err" id="dlg-date-<%= r.id %>-e"><%~ ic('alerte') %><span><b><%= t('Erreur :') %></b> <%= e.taken_on %> <%= t('Écrivez par exemple « 14 oct. 2026 ».') %></span></p></div>
+<% } %><% if (r.issues.verify && !P) { %>        <div class="choix-a"><label><input type="checkbox" name="confirmer_<%= r.id %>" value="1"<%~ r.confirmed ? ' checked' : '' %>><span><%= t('À vérifier : je confirme que les personnes reconnaissables sur cette photo ont accepté le site, ou n’y sont pas reconnaissables.') %></span><span class="sec"><%= r.issues.reasons.join(' ; ') %></span></label></div>
+<% } else if (r.issues.verify) { %>        <p class="hint"><%= t('Elle reste en brouillon : confirmez l’accord dans sa fiche.') %> <a class="lien-a" href="/admin/photos/<%= r.id %>#publication"><%= t('Ouvrir sa fiche') %></a></p>
+<% } %>      </div></li>
+<% }) %>
+    </ul>
+<% if (!P) { %>    <div class="champ-a"><label for="dlg-mot"><%= t('Un mot pour la modération') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><textarea id="dlg-mot" name="message" rows="2" maxlength="1000"><%= D.message %></textarea></div>
+<% } %>
+    <div class="actions"><a class="btn ghost" href="<%= lotUrl %>" data-annuler><%= t('Annuler') %></a><% if (!P) { %><button class="btn ghost" type="submit" name="sans_corriger" value="1"><%= t('Proposer sans corriger') %></button><% } %><button class="btn" type="submit" autofocus><%= P ? (nOk > 1 ? t('Publier les {n} photos', { n: nOk }) : t('Publier la photo')) : mainLabel %></button></div>
+  </form>
+</dialog>
+<% } %>
+
+<% if (it.rest && it.rest.length) { %>
+<p class="flash" role="note"><%= t('{n} photos sur {total} : une page en montre 200 au plus.', { n: N, total: it.total }) %> <a class="more" href="/admin/photos/lot?ids=<%= it.rest.join(',') %>"><%= it.rest.length > 1 ? t('Les {n} suivantes →', { n: it.rest.length }) : t('La suivante →') %></a></p>
+<% } %>
+<ol class="steps" aria-label="<%= t('Étapes de l’import') %>">
+  <li class="done"><span class="n">1.</span> <%= t('Choisir et vérifier') %></li>
+  <li class="done"><span class="n">2.</span> <%= t('Envoi et traitement') %></li>
+  <li aria-current="step"><span class="n">3.</span> <span class="et-sur"><%= t('Étape 3 sur 3 :') %> </span><%= publish ? t('Compléter et publier') : t('Compléter et proposer') %></li>
+</ol>
+<% if (Object.keys(E).length && !D) { %>
+<section class="resume-a" id="resume-lot" tabindex="-1" aria-labelledby="resume-lot-t"><h2 id="resume-lot-t"><%~ ic('alerte') %><%= t('Lot enregistré, sauf :') %></h2>
+  <ul><% all.filter(p => E[p.id]).forEach(p => Object.entries(E[p.id]).forEach(([k, m]) => { %><li><a href="#<%= k === 'title' ? 'titre' : k === 'taken_on' ? 'date' : 'lieu' %>-<%= p.id %>"><%= t('{champ} de « {photo} » : {msg}', { champ: k === 'title' ? t('Titre') : k === 'taken_on' ? t('Date') : k === 'category_id' ? t('Série') : t('Lieu'), photo: p.title, msg: m }) %></a></li><% })) %></ul></section>
+<% } %>
+
+<form class="bulk bulk-l" id="bulk" action="/admin/photos/actions" method="post" aria-labelledby="b-t" data-v2-bulk>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <input type="hidden" name="back" value="<%= lotUrl %>">
+  <strong id="b-t" role="status" data-bulk-count><%= t('Pour les photos cochées :') %></strong>
+  <button class="btn ghost bulk-toggle js-seul" type="button" aria-expanded="false" aria-controls="bulk-g" data-bulk-toggle><%= t('Changer la série, le lieu, la ville ou la date') %><%~ ic('bas') %></button>
+  <div class="bulk-groups" id="bulk-g">
+    <div class="champ-a"><label for="b-serie"><%= t('Série') %></label><select id="b-serie" name="category_id"><option value=""><%= t('Celle de chaque photo') %></option><% it.categories.forEach(c => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %><% if (it.can('series.gerer')) { %><option value="new"><%= t('Nouvelle série (nom ci-dessous)') %></option><% } %></select>
+<% if (it.can('series.gerer')) { %>      <input type="text" name="new_category" maxlength="80" aria-label="<%= t('Nom de la nouvelle série') %>" placeholder="<%= t('Nom de la nouvelle série') %>" class="b-nouvelle"><% } %></div>
+    <div class="champ-a"><label for="b-lieu"><%= t('Lieu') %></label><input type="text" id="b-lieu" name="place" maxlength="120" placeholder="<%= t('Celui de chaque photo') %>"></div>
+    <div class="champ-a ville-l"><label for="b-ville"><%= t('Ville de la carte') %></label><input type="text" id="b-ville" name="city_label" maxlength="120" placeholder="<%= t('Celle de chaque photo') %>" autocomplete="off" data-ville><input type="hidden" name="city_id" value="" data-ville-id>
+      <ul class="ville-pop" aria-label="<%= t('Villes proposées') %>" data-ville-liste hidden></ul></div>
+    <div class="champ-a"><label for="b-date"><%= t('Date') %></label><input type="text" id="b-date" name="taken_on" maxlength="40" placeholder="<%= t('Celle de chaque photo') %>"></div>
+    <button class="btn ghost" type="submit" name="action" value="appliquer" data-bulk-apply><%= t('Appliquer aux photos cochées') %></button>
+    <p class="hint"><%= t('Rien ne change avant « Appliquer ».') %></p>
+  </div>
+</form>
+
+<nav class="chips filtre-lot" aria-label="<%= t('Filtrer le lot') %>"><a class="chip" href="<%= lotUrl %>"<%~ !it.voir ? ' aria-current="page"' : '' %>><%= N > 1 ? t('Les {n} photos', { n: N }) : t('La photo') %></a><a class="chip" href="<%= lotUrl %>&amp;voir=a-corriger"<%~ it.voir === 'a-corriger' ? ' aria-current="page"' : '' %>><%= t('À corriger') %><span class="n"><%= it.counts.fix %></span></a><a class="chip<%= it.counts.agree ? ' warn' : '' %>" href="<%= lotUrl %>&amp;voir=accord"<%~ it.voir === 'accord' ? ' aria-current="page"' : '' %>><span class="chip-st chip-st--attention"><%~ ic('attention', 12) %></span><%= t('Accord à vérifier') %><span class="n"><%= it.counts.agree %></span></a></nav>
+<% if (it.voir && !it.photos.length) { %><p class="hint"><%= it.voir === 'accord' ? t('Aucune photo n’attend de vérification d’accord.') : t('Rien à corriger : titres et dates sont là.') %></p><% } %>
+
+<form id="lot-f" action="/admin/photos/lot" method="post" novalidate data-v2-lot>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="ids" value="<%= it.ids.join(',') %>">
+  <div class="tablewrap">
+  <table class="lot">
+    <caption class="sr-only"><%= t('Les photos du lot, une ligne par photo') %></caption>
+    <colgroup><col class="col-chk"><col class="col-photo"><col class="col-titre"><col class="col-serie"><col class="col-lieu"><col class="col-date"><col class="col-etat"></colgroup>
+    <thead><tr><th scope="col"><label class="chk-l js-seul"><input class="chk" type="checkbox" checked data-tout aria-label="<%= N > 1 ? t('Cocher les {n} photos', { n: N }) : t('Cocher la photo') %>"></label></th><th scope="col"><%= t('Photo') %></th><th scope="col" id="h-titre"><%= t('Titre') %></th><th scope="col" id="h-serie"><%= t('Série') %></th><th scope="col" id="h-lieu"><%= t('Lieu') %></th><th scope="col" id="h-date"><%= t('Date') %></th><th scope="col"><%= t('État') %></th></tr></thead>
+    <tbody>
+      <!-- [html-validate-disable-block form-dup-name: les cases des lignes forment un groupe, name="ids" répété comme dans la v1 ; le serveur en reçoit la liste] -->
+<% it.photos.forEach(p => { const e = E[p.id] || {}, v = { ...p, ...(V[p.id] || {}) }; const [st, stLabel] = ETAT(p); const nTr = [p.title_en, p.title_de].filter(x => String(x || '').trim()).length;
+   const sg = (p.suggest || []).find(x => x.id !== Number(v.category_id));
+   const desc = (id, more) => [id, ...more].filter(Boolean).join(' '); %>
+      <tr data-photo="<%= p.id %>" data-url="/admin/photos/<%= p.id %>/champs" data-objet="<%= p.title %>">
+        <td class="c-chk"><label class="chk-l"><input class="chk" type="checkbox" name="ids" value="<%= p.id %>" form="bulk" checked aria-labelledby="p<%= p.id %>"></label></td>
+        <th scope="row" class="c-thumb" id="p<%= p.id %>"><% if (p.ready) { %><%~ it.picture(p, { sizes: '96px', alt: '' }) %><% } else { %><span class="ph" data-traitement="<%= p.id %>"><%= t('Traitement…') %></span><% } %><span class="fic"><%= p.source_name || p.slug %></span><span class="sr-only">, <%= p.title %></span></th>
+        <td class="c-title"><div class="cell"><span class="lb-cell" aria-hidden="true"><%= t('Titre') %></span><input type="text" id="titre-<%= p.id %>" name="title_<%= p.id %>" value="<%= v.title %>" maxlength="160" aria-labelledby="h-titre p<%= p.id %>" data-champ="title" data-label="<%= t('Titre') %>" aria-describedby="<%= desc(p.provisional ? `prov-${p.id}` : '', [e.title && `err-titre-${p.id}`]) %>"<%~ e.title ? ' aria-invalid="true"' : '' %>>
+          <p class="att" id="prov-<%= p.id %>" data-provisoire<%~ p.provisional ? '' : ' hidden' %>><%~ ic('alerte') %><%= t('Titre provisoire (nom du fichier)') %></p>
+          <details class="tr"<%~ e.title_en || e.title_de ? ' open' : '' %>><summary><%~ ic('chev') %><%= t('Anglais et allemand') %> <span class="hint">· <%= nTr === 2 ? t('2 sur 2') : nTr === 1 ? t('1 sur 2') : t('à traduire') %></span></summary><div class="cell">
+            <label><%= t('Anglais') %> <input type="text" lang="en" name="title_en_<%= p.id %>" value="<%= v.title_en || '' %>" maxlength="160" data-champ="title_en" data-label="<%= t('Titre anglais') %>"></label>
+            <label><%= t('Allemand') %> <input type="text" lang="de" name="title_de_<%= p.id %>" value="<%= v.title_de || '' %>" maxlength="160" data-champ="title_de" data-label="<%= t('Titre allemand') %>"></label></div></details></div></td>
+        <td class="c-cat"><div class="cell"><span class="lb-cell" aria-hidden="true"><%= t('Série') %></span><select id="serie-<%= p.id %>" name="category_id_<%= p.id %>" aria-labelledby="h-serie p<%= p.id %>" data-champ="category_id" data-label="<%= t('Série') %>"><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select>
+<% if (sg) { %>          <span class="sugg-l"><button class="sugg js-seul" type="button" data-accepter="<%= sg.id %>"><span class="s" aria-hidden="true">✦</span><%= t('Suggestion : {name}', { name: sg.name }) %><span class="sr-only">,</span> <span class="acc"><%= t('Accepter') %></span></button>
+            <label class="chk-ligne sans-script"><input class="chk" type="checkbox" name="accept_suggestion_<%= p.id %>" value="<%= sg.id %>"><span><span aria-hidden="true">✦ </span><%= t('Accepter la suggestion : {name}', { name: sg.name }) %></span></label></span>
+<% } %></div></td>
+        <td class="c-place"><div class="cell"><span class="lb-cell" aria-hidden="true"><%= t('Lieu') %></span><input type="text" id="lieu-<%= p.id %>" name="place_<%= p.id %>" value="<%= v.place || '' %>" maxlength="120" aria-labelledby="h-lieu p<%= p.id %>" data-champ="place" data-label="<%= t('Lieu') %>"<%~ e.place ? ` aria-invalid="true" aria-describedby="err-lieu-${p.id}"` : '' %>></div></td>
+        <td class="c-date"><div class="cell"><span class="lb-cell" aria-hidden="true"><%= t('Date') %></span><input type="text" id="date-<%= p.id %>" name="taken_on_<%= p.id %>" value="<%= v.taken_on || '' %>" maxlength="40" placeholder="<%= t('14 oct. 2026') %>" aria-labelledby="h-date p<%= p.id %>" aria-describedby="<%= desc(`lu-${p.id}`, [e.taken_on && `err-date-${p.id}`]) %>" data-champ="taken_on" data-label="<%= t('Date') %>"<%~ e.taken_on ? ' aria-invalid="true"' : '' %>>
+          <p class="lu" id="lu-<%= p.id %>" data-lu data-texte="<%= t('Lu : {date}', { date: '{date}' }) %>"><%= p.read && !e.taken_on ? t('Lu : {date}', { date: p.time ? `${p.read}, ${p.time}` : p.read }) : '' %></p></div></td>
+        <td class="c-state"><div class="etat-c"><span class="etat etat--<%= st %>"><%~ ic(st, 12) %><%= stLabel %></span><span data-etat-ligne></span><% if (p.issues.verify || p.issues.blocked) { %><a class="att" href="/admin/photos/<%= p.id %>#publication"><%~ ic('attention', 12) %><%= p.issues.blocked ? t('Accord refusé') : t('Accord à vérifier') %></a><% } %></div></td>
+      </tr>
+<% if (Object.keys(e).length) { %>      <tr class="err-ligne"><td colspan="7"><% Object.entries(e).forEach(([k, m]) => { %><p class="err" id="err-<%= k === 'title' ? 'titre' : k === 'taken_on' ? 'date' : 'lieu' %>-<%= p.id %>"><%~ ic('alerte') %><span><b><%= t('Erreur, {champ} de « {photo} » :', { champ: k === 'title' ? t('titre') : k === 'taken_on' ? t('date') : k === 'category_id' ? t('série') : t('lieu'), photo: p.title }) %></b> <%= m %><%= k === 'taken_on' ? ` ${t('Écrivez par exemple « 14 oct. 2026 » ; la date n’est pas enregistrée.')}` : '' %></span></p><% }) %></td></tr>
+<% } %>
+<% }) %>
+    </tbody>
+  </table>
+  </div>
+  <p class="sans-script"><button class="btn ghost" type="submit"><%= t('Enregistrer le lot') %></button></p>
+</form>
+<p class="suite"><%= t('Légende, filigrane et texte de remplacement : dans la fiche de chaque photo (clic sur son titre depuis la Photothèque).') %></p>

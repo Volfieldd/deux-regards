@@ -23,6 +23,7 @@ import { FeedbackError } from '../feedback.js';
 import { shareLinks, shareQr } from '../share.js';
 import { EncounterError } from '../encounters.js';
 import { safeNext } from '../auth.js';
+import { registerCarnetPages, registerCarnetFeeds, carnetContext, carnetSitemap } from './carnet-public.js';
 
 const HERO_COUNT = 5;
 const YEAR = 365 * 24 * 3600;
@@ -57,7 +58,10 @@ export default async function publicRoutes(app) {
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
   for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, codeGuard });
 
-  // Sélecteur de langue : retient le choix (seul cookie du site, posé à ce moment-là) puis ouvre la page demandée.
+  // Flux des Carnets (/carnet/flux.xml, /en/…, /de/…), hors des pages : jamais redirigés d'une langue à l'autre (B58).
+  registerCarnetFeeds(app);
+
+  // Sélecteur de langue : retient le choix (cookie de langue, posé à ce moment-là ; l'autre cookie du site public est celui des galeries privées) puis ouvre la page demandée.
   // Adresses habituelles des mentions légales en Allemagne et en anglais.
   app.get('/impressum', async (request, reply) => reply.redirect('/de/mentions-legales', 301));
   app.get('/legal-notice', async (request, reply) => reply.redirect('/en/mentions-legales', 301));
@@ -141,9 +145,10 @@ export default async function publicRoutes(app) {
     return reply.header('cache-control', 'no-store').header('x-robots-tag', 'noindex').type('image/jpeg').send(buf);
   });
 
-  // Moteurs de recherche : tout le site public, jamais l'admin ni la connexion.
+  // Moteurs de recherche : tout le site public, jamais l'admin ni la connexion. Galeries privées : /prive/ interdit (tout y
+  // répond 404 sans session) ; /g/ ne l'est pas : une page interdite ne voit jamais son « noindex » (G36, M7).
   app.get('/robots.txt', async (request, reply) => reply.type('text/plain; charset=utf-8')
-    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nDisallow: /pour-vous/\n${app.securite.enabled ? `Disallow: ${TRAP_PATH}\n` : ''}Allow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
+    .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nDisallow: /pour-vous/\nDisallow: /prive/\n${app.securite.enabled ? `Disallow: ${TRAP_PATH}\n` : ''}Allow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
 
   // Chaque page dans ses trois langues, avec les liens hreflang entre elles.
   app.get('/sitemap.xml', async (request, reply) => {
@@ -160,11 +165,13 @@ export default async function publicRoutes(app) {
       // Voyages publiés (avec au moins une photo publiée).
       ...(() => { const ids = new Set(photos.map(p => p.id)); const open = app.trips.listPublic().filter(tr => app.trips.photos(tr.id).some(p => ids.has(p.id))); return open.length ? [{ loc: '/voyages' }, ...open.map(tr => ({ loc: `/voyage/${tr.slug}` }))] : []; })(),
       { loc: '/a-propos' }, { loc: '/droits' }, { loc: '/confidentialite' }, { loc: '/mentions-legales' },
+      // Carnets (v2 appliquée seulement) : la liste et les billets publiés, dans leurs langues publiées (B69).
+      ...carnetSitemap(app),
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-    const links = loc => LANGS.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${xml(base + localize(loc, l))}"/>`).join('');
-    const body = pagesList.flatMap(u => LANGS.map(l =>
-      `  <url><loc>${xml(base + localize(u.loc, l))}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}${links(u.loc)}</url>`)).join('\n');
+    const links = (loc, langs = LANGS) => langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${xml(base + localize(loc, l))}"/>`).join('');
+    const body = pagesList.flatMap(u => (u.langs || LANGS).map(l =>
+      `  <url><loc>${xml(base + localize(u.loc, l))}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}${links(u.loc, u.langs)}</url>`)).join('\n');
     return reply.type('application/xml; charset=utf-8')
       .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${body}\n</urlset>\n`);
   });
@@ -221,14 +228,15 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   // vue dans les 30 derniers jours existait donc alors).
   const RECENT = 30 * 864e5;
   const seenLately = app.db.prepare('SELECT 1 FROM stats_pages WHERE page = ? AND day >= ? LIMIT 1').pluck();
-  const ignored = (request, champ) => {
+  // emetteur, page : les Carnets (BV-13) reprennent la même fonction avec leur émetteur (« · carnet ») et, pour ?par=, la page
+  // d'un photographe (« auteur: ») comme preuve d'une adresse ancienne.
+  const ignored = (request, champ, emetteur = 'server/routes/public.js · filtres', page = { regard: 'auteur', serie: 'serie' }[champ]) => {
     const value = request.query[champ];
     if (!app.securite.enabled || value == null || value === '') return undefined;
     const valeur = String(value);
     if (scanValue('query', `query.${champ}`, valeur)) return undefined;
-    const page = { regard: 'auteur', serie: 'serie' }[champ];
     if (page && seenLately.get(`${page}:${valeur}`, parisDay(new Date(Date.now() - RECENT)))) return undefined;
-    app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/public.js · filtres', detail: { raison: 'valeur de filtre hors liste', champ, valeur: valeur.slice(0, 60) } });
+    app.securite.emit('input_validation_fail', { request, emetteur, detail: { raison: 'valeur de filtre hors liste', champ, valeur: valeur.slice(0, 60) } });
     return undefined;
   };
   const readOrdre = request => (ORDRES.includes(request.query.ordre) ? request.query.ordre : ignored(request, 'ordre'));
@@ -305,10 +313,12 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
 
   app.get('/photo/:slug', async (request, reply) => {
     const siteName = app.siteName();
-    let filter = readFilter(request, repo.authors(), repo.categories());
-    let list = repo.publishedPhotos({ author: filter.regard, category: filter.serie, ordre: filter.ordre, lang });
-    let i = list.findIndex(p => p.slug === request.params.slug);
-    if (i === -1 && (filter.regard || filter.serie)) {
+    // Ouverte depuis un billet des Carnets (?carnet=<billet>, v2) : retour au billet, voisines du billet (MQ-12, repère 16).
+    const fromPost = carnetContext(app, request, { lang, repo, ignored, slug: request.params.slug });
+    let filter = fromPost ? { carnet: fromPost.post.slug } : readFilter(request, repo.authors(), repo.categories());
+    let list = fromPost ? fromPost.list : repo.publishedPhotos({ author: filter.regard, category: filter.serie, ordre: filter.ordre, lang });
+    let i = fromPost ? fromPost.i : list.findIndex(p => p.slug === request.params.slug);
+    if (!fromPost && i === -1 && (filter.regard || filter.serie)) {
       filter = { ordre: filter.ordre };
       list = repo.publishedPhotos({ ordre: filter.ordre, lang });
       i = list.findIndex(p => p.slug === request.params.slug);
@@ -332,7 +342,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const next = list[(i + 1) % list.length];
     return reply.render('photo', {
       ...base, siteName, filter, photo, prev, next, position: i + 1, count: list.length,
-      backUrl: `${base.galleryUrl(filter)}#galerie`,
+      backUrl: fromPost ? `${base.u(`/carnet/${fromPost.post.slug}`)}#photo-${i + 1}` : `${base.galleryUrl(filter)}#galerie`,
+      carnet: fromPost ? { title: fromPost.title, lang: fromPost.lang, href: base.u(`/carnet/${fromPost.post.slug}`) } : null,
       pageTitle: `${photo.title} · ${siteName}`,
       canonical: photoUrl(photo.slug),
       // Légende coupée à 160 caractères (au mot près) : l'auteur, le lieu et la date restent dans les aperçus de liens.
@@ -575,6 +586,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     }
     return reply.redirect(done, 303);
   });
+
+  // ---------- Carnets (v2 seulement, server/routes/carnet-public.js) ----------
+  registerCarnetPages(app, { lang, repo, base, ignored, gate, shareLimit });
 
   // « Je vous ai photographié » : page du QR des cartes « pour eux » (référence dans l'adresse) ou tapée à la main.
   // Jamais indexée ; aucune photo ni donnée d'une autre personne n'y est montrée.

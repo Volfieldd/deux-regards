@@ -1,6 +1,6 @@
 {
   "name": "site-photo",
-  "version": "1.90.0",
+  "version": "1.166.0",
   "private": true,
   "description": "Site photo de Sébastien et Julien : galerie publique et admin OIDC",
   "type": "module",
@@ -16,7 +16,8 @@
     "test": "AVIF_EFFORT=0 node --test \"test/**/*.test.js\"",
     "test:vigie": "AVIF_EFFORT=0 TEST_AVEC_VIGIE=1 node --test \"test/**/*.test.js\"",
     "e2e": "e2e/run.sh",
-    "backup": "node --env-file-if-exists=.env server/db/backup.js"
+    "backup": "node --env-file-if-exists=.env server/db/backup.js",
+    "attaques": "node scripts/attaques/index.mjs"
   },
   "dependencies": {
     "@fastify/cookie": "11.1.2",

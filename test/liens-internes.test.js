@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { setup } from './helpers.js';
 import { TRAP_PATH } from '../server/securite/piege.js';
 import { search } from '../server/geo/cities.js';
+import { billet } from './carnet-helpers.js';
 
 // Aucun lien interne vers une page introuvable (registre docs/etudes/vigie-besoins-des-briques.md, BV-5) : la Vigie
 // compte les 404 par adresse (malicious_excess_404, score d'adresse DS22) ; un lien cassé du site en ferait compter à des
@@ -56,7 +57,9 @@ function internal(raw, from, origin) {
   return { path: u.pathname, url: `${u.pathname}${u.search}` };
 }
 
-async function crawl(app, { origin }) {
+// starts : adresses de départ ; cookie : la session d'un visiteur ; follow : pages dont on lit les liens (les autres sont
+// seulement vérifiées).
+async function crawl(app, { origin, starts = ['/', '/en', '/de'], cookie = null, follow = () => true }) {
   const seen = new Map();                 // adresse → première page qui y mène
   const broken = [];
   const trapSeen = [];
@@ -71,18 +74,18 @@ async function crawl(app, { origin }) {
     seen.set(i.url, from);
     queue.push({ url: i.url, path: i.path, from, depth, kind });
   };
-  for (const start of ['/', '/en', '/de']) add(start, '/', 0, 'départ');
+  for (const start of starts) add(start, '/', 0, 'départ');
   while (queue.length) {
     assert.ok(seen.size <= MAX_URLS, `parcours borné : plus de ${MAX_URLS} adresses`);
     const { url, path, from, depth, kind } = queue.shift();
     const resource = RESOURCE.test(path) && !path.endsWith('.css');
-    const res = await app.inject({ method: resource ? 'HEAD' : 'GET', url, headers: { 'user-agent': UA, accept: 'text/html,*/*' } });
+    const res = await app.inject({ method: resource ? 'HEAD' : 'GET', url, headers: { 'user-agent': UA, accept: 'text/html,*/*', ...(cookie ? { cookie } : {}) } });
     if (res.statusCode >= 400) {                                       // 404, erreur, ou tout autre refus
       broken.push({ url, from, kind, status: res.statusCode });
       continue;
     }
     if (res.statusCode >= 300 && res.statusCode < 400) { if (res.headers.location) add(res.headers.location, url, depth, 'redirection'); continue; }
-    if (resource || OUTSIDE.test(path) || depth >= MAX_DEPTH) continue;
+    if (resource || OUTSIDE.test(path) || depth >= MAX_DEPTH || !follow(path)) continue;
     const type = String(res.headers['content-type'] || '');
     if (type.startsWith('text/css')) { for (const l of cssLinks(res.body)) add(l.url, url, depth + 1, l.kind); continue; }
     if (!type.startsWith('text/html')) continue;
@@ -92,7 +95,9 @@ async function crawl(app, { origin }) {
   return { broken, pages, urls: seen.size, trapSeen, seen };
 }
 
-// Site de démonstration avec toutes les pages facultatives ouvertes : carte, recherche, mots-clés, un voyage publié.
+// Site de démonstration avec toutes les pages facultatives ouvertes : carte, recherche, mots-clés, un voyage publié, et des
+// billets des Carnets (v2 seulement : en v1, aucune page n'y mène) : publiés, traduits, liés entre eux, à une série et au
+// voyage ; un billet retiré et un brouillon, vers lesquels aucun lien ne doit mener.
 async function world(t, version) {
   const c = await setup(t, { seeded: true });
   await c.app.ready();
@@ -110,7 +115,19 @@ async function world(t, version) {
   c.app.trips.update(trip, { intro: 'Deux jours.' });
   c.app.trips.addDays(trip, [{ author_id: ids[0].author_id, day: '2026-09-01' }, { author_id: ids[1].author_id, day: '2026-09-02' }]);
   c.db.prepare('UPDATE trips SET public = 1 WHERE id = ?').run(trip);
+  const first = await billet(c, { title: 'Lisbonne et Porto', authors: ['sebastien', 'julien'], body: `Texte.\n\nphoto:${ids[0].id}\n\n## Lisbonne\n\nphoto:${ids[1].id}\nphoto:${ids[2].id}\n\n## Porto\n\nVoir [la série](serie:1) et [le voyage](voyage:${trip}).\n\nphoto:${ids[3].id}\nphoto:${ids[4].id}\nphoto:${ids[5].id}`,
+    extra: { trip_id: trip, title_en: 'Lisbon and Porto', dek_en: 'Two days.', body_en: `Text.\n\nphoto:${ids[0].id}`, langs: ['en'] } });
+  await billet(c, { title: 'Notes d’atelier', rubrique: 'atelier', authors: ['julien'], body: `Lire [le billet](carnet:${first.id}).\n\nphoto:${ids[6].id}` });
+  const gone = await billet(c, { title: 'Billet retiré', body: `photo:${ids[7].id}` });
+  c.app.carnet.retire(gone.id, { sub: 'x', name: 'x' }, 'test');
+  await billet(c, { title: 'Brouillon', publish: false });
   c.app.publicVersion.save(version);
+  // Une galerie privée ouverte, avec un accès : aucune page publique n'y mène (G35).
+  const space = c.app.spaces.createSpace({ title: 'Galerie privée de test', closes: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10) }, { authorId: ids[0].author_id, by: 'test' });
+  c.app.spaces.addPhotos(space, ids.slice(0, 3).map(p => p.id));
+  c.app.spaces.setState(space, 'ouverte', null);
+  c.privateAccess = await c.app.spaces.createInvite(space, { label: 'Invitée', expires: new Date(Date.now() + 20 * 864e5).toISOString().slice(0, 10), favoris: '1', telecharger: '1' }, { by: 'test', request: null });
+  c.privateSpace = c.app.spaces.get(space);
   return c;
 }
 
@@ -128,6 +145,14 @@ for (const version of ['v1', 'v2']) {
     }
     assert.ok([...r.seen.keys()].some(u => u.startsWith('/media/')), 'images suivies');
     assert.ok([...r.seen.keys()].some(u => u.startsWith('/voyage/')), 'voyage suivi');
+    // Les Carnets : parcourus en v2 (liste, filtres, billets, traduction, visionneuse ?carnet=, flux), jamais en v1.
+    const carnet = [...r.seen.keys()].filter(u => /^(?:\/en|\/de)?\/carnet|[?&]carnet=/.test(u));
+    if (version === 'v2') {
+      for (const u of ['/carnet', '/en/carnet', '/de/carnet', '/carnet/lisbonne-et-porto', '/en/carnet/lisbonne-et-porto', '/carnet/notes-d-atelier', '/carnet?rubrique=atelier', '/carnet?par=julien', '/carnet/flux.xml', '/carnet/lisbonne-et-porto/partager'])
+        assert.ok(r.seen.has(u), `${u} parcourue`);
+      assert.ok(carnet.some(u => u.startsWith('/photo/') && u.includes('?carnet=lisbonne-et-porto')), 'visionneuse dans le contexte du billet');
+      assert.ok(!carnet.some(u => /billet-retire|\/carnet\/brouillon/.test(u)), 'aucun lien vers un billet retiré ou un brouillon');
+    } else assert.deepEqual(carnet, [], 'v1 : aucun lien vers les Carnets');
     assert.ok(r.pages > 50, `${r.pages} pages lues`);
     // Bien la version demandée (feuilles de style de la v2 seulement en v2).
     assert.equal([...r.seen.keys()].some(u => u.startsWith('/static/css/v2/')), version === 'v2');
@@ -135,6 +160,27 @@ for (const version of ['v1', 'v2']) {
     if (c.app.securite.enabled) assert.ok(r.trapSeen.length > 0, 'lien piège vu dans les pages');
     assert.ok(![...r.seen.keys()].some(u => u.startsWith(TRAP_PATH)));
     assert.equal((await c.app.inject(TRAP_PATH)).statusCode, 404);
+    // Les pages des galeries privées ne sont atteintes depuis aucune page publique (G35, BV-5).
+    assert.ok(![...r.seen.keys()].some(u => /^\/(?:g|prive)\//.test(u)), 'aucun lien public vers /g/ ni /prive/');
     t.diagnostic(`${version} : ${r.pages} pages, ${r.urls} adresses`);
   });
 }
+
+// BV-5 étendu (registre de la Vigie, prérequis des galeries privées) : avec une session d'invité, chaque lien des pages
+// /g/ et /prive/ (vues, photos, téléchargements permis, pied de page) répond sans 404 ; le lien piège n'est pas suivi.
+test('galerie privée : avec la session d’un invité, aucun lien de ses pages vers une 404 (BV-5 étendu)', async t => {
+  const c = await world(t, 'v1');
+  const origin = new URL(c.config.publicUrl).origin;
+  const { token, password } = c.privateAccess;
+  const enter = await c.app.inject({ method: 'POST', url: `/g/${token}`, headers: { 'content-type': 'application/x-www-form-urlencoded', origin }, payload: `password=${password}` });
+  assert.equal(enter.statusCode, 303);
+  const cookie = [].concat(enter.headers['set-cookie']).map(x => x.split(';')[0]).find(x => x.includes('visiteur='));
+  const pid = c.privateSpace.public_id;
+  const r = await crawl(c.app, { origin, starts: [`/prive/${pid}`, `/prive/${pid}?vue=favoris`, `/g/${token}`], cookie, follow: p => /^\/(?:g|prive)\//.test(p) });
+  assert.equal(r.broken.length, 0, r.broken.map(b => `${b.status} ${b.url} (${b.kind}, depuis ${b.from})`).join('\n'));
+  const seen = [...r.seen.keys()];
+  for (const re of [new RegExp(`^/prive/${pid}/photo/3$`), new RegExp(`^/prive/${pid}/m/`), new RegExp(`^/prive/${pid}/telecharger/1/web$`), /^\/confidentialite$/, /^\/mentions-legales$/])
+    assert.ok(seen.some(u => re.test(u)), `${re} suivie`);
+  assert.ok(!seen.some(u => u.startsWith(TRAP_PATH)));
+  assert.ok(!seen.some(u => u.startsWith('/langue/')), 'aucun sélecteur /langue/ sur ces pages (G37)');
+});

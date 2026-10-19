@@ -1,0 +1,56 @@
+<%
+  // Textes d'admin-v2.js, traduits par le serveur (server/admin-i18n) : le script les lit dans ce bloc de données
+  // (type application/json : jamais exécuté, la CSP n'a rien à autoriser). La clé est le texte français.
+  const t = it.t;
+  // tk(clé) : une clé du dictionnaire et sa traduction (test/langues-admin.test.js lit ces appels comme ceux de t).
+  const tk = k => [k, t(k)];
+  const out = Object.fromEntries([
+    tk('Défaire'), tk('Fermer'), tk('Réessayer'), tk('Annuler'), tk('Enregistré à {h}'), tk('{n} champ non enregistré : {champs}'),
+    tk('{n} champs non enregistrés : {champs}'), tk('Enregistrement…'), tk('« {champ} » enregistré.'), tk('« {champ} » rétabli.'),
+    tk('Erreur : {msg}'), tk('Réseau coupé : rien n’est enregistré. Réessayez quand le réseau revient.'),
+    tk('Session expirée : reconnectez-vous dans un nouvel onglet, puis réessayez ici.'), tk('« {champ} » de « {photo} »'),
+    tk('Modification défaite.'), tk('Défaire impossible : {msg}'), tk('Erreur {status}'), tk('Aucun résultat pour « {q} ».'), tk('{n} résultats'),
+    tk('1 résultat'), tk('Chercher « {q} » dans l’aide'), tk('Aller à'), tk('Actions'), tk('Photos'), tk('Séries'), tk('Réglages'), tk('{n} photos'),
+    tk('{n} photo'), tk('brouillon'), tk('publiée'), tk('Basculer en mode clair / sombre'), tk('Voir le site public'), tk('Importer des photos'),
+    tk('Revenir à l’admin v1'), tk('Passer en mode clair'), tk('Passer en mode sombre'), tk('Traitement : {n} photos'), tk('Traitement : {n} photo'),
+    tk('Pour les {n} photos cochées :'), tk('Pour la photo cochée :'),
+    tk('Aucune photo cochée : cochez-en une pour changer sa série, son lieu, sa ville ou sa date.'), tk('Appliquer aux {n} photos'),
+    tk('Appliquer à la photo'), tk('Cocher les {n} photos'), tk('Quitter sans enregistrer ?'),
+    tk('Ce qui n’est pas enregistré sera perdu : {champs}. Le reste l’est déjà.'), tk('Quitter quand même'), tk('Rester'), tk('Allumé'),
+    tk('Éteint'), tk('Signature effacée.'), tk('Envoi…')
+  ]);
+  // Pages proposées par la palette (Ctrl K), avec leurs synonymes (MQ-07, état 16) : seulement celles que le compte peut ouvrir.
+  const can = it.can || (() => true);
+  const PAGES = [
+    [t('Aujourd’hui'), '/admin', 'admin.acceder', t('tableau de bord, accueil, à faire')],
+    [t('Photothèque'), '/admin/photos', 'photos.voir', t('photos, images, galerie')],
+    [t('Photos à finir'), '/admin/photos?statut=afinir', 'photos.voir', t('brouillons, titres provisoires')],
+    [t('Séries'), '/admin/series', 'series.gerer', t('thèmes, catégories')],
+    [t('Sorties'), '/admin/sorties', 'sorties.voir', t('journées de prise de vue')],
+    [t('Voyages'), '/admin/voyages', 'sorties.voir', t('carnet de route')],
+    [t('Personnes photographiées'), '/admin/personnes', 'personnes.voir', t('rencontres, accords, droit à l’image, RGPD')],
+    [t('Signalements'), '/admin/signalements', 'signalements.traiter', t('plaintes, retraits')],
+    [t('App de terrain'), '/admin/terrain', 'terrain.app', t('cartes d’accord, QR, téléphone')],
+    [t('Nouvelle rencontre'), '/admin/rencontre', 'terrain.app', t('accord, signature')],
+    [t('À valider'), '/admin/a-valider', 'photos.publier', t('propositions, modération, publier')],
+    [t('Site public'), '/admin/site', 'site.textes', t('textes, accroche, à propos, ouverture, carte du monde')],
+    [t('Carnets'), '/admin/carnet', 'carnet.voir', t('billets, blog, récits')],
+    [t('Galeries privées'), '/admin/galeries', 'galeries.voir', t('clients, accès, mot de passe')],
+    ['Instagram', '/admin/instagram', 'instagram.voir', t('réseaux sociaux, file de publication')],
+    [t('Comptes et rôles'), '/admin/comptes', 'comptes.gerer', t('utilisateurs, droits, permissions')],
+    [t('Circuit de publication'), '/admin/circuit', 'circuit.regler', t('validation, modérateur')],
+    [t('Journal'), '/admin/journal', 'journal.voir', t('historique, audit, qui a fait quoi')],
+    [t('Statistiques'), '/admin/statistiques', 'statistiques.voir', t('visiteurs, audience, vues')],
+    [t('Identité et apparence'), '/admin/apparence', 'site.apparence', t('thème, logo, marque, emblème, version du site')],
+    [t('Filigrane et EXIF'), '/admin/images', 'site.filigrane', t('watermark, métadonnées, signature des images')],
+    [t('Mentions légales'), '/admin/droits#mentions', 'reglages.droits', t('impressum, éditeur, directeur de la publication, hébergeur')],
+    [t('Droits et licences'), '/admin/droits#droits', 'reglages.droits', t('droits d’utilisation, licence, reproduction')],
+    [t('Confidentialité'), '/admin/droits#confidentialite', 'reglages.droits', t('RGPD, données personnelles, vie privée')],
+    [t('Photographes'), '/admin/auteurs', 'photographes.gerer', t('auteurs, biographie, préfixe des cartes')],
+    [t('Assistants d’analyse'), '/admin/reglages/assistants', 'series.propositions', t('intelligence artificielle, IA, suggestions, description automatique, mots-clés')],
+    [t('Mon compte'), '/admin/compte', 'admin.acceder', t('e-mail des avis, version de l’admin, v1, v2')],
+    [t('Aide'), '/admin/aide', 'admin.acceder', t('mode d’emploi, documentation, questions')],
+    [t('Nouveautés'), '/admin/nouveautes', 'admin.acceder', t('versions, changements')],
+  ].filter(([, , perm]) => can(perm)).map(([label, href, , also]) => ({ label, href, also }));
+%>
+<script type="application/json" id="v2-textes"><%~ JSON.stringify({ t: out, pages: PAGES }).replace(/</g, '\\u003c') %></script>

@@ -16,11 +16,10 @@
 import { ACTIONS, LABELS, ROLES, rank } from '../droits.js';
 import { IDLE, ABSOLUTE, FRESH } from '../sessions.js';
 import { dateHeure, heure, ilYa, nombre } from '../format.js';
+import { lire, pluriel } from '../lexique.js';
 
 const F = ' ', N = ' ';
 const D = `${F}: `;
-const pluriel = (n, un, plusieurs = `${un}s`) => (n > 1 ? plusieurs : un);
-const lire = s => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 const propre = (v, max = 200) => String(v ?? '').replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').trim().slice(0, max);
 
 export const JOURNAL_MAX = 40;       // lignes du journal des droits
@@ -113,7 +112,8 @@ function ligneJournal(r, nomDe) {
   const sec = [];
   let morceaux;
   if (r.type === 'vigie_console_droits' && d.objet === 'attribution') {
-    const parSub = propre(String(r.emetteur || '').replace(/^console · /, ''));
+    // Auteur : identifiant dans le détail (par_sub) ou en fin d'émetteur « console · Nom (sub) » ; ancien format : le sub seul.
+    const parSub = propre(d.par_sub || (/\(([^()]+)\)$/.exec(String(r.emetteur || '')) || [])[1] || String(r.emetteur || '').replace(/^console · /, ''));
     morceaux = [...qui(parSub, nomDe(parSub)), { t: ' change l’attribution de ' }, ...p, { t: `${D}${roleOu(d.avant, 'aucune')} → ${roleOu(d.apres, 'aucune')}.` }];
     sec.push({ t: `droit effectif${D}${roleOu(d.effectif, 'aucun accès')}` });
   } else if (r.type === 'vigie_console_droits') {
@@ -235,5 +235,4 @@ export function register(app, ctx) {
     const d = req.moi.role === 'admin' ? vueAdmin({ db, rights, now, moi }) : vueSoi({ rights, now, moi });
     return view(reply, req, 'droits', { page: 'droits', titre: d.admin ? 'Droits · Vigie' : 'Vos droits · Vigie', d, identite });
   });
-  return ['/droits'];
 }

@@ -1,0 +1,15 @@
+<%
+  // Textes de review-v2.js (À valider), traduits par le serveur : un bloc de données, jamais exécuté (CSP), réuni par admin-v2.js à ceux de
+  // views/admin/v2/_textes.eta. La clé est le texte français.
+  const t = it.t;
+  const tk = k => [k, t(k)];
+  const out = Object.fromEntries([
+    tk('{n} photos cochées'), tk('{n} photo cochée'), tk('Aucune photo cochée.'), tk('Valider les photos cochées'),
+    tk('Programmer les {n} photos…'), tk('Programmer la photo…'), tk('Publier les {n} photos…'), tk('Publier la photo…'),
+    tk('Cochez au moins une photo.'), tk('Choisissez une date et une heure.'), tk('Programmer les {n} photos le {date} ?'),
+    tk('Programmer la photo le {date} ?'), tk('Publier les {n} photos ?'), tk('Publier « {title} » ?'),
+    tk('Elles seront en ligne tout de suite ; leurs photographes sont prévenus.'), tk('titre provisoire'), tk('Valider quand même'),
+    tk('Programmer les {n} photos'), tk('Programmer la photo'), tk('Publier les {n} photos'), tk('Publier la photo')
+  ]);
+%>
+<script type="application/json" id="v2-textes-page"><%~ JSON.stringify({ t: out }).replace(/</g, '\\u003c') %></script>

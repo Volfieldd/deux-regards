@@ -1,0 +1,548 @@
+# Galeries privées et Carnets (registre des briques, docs/etudes/vigie-besoins-des-briques.md : BV-12, BV-14, BV-16 à
+# BV-19, BV-21 pour les billets, BV-22, BV-23, BV-25 ; décisions du propriétaire, section « Tranché », qui l'emportent).
+# Événements tels que les émettent les PR #149 (galeries privées : server/routes/prive.js, server/routes/galeries.js,
+# server/spaces.js) et #151 (Carnets : server/routes/carnet.js, server/carnet-markdown.js).
+#   - Un invité n'est jamais un compte (G4) : ses règles groupent par detail.acces (l'accès, son numéro), par ip ou par
+#     reference (« visiteur:<12 signes> », identité technique de la session visiteur), jamais par sub.
+#   - Une alerte sur un accès vise l'entité « site » de clé « acces:<numéro> » (préfixe de l'entité, vigie/sigma.js).
+#   - Mode « alerter » partout le premier mois (Tranché 5) ; seule acces_pays_multiples porte une réponse automatique
+#     (suspendre_acces), appliquée quand on la passera en mode « bloquer ».
+
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-16 — Force brute du mot de passe d'un accès
+title: Mot de passe d'une galerie privée refusé
+name: galerie_refus
+id: 2269ea50-9135-4544-98a2-1f86be105b6a
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: authn_login_fail
+    composant: site · public
+    detail.portail: galerie_privee
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Mots de passe de galeries privées refusés en série depuis une adresse
+name: galerie_echecs_adresse
+id: e8116304-a447-41bb-901f-fc5607252eba
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  10 refus en 15 minutes (registre BV-16) : bien au-delà des fautes de frappe d'une invitée (le site pose une pause d'une
+  minute au 5e refus de suite) ; le site limite déjà l'adresse à 20 essais par 15 minutes. Des points sur l'adresse,
+  comme enumeration_jetons (DS16).
+tags: [attack.credential_access, attack.t1110.001]
+correlation:
+  type: event_count
+  rules: [galerie_refus]
+  group-by: [ip]
+  timespan: 15m
+  condition: { gte: 10 }
+level: medium
+vigie: { cas: DS16, entite: { kind: ip, champ: ip }, points: 3 }
+---
+title: Mot de passe d'un même accès essayé depuis plusieurs adresses (le lien a fui)
+name: galerie_essais_repartis
+id: 0505790f-6e25-438c-bbd9-7b8b4c3dde58
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  3 adresses en 1 h sur le même accès (registre BV-16, Tranché 3 : l'une des deux seules alertes des essais). Le lien est
+  personnel et le mot de passe ne voyage pas avec lui : des refus venus de trois adresses disent que le lien circule.
+tags: [attack.credential_access, attack.t1110.004]
+correlation:
+  type: value_count
+  rules: [galerie_refus]
+  group-by: [detail.acces]
+  timespan: 1h
+  condition: { gte: 3, field: ip }
+level: high
+vigie: { cas: DS31, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter }
+---
+title: Accès d'une galerie privée suspendu après 30 refus
+name: galerie_suspendue
+id: b88fe74d-f7bc-4e02-973e-f334c80d400f
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Tranché 3 : la Vigie n'alerte qu'à la suspension, une pause reste un contexte. Deux formes acceptées tant que la PR des
+  galeries n'émet pas encore le vrai type : authn_login_lock, ou authn_login_disabled avec detail.type_attendu.
+tags: [attack.credential_access, attack.t1110]
+detection:
+  verrou:
+    type: authn_login_lock
+  verrou_provisoire:
+    type: authn_login_disabled
+    detail.type_attendu: authn_login_lock
+  suspension:
+    detail.portail: galerie_privee
+    detail.palier: suspension
+  condition: (verrou or verrou_provisoire) and suspension
+level: medium
+vigie: { cas: DS16, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter }
+---
+title: File des calculs de mot de passe des galeries saturée
+name: galerie_scrypt
+id: 6a0de120-b9ee-4d3b-9d9e-0bc478e36649
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: excess_rate_limit_exceeded
+    detail.limite: mot_de_passe_global
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Calculs de mot de passe des galeries saturés pendant plusieurs minutes (déni de service)
+name: galerie_scrypt_sature
+id: fb3e7486-3233-48d6-9c38-ee4c3b2f4358
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Le site signale la saturation une fois par minute au plus : 5 en 10 minutes, c'est la moitié du temps sans calcul
+  possible pour les invités (registre BV-16, DS21).
+tags: [attack.impact, attack.t1499]
+correlation:
+  type: event_count
+  rules: [galerie_scrypt]
+  timespan: 10m
+  condition: { gte: 5 }
+level: medium
+vigie: { cas: DS21, entite: { kind: site, valeur: mot_de_passe_global }, source_unique: true, mode: alerter }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-18 — Accès qui fuit : entrées depuis de nombreux réseaux ou pays (réseau seul et pays du site, J6)
+title: Entrée dans une galerie privée (mot de passe accepté)
+name: galerie_entree
+id: 8ebc47c2-1fcf-4c0f-9e96-701985094cd0
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: session_created
+    detail.portail: galerie_privee
+  condition: selection
+level: informational
+vigie: { signal: false }
+---
+title: Entrée par un accès personnel
+name: galerie_entree_personnelle
+id: 48d3849c-a7b8-4779-92e3-d60fac856eea
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: session_created
+    detail.portail: galerie_privee
+    detail.groupe: false
+  condition: selection
+level: informational
+vigie: { signal: false }
+---
+title: Entrée par un lien de groupe
+name: galerie_entree_groupe
+id: 839215fe-2260-4bc2-a709-bc839f05e7c3
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: session_created
+    detail.portail: galerie_privee
+    detail.groupe: true
+  condition: selection
+level: informational
+vigie: { signal: false }
+---
+title: Accès personnel ouvert depuis 4 réseaux en 7 jours
+name: acces_reseaux_multiples
+id: 99bbab4f-f46d-44c2-8751-a7ed03ced664
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Tranché 4 : le site signale à 3 appareils sans refuser ; la Vigie alerte à 4 réseaux en 7 jours. Des tiers qui voient
+  une galerie où l'on reconnaît des personnes : violation possible (étude § 2.7).
+tags: [attack.initial_access, attack.t1078, attack.collection]
+correlation:
+  type: value_count
+  rules: [galerie_entree_personnelle]
+  group-by: [detail.acces]
+  timespan: 7d
+  condition: { gte: 4, field: ip_net }
+level: medium
+vigie: { cas: DS18, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter }
+---
+title: Lien de groupe ouvert depuis 10 réseaux en 7 jours
+name: acces_groupe_reseaux_multiples
+id: d3e0e5e8-9c0a-4d0f-a0d8-691a776f4704
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: Tranché 6 — un lien de groupe est permis et signalé, les seuils de BV-18 relevés (10 réseaux).
+tags: [attack.initial_access, attack.t1078, attack.collection]
+correlation:
+  type: value_count
+  rules: [galerie_entree_groupe]
+  group-by: [detail.acces]
+  timespan: 7d
+  condition: { gte: 10, field: ip_net }
+level: medium
+vigie: { cas: DS18, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter }
+---
+title: Accès personnel ouvert depuis 3 pays en 24 heures (voyage impossible d'un accès)
+name: acces_pays_multiples
+id: 7aff7600-fba8-4c96-a586-898298a752d3
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Tranché 5 : décision suspendre_acces, en mode « alerter » le premier mois, puis « bloquer » pour cette seule règle.
+  Pays tel que le site le lit (detail.pays, Cloudflare derrière TRUST_PROXY) ; sans lui, la règle ne voit rien.
+tags: [attack.initial_access, attack.t1078]
+correlation:
+  type: value_count
+  rules: [galerie_entree_personnelle]
+  group-by: [detail.acces]
+  timespan: 24h
+  condition: { gte: 3, field: detail.pays }
+level: high
+vigie: { cas: DS3, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter, reponse: suspendre_acces }
+---
+title: Lien de groupe ouvert depuis 5 pays en 24 heures
+name: acces_groupe_pays_multiples
+id: 75d8b835-b4a3-4e48-b2ab-64b442d73f82
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Seuil proposé (le registre ne le fixe pas) : un lien de groupe circule par construction (une famille, des invités
+  venus de l'étranger) ; 3 pays en 24 h y sont ordinaires, 5 ne le sont plus. Même réponse que pour un accès personnel.
+tags: [attack.initial_access, attack.t1078]
+correlation:
+  type: value_count
+  rules: [galerie_entree_groupe]
+  group-by: [detail.acces]
+  timespan: 24h
+  condition: { gte: 5, field: detail.pays }
+level: high
+vigie: { cas: DS3, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter, reponse: suspendre_acces }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-19 — Téléchargement en masse (seuls les seuils et les archives émettent : une ligne par photo ferait du volume)
+title: Limite de téléchargements ou d'archives d'un accès atteinte (siphonage)
+name: telechargements_en_masse
+id: f68ea402-176d-42fc-96a7-681fbdee3464
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Le site émet à la 51e photo téléchargée en 1 h par un accès, ou à la 4e archive du jour (3 par jour, G46) : une
+  invitée ordinaire n'y arrive pas (48 photos dans une galerie type, une archive suffit).
+tags: [attack.collection, attack.exfiltration, attack.t1530]
+detection:
+  selection:
+    type: excess_rate_limit_exceeded
+    detail.portail: galerie_privee
+    detail.limite: [telechargements, archives]
+  condition: selection
+level: medium
+vigie: { cas: DS15, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter }
+---
+title: Entrée depuis un nouvel appareil (au-delà du premier)
+name: galerie_nouvel_appareil
+id: 8a835e90-d913-4e80-af15-637a90a2eb5c
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: session_created
+    detail.portail: galerie_privee
+    detail.nouvel_appareil: true
+    detail.appareil_n|gte: 2
+  condition: selection
+level: informational
+vigie: { signal: false }
+---
+title: Nouvel appareil sur un accès puis téléchargement en masse dans l'heure
+name: acces_nouvel_appareil_puis_siphonage
+id: ab7eb5f4-fb31-4732-b168-5ec932099020
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Corrélation de BV-18 et BV-19. « Nouveau réseau » n'est pas dans l'événement (le site n'envoie qu'un réseau par
+  entrée) : le site dit le nouvel appareil, et le premier appareil d'un accès n'en est pas un (c'est l'invitée qui
+  arrive). Une archive seule n'y entre pas : ouvrir sur le téléphone puis télécharger l'archive sur l'ordinateur est le
+  parcours ordinaire ; seule une limite atteinte compte.
+tags: [attack.collection, attack.exfiltration, attack.t1530, attack.t1078]
+correlation:
+  type: temporal
+  rules: [galerie_nouvel_appareil, telechargements_en_masse]
+  group-by: [detail.acces]
+  timespan: 1h
+level: high
+vigie: { cas: DS18, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-22 — Accès gardé après révocation (cookie copié, ancien lien conservé)
+title: Accès retiré ou lien remplacé encore présenté
+name: acces_apres_revocation
+id: 3606dc54-69a5-4cca-a1ac-d359679d4e4d
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Le site refuse déjà ; l'alerte dit que l'accès retiré est encore tenté, souvent signe d'une fuite à instruire
+  (procédure de violation, docs/wiki/RGPD.md § 4). Gravité de l'événement : « haut » quand réseau et navigateur
+  diffèrent de l'entrée d'origine. cookie_rejoue (10-preuves.yml) exige un sub : il ne la double pas.
+tags: [attack.credential_access, attack.t1539, attack.t1550.004]
+detection:
+  selection:
+    type: session_use_after_expire
+    composant: site · public
+    detail.portail: galerie_privee
+  condition: selection
+level: medium
+vigie: { cas: DS1, entite: { kind: site, champ: detail.acces, prefixe: 'acces:', sinon: galerie_privee }, source_unique: true, gravite: evenement, mode: alerter }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-25 — CSRF d'un invité : corrélation sœur de csrf_repetes (20-connexion.yml), groupée par la session visiteur
+title: Échec CSRF d'un invité
+name: csrf_invite
+id: 6a50ef76-acd4-456d-b5e7-d0fc4a643838
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: authz_csrf_fail
+    composant: site · public
+    reference|startswith: 'visiteur:'
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Échecs CSRF répétés pour une session d'invité
+name: csrf_repetes_invite
+id: 9e94a6ef-2dff-43ce-88f9-cb03f0029697
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: Même seuil que pour un compte (3 en 1 h) ; points sur la session visiteur, comme csrf_repetes.
+tags: [attack.t1185]
+correlation:
+  type: event_count
+  rules: [csrf_invite]
+  group-by: [reference]
+  timespan: 1h
+  condition: { gte: 3 }
+level: medium
+vigie: { cas: DS14, entite: { kind: session, champ: reference }, points: 3 }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-23 — Accès donnés, élargis ou retirés dans l'admin (un seul point d'émission : server/spaces.js)
+title: Accès créé ou lien renouvelé
+name: acces_prive_ouvert
+id: cf46d311-4146-4c06-b05a-49c3ded543d5
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: privacy_exposure_changed
+    detail.objet: acces_prive
+    detail.action: [cree, nouveau_lien]
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Accès de galeries privées créés en série par un compte (5 en 1 h)
+name: acces_crees_en_masse
+id: 2f95a3af-e11a-418f-b5c1-1b76a79b0012
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Une séance donne quelques accès, rarement plus de trois d'un coup ; un compte volé qui ouvre des galeries à des tiers en
+  crée à la suite (registre BV-23 : 5 en 1 h).
+tags: [attack.collection, attack.t1213]
+correlation:
+  type: event_count
+  rules: [acces_prive_ouvert]
+  group-by: [sub]
+  timespan: 1h
+  condition: { gte: 5 }
+level: medium
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: Accès débloqué
+name: acces_debloque
+id: 5ead33ef-a54c-4732-abba-50bc31063684
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: privacy_exposure_changed
+    detail.objet: acces_prive
+    detail.action: debloque
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Accès débloqué dans les 24 heures qui suivent sa suspension
+name: acces_debloque_apres_suspension
+id: 10dffef1-9bdc-4d64-8b49-b4fc24eb390b
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Après 30 refus, débloquer sans changer le mot de passe rend la main à qui essayait (registre BV-23, DS16 et DS23) ;
+  « Nouveau mot de passe… », le remède conseillé (G10), n'y entre pas.
+tags: [attack.persistence, attack.credential_access, attack.t1110]
+correlation:
+  type: temporal
+  rules: [galerie_suspendue, acces_debloque]
+  group-by: [detail.acces]
+  timespan: 24h
+level: medium
+vigie: { cas: DS16, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: Accès créé, élargi, prolongé ou lien renouvelé
+name: acces_prive_elargi
+id: 48f750a7-7510-4c93-9297-1040d6f370ef
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: privacy_exposure_changed
+    detail.objet: acces_prive
+    detail.action: [cree, droits_elargis, prolonge, nouveau_lien]
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Accès créé ou élargi dans l'heure qui suit une session reprise depuis un autre appareil
+name: acces_apres_session_reprise
+id: 53b424f2-6bd9-40de-9551-375828ae195b
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.persistence, attack.collection, attack.t1078]
+correlation:
+  type: temporal
+  rules: [session_autre_appareil, acces_prive_elargi]
+  group-by: [sub]
+  timespan: 1h
+level: high
+vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: Accès donné ou prolongé pour plus de 90 jours
+name: acces_longue_echeance
+id: 74f36be2-8846-4a1e-b6fc-769be5013ab6
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: Tranché 2 — 30 jours par défaut, 6 mois au plus ; la Vigie signale en « bas » au-delà de 90 jours.
+tags: [attack.persistence, attack.t1098]
+detection:
+  selection:
+    type: privacy_exposure_changed
+    detail.objet: acces_prive
+    detail.action: [cree, prolonge]
+    detail.echeance_jours|gt: 90
+  condition: selection
+level: low
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-14 — Écriture hors portée (billets, galeries, accès, voyages) : l'interface ne montre jamais l'objet de l'autre
+title: Écriture sur l'objet d'un autre photographe (hors portée)
+name: ecriture_hors_portee
+id: 82901194-528a-4afd-bcb5-ba097cea8540
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Une consultation hors portée reste dans exploration_droits (10 en 10 minutes, DS10) ; une écriture ne vient pas d'un
+  clic (logique de DS12), elle ouvre l'alerte d'elle-même. Émetteurs : routes/carnet.js, routes/galeries.js,
+  routes/prive.js (vue équipe) et routes/voyages.js, détail { raison: hors portée, objet, id, ecriture }.
+tags: [attack.privilege_escalation, attack.t1078]
+detection:
+  selection:
+    type: authz_fail
+    detail.raison: hors portée
+    detail.ecriture: true
+  condition: selection
+level: medium
+vigie: { cas: DS10, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-12 — Construction active neutralisée par le rendu d'un billet (« moyen » ; « bas » pour du HTML inoffensif ou une
+# image externe, gardé pour l'enquête sans alerte)
+title: Construction active neutralisée dans un billet (script, attribut on…, javascript:, data:)
+name: billet_construction_active
+id: 3726b765-ecad-41f6-a87a-4b800000c90a
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Le rendu (server/carnet-markdown.js) a neutralisé une construction active à l'enregistrement, la proposition, la
+  publication ou au rétablissement d'une version (jamais à l'aperçu) : XSS stocké tenté par un compte volé, ou par une
+  traduction collée.
+tags: [attack.initial_access, attack.execution, attack.t1189, attack.t1059.007]
+detection:
+  selection:
+    type: malicious_input
+    detail.objet: billet
+    severity: [moyen, haut, critique]
+  condition: selection
+level: medium
+vigie: { cas: DS11, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+title: Construction active dans un billet dans l'heure qui suit une session reprise depuis un autre appareil
+name: billet_apres_session_reprise
+id: 07d7f4bd-da57-4bca-97bf-d73c91e37c1e
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.persistence, attack.execution, attack.t1078]
+correlation:
+  type: temporal
+  rules: [session_autre_appareil, billet_construction_active]
+  group-by: [sub]
+  timespan: 1h
+level: high
+vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# BV-21 appliqué aux billets (Tranché 10 : une corrélation à part, 3 billets en 1 h, plutôt que 20 en 10 minutes)
+title: Billet en ligne changé (publié, modifié, retiré, republié)
+name: billet_en_ligne_change
+id: 29f9a789-64b4-4e50-8316-b84fa433559d
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: config_public_changed
+    detail.objet: textes_publics
+    detail.champs|startswith: 'posts.'
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Billets en ligne réécrits ou retirés en série par un compte (défacement, 3 en 1 h)
+name: billets_modifies_en_masse
+id: fac02f39-7835-4758-99ab-252f682a21fd
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Un geste du site (detail.objet textes_publics) compte une fois, quel que soit le nombre de champs ou de langues qu'il
+  change : on compte les événements distincts (champ id), pas detail.nombre, qui pèserait une traduction en trois langues
+  comme trois billets. Deux billets par mois sont annoncés (D17). Une publication programmée (sub nul) n'est rattachée à
+  aucun compte.
+tags: [attack.impact, attack.t1491.001]
+correlation:
+  type: value_count
+  rules: [billet_en_ligne_change]
+  group-by: [sub]
+  timespan: 1h
+  condition: { gte: 3, field: id }
+level: medium
+vigie: { cas: DS9, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }

@@ -1,0 +1,14 @@
+<% /* Pied réduit des galeries privées (MQ-16, MQ-17 : .sf--reduit) : la marque, les mentions légales et la confidentialité,
+      dans la langue de la page. Le lien piège de la Vigie (it.trapLink), comme sur toutes les pages : caché, hors du clavier
+      et des lecteurs d'écran (views/v2/_pied.eta). */ %>
+<% const P = it.P; %>
+<footer class="sf sf--reduit wrap">
+  <div class="sf-in">
+    <p class="sf-marque"><b><%= it.siteName %></b></p>
+    <ul>
+      <li><a href="<%= it.u('/mentions-legales') %>"><%= P.legal %></a></li>
+      <li><a href="<%= it.u('/confidentialite') %>"><%= P.privacy %></a></li>
+    </ul>
+  </div>
+<% if (it.trapLink) { %>  <a href="<%= it.trapLink %>" rel="nofollow" hidden tabindex="-1" aria-hidden="true">archives</a>
+<% } %></footer>

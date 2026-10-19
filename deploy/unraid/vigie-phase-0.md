@@ -207,7 +207,7 @@ VIGIE_ACCESS_AUD=<Application Audience (AUD) Tag>
 VIGIE_ADMIN_SUBS=<sub Zitadel des deux administrateurs, séparés par une virgule>
 ```
 
-Une valeur par ligne, rien d'autre après le `=` (pas de commentaire en fin de ligne). Le **Client Secret** va dans un fichier, jamais dans `vigie.env` : `VIGIE_SECRETS_DIR/console-secret` (celui de « Console Vigie », pas de « Cloudflare Access » ; une ligne, `chmod 600`, propriétaire 99:100). Le sub d'un compte se lit dans Zitadel (**Users →** le compte, champ *ID*). La console exige aussi la lecture des événements : `VIGIE_ZITADEL_ISSUER=https://<instance>.zitadel.cloud` décommenté dans `vigie.env` et la clé dans `VIGIE_SECRETS_DIR/zitadel.json` (étape 1.3) ; elle relit les rôles `vigie.*` toutes les 5 minutes par ce compte de service. Sans eux, la Vigie refuse de démarrer : « La console exige VIGIE_ZITADEL_ISSUER et le compte de service ».
+Une valeur par ligne, rien d'autre après le `=` (pas de commentaire en fin de ligne). Le **Client Secret** va dans un fichier, jamais dans `vigie.env` : `VIGIE_SECRETS_DIR/console-secret` (celui de « Console Vigie », pas de « Cloudflare Access » ; une ligne, `chmod 600`, propriétaire 99:100). Le sub d'un compte se lit dans Zitadel (**Users →** le compte, champ *ID*). La console exige aussi la lecture des événements : `VIGIE_ZITADEL_ISSUER=https://<instance>.zitadel.cloud` décommenté dans `vigie.env` et la clé dans `VIGIE_SECRETS_DIR/zitadel.json` (étape 1.3) ; elle relit les rôles `vigie.*` toutes les 5 minutes par ce compte de service. Chaque relecture compte deux requêtes dans le quota mensuel de l'API de Zitadel Cloud (offre gratuite : 5 000) ; la Vigie compte ce qu'elle consomme et prévient à 80 % (wiki, « Quota de l'API de Zitadel Cloud »). Sans eux, la Vigie refuse de démarrer : « La console exige VIGIE_ZITADEL_ISSUER et le compte de service ».
 
 Première connexion : vérifier que la console vous laisse entrer avec la clé d'accès. Un refus « clé d'accès exigée » veut dire que le jeton ne porte pas `mfa` dans `amr` : revoir l'étape 1.1, et me transmettre la ligne `vigie_console_refus` du journal (`docker exec nicephos-vigie node vigie/cli.js console`), qui donne le contenu de `amr`. Autres symptômes (« Host Error », 502, « User email was not returned », « Connexion refusée ») : wiki [Vigie, Dépannage](https://github.com/Volfieldd/deux-regards/wiki/Vigie#dépannage).
 
@@ -223,17 +223,27 @@ au lieu de `(http.host ne "www.nicephos.art")`. Le reste de la règle ne change 
 
 Vérifier : `curl -sI https://nicephos.art/` → `301` vers `www` ; `curl -sI https://vigie.nicephos.art/` → `302` vers la connexion Cloudflare Access.
 
-### 3.4 Jeton d'API pour la liste (phase E)
+### 3.4 Liste des adresses bloquées chez Cloudflare (phase E3, facultative)
 
-**My Profile → API Tokens → Create Token → Custom token** :
+La Vigie recopie ses blocages de tout le site de 24 h et plus dans une liste d'adresses de votre compte Cloudflare ; une règle du pare-feu bloque cette liste avant tout le reste (le Worker de bordure n'est même pas appelé : son quota gratuit est épargné, et le blocage tient si le Worker est coupé).
 
-- nom : « Vigie : liste des adresses bloquées » ;
-- *Permissions* : **Account → Account Filter Lists → Edit**, rien d'autre ;
-- *Account Resources* : votre compte seulement ;
-- *Client IP Address Filtering* : l'adresse publique d'Unraid, si elle est fixe ;
-- *TTL* : un an.
+1. **Le jeton de la bordure** (celui de `VIGIE_SECRETS_DIR/cloudflare-token`, phase C3) : **My Profile → API Tokens →** le jeton « Vigie » **→ Edit**, ajouter la permission **Account → Account Filter Lists → Edit** (votre compte seulement). Rien d'autre ne change.
+2. **`vigie.env`** : `VIGIE_CF_LISTE=vigie_bloquees`, puis redémarrer la Vigie. Elle crée la liste si elle n'existe pas (**Manage Account → Configurations → Lists**), puis la remplit dans les 5 minutes.
+3. **La règle** : **Security → WAF → Custom rules → Create rule** sur la zone `nicephos.art` :
+   - nom : « Vigie : adresses bloquées » ;
+   - *Field* : **IP Source Address**, *Operator* : **is in list**, *Value* : `vigie_bloquees` (expression : `(ip.src in $vigie_bloquees)`) ;
+   - *Action* : **Block** ; placer la règle **en premier**.
+4. Vérifier : `docker exec nicephos-vigie node vigie/cli.js bordure` affiche « Liste chez Cloudflare (vigie_bloquees) : N adresse(s), rapprochée le … ». La page **Santé** de la console le montre aussi.
 
-Le jeton va dans le `.env` de la Vigie (`VIGIE_CLOUDFLARE_TOKEN`) avec l'identifiant du compte et celui de la liste `vigie_bloquees`. Jamais ailleurs.
+Ce que la Vigie ne touche jamais : une entrée ajoutée à la main dans la liste (sans commentaire « Vigie #… »). Pour arrêter : retirer `VIGIE_CF_LISTE` (les entrées de la Vigie restent jusqu'à ce que vous vidiez la liste) ou désactiver la règle.
+
+### 3.6 Mode urgence depuis la console (« I'm Under Attack », facultatif)
+
+Le mode urgence fait passer chaque visiteur par une vérification de son navigateur chez Cloudflare (quelques secondes) avant le site : utile contre une attaque massive. La console (Règles et réglages, Analyste ou Administrateur, identité redemandée) l'active pour une durée (24 h au plus par défaut, `VIGIE_CF_URGENCE_MAX`) ; à la fin, la Vigie remet le niveau de sécurité d'avant. Chaque activation ouvre une alerte haute (les Administrateurs sont prévenus).
+
+1. **Jeton à part** (droit plus large que celui de la bordure : il ne sert qu'à ça) : **My Profile → API Tokens → Create Token → Custom token**, nom « Vigie : mode urgence », *Permissions* : **Zone → Zone Settings → Edit**, *Zone Resources* : **Specific zone → nicephos.art**, filtrage par adresse si l'adresse d'Unraid est fixe, *TTL* : un an.
+2. Le jeton va dans `VIGIE_SECRETS_DIR/cloudflare-urgence` (une ligne, `chmod 600`, propriétaire 99:100) ; l'identifiant de la zone (page d'accueil de la zone, colonne de droite, *Zone ID*) dans `vigie.env` : `VIGIE_CF_ZONE_ID=…`. Redémarrer la Vigie.
+3. Essai : `docker exec nicephos-vigie node vigie/cli.js urgence marche --duree 1h --motif "essai"`, ouvrir le site (la page de vérification de Cloudflare apparaît), puis `… urgence arret`.
 
 ---
 
@@ -250,3 +260,4 @@ Le jeton va dans le `.env` de la Vigie (`VIGIE_CLOUDFLARE_TOKEN`) avec l'identif
 | Passerelle Signal ([`signal/README.md`](signal/README.md)) | maintenant | ☐ |
 | 3.1 à 3.3 Projet Vigie, Access, redirection | phase B | ☐ |
 | 3.4 Jeton d'API | phase E | ☐ |
+| Sorties réseau : mandataire, règles de l'hôte, journaux lus par la Vigie ([`reseau/README.md`](reseau/README.md)) | phase E4, instance de test d'abord | ☐ |

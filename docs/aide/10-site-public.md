@@ -11,7 +11,7 @@ Le site existe en **français** (adresses habituelles, `/photo/…`), **anglais*
   - page en allemand : allemand, sinon français, sinon anglais ;
   - page en anglais : anglais, sinon français, sinon allemand ;
   - page en français : français, sinon anglais, sinon allemand.
-- **Sélecteur :** au bout du menu (et en haut de la page d'une photo), le drapeau et le code de la langue (🇫🇷 FR). Il ouvre la **même page** dans une autre langue, filtres compris. Le choix est retenu (le seul cookie du site, posé seulement à ce moment-là).
+- **Sélecteur :** au bout du menu (et en haut de la page d'une photo), le drapeau et le code de la langue (🇫🇷 FR). Il ouvre la **même page** dans une autre langue, filtres compris. Le choix est retenu (le cookie de langue, posé seulement à ce moment-là ; le seul autre cookie du site public est celui d'une galerie privée ouverte avec son mot de passe).
 - **Langue à l'arrivée** sur une page française, si le visiteur n'a rien choisi :
   - pays de langue française (France, Monaco, outre-mer, Afrique francophone…) : français ;
   - Allemagne, Autriche, Liechtenstein : allemand ;

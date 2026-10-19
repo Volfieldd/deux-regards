@@ -185,6 +185,9 @@ test('Zitadel : jeton par clé JWT, événements suivis seulement, charge rédui
     if (body.event_types.length > 30) return new Response(JSON.stringify({ code: 3, message: 'invalid ListEventsRequest.EventTypes: value must contain no more than 30 item(s)' }), { status: 400 });
     return new Response(JSON.stringify({ events: events.filter(e => body.event_types.includes(e.type.type) || e.type.type === 'org.policy.label.changed') }), { status: 200 });
   };
+  // Repli par lots de 30 types (quand Zitadel refuse la requête sans filtre) : forcé ici ; la lecture en une requête a
+  // son propre test.
+  v.store.setting.set('zitadel_par_lots', true);
   const z = createZitadelReader({ issuer: 'https://exemple.zitadel.cloud', keyFile: null, readKey: () => keyJson, store: v.store, fetchImpl, now: () => clock });
   assert.equal(await z.run(), 2);
   // Tous les types suivis demandés, par lots de 30 au plus.
@@ -217,15 +220,15 @@ test('ligne de commande : clés, blocage, gel, verrouillage, interrupteur, levé
   const k = keys();
   const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_INGEST_KEY: k.vigie.VIGIE_INGEST_KEY, VIGIE_LOG_KEY: k.vigie.VIGIE_LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: k.vigie.VIGIE_DECISIONS_PRIVATE_KEY });
   assert.match(cli(['cles']), /VIGIE_DECISIONS_PUBKEY=/);
-  assert.match(cli(['bloquer', '203.0.113.7', '--duree', '2h', '--motif', 'scan'], { config, user: 'root' }), /Décision #1/);
-  assert.throws(() => cli(['bloquer', '0.0.0.0/0'], { config }), /trop large/);
-  assert.match(cli(['geler', 'zitadel-x', '--duree', '1h'], { config }), /gelé/);
-  assert.match(cli(['verrouiller', '--comptes', 'zitadel-moi'], { config }), /verrouillée/);
+  assert.match(cli(['bloquer', '203.0.113.7', '--portee', 'tout', '--duree', '2h', '--motif', 'scan'], { config, user: 'root' }), /Décision #1/);
+  assert.throws(() => cli(['bloquer', '0.0.0.0/0', '--portee', 'tout', '--motif', 'x'], { config }), /trop large/);
+  assert.match(cli(['geler', 'zitadel-x', '--duree', '1h', '--motif', 'essai'], { config }), /gelé/);
+  assert.match(cli(['verrouiller', '--comptes', 'zitadel-moi', '--motif', 'essai'], { config }), /verrouillée/);
   assert.throws(() => cli(['interrupteur', 'blocages', 'arret', '--duree', '2h'], { config }), /--motif/);
   assert.match(cli(['interrupteur', 'blocages', 'arret', '--duree', '2h', '--motif', 'essai'], { config }), /arret pour 2h/);
   assert.match(cli(['decisions'], { config }), /#1 {2}bloquer {2}203\.0\.113\.7\/32 \(tout\)[^\n]*ligne de commande \(root\)[^\n]*scan/);
-  assert.match(cli(['lever', '1'], { config }), /1 décision/);
-  assert.match(cli(['lever', '--tout'], { config }), /2 décision/);
+  assert.match(cli(['lever', '1', '--motif', 'fini'], { config }), /1 décision/);
+  assert.match(cli(['lever', '--tout', '--motif', 'fini'], { config }), /2 décision/);
   assert.match(cli(['etat'], { config }), /blocages ARRÊT jusqu'au/);
   assert.match(cli(['verifier'], { config }), /Chaîne intacte \(\d+ lignes\)/);
   const db = openVigieDb(config.databasePath);
@@ -398,7 +401,7 @@ test('revue B : ADMIN_SUBS jamais gelé ni tenu dehors ; ligne de commande sous 
   const k = keys();
   const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, ...k.vigie });
   t.mock.method(os, 'userInfo', () => { throw new Error('uv_os_get_passwd returned ENOENT'); });
-  assert.match(cli(['bloquer', '203.0.113.9', '--duree', '1h'], { config }), /Décision #1/);
+  assert.match(cli(['bloquer', '203.0.113.9', '--portee', 'tout', '--duree', '1h', '--motif', 'essai'], { config }), /Décision #1/);
   assert.match(cli(['decisions'], { config }), /ligne de commande \(/);
   assert.throws(() => cli(['interrupteur', 'blocages', 'arret'], { config }), /toujours pour une durée/);
   assert.throws(() => loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, ...k.vigie, VIGIE_LOG_KEY: k.vigie.VIGIE_INGEST_KEY }), /différente/);
@@ -449,6 +452,7 @@ test('Zitadel : lot inachevé, le curseur reste où il s’est arrêté ; erreur
     }
     return new Response(JSON.stringify({ events: [{ aggregate: { id: 'b', type: 'user' }, sequence: 1, creationDate: new Date(clock - 1000).toISOString(), type: { type: body.event_types[0] } }] }));
   };
+  v.store.setting.set('zitadel_par_lots', true);
   const z = createZitadelReader({ issuer: 'https://z.example', keyFile: null, readKey: () => key, store: v.store, fetchImpl, now: () => clock });
   await z.run();
   const cursor = Date.parse(v.store.setting.get('zitadel_curseur'));
@@ -488,4 +492,93 @@ test('console réglée mais impossible à écouter (audit D3-D7) : la réception
   vigie.engine.enqueue();
   await vigie.engine.drain?.();
   assert.equal(vigie.store.db.prepare("SELECT gravite FROM alerts WHERE regle = 'sigma.console_indisponible'").pluck().get(), 'haut');
+});
+
+test('vérification de la chaîne (audit D3-D9) : une seule à la fois, partagée par la console et la tâche quotidienne, notée une fois', async t => {
+  const dir = tmp(t);
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_HOST: '127.0.0.1', VIGIE_INGEST_PORT: '0', VIGIE_INGEST_KEY: KEY, VIGIE_LOG_KEY: LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: VIGIE_KEYS.priv64 });
+  const vigie = await startVigie({ config, logger: false });
+  t.after(() => vigie.close());
+  vigie.store.add(Array.from({ length: 1500 }, (_, i) => ({ id: `v-${i}`, type: 'malicious_excess_404', severity: 'bas', composant: 'site · public', canal: 'ingestion signée', confiance: 'rapporté', ip: '203.0.113.9' })));
+  const verifyAsync = vigie.store.verifyAsync;
+  let lancees = 0;
+  vigie.store.verifyAsync = async () => { lancees += 1; return verifyAsync(); };
+  const notees = [];
+  const set = vigie.store.setting.set;
+  vigie.store.setting.set = (k, val) => { if (k === 'chaine_verifiee') notees.push(val); return set(k, val); };
+  // Trois demandes pendant qu'elle tourne (clics répétés) : une seule vérification, le même résultat pour chacune.
+  const [a, b, c] = [vigie.verifyChain(), vigie.verifyChain(), vigie.verifyChain()];
+  assert.equal(a, b);
+  assert.equal(b, c);
+  const r = await a;
+  assert.equal(r.ok, true);
+  assert.ok(r.lignes >= 1500);
+  assert.deepEqual(await c, r);
+  assert.equal(lancees, 1);
+  assert.equal(notees.length, 1, 'notée une fois');
+  // Finie : la suivante en relance une.
+  await vigie.verifyChain();
+  assert.equal(lancees, 2);
+});
+
+test('arrêt (audit D3-D16) : close() annule aussi les minuteries de démarrage (purge, contrôle des rôles, listes de menaces)', async t => {
+  const dir = tmp(t);
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, VIGIE_HOST: '127.0.0.1', VIGIE_INGEST_PORT: '0', VIGIE_INGEST_KEY: KEY, VIGIE_LOG_KEY: LOG_KEY, VIGIE_DECISIONS_PRIVATE_KEY: VIGIE_KEYS.priv64 });
+  // Les minuteries posées pendant le démarrage (d'une seconde au moins) et celles annulées ensuite.
+  const { setTimeout: st, clearTimeout: ct } = globalThis;
+  const posees = new Set(), annulees = new Set();
+  globalThis.setTimeout = (fn, ms, ...a) => { const h = st(fn, ms, ...a); if (ms >= 1000) posees.add(h); return h; };
+  globalThis.clearTimeout = h => { annulees.add(h); return ct(h); };
+  let vigie;
+  try {
+    vigie = await startVigie({ config, logger: false });
+    globalThis.setTimeout = st;
+    assert.ok(posees.size >= 3, `minuteries de démarrage : ${posees.size}`);
+    await vigie.close();
+    vigie = null;
+    assert.deepEqual([...posees].filter(h => !annulees.has(h)), [], 'aucune minuterie de démarrage ne survit à close()');
+  } finally {
+    globalThis.setTimeout = st;
+    globalThis.clearTimeout = ct;
+    await vigie?.close();
+  }
+});
+
+
+test('Zitadel : une requête par passage (sans filtre, types triés ici), repli par lots sur refus ; quota mensuel compté, alertes à 80 et 95 %', async t => {
+  let clock = Date.parse('2026-10-17T12:00:00Z');
+  const v = vigieOf(t, { now: () => clock });
+  const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const keyJson = { keyId: 'k', key: privateKey.export({ type: 'pkcs8', format: 'pem' }), userId: 'u' };
+  let refuseSansFiltre = false;
+  const bodies = [];
+  const fetchImpl = async (url, init) => {
+    if (url.endsWith('/oauth/v2/token')) return new Response(JSON.stringify({ access_token: 'j', expires_in: 3600 }));
+    const body = JSON.parse(init.body || '{}');
+    bodies.push(body);
+    if (refuseSansFiltre && !body.event_types) return new Response(JSON.stringify({ code: 3, message: 'filtre exigé' }), { status: 400 });
+    return new Response(JSON.stringify({ events: [
+      { aggregate: { id: 'user-1', type: 'user' }, sequence: 1, creationDate: '2026-10-17T11:59:00Z', type: { type: 'user.grant.added' }, payload: {} },
+      { aggregate: { id: 'x', type: 'org' }, sequence: 2, creationDate: '2026-10-17T11:59:10Z', type: { type: 'org.policy.label.changed' }, payload: {} },
+    ].filter(e => !body.event_types || body.event_types.includes(e.type.type)) }));
+  };
+  const z = createZitadelReader({ issuer: 'https://z.example', keyFile: null, readKey: () => keyJson, store: v.store, fetchImpl, now: () => clock, quota: 10 });
+  assert.equal(await z.run(), 1, 'type non suivi écarté ici');
+  assert.equal(bodies.length, 1, 'une seule requête');
+  assert.equal(bodies[0].event_types, undefined);
+  assert.equal(z.usage().n, 1, 'le jeton (/oauth) ne compte pas');
+  // Zitadel refuse la requête sans filtre : repli par lots, gardé.
+  refuseSansFiltre = true;
+  bodies.length = 0;
+  await z.run();
+  assert.equal(v.store.setting.get('zitadel_par_lots'), true);
+  assert.ok(bodies.slice(1).every(b => b.event_types.length <= 30));
+  // Quota (10 ici) : alerte à 80 %, puis à 95 %, une fois chacune ; ralentissement au-delà.
+  for (let i = 0; i < 3; i++) await z.api('/management/v1/users/x', { method: 'GET', usage: 'plafond' }).catch(() => {});
+  const alertes = v.db.prepare("SELECT severity, detail FROM events WHERE type = 'vigie_zitadel_quota' ORDER BY seq").all();
+  assert.deepEqual(alertes.map(a => [a.severity, JSON.parse(a.detail).seuil]), [['moyen', 80], ['haut', 95]]);
+  assert.ok(z.usage().par.plafond >= 3);
+  // Mois suivant : remis à zéro.
+  clock = Date.parse('2026-11-01T00:00:01Z');
+  assert.equal(z.usage().n, 0);
 });

@@ -13,7 +13,8 @@ import { clean, netOf } from './util.js';
 //   - lit chaque minute ce que le Worker a écrit dans Workers Analytics Engine (une requête par minute ; offre gratuite :
 //     10 000 par jour), par minute close (2 minutes de retard, le temps que Cloudflare range les points), et en tire
 //     des événements « bordure » (source à part entière du quorum) : blocages appliqués, rafales d'erreurs, rafales de
-//     pages, admin depuis un opérateur jamais vu, erreurs du Worker ; bordure silencieuse (6 h sans point) signalée.
+//     pages, admin depuis un opérateur jamais vu, erreurs du Worker, réponse privée servie par le cache de Cloudflare
+//     (BV-26) ; bordure silencieuse (6 h sans point) signalée.
 // Jeton Cloudflare (fichier, jamais dans le .env) : Account Analytics Read et Workers KV Storage Edit, sur ce compte.
 
 const API = 'https://api.cloudflare.com/client/v4';
@@ -110,6 +111,13 @@ export function createEdge({ store, decisions, accountId, tokenFile, kvNamespace
     // Par adresse et par minute.
     const per = new Map();
     for (const r of closed) {
+      // Réponse privée servie par le cache (BV-26) : un événement par minute, adresse et nature, jamais compté comme une
+      // page ou une erreur (la requête a déjà son point ordinaire).
+      if (r.classe === 'cache_prive') {
+        const m = /^(lien|page|image|fichier)\|([A-Z]{3,12})$/.exec(String(r.note || ''));
+        out.push(ev('bordure_cache_prive', r, { classe: m ? m[1] : 'page', statut_cache: m ? m[2] : null, requetes: r.n }, 'haut'));
+        continue;
+      }
       const k = `${r.minute}|${r.ip}`;
       const a = per.get(k) || { r, bloque: 0, erreurs: 0, pages: 0, total: 0, erreurWorker: 0, admin: new Map() };
       a.total += r.n;

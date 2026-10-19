@@ -1,0 +1,29 @@
+<% /* En-tête des galeries privées (MQ-16, MQ-17 : .sh--prive, planche § 1). it.mode :
+      - « tunnel » : page du lien et messages (404, 410, après « Quitter ») : « Galerie privée » à gauche, la marque en texte,
+        sans lien de sortie, ni langue, ni menu (G34, G37) ;
+      - « contexte » : la galerie ouverte : la langue en boutons d'un formulaire POST (jamais /langue/?vers=, G37) et
+        « Quitter la galerie » en bouton (POST, jeton CSRF, G29) ; en vue équipe, le retour à l'administration ;
+      - « retour » : une photo de la galerie : le retour vers la galerie à la place du titre.
+      Le cadenas et la flèche sont décoratifs ; « Galerie privée » passe sur deux lignes plutôt que d'être coupé. */ %>
+<% const P = it.P, ic = it.v2.ic, lang = it.lang, mode = it.mode || 'tunnel';
+   const lock = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+   const out = '<svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg>'; %>
+<header class="sh <%= mode === 'tunnel' ? 'sh--tunnel' : 'sh--contexte' %> sh--prive">
+  <div class="sh-bar">
+<% if (mode === 'retour') { %>    <a class="sh-retour" href="/prive/<%= it.pid %>"><%~ ic('retour') %><span class="sh-retour-t"><span class="sh-court"><span class="sr-only"><%= P.backSrShort %></span><%= P.backShort %></span><span class="sh-long"><span class="sr-only"><%= P.backSr %></span><%= it.title %></span></span></a>
+<% } else { %>    <p class="sh-contexte-t"><%~ lock %><span><%= P.label %></span></p>
+<% } %>    <span class="sh-marque"><%= it.siteName %></span>
+<% if (mode !== 'tunnel') { %>    <div class="sh-outils">
+<% if (it.team) { %>      <a class="sh-outil" href="/admin/galeries/<%= it.space.id %>"><%~ out %><span class="sh-outil-t"><%= P.backAdmin %></span></a>
+<% } else { %>      <details class="lang-pick" data-lang-pick>
+        <summary><span><%= lang.toUpperCase() %></span><span class="sr-only"> – <%= it.v2.typo(P.langCurrent) %></span><%~ ic('bas', { size: 16 }) %></summary>
+        <form method="post" action="/prive/<%= it.pid %>/langue"><input type="hidden" name="csrf" value="<%= it.csrf %>"><% if (it.photo) { %><input type="hidden" name="photo" value="<%= it.photo.n %>"><% } %><ul aria-label="<%= P.langLabel %>">
+<% ['fr', 'en', 'de'].forEach(l => { %>          <li><button type="submit" name="lang" value="<%= l %>" lang="<%= l %>"<%~ l === lang ? ' aria-current="true"' : '' %>><%= { fr: 'Français', en: 'English', de: 'Deutsch' }[l] %><% if (l === lang) { %><%~ ic('coche', { size: 18 }) %><% } %></button></li>
+<% }) %>        </ul></form>
+      </details>
+      <form class="sh-quitter" method="post" action="/prive/quitter"><input type="hidden" name="csrf" value="<%= it.csrf %>"><button class="sh-outil" type="submit"><%~ out %><span class="sh-outil-t sh-court"><%= P.leave %></span><span class="sh-outil-t sh-long"><%= P.leaveLong %></span></button></form>
+<% } %>    </div>
+<% } %>  </div>
+</header>
+<% if (it.team) { %><p class="pv-equipe" role="note"><%= it.v2.typo(P.team) %></p>
+<% } %>

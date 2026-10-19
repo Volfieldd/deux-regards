@@ -1,0 +1,53 @@
+<% /* Galerie privée ouverte (/prive/<id>, MQ-17) : une planche contact, pas une boutique. Les photos dans l'ordre de
+      l'équipe, en rangées (public.css § 6, servies par la route privée /prive/<id>/m/…, G38), une étoile sous chacune si
+      l'accès ouvre les favoris, le téléchargement s'il est permis, une seule action principale (envoyer la sélection).
+      Les droits sont dits une fois, en tête. Vue équipe : aucun formulaire d'invité, rien n'est noté. */ %>
+<% const P = it.P, ty = it.v2.typo, ic = it.v2.ic, v = it.v2, r = it.rights, who = it.who, pid = it.pid;
+   const favs = it.vue === 'favoris';
+   const shown = favs ? it.list.filter(p => it.favSet.has(p.item_id)) : it.list;
+   const canFav = !it.team && r.favoris, dl = !it.team && r.telechargement !== 'non' ? r.telechargement : null;
+   const px = dl ? (dl === 'grande' ? 4000 : 2048) : null;
+   const droits = it.team ? null : r.favoris && dl ? P.rights.tout : r.favoris ? P.rights.favoris(who) : dl ? P.rights.telecharger : P.rights.voir(who);
+   const star = '<svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>';
+   const nsp = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+   const meta = p => [p.author, p.place, v.date(p.taken_on)].filter(Boolean).join(' · ');
+   const inv = it.inv, sent = inv && inv.selection_sent_at, seen = inv && inv.selection_seen_at;
+   const favTitles = it.list.filter(p => it.favSet.has(p.item_id)).map(p => p.title).join(' · ');
+   const purge = it.until + 183 * 864e5; %>
+<% layout('./layout', { pageTitle: ty(`${it.title} · ${P.label} · ${it.siteName}`) }) %>
+<%~ include('./_prive-entete', { ...it, mode: 'contexte' }) %>
+<main id="contenu" class="wrap">
+  <div class="pv-tete">
+    <p class="etiquette"><%= it.first ? P.galleryOf(it.first) : P.label %></p>
+    <h1 class="titre-page"><%= it.title %></h1>
+    <p class="pv-meta"><%= P.preparedBy(who) %> · <b><%= P.photos(it.list.length) %></b><% if (r.favoris) { %> · <b><%= P.favs(it.nFav) %></b><% } %> · <%= P.accessUntil %> <time datetime="<%= it.isoDay(it.until) %>"><%= it.dateOf(it.until) %></time></p>
+<% if (droits) { %>    <p class="pv-droits"><%~ ic('info', { size: 18 }) %><span><%= ty(droits) %></span></p>
+<% } %><% if (it.intro) { %>    <p class="pv-mot"><%= it.intro %><span><%= who %></span></p>
+<% } %>  </div>
+<% if (it.etat === 'envoye') { %>  <div class="pv-etat"><div class="msg msg--ok" role="status"><%~ ic('coche', { size: 18 }) %><p><b><%= ty(P.sentTitle(who)) %></b><%= ty(it.nFav ? P.sentList(it.nFav, favTitles) : '') %></p></div></div>
+<% } else if (it.etat === 'repris') { %>  <div class="pv-etat"><div class="msg msg--ok" role="status"><%~ ic('coche', { size: 18 }) %><p><%= ty(P.takenBack) %></p></div></div>
+<% } else if (it.etat === 'figee') { %>  <div class="pv-etat"><div class="msg" role="status"><%~ ic('info', { size: 18 }) %><p><%= ty(P.seenNote(who)) %></p></div></div>
+<% } else if (it.etat === 'archive-limite' || it.etat === 'telechargements-limite') { %>  <div class="pv-etat"><div class="msg" role="status"><%~ ic('horloge', { size: 18 }) %><p><%= ty(it.etat === 'archive-limite' ? P.archiveLimit : P.downloadLimit) %></p></div></div>
+<% } %><% if (dl && !favs && it.list.length) { %>  <div class="telecharger pv-etat"><form method="post" action="/prive/<%= pid %>/archive"><input type="hidden" name="csrf" value="<%= it.csrf %>"><button class="btn btn--filet" type="submit"><%= P.downloadAll %></button></form><p class="champ-aide"><%= ty(P.archiveHelp(it.list.length, nsp(px))) %></p></div>
+<% } %>  <section aria-labelledby="photos-t">
+    <h2 class="sr-only" id="photos-t"><%= P.photosTitle(shown.length) %></h2>
+<% if (r.favoris || it.team) { %>    <nav class="filtres vues" aria-label="<%= P.views %>"><div class="filtres-groupe"><ul><li><a class="filtre" href="/prive/<%= pid %>"<%~ favs ? '' : ' aria-current="page"' %>><span class="filtre-nom"><%= P.all %></span> <span class="filtre-n"><%= it.list.length %></span></a></li><li><a class="filtre" href="/prive/<%= pid %>?vue=favoris"<%~ favs ? ' aria-current="page"' : '' %>><span class="filtre-nom"><%= P.yourFavs %></span> <span class="filtre-n"><%= it.nFav %></span></a></li></ul></div>
+<% if (canFav) { %>      <p class="filtres-note"><%~ star %><%= ty(P.favNote) %></p>
+<% } %>    </nav>
+<% } %><% if (!shown.length) { %>    <div class="pv-vide">
+      <h2><%= favs ? P.emptyFavTitle : P.notFoundTitle %></h2>
+<% if (favs) { %>      <p class="pv-p"><%= ty(P.emptyFav[0]) %><%~ star.replace('class="ic"', 'class="ic ic-texte"').replace(/width="20" height="20"/, 'width="18" height="18"') %><%= ty(P.emptyFav[1]) %></p>
+      <p class="pv-p"><a class="lien" href="/prive/<%= pid %>"><%= P.seeAll(it.list.length) %></a></p>
+<% } %>    </div>
+<% } else { %>    <ul class="rangees<%= shown.length <= 2 ? ' rangees--par-deux' : '' %>" id="photos" tabindex="-1"><% shown.forEach(p => { const g = v.fmt(p); %><li class="favorisable <%= g.cls %><%= g.r < 1 ? ' v' : g.r === 1 ? ' c' : '' %>" id="p<%= p.n %>"><a class="vignette" href="/prive/<%= pid %>/photo/<%= p.n %>"><%~ it.picture(p, { sizes: v.rowSizes(p, shown), alt: p.alt || '', base: `/prive/${pid}/m/` }) %><span class="cartel cartel--ligne"><span class="cartel-t"><%~ v.nobr(p.title) %></span><span class="cartel-m"><%= meta(p) %></span></span></a><% if (canFav) { %><%~ include('./_prive-etoile', { ...it, p, retour: favs ? 'favoris' : 'galerie' }) %><% } %><% if (dl) { %><p class="dl-une"><a class="lien" href="/prive/<%= pid %>/telecharger/<%= p.n %>/<%= dl %>" download><%= P.download %><span class="sr-only"><%= ty(P.dlSr(p.title, nsp(px))) %></span></a><span class="donnee" aria-hidden="true"><%= P.dlData(nsp(px)) %></span></p><% } %></li><% }) %></ul>
+<% } %><% if (canFav) { %>    <div class="selection">
+<% if (sent) { %>      <p class="selection-n"><%~ ic('coche', { size: 20 }) %><span><%= ty(P.sentLine(it.nFav, who, `${it.dateOf(sent)} ${it.lang === 'fr' ? 'à' : it.lang === 'de' ? 'um' : 'at'} ${it.timeOf(sent)}`)) %></span></p>
+<% if (!seen) { %>      <form method="post" action="/prive/<%= pid %>/selection/reprendre"><input type="hidden" name="csrf" value="<%= it.csrf %>"><button class="btn btn--filet" type="submit"><%= P.takeBack %></button></form>
+<% } %><% } else { const s = P.inSelection(it.nFav); %>      <p class="selection-n"><%~ star %><span><a href="/prive/<%= pid %>?vue=favoris"><%= s[0] %></a><%= s[1] %></span></p>
+      <form method="post" action="/prive/<%= pid %>/selection/terminer"><input type="hidden" name="csrf" value="<%= it.csrf %>"><button class="btn" type="submit"><%= P.send(who) %></button></form>
+<% } %>    </div>
+<% if (sent) { %>    <p class="pv-p"><%= ty(seen ? P.seenNote(who) : P.sentNote(who)) %></p>
+<% } %><% } %>  </section>
+<% if (!it.team) { %>  <p class="pv-info"><%~ ty(P.info(it.v2.esc(who), `<time datetime="${it.isoDay(purge)}">${it.dateOf(purge)}</time>`)) %> <a href="<%= it.u('/confidentialite') %>"><%= P.privacy %></a></p>
+<% } %></main>
+<%~ include('./_prive-pied', it) %>

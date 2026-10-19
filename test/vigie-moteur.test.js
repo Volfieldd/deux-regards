@@ -160,15 +160,18 @@ test('alerte : rouverte après 24 h de calme, aggravation notée, réponse rejou
   v.decisions.lift({ all: true, par: 'test' });
   v.clock.t += 20 * 60e3;
   for (let i = 0; i < 6; i++) { v.site('malicious_input', 'moyen', { ip: '198.51.100.5' }); v.zitadel('zitadel_echec', 'moyen', { ip: '198.51.100.5' }); }
-  assert.equal(v.alerts().length, 1);
+  const scores = () => v.alerts().filter(a => a.regle !== 'sigma.surveillance_reduite');
+  assert.equal(scores().length, 1);
   assert.ok(v.decisions.active().some(d => d.cible === '198.51.100.5/32'), 'réponse rejouée');
-  assert.equal(v.alerts()[0].gravite, 'haut', 'score au double du seuil');
-  const aggr = v.db.prepare("SELECT detail FROM events WHERE type = 'vigie_alerte'").pluck().all().map(JSON.parse).filter(d => d.action === 'aggravee');
+  assert.equal(scores()[0].gravite, 'haut', 'score au double du seuil');
+  const aggr = v.db.prepare("SELECT detail FROM events WHERE type = 'vigie_alerte'").pluck().all().map(JSON.parse).filter(d => d.action === 'aggravee' && d.id === first.id);
   assert.equal(aggr.length, 1);
+  // Lever la réponse automatique a prévenu les Administrateurs (audit D3-B4).
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_surveillance_reduite'").pluck().get(), 1);
   // 24 h sans nouvel événement : la reprise ouvre une nouvelle alerte (et la notification qui va avec).
   v.clock.t += 25 * 3600e3;
   burst();
-  assert.equal(v.alerts().length, 2);
+  assert.equal(scores().length, 2);
 });
 
 test('alertes ouvertes 7 jours sans événement : closes sans suite (une alerte prise en charge reste) ; administrateurs protégés : sauvegarde seulement', async t => {
@@ -338,4 +341,107 @@ test('modes pendant un arrêt (audit D3-B1) : descendre ou prolonger demande un 
   const m = reduites();
   v.engine.setMode('entite.score', 'bloquer', 'test');
   assert.equal(reduites(), m);
+});
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Coût (audit D3-D2, D3-D3)
+
+test('top() (audit D3-D2) : une requête, présélection en SQL du score décru ; mêmes entités, même ordre que la lecture une à une', async t => {
+  const v = engineOf(t);
+  const t0 = v.clock.t;
+  // La base a bien pow (fonctions mathématiques de SQLite, compilées dans better-sqlite3).
+  assert.equal(v.db.prepare('SELECT pow(0.5, 2)').pluck().get(), 0.25);
+  // L'algorithme d'avant, tel quel : chaque entité des 7 jours relue par sa clé, triée en mémoire.
+  const SOURCE_MIN = 0.5;
+  const avant = (limit = 20) => v.db.prepare('SELECT kind, key FROM entities WHERE derniere > ?').all(v.clock.t - 7 * 864e5).map(r => v.engine.current(r.kind, r.key, v.clock.t))
+    .map(e => ({ ...e, sources: Object.entries(e.contributions).filter(([s, x]) => s !== 'menaces' && s !== 'contexte' && x >= SOURCE_MIN).map(([s]) => s).sort() }))
+    .filter(e => e.score >= 0.1).sort((a, b) => b.score - a.score).slice(0, limit);
+  // 3 000 entités : scores et âges variés, des ex aequo (même score, même instant : adresse et réseau d'un même
+  // événement), des entités éteintes (score décru sous 0,1), d'autres vues il y a plus de 7 jours.
+  let x = 7;
+  const rnd = () => { x = (x * 48271) % 2147483647; return x / 2147483647; };
+  const ins = v.db.prepare('INSERT INTO entities (kind, key, score, at, contributions, signaux, premiere, derniere) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+  v.db.transaction(() => {
+    for (let i = 0; i < 3000; i++) {
+      const at = t0 - Math.floor(rnd() * 9 * 864e5);
+      const score = i % 10 === 0 ? 4 : Math.round(rnd() * 400) / 10;
+      const contributions = JSON.stringify({ site: score * 0.6, zitadel: score * 0.3, menaces: score * 0.1 });
+      ins.run(i % 3 ? 'ip' : 'reseau', `198.51.${i >> 8}.${i & 255}`, score, at, contributions, 1 + (i % 5), at - 3600e3, at);
+      if (i % 50 === 0) ins.run('compte', `zitadel-${i}`, score, at, contributions, 2, at, at);   // ex aequo exact
+    }
+  })();
+  for (const decal of [0, 30 * 60e3, 5 * 3600e3, 3 * 864e5]) {
+    v.clock.t = t0 + decal;
+    for (const n of [1, 20, 50, 5000]) assert.deepEqual(v.engine.top(n), avant(n), `top(${n}) à +${decal / 60e3} min`);
+  }
+  // Rien d'actif : liste vide.
+  v.clock.t = t0 + 20 * 864e5;
+  assert.deepEqual(v.engine.top(50), []);
+});
+
+test('décisions (audit D3-D3) : colonne alerte_id hors de l’empreinte et de la liste signée ; purge à 13 mois qui garde les actives', async t => {
+  const v = engineOf(t);
+  const t0 = v.clock.t;
+  v.engine.setMode('entite.score', 'bloquer', 'test');
+  for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.77' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.77' }); }
+  const [a] = v.alerts();
+  const auto = v.db.prepare('SELECT * FROM decisions WHERE auto = 1').get();
+  assert.equal(auto.alerte_id, a.id, 'réponse automatique rattachée à son alerte');
+  assert.equal(auto.motif, `alerte #${a.id}`);
+  // Paramètre alerte, motif « alerte #n · … », motif sans numéro.
+  const m1 = v.decisions.create({ kind: 'geler', cible: 'zitadel-1', duree: '24h', par: 'test', motif: 'enquête', alerte: 41 });
+  const m2 = v.decisions.create({ kind: 'geler', cible: 'zitadel-2', duree: '24h', par: 'test', motif: 'alerte #42 · enquête' });
+  const m3 = v.decisions.create({ kind: 'geler', cible: 'zitadel-3', duree: '24h', par: 'test', motif: 'vu dans l’alerte #43' });
+  const col = id => v.db.prepare('SELECT alerte_id FROM decisions WHERE id = ?').pluck().get(id);
+  assert.deepEqual([col(m1), col(m2), col(m3)], [41, 42, null]);
+  assert.throws(() => v.decisions.create({ kind: 'geler', cible: 'zitadel-4', duree: '24h', par: 'test', alerte: 'x' }), /numéro d’alerte invalide/);
+  // L'empreinte ne dépend pas de la colonne : la changer à la main ne rend pas la décision suspecte ; la liste signée ne
+  // la contient pas.
+  v.db.prepare('UPDATE decisions SET alerte_id = 999 WHERE id = ?').run(m1);
+  assert.ok(v.decisions.active().some(d => d.id === m1), 'empreinte toujours valide');
+  assert.doesNotMatch(v.decisions.signed().payload, /alerte|999|"41"/);
+  // Purge : levée il y a plus de 13 mois, échue il y a plus de 13 mois : effacées ; levée ou échue depuis moins, active : gardées.
+  const old = v.decisions.create({ kind: 'geler', cible: 'zitadel-5', duree: '24h', par: 'test' });
+  const echue = v.decisions.create({ kind: 'geler', cible: 'zitadel-6', duree: '1h', par: 'test' });
+  v.decisions.lift({ id: old, par: 'test', motif: 'essai' });
+  v.clock.t = t0 + 300 * 864e5;
+  const recente = v.decisions.create({ kind: 'geler', cible: 'zitadel-7', duree: '1h', par: 'test' });
+  v.decisions.lift({ id: recente, par: 'test', motif: 'essai' });
+  // Une décision active depuis longtemps (insérée à la main : la durée est bornée à 30 jours) n'est jamais effacée.
+  const vieilleActive = Number(v.db.prepare("INSERT INTO decisions (kind, cible, motif, par, cree_a, fin) VALUES ('geler', 'zitadel-8', '', 'test', ?, ?)").run(t0 - 500 * 864e5, t0 + 900 * 864e5).lastInsertRowid);
+  v.clock.t = t0 + 400 * 864e5;
+  const avant = v.db.prepare('SELECT id FROM decisions ORDER BY id').pluck().all();
+  v.engine.purge();
+  const apres = v.db.prepare('SELECT id FROM decisions ORDER BY id').pluck().all();
+  for (const id of [old, echue, auto.id, m1, m2, m3]) assert.ok(!apres.includes(id), `décision ${id} effacée`);
+  assert.ok(apres.includes(recente), 'levée depuis moins de 13 mois : gardée');
+  assert.ok(apres.includes(vieilleActive), 'active : jamais effacée');
+  assert.equal(avant.length - apres.length, 6);
+  // Plans : les deux recherches de la console passent par l'index de la colonne.
+  const plan = (sql, ...a) => v.db.prepare(`EXPLAIN QUERY PLAN ${sql}`).all(...a).map(r => r.detail).join(' | ');
+  assert.match(plan('SELECT id FROM decisions WHERE alerte_id = ? ORDER BY id LIMIT 50', 1), /decisions_alerte/);
+  assert.match(plan('SELECT id FROM decisions WHERE alerte_id IN (SELECT value FROM json_each(?)) AND auto = 1 ORDER BY id LIMIT 500', '[1,2]'), /decisions_alerte/);
+});
+
+test('migration 012 : alerte_id repris du motif (« alerte #n », « alerte #n · … »), rien d’autre', async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-m012-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const file = path.join(dir, 'vigie.db');
+  // Une base d'avant la migration : colonne et index retirés, migration oubliée.
+  let db = openVigieDb(file);
+  db.exec("DROP INDEX decisions_alerte; DROP INDEX decisions_cree; ALTER TABLE decisions DROP COLUMN alerte_id; DELETE FROM migrations WHERE name = '012_decisions_alerte.sql'");
+  const motifs = ['alerte #412', 'alerte #413 · enquête', 'alerte #414 ·enquête', 'alerte #0415', 'Alerte #416', 'alerte #417x', 'vu dans l’alerte #418', 'alerte #', 'alerte #0', '', 'alerte #419 · ', 'alerte #99999999999 · grand'];
+  const ins = db.prepare("INSERT INTO decisions (kind, cible, motif, par, cree_a, fin, auto) VALUES ('geler', 'x', ?, 'test', 1, 2, 1)");
+  for (const m of motifs) ins.run(m);
+  db.close();
+  db = openVigieDb(file);
+  t.after(() => db.close());
+  const lu = db.prepare('SELECT motif, alerte_id FROM decisions ORDER BY id').all().map(r => [r.motif, r.alerte_id]);
+  assert.deepEqual(lu, [['alerte #412', 412], ['alerte #413 · enquête', 413], ['alerte #414 ·enquête', null], ['alerte #0415', null], ['Alerte #416', null], ['alerte #417x', null],
+    ['vu dans l’alerte #418', null], ['alerte #', null], ['alerte #0', null], ['', null], ['alerte #419 · ', 419], ['alerte #99999999999 · grand', 99999999999]]);
+  // La même règle que decisions.create (motif sans paramètre alerte).
+  for (const [m, attendu] of lu) {
+    const c = /^alerte #([1-9]\d{0,14})(?: · |$)/.exec(m);
+    assert.equal(c ? Number(c[1]) : null, attendu, m);
+  }
 });

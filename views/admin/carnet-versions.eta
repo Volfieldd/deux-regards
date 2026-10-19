@@ -1,0 +1,11 @@
+<% layout('./layout') %>
+<% /* Versions d'un billet (B38) : les 30 dernières, enregistrées à chaque « Enregistrer », à rétablir ; puis les décisions du
+      circuit. Rétablir une version l'enregistre comme une nouvelle (rien n'est perdu). */ %>
+<% const t = (k, x) => it.ty(it.t(k, x)), post = it.post;
+   const fmt = ms => new Intl.DateTimeFormat(it.locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms).replace(/ /g, '\u00a0'); %>
+<header class="ep"><a class="ep-retour" href="/admin/carnet/<%= post.id %>">← <%= post.title %></a><div class="ep-titre"><h1><%= t('Versions') %></h1></div><p class="ep-meta"><span><%= it.list.length > 1 ? t('{n} versions', { n: it.list.length }) : t('{n} version', { n: it.list.length }) %></span><span><%= t('les 30 dernières sont gardées') %></span></p></header>
+<section class="panel" aria-labelledby="v-t"><h2 class="panel-t" id="v-t"><%= t('Versions enregistrées') %></h2>
+<% if (!it.list.length) { %>  <p class="hint"><%= t('Aucune version : la première est gardée au premier enregistrement.') %></p>
+<% } else { %>  <ol class="chrono"><% it.list.forEach((v, i) => { %><li><time datetime="<%= new Date(v.at).toISOString() %>"><%= fmt(v.at) %></time><span><%= v.by_name || t('quelqu’un') %><% if (i === 0) { %> <span class="sec"><%= t('version actuelle') %></span><% } else if (it.r.write) { %>
+      <form method="post" action="/admin/carnet/<%= post.id %>/versions/<%= v.id %>/retablir"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Rétablir cette version') %></button></form><% } %></span></li><% }) %></ol>
+<% } %></section>

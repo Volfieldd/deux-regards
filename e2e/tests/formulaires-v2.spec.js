@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Pages à formulaire de la v2 (« Je vous ai photographié », MQ-05 ; Signaler et Partager sans script, planche MQ-00),
-// vues dans l'aperçu de la v2 : chaque test ouvre sa propre session d'administrateur (connexion locale de test) et y
+// vues dans la vue v2 : chaque test ouvre sa propre session d'administrateur (connexion locale de test) et y
 // ouvre l'aperçu ; les visiteurs et les autres tests gardent la v1. Les envois refusés (erreurs) n'écrivent rien ; un
 // envoi accepté écrit (une rencontre, un signalement) : il ne tourne qu'avec E2E_ALLOW_WRITES=1. Les limites du serveur
 // (8 envois par heure et par adresse sur /bonjour, 5 sur Signaler) comptent aussi ces envois : relancer la suite plus de
@@ -16,7 +16,7 @@ test.beforeEach(() => { errors = []; });
 test.afterEach(() => { expect(errors, 'erreurs console / CSP').toEqual([]); });
 
 async function apercu(browser, info, options = {}) {
-  test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent : l’aperçu de la v2 demande une session d’administrateur');
+  test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent : la vue v2 demande une session d’administrateur');
   const ctx = await browser.newContext({ ...info.project.use, storageState: { cookies: [], origins: [] }, ...options });
   const page = await ctx.newPage();
   const login = options.javaScriptEnabled === false ? await browser.newContext({ ...info.project.use, storageState: { cookies: [], origins: [] } }) : ctx;
@@ -28,7 +28,7 @@ async function apercu(browser, info, options = {}) {
   await expect(lp).toHaveURL(/\/admin\/apparence$/);
   const news = lp.getByRole('dialog', { name: /Nouveau depuis votre dernière visite/ });
   if (await news.isVisible()) await news.getByRole('button', { name: 'C’est noté' }).click();
-  await lp.getByRole('button', { name: 'Ouvrir l’aperçu de la v2' }).click();
+  await lp.getByRole('button', { name: 'Voir le site en v2' }).click();
   if (login !== ctx) { await ctx.addCookies(await login.cookies()); await login.close(); }
   watch(page);
   return { ctx, page };

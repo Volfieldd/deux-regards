@@ -15,6 +15,9 @@ coche ici ce qu'elle a pris (colonne « Pris »).
 
 Relevé du 18 octobre 2026, sur main après les PR #114, #115, #117, #119, #122 et #127, complété par la PR #129 (pages v2 sans formulaire).
 
+Complété le même jour par deux besoins qui ne viennent pas d'une brique mais du déploiement (BV-10, BV-11), retenus
+après examen d'une sonde réseau Suricata (décisions D24 à D26 de l'[étude de recadrage](recadrage-vigie-edge-wake.md#7-décisions)).
+
 Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1, BV-2, BV-4 et BV-6 (`server/securite/`, `vigie/`, point d'émission dans `app.audit.log`) ; le site prend BV-3, BV-5 et BV-7 (et l'émission du partage par QR de BV-6), dans la PR `fix/vigie-bv3-bv5-bv7`.
 
 ### Suivi (colonne « Pris »)
@@ -30,21 +33,23 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-7 Referer de la photo offerte | durcissement | ✓ site | PR #133 : `no-referrer` gardé dans `onSend` pour les adresses à jeton ou à code (`redactUrl`) | fait |
 | BV-8 Saisie de recherche impossible | DS12 | ✓ site | `fix/vigie-bv8-bv9-recherche` : `input_validation_fail` (émetteur `· recherche`, détail `raison`, `longueur`, `nombre_q`, jamais la saisie) | fait |
 | BV-9 Recherches en rafale | DS15, DS22 | ✓ site | `fix/vigie-bv8-bv9-recherche` : 60 recherches en 10 min par adresse, puis 429 et `excess_rate_limit_exceeded` (`limite: 'recherche'`) | fait |
-| BV-12 Construction active neutralisée dans un billet | DS11, DS23 | | Carnets, phase 35 : `malicious_input` émis par le rendu (`server/carnet-markdown.js`) ; corps de l'aperçu hors du crochet commun ; règle `billet_construction_active` | proposé |
-| BV-13 Filtres et contexte du carnet hors liste | DS12 | | Carnets, phase 35 : `input_validation_fail` (émetteur `· carnet`), comme BV-3 | proposé |
-| BV-14 Hors portée signalé pour les objets à plusieurs auteurs | DS10 | ✓ site (voyages) ; Carnets et galeries à leur implémentation ; règle : Vigie | voyages fait (`fix/vigie-bv14-voyages` : `authz_fail` « hors portée », émetteur `server/routes/voyages.js · portée`, consultation et rattachement d'une sortie) ; phases 35 et 37a ; règle `ecriture_hors_portee` | en partie |
-| BV-15 Lettre d'information | DS9, DS10, DS16, DS21, DS22 | | phase 44, si la lettre est retenue | proposé |
-| BV-16 Force brute du mot de passe d'un accès | DS16, DS21, DS31 | | galeries, phase 37a : `authn_login_fail` (composant public), `authn_login_lock` (nouveau) | proposé |
-| BV-17 Énumération des liens et des espaces | DS16 | | galeries, phase 37a : `token_guess`, limite `galerie_lien` | proposé |
-| BV-18 Accès qui fuit (nombreux réseaux ou pays) | DS18, DS3 | | galeries, phase 37a : `session_created` (composant public, réseau seul) ; décision `suspendre_acces` à trancher | proposé |
-| BV-19 Téléchargement en masse | DS15, DS18 | | galeries, phases 37b et 38 : `excess_rate_limit_exceeded`, `sensitive_export` (archives) | proposé |
-| BV-20 Texte publié qui gagne un lien, un e-mail ou un téléphone | DS9 | Vigie | `watchWrites` (`server/securite/site.js`), `config_public_changed` (`objet: 'texte_public'`) ; billets compris ; fin de D ou phase E | proposé |
-| BV-21 Textes publiés modifiés en masse (défacement) | DS9 | Vigie | corrélation sur le modèle de `heures_visibles_en_masse`, seuil à caler ; billets compris | proposé |
-| BV-22 Accès gardé après révocation | DS1 | | galeries, phase 37a : `session_use_after_expire` (composant public) | proposé |
-| BV-23 Accès donnés, élargis ou retirés dans l'admin | DS18, DS23, DS10, DS8 | | galeries, phase 37a : `privacy_exposure_changed` (`objet: 'acces_prive'`) | proposé |
-| BV-24 Données des invités lues ou exportées dans l'admin | DS18 | | galeries, phases 37a et 37b : `SENSITIVE` étendu, `config.audit` | proposé |
-| BV-25 Gestes d'invité impossibles pour l'interface | DS12, DS14 | | galeries, phase 37a : `input_validation_fail`, `authz_csrf_fail` (composant public) | proposé |
-| BV-26 Réponse privée servie par le cache de Cloudflare | DS18 | | bordure (phase C3), avant l'ouverture de la phase 37a | proposé |
+| BV-10 Sorties du site par liste autorisée | MV11, DS23 ; nouvelle source « réseau » du quorum | ✓ Vigie (phase E4) | `feat/vigie-e4` : mandataire `deploy/unraid/reseau/mandataire.js` (service `sortie`, profil « sortie », `SORTIE_MANDATAIRE`) ; site : `HTTPS_PROXY` et `NODE_USE_ENV_PROXY=1` (`server/config.js`), option `proxy` de nodemailer (`server/mailer.js`) ; règles de l'hôte `deploy/unraid/reseau/regles.sh` (`NICEPHOS-SORTIE`) ; Vigie : `vigie/reseau.js`, `vigie/regles/75-reseau.yml` (`reseau_sortie_refusee`, `reseau_sortie_directe`, `vigie_reseau_silence`, chaîne DS23), carte « Réseau » de la santé, `cli.js reseau` | fait côté code, à appliquer sur l'instance de test |
+| BV-11 Flux entre conteneurs hors liste | MV11, MV16 ; source « réseau » | ✓ Vigie (phase E4) | `feat/vigie-e4`, avec BV-10 : matrice des flux dans `regles.sh` (`NICEPHOS-FLUX`), adresses fixes du site et du traducteur, réseau interne `nicephos-sortie` ; Vigie : `reseau_flux_hors_liste` (règles `reseau_flux_site`, `reseau_flux_repetes`) ; découpage complet de `nicephos` : étape suivante, proposé dans `deploy/unraid/reseau/README.md` | fait côté code, à appliquer sur l'instance de test |
+| BV-12 Construction active neutralisée dans un billet | DS11, DS23 | ✓ site (émission) ; règle et option du crochet : Vigie ; ✓ Vigie | `feat/carnets` : `malicious_input` émis par le rendu (émetteur `server/carnet-markdown.js · billet`, composant `site · admin`, détail `objet`, `billet`, `champ`, `langue`, `familles`, `constructions` en nombres, `longueur`), « moyen » pour une construction active, « bas » pour du HTML inoffensif ou une image externe, une fois par champ, langue et contenu, à l'enregistrement, la proposition, la publication et au rétablissement d'une version, jamais à l'aperçu ni à l'enregistrement automatique ; routes de l'aperçu et du brouillon déclarées `config.vigie.corps = 'rendu'` (à lire par `server/securite/site.js`) ; règle `billet_construction_active` et corrélation `billet_apres_session_reprise` : Vigie ; Vigie (phase E1) : règles `billet_construction_active`, `billet_apres_session_reprise` (`vigie/regles/85-galeries-carnets.yml`) ; option de route `config.vigie.corps` à lire dans `server/securite/site.js` | fait |
+| BV-13 Filtres et contexte du carnet hors liste | DS12 | ✓ site | `feat/carnets` : `input_validation_fail` (émetteur `server/routes/public.js · carnet`, raison « valeur de filtre hors liste », `champ`, `valeur` à 60 signes) par la fonction `ignored()` de BV-3, pour `?rubrique=`, `?par=` (photographe vu depuis moins de 30 jours : rien), `?page=` (non entière ou inférieure à 1 ; au-delà de la dernière : 404), `?carnet=` de la visionneuse (billet retiré ou ancienne adresse : rien) ; `via` du partage d'un billet : raison « valeur hors liste » ; la règle DS12 s'applique telle quelle | fait |
+| BV-14 Hors portée signalé pour les objets à plusieurs auteurs | DS10 | ✓ site (voyages, galeries privées, Carnets) ; règle : Vigie ; ✓ Vigie | voyages fait (`fix/vigie-bv14-voyages`) ; galeries privées fait (`feat/galeries-privees` : `authz_fail` « hors portée », émetteurs `server/routes/galeries.js · portée` et `server/routes/prive.js · portée`, détail `{ objet: 'galerie' \ ; Vigie (phase E1) : règle `ecriture_hors_portee` (`85-galeries-carnets.yml`, `detail.ecriture: true`) ; voyages : `objet`, `id` et `ecriture` ajoutés à l'émission | fait | 'photo', id, ecriture }`) ; Carnets fait (`feat/carnets` : `authz_fail` « hors portée », émetteur `server/routes/carnet.js · portée`, détail `permission`, `objet: 'billet'`, `id`, `ecriture` ; aperçu public d'un billet non publié demandé par une session de l'admin hors portée : émetteur `server/routes/public.js · carnet`) ; règle `ecriture_hors_portee` | fait côté site |
+| BV-15 Lettre d'information | DS9, DS10, DS16, DS21, DS22 |  | phase 44, si la lettre est retenue | proposé |
+| BV-16 Force brute du mot de passe d'un accès | DS16, DS21, DS31 | ✓ site ; types et règles : Vigie ; ✓ Vigie | `feat/galeries-privees` : `authn_login_fail` (`site · public`, `bas`, `portail: galerie_privee`) ; palier posé en `authn_login_disabled` avec `type_attendu: authn_login_lock` (type absent du vocabulaire, à ajouter par la Vigie) ; `excess_rate_limit_exceeded` (`galerie_mot_de_passe`, `mot_de_passe_global`) ; Vigie (phase E1) : type `authn_login_lock` (`site · public`) ; règles `galerie_echecs_adresse`, `galerie_essais_repartis`, `galerie_suspendue` (deux formes, dont `authn_login_disabled` avec `type_attendu`), `galerie_scrypt_sature` | fait |
+| BV-17 Énumération des liens et des espaces | DS16 | ✓ site ; ✓ Vigie | `feat/galeries-privees` : `token_guess` (`lien de galerie privée`, `espace privé`, `image privée`), limite `galerie_lien` (61e ouverture en 1 h) ; Vigie (phase E1) : `enumeration_jetons` (DS16) telle quelle | fait |
+| BV-18 Accès qui fuit (nombreux réseaux ou pays) | DS18, DS3 | ✓ site (émission) ; règles et décision : Vigie ; ✓ Vigie | `feat/galeries-privees` : `session_created` (`site · public`, réseau seul, pays dans `detail.pays`) ; suspension applicable par le site (`spaces.suspend`) ; décision `suspendre_acces` à créer par la Vigie (Tranché 5) ; Vigie (phase E1) : règles `acces_reseaux_multiples` (4 en 7 j ; 10 pour un lien de groupe), `acces_pays_multiples` (3 en 24 h ; 5 pour un groupe) ; décision `suspendre_acces` (appliquée par le site avec `app.spaces.suspend`), réponse de `acces_pays_multiples` en mode Bloquer seulement | fait |
+| BV-19 Téléchargement en masse | DS15, DS18 | ✓ site ; règles : Vigie ; ✓ Vigie | `feat/galeries-privees` : `excess_rate_limit_exceeded` (`telechargements` 50/h, `archives` 3/jour), `sensitive_export` (`site · public`, archive) ; Vigie (phase E1) : règles `telechargements_en_masse`, `acces_nouvel_appareil_puis_siphonage` | fait |
+| BV-20 Texte publié qui gagne un lien, un e-mail ou un téléphone | DS9 | ✓ Vigie | `watchWrites` (`server/securite/site.js`), `config_public_changed` (`objet: 'texte_public'`) ; billets compris : côté site (`feat/carnets`), chaque écriture d'un billet passe par `app.audit.log` avec les noms des champs (`champs : body_de, title`), jamais leurs valeurs ; la version en ligne ne change que par l'enregistrement d'un billet publié, la publication, la republication, le rétablissement d'une version ou **`app.carnet.runDue()`** (server/carnet.js), seule fonction de la publication programmée (sans session : `sub` nul, « publication programmée », notée au journal) à brancher sur `watchWrites` ; réglage `carnet_contact` (adresse de « Écrire aux auteurs ») à ajouter à `WATCHED` et `CONTACT` ; fin de D ou phase E ; Vigie (phase E1) : `server/securite/textes-publics.js` (photos publiées, séries, photographes, billets publiés), publication programmée comprise (sub nul), règle `texte_public_contact` | fait |
+| BV-21 Textes publiés modifiés en masse (défacement) | DS9 | ✓ Vigie | corrélation sur le modèle de `heures_visibles_en_masse` ; billets : corrélation sœur `billets_modifies_en_masse` (3 billets publiés modifiés ou retirés par un même compte en 1 h, décision 10), à partir des lignes du journal d'audit des Carnets (`POST /admin/carnet/:id`, `/retirer`, `/republier`, `/versions/:rev/retablir`, `carnet · publication programmée`) ; Vigie (phase E1) : `textes_publics_geste_massif` (50 textes d'un geste), `textes_publics_en_serie` (20 gestes en 10 min), `billets_modifies_en_masse` (3 en 1 h) | fait |
+| BV-22 Accès gardé après révocation | DS1 | ✓ site ; règle : Vigie ; ✓ Vigie | `feat/galeries-privees` : `session_use_after_expire` (`site · public`, `portail: galerie_privee`, `jeton: lien \ ; Vigie (phase E1) : règle `acces_apres_revocation` | fait | site fait |
+| BV-23 Accès donnés, élargis ou retirés dans l'admin | DS18, DS23, DS10, DS8 | ✓ site (émission, journal d'audit) ; règles, `sys_state` : Vigie ; ✓ Vigie | `feat/galeries-privees` : `privacy_exposure_changed` (`objet: 'acces_prive'`, un seul point : `server/spaces.js`) ; `audit_log` « galerie privée : … » ; Vigie (phase E1) : règles `acces_crees_en_masse`, `acces_debloque_apres_suspension`, `acces_apres_session_reprise`, `acces_longue_echeance` (> 90 j) ; `role_incoherent` étendu ; contrôle des rôles : accès ouvert apparu sans événement | fait |
+| BV-24 Données des invités lues ou exportées dans l'admin | DS18 | ✓ site ; `SENSITIVE` : Vigie | `feat/galeries-privees` : `sensitive_read` émis par la route (fiche d'un accès, activité, sélections ; `detail.id` : l'accès), lecture notée au journal ; export CSV en `config.audit` ; Vigie : `SENSITIVE` laissé tel quel (la route émet déjà `sensitive_read` : l'étendre compterait chaque lecture deux fois) | fait |
+| BV-25 Gestes d'invité impossibles pour l'interface | DS12, DS14 | ✓ site ; corrélation : Vigie ; ✓ Vigie | `feat/galeries-privees` : `input_validation_fail` (provenance, photo hors galerie, taille hors liste ou non permise, vue ou langue inconnue), `authz_csrf_fail` (`site · public`) ; Vigie (phase E1) : corrélation `csrf_repetes_invite` (par session visiteur) ; DS12 telle quelle | fait |
+| BV-26 Réponse privée servie par le cache de Cloudflare | DS18 | ✓ Vigie | bordure (phase C3), avant l'ouverture de la phase 37a ; Vigie (phase E1) : point `cache_prive` du Worker, événement `bordure_cache_prive`, règle (`70-bordure.yml`, haute) | fait |
 
 ---
 
@@ -121,6 +126,11 @@ l'implémentation de la brique (précision de la session de la Vigie, 18 octobre
 | #129 v2 | Recherche `?q=` (formulaire GET, 100 caractères) | injection, sondage | `malicious_input` (E14) par le crochet commun, DS11, DS22, DS23 ; identique en v1 et v2 | **BV-8**, **BV-9** |
 | #129 v2 | Carte, voyages, 404 v2 | parcours systématique, scanners | `malicious_excess_404` (E17, DS15/DS16), piège (E18), règle `bordure_rafale` | aucun |
 | #129 v2 | Pages légales et confidentialité | — (texte identique à la v1, journal de sécurité compris) | — | aucun |
+| #147 v2 | Texte de remplacement dans « Compléter et publier » (champ par champ et tableau sans script) et dans l'inspecteur | défacement par un compte volé ; écriture sur la photo d'un autre photographe | `app.audit.log` avec le **nom** du champ (`champs : alt_text`, « photo 12 : alt_text » pour le lot), jamais sa valeur ; `authz_fail` hors portée (DS10), CSRF (DS14) | **BV-20**, **BV-21** (mêmes signaux que la fiche) |
+| #147 v2 | Migration 054 : déclencheurs du numéro d'inventaire recréés (année de Paris) | — | référence des déclencheurs reprise après la migration (`vigie_declencheurs`) ; ni ceux des comptes ni celui des sessions ne changent | aucun |
+| #147 v2 | Liste de contrôle de la bascule (`docs/wiki/Bascule-v2.md`) | faux positifs d'aspiration et de 404 après la bascule | DS15, `malicious_excess_404` | **BV-4** (recalage avant la bascule, à confirmer par la Vigie), **BV-5** (test des liens internes) |
+| v2 bouton | `POST /admin/apparence/apercu-v2` étendue (`vue=v1\|v2\|suivre`) : vue de la session d'un administrateur, bouton « Voir en v1 / Voir en v2 » des pages publiques | vue posée par une page tierce ; par un compte sans droit | `authz_csrf_fail` (DS14), `authz_fail` (DS10) ; journal d'audit « vue de la session : v2 (visiteurs : v1) » | aucun : préférence d'affichage de la session, pas un réglage public (pas de `config_public_changed`) |
+| v2 bouton | Pages publiques d'une session en `private, no-store` (304 compris, sans `CDN-Cache-Control`) | page portant le bouton ou le jeton CSRF d'un administrateur gardée par Cloudflare | — | aucun |
 
 ### BV-3 — Valeurs de filtre impossibles
 
@@ -182,6 +192,112 @@ Aujourd'hui, ni limite ni signal côté site sur `/recherche` (seule la règle `
 Cloudflare est installé). Proposition : une limite par adresse (60 en 10 minutes) qui, une fois atteinte, répond 429 et
 émet `excess_rate_limit_exceeded` (détail : `limite: 'recherche'`), gravité `bas`, rattachée à DS15 et au score
 d'adresse (DS22).
+
+---
+
+## Déploiement : sorties réseau et flux entre conteneurs
+
+Question posée le 18 octobre 2026 : une sonde Suricata sur le trafic entrant et entre les composants apporterait-elle à
+la Vigie ? Sur l'**entrant**, non : aucun port n'est ouvert, tout passe par le tunnel, chiffré jusqu'à `cloudflared` ;
+le seul tronçon en clair (`cloudflared` → `site:3000`) montre les requêtes que le site journalise déjà, sans compte ni
+session, et l'empreinte TLS du visiteur y est perdue (le TLS s'arrête chez Cloudflare), alors que le Worker de la
+phase C3 la voit. Le vrai angle mort est ailleurs :
+
+- **La sortie du site est libre.** Le site est sur le réseau `nicephos`, routé vers Internet. Compromis (MV11 : fichier
+  image piégé, modèle, dépendance npm), il peut ouvrir un shell inversé, joindre un serveur de commande ou envoyer la
+  base et `DATA_KEY` dehors. Aucune source de la Vigie ne le voit : elle ne connaît du site que ce qu'il lui envoie.
+- **Les conteneurs partagent un même réseau.** `site`, `backup`, `cloudflared`, `libretranslate` et `vigie` sont tous
+  sur `nicephos` : chacun peut joindre les autres, alors que les flux voulus tiennent en quelques lignes.
+
+Les deux besoins ci-dessous ajoutent une **source « réseau »** au quorum (3.2 de l'étude de recadrage), constatée hors du
+site : un site compromis ne la contrôle pas. Ils empêchent d'abord, puis signalent chaque tentative.
+
+### BV-10 — Sorties du site par une liste autorisée
+
+**Empêcher.** Le site ne sort plus que par un **mandataire de sortie** (un petit conteneur HTTP `CONNECT`, par exemple
+Squid ou tinyproxy) qui n'accepte que les noms de la liste ; tout autre nom est refusé et journalisé. Sorties relevées
+dans le code le 18 octobre 2026 :
+
+| Destination | Pour quoi | Où dans le code |
+|---|---|---|
+| `<instance>.zitadel.cloud` (`OIDC_ISSUER`) | connexion OIDC | `server/oidc.js` |
+| `graph.instagram.com`, `api.instagram.com` | publication Instagram | `server/instagram.js` |
+| `freetsa.org` (`TSA_URL`) | horodatage des preuves | `server/config.js` |
+| hôte de `SMTP_URL` | e-mails | `server/mailer.js` |
+| `huggingface.co` et ses serveurs de fichiers (noms exacts à relever pendant un téléchargement sur l'instance de test) | modèles de description et de suggestion de séries, au premier usage seulement | `server/describe-worker.js`, `server/series-suggest.js` |
+
+À vérifier à l'implémentation : `fetch` de Node 22 ne suit `HTTPS_PROXY` qu'avec `NODE_USE_ENV_PROXY=1` (selon la
+version mineure de l'image) ; nodemailer prend son mandataire par l'option `proxy` ; les modèles peuvent aussi être
+téléchargés une fois puis Hugging Face retiré de la liste.
+
+**Forcer le passage.** Une règle de l'hôte (chaîne `DOCKER-USER`) n'autorise depuis l'adresse du site, hors des réseaux
+internes, que le mandataire, et **rejette et journalise** tout le reste. Un site sain, réglé pour le mandataire, ne sort
+jamais en direct : une tentative directe prouve qu'un code qui n'est pas le nôtre tourne.
+
+**Signaler.** La Vigie lit, en lecture seule, le journal du mandataire et celui des rejets de l'hôte (comme elle lit
+déjà les sauvegardes), sans passer par le site. Événements proposés (source « réseau », confiance « constaté ») :
+
+| Événement | Quand | Gravité proposée |
+|---|---|---|
+| `reseau_sortie_refusee` | nom hors liste demandé au mandataire | `moyen` ; `haut` au-delà de 3 noms différents en 1 h |
+| `reseau_sortie_directe` | connexion du site vers Internet sans le mandataire, rejetée par l'hôte | `haut`, **exception à source unique** (comme le cookie rejoué) |
+| `vigie_reseau_silence` | journal du mandataire ou des rejets illisible ou muet au-delà de 24 h alors que le site tourne | `moyen` (comme `vigie_bordure_silence`) |
+
+Rattachement : MV11 (le site ne peut plus confirmer ni masquer seul), DS23 (une sortie refusée qui suit une saisie
+malveillante ou un fichier piégé, DS11 ou DS13, de la même heure fait une chaîne d'attaque).
+
+Limite connue : le résolveur DNS intégré de Docker relaie les noms externes depuis le démon, hors de la chaîne
+`DOCKER-USER` ; une fuite par requêtes DNS resterait possible. Parade en second temps : `dns:` du site vers un petit
+résolveur à liste autorisée qui journalise les noms refusés (le mandataire résout les noms autorisés, le site n'a plus
+besoin d'en résoudre d'autres que ceux des conteneurs).
+
+### BV-11 — Flux entre conteneurs hors de la liste
+
+**Empêcher.** Découper `nicephos` pour que chaque flux voulu ait son réseau, et rien d'autre :
+
+| De | Vers | Pourquoi |
+|---|---|---|
+| `cloudflared` | `site:3000` ; plus tard `vigie:4200` (console) | tunnel |
+| `site` | `vigie-reception:4100` (`nicephos-vigie-ingest`, déjà interne) | événements, décisions |
+| `site` | `libretranslate:5000` (profil « traduction ») | propositions de traduction |
+| `site` | mandataire de sortie (BV-10) | Internet, liste autorisée |
+| `vigie` | `signal:8080` (`nicephos-vigie-signal`, déjà interne) | notifications |
+| `vigie` | Internet : Zitadel, SMTP, API Cloudflare, listes de menaces | lecture, notifications |
+| `backup`, `vigie-backup` | aucun | sauvegardes locales (`network_mode: none` à vérifier pour `backup`) |
+
+**Signaler.** Ce qu'un découpage ne peut pas interdire (deux conteneurs qui partagent légitimement un réseau) passe par
+la même chaîne `DOCKER-USER` : tout paquet entre deux adresses des réseaux Nicephos qui n'est pas dans la liste est
+rejeté et journalisé. Événement proposé : `reseau_flux_hors_liste` (source, destination, port), gravité `haut`,
+exception à source unique quand la source est le site (mouvement latéral : MV16, le site qui sonde la console ou la
+passerelle). Les refus déjà vus par les services eux-mêmes restent comptés à part (`vigie_ingestion_refusee`, DS30).
+
+À valider sur l'instance de test avant Unraid : lancement des règles au démarrage de la grappe (script « User Scripts »),
+écriture des rejets dans un fichier dédié (préfixe de journal filtré par rsyslog), monté en lecture seule dans la Vigie
+seul ; volume borné.
+
+**État (19 octobre 2026, phase E4, `feat/vigie-e4`) : fait côté code, à appliquer sur l'instance de test.** Mandataire écrit
+dans le dépôt (`deploy/unraid/reseau/mandataire.js`, lancé avec l'image du site) plutôt que Squid ou tinyproxy : contrôle des
+adresses résolues (un nom autorisé qui mène au réseau local est refusé), journal JSON sans chemin par construction,
+battement horaire, liste tirée du `.env` au démarrage. Relevé du code : toutes les sorties du site passent par `fetch`
+(openid-client, Instagram, horodatage, modèles), sauf nodemailer ; Hugging Face sert les modèles depuis `*.hf.co`
+(`us.aws.cdn.hf.co` à l'essai). Règles de l'hôte : `deploy/unraid/reseau/regles.sh` (`--afficher`, `--retirer`,
+`--battement`, `--rsyslog`), chaînes `NICEPHOS*` appelées en tête de `DOCKER-USER`, posées d'un coup, sur des
+sous-réseaux et des adresses fixes (le site et le traducteur ont désormais la leur). Essai en conteneurs (sans iptables) :
+sortie autorisée réussie (FreeTSA, Hugging Face), noms refusés journalisés, journal lu par la Vigie en lecture seule,
+alertes ouvertes. Guide : [`deploy/unraid/reseau/README.md`](../../deploy/unraid/reseau/README.md). Restent à valider
+sur l'instance de test : les règles posées pour de bon (rejets réels dans `hote.log`, filtre rsyslog), le passage de chaque
+fonction du site par le mandataire, et le découpage complet du réseau `nicephos` (étape suivante, proposé dans le guide).
+
+### Perspective : Suricata, seulement en sortie
+
+Non retenu pour l'instant (D26). Si BV-10 et BV-11 montrent un besoin, une sonde Suricata **sur le seul pont de sortie
+du site** ajouterait ce qu'une liste ne voit pas : balises régulières vers un serveur de commande, tunnels DNS, client
+TLS qui n'est pas Node (empreinte JA3/JA4 de l'outil d'un attaquant), réputation des destinations (listes abuse.ch).
+Réglage à garder : `eve.json` limité aux flux, au DNS et au SNI, **sans** contenu HTTP ni capture de paquets (cookies et
+formulaires ne doivent jamais être gardés) ; règles ET Open restreintes aux familles malware et commande à distance.
+Coût : `NET_RAW` et `NET_ADMIN` (le conteneur le plus privilégié de la pile, qui analyse un trafic hostile), 0,5 à 1 Go
+de mémoire, des règles à suivre. Sur l'entrant, il n'apporterait rien que le Worker et les événements du site ne donnent
+déjà mieux.
 
 ---
 

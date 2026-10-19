@@ -1,0 +1,159 @@
+# Réseau (phase E4 ; registre des briques, BV-10 et BV-11 ; décisions D24 et D25) : journaux du mandataire de sortie et
+# des rejets du pare-feu de l'hôte, lus par la Vigie en lecture seule (vigie/reseau.js). Source « réseau » du quorum,
+# constatée hors du site : un site compromis ne peut ni la provoquer ni la taire. Ses événements ne portent que des
+# conteneurs de la pile et des destinations (ni visiteur ni compte) : les règles visent le site ou la Vigie et ouvrent
+# leur alerte elles-mêmes.
+title: Sortie du site refusée par le mandataire (nom hors de la liste autorisée)
+name: reseau_sortie_refusee
+id: 5e925a62-2bc3-4268-8f8b-a2c0e02be3b3
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Le site a demandé au mandataire un nom qui n'est pas dans la liste (BV-10). Une fonction du site qui gagne une
+  dépendance externe le fait aussi (à ajouter à SORTIE_NOMS) ; un code qui n'est pas le nôtre le fait d'abord.
+tags: [attack.command_and_control, attack.t1071.001, attack.exfiltration, attack.t1041]
+detection:
+  selection:
+    type: reseau_sortie_refusee
+  condition: selection
+level: medium
+vigie: { cas: MV11, entite: { kind: site, valeur: sortie }, source_unique: true }
+---
+title: Plus de trois noms différents refusés en une heure
+name: reseau_sorties_variees
+id: b9843ad1-2d9a-4382-8a6a-87ea82afdc7c
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.command_and_control, attack.t1071.001, attack.t1568]
+correlation:
+  type: value_count
+  rules: [reseau_sortie_refusee]
+  timespan: 1h
+  condition: { gt: 3, field: detail.hote }
+level: high
+vigie: { cas: MV11, entite: { kind: site, valeur: sortie }, source_unique: true, mode: alerter }
+---
+title: Sortie directe vers Internet rejetée par l'hôte (sans le mandataire)
+name: reseau_sortie_directe
+id: c7707fef-db1f-4646-b080-f05d486cf14f
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Un conteneur de la pile (le site, la sauvegarde) a tenté de joindre Internet sans le mandataire ; la règle de l'hôte l'a
+  rejeté (BV-10, « forcer le passage »). Un site sain, réglé pour le mandataire, ne le fait jamais : exception à source
+  unique, comme le cookie rejoué.
+tags: [attack.command_and_control, attack.t1095, attack.exfiltration, attack.t1048]
+detection:
+  selection:
+    type: reseau_sortie_directe
+  condition: selection
+level: high
+vigie: { cas: MV11, entite: { kind: site, valeur: sortie_directe }, source_unique: true, mode: alerter }
+---
+title: Le site joint un conteneur hors des flux voulus (mouvement latéral)
+name: reseau_flux_site
+id: 32989214-8152-469e-a956-41cd11986760
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Paquet du site vers un autre conteneur de la pile hors de la liste des flux (BV-11) : le site qui sonde la console,
+  la passerelle ou la sauvegarde (MV16). Exception à source unique.
+tags: [attack.lateral_movement, attack.discovery, attack.t1046]
+detection:
+  selection:
+    type: reseau_flux_hors_liste
+    detail.source_nom: site
+  condition: selection
+level: high
+vigie: { cas: MV16, entite: { kind: site, valeur: flux }, source_unique: true, mode: alerter }
+---
+title: Flux hors liste d'un autre conteneur de la pile
+name: reseau_flux_conteneur
+id: 0246c321-e1e3-4657-8eda-71b58b259010
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: reseau_flux_hors_liste
+  site:
+    detail.source_nom: site
+  condition: selection and not site
+level: low
+vigie: { signal: false }
+---
+title: Flux hors liste répétés depuis un même conteneur (trois en une heure)
+name: reseau_flux_repetes
+id: fdf68087-5ffb-480f-abb1-298565c94386
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Un conteneur autre que le site (tunnel, Vigie, traducteur, sauvegarde) envoie des paquets hors des flux voulus : un
+  paquet isolé peut venir d'un réglage (nom résolu sur le mauvais réseau) ; trois en une heure, c'est à regarder.
+tags: [attack.lateral_movement, attack.discovery, attack.t1046]
+correlation:
+  type: event_count
+  rules: [reseau_flux_conteneur]
+  group-by: [detail.source]
+  timespan: 1h
+  condition: { gte: 3 }
+level: high
+vigie: { cas: MV16, entite: { kind: site, champ: detail.source_nom, prefixe: 'conteneur:' }, source_unique: true }
+---
+title: Journal réseau illisible ou muet, ou règles de l'hôte absentes
+name: reseau_muet
+id: d959160f-036d-497a-b003-d18b26a8d645
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.defense_evasion, attack.t1562.004]
+detection:
+  selection:
+    type: vigie_reseau_silence
+  condition: selection
+level: medium
+vigie: { cas: DS24, entite: { kind: vigie, valeur: reseau }, source_unique: true }
+---
+# Chaîne DS23 : une saisie malveillante ou un fichier piégé (DS11, DS13) puis, dans la même heure, une sortie refusée par
+# le mandataire ou rejetée par l'hôte (dans un sens ou dans l'autre) : le code envoyé tourne peut-être et cherche à
+# sortir. Les constats « bas » (HTML inoffensif d'un billet, BV-12) n'y entrent pas.
+title: Saisie malveillante ou fichier piégé (pour la chaîne réseau)
+name: reseau_attaque_site
+id: f7b39a5d-fa17-42e5-9f2f-c89e4ad4a949
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  saisie:
+    type: malicious_input
+    severity: [moyen, haut, critique]
+  fichier:
+    type: upload_rejected
+  condition: 1 of them
+level: low
+vigie: { signal: false }
+---
+title: Sortie refusée ou directe (pour la chaîne réseau)
+name: reseau_sortie_suspecte
+id: 1ab74ff6-1072-4e64-86ce-b8e6e870e60f
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: [reseau_sortie_refusee, reseau_sortie_directe]
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Sortie refusée ou directe dans l'heure d'une saisie malveillante ou d'un fichier piégé
+name: reseau_chaine_attaque
+id: 551835e9-b8c0-43f7-b29f-85aa998b13c3
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.execution, attack.t1190, attack.command_and_control, attack.t1105]
+correlation:
+  type: temporal
+  rules: [reseau_attaque_site, reseau_sortie_suspecte]
+  timespan: 1h
+level: critical
+vigie: { cas: DS23, entite: { kind: site, valeur: chaine_sortie }, source_unique: true, mode: alerter }

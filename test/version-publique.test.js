@@ -7,7 +7,8 @@ import { fmt, visSizes } from '../server/v2-vues.js';
 import { shortDate } from '../server/format.js';
 
 // Site public v1 / v2 (server/version-publique.js) : réglage pour tous, aperçu réservé à l'administrateur connecté,
-// repli sur la v1 d'une page sans gabarit v2, réponses jamais gardées dans un cache partagé pendant l'aperçu.
+// repli sur la v1 d'une page sans gabarit v2, réponses jamais gardées dans un cache partagé pour une session.
+// Le bouton « Voir en v1 / Voir en v2 » et la vue de la session : test/vue-site.test.js.
 const PHOTO = '/photo/brume-sur-la-loire';
 const isV2 = body => /class="wrap vis-scene/.test(body);
 const isV1 = body => /<main class="viewer"/.test(body);
@@ -50,7 +51,7 @@ test('visiteur : la v1 quand le réglage est v1, quels que soient cookies, param
     const res = await c.visit(o.url, { cookies: o.cookies, headers: o.headers });
     assert.equal(res.statusCode, 200);
     assert.ok(isV1(res.body), JSON.stringify(o));
-    assert.doesNotMatch(res.body, /Aperçu de la v2/);
+    assert.doesNotMatch(res.body, /class="vue-site|apercu-v2/);
     assert.notEqual(res.headers['cache-control'], 'private, no-store');
   }
   // Ouvrir l'aperçu sans session, ou avec un faux jeton CSRF : refusé.
@@ -60,7 +61,7 @@ test('visiteur : la v1 quand le réglage est v1, quels que soient cookies, param
   assert.ok(isV1((await c.visit(PHOTO)).body));
 });
 
-test('aperçu : réservé à l’administrateur (site.apparence), private no-store, bandeau, quitté par POST', async t => {
+test('vue v2 : réservée à l’administrateur (site.apparence), private no-store, bouton, quittée par POST', async t => {
   const c = await site(t);
   // Un modérateur ou un photographe n'a pas le droit d'apparence : 403, et rien ne change pour lui.
   for (const role of ['moderateur', 'photographe', 'relecteur']) {
@@ -73,11 +74,11 @@ test('aperçu : réservé à l’administrateur (site.apparence), private no-sto
   assert.equal(on.statusCode, 303);
   assert.equal(on.headers.location, PHOTO);
   // Journal d'audit : qui, quoi.
-  assert.ok(c.db.prepare("SELECT 1 FROM audit_log WHERE sub = 'test:admin' AND detail = 'aperçu de la v2 ouvert'").get());
+  assert.ok(c.db.prepare("SELECT 1 FROM audit_log WHERE sub = 'test:admin' AND detail = 'vue de la session : v2 (visiteurs : v1)'").get());
   const page = await a.get(PHOTO);
   assert.ok(isV2(page.body));
   assert.equal(page.headers['cache-control'], 'private, no-store');
-  assert.match(page.body, /Aperçu de la v2 \(visible par vous seul\)/);
+  assert.match(page.body, /<aside class="vue-site vue-site--forcee"[^>]*>.*Vous seul voyez la v2\u202f; les visiteurs voient la v1\./s);
   assert.match(page.body, new RegExp(`name="_csrf" value="${a.csrf}"`));
   // Toutes les réponses publiques de la session (pages en v1 comprises, 404, sitemap) ; pas les fichiers statiques.
   for (const url of ['/', '/a-propos', '/en/photo/brume-sur-la-loire', '/nexiste-pas', '/sitemap.xml', '/robots.txt']) {
@@ -95,13 +96,13 @@ test('aperçu : réservé à l’administrateur (site.apparence), private no-sto
   assert.equal(off.headers.location, PHOTO);
   const after = await a.get(PHOTO);
   assert.ok(isV1(after.body));
-  assert.notEqual(after.headers['cache-control'], 'private, no-store');
+  assert.equal(after.headers['cache-control'], 'private, no-store');                   // toujours une session : jamais en cache partagé
   // Une adresse de retour hors du site est ignorée.
   assert.equal((await a.post('/admin/apparence/apercu-v2', { apercu: '0', vers: '//ailleurs.example/x' })).headers.location, '/admin/apparence');
   assert.equal((await a.post('/admin/apparence/apercu-v2', { apercu: '1', vers: 'https://ailleurs.example/' })).headers.location, '/');
 });
 
-test('aperçu : tombe avec la session (déconnexion, droit retiré)', async t => {
+test('vue de la session : tombe avec la session (déconnexion, droit retiré)', async t => {
   const c = await site(t);
   const a = c.as('admin');
   await a.post('/admin/apparence/apercu-v2', { apercu: '1' });
@@ -111,7 +112,8 @@ test('aperçu : tombe avec la session (déconnexion, droit retiré)', async t =>
   c.db.prepare("UPDATE accounts SET roles = '[\"relecteur\"]' WHERE sub = 'test:admin'").run();
   const res = await a.get(PHOTO);
   assert.ok(isV1(res.body));
-  assert.notEqual(res.headers['cache-control'], 'private, no-store');
+  assert.doesNotMatch(res.body, /class="vue-site/);                                    // plus de bouton sans le droit
+  assert.equal(res.headers['cache-control'], 'private, no-store');
   c.db.prepare("UPDATE accounts SET roles = '[\"admin\"]' WHERE sub = 'test:admin'").run();
   assert.ok(isV2((await a.get(PHOTO)).body));
   await a.logout();
@@ -128,14 +130,14 @@ test('repli : une page sans gabarit v2 reste en v1 (aperçu comme réglage v2) ;
   assert.equal(error.statusCode, 400);
   assert.match(error.body, /css\/site\.css/);                                         // la v1
   assert.doesNotMatch(error.body, /css\/v2\//);
-  assert.match(error.body, /cette page n’a pas encore sa version v2/);                 // le bandeau, même en v1
+  assert.match(error.body, /class="vue-site[^"]*".*Cette page n’a pas encore de v2\./s);   // le bouton, même en v1
   const notFound = await a.get('/nexiste-pas');
   assert.equal(notFound.statusCode, 404);
   assert.match(notFound.body, /css\/v2\/pages\.css/);                                 // la page introuvable v2
-  // L'admin et ses pages ne prennent ni la v2 ni le bandeau.
+  // L'admin et ses pages ne prennent ni la v2 ni le bouton.
   const admin = await a.get('/admin/apparence');
-  assert.doesNotMatch(admin.body, /css\/v2\/|Aperçu de la v2 \(visible/);
-  assert.match(admin.body, /Aperçu de la v2 ouvert/);
+  assert.doesNotMatch(admin.body, /css\/v2\/|class="vue-site/);
+  assert.match(admin.body, /Votre vue : la v2, pour vous seul, sur cette session\./);
   // Un nom de gabarit qui n'est pas celui d'une page publique n'est jamais cherché dans views/v2/.
   assert.equal(c.app.publicVersion.hasV2('../layout'), false);
   assert.equal(c.app.publicVersion.hasV2('admin/home'), false);
@@ -144,7 +146,7 @@ test('repli : une page sans gabarit v2 reste en v1 (aperçu comme réglage v2) ;
   assert.equal(c.app.publicVersion.hasV2('auth-error'), false);
 });
 
-test('réglage v2 : tout le monde voit la v2 (sans no-store ni bandeau) ; noté au journal ; valeur inconnue ignorée', async t => {
+test('réglage v2 : tout le monde voit la v2 (sans no-store ni bouton) ; noté au journal ; valeur inconnue ignorée', async t => {
   const c = await site(t);
   const a = c.as('admin');
   assert.equal((await a.post('/admin/apparence', { site_public: 'v3' })).statusCode, 303);
@@ -156,12 +158,13 @@ test('réglage v2 : tout le monde voit la v2 (sans no-store ni bandeau) ; noté 
     const res = await c.visit(`${lang}${PHOTO}`);
     assert.ok(isV2(res.body), lang);
     assert.equal(res.headers['cache-control'], undefined);
-    assert.doesNotMatch(res.body, /Aperçu de la v2/);
+    assert.doesNotMatch(res.body, /class="vue-site/);
   }
-  // La page Apparence le dit, et ne propose plus l'aperçu.
+  // La page Apparence le dit, et propose de voir la v1.
   const page = (await a.get('/admin/apparence')).body;
   assert.match(page, /value="v2" checked/);
   assert.match(page, /La v2 est appliquée/);
+  assert.match(page, /Voir le site en v1/);
   // Retour en v1.
   await a.post('/admin/apparence', { site_public: 'v1' });
   assert.ok(isV1((await c.visit(PHOTO)).body));
@@ -257,4 +260,22 @@ test('aides v2 : format arrondi vers le bas, sizes, date abrégée insécable', 
   assert.equal(shortDate('2026-10-10', 'de'), '10. Okt. 2026');
   assert.equal(shortDate('2024-03'), 'mars 2024');
   assert.equal(shortDate(''), '');
+});
+
+test('page Apparence : « Site public : v1 ou v2 » en tête, avant le thème ; un texte qui ne date pas', async t => {
+  const c = await site(t);
+  const page = (await c.as('admin').get('/admin/apparence')).body;
+  const main = page.slice(page.indexOf('<h1'));
+  const section = main.indexOf('id="site-public"'), theme = main.indexOf('name="theme"');
+  assert.ok(section > 0 && theme > 0 && section < theme, 'la version avant le formulaire du thème');
+  assert.ok(main.indexOf('id="site-public"') < main.indexOf('<form'), 'la section est le premier bloc après le titre');
+  assert.match(page, /Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion/);
+  assert.doesNotMatch(page, /aujourd’hui : la page d’une photo|arrivent une à une|le site actuel/);
+  // Toujours en anglais et en allemand (dictionnaire de l'admin).
+  const { translator } = await import('../server/admin-i18n.js');
+  for (const l of ['en', 'de']) {
+    for (const k of ['La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion, qui gardent la présentation v1. L’administration ne change pas.', 'la nouvelle présentation', 'la présentation d’origine']) {
+      assert.notEqual(translator(l)(k), k, `${l} : ${k}`);
+    }
+  }
 });

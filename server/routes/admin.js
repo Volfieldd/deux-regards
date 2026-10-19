@@ -34,9 +34,14 @@ import { TranslateError } from '../translate.js';
 import { registerEncounters } from './rencontres.js';
 import { registerOutings } from './sorties.js';
 import { registerTrips } from './voyages.js';
+import { registerGaleries } from './galeries.js';
+import { registerCarnet } from './carnet.js';
 import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
 import { legalMissing } from '../legal.js';
+import { createAdminVersion, ADMIN_VERSIONS } from '../admin-version.js';
+import { typoHtml } from '../typo-html.js';
+import { fileURLToPath } from 'node:url';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
 // (public/admin/carte-monde.svg, généré par scripts/carte-monde.mjs), nom du pays en français.
@@ -184,7 +189,11 @@ export default async function adminRoutes(app) {
     if (request.session && ((request.method !== 'GET' && request.method !== 'HEAD') || request.routeOptions.config?.audit)) {
       const action = `${request.method} ${request.routeOptions.url}`;
       request.log.info({ audit: true, sub: request.session.sub, action, params: request.params, status: reply.statusCode }, 'action admin');
-      if (!request.audited && !['POST /admin/langue', 'POST /admin/theme'].includes(action)) {
+      // L'aperçu d'un billet et son enregistrement automatique (une demande toutes les 1,5 à 30 s pendant qu'on écrit) ne
+      // le sont pas non plus (étude des Carnets, B34) : ils n'écrivent rien du billet ; « Enregistrer » est noté.
+      // Le choix de l'admin v1 ou v2 (POST /admin/version) est une préférence du compte, comme la langue et le thème ; de
+      // même les raccourcis d'une touche de la photothèque v2 (POST /admin/compte/raccourcis).
+      if (!request.audited && !['POST /admin/langue', 'POST /admin/theme', 'POST /admin/version', 'POST /admin/compte/raccourcis', 'POST /admin/carnet/:id/apercu', 'POST /admin/carnet/:id/brouillon'].includes(action)) {
         // Statut gardé : celui de l'issue (422 pour un refus par failed(), redirigé en 303), lu « fait » ou « refusé ».
         app.audit.log({ sub: request.session.sub, name: request.session.name, action, target: Object.values(request.params || {}).join(' / '), status: request.refused && reply.statusCode < 400 ? 422 : reply.statusCode,
           detail: request.auditChanges?.length ? `champs : ${request.auditChanges.join(' ; ')}` : '' });
@@ -278,6 +287,23 @@ export default async function adminRoutes(app) {
   const vigieView = app.decisions && app.config.vigie ? createVigieAdmin({ decisions: app.decisions, consoleUrl: app.config.vigie.consoleUrl }) : null;
   const securiteOf = request => (vigieView && request.can('securite.voir') ? vigieView(request.t) : null);
 
+  // Admin v1 ou v2, au choix de chaque compte (server/admin-version.js) ; un écran sans gabarit v2 reste en v1.
+  const adminVersion = createAdminVersion({ db: app.db, viewsDir: fileURLToPath(new URL('../../views/', import.meta.url)), cache: app.config.production });
+  // Onglets des Réglages de la v2 (MQ-07) : les pages de réglage existantes, chacune avec sa permission ; « Mentions et
+  // confidentialité » compte les rubriques légales qui manquent.
+  const SETTINGS_TABS = [
+    ['appearance', '/admin/apparence', 'Identité et apparence', 'site.apparence'],
+    ['images', '/admin/images', 'Filigrane et EXIF', 'site.filigrane'],
+    ['droits', '/admin/droits', 'Mentions et confidentialité', 'reglages.droits'],
+    ['authors', '/admin/auteurs', 'Photographes', 'photographes.gerer'],
+    ['assistants', '/admin/reglages/assistants', 'Assistants d’analyse', 'series.propositions'],
+  ];
+  // Pages de la v2 en français : espaces insécables posées à l'envoi (server/typo-html.js).
+  app.decorateRequest('typoV2', false);
+  app.addHook('onSend', async (request, reply, payload) => (request.typoV2 && typeof payload === 'string' && String(reply.getHeader('content-type') || '').startsWith('text/html') ? typoHtml(payload) : payload));
+  const settingsTabs = request => SETTINGS_TABS.filter(([, , , perm]) => request.can(perm))
+    .map(([key, href, label, perm]) => ({ key, href, label: request.t(label), alert: key === 'droits' ? legalMissing(repo.settings()).length : 0, perm }));
+
   // Messages de validation (écrits en français dans le code) : traduits dans la langue de l'admin à l'affichage.
   const translateDeep = (t, v) => (typeof v === 'string' ? t.msg(v) : v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, k === 'values' ? x : translateDeep(t, x)])) : v);
   function render(request, reply, template, data) {
@@ -293,7 +319,16 @@ export default async function adminRoutes(app) {
       app.accounts.setSeenRelease(request.session.sub, RELEASE_CURRENT);
     }
     const securite = data.securite === undefined ? securiteOf(request) : data.securite;
-    return reply.render(`admin/${template}`, {
+    const version = adminVersion.of(request.session.sub);
+    // data.v2 : le gabarit v2 d'un écran que la v1 rend avec un gabarit partagé (« settings » sert Site public et Droits).
+    const shown = adminVersion.template(request, data.v2 || template);
+    const v2 = shown.startsWith('admin/v2/');
+    if (v2) request.typoV2 = true;
+    return reply.render(v2 ? shown : `admin/${template}`, {
+      // Choix de l'admin (menu du compte) ; en v2, les onglets des Réglages et le rôle affiché sous le nom.
+      adminVersion: version, adminV2: v2,
+      // shortcuts : raccourcis d'une touche de la photothèque (préférence du compte, « Mon compte »).
+      ...(v2 ? { settingsTabs: settingsTabs(request), roleNames: (request.session.roles || []).map(r => request.t(ROLES[r]?.label || r)), shortcuts: adminVersion.shortcuts(request.session.sub) } : {}),
       releasePopup, releaseCurrent: RELEASE_CURRENT, securite,
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
@@ -306,6 +341,8 @@ export default async function adminRoutes(app) {
       variants: request.can('site.filigrane') ? app.variants.status() : { running: false, total: 0, done: 0, errors: [] },
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
       translate: app.translator.enabled, encountersNew: newEncounters(request), reportsNew: request.can('signalements.traiter') ? app.feedback.pending() : 0, urgent: app.todo.urgentCount(perm => request.scope(perm)) + (securite?.task?.level === 'urgent' ? 1 : 0), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
+      // Billets proposés, à valider (Carnets) : pour qui publie tous les billets.
+      carnetsPending: request.scope('carnet.publier')?.all ? app.carnet.countIn('propose') : 0,
       t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
@@ -326,7 +363,7 @@ export default async function adminRoutes(app) {
   const hourOf = (time, lang) => (lang === 'fr' ? time.replace(':', ' h ') : time);
   // Données d'une photo pour l'inspecteur de la photothèque.
   const dataOf = (p, lang = 'fr') => ({
-    id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, status: p.status, provisional: p.provisional,
+    id: p.id, n: p.n, title: p.title, slug: p.slug, legend: p.legend, alt_text: p.alt_text || '', status: p.status, provisional: p.provisional, review: p.review || null,
     category_id: p.category_id, category: p.category, author_id: p.author_id, author: p.author, place: p.place,
     taken_on: p.taken_on, when: p.when, time: p.taken_time ? hourOf(p.taken_time, lang) : '', width: p.width, height: p.height, ready: p.ready,
     city_id: p.city_id ?? null, city: cities.labelOf(p, lang), city_source: p.city_source ?? null, on_map: Boolean(p.on_map),
@@ -362,6 +399,8 @@ export default async function adminRoutes(app) {
       title: request.t('Aujourd’hui'), tasks, securite,
       // État des accords de chaque brouillon affiché (prête, à vérifier, bloquée) : « Publier » seulement si prête.
       todo: todo.slice(0, 6).map(withReady).map(p => ({ ...p, gate: (g => (g.blocked.length ? 'no' : g.verify.length ? 'warn' : 'ok'))(app.readiness.gate([p.id])) })), todoCount: todo.length,
+      // Toutes les photos à finir (200 au plus) : « Compléter dans le lot » de la v2.
+      todoIds: todo.slice(0, 200).map(p => p.id),
       hero: (hero.length ? hero : published.slice(0, 5)).map(withReady).filter(p => p.ready),
       heroChosen: hero.length > 0,
       rhythm: repo.importsByMonth(12, own),
@@ -410,7 +449,7 @@ export default async function adminRoutes(app) {
     // Données de l'inspecteur (une photo choisie) : lues par admin.js, jamais exécutées.
     const data = photos.map(p => dataOf(p, request.t.lang));
     return render(request, reply, 'photos', {
-      title: request.t('Photothèque'), photos, filter, authors, categories: repo.categories(), ratioClass,
+      title: request.t('Photothèque'), photos, filter, authors, categories: repo.categories(), ratioClass, altMax: LIMITS.alt_text,
       json: JSON.stringify(data).replace(/</g, '\\u003c'),
       filtered: Boolean(filter.q || filter.author || filter.category || filter.status || todo || missing), todo,
       missing: missing ? { key: missing, label: MISSING[missing].label } : null,
@@ -929,6 +968,8 @@ export default async function adminRoutes(app) {
     if (page === 'carte') return t('Carte');
     if (page === 'confidentialite') return t('Confidentialité');
     if (page === 'bonjour') return t('Je vous ai photographié (/bonjour)');
+    if (page === 'carnet') return t('Carnets');
+    if (page.startsWith('carnet:')) { const slug = page.slice(7); return t('Billet « {title} »', { title: app.carnet.bySlug(slug)?.post?.title || slug }); }
     const [kind, slug] = page.split(':');
     if (kind === 'serie') return t('Série « {name} »', { name: categories.find(c => c.slug === slug)?.name || slug });
     if (kind === 'auteur') return t('Regard de {name}', { name: authors.find(a => a.slug === slug)?.name || slug });
@@ -980,6 +1021,8 @@ export default async function adminRoutes(app) {
     suggest: suggestOf(app.seriesSuggest.forPhoto(repo.photo(photo.id)), undefined, true, request),
     ready: app.readiness.state(photo.id, null, t), confirmations: app.readiness.confirmations(photo.id), igConfirmed: app.readiness.confirmed(photo.id, 'instagram'),
     siteConfirmed: app.readiness.confirmed(photo.id, 'site'),
+    // Fiche de l'admin v2 : titre provisoire (UX-A-03), date lue, heure de prise de vue dans la langue de l'admin.
+    moderators: moderators(request), provisional: Boolean(repo.photoView(photo.id)?.provisional), read: readDate(photo.taken_on, t.lang), time: photo.taken_time ? hourOf(photo.taken_time, t.lang) : '',
   });
   const photoStats = id => {
     const { from, to } = app.stats.range(30);
@@ -1161,6 +1204,32 @@ export default async function adminRoutes(app) {
     return reply.redirect(safeBack(request, '/admin'), 303);
   });
 
+  // Admin v1 ou v2 (menu du compte) : une préférence du compte, comme la langue et le thème, jamais un réglage du site ;
+  // le retour en v1 est un clic, au pied du menu de la v2.
+  app.post('/admin/version', W('admin.acceder'), async (request, reply) => {
+    const v = request.body?.version;
+    const back = safeBack(request, '/admin');
+    if (!ADMIN_VERSIONS.includes(v) || !adminVersion.set(request.session.sub, v)) return failed(reply, back, request.t('Version de l’admin inconnue : rien n’a changé.'));
+    if (!request.headers.accept?.includes('text/html')) return { ok: true, version: v };
+    return done(reply, back, v === 'v2' ? request.t('Vous êtes dans l’admin v2. Pour revenir à la v1 : « Revenir à l’admin v1 », au pied du menu.') : request.t('Vous êtes de retour dans l’admin v1. La v2 reste à un clic : « Essayer l’admin v2 », au pied du menu.'));
+  });
+  // Raccourcis d'une touche de la photothèque v2 (UX-A-02) : les couper, ou les rallumer, depuis « Mon compte ». Une
+  // préférence du compte (account_prefs), pas au journal ; « raccourcis » vaut off (champ caché) puis on (case cochée), ou
+  // « action » en JSON (l'interrupteur enregistré au geste, admin-v2.js).
+  app.post('/admin/compte/raccourcis', W('admin.acceder'), async (request, reply) => {
+    const on = switchAction(request.body?.action ?? request.body?.raccourcis) === 'on';
+    const back = safeBack(request, '/admin/compte');
+    if (!adminVersion.setShortcuts(request.session.sub, on)) return failed(reply, back, request.t('Compte introuvable : rien n’a changé.'));
+    if (!request.headers.accept?.includes('text/html')) return { ok: true, raccourcis: on };
+    return done(reply, back, on ? request.t('Raccourcis d’une touche allumés.') : request.t('Raccourcis d’une touche coupés : seuls Ctrl K, Ctrl A et Ctrl Z restent.'));
+  });
+  // Mon compte (v2) : la version de l'admin et les e-mails des avis. En v1, ces réglages sont sur « Aujourd'hui ».
+  app.get('/admin/compte', P('admin.acceder'), async (request, reply) => {
+    if (!adminVersion.hasV2('compte') || adminVersion.of(request.session.sub) !== 'v2') return reply.redirect('/admin#compte', 303);
+    return render(request, reply, 'compte', { title: request.t('Mon compte'), account: app.accounts.bySub(request.session.sub), me: repo.authorBySub(request.session.sub), mailer: app.mailer.enabled,
+      roleLabels: Object.fromEntries(Object.entries(ROLES).map(([k, r]) => [k, r.label])) });
+  });
+
   app.post('/admin/theme', W('admin.acceder'), async (request, reply) => {
     const theme = request.body?.theme;
     if (theme === 'dark' || theme === 'light') reply.setCookie(THEME_COOKIE, theme, { path: '/admin', httpOnly: true, sameSite: 'lax', secure: secureCookies, maxAge: 365 * 24 * 3600 });
@@ -1181,11 +1250,40 @@ export default async function adminRoutes(app) {
   // ---------- compléter un lot ----------
   const lotAll = raw => [...new Set(String([].concat(raw || []).join(',')).split(',').filter(Boolean).map(Number))].filter(Number.isInteger);
   const lotIds = raw => lotAll(raw).slice(0, 200);
+  // Date lue (« mercredi 14 octobre 2026 », « octobre 2026 ») : ce que le serveur a compris de la saisie (lot de la v2).
+  const readDate = (taken, lang) => {
+    const m = /^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/.exec(String(taken || ''));
+    if (!m) return '';
+    const d = new Date(Date.UTC(Number(m[1]), m[2] ? Number(m[2]) - 1 : 0, m[3] ? Number(m[3]) : 1, 12));
+    const loc = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang] || 'fr-FR';
+    const o = m[3] ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } : m[2] ? { month: 'long', year: 'numeric' } : { year: 'numeric' };
+    return new Intl.DateTimeFormat(loc, { ...o, timeZone: 'UTC' }).format(d);
+  };
+  // Qui valide les propositions (MQ-08 : « Proposer les 3 photos à Julien ? ») : les comptes actifs qui publient toutes
+  // les photos, sauf celui de la session ; plus de deux, ou aucun : « la modération ».
+  const moderators = request => app.accounts.list().filter(a => a.status === 'actif' && a.sub !== request.session.sub && grantsOf(a.roles, a.adjust).get('photos.publier') === 'tout')
+    .map(a => String(a.name || '').replace(/\s*\(test\)$/, '').split(' ')[0]).filter(Boolean);
+  // Ce qui reste à faire sur une photo du lot (filtre « À corriger », dialogues de proposition et de publication) :
+  // titre provisoire, sans date ; accord à vérifier ou refusé (état pour le site, server/readiness.js).
+  const lotIssues = (request, p, people) => {
+    const site = app.readiness.state(p, people, request.t).site;
+    return { provisional: Boolean(p.provisional), noDate: !p.taken_on, verify: site.level === 'warn' && !app.readiness.confirmed(p.id, 'site'), blocked: site.level === 'no', reasons: site.reasons || [] };
+  };
   const lotPage = (request, reply, ids, extra = {}) => {
     const byIdMap = new Map(repo.photos().map(p => [p.id, withReady(p)]));
-    const photos = ids.map(id => byIdMap.get(id)).filter(Boolean);
+    const all = ids.map(id => byIdMap.get(id)).filter(Boolean);
+    const people = new Map();
+    const sugg = app.seriesSuggest.forPhotos(all), names = catNames();
+    const enrich = all.map(p => ({ ...p, issues: lotIssues(request, p, people), suggest: suggestOf(sugg.get(p.id), names), read: readDate(p.taken_on, request.t.lang),
+      time: p.taken_time ? hourOf(p.taken_time, request.t.lang) : '' }));
+    // Filtres du lot (MQ-08, repère 7) : « À corriger » (titre provisoire, sans date), « Accord à vérifier ».
+    const voir = ['a-corriger', 'accord'].includes(request.query?.voir) ? request.query.voir : '';
+    const fix = p => p.issues.provisional || p.issues.noDate;
+    const agree = p => p.issues.verify || p.issues.blocked;
+    const shown = voir === 'a-corriger' ? enrich.filter(fix) : voir === 'accord' ? enrich.filter(agree) : enrich;
     return render(request, reply, 'batch', {
-      title: request.t('Compléter et publier'), photos, ids: photos.map(p => p.id), categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'),
+      title: request.scope('photos.publier')?.all ? request.t('Compléter et publier') : request.t('Compléter et proposer'), photos: shown, all: enrich, ids: all.map(p => p.id), categories: repo.categories(), authors: request.mine('photos.modifier', repo.authors(), 'id'), altMax: LIMITS.alt_text,
+      voir, counts: { fix: enrich.filter(fix).length, agree: enrich.filter(agree).length }, moderators: moderators(request), canPublishAll: Boolean(request.scope('photos.publier')?.all),
       errors: {}, values: {}, ...extra,
     });
   };
@@ -1198,17 +1296,26 @@ export default async function adminRoutes(app) {
     return lotPage(request, reply, ids, { rest: all.slice(200), total: all.length });
   });
 
-  // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…).
+  // Sans JavaScript : tout le tableau est envoyé d'un coup (champs titre_<id>, serie_<id>…). Le texte de remplacement
+  // (alt_text_<id>, en français) est un texte comme le titre : photos.textes suffit. Admin v2 (MQ-08) : les titres anglais
+  // et allemand (title_en_<id>, title_de_<id>), la suggestion de série acceptée (accept_suggestion_<id>), et deux suites :
+  // « proposer=1 » (proposer le lot au modérateur) et « publish=1 » (publier) ; ce qui empêche ou mérite d'être revu
+  // (titre provisoire, date refusée, accord à vérifier) est d'abord montré dans un dialogue, sauf « forcer=1 ».
   app.post('/admin/photos/lot', W('photos.textes'), async (request, reply) => {
     const body = request.body || {};
     const ids = repo.existingIds(lotIds(body.ids)).filter(id => request.owns('photos.textes', repo.photo(id)?.author_id) && editable(request, repo.photo(id)));
     if (body.publish === '1' && ids.some(id => !request.owns('photos.publier', repo.photo(id).author_id))) return app.forbid(request, reply);
-    if (ids.some(id => !request.owns('photos.modifier', repo.photo(id).author_id) && touchesMore(repo.photo(id), { category_id: body[`category_id_${id}`], taken_on: body[`taken_on_${id}`] }))) return app.forbid(request, reply);
+    if (body.proposer === '1' && ids.some(id => !request.owns('photos.proposer', repo.photo(id).author_id))) return app.forbid(request, reply);
+    // « Proposer sans corriger » : les corrections du dialogue ne sont pas reprises.
+    if (body.sans_corriger === '1') for (const k of Object.keys(body)) if (/^(title|taken_on)_\d+$/.test(k)) delete body[k];
+    const accepted = id => { const c = Number(body[`accept_suggestion_${id}`]); return c && repo.categories().some(x => x.id === c) ? c : undefined; };
+    if (ids.some(id => !request.owns('photos.modifier', repo.photo(id).author_id) && touchesMore(repo.photo(id), { category_id: accepted(id) ?? body[`category_id_${id}`], taken_on: body[`taken_on_${id}`] }))) return app.forbid(request, reply);
     const errors = {};
     const values = {};
     for (const id of ids) {
-      const fields = { title: body[`title_${id}`], category_id: body[`category_id_${id}`], place: body[`place_${id}`], taken_on: body[`taken_on_${id}`] };
+      const fields = { title: body[`title_${id}`], title_en: body[`title_en_${id}`], title_de: body[`title_de_${id}`], alt_text: body[`alt_text_${id}`], category_id: accepted(id) ?? body[`category_id_${id}`], place: body[`place_${id}`], taken_on: body[`taken_on_${id}`] };
       for (const k of Object.keys(fields)) if (fields[k] === undefined) delete fields[k];
+      if (!Object.keys(fields).length) continue;
       try {
         const before = snapshot(id);
         repo.patchPhoto(id, fields);
@@ -1220,21 +1327,41 @@ export default async function adminRoutes(app) {
       }
     }
     app.variants.schedule();
-    if (Object.keys(errors).length) return lotPage(request, reply.code(422), ids, { errors, values });
+    const t = request.t;
+    // Proposer ou publier : ce qui reste à revoir est montré d'abord (dialogue), sauf si la personne a déjà choisi d'y aller.
+    const next = body.proposer === '1' ? 'proposer' : body.publish === '1' ? 'publier' : null;
+    // La v1 garde sa règle : une erreur arrête tout ; publier part sans dialogue.
+    const v2 = adminVersion.of(request.session.sub) === 'v2';
+    if (!v2 && Object.keys(errors).length) return lotPage(request, reply.code(422), ids, { errors, values });
+    // Le dialogue envoie forcer=1 : ses corrections sont appliquées, puis la suite part ; une correction refusée le rouvre.
+    if (v2 && next && (body.forcer !== '1' || Object.keys(errors).length)) {
+      const people = new Map();
+      const review = ids.map(id => ({ p: repo.photoView(id), e: errors[id] })).filter(x => x.p).map(x => ({ id: x.p.id, title: x.p.title, file: x.p.source_name || '', issues: lotIssues(request, x.p, people), errors: x.e || null, values: values[x.p.id] || {},
+        ready: rendered(x.p), thumb: rendered(x.p) ? thumb(x.p) : null, confirmed: body[`confirmer_${x.p.id}`] === '1' }))
+        .filter(x => x.issues.provisional || x.errors || (x.issues.verify && !x.confirmed) || x.issues.blocked);
+      if (review.length) return lotPage(request, reply.code(Object.keys(errors).length ? 422 : 200), ids, { errors, values, dialog: { kind: next, review, message: String(body.message || '').slice(0, 1000) } });
+    } else if (Object.keys(errors).length && (!next || body.forcer !== '1')) return lotPage(request, reply.code(422), ids, { errors, values });
     const to = `/admin/photos/lot?ids=${ids.join(',')}`;
-    if (body.publish === '1') {
+    if (next === 'proposer') {
+      // Les photos dont l'accord est à vérifier ne partent qu'avec la confirmation du photographe (case par photo).
+      const sure = ids.filter(id => body[`confirmer_${id}`] === '1');
+      const r1 = sure.length ? await app.review.propose(sure, by(request), { message: body.message, confirm: true }) : { proposed: [], verify: [], blocked: [], skipped: [] };
+      const r2 = await app.review.propose(ids.filter(id => !sure.includes(id)), by(request), { message: body.message });
+      const r = { proposed: [...r1.proposed, ...r2.proposed], verify: [...r1.verify, ...r2.verify], blocked: [...r1.blocked, ...r2.blocked], skipped: [...r1.skipped, ...r2.skipped] };
+      return (r.proposed.length ? done : failed)(reply, r.proposed.length ? '/admin/photos?manque=proposees' : to, proposedText(t, r));
+    }
+    if (next === 'publier') {
       const g = app.readiness.gate(ids.filter(id => repo.photo(id)?.status !== 'published'));
       const before = repo.setStatuses(Object.fromEntries(g.ok.map(id => [id, 'published'])));
       queued(before);
       const held = g.verify.length + g.blocked.length;
-      const t = request.t;
       const published = g.ok.length > 1 ? t('{n} photos publiées.', { n: g.ok.length }) : t('{n} photo publiée.', { n: g.ok.length });
       const parts = [g.verify.length && t('{n} à vérifier (confirmez dans leur fiche)', { n: g.verify.length }),
         g.blocked.length && (g.blocked.length > 1 ? t('{n} bloquées par un refus', { n: g.blocked.length }) : t('{n} bloquée par un refus', { n: g.blocked.length }))].filter(Boolean);
       const rest = held ? ` ${held > 1 ? t('{n} restent en brouillon :', { n: held }) : t('{n} reste en brouillon :', { n: held })} ${parts.join(', ')}.` : '';
       return done(reply, '/admin/photos', `${published}${rest}`);
     }
-    return done(reply, to, request.t('Modifications enregistrées.'));
+    return done(reply, to, t('Modifications enregistrées.'));
   });
 
   // Un champ à la fois (enregistrement à la sortie du champ). Réponse : valeurs telles qu'enregistrées.
@@ -1250,7 +1377,7 @@ export default async function adminRoutes(app) {
       editedIfChanged(request, before);
       app.variants.schedule();
       const shown = repo.photoView(id);
-      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, taken_on: p.taken_on, when: shown?.when || '', provisional: shown?.provisional || false,
+      return { ok: true, photo: { title: p.title, slug: p.slug, category_id: p.category_id, author_id: p.author_id, place: p.place, legend: p.legend, alt_text: p.alt_text, taken_on: p.taken_on, when: shown?.when || '', read: readDate(p.taken_on, request.t.lang), provisional: shown?.provisional || false,
         city_id: p.city_id ?? null, city: cities.labelOf(p, request.t.lang), city_source: p.city_source ?? null, on_map: Boolean(p.on_map) } };
     } catch (err) {
       if (!(err instanceof ValidationError)) throw err;
@@ -1342,6 +1469,41 @@ export default async function adminRoutes(app) {
             ? `${t('{photos} sur la carte.', { photos: word(changed) })}${skipped ? ` ${t('{photos} sans ville : choisissez sa ville dans la fiche.', { photos: word(skipped) })}` : ''}`
             : changed > 1 ? t('{n} photos retirées de la carte.', { n: changed }) : t('{n} photo retirée de la carte.', { n: changed });
           return ok(text, { undo: { action: 'map_restore', map: before } });
+        }
+        // Lot de la v2 (MQ-08, repère 6) : la barre « Pour les photos cochées » applique d'un coup la série, le lieu, la
+        // date et la ville de la carte choisis (un champ vide : celui de chaque photo) ; « Défaire » rend à chaque photo
+        // ce qu'elle avait. Sans script, le même envoi (formulaire) revient au lot avec son message.
+        case 'appliquer': {
+          if (!n) return ko(422, t('Aucune photo sélectionnée.'));
+          if (body.category_id === 'new' && !request.can('series.gerer')) return app.forbid(request, reply);
+          const targetId = body.category_id === 'new' ? repo.saveCategory(null, { name: body.new_category }) : Number(body.category_id) || null;
+          const target = targetId ? repo.categories().find(c => c.id === targetId) : null;
+          if (body.category_id && !target) return ko(422, t('Choisissez une série.'));
+          const city = String(body.city_label || '').trim();
+          if (!target && !String(body.place || '').trim() && !String(body.taken_on || '').trim() && !city) return ko(422, t('Rien à appliquer : choisissez une série, un lieu, une date ou une ville.'));
+          const snap = snapshot(ids);
+          const undo = { action: 'restaurer', map: Object.fromEntries(ids.map(id => { const p = repo.photo(id); return [id, { category_id: p.category_id, place: p.place, taken_on: p.taken_on, city_label: cities.labelOf(p, 'fr'), city_id: p.city_id ?? null, on_map: p.on_map }]; })) };
+          // La ville d'abord : introuvable, elle arrête tout avant le moindre changement (la même pour toutes les photos).
+          if (city) for (const id of ids) repo.patchPhoto(id, { city_label: city, city_id: body.city_id, on_map: repo.photo(id).on_map ? 'on' : '' });
+          if (String(body.place || '').trim() || String(body.taken_on || '').trim()) repo.setFields(ids, body);
+          if (target) repo.setCategories(each(target.id));
+          editedIfChanged(request, snap);
+          app.variants.schedule();
+          const what = [target && t('série « {name} »', { name: target.name }), String(body.place || '').trim() && t('lieu'), String(body.taken_on || '').trim() && t('date'), city && t('ville de la carte')].filter(Boolean).join(', ');
+          const photos = ids.map(id => { const p = repo.photoView(id); return { id, category_id: p.category_id, place: p.place, taken_on: p.taken_on, when: readDate(p.taken_on, t.lang), city: cities.labelOf(p, t.lang) }; });
+          return ok(t('{what} : appliqué à {photos}.', { what: what.charAt(0).toUpperCase() + what.slice(1), photos: photosWord }), { undo, photos });
+        }
+        case 'restaurer': {
+          const m = map(body.map), snap = snapshot(Object.keys(m));
+          for (const [id, v] of Object.entries(m)) {
+            if (!v || typeof v !== 'object') continue;
+            repo.restoreFields({ [id]: { place: v.place, taken_on: v.taken_on } });
+            if (repo.categories().some(c => c.id === Number(v.category_id))) repo.setCategories({ [id]: Number(v.category_id) });
+            try { repo.patchPhoto(Number(id), { city_label: String(v.city_label || ''), city_id: v.city_id, on_map: v.on_map ? 'on' : '' }); } catch (err) { if (!(err instanceof ValidationError)) throw err; }
+          }
+          editedIfChanged(request, snap);
+          app.variants.schedule();
+          return ok(t('Modification défaite.'));
         }
         case 'map_restore': {
           const m = map(body.map), snap = snapshot(Object.keys(m));
@@ -1731,9 +1893,9 @@ export default async function adminRoutes(app) {
       app.accounts.setNotify(request.session.sub, { on: request.body?.email === '1', to: request.body?.adresse, digest: request.body?.recap });
     } catch (err) {
       if (!(err instanceof AccountError)) throw err;
-      return failed(reply, '/admin#compte', request.t.msg(err.message));
+      return failed(reply, safeBack(request, '/admin#compte'), request.t.msg(err.message));
     }
-    return done(reply, '/admin#compte', request.t('Préférence enregistrée.'));
+    return done(reply, safeBack(request, '/admin#compte'), request.t('Préférence enregistrée.'));
   });
 
   app.post('/admin/photos/:id/status', W('photos.publier'), async (request, reply) => {
@@ -1782,34 +1944,44 @@ export default async function adminRoutes(app) {
     suggest: app.seriesSuggest.state(), describe: app.describer.state(), describeModels: app.describer.MODELS, translate: app.translator.enabled, limits: LIMITS, ...extra,
   });
   app.get('/admin/series', P('series.gerer'), async (request, reply) => seriesPage(request, reply));
+  // Réglages › Assistants d'analyse (admin v2, MQ-07) : les réglages des assistants, sortis du bas de la page Séries
+  // (UX-A-17). En v1, ils restent sur la page Séries.
+  app.get('/admin/reglages/assistants', P('series.propositions'), async (request, reply) => {
+    if (adminVersion.of(request.session.sub) !== 'v2' || !adminVersion.hasV2('assistants')) return reply.redirect('/admin/series#propositions', 303);
+    return render(request, reply, 'assistants', { title: request.t('Assistants d’analyse'), suggest: app.seriesSuggest.state(), describe: app.describer.state(), describeModels: app.describer.MODELS, translate: app.translator.enabled });
+  });
 
   // Série proposée : allumer (téléchargement du modèle puis analyse, en arrière-plan) ou éteindre et tout effacer.
   app.get('/admin/series/propositions', P('series.propositions'), async () => app.seriesSuggest.state());
+  // Interrupteur de la v2 (Réglages › Assistants d'analyse) : « action » vaut off (champ caché) puis on (la case cochée) ;
+  // la dernière décide. Retour à la page d'où vient le formulaire (back), en JSON pour l'enregistrement au geste.
+  const switchAction = v => { const all = [].concat(v ?? []); return all.includes('on') ? 'on' : all.includes('off') ? 'off' : undefined; };
+  const answer = (request, reply, ok, to, text) => (request.headers.accept?.includes('text/html') || !request.headers.accept ? (ok ? done : failed)(reply, safeBack(request, to), text) : reply.code(ok ? 200 : 422).send(ok ? { ok: true, text } : { error: text }));
   app.post('/admin/series/propositions', W('series.propositions'), async (request, reply) => {
-    if (request.body?.action === 'on') {
+    if (switchAction(request.body?.action) === 'on') {
       app.seriesSuggest.enable();
-      return done(reply, '/admin/series#propositions', request.t('Propositions de série allumées : le modèle se télécharge, puis les photos sont analysées.'));
+      return answer(request, reply, true, '/admin/series#propositions', request.t('Propositions de série allumées : le modèle se télécharge, puis les photos sont analysées.'));
     }
     await app.seriesSuggest.disable();
-    return done(reply, '/admin/series#propositions', request.t('Propositions de série éteintes : modèle et empreintes effacés.'));
+    return answer(request, reply, true, '/admin/series#propositions', request.t('Propositions de série éteintes : modèle et empreintes effacés.'));
   });
 
   // Descriptions suggérées (Florence-2) : allumer avec le modèle et les heures de nuit choisis, ou éteindre et effacer.
   app.post('/admin/series/descriptions', W('series.propositions'), async (request, reply) => {
     const b = request.body || {};
-    if (b.action === 'off') {
+    if (switchAction(b.action) === 'off') {
       await app.describer.remove();
-      return done(reply, '/admin/series#descriptions', request.t('Descriptions éteintes : modèle effacé (les descriptions déjà faites restent).'));
+      return answer(request, reply, true, '/admin/series#descriptions', request.t('Descriptions éteintes : modèle effacé (les descriptions déjà faites restent).'));
     }
     let s;
     try {
       s = app.describer.save({ on: true, model: b.model, from: b.from, to: b.to });
     } catch (err) {
       if (!(err instanceof DescribeError)) throw err;
-      return failed(reply, '/admin/series#descriptions', request.t.msg(err.message));
+      return answer(request, reply, false, '/admin/series#descriptions', request.t.msg(err.message));
     }
     app.describer.run();
-    return done(reply, '/admin/series#descriptions', request.t('Descriptions allumées : au premier calcul, le modèle se télécharge ; les photos sont décrites la nuit, de {from} h à {to} h.', { from: s.from, to: s.to }));
+    return answer(request, reply, true, '/admin/series#descriptions', request.t('Descriptions allumées : au premier calcul, le modèle se télécharge ; les photos sont décrites la nuit, de {from} h à {to} h.', { from: s.from, to: s.to }));
   });
 
   app.post('/admin/series', W('series.gerer'), async (request, reply) => {
@@ -2016,7 +2188,7 @@ export default async function adminRoutes(app) {
 
   app.get('/admin/apparence', P('site.apparence'), async (request, reply) => render(request, reply, 'appearance', {
     title: request.t('Apparence'), THEMES, BRAND_MODES, BRAND_SLOTS, themeId: app.appearance.themeId(), brand: app.appearance.brand(),
-    publicVersion: app.publicVersion.setting(), previewV2: app.publicVersion.previewOn(request),
+    publicVersion: app.publicVersion.setting(), vueSession: app.publicVersion.viewOf(request),
   }));
 
   app.post('/admin/apparence', W('site.apparence'), async (request, reply) => {
@@ -2037,15 +2209,21 @@ export default async function adminRoutes(app) {
     return done(reply, '/admin/apparence', request.t('Apparence enregistrée.'));
   });
 
-  // Aperçu de la v2 du site public, pour cette session seulement (server/version-publique.js) : « apercu=1 » l'ouvre (sur
-  // l'accueil, ou la page « vers »), « apercu=0 » le quitte (retour à la page « vers », ou à Apparence). Noté au journal.
+  // Vue de la session sur le site public (server/version-publique.js, bouton « Voir en v1 / Voir en v2 » des pages
+  // publiques) : « vue=v1 » ou « vue=v2 » la force pour cette session seulement, « vue=suivre » l'oublie (la session suit
+  // le réglage, comme les visiteurs). Ancienne forme gardée : « apercu=1 » vaut « vue=v2 », « apercu=0 » « vue=suivre ».
+  // Retour à la page « vers » (du site seulement) ; noté au journal d'audit. Ce n'est pas un réglage : rien ne change
+  // pour les visiteurs.
   app.post('/admin/apparence/apercu-v2', W('site.apparence'), async (request, reply) => {
-    const on = request.body?.apercu === '1';
-    app.publicVersion.setPreview(request, on);
+    const b = request.body || {};
+    const vue = typeof b.vue === 'string' ? b.vue : b.apercu === '1' ? 'v2' : b.apercu === '0' ? 'suivre' : '';
+    if (!app.publicVersion.setView(request, vue)) return reply.code(400).send({ error: request.t('Vue inconnue.') });
     request.audited = true;
-    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/apercu-v2', target: 'site public', status: 303, detail: on ? 'aperçu de la v2 ouvert' : 'aperçu de la v2 quitté' });
-    const to = safeNext(typeof request.body?.vers === 'string' ? request.body.vers : '', on ? '/' : '/admin/apparence');
-    return reply.redirect(/^\/(?:admin|auth)(?:[/?#]|$)/.test(to) && on ? '/' : to, 303);
+    const applied = app.publicVersion.setting();
+    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/apercu-v2', target: 'site public', status: 303,
+      detail: vue === 'suivre' ? `vue de la session : suit le réglage (${applied})` : `vue de la session : ${vue} (visiteurs : ${applied})` });
+    const to = safeNext(typeof b.vers === 'string' ? b.vers : '', vue === 'suivre' ? '/admin/apparence' : '/');
+    return reply.redirect(/^\/(?:admin|auth)(?:[/?#]|$)/.test(to) && vue !== 'suivre' ? '/' : to, 303);
   });
 
   // Marque : quatre emplacements (emblème, icône, logo complet, image de partage). PNG, WebP ou JPEG ;
@@ -2138,7 +2316,7 @@ export default async function adminRoutes(app) {
   const helpIn = lang => (app.config.production ? (helpCache[lang] ??= loadHelp(lang)) : loadHelp(lang));
   // Chapitres de l'aide réservés : ils n'apparaissent qu'à qui peut ouvrir l'une des pages qu'ils décrivent.
   const HELP_PERMS = { preuves: ['photos.voir'], series: ['series.gerer'], auteurs: ['photographes.gerer'], 'filigrane-exif': ['site.filigrane'], apparence: ['site.apparence'],
-    reglages: ['site.textes', 'reglages.droits', 'comptes.gerer', 'journal.voir'], statistiques: ['statistiques.voir'], instagram: ['instagram.voir'], rencontres: ['personnes.voir', 'terrain.app'] };
+    reglages: ['site.textes', 'reglages.droits', 'comptes.gerer', 'journal.voir'], statistiques: ['statistiques.voir'], instagram: ['instagram.voir'], rencontres: ['personnes.voir', 'terrain.app'], 'galeries-privees': ['galeries.voir'] };
   app.get('/admin/aide', P('admin.acceder'), async (request, reply) => {
     const help = helpIn(request.t.lang);
     const sections = help.sections.filter(sec => !HELP_PERMS[sec.id] || HELP_PERMS[sec.id].some(perm => request.can(perm)));
@@ -2146,9 +2324,11 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- rencontres (page /bonjour, cartes) ----------
-  registerEncounters(app, { repo, render, P, W, done, failed, withReady });
+  registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion });
   registerOutings(app, { repo, render, P, W, done, failed, withReady });
   registerTrips(app, { repo, render, P, W, done, failed, withReady });
+  registerGaleries(app, { repo, render, P, W, done, failed });
+  registerCarnet(app, { repo, render, P, W, done, failed, withReady });
 
   // ---------- traductions ----------
   // Proposition de traduction d'un champ (LibreTranslate du réseau local) : l'auteur la relit avant d'enregistrer.
@@ -2168,7 +2348,7 @@ export default async function adminRoutes(app) {
   // Deux pages, un seul enregistrement : « Site public » (textes, ouverture, carte du monde) et « Droits &
   // confidentialité ». Chaque formulaire n'enregistre que ses propres champs (part).
   const settingsPage = (request, reply, part) => render(request, reply, 'settings', {
-    heroMax: 8, part, section: part,
+    heroMax: 8, part, section: part, v2: part === 'droits' ? 'droits' : undefined,
     title: part === 'site' ? request.t('Site public') : request.t('Droits & confidentialité'), settings: repo.settings(), published: repo.photos({ status: 'published' }), defaultName: app.config.siteName,
     rights: LANGS.map(l => ({ lang: l, ...RIGHTS[l] })), rightsDefaults: defaultsNow(),
     ...mapCounts.get(), encrypted: app.encounters.encrypted, legalMissing: legalMissing(repo.settings()),
@@ -2182,6 +2362,13 @@ export default async function adminRoutes(app) {
   app.post('/admin/reglages', W('site.textes'), async (request, reply) => {
     const part = ['site', 'droits'].includes(request.body?.part) ? request.body.part : null;
     if (part !== 'site' && !request.can('reglages.droits')) return app.forbid(request, reply);
+    // Contacts des droits et de la confidentialité : une adresse e-mail ou une page https, sans guillemet, chevron, apostrophe
+    // ni esperluette (recopiés dans des liens, dont ceux des pages des galeries privées ; revue de sécurité de la PR #149).
+    if (part === 'droits') {
+      const SAFE = /^[^\s@"<>'&]+@[^\s@"<>'&]+\.[^\s@"<>'&]+$|^https:\/\/[^\s"<>'&]+$/;
+      const bad = ['rights_contact', 'privacy_contact'].find(k => String(request.body?.[k] ?? '').trim() && !SAFE.test(String(request.body[k]).trim()));
+      if (bad) return failed(reply, '/admin/droits', request.t('Contact refusé : écrivez une adresse e-mail (nom@exemple.fr) ou une adresse de page en https://, sans guillemet, chevron, apostrophe ni esperluette.'));
+    }
     repo.saveSettings(withoutDefaults(request.body || {}, defaultsNow()), part);
     app.variants.schedule();            // {site} peut figurer dans le filigrane
     if (request.body?.hero_op || request.body?.hero_save) return done(reply, '/admin/site#ouverture', request.t('Ordre de l’ouverture enregistré.'));

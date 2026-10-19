@@ -46,6 +46,27 @@ Pendant le traitement d’un import, l’indicateur **Traitement : *n* photos** 
 
 Chaque écran a un lien **« Aide sur cette page »** (dans la photothèque : **Aide**, en haut à droite) qui mène directement à la bonne section.
 
+## L’admin v2
+
+L’administration existe en deux versions, côte à côte. La **v2** est la nouvelle, issue de l’audit d’ergonomie d’octobre 2026 ; la **v1** est celle que vous connaissez. **Chaque compte choisit la sienne** : votre choix ne change rien pour les autres, ni pour le site public.
+
+- **Essayer la v2** : au pied de la barre latérale, au-dessus de votre nom, **Essayer l’admin v2**. Un clic, et vous y êtes.
+- **Revenir à la v1** : au même endroit, **Revenir à l’admin v1**. Un clic aussi, quand vous voulez. Le choix se règle aussi dans **Mon compte** (cliquez sur votre nom), avec les e-mails des avis.
+- **Un écran pas encore refait** s’affiche en v1, entier : la barre latérale de la v1 le dit (« Écran pas encore en v2 ») et garde le bouton du retour. Les autres écrans restent en v2.
+
+Ce que la v2 change :
+
+- **Le menu en quatre groupes** : **Photos** (Photothèque, Séries, Sorties, Voyages), **Personnes** (Personnes, Signalements, App de terrain), **Publier** (À valider ou Mes propositions, Site public, Carnets, Galeries privées, Instagram), **Équipe** (Comptes et rôles, Circuit de publication, Journal, Sécurité, Statistiques). Au pied : Réglages, Aide, Voir le site, la langue, Nouveautés. Une entrée n’apparaît que si votre rôle peut ouvrir la page.
+- **Les Réglages à onglets** : Identité et apparence, Filigrane et EXIF, Mentions et confidentialité, Photographes, **Assistants d’analyse** (les aides calculées sur le serveur, avec leur interrupteur). Au téléphone, les onglets sont des cases, tous visibles.
+- **Une seule façon d’enregistrer** : ce qui se défait s’enregistre quand vous quittez le champ ou touchez l’interrupteur ; le message en bas propose **Défaire** pendant 10 secondes (il attend tant que la souris ou le clavier est dessus). Le **témoin** sous le titre dit « Enregistré à 22 h 40 », ou « 1 champ non enregistré » avec un lien vers le champ. Ce qui a un effet public (les mentions légales, publier, proposer) garde un bouton qui le dit. Sans JavaScript, un bouton **Enregistrer** apparaît.
+- **Compléter et proposer** (le lot d’un import) : titres anglais et allemand repliés sous chaque titre, la suggestion de série en un clic, **Pour les photos cochées** (série, lieu, ville de la carte, date) qui ne change rien avant **Appliquer**, des filtres **À corriger** et **Accord à vérifier**. **Proposer** (ou **Publier**, pour qui publie) montre d’abord ce qui reste à revoir — titre provisoire, date refusée, accord à vérifier — et se corrige sur place.
+- **La fiche d’une photo** : la photo à gauche, les champs à droite, dans l’ordre de ce que voit le visiteur (titre, légende, texte de remplacement, mots-clés), puis **Où et quand** (série, photographe, lieu, ville de la carte, date, heure montrée) et **Diffusion** (filigrane, adresse). Chaque champ s’enregistre quand vous le quittez, avec **Défaire**. Une suggestion (description, traduction, mot-clé) remplit le champ sans rien enregistrer : relisez, puis **Enregistrer**. Plus de boutons « Brouillon / Publiée » : **Publier…**, **Proposer…** et **Dépublier…** (qui demande une raison, envoyée au photographe) passent par un dialogue, comme **Renvoyer** et **Supprimer**. Les accords et les visages sont en tête, avec un titre provisoire signalé.
+- **La photothèque** : des filtres d’état avec leur symbole (○ Brouillons, ● Publiées, ◐ Proposées, ▲ Accord à vérifier…), un bouton **Filtrer** (les listes n’agissent plus à la première flèche), l’inspecteur qui nomme la photo choisie et dit une erreur sous son champ. **P** ouvre d’abord le dialogue de publication, qui montre les titres provisoires ; toutes les actions proposent **Défaire** sans recharger la page. Les touches d’une lettre (**P**, **I**, **L**, **Espace**) ne valent que quand une vignette ou l’inspecteur a le focus, et se coupent dans **Mon compte** (**Raccourcis d’une touche**).
+- **À valider** : une ligne par proposition, avec l’état des accords et le titre provisoire ; **Renvoyer…** depuis la ligne, **Annuler la programmation** depuis la liste des programmées ; **Valider les photos cochées** montre d’abord combien partent, et quand.
+- **L’app de terrain** : un titre, l’heure de fin de votre session, **Tendre le téléphone à la personne** qui replie votre partie, la langue de la personne sans drapeau, ce qui manque dit dans sa langue, la signature gardée après une erreur et **Effacer** qui se défait ; si le réseau coupe ou si la session expire, l’accord reste à l’écran jusqu’à **Réessayer**.
+
+La Vigie est la même qu’en v1 : l’entrée **Sécurité** et son badge, la ligne en tête d’**Aujourd’hui**, le bandeau d’une alerte critique.
+
 ## Après chaque action
 
 Un message apparaît en haut de la page :

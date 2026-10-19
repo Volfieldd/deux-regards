@@ -9,7 +9,9 @@ import { createEngine } from './moteur.js';
 import { createThreats } from './menaces.js';
 import { testChannel } from './notifications.js';
 import { setTrust, runRolesCheck } from './reglages.js';
+import { createUrgence } from './cloudflare-urgence.js';
 import { createRights, LABELS } from './console/droits.js';
+import { createReseau } from './reseau.js';
 
 // Secours en ligne de commande (annexe architecture, section 6.4), dans le conteneur :
 //   docker exec nicephos-vigie node vigie/cli.js <commande>
@@ -20,12 +22,13 @@ const HELP = `Commandes :
   etat                                     chaîne, décisions actives, interrupteurs, dernière lecture de Zitadel
   verifier                                 vérifie la chaîne du journal
   decisions                                liste les décisions actives
-  bloquer <ip|réseau> [--duree 24h] [--portee tout|admin|auth] [--motif "…"]
-  revoquer-session <empreinte> [--duree 48h] [--motif "…"]
-  revoquer-compte <sub> [--motif "…"]      ferme toutes les sessions ouvertes de ce compte
-  geler <sub> [--duree 24h] [--motif "…"]  compte traité comme désactivé sur le site
-  verrouiller --comptes <sub,…> [--adresses <ip,…>] [--duree 12h] [--motif "…"]
-  lever <id> | lever --tout
+  bloquer <ip|réseau> --portee tout|admin|auth --motif "…" [--duree 24h]
+  revoquer-session <empreinte> --motif "…" [--duree 48h]
+  revoquer-compte <sub> --motif "…"        ferme toutes les sessions ouvertes de ce compte
+  geler <sub> --motif "…" [--duree 24h]    compte traité comme désactivé sur le site
+  suspendre-acces <n°> --motif "…" [--duree 7j]   accès d'une galerie privée suspendu par le site (l'équipe le rouvre)
+  verrouiller --comptes <sub,…> [--adresses <ip,…>] --motif "…" [--duree 12h]
+  lever <id> --motif "…" | lever --tout --motif "…"
   interrupteur <detection|alertes|blocages> marche | arret --duree 2h   (7j au plus)
   alertes [--toutes]                       alertes ouvertes (ou toutes, 50 dernières)
   alerte <id>                              détail : règle, entité, sources, événements, réponse
@@ -33,15 +36,19 @@ const HELP = `Commandes :
   classer <id> <incident|faux_positif|test> [--note "…"]   alerte close
   entites                                  entités les plus chaudes (score, sources)
   regles                                   règles et leur mode
-  regle <règle> <arret|observer|alerter|bloquer>
-  seuil <ip|reseau|compte|session|appareil> <points>
-  confiance <ajouter|retirer> <ip>         adresse jamais bloquée automatiquement
+  regle <règle> <arret|observer|alerter|bloquer> [--duree 4h] [--motif "…"]   motif obligatoire pour réduire
+  seuil <ip|reseau|compte|session|appareil> <points> [--motif "…"]          motif obligatoire pour relever
+  confiance ajouter <ip> --duree 7j --motif "…"   adresse jamais bloquée automatiquement (7 jours au plus)
+  confiance retirer <ip>
   menaces                                  état des listes de menaces (Spamhaus DROP, Feodo, Tor)
   controle [--accepter --motif "…"]       contrôle des rôles sur la dernière sauvegarde du site ;
                                            --accepter : l'instantané devient la référence
   bordure                                  état de la bordure Cloudflare : copie des blocages, battement, en-têtes
                                            refusés par le site, stabilité des empreintes TLS (essai, phase C3)
+  reseau [--lire]                          source « réseau » (phase E4) : journaux lus, positions, battements, constats
+                                           sur 24 h, noms refusés et acceptés ; --lire : un passage de lecture tout de suite
   notifier essai <signal|email>            envoie un message d'essai sur le canal
+  urgence [marche --duree 2h --motif "…" | arret]   mode urgence de Cloudflare (« I'm Under Attack ») ; sans argument : état
   console                                  droits de la console (plafond, attribution, effectif), sessions ouvertes,
                                            dix dernières connexions refusées (raison, amr)`;
 
@@ -91,6 +98,14 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
     // la base par son curseur (dans la minute ; au démarrage s'il était arrêté), une seule fois.
     const par = `ligne de commande (${user})`;
     const motif = opt.motif === true ? '' : opt.motif || '';
+    // Mêmes exigences que la console (audit D3-B10) : motif pour toute décision et toute levée, portée d'un blocage
+    // choisie, alerte close ni reprise ni reclassée.
+    const motifExige = () => { if (!String(motif).trim()) throw new DecisionError('motif obligatoire (--motif "…") : il dit aux autres pourquoi'); };
+    const ouverte = id => {
+      const a = db.prepare('SELECT statut FROM alerts WHERE id = ?').get(id);
+      if (!a) throw new DecisionError('alerte inconnue');
+      if (a.statut === 'close') throw new DecisionError(`alerte #${id} close`);
+    };
     const list = () => decisions.active().map(d => `#${d.id}  ${d.kind}  ${d.cible}${d.portee ? ` (${d.portee})` : ''}  jusqu'au ${new Date(d.fin).toISOString().slice(0, 16).replace('T', ' ')} UTC  par ${d.par}${d.motif ? `  — ${d.motif}` : ''}`).join('\n') || 'Aucune décision active.';
     switch (cmd) {
       case 'etat': {
@@ -101,6 +116,7 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
           `Chaîne : ${v ? `${v.ok ? 'intacte' : `ROMPUE (${v.rupture?.raison}, ligne ${v.rupture?.seq})`}, vérifiée le ${new Date(v.at).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais vérifiée'}`,
           `Événements des dernières 24 h : ${day.map(r => `${r.severity} ${r.n}`).join(', ') || 'aucun'}`,
           `Zitadel : ${z ? `lu le ${new Date(z).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais lu (ou non configuré)'}`,
+          ...(() => { const q = store.setting.get('zitadel_quota'); return q && q.mois === new Date(now()).toISOString().slice(0, 7) ? [`API de Zitadel ce mois (${q.mois}) : ${q.n} requête(s)${config.zitadel?.quota ? ` sur ${config.zitadel.quota}` : ''} (${Object.entries(q.par || {}).map(([a, n]) => `${a} ${n}`).join(', ')})`] : []; })(),
           // Abaques (docs/etudes/vigie-capacite.md) : retard d'analyse, lignes gardées, taille de la base.
           `Analyse : ${engine.lag()} événement(s) en attente ; base : ${db.prepare('SELECT COUNT(*) FROM events').pluck().get()} lignes, ${Math.round((db.pragma('page_count', { simple: true }) * db.pragma('page_size', { simple: true })) / 1048576)} Mo`,
           `Interrupteurs : ${Object.entries(switches.state()).map(([n, s]) => `${n} ${s.marche ? 'marche' : `ARRÊT${s.jusqua ? ` jusqu'au ${new Date(s.jusqua).toISOString().slice(0, 16).replace('T', ' ')} UTC` : ''}`}`).join(', ')}`,
@@ -109,16 +125,22 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
       }
       case 'verifier': { const r = store.verify(); store.setting.set('chaine_verifiee', { at: now(), ...r }); if (!r.ok) store.own('log_integrity_fail', { emetteur: par, detail: { ruptures: r.ruptures } }); return r.ok ? `Chaîne intacte (${r.lignes} lignes).` : `CHAÎNE ROMPUE :\n${r.ruptures.map(x => `  ligne ${x.seq} : ${x.raison}`).join('\n')}`; }
       case 'decisions': return list();
-      case 'bloquer': return `Décision #${decisions.create({ kind: 'bloquer', cible: rest[0], portee: opt.portee || 'tout', duree: opt.duree || '24h', motif, par })} : ${rest[0]} bloqué.`;
-      case 'revoquer-session': return `Décision #${decisions.create({ kind: 'revoquer_session', cible: rest[0], duree: opt.duree || '48h', motif, par })} : session révoquée.`;
-      case 'revoquer-compte': return `Décision #${decisions.create({ kind: 'revoquer_compte', cible: rest[0], duree: '48h', motif, par })} : sessions de ${rest[0]} fermées.`;
-      case 'geler': return `Décision #${decisions.create({ kind: 'geler', cible: rest[0], duree: opt.duree || '24h', motif, par })} : ${rest[0]} gelé.`;
+      case 'bloquer':
+        if (!['tout', 'admin', 'auth'].includes(opt.portee)) throw new DecisionError('portée à choisir : --portee tout|admin|auth');
+        motifExige();
+        return `Décision #${decisions.create({ kind: 'bloquer', cible: rest[0], portee: opt.portee, duree: opt.duree || '24h', motif, par })} : ${rest[0]} bloqué.`;
+      case 'revoquer-session': motifExige(); return `Décision #${decisions.create({ kind: 'revoquer_session', cible: rest[0], duree: opt.duree || '48h', motif, par })} : session révoquée.`;
+      case 'revoquer-compte': motifExige(); return `Décision #${decisions.create({ kind: 'revoquer_compte', cible: rest[0], duree: '48h', motif, par })} : sessions de ${rest[0]} fermées.`;
+      case 'suspendre-acces': motifExige(); return `Décision #${decisions.create({ kind: 'suspendre_acces', cible: rest[0], duree: opt.duree || '7j', motif, par })} : accès ${rest[0]} à suspendre (le site l’applique une fois ; l’équipe le rouvre dans l’admin).`;
+      case 'geler': motifExige(); return `Décision #${decisions.create({ kind: 'geler', cible: rest[0], duree: opt.duree || '24h', motif, par })} : ${rest[0]} gelé.`;
       case 'verrouiller': {
         const split = v => (typeof v === 'string' ? v.split(',').map(s => s.trim()).filter(Boolean) : []);
+        motifExige();
         return `Décision #${decisions.create({ kind: 'verrouiller', cible: 'admin', duree: opt.duree || '12h', motif, par, details: { comptes: split(opt.comptes), adresses: split(opt.adresses) } })} : admin verrouillée.`;
       }
       case 'lever': {
-        const n = opt.tout ? decisions.lift({ all: true, par }) : decisions.lift({ id: Number(rest[0]), par });
+        motifExige();
+        const n = opt.tout ? decisions.lift({ all: true, par, motif }) : decisions.lift({ id: Number(rest[0]), par, motif });
         return n ? `${n} décision(s) levée(s).` : 'Rien à lever.';
       }
       case 'interrupteur':
@@ -139,8 +161,8 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
           `Première ${iso(a.premiere)} UTC, dernière ${iso(a.derniere)} UTC, ${a.compteur} fois`, `Réponse : ${a.reponse || 'aucune'}`,
           'D’où vient le signal (heure de la source · écart jusqu’à la réception par la Vigie) :', ...evs.map(e => `  ${iso(e.survenu_a ?? e.recu_a)}${e.survenu_a != null && Math.abs(e.recu_a - e.survenu_a) >= 1000 ? ` (reçu ${e.recu_a >= e.survenu_a ? '+' : '−'}${gap(Math.abs(e.recu_a - e.survenu_a))})` : ''}  ${e.type} (${e.severity})  ${e.composant} · ${e.emetteur || ''} · ${e.confiance}${e.ip ? `  ${e.ip}` : ''}${e.sub ? `  ${e.sub}` : ''}`)].join('\n');
       }
-      case 'prendre': return engine.classify(Number(rest[0]), { classement: null, par, statut: 'en_cours' }) ? `Alerte #${rest[0]} prise en charge.` : 'Alerte inconnue.';
-      case 'classer': return engine.classify(Number(rest[0]), { classement: rest[1], note: opt.note === true ? '' : opt.note || '', par }) ? `Alerte #${rest[0]} close (${rest[1]}).` : 'Alerte inconnue.';
+      case 'prendre': ouverte(Number(rest[0])); return engine.classify(Number(rest[0]), { classement: null, par, statut: 'en_cours' }) ? `Alerte #${rest[0]} prise en charge.` : 'Alerte inconnue.';
+      case 'classer': ouverte(Number(rest[0])); return engine.classify(Number(rest[0]), { classement: rest[1], note: opt.note === true ? '' : opt.note || '', par }) ? `Alerte #${rest[0]} close (${rest[1]}).` : 'Alerte inconnue.';
       case 'entites': return engine.top(20).map(e => `${e.kind.padEnd(8)} ${e.key}  score ${e.score.toFixed(1)}  sources ${e.sources.join('+') || '—'}  ${e.signaux} signaux`).join('\n') || 'Aucune entité active.';
       case 'regles': return engine.rules().map(r => `${r.id.padEnd(40)} ${r.mode.padEnd(9)} ${(r.cas || '').padEnd(5)}${r.expire ? ` ${r.expire < now() ? 'EXPIRÉE' : 'expire'} le ${new Date(r.expire).toISOString().slice(0, 10)}` : ''}`).join('\n') + `\nSeuils : ${Object.entries(engine.thresholds()).map(([k, v]) => `${k} ${v}`).join(', ')}`;
       case 'regle':
@@ -165,6 +187,15 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         return [config.console ? 'Console réglée.' : 'Console non réglée (VIGIE_CONSOLE_CLIENT_ID absent).', 'Droits :', ...(droits.length ? droits : ['  aucun compte connu']),
           `Sessions ouvertes : ${ouvertes}`, 'Connexions refusées (10 dernières) :', ...(refus.length ? refus : ['  aucune'])].join('\n');
       }
+      case 'urgence': {
+        if (!config.urgence) throw new DecisionError('mode urgence non réglé (VIGIE_CF_ZONE_ID, VIGIE_CF_URGENCE_TOKEN_FILE)');
+        const u = createUrgence({ store, ...config.urgence, now });
+        const iso = t => new Date(t).toISOString().slice(0, 16).replace('T', ' ');
+        if (rest[0] === 'marche') return u.activer({ duree: opt.duree, par, motif }).then(e => `Mode urgence actif jusqu'au ${iso(e.jusqua)} UTC (niveau d'avant : ${e.avant}).`);
+        if (rest[0] === 'arret') return u.desactiver({ par, raison: 'levé' }).then(e => (e ? `Mode urgence levé : niveau ${e.avant} remis.` : 'Le mode urgence n’était pas actif.'));
+        const e = u.etat();
+        return e?.actif ? `Mode urgence actif jusqu'au ${iso(e.jusqua)} UTC, par ${e.par} : « ${e.motif} ».` : `Mode urgence inactif${e?.fin ? ` (dernier terminé le ${iso(e.fin)} UTC, ${e.fin_raison})` : ''}.`;
+      }
       case 'bordure': {
         // Grille de lecture de l'essai sur l'instance de test (docs/wiki/Vigie.md, bordure).
         const iso = t => (t ? `${new Date(t).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais');
@@ -176,10 +207,42 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         const seen = db.prepare("SELECT type, COUNT(*) n FROM events WHERE composant = 'bordure' AND recu_a > ? GROUP BY type").all(day);
         return [
           `Blocages copiés dans KV : ${kv ? `version ${kv.version}, le ${iso(kv.at)}` : 'jamais (VIGIE_CF_* non réglées ?)'}`,
+          ...(() => { const l = store.setting.get('cf_liste'); return l ? [`Liste chez Cloudflare (${l.liste || '—'}) : ${l.ok === false ? `EN ÉCHEC le ${iso(l.at_echec)} : ${l.erreur}` : `${l.total} adresse(s), rapprochée le ${iso(l.at)} (+${l.ajoutees}, −${l.retirees})`}`] : []; })(),
           `Dernier battement du Worker : ${beat ? `${iso(beat.at)} (${beat.etat || '—'})` : 'jamais'} ; dernière requête vue : ${iso(store.setting.get('bordure_derniere_donnee'))} ; minute lue jusqu'à : ${iso(store.setting.get('bordure_curseur'))}`,
           `Constats de la bordure (24 h) : ${seen.map(r => `${r.type} ${r.n}`).join(', ') || 'aucun'}`,
           `En-têtes refusés par le site (24 h) : ${refused.map(r => `${r.r} ${r.n}`).join(', ') || 'aucun'}${refused.some(r => r.r === 'adresse différente') ? ' → vérifier TRUST_PROXY (adresse vue par le site)' : ''}`,
           `Empreinte TLS (7 jours) : ${withEdge} session(s) avec la bordure, ${tlsChanged} dont l'empreinte a changé${withEdge ? ` (${Math.round((100 * tlsChanged) / withEdge)} %)` : ''}`,
+        ].join('\n');
+      }
+      case 'reseau': {
+        // Grille de lecture de l'essai sur l'instance de test (deploy/unraid/reseau/README.md).
+        const iso = t => (t ? `${new Date(t).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais');
+        if (!config.reseau) return 'Source réseau non réglée (VIGIE_RESEAU_MANDATAIRE et VIGIE_RESEAU_HOTE absents de vigie.env).';
+        let lus = null;
+        if (opt.lire) lus = createReseau({ store, ...config.reseau, now }).lire();
+        const etat = store.setting.get('reseau_etat', {});
+        const silence = store.setting.get('reseau_silence_signale', {});
+        const day = now() - 864e5;
+        const ligne = (nom, k) => {
+          const e = etat[k] || {};
+          if (!config.reseau[k]) return `${nom} : non réglé`;
+          return `${nom} : ${config.reseau[k]}${e.erreur ? ` — ILLISIBLE (${e.erreur})` : e.absent ? ' — absent' : ''}\n  dernière ligne ${iso(e.derniere_ligne)} ; `
+            + (k === 'hote' ? `battement des règles ${e.battement ? `${iso(e.battement.at)} (etat=${e.battement.etat}, ${e.battement.regles ?? '?'}/${e.battement.attendues ?? '?'} règles)` : 'jamais'}`
+              : `battement ${iso(e.dernier_battement)}${e.liste ? `\n  liste autorisée au démarrage : ${e.liste.join(', ')}` : ''}`)
+            + `\n  position ${e.position ? `${e.position.pos} octets (inode ${e.position.ino})` : '—'} ; lu ${iso(e.lu_a)}${e.rotations ? ` ; ${e.rotations} rotation(s)` : ''}${e.troncatures ? ` ; ${e.troncatures} troncature(s)` : ''}${e.illisibles ? ` ; ${e.illisibles} ligne(s) illisible(s)` : ''}${e.echecs ? ` ; ${e.echecs} demande(s) permise(s) en échec (serveur injoignable…)` : ''}`
+            + (silence[k] ? `\n  SILENCE SIGNALÉ : ${silence[k]}` : '');
+        };
+        const par = db.prepare("SELECT type, COUNT(*) n FROM events WHERE composant = 'réseau' AND recu_a > ? GROUP BY type").all(day);
+        const refus = db.prepare("SELECT json_extract(detail, '$.hote') h, json_extract(detail, '$.port') p, json_extract(detail, '$.raison') r, SUM(1 + COALESCE(json_extract(detail, '$.nombre'), 0)) n FROM events WHERE type = 'reseau_sortie_refusee' AND recu_a > ? GROUP BY h, p, r ORDER BY n DESC LIMIT 15").all(day);
+        const directes = db.prepare("SELECT json_extract(detail, '$.source_nom') s, json_extract(detail, '$.destination') d, json_extract(detail, '$.port') p, SUM(1 + COALESCE(json_extract(detail, '$.nombre'), 0)) n FROM events WHERE type IN ('reseau_sortie_directe', 'reseau_flux_hors_liste') AND recu_a > ? GROUP BY s, d, p ORDER BY n DESC LIMIT 15").all(day);
+        const acceptes = Object.entries(store.setting.get('reseau_noms_acceptes', {})).sort((a, b) => b[1].at - a[1].at).slice(0, 15);
+        return [
+          ...(lus != null ? [`Passage de lecture : ${lus} événement(s) écrit(s).`] : []),
+          ligne('Mandataire de sortie', 'mandataire'), ligne('Rejets de l’hôte', 'hote'),
+          `Constats (24 h) : ${par.map(r => `${r.type} ${r.n}`).join(', ') || 'aucun'}`,
+          `Noms refusés (24 h) : ${refus.map(r => `${r.h ?? '—'}:${r.p ?? '—'} (${r.r}) ×${r.n}`).join(', ') || 'aucun'}`,
+          `Rejets de l’hôte (24 h) : ${directes.map(r => `${r.s} → ${r.d}:${r.p ?? '—'} ×${r.n}`).join(', ') || 'aucun'}`,
+          `Noms acceptés (derniers) : ${acceptes.map(([k, v]) => `${k} ×${v.n} (${iso(v.at)})`).join(', ') || 'aucun'}`,
         ].join('\n');
       }
       case 'menaces': {

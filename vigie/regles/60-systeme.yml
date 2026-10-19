@@ -92,3 +92,18 @@ detection:
   condition: selection
 level: medium
 vigie: { cas: DS24, entite: { kind: vigie, champ: detail.objet }, source_unique: true, mode: alerter }
+---
+title: Mode urgence de Cloudflare activé (« I'm Under Attack »)
+name: mode_urgence
+id: d8095ca7-f893-4b62-bef5-9a2d4da84aa3
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.impact, attack.t1498]
+description: Chaque visiteur passe par une vérification de son navigateur ; les Administrateurs doivent savoir qui l'a décidé, pourquoi et jusqu'à quand.
+detection:
+  selection:
+    type: vigie_urgence
+    detail.action: [activé, prolongé]
+  condition: selection
+level: high
+vigie: { cas: DS24, entite: { kind: vigie, valeur: urgence }, source_unique: true, mode: alerter }

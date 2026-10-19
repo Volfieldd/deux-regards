@@ -6,6 +6,7 @@ import { sameToken } from '../auth.js';
 import { ABSOLUTE_TTL } from '../sessions.js';
 import { TEXTS, PER_SHEET, MAX_PAIRS, buildPairs, sheets } from '../cards.js';
 import { UI } from '../i18n.js';
+import { translator } from '../admin-i18n.js';
 import QRCode from 'qrcode';
 import { composition } from '../textile.js';
 import { MailError } from '../mailer.js';
@@ -24,7 +25,7 @@ async function photoFormat(buf) { try { return PHOTO_FORMATS.includes((await sha
 // Champs des formulaires multipart : noms simples seulement, qui commencent par une lettre (rien comme « __proto__ »).
 const FIELD = /^[a-z][a-z_]{0,29}$/;
 
-export function registerEncounters(app, { repo, render, P, W, done, failed, withReady }) {
+export function registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion = null }) {
   // ---------- portée « les miennes » ----------
   // L'accord est donné par sortie et par photographe : un photographe ne voit que ses rencontres, ses photos, et une
   // personne seulement avec ce qui le concerne. Agir sur une personne partagée avec l'autre photographe (rapprocher,
@@ -136,8 +137,16 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   // ---------- rencontre saisie sur le téléphone (web app installable) ----------
   const LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
   // Erreurs de saisie de l'app : dans la langue de l'admin du photographe (la page de la personne, elle, a sa langue).
-  const appView = (reply, view, data) => reply.header('cache-control', 'no-store').render(`admin/${view}`, { siteName: app.siteName(), UI, t: reply.request.t, lang: reply.request.t.lang, locale: reply.request.t.locale, ...data,
+  // Admin v2 (MQ-10) : l'écran de la v2 s'il existe et que le compte l'a choisie, sinon la v1 ; les textes de la personne
+  // dans ses trois langues (traducteurs de l'admin) et l'heure de fin de la session (« connecté jusqu'à 3 h 24 »).
+  const PERSON = Object.fromEntries(['fr', 'en', 'de'].map(l => [l, translator(l)]));
+  const appView = (reply, view, data) => {
+    const tpl = adminVersion ? adminVersion.template(reply.request, view) : `admin/${view}`;
+    if (tpl.startsWith('admin/v2/')) reply.request.typoV2 = true;
+    return reply.header('cache-control', 'no-store').render(tpl, { siteName: app.siteName(), UI, t: reply.request.t, lang: reply.request.t.lang, locale: reply.request.t.locale,
+    tl: PERSON, session: reply.request.session, csrfToken: reply.request.session?.csrf, ...data,
     errors: Object.fromEntries(Object.entries(data.errors || {}).map(([k, v]) => [k, typeof v === 'string' ? reply.request.t.msg(v) : v])) });
+  };
   const authorOf = request => repo.authorBySub(request.session.sub) || null;
   function appPage(request, reply, extra = {}) {
     // Photographe : celui choisi sur l'accueil Terrain (?photographe=), sinon celui du compte.
@@ -237,7 +246,10 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
       // La photo et la signature ne sont pas gardées entre deux envois : l'écran le dit (à refaire).
-      return appPage(request, reply.code(422), { errors: err.errors, values: { ...body, signature: '' }, redo: { portrait: Boolean(portrait), signature: body.decision === 'accord' && Boolean(body.signature) } });
+      // Admin v2 (MQ-10, repère 9) : la signature, vérifiée (un PNG en base64, 500 Ko au plus), est renvoyée à l'écran pour
+      // ne pas faire signer la personne une seconde fois ; la v1 ne la lit pas.
+      const kept = /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(String(body.signature || '')) && String(body.signature).length < 700_000 ? body.signature : '';
+      return appPage(request, reply.code(422), { errors: err.errors, values: { ...body, signature: '' }, signatureKept: kept, redo: { portrait: Boolean(portrait), signature: body.decision === 'accord' && Boolean(body.signature) } });
     }
   });
 

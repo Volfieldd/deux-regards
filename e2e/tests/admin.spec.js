@@ -88,7 +88,7 @@ test('aide : lien contextuel, sommaire, recherche', async ({ page }) => {
   await search.fill('zzzz introuvable');
   await expect(page.getByText('Aucune section ne contient ce texte.')).toBeVisible();
   await search.fill('');
-  await expect(page.locator('[data-help-section]:visible')).toHaveCount(15);
+  await expect(page.locator('[data-help-section]:visible')).toHaveCount(17);
   await page.locator('.help-toc').getByRole('link', { name: /^Changer l.ordre$/ }).click();
   await expect(page.locator('#photos-changer-lordre')).toBeInViewport();
 });

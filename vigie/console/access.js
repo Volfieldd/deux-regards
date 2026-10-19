@@ -6,9 +6,10 @@ import { readLimited } from '../zitadel.js';
 // signature, l'émetteur (https://<équipe>.cloudflareaccess.com), l'audience (étiquette de l'application) et les dates.
 // Sans lui : 403 sobre. Ferme le passage direct par le réseau du tunnel (un conteneur qui joindrait la console sans
 // passer par Cloudflare).
-// Clés relues au plus une fois par heure, ou tout de suite si un jeton porte une clé inconnue (rotation), au plus une
-// fois par minute.
-
+// Clés (audit D3-A2/D3-D1) : relues en tâche de fond quand elles ont plus d'une heure, une seule lecture à la fois ;
+// si la relecture échoue (incident réseau), les clés connues restent valables 24 h : la console reste ouverte à ceux
+// qui ont un jeton signé par elles. Un jeton portant une clé inconnue (rotation) fait relire tout de suite, au plus une
+// fois par minute. Seules attentes : la toute première lecture, et des clés de plus de 24 h.
 const SKEW = 60;
 
 const b64json = s => JSON.parse(Buffer.from(s, 'base64url').toString('utf8'));
@@ -17,10 +18,17 @@ export function createAccessVerifier({ team, aud, fetchImpl = fetch, now = Date.
   if (!/^[a-z0-9-]{1,63}$/.test(team || '')) throw new Error('VIGIE_ACCESS_TEAM : nom d’équipe Cloudflare Access attendu');
   if (!/^[0-9a-f]{64}$/.test(aud || '')) throw new Error('VIGIE_ACCESS_AUD : étiquette d’audience (64 caractères hexadécimaux) attendue');
   const issuer = `https://${team}.cloudflareaccess.com`;
-  let keys = new Map(), fetchedAt = 0, lastTry = 0;
+  let keys = new Map(), fetchedAt = 0, lastTry = 0, inflight = null;
 
-  async function refresh() {
-    lastTry = now();
+  // Une seule lecture à la fois ; les requêtes qui en ont besoin attendent la même.
+  function refresh() {
+    if (!inflight) {
+      lastTry = now();
+      inflight = load().finally(() => { inflight = null; });
+    }
+    return inflight;
+  }
+  async function load() {
     const r = await fetchImpl(`${issuer}/cdn-cgi/access/certs`, { redirect: 'error', signal: AbortSignal.timeout(10000) });
     if (r.status !== 200) throw new Error(`clés Access : réponse ${r.status}`);
     const body = JSON.parse(await readLimited(r, 256 * 1024));
@@ -41,7 +49,10 @@ export function createAccessVerifier({ team, aud, fetchImpl = fetch, now = Date.
     let header, payload;
     try { header = b64json(parts[0]); payload = b64json(parts[1]); } catch { throw new Error('jeton Access illisible'); }
     if (header.alg !== 'RS256') throw new Error('jeton Access : algorithme refusé');
-    if (now() - fetchedAt > 3600e3 || (!keys.has(header.kid) && now() - lastTry > 60e3)) await refresh();
+    const age = now() - fetchedAt;
+    if (!keys.size || age > 24 * 3600e3) await refresh();                                     // jamais lues, ou trop vieilles
+    else if (!keys.has(header.kid) && now() - lastTry > 60e3) await refresh().catch(() => {}); // rotation
+    else if (age > 3600e3 && now() - lastTry > 60e3) refresh().catch(() => {});               // en tâche de fond
     const key = keys.get(header.kid);
     if (!key) throw new Error('jeton Access : clé inconnue');
     const ok = crypto.verify('RSA-SHA256', Buffer.from(`${parts[0]}.${parts[1]}`), key, Buffer.from(parts[2], 'base64url'));

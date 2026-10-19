@@ -4,7 +4,8 @@
 const v = it.v ? '?v=' + encodeURIComponent(it.v) : '';
 const page = it.page || '';
 const moi = it.moi || {};
-const ROLES = { viewer: 'Lecteur', handler: 'Intervenant', analyst: 'Analyste', admin: 'Administrateur' };
+// Nom du rôle : droits.js (LABELS), passé à chaque gabarit par la console (render).
+const ROLES = it.roles || {};
 const nom = String(moi.nom || '').trim() || String(moi.sub || '').trim() || 'Compte';
 const initiale = (nom.match(/[\p{L}\p{N}]/u) || ['?'])[0].toUpperCase();
 const n = x => Math.max(0, Math.trunc(Number(x) || 0));

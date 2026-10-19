@@ -1,5 +1,197 @@
 [
   {
+    "version": "1.166.0",
+    "date": "2026-10-19",
+    "pr": 166,
+    "title": {
+      "fr": "L’admin v2 : la fiche, la photothèque et « À valider »",
+      "en": "Admin v2: the photo record, the photo library and “To approve”",
+      "de": "Verwaltung v2: Datenblatt, Fotothek und „Zu bestätigen“"
+    },
+    "items": [
+      {
+        "fr": "En v2, la fiche d’une photo s’enregistre champ par champ, avec « Défaire » ; publier, dépublier (avec une raison) ou supprimer passent par une confirmation, et une suggestion n’est jamais enregistrée sans « Enregistrer ».",
+        "en": "In v2, a photo’s record is saved field by field, with “Undo”; publishing, unpublishing (with a reason) or deleting asks for confirmation, and a suggestion is never saved without “Save”.",
+        "de": "In v2 wird das Datenblatt eines Fotos Feld für Feld gespeichert, mit „Rückgängig“; Veröffentlichen, Zurückziehen (mit Grund) oder Löschen verlangt eine Bestätigung, und ein Vorschlag wird nie ohne „Speichern“ gespeichert."
+      },
+      {
+        "fr": "La photothèque en v2 : filtres par état, la touche P qui demande confirmation, « Défaire » sans recharger la page ; les raccourcis d’une touche se coupent dans « Mon compte ».",
+        "en": "The photo library in v2: filters by state, the P key asks for confirmation, “Undo” without reloading the page; single-key shortcuts can be turned off in “My account”.",
+        "de": "Die Fotothek in v2: Filter nach Status, die Taste P fragt nach Bestätigung, „Rückgängig“ ohne Neuladen der Seite; Einzeltasten-Kürzel lassen sich in „Mein Konto“ ausschalten."
+      },
+      {
+        "fr": "« À valider » en v2 : le titre provisoire et l’état des accords sur chaque ligne ; renvoyer ou annuler une programmation sans quitter la page.",
+        "en": "“To approve” in v2: the provisional title and consent state on each line; send back or cancel a schedule without leaving the page.",
+        "de": "„Zu bestätigen“ in v2: vorläufiger Titel und Stand der Einwilligungen in jeder Zeile; zurückschicken oder eine Planung aufheben, ohne die Seite zu verlassen.",
+        "perm": "photos.publier"
+      }
+    ]
+  },
+  {
+    "version": "1.160.0",
+    "date": "2026-10-19",
+    "pr": 160,
+    "title": {
+      "fr": "L’admin v2, à essayer",
+      "en": "Admin v2, ready to try",
+      "de": "Die Verwaltung v2 zum Ausprobieren"
+    },
+    "items": [
+      {
+        "fr": "« Essayer l’admin v2 », au pied du menu : chacun choisit sa version et revient à la v1 d’un clic. Un écran pas encore refait s’affiche en v1, avec la mention « Écran pas encore en v2 ».",
+        "en": "“Try admin v2”, at the foot of the menu: everyone picks their version and goes back to v1 in one click. A screen not yet redone shows in v1, marked “Screen not yet in v2”.",
+        "de": "„Verwaltung v2 ausprobieren“ unten im Menü: Jede und jeder wählt die eigene Version und kehrt mit einem Klick zu v1 zurück. Ein noch nicht überarbeiteter Bildschirm erscheint in v1, mit dem Hinweis „Bildschirm noch nicht in v2“."
+      },
+      {
+        "fr": "En v2 : menu en quatre groupes, réglages en onglets (en cases au téléphone), chaque champ enregistré quand on le quitte, avec « Défaire » pendant 10 secondes.",
+        "en": "In v2: a menu in four groups, settings in tabs (boxes on a phone), each field saved when you leave it, with “Undo” for 10 seconds.",
+        "de": "In v2: Menü in vier Gruppen, Einstellungen in Reitern (auf dem Telefon als Kacheln), jedes Feld wird beim Verlassen gespeichert, mit „Rückgängig“ für 10 Sekunden."
+      },
+      {
+        "fr": "Le lot en v2 : traductions des titres, série suggérée en un clic, actions sur les photos cochées ; « Proposer » montre d’abord ce qui reste à revoir.",
+        "en": "The batch in v2: title translations, suggested series in one click, actions on ticked photos; “Submit” first shows what is left to check.",
+        "de": "Der Stapel in v2: Übersetzungen der Titel, vorgeschlagene Serie mit einem Klick, Aktionen für die angehakten Fotos; „Vorschlagen“ zeigt zuerst, was noch zu prüfen ist.",
+        "perm": "photos.importer"
+      },
+      {
+        "fr": "L’app de terrain en v2 : si le réseau coupe, l’accord reste à l’écran jusqu’à « Réessayer ».",
+        "en": "The field app in v2: if the network drops, the consent stays on screen until “Try again”.",
+        "de": "Die Feld-App in v2: Fällt das Netz aus, bleibt die Einwilligung bis „Erneut versuchen“ auf dem Bildschirm.",
+        "perm": "terrain.app"
+      }
+    ]
+  },
+  {
+    "version": "1.156.0",
+    "date": "2026-10-19",
+    "pr": 156,
+    "title": {
+      "fr": "Voir le site en v1 ou en v2",
+      "en": "See the site in v1 or v2",
+      "de": "Die Website in v1 oder v2 ansehen"
+    },
+    "items": [
+      {
+        "fr": "Connecté à l’admin, une petite ligne en tête des pages publiques bascule votre vue entre v1 et v2. Les visiteurs voient ce que décide Apparence. La v1 est gardée.",
+        "en": "When logged in to the admin, a small line at the top of public pages switches your view between v1 and v2. Visitors see what Appearance decides. v1 is kept.",
+        "de": "Angemeldet in der Verwaltung schaltet eine kleine Zeile oben auf den öffentlichen Seiten Ihre Ansicht zwischen v1 und v2 um. Besucher sehen, was unter Darstellung eingestellt ist. v1 bleibt erhalten.",
+        "perm": "site.apparence"
+      }
+    ]
+  },
+  {
+    "version": "1.151.0",
+    "date": "2026-10-19",
+    "pr": 151,
+    "title": {
+      "fr": "Les Carnets",
+      "en": "The Notebooks (Carnets)",
+      "de": "Die Notizbücher (Carnets)"
+    },
+    "items": [
+      {
+        "fr": "Menu « Carnets » : écrire un billet avec ses photos, le proposer, le publier ou le programmer, avec ses versions et ses traductions. Les Carnets s’affichent sur le site en v2.",
+        "en": "“Carnets” menu: write a post with its photos, submit it, publish or schedule it, with its versions and translations. The Carnets show on the site in v2.",
+        "de": "Menü „Carnets“: einen Beitrag mit seinen Fotos schreiben, vorschlagen, veröffentlichen oder planen, mit Versionen und Übersetzungen. Die Carnets erscheinen auf der Website in v2.",
+        "perm": "carnet.voir"
+      }
+    ]
+  },
+  {
+    "version": "1.149.0",
+    "date": "2026-10-19",
+    "pr": 149,
+    "title": {
+      "fr": "Les galeries privées",
+      "en": "Private galleries",
+      "de": "Private Galerien"
+    },
+    "items": [
+      {
+        "fr": "Publier › Galeries privées : partagez des photos avec une personne par un lien et un mot de passe, montrés une seule fois. Prolonger, changer le mot de passe ou révoquer à tout moment ; les photos à vérifier restent cachées tant qu’elles ne sont pas confirmées.",
+        "en": "Publish › Private galleries: share photos with someone through a link and a password, shown only once. Extend, change the password or revoke at any time; photos to check stay hidden until confirmed.",
+        "de": "Veröffentlichen › Private Galerien: Fotos über einen Link und ein Passwort teilen, die nur einmal angezeigt werden. Jederzeit verlängern, Passwort ändern oder widerrufen; zu prüfende Fotos bleiben verborgen, bis sie bestätigt sind.",
+        "perm": "galeries.voir"
+      }
+    ]
+  },
+  {
+    "version": "1.140.0",
+    "date": "2026-10-18",
+    "pr": 140,
+    "title": {
+      "fr": "Textes de la v2 et numéro d’inventaire",
+      "en": "v2 texts and inventory number",
+      "de": "Texte der v2 und Inventarnummer"
+    },
+    "items": [
+      {
+        "fr": "Fiche photo : un texte de remplacement pour les personnes aveugles, en trois langues ; la suggestion automatique n’est jamais publiée sans « Enregistrer ».",
+        "en": "Photo page: a text alternative for blind people, in three languages; the automatic suggestion is never published without “Save”.",
+        "de": "Fotoseite: ein Alternativtext für blinde Menschen, in drei Sprachen; der automatische Vorschlag wird nie ohne „Speichern“ veröffentlicht.",
+        "perm": "photos.textes"
+      },
+      {
+        "fr": "Séries : un texte d’intention ; Photographes : une description courte. Chaque photo publiée reçoit un numéro d’inventaire (ex. J26-003).",
+        "en": "Series: an intent text; Photographers: a short description. Each published photo gets an inventory number (e.g. J26-003).",
+        "de": "Serien: ein Absichtstext; Fotografen: eine Kurzbeschreibung. Jedes veröffentlichte Foto erhält eine Inventarnummer (z. B. J26-003)."
+      }
+    ]
+  },
+  {
+    "version": "1.117.0",
+    "date": "2026-10-18",
+    "pr": 117,
+    "title": {
+      "fr": "L’heure de prise de vue, si vous le voulez",
+      "en": "The time a photo was taken, if you want",
+      "de": "Die Aufnahmezeit, wenn Sie wollen"
+    },
+    "items": [
+      {
+        "fr": "Fiche photo : « Montrer l’heure sur le site », décochée par défaut. L’heure n’apparaît que sur la page de la photo, si la date est au jour.",
+        "en": "Photo page: “Show the time on the site”, unticked by default. The time only appears on the photo’s page, if the date is to the day.",
+        "de": "Fotoseite: „Uhrzeit auf der Website zeigen“, standardmäßig nicht angehakt. Die Uhrzeit erscheint nur auf der Seite des Fotos, wenn das Datum tagesgenau ist.",
+        "perm": "photos.modifier"
+      }
+    ]
+  },
+  {
+    "version": "1.115.0",
+    "date": "2026-10-18",
+    "pr": 115,
+    "title": {
+      "fr": "Le site public v2",
+      "en": "The public site v2",
+      "de": "Die öffentliche Website v2"
+    },
+    "items": [
+      {
+        "fr": "Réglages › Apparence : la nouvelle présentation du site public (visionneuse, galerie, séries, accueil, formulaires, pages), à voir en aperçu avant de l’appliquer aux visiteurs.",
+        "en": "Settings › Appearance: the new presentation of the public site (viewer, gallery, series, home, forms, pages), to preview before applying it to visitors.",
+        "de": "Einstellungen › Darstellung: die neue Gestaltung der öffentlichen Website (Bildbetrachter, Galerie, Serien, Startseite, Formulare, Seiten), vor der Freigabe für Besucher in der Vorschau ansehen.",
+        "perm": "site.apparence"
+      }
+    ]
+  },
+  {
+    "version": "1.114.0",
+    "date": "2026-10-18",
+    "pr": 114,
+    "title": {
+      "fr": "Corrections d’ergonomie",
+      "en": "Usability fixes",
+      "de": "Korrekturen der Bedienbarkeit"
+    },
+    "items": [
+      {
+        "fr": "Le focus se voit sur un champ en erreur ; le menu de l’admin s’ouvre au téléphone même sans script ; les mentions légales nomment le directeur de la publication et l’hébergement.",
+        "en": "Focus is visible on a field in error; the admin menu opens on a phone even without script; the legal notice names the publication director and the host.",
+        "de": "Der Fokus ist auf einem fehlerhaften Feld sichtbar; das Menü der Verwaltung öffnet sich auf dem Telefon auch ohne Skript; das Impressum nennt die verantwortliche Person und den Hoster."
+      }
+    ]
+  },
+  {
     "version": "1.90.0",
     "date": "2026-10-16",
     "pr": 90,

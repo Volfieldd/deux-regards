@@ -1,0 +1,13 @@
+<% layout('./layout') %>
+<% /* Confirmation d'un geste sur une galerie ou un accès (MQ-18, repères 18 et 19), sans script : la question sur une page,
+      qui nomme la personne ou la galerie ; « Annuler » d'abord ; ce qui part, ce qui reste. */ %>
+<% const t = it.t; %>
+<div class="gp">
+<header class="ep"><a class="ep-retour" href="<%= it.back %>"><%= it.s.title %></a><div class="ep-titre"><h1><%= it.title %></h1></div></header>
+<section class="panel confirm-page" aria-labelledby="q-t"><form method="post" action="<%= it.action %>"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <h2 id="q-t"><%= it.question %></h2>
+  <p><%= it.text %></p>
+<% if (it.consequences.length) { %>  <ul class="dlg-cons"><% it.consequences.forEach(c => { %><li><%= c %></li><% }) %></ul><% } %>
+  <div class="actions"><a class="btn ghost" href="<%= it.back %>"><%= t('Annuler') %></a><button class="btn<%= it.plain ? '' : ' danger' %>" type="submit"><%= it.button %></button></div>
+</form></section>
+</div>

@@ -4,12 +4,14 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Eta } from 'eta';
+import { VIGIE_KEYS } from './helpers.js';
 import { openVigieDb, createStore } from '../vigie/store.js';
 import { createDecisions } from '../vigie/decisions.js';
 import { createSwitches } from '../vigie/interrupteurs.js';
 import { createEngine } from '../vigie/moteur.js';
 import { overview, compteurs } from '../vigie/console/vue-ensemble.js';
-import { adresseVue, adresseDetail, dateHeure, heure, ilYa, quand, gravite, role } from '../vigie/console/format.js';
+import { adresseVue, adresseDetail, dateHeure, heure, ilYa, quand, gravite } from '../vigie/console/format.js';
+import { LABELS } from '../vigie/console/droits.js';
 
 // Console de la Vigie, phase D3a : gabarits (pages hors session, vue d'ensemble, fragment, écran à venir), vue d'ensemble
 // lue dans une base de la Vigie en mémoire, aides de présentation. La CSP de la console interdit tout style et tout script en
@@ -99,7 +101,7 @@ function decor(t) {
   return { ...v, ids: { a407, a409, a412, a413, a399, a414 } };
 }
 
-const commun = (moi, extra = {}) => ({ titre: 'Vue d’ensemble', v: 'abc123', page: 'vue', moi, csrf: 'jeton-csrf', ...extra });
+const commun = (moi, extra = {}) => ({ titre: 'Vue d’ensemble', v: 'abc123', page: 'vue', moi, csrf: 'jeton-csrf', roles: LABELS, ...extra });
 
 // ---------- Pages hors session ----------
 
@@ -303,12 +305,11 @@ test('vue d’ensemble sans alerte : une phrase, pas de tableau vide ; dernière
   assert.match(html, /<p class="vg-compte">Aucune décision en cours\.<\/p>/);
 });
 
-test('écran à venir : page en session sobre, lien actif', () => {
-  const html = eta.render('a-venir', { titre: 'Alertes', v: '1', page: 'alertes', moi: { nom: 'Julien', role: 'analyst' }, compteurs: { alertes: 0, sante: 0, decisions: 0 }, csrf: 'c' });
+test('page en session sobre (alerte introuvable) : lien actif, nom du rôle de droits.js', () => {
+  const html = eta.render('alertes-introuvable', { titre: 'Alerte introuvable', v: '1', page: 'alertes', moi: { nom: 'Julien', role: 'analyst' }, compteurs: { alertes: 0, sante: 0, decisions: 0 }, csrf: 'c', roles: LABELS, numero: 12 });
   verifierPage(html);
-  assert.match(html, /<title>Alertes · Vigie · Nicephos<\/title>/);
-  assert.match(html, /<h1>Alertes<\/h1>/);
-  assert.match(html, /Cet écran arrive bientôt\./);
+  assert.match(html, /<title>Alerte introuvable · Vigie · Nicephos<\/title>/);
+  assert.match(html, /<h1>Alerte introuvable<\/h1>/);
   assert.match(html, /<a href="\/alertes" aria-current="page">/);
   assert.doesNotMatch(html, /data-rafraichir/, 'pas de rafraîchissement hors de la vue d’ensemble');
   assert.doesNotMatch(html, /nav-badge/, 'compteurs à zéro : pas de pastille');
@@ -352,10 +353,7 @@ test('format : heure de Paris (été et hiver), dates abrégées, il y a, rôles
   assert.equal(ilYa(T0 - 3 * min, T0), `il y a 3${NBSP}min`);
   assert.equal(ilYa(T0 - 30e3, T0), 'à l’instant');
   assert.equal(ilYa(T0 - 3 * 864e5, T0), `il y a 3${NBSP}jours`);
-  assert.equal(role('handler'), 'Intervenant');
-  assert.equal(role('viewer'), 'Lecteur');
-  assert.equal(role('analyst'), 'Analyste');
-  assert.equal(role('admin'), 'Administrateur');
+  assert.deepEqual(LABELS, { viewer: 'Lecteur', handler: 'Intervenant', analyst: 'Analyste', admin: 'Administrateur' });
   assert.deepEqual([gravite('critique').mot, gravite('haut').mot, gravite('moyen').mot, gravite('bas').mot], ['Critique', 'Haute', 'Moyenne', 'Basse']);
 });
 
@@ -370,4 +368,24 @@ test('format : adresse vue par un Lecteur (/24, /48), complète pour les autres 
   assert.deepEqual(adresseDetail('198.51.100.23', 'viewer'), { texte: '198.51.100.0/24', tronquee: true, v6: false });
   for (const r of ['handler', 'analyst', 'admin']) assert.equal(adresseVue('198.51.100.23', r), '198.51.100.23');
   assert.equal(adresseVue('198.51.100.23', undefined), '198.51.100.0/24', 'rôle inconnu : traité en Lecteur');
+});
+
+test('lexique (audit D3-D10) : classements de la table alerts, barème des détecteurs commun au moteur et aux réglages', async () => {
+  const { CLASSEMENTS, DETECTEURS: TITRES, titreDe, typo, virgule } = await import('../vigie/console/lexique.js');
+  const { DETECTEURS } = await import('../vigie/detecteurs.js');
+  // Les classements : ceux qu'admet la contrainte CHECK de la table alerts (migration 003), et eux seuls.
+  const sql = fs.readFileSync(new URL('../vigie/migrations/003_entites_alertes.sql', import.meta.url), 'utf8');
+  const admis = /classement\s+TEXT CHECK \(classement IN \(([^)]*)\)\)/.exec(sql)[1].split(',').map(x => x.trim().replace(/'/g, ''));
+  assert.deepEqual(Object.keys(CLASSEMENTS).sort(), admis.sort());
+  // Chaque détecteur a un titre et un barème ; le registre du moteur en tient ses cas.
+  assert.deepEqual(Object.keys(TITRES).sort(), Object.keys(DETECTEURS).sort());
+  const db = openVigieDb(':memory:');
+  const store = createStore({ db, logKey: 'cle-de-chaine-vigie-0123456789abcdefgh' });
+  const engine = createEngine({ store, decisions: createDecisions({ store, privateKey: VIGIE_KEYS.privateKey }), switches: createSwitches({ store }) });
+  for (const r of engine.rules().filter(x => x.id.startsWith('detecteur.'))) assert.equal(r.cas, DETECTEURS[r.id.slice(10)].cas, r.id);
+  db.close();
+  assert.equal(titreDe('detecteur.voyage_impossible', new Map([['detecteur.voyage_impossible', 'voyage impossible']])), 'Voyage impossible entre deux connexions d’un compte');
+  assert.equal(typo("l'admin : 24 h"), 'l’admin : 24 h');
+  assert.equal(virgule(2.345), '2,3');
+  assert.equal(virgule(12.5), '12,5');
 });

@@ -1,0 +1,64 @@
+<% layout('./layout') %>
+<% /* Suivi d'un accès (MQ-18, état « 17 h 32 ») : quatre chiffres (ouvert, dernière visite, appareils, favoris), sa
+      sélection (exporter, rouvrir), son activité (le journal, réseau et pays seulement), les réglages (fin, droits), lien et
+      mot de passe (nouveaux, une seule fois), la pause ou la suspension avec « Débloquer », et ses données (effacées
+      seules six mois après la fin ; « Effacer » plus tôt). Lire cette page est noté au journal (données d'un invité). */ %>
+<% const t = it.t, s = it.s, i = it.inv, v = it.values || {}, e = it.errors || {};
+   const csrf = `<input type="hidden" name="_csrf" value="${it.csrf}">`;
+   const on = k => v[k] === '1' || v[k] === 'on' || v[k] === true;
+   const errP = k => e[k] ? `<p class="err" id="${k}-err"><span><b>${t('Erreur :')}</b> ${String(e[k]).replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span></p>` : '';
+   const live = !['revoque', 'expire'].includes(i.state); %>
+<div class="gp">
+<p class="help-link"><a href="/admin/aide#galeries-privees"><%= t('Aide sur cette page') %></a></p>
+<header class="ep">
+  <a class="ep-retour" href="/admin/galeries/<%= s.id %>"><%= s.title %></a>
+  <div class="ep-titre"><h1><%= t('Accès de {name}', { name: i.label }) %></h1><%~ include('./_galerie-etat', { key: i.stateKey, text: i.stateText }) %></div>
+  <p class="ep-meta"><span><%= i.is_group ? t('lien de groupe') : t('lien personnel') %></span><span><%= t('créé le {date}', { date: i.createdText }) %></span><span><%= t('jusqu’au {date}', { date: i.expiresText }) %></span><span lang="<%= i.lang %>"><%= { fr: 'Français', en: 'English', de: 'Deutsch' }[i.lang] %></span></p>
+  <div class="ep-actions"><a class="btn ghost ep-secondaire" href="/admin/galeries/<%= s.id %>/apercu"><%= t('Voir comme un invité') %></a><% if (it.canShare && i.state !== 'revoque') { %><a class="btn danger-c" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/revoquer"><%= t('Révoquer l’accès…') %></a><% } %></div>
+</header>
+<% if (i.suspended_at || it.lockedText) { %><div class="signal gp-marge-b" role="note"><p class="signal-t"><span aria-hidden="true">▲</span> <%= i.suspended_at ? t('Suspendu après 30 mots de passe refusés') : t('En pause de sécurité jusqu’à {time} : {n} essais refusés', { time: it.lockedText, n: i.failed_count }) %></p>
+  <p><%= i.suspended_at ? t('Le lien a peut-être fui : quelqu’un essaie des mots de passe. Si la personne vous appelle, redonnez-lui un nouveau mot de passe ; sinon, révoquez l’accès.') : t('La pause se lève seule. Si la personne vous appelle, redonnez-lui le mot de passe de vive voix, puis débloquez : elle peut réessayer tout de suite. Après 10 refus, la pause dure 15 minutes ; après 30, l’accès est suspendu jusqu’à ce que vous le débloquiez.') %></p>
+<% if (it.canShare) { %>  <div class="actions"><form method="post" action="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/debloquer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Débloquer l’accès') %></button></form><a class="btn ghost" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/nouveau-mot-de-passe"><%= t('Nouveau mot de passe…') %></a></div><% } %></div>
+<% } %>
+<% if (s.hidden) { %><div class="signal gp-marge-b" role="note"><p class="signal-t"><span aria-hidden="true">▲</span> <%= s.hidden > 1 ? t('{n} photos cachées aux invités', { n: s.hidden }) : t('1 photo cachée aux invités') %></p><p><a class="more" href="/admin/galeries/<%= s.id %>/photos"><%= t('Les confirmer dans l’onglet Photos') %></a></p></div>
+<% } %><dl class="chiffres">
+  <div><dt><%= t('Ouvert') %></dt><dd><%= i.openedText || t('pas encore') %><span class="sec"><%= i.openedText ? t('mot de passe accepté') : t('le lien seul ne compte pas') %></span></dd></div>
+  <div><dt><%= t('Dernière visite') %></dt><dd><%= i.lastText %></dd></div>
+  <div><dt><%= t('Appareils') %></dt><dd><%= i.devices %><span class="sec"><%= t('signalé au-delà de 3') %></span></dd></div>
+<% if (i.rights.favoris) { %>  <div><dt><%= t('Favoris') %></dt><dd><%= t('{n} sur {total}', { n: i.nFav, total: it.nPhotos }) %><span class="sec"><%= i.selection_sent_at ? t('sélection envoyée') : t('pas encore envoyée') %></span></dd></div><% } %>
+</dl>
+<div class="deux-col">
+<div>
+<% if (i.rights.favoris || it.favs.length) { %><section class="panel" aria-labelledby="t-fav"><h2 class="panel-t" id="t-fav"><%= it.favs.length > 1 ? t('Sa sélection · {n} favoris', { n: it.favs.length }) : t('Sa sélection · {n} favori', { n: it.favs.length }) %></h2>
+<% if (i.selection_sent_at) { %><p class="lu"><%= i.selection_seen_at ? t('Envoyée le {date} ; vue par l’équipe : la personne ne peut plus la reprendre seule.', { date: it.sentText }) : t('Envoyée le {date}.', { date: it.sentText }) %></p><% } %>
+<% if (it.favs.length) { %><ul class="favoris-a" aria-label="<%= t('Ses favoris, dans l’ordre où elle les a posés') %>"><% it.favs.forEach(p => { %><li><img src="<%= p.thumb %>" alt="<%= p.alt || p.title %>" height="80" width="<%= Math.round(80 * p.width / p.height) %>" loading="lazy"><span class="t"><%= p.title %></span><span class="sec"><%= t('favori à {time}', { time: p.when }) %></span></li><% }) %></ul>
+<div class="btns-ligne"><a class="btn ghost" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/selection.csv"><%= t('Exporter la sélection (CSV)') %></a><% if (it.canManage && i.selection_sent_at) { %><form method="post" action="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/selection/rouvrir"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Rouvrir la sélection') %></button></form><% } %></div>
+<% if (i.selection_sent_at) { %><p class="hint gp-marge"><%= t('« Rouvrir » lui rend la main : elle pourra changer ses favoris et renvoyer sa sélection.') %></p><% } %>
+<% } else { %><p class="empty"><%= t('Aucun favori pour l’instant.') %></p><% } %></section><% } %>
+<section class="panel" aria-labelledby="t-act"><h2 class="panel-t" id="t-act"><%= t('Activité') %></h2>
+<% if (!it.events.length) { %><p class="empty"><%= t('Rien encore.') %></p><% } else { %><ol class="chrono">
+<% it.events.forEach(ev => { %><li><time datetime="<%= new Date(ev.at).toISOString() %>"><%= ev.when %></time><span><%= ev.text %><% if (ev.photo) { %> « <%= ev.photo %> »<% } %><% if (ev.antivirus) { %><br><span class="sec"><%= t('Souvent l’antivirus de la messagerie qui vérifie le lien, pas la personne.') %></span><% } %><% if (ev.net) { %><br><span class="sec"><%= ev.net %><% if (ev.robot) { %> · <%= t('robot ou aperçu de lien') %><% } %></span><% } %></span></li>
+<% }) %></ol><% } %>
+<p class="hint"><%= t('Adresses IP tronquées, pays estimé par Cloudflare, aucun navigateur noté.') %></p></section>
+</div>
+<div>
+<% if (it.canShare && live) { %><section class="panel" aria-labelledby="t-reg"><h2 class="panel-t" id="t-reg"><%= t('Réglages de l’accès') %></h2>
+<form class="form" action="/admin/galeries/<%= s.id %>/acces/<%= i.id %>" method="post" novalidate><%~ csrf %>
+  <div class="champ-a"><label for="fin-s"><%= t('Fin de l’accès') %></label><p class="aide" id="fin-s-aide"><%= t('Au plus tard le {date}, fermeture de la galerie ; 6 mois au plus. Prolonger garde le lien et le mot de passe.', { date: it.closesText }) %></p><input type="text" id="fin-s" name="expires" maxlength="40" value="<%= v.expires || '' %>" aria-describedby="fin-s-aide fin-s-lu<%= e.expires ? ' expires-err' : '' %>"<%~ e.expires ? ' aria-invalid="true"' : '' %>><p class="lu" id="fin-s-lu"><%= it.lu %></p><%~ errP('expires') %></div>
+  <fieldset class="choix-a"><legend><%= t('Ce que la personne peut faire') %></legend>
+    <label><input type="checkbox" name="favoris" value="1"<%~ on('favoris') ? ' checked' : '' %>><span><%= t('Choisir ses favoris') %></span></label>
+    <label><input type="checkbox" name="telecharger" value="1"<%~ on('telecharger') ? ' checked' : '' %>><span><%= t('Télécharger les photos en 2 048 px') %></span></label>
+    <label><input type="checkbox" name="grande" value="1"<%~ on('grande') ? ' checked' : '' %>><span><%= t('Et en grande taille, jusqu’à 4 000 px') %></span></label>
+  </fieldset>
+  <p><button class="btn ghost" type="submit"><%= t('Enregistrer') %></button></p>
+</form>
+<div class="champ-a gp-marge"><span class="lb"><%= t('Lien et mot de passe') %></span><p class="aide"><%= t('Affichés une seule fois, à la création. Un nouveau mot de passe garde le lien ; un nouveau lien garde le mot de passe. L’ancien cesse de marcher aussitôt.') %></p>
+  <div class="btns-ligne"><a class="btn ghost" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/nouveau-mot-de-passe"><%= t('Nouveau mot de passe…') %></a><a class="btn ghost" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/nouveau-lien"><%= t('Nouveau lien…') %></a></div></div>
+</section><% } %>
+<section class="panel" aria-labelledby="t-don"><h2 class="panel-t" id="t-don"><%= t('Données de cet accès') %></h2>
+<p><%= t('Nom chiffré, activité, favoris et sélection : effacés seuls le {date}, six mois après la fin de l’accès.', { date: it.purgeText }) %></p>
+<p class="hint"><%= t('La personne peut demander à les effacer plus tôt ; « Effacer » révoque aussi l’accès.') %></p>
+<% if (it.canShare) { %><p class="gp-marge"><a class="btn danger-c" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/effacer"><%= t('Effacer l’accès et ses données…') %></a></p><% } %></section>
+</div>
+</div>
+</div>

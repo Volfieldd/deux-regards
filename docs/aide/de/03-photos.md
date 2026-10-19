@@ -39,13 +39,14 @@ Bei der Verarbeitung wendet die Website die Ausrichtung der Kamera an, berechnet
 
 ### 3. Vervollständigen und veröffentlichen
 
-Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel, Serie, Ort und Datum. Ein Bildschirm zeigt höchstens 200: darüber hinaus (eine große Speicherkarte) steht es oben, mit einem Link zu den nächsten.
+Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel und Alternativtext, Serie, Ort und Datum. Ein Bildschirm zeigt höchstens 200: darüber hinaus (eine große Speicherkarte) steht es oben, mit einem Link zu den nächsten.
 
 - **Am Computer:** eine Tabelle, eine Zeile pro Foto.
-- **Auf dem Telefon:** **eine Karte pro Foto**, mit Kästchen, Miniatur und Zustand, darunter die Felder Titel, Serie, Ort und Datum untereinander.
+- **Auf dem Telefon:** **eine Karte pro Foto**, mit Kästchen, Miniatur und Zustand, darunter die Felder Titel, Alternativtext, Serie, Ort und Datum untereinander.
 
 - **Jedes Feld wird gespeichert, wenn Sie es verlassen** (Tab, Klick an eine andere Stelle oder Eingabe). Die Spalte **Zustand** zeigt „Wird gespeichert…“ und dann „✓ Gespeichert“. Die Meldung unten am Bildschirm bietet einige Sekunden lang **Rückgängig** an.
 - **Vorläufiger Titel:** Solange der Titel der aus dem Dateinamen ist, wird das unter dem Feld angezeigt.
+- **Alternativtext:** unter dem Titel, was auf dem Foto zu sehen ist, in einer Zeile (höchstens 250 Zeichen; ein Zeilenumbruch wird zu einem Leerzeichen). Blinde Menschen hören ihn anstelle des Fotos. Leer wird er nie von selbst gefüllt: Die vorgeschlagene Beschreibung wird in den Details übernommen.
 - **Datum:** bereits ausgefüllt, wenn die Kamera es gespeichert hat. Andernfalls in Alltagssprache: „oct. 2026“, „octobre 2026“, „10/2026“, „5/10/2026“ oder „2026-10“. Die Website zeigt an, was sie verstanden hat („verstanden: oct. 2026“).
 - **Für die angekreuzten Fotos** (anfangs alle) wendet die obere Leiste eine **Serie** (auch eine neue), einen **Ort** oder ein **Datum** an, **sobald Sie sie ändern** — ohne Schaltfläche, mit **Rückgängig** in der Meldung. Dann **Veröffentlichen**.
   - Am Computer bleibt die Leiste sichtbar, wenn Sie in der Tabelle scrollen.
@@ -54,7 +55,7 @@ Alle Fotos des Stapels sind auf einem einzigen Bildschirm versammelt: Titel, Ser
 In der Praxis, für einen Stapel: Titel eingeben, den Ort einmal in der Leiste, dann **Veröffentlichen**.
 - **Fotos mit vorläufigem Titel veröffentlichen:** Ein Klick genügt. Der vorläufige Titel wird vorher angezeigt („Vorläufiger Titel (Dateiname)“ unter dem Titel) und in der folgenden Meldung erwähnt, mit **Rückgängig**, um zurückzugehen.
 
-Bildunterschrift, Wasserzeichen und Nachweis werden in den Details jedes Fotos eingestellt (siehe unten).
+Bildunterschrift, Übersetzungen, vorgeschlagene Beschreibung, Wasserzeichen und Nachweis werden in den Details jedes Fotos eingestellt (siehe unten).
 
 ## Der Kontaktbogen
 
@@ -72,7 +73,7 @@ Bildunterschrift, Wasserzeichen und Nachweis werden in den Details jedes Fotos e
 Er ändert sich je nach Auswahl:
 
 - **Nichts ausgewählt**: die Zahlen der Fotothek und die Tastenkürzel.
-- **Ein Foto** (ein Klick darauf): oben im Bereich die Schaltfläche **Details öffnen**; dann das große Bild, **Titel**, **Bildunterschrift**, **Serie** (Chips), **Ort**, **Datum**, **Fotograf** und sein **Publikum** über 30 Tage (für Konten, die die Statistiken sehen). Jedes Feld wird gespeichert, wenn Sie es verlassen (oder Eingabe); die Meldung unten bietet **Rückgängig** an. **Details öffnen** oder der Link **Alle Details** unten im Bereich führt zu den Details (Wasserzeichen, Instagram, Prioritätsnachweis, Löschen).
+- **Ein Foto** (ein Klick darauf): oben im Bereich die Schaltfläche **Details öffnen**; dann das große Bild, **Titel**, **Bildunterschrift**, **Alternativtext** (auf Französisch, eine Zeile; seine Übersetzungen und die vorgeschlagene Beschreibung sind in den Details), **Serie** (Chips), **Ort**, **Datum**, **Fotograf** und sein **Publikum** über 30 Tage (für Konten, die die Statistiken sehen). Jedes Feld wird gespeichert, wenn Sie es verlassen (oder Eingabe); die Meldung unten bietet **Rückgängig** an. **Details öffnen** oder der Link **Alle Details** unten im Bereich führt zu den Details (Wasserzeichen, Instagram, Prioritätsnachweis, Löschen).
 - **Mehrere Fotos**: siehe unten.
 
 Unten immer: **Veröffentlichen**, **Veröffentlichung zurückziehen**, **Löschen…**.
@@ -114,7 +115,7 @@ Schlägt das Speichern fehl (Sitzung abgelaufen…), kehrt die vorherige Reihenf
 | **Uhrzeit auf der Website zeigen** | nur angeboten, wenn die Aufnahmezeit bekannt ist, **anfangs nicht angekreuzt**. Angekreuzt zeigt die Seite des Fotos die Uhrzeit nach dem Datum („1. Mai 2025, 14:32 Uhr“; „14 h 32“ auf Französisch, „2:32 pm“ auf Englisch), und nur, wenn das Datum tagesgenau ist (nicht „mars 2024“). Zusammen mit dem Ort verrät die Uhrzeit, wo sich die fotografierten Personen in diesem Moment aufhielten: nur bewusst ankreuzen. Nirgends sonst auf der Website (Galerie, In der Nähe, Karte, Teilen, Sitemap); bei den Metadaten „Aufnahmedaten“ folgen Datum und Uhrzeit der ausgelieferten Bilder dem Kästchen (siehe [Wasserzeichen und EXIF](filigrane-exif)). Gleiches Recht wie das Datum: Fotografen stellen es für ihre eigenen Fotos ein. |
 | **Bildunterschrift** | unter dem Foto angezeigt, 2000 Zeichen |
 | **Alternativtext** | was auf dem Foto zu sehen ist, in einem Satz: Blinde Menschen (Bildschirmleser) hören ihn anstelle des Fotos, auf der Seite des Fotos und, in der v2 der Website, bei jeder Miniatur. Eine Zeile (Zeilenumbrüche werden zu Leerzeichen), **höchstens 250 Zeichen**: ein oder zwei Sätze, mit Platz für das Deutsche; was länger ist, gehört in die Bildunterschrift. Leer: Der Titel wird vorgelesen. Beschreiben Sie, was zu sehen ist, ohne eine fotografierte Person zu nennen: Der Text ist öffentlich wie die Bildunterschrift. Eine vorgeschlagene Beschreibung (unten) wird nie von selbst übernommen: **Als Alternativtext übernehmen** füllt das Feld, Sie prüfen und speichern. Gleiches Recht wie die Bildunterschrift: der Fotograf für seine Fotos, der Korrektor für alle. |
-| **Inventarnummer** | unter der Vorschau („Inventarnummer J26-003“): der Anfangsbuchstabe des Fotografen (sein Kartenbuchstabe), die zwei Ziffern des Jahres der ersten Veröffentlichung und sein Rang in diesem Jahr. Sie wird **bei der ersten Veröffentlichung automatisch vergeben**, ändert sich danach nie (Zurückziehen, Umsortieren, anderer Fotograf) und wird nie neu vergeben, auch nicht, wenn das Foto gelöscht wird. Sie hat kein Feld: Sie lässt sich nicht ändern. Die Bildansicht der v2 zeigt sie in den Angaben des Fotos. |
+| **Inventarnummer** | unter der Vorschau („Inventarnummer J26-003“): der Anfangsbuchstabe des Fotografen (sein Kartenbuchstabe), die zwei Ziffern des Jahres der ersten Veröffentlichung (nach Pariser Zeit: Ein Foto, das am 1. Januar um 0:30 Uhr veröffentlicht wird, zählt zum neuen Jahr) und sein Rang in diesem Jahr. Sie wird **bei der ersten Veröffentlichung automatisch vergeben**, ändert sich danach nie (Zurückziehen, Umsortieren, anderer Fotograf) und wird nie neu vergeben, auch nicht, wenn das Foto gelöscht wird. Sie hat kein Feld: Sie lässt sich nicht ändern. Die Bildansicht der v2 zeigt sie in den Angaben des Fotos. |
 | **Status** | Entwurf oder Veröffentlicht |
 | **Wasserzeichen** | „Laut Einstellungen“ oder „Nie auf diesem Foto“ (siehe [Wasserzeichen und EXIF](filigrane-exif)) |
 | **… auf Englisch und Deutsch** | unter Titel, Ort, Bildunterschrift und Alternativtext: ihre englische und deutsche Fassung, freiwillig. Leer: Die englische oder deutsche Seite zeigt den französischen Text (ein nur auf Englisch beschriebenes Foto erscheint überall auf Englisch; siehe [Die Website aus Sicht der Besucher](site-public)). |

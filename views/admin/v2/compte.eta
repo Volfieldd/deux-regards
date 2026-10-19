@@ -1,0 +1,54 @@
+<% layout('./layout') %>
+<% const t = it.t; const a = it.account || {}; %>
+<% /* Mon compte (MQ-07, état 18), ouvert depuis le nom au pied du menu : la version de l'admin, les e-mails des avis. La
+      langue et le thème se règlent au pied du menu, à un seul endroit. */ %>
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Mon compte') %></h1></div>
+  <p class="ep-meta"><span><%= it.session.name || it.session.sub %></span><span><%= (it.session.roles || []).map(r => t(it.roleLabels[r] || r)).join(', ') || '—' %></span></p>
+</header>
+
+<section class="panel compte-p" aria-labelledby="ver-t">
+  <h2 id="ver-t"><%= t('Version de l’admin') %></h2>
+  <p class="hint"><%= t('La v2 est la nouvelle administration, issue de l’audit d’ergonomie : un menu en quatre groupes, des Réglages à onglets, un lot qui se complète et se propose sur place. Un écran qui n’est pas encore refait s’affiche en v1. Ce choix ne vaut que pour votre compte ; vous pouvez revenir quand vous voulez.') %></p>
+  <form class="form" method="post" action="/admin/version">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <input type="hidden" name="back" value="/admin/compte">
+    <fieldset class="choix-a">
+      <legend><%= t('Admin') %></legend>
+      <label><input type="radio" name="version" value="v1"<%~ it.adminVersion === 'v1' ? ' checked' : '' %>><span><b>v1</b> <%= t('la présentation d’origine') %></span></label>
+      <label><input type="radio" name="version" value="v2"<%~ it.adminVersion === 'v2' ? ' checked' : '' %>><span><b>v2</b> <%= t('la nouvelle administration') %></span></label>
+    </fieldset>
+    <p class="form-pied"><button class="btn" type="submit"><%= t('Changer de version') %></button></p>
+  </form>
+</section>
+
+<% /* Raccourcis d'une touche de la photothèque (UX-A-02) : un interrupteur enregistré au geste (Défaire 10 s) ; sans script, son
+      bouton. Ctrl K, Ctrl A et Ctrl Z, qui ont une touche de modification, restent toujours. */ %>
+<section class="panel compte-p assist" aria-labelledby="rac-t">
+  <form method="post" action="/admin/compte/raccourcis" data-inter data-nom="<%= t('Raccourcis d’une touche') %>">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/compte"><input type="hidden" name="raccourcis" value="off">
+    <div class="assist-tete"><h2 id="rac-t"><%= t('Raccourcis d’une touche') %></h2><label class="inter"><span class="inter-mot" aria-hidden="true"><span class="inter-oui"><%= t('Allumé') %></span><span class="inter-non"><%= t('Éteint') %></span></span><input type="checkbox" role="switch" name="raccourcis" value="on"<%~ it.shortcuts ? ' checked' : '' %> aria-labelledby="rac-t" aria-describedby="rac-e"><span class="inter-piste" aria-hidden="true"></span></label></div>
+    <p class="assist-effet" id="rac-e"><%= t('Dans la photothèque, quand une vignette ou l’inspecteur a le focus : P publie la sélection (après confirmation), I ouvre l’import, L ou Espace la loupe. Éteints, ces touches ne font plus rien ; Ctrl K, Ctrl A et Ctrl Z restent.') %></p>
+    <p class="sans-script"><button class="btn ghost" type="submit"><%= t('Enregistrer') %></button></p>
+  </form>
+</section>
+
+<section class="panel compte-p" aria-labelledby="avis-t">
+  <h2 id="avis-t"><%= t('Avis par e-mail') %></h2>
+  <p class="hint"><%~ it.me ? t('Ce compte est lié au photographe {name} : vos imports lui sont attribués par défaut.', { name: `<strong>${__eta.e(it.me.name)}</strong>` }) : __eta.e(t('Ce compte n’est lié à aucun photographe : un administrateur peut le relier dans « Comptes et rôles ».')) %></p>
+  <form class="form" method="post" action="/admin/compte/notifications">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <input type="hidden" name="back" value="/admin/compte">
+    <div class="choix-a"><label><input type="checkbox" name="email" value="1"<%~ a.notify_email ? ' checked' : '' %>><span><%= t('Me prévenir aussi par e-mail (propositions, décisions sur mes photos, remarques)') %></span></label></div>
+    <div class="champ-a"><label for="avis-adresse"><%= t('Adresse') %> <span class="facultatif"><%= a.email ? t('(facultatif)') : '' %></span></label>
+      <p class="aide" id="avis-adresse-a"><%= a.email ? t('Vide : {email}, l’adresse du compte.', { email: a.email }) : t('Obligatoire pour recevoir les e-mails.') %></p>
+      <input type="email" id="avis-adresse" name="adresse" value="<%= a.notify_to || '' %>" maxlength="200" autocomplete="email" aria-describedby="avis-adresse-a"></div>
+    <div class="champ-a"><label for="avis-recap"><%= t('Récapitulatif de ce qui vous attend') %></label>
+      <p class="aide" id="avis-recap-a"><%= t('par e-mail, vers 8 h, seulement s’il y a quelque chose') %></p>
+      <select id="avis-recap" name="recap" aria-describedby="avis-recap-a"><% [['off', t('jamais')], ['daily', t('chaque jour')], ['weekly', t('chaque semaine (le lundi)')]].forEach(([k, l]) => { %><option value="<%= k %>"<%~ (a.digest || 'off') === k ? ' selected' : '' %>><%= l %></option><% }) %></select></div>
+    <p class="hint"><%= t('Les demandes RGPD (accès, effacement) vous sont toujours envoyées, avec des relances au fil du délai d’un mois.') %></p>
+<% if (!it.mailer) { %>    <p class="hint"><%= t('L’envoi d’e-mails n’est pas configuré sur ce serveur : seul « Aujourd’hui » vous préviendra.') %></p>
+<% } %>    <p class="form-pied"><button class="btn ghost" type="submit"><%= t('Enregistrer les avis') %></button></p>
+  </form>
+</section>
+<p class="hint"><%= t('Langue et thème : au pied du menu, à côté de votre nom ; ils changent tout de suite.') %></p>

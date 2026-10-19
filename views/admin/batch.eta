@@ -64,6 +64,9 @@
           <span class="cellnote warn" id="prov-<%= p.id %>"<%~ p.provisional ? '' : ' hidden' %>><%= t('Titre provisoire (nom du fichier)') %></span>
 <% if (e.title) { %>          <span class="err" id="err-title-<%= p.id %>"><%= e.title %></span>
 <% } %>
+<% /* Texte de remplacement (français ; ses traductions et la description suggérée sont dans la fiche) : écrit par une
+      personne, jamais prérempli par la suggestion. */ %>
+          <label><%= t('Texte de remplacement') %><input name="alt_text_<%= p.id %>" value="<%= v.alt_text || '' %>" maxlength="<%= it.altMax %>" placeholder="<%= t('ce qu’on voit, en une ligne') %>" aria-label="<%= t('Texte de remplacement de la photo {id}', { id: p.id }) %>" data-field="alt_text"></label>
         </td>
         <td class="c-cat" data-label="<%= t('Série') %>"><select name="category_id_<%= p.id %>" aria-label="<%= t('Série de la photo {id}', { id: p.id }) %>" data-field="category_id"><% it.categories.forEach(c => { %><option value="<%= c.id %>"<%~ c.id === Number(v.category_id) ? ' selected' : '' %>><%= c.name %></option><% }) %></select></td>
         <td class="c-place" data-label="<%= t('Lieu') %>"><input name="place_<%= p.id %>" value="<%= v.place || '' %>" maxlength="120" aria-label="<%= t('Lieu de la photo {id}', { id: p.id }) %>" data-field="place"></td>
@@ -84,6 +87,6 @@
 <% if (it.can('photos.publier')) { %>    <button class="btn" type="submit" name="publish" value="1"><%= t('Enregistrer et publier tout') %></button>
 <% } %>
   </p>
-  <p class="hint"><%= t('Légende, filigrane et preuve d’antériorité : depuis la fiche de chaque photo (Photos › titre).') %></p>
+  <p class="hint"><%= t('Légende, traductions, description suggérée, filigrane et preuve d’antériorité : depuis la fiche de chaque photo (Photos › titre).') %></p>
 </form>
 

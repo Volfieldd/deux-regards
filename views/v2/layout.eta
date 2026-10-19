@@ -10,19 +10,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="<%= it.bodyClass === 'dark' ? 'dark' : theme.scheme || 'light' %>">
   <title><%= it.pageTitle %></title>
+<% if (it.neutral) { /* Galeries privées (G33) : ni description, ni Open Graph, ni canonical, ni hreflang ; jamais indexées. */ %>
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+<% } else { %>
 <% if (it.description) { %>
   <meta name="description" content="<%= it.description %>">
 <% } %>
 <% if (it.canonical) { %>
   <link rel="canonical" href="<%= it.publicUrl + it.localize(it.canonical, lang) %>">
   <meta property="og:url" content="<%= it.publicUrl + it.localize(it.canonical, lang) %>">
-<% it.langs.forEach(l => { %>
+<% /* it.alternates : les langues où la page existe vraiment (un billet : ses langues publiées, B67) ; sinon les trois. */ (it.alternates || it.langs).forEach(l => { %>
   <link rel="alternate" hreflang="<%= l %>" href="<%= it.publicUrl + it.localize(it.canonical, l) %>">
 <% }) %>
   <link rel="alternate" hreflang="x-default" href="<%= it.publicUrl + it.canonical %>">
 <% } %>
   <meta property="og:locale" content="<%= it.locales[lang] %>">
-  <meta property="og:type" content="website">
+<% if (it.robots) { %>  <meta name="robots" content="<%= it.robots %>">
+<% } %>  <meta property="og:type" content="<%= it.ogType || 'website' %>">
+<% if (it.article) { /* Billet des Carnets (B66) : dates, auteurs, rubrique. */ %>  <meta property="article:published_time" content="<%= it.article.published %>">
+  <meta property="article:modified_time" content="<%= it.article.modified %>">
+<% it.article.authors.forEach(a => { %>  <meta property="article:author" content="<%= a %>">
+<% }) %>  <meta property="article:tag" content="<%= it.article.tag %>">
+<% } %>
   <meta property="og:title" content="<%= it.pageTitle %>">
   <meta property="og:site_name" content="<%= it.siteName %>">
 <% if (it.description) { %>
@@ -32,10 +42,16 @@
   <meta property="og:image" content="<%= ogImage %>">
   <meta name="twitter:card" content="summary_large_image">
 <% } %>
+<% } %>
   <link rel="stylesheet" href="<%= it.asset('css/v2/tokens.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/public.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/pages.css') %>">
-<% if (it.formulaires) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/formulaires.css') %>">
+<% if (it.carnetCss) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/carnet.css') %>">
+<% } %><% if (it.feed) { /* Flux des Carnets (B58), déclaré sur leurs pages. */ %>  <link rel="alternate" type="application/atom+xml" title="<%= it.feed.title %>" href="<%= it.feed.href %>">
+<% } %><% if (it.jsonLd) { /* Bloc de données, non exécuté (CSP : rien à autoriser) ; « < » échappé (B68). */ %>  <script type="application/ld+json"><%~ it.jsonLd %></script>
+<% } %>
+<% if (it.formulaires || it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/formulaires.css') %>">
+<% } %><% if (it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/prive.css') %>">
 <% } %><% if (brand.favicon64) { %>
   <link rel="icon" type="image/png" href="/brand/<%= brand.favicon64 %>">
   <link rel="apple-touch-icon" href="/brand/<%= brand.favicon180 %>">
@@ -44,8 +60,8 @@
 </head>
 <body class="<%= it.bodyClass || '' %>">
 <a class="skip" href="#contenu"><%= t.v2.skip %></a>
-<% if (it.apercuV2) { %>
-<div class="apercu-v2" role="note" lang="fr"><form method="post" action="/admin/apparence/apercu-v2"><input type="hidden" name="_csrf" value="<%= it.apercuV2.csrf %>"><input type="hidden" name="apercu" value="0"><input type="hidden" name="vers" value="<%= it.apercuV2.vers %>"><span>Aperçu de la v2 (visible par vous seul)</span> <a href="/admin/apparence">Apparence</a> <button type="submit">Quitter l’aperçu</button></form></div>
+<% if (it.vueSite) { %>
+<%~ include('../_vue-site', it.vueSite) %>
 <% } %>
 <%~ it.body %>
 </body>

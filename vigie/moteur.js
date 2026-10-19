@@ -3,8 +3,10 @@ import { fileURLToPath } from 'node:url';
 import { pointsOf, THRESHOLDS, HALF_LIFE_MIN, SOURCE_MIN, QUORUM, sourceOf, MODES } from './poids.js';
 import { rank } from './vocabulaire.js';
 import { loadRules, createCorrelator, fieldOf, RegexTimeout } from './sigma.js';
-import { createDetectors, createChains, lru } from './detecteurs.js';
+import { createDetectors, createChains, lru, DETECTEURS } from './detecteurs.js';
+import { LISTS } from './menaces.js';
 import { parseDuration } from './decisions.js';
+import { cleReseau } from '../server/securite/adresses-ip.js';
 
 // Moteur de détection de la Vigie (phases C1 et C2, recadrage du 17 octobre 2026, concepts de marlinOS) :
 //   - entités (adresse, réseau, compte, session) et score composite qui perd la moitié de sa valeur chaque heure,
@@ -61,8 +63,8 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   const REGISTRY = {
     'entite.score': { cas: 'quorum', mode: 'observer', titre: 'Score d’une entité au-dessus du seuil, confirmé par deux sources' },
     ...Object.fromEntries([...rules.filter(r => r.generate && r.signal), ...correlations].map(r => [`sigma.${r.name}`, { cas: r.cas, mode: r.mode, titre: r.title, sourceUnique: r.sourceUnique, expire: r.expireAt, tags: r.tags || [] }])),
-    ...Object.fromEntries(['premiere_apparition', 'heure_inhabituelle', 'vitesse', 'voyage_impossible', 'pivot_identifiants', 'role_incoherent', 'exploration_lente', 'chaine_attaque', 'silence', 'menaces']
-      .map(n => [`detecteur.${n}`, { cas: { premiere_apparition: 'DS4', heure_inhabituelle: 'DS18', vitesse: 'DS17', voyage_impossible: 'DS3', pivot_identifiants: 'DS25', role_incoherent: 'DS10', exploration_lente: 'DS15', chaine_attaque: 'DS23', silence: 'DS24', menaces: 'DS22' }[n], mode: 'observer', titre: n.replaceAll('_', ' ') }])),
+    // Détecteurs : leur barème (vigie/detecteurs.js, DETECTEURS), lu aussi par l'écran des réglages.
+    ...Object.fromEntries(Object.entries(DETECTEURS).map(([n, d]) => [`detecteur.${n}`, { cas: d.cas, mode: 'observer', titre: n.replaceAll('_', ' ') }])),
   };
   const q = {
     entity: db.prepare('SELECT * FROM entities WHERE kind = ? AND key = ?'),
@@ -136,7 +138,9 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   function entitiesOf(row) {
     const out = [];
     if (row.ip) out.push({ kind: 'ip', key: clean(row.ip) });
-    if (row.ip_net && row.ip_net !== row.ip) out.push({ kind: 'reseau', key: clean(row.ip_net) });
+    // Réseau sous sa forme canonique : un événement reçu avant l'audit D3-C4 (reprise de l'analyse) peut porter une ancienne
+    // clé fausse (« 2a01::bad:: »).
+    if (row.ip_net && row.ip_net !== row.ip) out.push({ kind: 'reseau', key: clean(cleReseau(row.ip_net) || row.ip_net) });
     if (row.sub) out.push({ kind: 'compte', key: clean(row.sub) });
     if (row.session) out.push({ kind: 'session', key: clean(row.session) });
     return out;
@@ -148,7 +152,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     const e = def.entite;
     if (e.valeur) return { kind: e.kind, key: String(e.valeur) };
     const v = fieldOf(row, e.champ || 'sub');
-    if (v != null && v !== '') return { kind: e.kind, key: String(v) };
+    if (v != null && v !== '') return { kind: e.kind, key: e.kind === 'reseau' ? cleReseau(String(v)) || String(v) : `${e.prefixe || ''}${v}` };
     return e.sinon ? { kind: 'site', key: String(e.sinon) } : null;
   }
 
@@ -186,11 +190,14 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     const done = [];
     const make = (kind, cible, duree, extra = {}) => {
       if (active.some(d => d.kind === kind && (d.cible === cible || d.cible === `${cible}/32` || d.cible === `${cible}/128`))) return;
-      try { decisions.create({ kind, cible, duree, par, auto: true, motif: `alerte #${id}`, ...extra }); done.push(`${kind} ${cible}`); } catch (err) { done.push(`${kind} refusé : ${err.message}`); }
+      try { decisions.create({ kind, cible, duree, par, auto: true, motif: `alerte #${id}`, alerte: id, ...extra }); done.push(`${kind} ${cible}`); } catch (err) { done.push(`${kind} refusé : ${err.message}`); }
     };
     const what = reponse || (regle === 'entite.score' && entite.kind === 'ip' ? 'bloquer_ip' : null);
     if (what === 'revoquer_compte' && entite.kind === 'compte') make('revoquer_compte', entite.key, '48h');
     else if (what === 'geler_et_revoquer' && entite.kind === 'compte') { make('geler', entite.key, '24h'); make('revoquer_compte', entite.key, '48h'); }
+    // Accès d'une galerie privée qui fuit (registre des briques, BV-18 ; « Tranché » 5) : le site le suspend comme après
+    // 30 refus (autorisations retirées ; l'équipe débloque ou donne un nouveau mot de passe). Mode « bloquer » seulement.
+    else if (what === 'suspendre_acces' && entite.kind === 'site' && /^acces:[1-9]\d{0,14}$/.test(entite.key)) make('suspendre_acces', entite.key.slice(6), '7j');
     else if (what === 'bloquer_ip' && entite.kind === 'ip') {
       // Jamais une adresse privée (réseau Docker, proxy), de confiance, ni une adresse vue avec un administrateur (30
       // jours) : on ne s'enferme pas dehors. Un compte ordinaire ne protège pas son adresse (sinon un attaquant qui ouvre
@@ -223,7 +230,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     }
     if (sourceUnique) raise(regle, entite, gravite, row, { sources, reponse });
     else for (const s of sources.length ? sources : [null]) { score(entite, points / Math.max(sources.length, 1), s, row); }
-    if (tags.length && chain(entite, tags)) raise('detecteur.chaine_attaque', entite, 'critique', row, { sources });
+    if (tags.length && chain(entite, tags)) raise('detecteur.chaine_attaque', entite, DETECTEURS.chaine_attaque.gravite, row, { sources });
   }
 
   function processRow(row) {
@@ -244,7 +251,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
         const k = `${row.ip}|${l}`;
         if (threatSeen.get(k) === day) continue;
         threatSeen.set(k, day);
-        deposit('ip', clean(row.ip), { spamhaus_drop: 3, feodo: 3, tor: 1 }[l] || 1, 'menaces', t);
+        deposit('ip', clean(row.ip), LISTS[l]?.points ?? 1, 'menaces', t);
       }
     }
     // Règles Sigma et corrélations. Une règle qui échoue sur un événement est notée, les autres continuent.
@@ -358,7 +365,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     for (const s of detectors.periodic()) signal({ regle: `detecteur.${s.nom}`, titre: s.nom.replaceAll('_', ' '), ...s }, null, ['site']);
     const last = q.lastSite.get();
     if (last && now() - last > 3 * 60e3) {
-      if (!silent) { silent = true; raise('detecteur.silence', { kind: 'site', key: 'battement' }, 'haut', null, { sources: ['vigie'] }); }
+      if (!silent) { silent = true; raise('detecteur.silence', { kind: 'site', key: 'battement' }, DETECTEURS.silence.gravite, null, { sources: ['vigie'] }); }
     } else silent = false;
   }
 
@@ -381,11 +388,26 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     };
   }
 
+  // Entités les plus chaudes (console /entites, ligne de commande « entites ») : actives depuis 7 jours, score décru d'au
+  // moins 0,1, du plus fort au plus faible (à score égal : la moins récemment vue d'abord, l'ordre de l'index). Audit
+  // D3-D2 : une seule requête, le score décru calculé et trié par SQLite (pow), quelques lignes rendues ; avant, une
+  // requête par entité et un tri en mémoire (0,4 à 2 s de boucle bloquée pour 20 000 à 100 000 entités). Le score exact
+  // (et les sources) est ensuite recalculé comme current() ; la présélection garde une marge (quelques lignes de plus,
+  // seuil à peine plus bas) : un arrondi de pow ne change ni la liste ni son ordre.
+  const qTop = db.prepare(`SELECT rowid r, kind, key, score, at, contributions, signaux, premiere, derniere,
+      score * pow(0.5, (@t - at) / ${HALF_LIFE_MIN * 60e3}.0) s
+    FROM entities WHERE derniere > @depuis AND score * pow(0.5, (@t - at) / ${HALF_LIFE_MIN * 60e3}.0) >= 0.0999
+    ORDER BY s DESC, derniere, rowid LIMIT @n`);
   function top(limit = 20) {
     const t = now();
-    return db.prepare('SELECT kind, key FROM entities WHERE derniere > ?').all(t - 7 * 864e5).map(r => current(r.kind, r.key, t))
-      .map(e => ({ ...e, sources: sourcesOf(e) })).filter(e => e.score >= 0.1).sort((a, b) => b.score - a.score).slice(0, limit);
+    return qTop.all({ t, depuis: t - 7 * 864e5, n: limit + 20 }).map(({ r, s, ...row }) => {
+      const f = DECAY(t - row.at);
+      const contributions = Object.fromEntries(Object.entries(parse(row.contributions)).map(([k, v]) => [k, v * f]).filter(([, v]) => v >= 0.01));
+      const e = { ...row, score: row.score * f, contributions, at: t };
+      return { e: { ...e, sources: sourcesOf(e) }, r };
+    }).filter(x => x.e.score >= 0.1).sort((a, b) => b.e.score - a.e.score || a.e.derniere - b.e.derniere || a.r - b.r).slice(0, limit).map(x => x.e);
   }
+  const DECISIONS_GARDE = 395 * 864e5;           // décisions levées ou échues : gardées 13 mois, comme les alertes closes
   function purge() {
     db.prepare('DELETE FROM entities WHERE derniere < ?').run(now() - 30 * 864e5);
     db.prepare('DELETE FROM entity_links WHERE derniere < ?').run(now() - 90 * 864e5);
@@ -395,6 +417,10 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       db.prepare("DELETE FROM alert_events WHERE alert_id IN (SELECT id FROM alerts WHERE statut = 'close' AND derniere < ?)").run(before);
       db.prepare("DELETE FROM alerts WHERE statut = 'close' AND derniere < ?").run(before);
     })();
+    // Décisions levées ou échues depuis plus de 13 mois (audit D3-D3 : la table n'était jamais purgée). Une décision
+    // active (ni levée ni échue) n'est jamais effacée ; la liste signée du site ne contient que des actives.
+    const avant = now() - DECISIONS_GARDE;
+    return db.prepare('DELETE FROM decisions WHERE (leve_a IS NOT NULL AND leve_a < @avant) OR (leve_a IS NULL AND fin < @avant)').run({ avant }).changes;
   }
   // Note ajoutée à une alerte (console) : dans son historique (événement vigie_alerte), sans changer son état.
   function note(id, texte, par) {

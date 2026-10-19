@@ -1,0 +1,25 @@
+<% layout('./layout') %>
+<% /* « Décrire la photo… » d'un billet (MQ-20, état 10) : texte de remplacement et légende dans la langue de l'onglet, taille
+      dans le billet, photo décorative. Les réglages sont ceux du billet ; la photo elle-même ne change pas (sa fiche le fait). */ %>
+<% const t = (k, x) => it.ty(it.t(k, x)), post = it.post, ph = it.at.photo, s = it.s, l = it.lang, q = l !== 'fr' ? `?langue=${l}` : '';
+   const k = f => (l === 'fr' ? f : `${f}_${l}`);
+   const WARN = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>';
+   const alt = s[k('alt')] || '', missing = !s.decorative && !alt && !ph.alt_text; %>
+<header class="ep">
+  <a class="ep-retour" href="/admin/carnet/<%= post.id %><%= q %>#ph-<%= it.at.n %>">← <%= post.title %></a>
+  <div class="ep-titre"><h1><%= t('Photo {n} du billet', { n: it.at.n }) %></h1></div>
+  <p class="ep-meta"><span><%= ph.title %></span><span><%= ph.author %></span><span><%= ph.status === 'published' ? t('publiée') : t('brouillon') %></span></p>
+</header>
+<form class="panel form photo-insp" method="post" action="/admin/carnet/<%= post.id %>/photos/<%= it.at.n %>" novalidate>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="langue" value="<%= l %>">
+  <%~ it.picture(ph, { sizes: '(max-width: 720px) 100vw, 480px', alt: alt || ph.alt_text || '' }) %>
+  <div class="champ-a"><label for="alt"><%= t('Texte de remplacement') %></label><p class="aide" id="alt-aide"><%= t('Ce que montre la photo, pour qui ne la voit pas. Une phrase.') %><% if (ph.alt_text && !alt) { %> <%= t('Vide : celui de la photothèque (« {alt} »).', { alt: ph.alt_text }) %><% } %></p>
+    <textarea id="alt" name="alt" rows="2" maxlength="<%= it.LIMITS.alt %>" lang="<%= l %>"<%~ missing ? ' aria-invalid="true"' : '' %> aria-describedby="alt-aide<%= missing ? ' alt-err' : '' %>"<%~ missing ? ' autofocus' : '' %>><%= alt %></textarea>
+<% if (missing) { %>    <p class="err" id="alt-err"><%~ WARN %><span><b><%= t('Erreur :') %></b> <%= t('décrivez la photo ; sans ce texte, le billet ne peut pas être proposé.') %></span></p>
+<% } %><% if (it.suggestion) { %>    <div class="sugg-bloc"><p><span class="s" aria-hidden="true">✦</span> <%= t('Suggestion, à relire : « {text} »', { text: it.suggestion }) %></p><button class="btn ghost js-seul" type="button" data-reprendre="<%= it.suggestion %>" data-cible="alt"><%= t('Reprendre la suggestion') %></button></div>
+<% } %>  </div>
+  <div class="champ-a"><label for="leg"><%= t('Légende') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><input type="text" id="leg" name="legende" value="<%= s[k('legend')] || '' %>" maxlength="<%= it.LIMITS.legend %>" lang="<%= l %>" aria-describedby="leg-aide"><p class="aide" id="leg-aide"><%= t('Vide : le titre de la photo s’affiche seul.') %></p></div>
+<% if (it.r.write) { %>  <fieldset class="choix-a"><legend><%= t('Taille') %></legend><label><input type="radio" name="taille" value="texte"<%~ s.size !== 'large' ? ' checked' : '' %>><span><%= t('Largeur du texte') %></span></label><label><input type="radio" name="taille" value="large"<%~ s.size === 'large' ? ' checked' : '' %>><span><%= t('Pleine largeur') %></span></label></fieldset>
+  <fieldset class="choix-a"><legend><%= t('Photo décorative') %></legend><label><input type="checkbox" name="decorative"<%~ s.decorative ? ' checked' : '' %>><span><%= t('Décorative : elle ne dit rien que le texte ne dise (texte de remplacement vide)') %></span></label></fieldset>
+<% } %>  <div class="form-pied"><a class="btn ghost" href="/admin/carnet/<%= post.id %><%= q %>#ph-<%= it.at.n %>"><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Mettre à jour la photo') %></button></div>
+</form>

@@ -17,7 +17,7 @@ import { parseAllDocuments } from 'yaml';
 export const LEVELS = { informational: 'info', low: 'bas', medium: 'moyen', high: 'haut', critical: 'critique' };
 export const POINTS = { info: 0, bas: 0.5, moyen: 1.5, haut: 3, critique: 5 };
 const KINDS = ['ip', 'reseau', 'compte', 'session', 'appareil', 'site', 'vigie'];
-const RESPONSES = ['revoquer_compte', 'geler_et_revoquer', 'bloquer_ip'];
+const RESPONSES = ['revoquer_compte', 'geler_et_revoquer', 'bloquer_ip', 'suspendre_acces'];
 const MODES = ['arret', 'observer', 'alerter', 'bloquer'];
 
 export class RuleError extends Error {}
@@ -135,6 +135,10 @@ function vigieBlock(doc, file) {
   if (!gravite) throw new RuleError(`${file} : level attendu (${Object.keys(LEVELS).join(', ')})`);
   const entite = v.entite || { kind: 'compte', champ: 'sub' };
   if (!KINDS.includes(entite.kind)) throw new RuleError(`${file} : entité inconnue ${entite.kind}`);
+  // Préfixe facultatif de la clé (« acces: » : l'accès 12 d'une galerie privée s'écrit « acces:12 », jamais « 12 » seul,
+  // qui ne dirait pas ce qu'il désigne dans la console).
+  if (entite.prefixe != null && !/^[a-z_]{1,20}:$/.test(String(entite.prefixe))) throw new RuleError(`${file} : préfixe d'entité invalide ${entite.prefixe}`);
+  if (v.reponse === 'suspendre_acces' && !(entite.kind === 'site' && entite.prefixe === 'acces:')) throw new RuleError(`${file} : suspendre_acces vise un accès (entité site, préfixe « acces: »)`);
   if (v.reponse && !RESPONSES.includes(v.reponse)) throw new RuleError(`${file} : réponse inconnue ${v.reponse}`);
   if (v.mode && !MODES.includes(v.mode)) throw new RuleError(`${file} : mode inconnu ${v.mode}`);
   // Les points ne se déposent que sur une adresse, un réseau, un compte, une session ou un appareil : une règle sur le site
@@ -233,11 +237,15 @@ export function createCorrelator(correlations, { now = Date.now, maxGroups = 10_
         : c.type === 'value_count' ? new Set(g.hits.map(h => h.v).filter(v => v != null)).size
           : new Set(g.hits.map(h => h.rule)).size === c.rules.length ? 1 : 0;
       const ok = c.type === 'temporal' ? n === 1 : ('gte' in c.cond ? n >= c.cond.gte : n > c.cond.gt);
-      // Une fois par fenêtre et par groupe (pas un signal par événement suivant).
-      if (ok && t - g.fired > c.span) {
+      // Satisfaite : un signal, puis le compte repart de zéro (jamais un signal par événement suivant ; mais une attaque qui
+      // continue la satisfait de nouveau et la réponse reprend, même si la règle est passée en Bloquer entre-temps ou si
+      // la décision a été levée : avant, plus rien pendant toute la fenêtre, constat du jeu d'attaques E2).
+      if (ok) {
         g.fired = t;
         out.push({ correlation: c, key, valeur: n, evenements: g.hits.map(h => h.seq).filter(Boolean).slice(-50),
           sources: [...new Set(g.hits.map(h => h.source).filter(Boolean))].sort() });
+        total -= g.hits.length;
+        g.hits = [];
       }
     }
     return out;

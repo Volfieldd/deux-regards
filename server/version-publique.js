@@ -5,21 +5,29 @@ import path from 'node:path';
 // l'audit d'ergonomie du 16 oct. 2026). Le réglage « Site public » (Réglages → Apparence) choisit la version de tous
 // les visiteurs ; v1 par défaut. Une page qui n'a pas encore de gabarit v2 s'affiche en v1 (repli automatique).
 //
-// Aperçu : un administrateur (permission site.apparence) voit la v2 avant de l'appliquer. Le drapeau est gardé ici, en
+// Vue de la session : un administrateur (permission site.apparence) peut voir le site public dans l'autre version que celle
+// des visiteurs, d'un clic sur le bouton « Voir en v1 / Voir en v2 » des pages publiques (server/vue-site.js). Trois états :
+// aucune vue (il suit le réglage, comme les visiteurs), « v1 » ou « v2 » (forcée pour lui). La vue est gardée ici, en
 // mémoire, pour sa session (l'empreinte de son jeton) : ni cookie, ni paramètre d'adresse, rien que le navigateur puisse
-// fabriquer. Il tombe avec la session (déconnexion, expiration, droit retiré) et au redémarrage du serveur.
-// Pendant l'aperçu, les réponses publiques sont « private, no-store » (voir app.js) : une page v2 ne peut pas entrer
-// dans un cache partagé (Cloudflare) et être servie à un visiteur.
+// fabriquer. Elle tombe avec la session (déconnexion, expiration, droit retiré) et au redémarrage du serveur. C'est une
+// préférence d'affichage de la session, pas un réglage du site : les visiteurs voient toujours le réglage.
+// Toute réponse publique faite à une session (bouton, jeton CSRF, vue forcée) est « private, no-store » (voir app.js) :
+// rien de ce que voit un administrateur ne peut entrer dans un cache partagé (Cloudflare) et être servi à un visiteur.
 export const VERSIONS = ['v1', 'v2'];
 const KEY = 'public_version';
 const PERM = 'site.apparence';
-const MAX_PREVIEWS = 64;                     // borne de la mémoire : au-delà, les plus anciens aperçus sont oubliés
+const MAX_VIEWS = 64;                      // borne de la mémoire : au-delà, les plus anciennes vues sont oubliées
+// Pages qui n'existent qu'en v2 (galeries privées, MQ-16 et MQ-17) : de nouvelles pages, hors menu, sans gabarit v1 ;
+// servies en v2 quel que soit le réglage (un invité s'en sert même si le site est en v1). La v1 reste figée : aucun de
+// ses gabarits n'est touché, et une page v1 n'est jamais servie en v2 par ce biais (préfixe « prive- » seulement).
+export const ONLY_V2 = /^prive-[a-z]+$/;
 
 export function createPublicVersion({ db, viewsDir, cache = false }) {
   const read = db.prepare('SELECT value FROM settings WHERE key = ?').pluck();
   const write = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
-  const previews = new Map();                // empreinte du jeton de session → échéance de la session
+  const views = new Map();                   // empreinte du jeton de session → { vue: 'v1' | 'v2', expires }
   const known = new Map();                   // gabarit → existe-t-il en v2 ? (gardé en production seulement)
+  const knownV1 = new Map();                 // gabarit → existe-t-il en v1 ?
 
   const setting = () => {
     let v = null;
@@ -27,40 +35,60 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
     return VERSIONS.includes(v) ? v : 'v1';
   };
 
-  // Aperçu actif pour cette requête : session valide, droit d'apparence, drapeau posé pour cette session.
-  const previewOn = request => {
+  // Cette requête peut-elle changer de vue ? Session valide et droit d'apparence, relu à chaque requête.
+  const canSwitch = request => Boolean(request.session?.id && request.can?.(PERM));
+
+  // Vue posée pour cette session (« v1 », « v2 »), ou null : aucune, échue, ou droit retiré.
+  const viewOf = request => {
     const s = request.session;
-    if (!s?.id || !previews.has(s.id)) return false;
-    if (previews.get(s.id) <= Date.now()) { previews.delete(s.id); return false; }
-    return Boolean(request.can?.(PERM));
+    if (!s?.id || !views.has(s.id)) return null;
+    const v = views.get(s.id);
+    if (v.expires <= Date.now()) { views.delete(s.id); return null; }
+    return request.can?.(PERM) ? v.vue : null;
   };
 
   return {
     setting,
     save(v) { if (!VERSIONS.includes(v)) return false; write.run(KEY, JSON.stringify(v)); return true; },
-    previewOn,
-    // on : vrai pour ouvrir l'aperçu, faux pour le quitter. Seulement pour une session qui a le droit.
-    setPreview(request, on) {
+    canSwitch,
+    viewOf,
+    // La session voit-elle une autre version que les visiteurs ?
+    forcedOn: request => { const v = viewOf(request); return Boolean(v) && v !== setting(); },
+    // vue : « v1 », « v2 », ou « suivre » (oublier la vue : suivre le réglage). Seulement pour une session qui a le droit.
+    setView(request, vue) {
       const s = request.session;
-      if (!s?.id || !request.can?.(PERM)) return false;
-      previews.delete(s.id);
-      if (!on) return true;
-      previews.set(s.id, s.expires_at);
-      while (previews.size > MAX_PREVIEWS) previews.delete(previews.keys().next().value);
+      if (!canSwitch(request) || !(VERSIONS.includes(vue) || vue === 'suivre')) return false;
+      views.delete(s.id);
+      if (vue === 'suivre') return true;
+      views.set(s.id, { vue, expires: s.expires_at });
+      while (views.size > MAX_VIEWS) views.delete(views.keys().next().value);
       return true;
     },
-    // Version servie à cette requête : v2 si le réglage le dit, ou pendant l'aperçu d'un administrateur.
+    // Version servie à cette requête : la vue de la session si elle en a une, sinon le réglage.
+    // applied : ce que voient les visiteurs ; forced : la session voit autre chose ; switcher : elle a le bouton.
     forRequest(request) {
-      const preview = previewOn(request);
       const applied = setting();
-      return { version: applied === 'v2' || preview ? 'v2' : 'v1', preview: preview && applied !== 'v2' };
+      const view = viewOf(request);
+      const version = view || applied;
+      return { version, applied, view, forced: version !== applied, switcher: canSwitch(request) };
     },
+    // Page sans version v1 : toujours en v2.
+    onlyV2: template => ONLY_V2.test(template),
     // Le gabarit v2 de cette page existe-t-il ? Sinon, la page reste en v1.
     hasV2(template) {
       if (!/^[a-z][\w-]*$/i.test(template)) return false;                     // pages publiques seulement (pas « admin/… »)
       if (cache && known.has(template)) return known.get(template);
       const ok = fs.existsSync(path.join(viewsDir, 'v2', `${template}.eta`));
       if (cache) known.set(template, ok);
+      return ok;
+    },
+    // Le gabarit v1 de cette page existe-t-il ? Une page née avec la v2 (les Carnets) n'en a pas : en v1, elle n'existe pas
+    // (404), et le rendu ne tombe jamais sur un gabarit absent.
+    hasV1(template) {
+      if (!/^[a-z][\w-]*$/i.test(template)) return true;
+      if (cache && knownV1.has(template)) return knownV1.get(template);
+      const ok = fs.existsSync(path.join(viewsDir, `${template}.eta`));
+      if (cache) knownV1.set(template, ok);
       return ok;
     },
   };

@@ -3,6 +3,12 @@ import net from 'node:net';
 import Fastify from 'fastify';
 import { isSiteType, SEVERITIES, SITE_COMPOSANTS } from './vocabulaire.js';
 import { clean, num, netOf } from './util.js';
+import { cleReseau } from '../server/securite/adresses-ip.js';
+
+// Réseau d'un événement reçu : tiré de l'adresse quand elle est là (même calcul que le site, forme canonique) ; sinon la clé
+// envoyée, ramenée à sa forme canonique (une ancienne clé fausse, « 2a01::bad:: », ne garde jamais l'hôte : audit D3-C4).
+const reseauRecu = e => (typeof e.ip === 'string' && net.isIP(e.ip) ? netOf(e.ip) : null)
+  ?? (typeof e.ip_net === 'string' ? cleReseau(e.ip_net) ?? clean(e.ip_net, 50) : null);
 
 const str = v => (typeof v === 'string' ? v : null);
 
@@ -70,7 +76,7 @@ export function createIngest({ store, decisions, ingestKey, now = Date.now, logg
       id: e.id, recu_a: t, survenu_a: site ?? t, type: e.type, severity: e.severity,
       composant, emetteur: clean(str(e.origine?.emetteur), 120), canal: 'ingestion signée', confiance: 'rapporté', reference: clean(str(e.origine?.reference), 120),
       sub: clean(str(e.sub), 200), session: typeof e.session === 'string' && /^[0-9a-f]{12}$/.test(e.session) ? e.session : null,
-      ip: typeof e.ip === 'string' && net.isIP(e.ip) ? e.ip : null, ip_net: clean(str(e.ip_net), 50), country: typeof e.country === 'string' && /^[A-Z]{2}$/.test(e.country) ? e.country : null,
+      ip: typeof e.ip === 'string' && net.isIP(e.ip) ? e.ip : null, ip_net: reseauRecu(e), country: typeof e.country === 'string' && /^[A-Z]{2}$/.test(e.country) ? e.country : null,
       city: clean(str(e.city), 80), lat: num(e.lat, -90, 90), lon: num(e.lon, -180, 180), ua: clean(str(e.ua), 200), ua_family: clean(str(e.ua_family), 60),
       method: typeof e.method === 'string' && /^[A-Z]{3,10}$/.test(e.method) ? e.method : null, route: clean(str(e.route), 120),
       status: Number.isInteger(e.status) && e.status >= 100 && e.status < 600 ? e.status : null, detail, retard: late,

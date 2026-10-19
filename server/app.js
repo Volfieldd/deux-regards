@@ -13,8 +13,11 @@ import formbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import * as cities from './geo/cities.js';
 import { LANGS, NAMES, LOCALES, localize, splitLang } from './i18n.js';
+import { vueSite } from './vue-site.js';
 import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
+import privateRoutes from './routes/prive.js';
+import { createSpaces } from './spaces.js';
 import adminRoutes from './routes/admin.js';
 import mediaRoutes from './routes/media.js';
 import brandRoutes, { createAppearance } from './routes/brand.js';
@@ -42,6 +45,8 @@ import { createShares } from './share.js';
 import { truncateIp } from './ip.js';
 import { TRAP_PATH } from './securite/piege.js';
 import { createPublicVersion } from './version-publique.js';
+import { createCarnet } from './carnet.js';
+import { createRepo } from './repo.js';
 
 export { truncateIp };
 
@@ -77,6 +82,10 @@ export function redactUrl(url) {
   try { u = decodeURIComponent(u); } catch { /* URL mal encodée : telle quelle */ }
   return u.replace(/([?&](?:code|state)=)[^&#]*/g, '$1[masqué]').replace(/(\/partage\/instagram\/)[^/?#]+/, '$1[masqué]')
     .replace(/(\/pour-vous\/)[^/?#]+/, '$1[masqué]')
+    // Lien d'une galerie privée (/g/<jeton>) : toute suite de 20 caractères [\w-] ou plus après « /g/ », quelle que soit la
+    // casse et ce qui précède (« //g/… », « /fr/g/… », « /./g/… », « /G/… », « vers=/g/… », « next=https://site/g/… ») :
+    // annexe de sécurité, G13, M14 ; revue de sécurité de la PR #149.
+    .replace(/(\/g\/)[\w-]{20,}/gi, '$1[masqué]')
     .replace(/(\/bonjour\/)([^/?#]+)/, (m, p, seg) => { const r = parseRef(seg); return r?.code ? `${p}${r.ref}-[masqué]` : m; });
 }
 const loggerOptions = logger => logger && {
@@ -143,15 +152,22 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const brand = app.appearance.brand();
     const theme = app.appearance.forRequest(this.request, this);
     // Pages publiques seulement : l'admin et ses pages d'erreur restent ce qu'elles sont.
-    const pv = /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
-    const v2 = pv?.version === 'v2' && app.publicVersion.hasV2(template);
+    // Pages des galeries privées : toujours en v2 (elles n'ont pas de v1), sans le bouton de la vue (pages neutres).
+    const only = app.publicVersion.onlyV2(template);
+    const pv = only || /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
+    const v2 = only || (pv?.version === 'v2' && app.publicVersion.hasV2(template));
+    // Page sans gabarit v1 (née avec la v2, comme les Carnets) servie en v1 : introuvable, jamais une erreur.
+    if (pv && !v2 && !app.publicVersion.hasV1(template)) return this.callNotFound();
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
+      // Lien « Carnets » du menu et du pied de page v2 : au moins un billet publié (le menu v1 ne change pas).
+      carnetPage: pv?.version === 'v2' && app.carnet.publishedCount() > 0,
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
       authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '',
-      // Bandeau « Aperçu de la v2 · Quitter l'aperçu » (formulaire POST, jeton CSRF de la session), en v2 comme sur une
-      // page restée en v1 faute de gabarit v2 : l'administrateur sait toujours où il est.
-      apercuV2: pv?.preview ? { csrf: this.request.session.csrf, vers: this.request.url } : null };
+      // Bouton « Voir en v1 / Voir en v2 » (server/vue-site.js ; formulaire POST, jeton CSRF de la session), pour
+      // l'administrateur qui a le droit d'apparence seulement, en v2 comme sur une page restée en v1 faute de gabarit v2.
+      vueSite: pv?.switcher ? vueSite({ pv, lang: data?.lang || splitLang(this.request.url).lang, url: this.request.url, csrf: this.request.session.csrf,
+        rendu: v2 ? 'v2' : 'v1', sansV1: !app.publicVersion.hasV1(template) }) : null };
     return this.type('text/html; charset=utf-8').send(eta.render(v2 ? `./v2/${template}` : `./${template}`, { ...common, ...data }));
   });
 
@@ -251,11 +267,34 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     app.variants.schedule();
   };
   app.decorate('review', createReview({ db, readiness: app.readiness, notes: app.notes, accounts: app.accounts, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, publish: publishNow, log: app.log }));
-  // Publications programmées : vérifiées chaque minute.
+  // Carnets (server/carnet.js) : billets, circuit de publication, publication programmée.
+  app.decorate('publicRepo', createRepo(db));
+  app.decorate('carnet', createCarnet({ db, repo: app.publicRepo, readiness: app.readiness, accounts: app.accounts, mailer: app.mailer, audit: app.audit, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
+  // Publications programmées : vérifiées chaque minute, photos d'abord (un billet programmé attend ses photos programmées
+  // à la même heure), puis billets (app.carnet.runDue, seule à publier un billet programmé).
   let reviewTimer = null;
-  app.addHook('onReady', async () => { reviewTimer = setInterval(() => app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée')), 60 * 1000); reviewTimer.unref(); });
+  // Une seule exécution à la fois : un e-mail lent ne fait jamais chevaucher deux passages (revue de sécurité des Carnets).
+  let dueRunning = false;
+  const runDue = async () => {
+    if (dueRunning) return;
+    dueRunning = true;
+    try {
+      const photos = await app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'));
+      const billets = await app.carnet.runDue().catch(err => app.log.error({ err }, 'carnets : publication programmée'));
+      // Textes mis en ligne sans écriture de l'admin : comparés par la Vigie (BV-20, BV-21 ; sub nul).
+      if (photos || billets) app.securite?.watchPublication?.();
+    } finally { dueRunning = false; }
+  };
+  app.addHook('onReady', async () => { reviewTimer = setInterval(runDue, 60 * 1000); reviewTimer.unref(); });
   app.addHook('onClose', async () => clearInterval(reviewTimer));
   app.decorate('trips', createTrips({ db }));
+  // Galeries privées (server/spaces.js) : galeries, photos, accès, autorisations des invités ; purges chaque heure.
+  app.decorate('spaces', createSpaces({ db, vault: createVault(config.dataKey), readiness: app.readiness, encounters: app.encounters, storageDir: config.storageDir,
+    securite: () => app.securite, variants: () => app.variants, trustCountry: Boolean(config.trustProxy) }));
+  let spacesTimer = null;
+  const purgeSpaces = () => { try { app.spaces.purge(); app.purgeVisitors?.(); } catch (err) { app.log.error({ err }, 'galeries privées : purge'); } };
+  app.addHook('onReady', async () => { purgeSpaces(); spacesTimer = setInterval(purgeSpaces, 3600 * 1000); spacesTimer.unref(); });
+  app.addHook('onClose', async () => clearInterval(spacesTimer));
   app.decorate('keywordSuggest', createKeywordSuggester({ db, log: app.log }));
   // Descriptions suggérées (Florence-2, désactivées par défaut) : demandes depuis la fiche tout de suite, file de nuit
   // vérifiée toutes les 10 minutes. describeOptions.model (tests) remplace le modèle ; manual : rien ne démarre seul.
@@ -265,7 +304,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Au démarrage, les photos en échec sont reprises une fois (réseau rétabli, modèle réparé…).
   if (!describeOptions.manual) app.addHook('onReady', async () => { app.describer.retryFailed(); describeTimer = setInterval(() => app.describer.run(), 10 * 60 * 1000); describeTimer.unref(); });
   app.addHook('onClose', async () => { clearInterval(describeTimer); await app.describer.close(); });
-  app.decorate('todo', createTodo({ db, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
+  app.decorate('todo', createTodo({ db, spaces: app.spaces, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
   // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.
   app.decorate('reminders', createReminders({ db, accounts: app.accounts, todo: app.todo, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
@@ -295,9 +334,14 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     if (noReferrer) reply.header('referrer-policy', 'no-referrer');
     // Rien de l'admin ne se garde en cache, quel que soit le gestionnaire (fichier envoyé par sendFile compris).
     if (/^\/admin(?:[/?#]|$)/.test(request.url)) reply.header('cache-control', 'no-store');
-    // Aperçu de la v2 : rien de ce que voit l'administrateur ne peut entrer dans un cache partagé (Cloudflare) et être
-    // servi ensuite à un visiteur. Les fichiers statiques, les images et la marque, identiques pour tous, gardent leur cache.
-    else if (!/^\/(?:static|fonts|media|brand)\//.test(request.url) && app.publicVersion.previewOn(request)) reply.header('cache-control', 'private, no-store');
+    // Session ouverte (administrateur, photographe…) : rien de ce qu'elle voit ne peut entrer dans un cache partagé
+    // (Cloudflare) et être servi ensuite à un visiteur : bouton « Voir en v1 / v2 » et son jeton CSRF, vue forcée, liens
+    // de l'équipe. Réponses 304 et adresses à ETag comprises (flux des Carnets) ; les consignes propres aux CDN sont
+    // retirées (elles l'emporteraient sur Cache-Control). Les fichiers statiques, les images et la marque, identiques
+    // pour tous, gardent leur cache. Un visiteur (sans session valide, cookie forgé compris) n'est pas concerné.
+    else if (request.session && !/^\/(?:static|fonts|media|brand)\//.test(request.url)) {
+      reply.header('cache-control', 'private, no-store').removeHeader('cdn-cache-control').removeHeader('cloudflare-cdn-cache-control');
+    }
     // Seul l'écran « Rencontre » de l'admin (sur le téléphone) peut demander la position, au site lui-même.
     if (request.routeOptions?.config?.geolocation) reply.header('permissions-policy', 'camera=(), microphone=(), geolocation=(self)');
     // Sans includeSubDomains : à ajouter quand tous les sous-domaines de nicephos.art seront servis en HTTPS (PLAN.md, feuille de route).
@@ -333,6 +377,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   await app.register(mediaRoutes);
   await app.register(brandRoutes);
   await app.register(adminRoutes);
+  await app.register(privateRoutes);
   await app.register(publicRoutes);
 
   return app;

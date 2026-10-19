@@ -1,0 +1,73 @@
+<% layout('./layout') %>
+<% const w = it.watermark; const t = it.t; %>
+<% /* Réglages › Filigrane et EXIF (MQ-07) : les champs et les routes de la v1, avec les composants de la planche. Un bouton
+      nomme l'effet (« Enregistrer et mettre à jour les images ») : l'enregistrement recalcule toutes les images du site. */ %>
+<%~ include('./_reglages', { ...it, courant: 'images' }) %>
+<div class="fil">
+  <div class="fil-texte">
+    <h2 class="rub-titre"><%= t('Filigrane et EXIF') %></h2>
+    <p class="rub-intro"><%= t('Ces réglages s’appliquent aux images servies sur le site. Les originaux ne sont jamais modifiés : à chaque enregistrement, les images sont recalculées en arrière-plan, puis le site bascule sur les nouvelles d’un coup.') %></p>
+  </div>
+<% if (it.previewId) { %>
+  <figure class="fil-apercu">
+    <img src="/admin/images/apercu.webp?photo=<%= it.previewId %>" alt="<%= t('Aperçu du filigrane enregistré') %>" width="1280" height="853">
+    <figcaption><%= t('Aperçu des réglages enregistrés (1280 px)') %><%= w.enabled ? '' : ` · ${t('filigrane désactivé')}` %></figcaption>
+  </figure>
+<% } else { %>
+  <p class="note-a fil-apercu"><span><%= t('Importez une photo pour voir un aperçu du filigrane.') %></span></p>
+<% } %>
+  <form class="form fil-form" method="post" action="/admin/images" id="images-form" data-garde>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <fieldset class="panel titre-dedans">
+      <legend><%= t('Filigrane') %></legend>
+      <div class="champs">
+        <div class="choix-a"><label><input type="checkbox" name="wm_enabled"<%~ w.enabled ? ' checked' : '' %>><span><%= t('Ajouter un filigrane aux images du site') %></span></label></div>
+        <fieldset class="choix-a choix-a--ligne"><legend><%= t('Type') %></legend>
+<% Object.entries(it.KINDS).forEach(([k, label]) => { const missing = (k === 'emblem' || k === 'logotype') && !it.brand[k]; %>          <label<%~ missing && w.kind !== k ? ' class="inactif"' : '' %>><input type="radio" name="wm_kind" value="<%= k %>"<%~ w.kind === k ? ' checked' : '' %><%~ missing && w.kind !== k ? ' disabled' : '' %>><span><%= t(label) %></span><% if (missing) { %><span class="sec"><%= t('à envoyer d’abord dans « Identité et apparence »') %></span><% } %></label>
+<% }) %>        </fieldset>
+        <div class="champ-a"><label for="wm-text"><%= t('Texte') %></label><p class="aide" id="wm-text-a"><%= t('Variables :') %> {auteur} · {annee} · {site} · {titre} — <%= t('ex.') %> « © {auteur} {annee} »</p><input type="text" id="wm-text" name="wm_text" value="<%= w.text %>" maxlength="80" aria-describedby="wm-text-a"></div>
+        <div class="row">
+          <div class="champ-a"><label for="wm-font"><%= t('Police') %></label><select id="wm-font" name="wm_font"><% Object.entries(it.FONTS).forEach(([k, f]) => { %><option value="<%= k %>"<%~ w.font === k ? ' selected' : '' %>><%= t(f.label) %></option><% }) %></select></div>
+          <fieldset class="choix-a choix-a--ligne"><legend><%= t('Teinte') %></legend><p class="aide"><%= t('texte et dessins du site ; un logo envoyé garde ses couleurs') %></p>
+<% Object.entries(it.TONE_LABELS).forEach(([k, label]) => { %>            <label><input type="radio" name="wm_tone" value="<%= k %>"<%~ (w.tone || 'light') === k ? ' checked' : '' %>><span><%= t(label) %></span></label>
+<% }) %>          </fieldset>
+        </div>
+        <div class="row">
+          <div class="champ-a"><label for="wm-pos"><%= t('Position') %></label><select id="wm-pos" name="wm_position"><% Object.entries(it.POSITIONS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ w.position === k ? ' selected' : '' %>><%= t(label) %></option><% }) %></select></div>
+          <div class="champ-a"><label for="wm-min"><%= t('Appliquer aux tailles') %></label><select id="wm-min" name="wm_min_width"><% Object.entries(it.MIN_WIDTHS).forEach(([k, label]) => { %><option value="<%= k %>"<%~ String(w.minWidth) === k ? ' selected' : '' %>><%= t(label) %></option><% }) %></select></div>
+        </div>
+        <div class="row">
+          <div class="champ-a"><label for="wm-op"><%= t('Opacité (%)') %></label><input type="number" id="wm-op" name="wm_opacity" min="5" max="100" value="<%= w.opacity %>"></div>
+          <div class="champ-a"><label for="wm-size"><%= t('Largeur (% de l’image)') %></label><p class="aide" id="wm-size-a"><%= t('sans effet en plein cadre') %></p><input type="number" id="wm-size" name="wm_size" min="3" max="100" value="<%= w.size %>" aria-describedby="wm-size-a"></div>
+          <div class="champ-a"><label for="wm-mar"><%= t('Marge (% de l’image)') %></label><input type="number" id="wm-mar" name="wm_margin" min="0" max="20" value="<%= w.margin %>"></div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset class="panel titre-dedans">
+      <legend><%= t('Métadonnées (EXIF) des images servies') %></legend>
+      <div class="choix-a">
+<% Object.entries(it.EXIF_MODES).forEach(([k, m]) => { %>        <label><input type="radio" name="exif_mode" value="<%= k %>"<%~ it.exif.mode === k ? ' checked' : '' %>><span><%= t(m.label) %></span><span class="sec"><%= t(m.help) %></span></label>
+<% }) %>      </div>
+    </fieldset>
+    <div class="panel apercu-l">
+      <div class="champ-a"><label for="wm-prev"><%= t('Photo d’aperçu') %></label><select id="wm-prev" name="preview_photo"><% it.photos.forEach(p => { %><option value="<%= p.id %>"<%~ p.id === it.previewId ? ' selected' : '' %>><%= p.title %></option><% }) %></select></div>
+      <button class="btn ghost" type="submit" formaction="/admin/images/apercu" formtarget="_blank"><%= t('Aperçu sans enregistrer') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></button>
+    </div>
+    <div class="form-pied"><span class="mod" role="status" data-modifs data-texte="<%= t('Modifié, pas encore enregistré :') %>" hidden></span><button class="btn ghost" type="reset"><%= t('Revenir à la version enregistrée') %></button><button class="btn" type="submit"><%= t('Enregistrer et mettre à jour les images') %></button></div>
+  </form>
+
+  <section class="panel fil-logo" aria-labelledby="logo-t">
+    <h2 id="logo-t"><%= t('Logo du filigrane') %></h2>
+<% if (w.image) { %>
+    <p><img class="logo" src="/admin/images/logo" alt="<%= t('Logo actuel du filigrane') %>"></p>
+    <form method="post" action="/admin/images/logo/delete"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Retirer le logo') %></button></form>
+<% } else { %>
+    <p class="hint"><%= t('Aucun logo. Pour un filigrane de type « Logo », envoyez une image PNG ou WebP à fond transparent.') %></p>
+<% } %>
+    <form class="logo-f" method="post" action="/admin/images/logo" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <div class="champ-a"><label for="logo-f"><%= t('Nouveau logo') %></label><p class="aide" id="logo-f-a"><%= t('PNG ou WebP · 5 Mo et 4000 px de côté au plus') %></p><input type="file" id="logo-f" name="logo" accept="image/png,image/webp" required aria-describedby="logo-f-a"></div>
+      <button class="btn ghost" type="submit"><%= t('Envoyer le logo') %></button>
+    </form>
+  </section>
+</div>

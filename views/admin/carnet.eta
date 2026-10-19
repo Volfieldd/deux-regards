@@ -1,0 +1,187 @@
+<% layout('./layout') %>
+<% /* Éditeur d'un billet (maquette MQ-20 ; étude § 1.5 et § 1.6). En tête, l'en-tête de page type : retour, titre, état,
+      méta (dont l'enregistrement automatique), une seule commande de publication. Colonne de gauche : le formulaire du
+      billet dans la langue de l'onglet (titre, chapô, texte en Markdown restreint, une photo par ligne), puis l'aperçu
+      « comme sur le site », rendu par le serveur. Colonne d'appui : les photos du billet avec leur état, la publication,
+      les autres réglages repliés, l'historique. Tout marche sans script : formulaire classique, « Enregistrer et voir
+      l'aperçu », photos à cocher ; avec le script (public/admin/carnet.js) : barre de mise en forme, enregistrement
+      automatique, aperçu à côté, sélecteur de photos. Les champs de la colonne d'appui appartiennent au formulaire du
+      billet (attribut form). */ %>
+<% const t = (k, x) => it.ty(it.t(k, x)), p = it.post, r = it.r, lang = it.lang, f = it.fields;
+   const LN = { fr: 'Français', en: 'English', de: 'Deutsch' };
+   const fmt = (ms, o = { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) => new Intl.DateTimeFormat(it.locale, { ...o, timeZone: 'Europe/Paris' }).format(ms).replace(/ /g, '\u00a0');
+   const time = ms => new Intl.DateTimeFormat(it.locale, { timeStyle: 'short', timeZone: 'Europe/Paris' }).format(ms).replace(/ /g, '\u00a0');
+   const ICON = (d, s = 16) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`;
+   const EYE = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+   const DOTS = '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>';
+   const CHECK = '<path d="M5 12.5l4.5 4.5L19 7.5"/>', WARN = '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>', CHEV = '<path d="M9 6l6 6-6 6"/>';
+   const who = it.who.map(a => a.name).join(t(' et '));
+   const pubs = it.publishers;
+   const proposeLabel = pubs.length === 1 ? t('Proposer à {name}', { name: pubs[0] }) : t('Proposer à la publication');
+   const editable = r.text && (p.state !== 'publie' || r.live);
+   const neverPublished = p.published_at == null;
+   const form = 'billet';
+   const blocking = it.checks ? it.checks.blocking : [];
+   const warnings = it.checks ? it.checks.warnings : [];
+   const describe = b => {
+     if (b.code === 'chapo') return { href: '#chapo', text: t('Écrivez le chapô : il est exigé pour proposer et publier.') };
+     if (b.code === 'alt') return { href: `#ph-${b.n}`, text: t('Photo {n}, « {title} » : écrivez son texte de remplacement.', { n: b.n, title: b.title }) };
+     if (b.code === 'accord_a_verifier') return { href: `#ph-${b.n}`, text: t('Photo {n}, « {title} » : un accord est à vérifier.', { n: b.n, title: b.title }) };
+     if (b.code === 'accord_refuse') return { href: `#ph-${b.n}`, text: t('Photo {n}, « {title} » : bloquée par un refus.', { n: b.n, title: b.title }) };
+     if (b.code === 'photos_non_publiees') return { href: '#photos', text: t('Photos pas encore publiées : {titles}.', { titles: b.titles.join(', ') }) };
+     return { href: '#texte', text: t(b.code) };
+   };
+   const WARN_TEXT = { titre_long: t('Titre de plus de 70 signes : les moteurs de recherche couperont la fin.'), chapo_long: t('Chapô de plus de 160 signes : les moteurs de recherche couperont la fin.'),
+     sans_photo: t('Aucune photo dans le texte.'), traduction_vide: t('Traduction cochée mais vide.'), lien_casse: t('Un lien interne mène à une page qui n’est pas publiée : il s’affiche en texte simple.'),
+     image_externe: t('Image externe retirée : seules les photos de la photothèque s’affichent.'), photo_dans_le_texte: t('Une photo s’écrit seule sur sa ligne (photo:adresse).'), niveau_saute: t('Niveau d’intertitre sauté (### sans ## avant).'),
+     cliquez_ici: t('Un lien dit « cliquez ici » : nommez plutôt sa destination.'), schema_refuse: t('Un lien au schéma refusé a été rendu en texte.'), lien_refuse: t('Un lien illisible a été rendu en texte.'), html_brut: t('Du HTML est affiché comme du texte.'),
+     photo_inconnue: t('Une ligne photo: ne correspond à aucune photo que vous pouvez utiliser.'), rendu_impossible: t('Ce texte ne peut pas être rendu : simplifiez sa mise en forme.'), photos_non_publiees: t('Des photos du billet ne sont pas encore publiées.'), galerie_trop_longue: t('Galerie de plus de 12 photos : les suivantes ne s’affichent pas.') };
+   const ACTIONS = { cree: t('Billet créé'), propose: t('Proposé à la publication'), proposition_retiree: t('Proposition retirée'), publie: t('Publié'), programme: t('Programmé'),
+     deprogramme: t('Programmation annulée'), renvoye: t('Renvoyé'), retire: t('Retiré du site'), republie: t('Republié'), version_retablie: t('Version rétablie'), modifie: t('Modifié après validation') };
+   const ensuite = p.state === 'publie' ? t('en ligne depuis le {date}', { date: fmt(p.published_at, { day: 'numeric', month: 'short', year: 'numeric' }) })
+     : p.state === 'retire' ? t('retiré du site : son adresse répond « retiré »')
+     : p.state === 'programme' ? t('en ligne le {date}', { date: fmt(p.publish_at, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) })
+     : r.publish ? t('vous publiez, maintenant ou à une date')
+     : p.state === 'propose' ? (pubs.length === 1 ? t('{name} publie, ou vous le renvoie', { name: pubs[0] }) : t('le modérateur publie, ou vous le renvoie'))
+     : (pubs.length === 1 ? t('vous proposez, {name} publie', { name: pubs[0] }) : t('vous proposez, le modérateur publie')); %>
+<header class="ep">
+  <a class="ep-retour" href="/admin/carnet"><%~ ICON('<path d="M19 12H5M11 6l-6 6 6 6"/>') %><%= t('Carnets') %></a>
+  <div class="ep-titre"><h1><%= p.title %></h1><%~ it.pill(p.state) %></div>
+  <p class="ep-meta"><span><%= who %></span><span><%= t(it.rubriques.find(x => x.slug === p.rubrique)?.name || '') %></span><span><%= t('commencé le {date}', { date: fmt(p.created_at) }) %></span><span role="status"><span class="enreg enreg--ok" data-enreg><%~ ICON(CHECK, 14) %><%= t('Enregistré à {time}', { time: time(it.fresh ? it.fresh.at : p.updated_at) }) %></span></span></p>
+  <div class="ep-actions">
+    <a class="btn ghost ep-secondaire" href="#apercu"><%~ ICON(EYE) %><%= t('Aperçu') %></a>
+<% if (r.write && neverPublished) { %>    <a class="btn danger-c ep-secondaire" href="/admin/carnet/<%= p.id %>/supprimer"><%= t('Supprimer…') %></a>
+<% } %>    <details class="menu ep-plus"><summary class="btn ghost" aria-label="<%= t('Plus d’actions') %>"><%~ ICON(DOTS, 18) %></summary><div class="menu-pop"><a href="#apercu"><%= t('Aperçu') %></a><a href="/admin/carnet/<%= p.id %>/versions"><%= t('Versions') %></a><% if (r.write && neverPublished) { %><a href="/admin/carnet/<%= p.id %>/supprimer"><%= t('Supprimer…') %></a><% } %></div></details>
+<% if (editable && r.publish && ['brouillon', 'propose', 'a_reprendre'].includes(p.state)) { %>    <button class="btn" type="submit" form="<%= form %>" name="faire" value="publier"><%= t('Publier') %></button>
+<% } else if (editable && r.write && ['brouillon', 'a_reprendre'].includes(p.state)) { %>    <button class="btn" type="submit" form="<%= form %>" name="faire" value="proposer"><%= proposeLabel %></button>
+<% } else if (r.write && p.state === 'propose') { %>    <button class="btn" type="submit" form="<%= form %>" formaction="/admin/carnet/<%= p.id %>/retirer-proposition" formnovalidate><%= t('Retirer ma proposition') %></button>
+<% } else if (editable && p.state === 'publie') { %>    <button class="btn" type="submit" form="<%= form %>" name="faire" value="enregistrer"><%= t('Enregistrer les modifications') %></button>
+<% } %>  </div>
+</header>
+<div class="editeur-grille" data-editeur data-id="<%= p.id %>" data-langue="<%= lang %>" data-vue="ecrire" data-t-saving="<%= t('Enregistrement…') %>" data-t-saved="<%= t('Enregistré à {time}') %>" data-t-failed="<%= t('Non enregistré : une copie est gardée sur cet appareil.') %>" data-t-session="<%= t('Session expirée ? Rechargez la page : une copie est gardée sur cet appareil.') %>" data-t-kept="<%= t('Une copie de ce billet, non enregistrée, est restée sur cet appareil. La reprendre ?') %>" data-t-words="<%= t('{n} mots') %>" data-t-word="<%= t('{n} mot') %>" data-t-minutes="<%= t('{n} min de lecture') %>" data-t-bold="<%= t('texte en gras') %>" data-t-italic="<%= t('texte en italique') %>" data-t-link-text="<%= t('texte du lien') %>" data-t-draft="<%= t('brouillon') %>">
+<div class="panel"><form class="form" id="<%= form %>" action="/admin/carnet/<%= p.id %>" method="post" aria-label="<%= t('Billet, version {langue}', { langue: LN[lang] }) %>">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="langue" value="<%= lang %>"><input type="hidden" name="version" value="<%= p.version %>">
+<% if (blocking.length) { %>
+  <section class="resume-a" id="resume" tabindex="-1" aria-labelledby="res-t"><h2 id="res-t"><%~ ICON(WARN) %><%= it.checks && blocking.length ? (blocking.length > 1 ? t('Pas encore {action} : {n} points à corriger', { action: it.verifyAction, n: blocking.length }) : t('Pas encore {action} : 1 point à corriger', { action: it.verifyAction })) : '' %></h2>
+    <ul><% blocking.forEach(b => { const d = describe(b); %><li><a href="<%= d.href %>"><%= d.text %></a></li><% }) %></ul></section>
+<% } %>
+<% if (it.fresh) { %>
+  <div class="signal reprise" role="status"><p class="signal-t"><%~ ICON(WARN) %><%= t('Texte repris de l’enregistrement automatique de {time}, pas encore enregistré dans le billet.', { time: time(it.fresh.at) }) %></p>
+    <button class="btn ghost" type="submit" name="faire" value="enregistrer"><%= t('Enregistrer dans le billet') %></button><button class="btn ghost" type="submit" formaction="/admin/carnet/<%= p.id %>/brouillon/ecarter" formnovalidate><%= t('Écarter') %></button></div>
+<% } %>
+<% if (p.state === 'a_reprendre' && it.lastRemark) { %>
+  <div class="signal" role="note"><p class="signal-t"><%~ ICON(WARN) %><%= t('Renvoyé par {name} :', { name: it.lastRemark.by_name || t('le modérateur') }) %></p><p><%= it.lastRemark.message %></p></div>
+<% } %>
+<% if (p.state === 'publie' && !r.live) { %>
+  <div class="note-a"><%~ ICON('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.2"/>', 18) %><p><%= t('Ce billet est en ligne : il ne se modifie qu’avec le droit de modifier les billets publiés.') %></p></div>
+<% } %>
+  <div class="edit-langues"><nav class="seg" aria-label="<%= t('Langue du billet') %>"><% it.LANGS.forEach(l => { %><a href="/admin/carnet/<%= p.id %><%= l === 'fr' ? '' : `?langue=${l}` %>"<%~ l === lang ? ' aria-current="page"' : '' %> lang="<%= l %>"><%= LN[l] %> <span class="st-l" lang="<%= it.lang %>"><%= l === 'fr' ? t(it.STATE_LABEL[p.state]).toLowerCase() : it.langState(l) %></span></a><% }) %></nav>
+    <span class="hint"><%= lang === 'fr' ? t('Français : langue d’origine') : t('Traduction, d’après le français') %></span></div>
+  <div class="champ-a"><div class="lb-l"><label for="titre"><%= t('Titre') %></label><span class="compteur<%= f.title.length > it.ADVISE.title ? ' trop' : '' %>" id="titre-n" data-compte="titre" data-max="<%= it.ADVISE.title %>"><%= f.title.length %> / <%= it.ADVISE.title %></span></div>
+    <input type="text" id="titre" name="title" value="<%= f.title %>" maxlength="<%= it.LIMITS.title %>" lang="<%= lang %>" aria-describedby="titre-n"<%~ lang === 'fr' ? ' required' : '' %><%~ editable ? '' : ' readonly' %> data-champ="title"></div>
+  <div class="champ-a"><div class="lb-l"><label for="chapo"><%= t('Chapô') %></label><span class="compteur<%= f.dek.length > it.ADVISE.dek ? ' trop' : '' %>" id="chapo-n" data-compte="chapo" data-max="<%= it.ADVISE.dek %>"><%= f.dek.length %> / <%= it.ADVISE.dek %></span></div>
+    <p class="aide" id="chapo-aide"><%= t('Sous le titre, dans la liste des carnets et dans le flux. 300 signes au plus.') %></p>
+    <textarea class="auto" id="chapo" name="dek" rows="3" maxlength="<%= it.LIMITS.dek %>" lang="<%= lang %>" aria-describedby="chapo-aide chapo-n<%= f.dek.length > it.ADVISE.dek ? ' chapo-av' : '' %>"<%~ editable ? '' : ' readonly' %> data-champ="dek"><%= f.dek %></textarea>
+<% if (f.dek.length > it.ADVISE.dek) { %>    <p class="avert" id="chapo-av"><%~ ICON(WARN, 14) %><span><%= t('{n} signes au-delà de 160 : les moteurs de recherche couperont la fin. Rien n’empêche de proposer.', { n: f.dek.length - it.ADVISE.dek }) %></span></p>
+<% } %>  </div>
+  <div class="champ-a champ-texte"><div class="lb-l"><label for="texte"><%= t('Texte') %></label><div class="seg js-seul" role="group" aria-label="<%= t('Affichage du texte') %>"><a href="#texte" aria-current="page" data-vue-lien="ecrire"><%= t('Écrire') %></a><a href="#apercu" data-vue-lien="apercu"><%= t('Aperçu') %></a></div></div>
+    <div><div class="barre-outils js-seul" role="toolbar" aria-label="<%= t('Mise en forme') %>" aria-controls="texte" data-barre>
+      <button type="button" data-outil="titre"><%= t('Intertitre') %></button><button type="button" data-outil="gras"><%= t('Gras') %></button><button type="button" data-outil="italique"><%= t('Italique') %></button><button type="button" data-outil="lien"><%= t('Lien') %></button><button type="button" data-outil="citation"><%= t('Citation') %></button><button type="button" data-outil="liste"><%= t('Liste') %></button><span class="sep" aria-hidden="true"></span><button type="button" aria-haspopup="dialog" data-outil="photo"><%= t('Photo…') %></button><button type="button" aria-haspopup="dialog" data-outil="galerie"><%= t('Galerie…') %></button><button type="button" aria-haspopup="dialog" data-outil="interne"><%= t('Lien interne…') %></button></div>
+    <textarea class="source" id="texte" name="body" rows="16" spellcheck="true" lang="<%= lang %>" maxlength="<%= it.LIMITS.body %>" aria-describedby="texte-aide syntaxe"<%~ editable ? '' : ' readonly' %> data-champ="body"><%= f.body %></textarea></div>
+    <p class="sous-source" id="texte-aide"><span><%= t('## intertitre · **gras** · > citation · une photo : sa ligne seule, photo:adresse ; son texte et sa légende se règlent à droite') %></span><span><span data-mots><%= it.words > 1 ? t('{n} mots', { n: it.words }) : t('{n} mot', { n: it.words }) %>&nbsp;· <%= t('{n} min de lecture', { n: it.minutes }) %></span>&nbsp;· <a href="/admin/aide#carnets-la-mise-en-forme"><%= t('Aide sur la mise en forme') %></a></span></p>
+    <details class="plier" id="syntaxe"><summary><%~ ICON(CHEV) %><span><%= t('Aide Markdown') %><span class="sec"><%= t('intertitres, liens, citations, photos') %></span></span></summary>
+      <ul class="aide"><li><%= t('« ## Samedi, Lisbonne » : un intertitre (deux au moins font le sommaire du billet).') %></li><li><%= t('« photo:alfama-premier-tram » seul sur sa ligne : une photo ; deux lignes qui se suivent : une paire (un diptyque quand ce sont les deux regards) ; trois à douze : une galerie.') %></li>
+        <li><%= t('« [texte](https://…) » : un lien ; « [texte](serie:rue) », « voyage: », « carnet: », « photo: » : un lien vers le site ; titre « sponsorisé » pour un lien payé.') %></li><li><%= t('« > (pt-PT) … » : une citation et sa langue ; « > Traduction : … » ; « > — Inês » : sa source.') %></li><li><%= t('Le HTML s’affiche comme du texte ; une image externe est retirée.') %></li></ul></details>
+  </div>
+<% if (lang !== 'fr') { %>
+  <fieldset class="choix-a"><legend><%= t('Publication en {langue}', { langue: LN[lang] }) %></legend><input type="hidden" name="langs_set" value="1">
+    <label><input type="checkbox" name="langs" value="<%= lang %>"<%~ p.langs.includes(lang) ? ' checked' : '' %><%~ r.write ? '' : ' disabled' %>><span><%= t('Traduction relue : publier aussi en {langue}', { langue: LN[lang] }) %></span><span class="sec"><%= t('Non cochée, la page {langue} montre le texte français avec un bandeau, sans redirection.', { langue: LN[lang] }) %></span></label></fieldset>
+<% if (it.translate && editable) { %>  <div class="sugg-bloc"><p class="t"><span class="s" aria-hidden="true">✦</span><%= t('Traduction proposée par l’assistant, d’après le français : à relire avant toute publication.') %></p><button class="btn ghost" type="submit" formaction="/admin/carnet/<%= p.id %>/traduire" formnovalidate><%= t('Proposer une traduction') %></button></div>
+<% } %><% } %>
+<% if (editable) { %>  <p class="sans-script"><button class="btn ghost" type="submit" name="faire" value="enregistrer"><%= t('Enregistrer et voir l’aperçu') %></button></p>
+<% } %>
+</form>
+<section class="apercu-site mode-nuit theme-nicephos" id="apercu" aria-labelledby="apercu-t" tabindex="-1">
+  <p class="bandeau"><%= t('Aperçu · non publié · visible de l’équipe seulement') %></p>
+  <div class="corps" lang="<%= lang %>"><p class="rub"><%= t(it.rubriques.find(x => x.slug === p.rubrique)?.name || '') %></p><h2 class="tt" id="apercu-t"><%= f.title || p.title %></h2><p class="par"><%= t('Par {names}', { names: who }) %></p>
+<% if (f.dek) { %>    <p class="chapo"><%= f.dek %></p>
+<% } %>    <div data-apercu><%~ it.preview.html %></div></div>
+</section>
+</div>
+<div class="cote">
+<section class="panel" id="photos" aria-labelledby="t-ph"><h2 class="panel-t" id="t-ph"><%= t('Photos du billet · {n}', { n: it.photos.length }) %></h2>
+<% if (!it.photos.length) { %>  <p class="hint"><%= t('Aucune photo : écrivez photo:adresse seul sur une ligne, ou cochez-en ci-dessous.') %></p>
+<% } else { %>  <ol class="objets-a" aria-label="<%= t('Photos du billet, dans l’ordre') %>">
+<% it.photos.forEach(ph => { const published = ph.status === 'published'; const kind = ph.level === 'no' ? 'arret' : ph.level === 'warn' ? 'attention' : published ? 'abouti' : 'afaire';
+     const label = ph.level === 'no' ? t('Bloquée') : ph.level === 'warn' ? t('Accord à vérifier') : published ? t('Publiée') : t('Brouillon');
+     const noAlt = !ph.setting.decorative && !ph.alt; %>
+    <li id="ph-<%= ph.n %>"><% if (ph.ready) { %><img src="<%= ph.thumb %>" width="64" height="<%= Math.round(64 * ph.height / ph.width) %>" alt="<%= ph.alt %>" loading="lazy" decoding="async"><% } else { %><span class="ph" aria-hidden="true"></span><% } %><span class="t"><span class="n"><%= ph.n %></span><%= ph.title %><span class="sec"><%= [ph.when, ph.cover ? t('couverture') : '', ph.setting.decorative ? t('photo décorative') : ph.alt ? t('texte de remplacement écrit') : '', !published && r.write ? t('ira au modérateur avec le billet') : ''].filter(Boolean).join('\u00a0· ') %></span></span><span class="etat etat--<%= kind %>"><%~ it.symbol(kind) %><%= label %></span>
+<% if (ph.level !== 'ok') { %>      <p class="detail"><%= ph.reasons.join(' ; ') %></p>
+<% } %><% if (noAlt) { %>      <p class="err" id="ph-<%= ph.n %>-err"><%~ ICON(WARN, 14) %><span><b><%= t('Erreur :') %></b> <%= t('texte de remplacement vide. Décrivez la photo pour qui ne la voit pas.') %></span></p>
+<% } %>      <div class="actions"><% if (r.text) { %><a class="btn ghost" href="/admin/carnet/<%= p.id %>/photos/<%= ph.n %><%= lang !== 'fr' ? `?langue=${lang}` : '' %>"<%~ noAlt ? ` aria-describedby="ph-${ph.n}-err"` : '' %>><%= t('Décrire la photo…') %></a><% } %><% if (ph.level !== 'ok') { %><a class="btn ghost" href="/admin/photos/<%= ph.id %>"><%= t('Ouvrir la fiche de la photo') %></a><% } %><% if (editable && r.write) { %><button class="btn ghost" type="submit" form="<%= form %>" name="retirer" value="<%= ph.id %>"><%= t('Retirer du billet') %></button><% } %></div></li>
+<% }) %>  </ol>
+<% } %>
+<% if (editable && r.write && it.candidates.length) { %>  <details class="plier sans-script"><summary><%~ ICON(CHEV) %><span><%= t('Ajouter des photos') %><span class="sec"><%= t('cochées, elles s’ajoutent à la fin du texte') %></span></span></summary>
+    <fieldset class="choix-a"><legend class="sr-only"><%= t('Photos à ajouter') %></legend><p class="aide"><%= t('Cochées, elles s’ajoutent à la fin du texte, une ligne chacune ; déplacez ensuite leur ligne.') %></p>
+<% it.candidates.forEach(c => { %>      <label><input type="checkbox" name="photos[]" value="<%= c.slug %>" form="<%= form %>"><span><%= c.title %><% if (c.status !== 'published') { %> <span class="sec"><%= t('brouillon') %></span><% } %></span></label>
+<% }) %>    </fieldset></details>
+<% } %>
+</section>
+<section class="panel" id="publication" aria-labelledby="t-pub"><h2 class="panel-t" id="t-pub"><%= t('Publication') %></h2>
+  <dl class="kv-a"><dt><%= t('État') %></dt><dd><%~ it.pill(p.state) %></dd><dt><%= t('Ensuite') %></dt><dd><%= ensuite %></dd><dt><%= t('Adresse') %></dt><dd><span class="donnee">/carnet/<%= p.slug %></span><span class="hint sec"><%= neverPublished ? t('modifiable jusqu’à la première publication') : t('l’ancienne adresse mènera à la nouvelle') %></span></dd></dl>
+<% if (r.publish && ['brouillon', 'propose', 'a_reprendre'].includes(p.state)) { %>
+  <form method="post" action="/admin/carnet/<%= p.id %>/publier" data-publier>
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="langue" value="<%= lang %>">
+    <fieldset class="choix-a choix-a--ligne"><legend><%= t('Quand') %></legend><label><input type="radio" name="quand" value="maintenant" checked><span><%= t('Maintenant') %></span></label><label><input type="radio" name="quand" value="programmer"><span><%= t('Programmer') %></span></label></fieldset>
+    <div class="champ-a"><label for="quand"><%= t('Jour et heure') %> <span class="facultatif"><%= t('(pour programmer)') %></span></label><p class="aide" id="quand-aide"><%= t('Écrivez-les comme vous voulez : « samedi 8 h », « 17/10 8:00 ».') %></p><input type="text" id="quand" name="publish_at" value="" aria-describedby="quand-aide"></div>
+    <div class="form-pied"><% if (p.state === 'propose') { %><a class="btn ghost" href="/admin/carnet/<%= p.id %>/renvoyer"><%= t('Renvoyer…') %></a><% } %><button class="btn" type="submit" data-publier-bouton data-maintenant="<%= t('Publier') %>" data-programmer="<%= t('Programmer') %>"><%= t('Publier') %></button></div>
+  </form>
+<% } else if (p.state === 'programme' && r.publish) { %>
+  <div class="form-pied"><a class="btn ghost" href="/admin/carnet/<%= p.id %>/renvoyer"><%= t('Renvoyer…') %></a><button class="btn ghost" type="submit" form="<%= form %>" formaction="/admin/carnet/<%= p.id %>/deprogrammer" formnovalidate><%= t('Déprogrammer') %></button></div>
+<% } else if (p.state === 'publie' && r.publish) { %>
+  <div class="form-pied"><a class="btn danger-c" href="/admin/carnet/<%= p.id %>/retirer"><%= t('Retirer du site…') %></a></div>
+<% } else if (p.state === 'retire' && r.publish) { %>
+  <p class="hint"><%= t('Retiré : {reason}', { reason: p.retired_reason }) %></p><div class="form-pied"><button class="btn" type="submit" form="<%= form %>" formaction="/admin/carnet/<%= p.id %>/republier" formnovalidate><%= t('Republier') %></button></div>
+<% } %>
+  <p class="hint"><%= t('Première vue : {n} ko estimés, budget 1 Mo', { n: it.weight }) %></p><progress class="bar jauge" max="1024" value="<%= Math.min(1024, it.weight) %>" aria-label="<%= t('{n} ko sur 1 Mo', { n: it.weight }) %>"></progress>
+  <p><a class="lien-a" href="/admin/carnet/<%= p.id %>/versions"><%= it.revisions > 1 ? t('{n} versions · voir et rétablir', { n: it.revisions }) : it.revisions ? t('1 version · voir et rétablir') : t('Versions') %></a><% if (p.state === 'publie' && it.v2) { %> · <a class="lien-a" href="/carnet/<%= p.slug %>" target="_blank" rel="noopener"><%= t('Voir sur le site') %></a><% } %></p>
+</section>
+<section class="panel" aria-labelledby="t-plus"><details class="plier"<%~ it.reglagesOuverts ? ' open' : '' %>><summary><%~ ICON(CHEV) %><span id="t-plus"><%= t('Autres réglages') %><span class="sec"><%= t('signature, rubrique, couverture, voyage, visibilité') %></span></span></summary>
+  <div class="form">
+<% const ro = r.write && editable ? '' : ' disabled'; %>
+    <fieldset class="choix-a"><legend><%= t('Signature') %></legend><input type="hidden" name="authors_set" value="1" form="<%= form %>"<%~ ro %>>
+<% it.authors.forEach(a => { %>      <label><input type="checkbox" name="authors[]" value="<%= a.id %>" form="<%= form %>"<%~ p.authors.includes(a.id) ? ' checked' : '' %><%~ ro %>><span><%= a.name %></span></label>
+<% }) %>    </fieldset>
+    <div class="champ-a"><label for="rubrique"><%= t('Rubrique') %></label><select id="rubrique" name="rubrique" form="<%= form %>"<%~ ro %>><% it.rubriques.forEach(x => { %><option value="<%= x.slug %>"<%~ x.slug === p.rubrique ? ' selected' : '' %>><%= x.name %></option><% }) %></select></div>
+    <div class="champ-a"><label for="couverture"><%= t('Couverture') %></label><p class="aide" id="couv-aide"><%= t('Par défaut, la première photo du texte.') %></p><select id="couverture" name="cover_id" form="<%= form %>" aria-describedby="couv-aide"<%~ ro %>><option value=""><%= t('La première photo du texte') %></option><% it.photos.forEach(ph => { %><option value="<%= ph.id %>"<%~ p.cover_id === ph.id ? ' selected' : '' %>><%= ph.n %> · <%= ph.title %></option><% }) %></select></div>
+    <div class="champ-a"><label for="partage"><%= t('Image de partage') %></label><select id="partage" name="share_id" form="<%= form %>"<%~ ro %>><option value=""><%= t('La couverture') %></option><% it.photos.forEach(ph => { %><option value="<%= ph.id %>"<%~ p.share_id === ph.id ? ' selected' : '' %>><%= ph.n %> · <%= ph.title %></option><% }) %></select></div>
+    <div class="champ-a"><label for="voyage"><%= t('Voyage lié') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><select id="voyage" name="trip_id" form="<%= form %>"<%~ ro %>><option value=""><%= t('Aucun') %></option><% it.trips.forEach(tr => { %><option value="<%= tr.id %>"<%~ p.trip_id === tr.id ? ' selected' : '' %>><%= tr.name %></option><% }) %></select></div>
+    <fieldset class="choix-a"><legend><%= t('Écrire aux auteurs') %></legend><input type="hidden" name="contact_set" value="1" form="<%= form %>"<%~ ro %>><label><input type="checkbox" name="contact" form="<%= form %>"<%~ p.contact ? ' checked' : '' %><%~ ro %>><span><%= t('« Écrire à {names} » en bas du billet', { names: who }) %></span><span class="sec"><%= t('Un lien e-mail, rien n’est gardé par le site.') %></span></label></fieldset>
+    <dl class="kv-a"><dt><%= t('Visibilité') %></dt><dd><%= t('public') %><span class="sec"><%= t('Les billets privés viendront avec les galeries privées.') %></span></dd></dl>
+    <div class="champ-a"><label for="adresse"><%= t('Adresse') %></label><p class="aide" id="adresse-aide"><%= neverPublished ? t('Elle suit le titre jusqu’à la première publication.') : t('Changée, l’ancienne adresse mène à la nouvelle (301).') %></p><input type="text" id="adresse" name="slug" value="<%= p.slug %>" form="<%= form %>" maxlength="120" aria-describedby="adresse-aide"<%~ ro %>></div>
+<% if (p.state === 'publie') { %>    <fieldset class="choix-a"><legend><%= t('Mise à jour') %></legend><label><input type="checkbox" name="revised" form="<%= form %>"<%~ editable ? '' : ' disabled' %>><span><%= t('Mise à jour signalée') %></span><span class="sec"><%= t('« Mis à jour le … » sur le billet. Une coquille ne la coche pas.') %></span></label></fieldset>
+<% } %>    <div class="champ-a"><label for="mention"><%= t('Mention commerciale') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="mention-aide"><%= t('En tête du billet, dès qu’un contenu est fait en partenariat (matériel prêté, invitation, lien d’affiliation).') %></p><input type="text" id="mention" name="mention" value="<%= f.mention %>" form="<%= form %>" maxlength="<%= it.LIMITS.mention %>" lang="<%= lang %>" aria-describedby="mention-aide"<%~ editable ? '' : ' readonly' %>></div>
+    <div class="champ-a"><label for="reponse"><%= t('Réponse') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="reponse-aide"><%= t('Droit de réponse : une personne nommée dans le billet le demande ; sa réponse s’affiche, datée, après le billet.') %></p><textarea id="reponse" name="reply" rows="3" form="<%= form %>" maxlength="<%= it.LIMITS.reply %>" lang="<%= lang %>" aria-describedby="reponse-aide"<%~ editable ? '' : ' readonly' %>><%= f.reply %></textarea></div>
+<% if (editable && r.write) { %>    <div class="form-pied"><button class="btn ghost" type="submit" form="<%= form %>" name="faire" value="enregistrer"><%= t('Enregistrer les réglages') %></button></div>
+<% } %>  </div>
+</details></section>
+<% { const list = [...warnings, ...it.preview.warnings].filter((w, i, a) => a.findIndex(x => x.code === w.code) === i && WARN_TEXT[w.code]); if (list.length) { %>
+<section class="panel" aria-labelledby="t-verif"><h2 class="panel-t" id="t-verif"><%= t('Vérifications') %></h2><ul class="plain"><% list.forEach(w => { %><li class="avert"><%~ ICON(WARN, 14) %><span><%= WARN_TEXT[w.code] %></span></li><% }) %></ul></section>
+<% } } %>
+<% if (it.history.length) { %>
+<section class="panel" aria-labelledby="t-hist"><h2 class="panel-t" id="t-hist"><%= t('Historique') %></h2>
+  <ol class="chrono"><% it.history.forEach(h => { %><li><time datetime="<%= new Date(h.at).toISOString() %>"><%= fmt(h.at) %></time><span><%= ACTIONS[h.action] || h.action %><% if (h.by_name) { %> <span class="sec">· <%= h.by_name %></span><% } %><% if (h.message) { %><span class="sec"><%= h.message %></span><% } %></span></li><% }) %></ol>
+</section>
+<% } %>
+</div>
+</div>
+<dialog class="choix-photos" data-choix-photos aria-labelledby="choix-t">
+  <form method="dialog">
+    <h2 id="choix-t" data-choix-titre data-photo="<%= t('Ajouter une photo') %>" data-galerie="<%= t('Ajouter une galerie') %>" data-interne="<%= t('Lien interne vers une photo') %>"><%= t('Ajouter une photo') %></h2>
+    <label for="choix-q"><%= t('Rechercher dans vos photos') %></label>
+    <input type="search" id="choix-q" data-choix-q autocomplete="off">
+    <ul data-choix-liste aria-label="<%= t('Photos') %>"></ul>
+    <p class="hint" data-choix-aide><%= t('Une photo donne une figure ; plusieurs, une paire ou une galerie. Le texte de remplacement se règle ensuite dans « Photos du billet ».') %></p>
+    <div class="actions"><button class="btn ghost" value="annuler" type="submit"><%= t('Annuler') %></button><button class="btn" value="ok" type="submit" data-choix-ok><%= t('Insérer') %></button></div>
+  </form>
+</dialog>
