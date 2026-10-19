@@ -1,0 +1,66 @@
+<% const t = it.t, E = __eta.e; %>
+<% /* Demandes et rencontres (admin v2, vague 3b) : chaque rencontre, demande reçue par /bonjour ou accord saisi. Mêmes données,
+      mêmes droits, mêmes images et mêmes routes que la v1 (views/admin/encounters.eta ; GET /admin/rencontres, et
+      « Saisir une carte signée » : POST /admin/rencontres, multipart). La v2 : son propre titre (UX-A-16), des filtres à état
+      courant visible, un tableau en cartes sous 1 100 px, les états en pastilles à symbole, la saisie d'une carte repliée. */ %>
+<% layout('./layout', { pageTitle: `${t('Demandes et rencontres')} · ${t('Administration')} · ${it.siteName}` }) %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', encours: '<path d="M12 2.7a9.3 9.3 0 0 1 0 18.6z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>',
+     abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>', attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>',
+     arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>', chev: '<path d="M9 6l6 6-6 6"/>', retour: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const SL = { site: t('site'), instagram: t('Instagram'), print: t('expositions et tirages'), name: t('avec son prénom') };
+   const ST = { nouvelle: t('Nouvelle'), en_cours: t('En cours'), traitee: t('Traitée') };
+   const STS = { nouvelle: t('Nouvelles'), en_cours: t('En cours'), traitee: t('Traitées') };
+   const STK = { nouvelle: 'attention', en_cours: 'encours', traitee: 'abouti' };
+   const consent = e => { if (e.refused) return etat('arret', t('Refus de publication'));
+     if (!e.consent) return etat('afaire', t('Sans décision'));
+     const scopes = it.SCOPES.filter(s => e.consent[s]).map(s => SL[s] || it.SCOPE_LABELS[s]).join(', ');
+     return etat('abouti', e.consent_source !== 'en_ligne' ? t('Accord signé : {scopes}', { scopes }) : t('Accord en ligne : {scopes}', { scopes })); };
+   const hasErr = Object.keys(it.errors || {}).length; %>
+<p class="help-link"><a href="/admin/aide#rencontres-traiter-une-rencontre"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <a class="ep-retour" href="/admin/personnes"><%~ ic('retour', 14) %><%= t('Personnes') %></a>
+  <div class="ep-titre"><h1><%= t('Demandes et rencontres') %></h1></div>
+  <p class="ep-meta"><span><%= it.list.length > 1 ? t('{n} rencontres', { n: it.list.length }) : t('{n} rencontre', { n: it.list.length }) %></span><span><%= t('demandes reçues par /bonjour et accords saisis') %></span></p>
+  <div class="ep-actions">
+<% if (it.can('terrain.app')) { %>    <a class="btn ghost" href="/admin/terrain"><%= t('Sur le terrain') %></a>
+    <a class="btn" href="/admin/rencontre">＋ <%= t('Nouvelle rencontre') %></a>
+<% } %>  </div>
+</header>
+<p class="rub-intro"><%~ t('Les personnes photographiées dans la rue : demandes reçues par la page <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> (QR des cartes) et accords signés sur les cartes.') %></p>
+<nav class="chips filtres-l" aria-label="<%= t('Filtrer les rencontres') %>">
+  <a class="chip" href="/admin/rencontres"<%~ !it.status ? ' aria-current="page"' : '' %>><%= t('Toutes') %></a>
+<% Object.keys(it.STATUS).forEach(k => { %>  <a class="chip" href="/admin/rencontres?statut=<%= k %>"<%~ it.status === k ? ' aria-current="page"' : '' %>><span class="chip-st chip-st--<%= STK[k] %>"><%~ ic(STK[k]) %></span><%= STS[k] %></a>
+<% }) %></nav>
+<% if (it.list.length) { %>
+<table class="liste-a renc-liste">
+  <caption><%= it.status ? t('Rencontres « {etat} », la plus récente d’abord.', { etat: ST[it.status] }) : t('Toutes les rencontres, la plus récente d’abord.') %></caption>
+  <thead><tr><th scope="col"><%= t('Rencontre') %></th><th scope="col"><%= t('Suivi') %></th><th scope="col"><%= t('Accord') %></th><th scope="col"><%= t('Mise à jour') %></th></tr></thead>
+  <tbody>
+<% it.list.forEach(e => { %>
+    <tr>
+      <th scope="row" class="c-pers"><div class="pers-objet"><% if (e.hasPortrait) { %><img class="pers-visage" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } else { %><span class="pers-ini" aria-hidden="true"><%= (e.name || e.ref || '?').charAt(0).toUpperCase() %></span><% } %>
+        <span class="t"><a class="ligne-lien" href="/admin/rencontres/<%= e.id %>"><%= e.anonymized ? t('Refus anonymisé') : (e.ref || t('Sans carte')) %><%= e.name ? ` · ${e.name}` : '' %></a><span class="sec"><%= e.author || t('photographe à choisir') %><% if (e.ref && !e.verified) { %> · <%= t('référence non vérifiée') %><% } %><% if (e.wants_photo) { %> · <%= t('veut la photo') %><% } %><% if (e.photos) { %> · <%= e.photos > 1 ? t('{n} photos liées', { n: e.photos }) : t('{n} photo liée', { n: e.photos }) %><% } %></span>
+<% if (e.last && (e.last.message || e.last.place)) { %>        <span class="renc-mot"><%= e.last.message ? `« ${e.last.message.slice(0, 160)}${e.last.message.length > 160 ? '…' : ''} »` : `${e.last.met_on || ''} · ${e.last.place}` %></span><% } %></span></div></th>
+      <td class="c-etat"><span class="etats-l"><%~ etat(STK[e.status] || 'afaire', ST[e.status] || it.STATUS[e.status]) %><% if (e.rights_request && !e.rights_done_at) { const due = it.fmt(it.rightsDue(e.rights_requested_at)).replace(/,? \d+:\d+$/, ''); %><%~ etat('arret', e.rights_request === 'acces' ? t('Demande d’accès · avant le {date}', { date: due }) : t('Demande d’effacement · avant le {date}', { date: due })) %><% } %><% if (e.anonymized) { %><%~ etat('arret', t('refus anonymisé')) %><% } %></span></td>
+      <td class="c-accord"><%~ consent(e) %></td>
+      <td class="c-quand"><time><%= it.fmt(e.updated_at) %></time></td>
+    </tr>
+<% }) %>
+  </tbody>
+</table>
+<% } else { %>
+<p class="panel hint"><%~ it.status ? t('Aucune rencontre dans cette catégorie. Les demandes envoyées depuis <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> arrivent ici.') : t('Aucune rencontre pour l’instant. Les demandes envoyées depuis <a href="/bonjour" target="_blank" rel="noopener">/bonjour</a> arrivent ici.') %></p>
+<% } %>
+
+<% if (it.can('personnes.gerer')) { %>
+<details class="panel plier-p" id="nouvelle"<%~ hasErr ? ' open' : '' %>>
+  <summary><%~ ic('chev', 16) %><span><span class="h"><%= t('Saisir une carte signée') %></span><span class="sec"><%= t('accord papier (carte « pour nous »)') %></span></span></summary>
+  <%~ include('./_rencontre-form', { ...it, v: it.values || {}, action: '/admin/rencontres', isNew: true, ic }) %>
+</details>
+<% } %>
+</div>

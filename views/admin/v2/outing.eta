@@ -1,0 +1,148 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; %>
+<% /* Une sortie (admin v2, vague 3b) : ses photos et ses personnes côte à côte, pour trier après la rue. Mêmes données, mêmes
+      droits, mêmes images et mêmes routes que la v1 (views/admin/outing.eta ; POST /admin/sorties/:author/:day/photos,
+      …/lieu, …/couper, …/reunir, …/voyage, …/proposer, …/publier, /admin/photos/:id/serie). La v2 : le lieu s'enregistre
+      quand on quitte le champ (JSON, même route ; « Défaire » 10 s ; MQ-09) ; les boutons des photos cochées disent qu'ils
+      agissent sur elles, et combien (UX-A-16) ; publier ou proposer d'un coup passe par un dialogue (sans script, il s'ouvre
+      dans la page). */ %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>',
+     retour: '<path d="M19 12H5M11 6l-6 6 6 6"/>', chev: '<path d="M9 6l6 6-6 6"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const hm = x => (it.lang === 'fr' ? x.replace(':', ' h ').replace(/ h 00$/, ' h') : x);
+   const o = it.o; const TAG = { refus: 'arret', 'a-trier': 'attention', terminee: 'abouti' };
+   const LABELS = { site: t('site'), instagram: t('Instagram'), print: t('tirages'), name: t('prénom') };
+   const LEVEL = { ok: t('prête'), warn: t('à vérifier'), no: t('bloquée') }, LK = { ok: 'abouti', warn: 'attention', no: 'arret' };
+   const pl = (n, zero, one, many) => n > 1 ? many : n === 1 ? one : zero;
+   const peopleOf = p => o.people.filter(e => o.linked.has(`${e.id}:${p.id}`));
+   const excludedAll = p => o.people.length > 0 && o.people.every(e => o.excluded.has(`${e.id}:${p.id}`) && !o.linked.has(`${e.id}:${p.id}`));
+   const base = `/admin/sorties/${o.author.slug}/${o.day}`, depuis = it.hhmm(o.starts);
+   const csrf = '<input type="hidden" name="_csrf" value="' + E(it.csrf) + '"><input type="hidden" name="depuis" value="' + E(depuis) + '">';
+   const readyDrafts = o.photos.filter(p => p.status === 'draft' && !['programmee', 'a_reprendre'].includes(p.review) && p.state.site.level === 'ok').length;
+   const action = readyDrafts && it.can('photos.publier') ? 'publier' : readyDrafts && it.can('photos.proposer') ? 'proposer' : null;
+   const manage = it.can('sorties.gerer');
+   // Cases des photos : seulement si une action les attend (lier, exclure, rétablir).
+   const pick = o.people.length > 0 && manage; %>
+<p class="help-link"><a href="/admin/aide#rencontres-les-sorties"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <a class="ep-retour" href="/admin/sorties"><%~ ic('retour', 14) %><%= t('Sorties') %></a>
+  <div class="ep-titre"><h1 data-sortie-titre><%= o.place || o.author.name %></h1><%~ etat(TAG[o.state], it.STATES[o.state]) %></div>
+  <p class="ep-meta"><span><%= o.when %><%= o.range ? ` · ${o.range}` : '' %></span><span><%= o.author.name %></span><span><%= pl(o.counts.photos, t('0 photo'), t('1 photo'), t('{n} photos', { n: o.counts.photos })) %></span><span><%= pl(o.people.length, t('0 personne'), t('1 personne'), t('{n} personnes', { n: o.people.length })) %></span><span role="status" data-temoin></span></p>
+<% if (action) { %>  <div class="ep-actions"><a class="btn" href="#dlg-lot" data-ouvre="dlg-lot"><%= action === 'publier' ? t('Publier les photos prêtes · {n}…', { n: readyDrafts }) : t('Proposer les photos prêtes · {n}…', { n: readyDrafts }) %></a></div>
+<% } %></header>
+<% if (it.trip || it.trips.length) { %>
+<form class="sortie-voyage btns-ligne" method="post" action="<%= base %>/voyage">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (it.trip) { %>  <span><%= t('Voyage :') %> <a class="lien-a" href="/admin/voyages/<%= it.trip.id %>"><%= it.trip.name %></a></span>
+<% } %><% if (it.trips.length) { %>  <div class="champ-a"><label class="sr-only" for="sortie-voyage"><%= t('Voyage de cette journée') %></label><select id="sortie-voyage" name="voyage"><option value=""><%= it.trip ? t('— le détacher —') : t('— aucun voyage —') %></option><% it.trips.forEach(x => { %><option value="<%= x.id %>"<%~ it.trip && it.trip.id === x.id ? ' selected' : '' %>><%= x.name %></option><% }) %></select></div>
+  <button class="btn ghost" type="submit"><%= it.trip ? t('Changer') : t('Rattacher à ce voyage') %></button>
+<% } %></form>
+<% } %>
+<% if (o.parts.length > 1) { %>
+<nav class="chips filtres-l" aria-label="<%= t('Parties de la journée') %>">
+<% o.parts.forEach(p => { %>  <a class="chip" href="<%= it.partUrl(p) %>"<%~ p.starts === o.starts ? ' aria-current="page"' : '' %>><%= p.starts === '00:00' ? t('Début de journée') : t('À partir de {time}', { time: hm(p.starts) }) %></a>
+<% }) %></nav>
+<% } %>
+
+<div class="sortie-grille">
+  <section class="panel" aria-labelledby="o-photos">
+    <h2 id="o-photos"><%= t('Photos de la sortie') %> <span class="sec"><%= o.range ? t('prises ce jour-là, {range} (heure de l’appareil)', { range: o.range }) : t('prises ce jour-là (heure de l’appareil)') %></span></h2>
+<% if (!o.photos.length) { %>
+    <p class="hint"><%= o.range ? t('Aucune photo de {name} datée de ce jour à ces heures pour l’instant : elles apparaîtront dès leur import.', { name: o.author.name }) : t('Aucune photo de {name} datée de ce jour pour l’instant : elles apparaîtront dès leur import.', { name: o.author.name }) %></p>
+<% } else { %>
+    <form method="post" action="<%= base %>/photos" id="sortie-photos" data-cocher>
+      <%~ csrf %>
+      <input type="hidden" name="back" value="<%= o.url %>">
+      <fieldset class="vign-choix"><legend class="sr-only"><%= t('Photos de la sortie') %></legend>
+      <!-- [html-validate-disable-block form-dup-name: les cases forment un groupe, name="photo" répété comme dans la v1 ; le serveur en reçoit la liste] -->
+      <ul class="vign-p sortie-vign">
+<% o.photos.forEach(p => { const who = peopleOf(p); const out = excludedAll(p); %>
+        <li>
+<% if (pick) { %>          <label><input class="chk" type="checkbox" name="photo" value="<%= p.id %>"><span class="vign-img"><% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></span><span class="sr-only"><%= t('Choisir « {title} »', { title: p.title }) %></span></label>
+<% } else { %>          <span class="vign-img" aria-hidden="true"><% if (p.ready) { %><%~ it.picture(p, { sizes: '160px', alt: '' }) %><% } else { %><span class="ph"></span><% } %></span>
+<% } %>
+          <a class="lien-a" href="/admin/photos/<%= p.id %>"><%= p.title %></a>
+          <span class="sec"><%= p.taken_time ? hm(p.taken_time) : t('heure inconnue') %> · <%= p.status === 'published' ? t('publiée') : t('brouillon') %><%= p.state.faces.n == null ? (p.state.faces.has ? ' · ' + t('visage ?') : '') : ' · ' + (p.state.faces.n ? (p.state.faces.n > 1 ? t('{n} visages', { n: p.state.faces.n }) : t('{n} visage', { n: p.state.faces.n })) : t('sans visage')) %></span>
+          <span class="etats-l"><%~ etat(LK[p.state.site.level], LEVEL[p.state.site.level]) %></span>
+<% if (p.state.site.reasons.length && p.state.site.level !== 'ok') { %>          <span class="sec"><%= p.state.site.reasons.join(' ; ') %></span>
+<% } %><% if (who.length) { %>          <span class="sec"><%= t('Liée à : {who}', { who: who.map(e => e.ref || e.name || t('rencontre')).join(', ') }) %></span>
+<% } else if (out) { %>          <span class="sec"><%= t('personne de la sortie') %></span>
+<% } %><% if (p.suggest.length) { %>          <span class="sortie-sugg"><span class="sec">✦ <%= t('Série proposée :') %></span>
+<% p.suggest.forEach(x => { %>            <button class="btn ghost" type="submit" formaction="/admin/photos/<%= p.id %>/serie" formnovalidate name="category_id" value="<%= x.id %>" title="<%= t('ressemble à {n} de ses {total} photos', { n: x.votes, total: x.size }) %>"><%= t('Classer dans « {name} »', { name: x.name }) %><span class="sr-only"> : « <%= p.title %> »</span></button>
+<% }) %>            <button class="lien-a" type="submit" formaction="/admin/photos/<%= p.id %>/serie" formnovalidate name="garder" value="1"><%= t('Garder « {name} »', { name: p.category }) %><span class="sr-only"> : « <%= p.title %> »</span></button></span>
+<% } %>        </li>
+<% }) %>
+      </ul></fieldset>
+<% if (pick) { %>
+      <div class="panel sortie-cochees">
+        <p class="t" data-cocher-compte data-zero="<%= t('Aucune photo cochée : cochez celles où figure une personne, ou celles où personne de la sortie ne figure.') %>"><%= t('Pour les photos cochées :') %></p>
+        <div class="champ-a"><label for="o-personne"><%= t('Personne qui y figure') %></label><select id="o-personne" name="personne"><% o.people.forEach(e => { %><option value="<%= e.id %>"><%= e.ref || t('sans carte') %><%= e.name ? ` · ${e.name}` : '' %></option><% }) %></select></div>
+        <div class="btns-ligne">
+          <button class="btn ghost" type="submit" name="action" value="lier"><%= t('Lier les photos cochées à cette personne') %></button>
+          <button class="btn ghost" type="submit" name="action" value="exclure"><%= t('Personne de la sortie n’y figure') %></button>
+          <button class="btn ghost" type="submit" name="action" value="retablir"><%= t('Rétablir les accords de la sortie') %></button>
+        </div>
+        <p class="hint"><%= t('Les accords de la sortie couvrent toutes ses photos. Liez une photo à la personne qui y figure ; si personne de la liste n’y figure (un paysage, une autre scène), indiquez-le : ses accords et refus ne la concernent plus.') %></p>
+      </div>
+<% } %>
+    </form>
+<% } %>
+  </section>
+
+  <div class="sortie-cote">
+    <section class="panel" aria-labelledby="o-people">
+      <h2 id="o-people"><%= t('Personnes rencontrées') %></h2>
+<% if (!o.people.length) { %>
+      <p class="hint"><%= t('Personne n’a été rencontré pendant cette sortie.') %></p>
+<% } else { %>
+      <ul class="objets-a pers-objets">
+<% o.people.forEach(e => { %>        <li><% if (e.hasPortrait) { %><img class="pers-visage" src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="32" height="32" loading="lazy"><% } else { %><span class="pers-ini" aria-hidden="true"><%= (e.name || e.ref || '?').charAt(0).toUpperCase() %></span><% } %>
+          <p class="t"><a class="lien-a" href="/admin/rencontres/<%= e.id %>"><%= e.ref || t('Sans carte') %><%= e.name ? ` · ${e.name}` : '' %></a><% if (e.met_time) { %><span class="sec"><%= e.met_time %></span><% } %></p>
+          <p class="detail"><% if (e.refused) { %><%~ etat('arret', t('Refuse la publication')) %><% } else if (e.consent) { %><%~ etat('abouti', Object.keys(LABELS).filter(s => e.consent[s]).map(s => LABELS[s]).join(', ')) %><% } else { %><%~ etat('afaire', t('Sans décision')) %><% } %></p></li>
+<% }) %>      </ul>
+<% } %>
+<% if (it.can('terrain.app')) { %>      <p class="btns-ligne"><a class="btn ghost" href="/admin/rencontre">＋ <%= t('Nouvelle rencontre') %></a></p>
+<% } %>    </section>
+
+<% if (manage) { %>
+    <section class="panel" aria-labelledby="o-settings">
+      <h2 id="o-settings"><%= t('La sortie') %></h2>
+      <form class="form" method="post" action="<%= base %>/lieu" novalidate data-autosave data-url="<%= base %>/lieu<%= depuis ? `?depuis=${depuis}` : '' %>" data-objet="<%= o.when %>">
+        <%~ csrf %>
+        <div class="champ-a"><label for="o-lieu"><%= t('Lieu') %></label><p class="aide" id="o-lieu-a"><%= o.placeSet ? t('choisi') : t('proposé d’après les rencontres et les photos') %></p><input type="text" id="o-lieu" name="lieu" value="<%= o.place %>" maxlength="120" aria-describedby="o-lieu-a" data-champ="lieu" data-label="<%= t('Lieu') %>"></div>
+        <p class="sans-script form-pied"><button class="btn ghost" type="submit"><%= t('Enregistrer le lieu') %></button></p>
+      </form>
+      <form class="form" method="post" action="<%= base %>/couper">
+        <%~ csrf %>
+        <div class="champ-a"><label for="o-couper"><%= t('Couper la sortie à') %></label><p class="aide" id="o-couper-a"><%= t('les photos et rencontres d’après forment une autre sortie') %></p><input type="time" id="o-couper" name="heure" required step="60" aria-describedby="o-couper-a"></div>
+        <p class="btns-ligne"><button class="btn ghost" type="submit"><%= t('Couper') %></button></p>
+      </form>
+<% if (o.starts !== '00:00') { %>
+      <form method="post" action="<%= base %>/reunir">
+        <%~ csrf %>
+        <p class="btns-ligne"><button class="btn ghost" type="submit"><%= t('Réunir avec la sortie précédente') %></button></p>
+      </form>
+<% } %>
+      <p class="hint"><%= t('Une photo ou une rencontre sans heure connue compte dans toutes les parties de la journée.') %></p>
+    </section>
+<% } %>
+  </div>
+</div>
+<% if (action) { %>
+<dialog class="confirm cible" id="dlg-lot" aria-labelledby="dl-t" aria-describedby="dl-d">
+  <form method="post" action="<%= base %>/<%= action %>">
+    <%~ csrf %>
+    <h2 id="dl-t"><%= action === 'publier' ? (readyDrafts > 1 ? t('Publier les {n} photos prêtes ?', { n: readyDrafts }) : t('Publier la photo prête ?')) : (readyDrafts > 1 ? t('Proposer les {n} photos prêtes ?', { n: readyDrafts }) : t('Proposer la photo prête ?')) %></h2>
+    <p id="dl-d"><%= action === 'publier' ? t('Les brouillons dont les accords sont en règle partent en ligne tout de suite ; ceux à vérifier ou bloqués restent en brouillon. « Dépublier », sur la fiche d’une photo, la retire.') : t('Les brouillons dont les accords sont en règle partent au modérateur, qui les publie, les programme ou vous les renvoie.') %></p>
+    <div class="actions"><a class="btn ghost" href="#contenu" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= action === 'publier' ? t('Publier') : t('Proposer') %></button></div>
+  </form>
+</dialog>
+<% } %>
+</div>
+<%~ include('./_textes-contenus', it) %>
+<script src="<%= it.asset('admin/v2/contenus-v2.js') %>" defer></script>

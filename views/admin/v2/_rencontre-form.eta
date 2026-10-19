@@ -1,0 +1,45 @@
+<% /* Carte signée (accord papier) : saisie d'une nouvelle carte (Demandes et rencontres) ou correction d'une rencontre (sa
+      fiche). Les champs et la route sont ceux de la v1 (views/admin/_encounter-form.eta : POST /admin/rencontres ou
+      /admin/rencontres/:id, multipart, avec les photos) ; un bouton « Enregistrer » qui le dit : un accord signé se saisit
+      en entier, avec sa preuve (MQ-09 : un bouton explicite pour ce qui engage). Une erreur se dit sous son champ et dans un
+      résumé titré ; quitter la page avec un champ modifié retient (data-garde). it.v : valeurs, it.errors, it.ic. */ %>
+<% const t = it.t, E = __eta.e, ic = it.ic; const v = it.v, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true;
+   const SL = { site: t('site'), instagram: t('Instagram'), print: t('expositions et tirages'), name: t('avec son prénom') };
+   const k = it.isNew ? 'nv' : 'rc';
+   const NAMES = { ref: t('Référence'), author: t('Photographe'), email: t('E-mail'), scopes: t('Usages acceptés') };
+   const IDS = { ref: `${k}-ref`, author: `${k}-auteur`, email: `${k}-email`, scopes: `${k}-scope-site` };
+   const err = key => (e[key] ? '<p class="err" id="err-' + k + '-' + key + '"><span><b>' + E(t('Erreur :')) + '</b> ' + E(e[key]) + '</span></p>' : '');
+   const bad = key => (e[key] ? ' aria-invalid="true" aria-describedby="err-' + k + '-' + key + '"' : '');
+   const n = Object.keys(e).length; %>
+<form class="form renc-form" method="post" action="<%= it.action %>" enctype="multipart/form-data" data-garde>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (n) { %>  <section class="resume-a" tabindex="-1" aria-labelledby="resume-<%= k %>"><h2 id="resume-<%= k %>"><%= n > 1 ? t('Carte non enregistrée : {n} champs à corriger', { n }) : t('Carte non enregistrée : 1 champ à corriger') %></h2>
+    <ul><% Object.entries(e).forEach(([key, m]) => { %><li><a href="#<%= IDS[key] || `${k}-ref` %>"><%= NAMES[key] || key %> : <%= m %></a></li><% }) %></ul></section>
+<% } %>  <p class="hint"><%= t('Tous les champs sont facultatifs, sauf les usages quand la carte est signée.') %> <%= t('Les photos ne sont jamais publiées : gardées en privé, chiffrées.') %></p>
+  <div class="row">
+    <div class="champ-a"><label for="<%= k %>-ref"><%= t('Référence') %></label><p class="aide" id="<%= k %>-ref-a"><%= t('La lettre et le numéro de la carte : J-0142.') %></p><input type="text" id="<%= k %>-ref" name="ref" value="<%= v.ref || '' %>" maxlength="20" autocapitalize="characters" aria-describedby="<%= k %>-ref-a<%= e.ref ? ` err-${k}-ref` : '' %>"<%~ e.ref ? ' aria-invalid="true"' : '' %> data-label="<%= t('Référence') %>"><%~ err('ref') %></div>
+    <div class="champ-a"><label for="<%= k %>-auteur"><%= t('Photographe') %></label><select id="<%= k %>-auteur" name="author_id"<%~ bad('author') %> data-label="<%= t('Photographe') %>"><option value=""><%= t('d’après la référence') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ Number(v.author_id) === a.id ? ' selected' : '' %>><%= a.name %></option><% }) %></select><%~ err('author') %></div>
+  </div>
+  <div class="row">
+    <div class="champ-a"><label for="<%= k %>-nom"><%= t('Nom') %></label><input type="text" id="<%= k %>-nom" name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="off" data-label="<%= t('Nom') %>"></div>
+    <div class="champ-a"><label for="<%= k %>-email"><%= t('E-mail') %></label><input type="email" id="<%= k %>-email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="off"<%~ bad('email') %> data-label="<%= t('E-mail') %>"><%~ err('email') %></div>
+  </div>
+  <div class="row">
+    <div class="champ-a"><label for="<%= k %>-date"><%= t('Date') %></label><input type="date" id="<%= k %>-date" name="met_on" value="<%= v.met_on || '' %>" data-label="<%= t('Date') %>"></div>
+    <div class="champ-a"><label for="<%= k %>-lieu"><%= t('Lieu') %></label><input type="text" id="<%= k %>-lieu" name="place" value="<%= v.place || '' %>" maxlength="120" data-label="<%= t('Lieu') %>"></div>
+  </div>
+  <div class="champ-a"><label for="<%= k %>-sortie"><%= t('Date de la sortie') %></label><p class="aide" id="<%= k %>-sortie-a"><%= t('facultatif : si l’horloge de l’appareil photo était décalée, la date que portent les photos') %></p><input type="date" id="<%= k %>-sortie" name="session_day" value="<%= v.session_day || '' %>" aria-describedby="<%= k %>-sortie-a" data-label="<%= t('Date de la sortie') %>"></div>
+  <div class="champ-a"><label for="<%= k %>-details"><%= t('Détails') %></label><input type="text" id="<%= k %>-details" name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="<%= t('tenue, scène…') %>" data-label="<%= t('Détails') %>"></div>
+  <fieldset class="choix-a">
+    <legend><%= t('Accord signé sur la carte') %></legend>
+    <label><input type="checkbox" name="signed"<%~ on('signed') ? ' checked' : '' %> data-label="<%= t('La carte « pour nous » est signée') %>"><span><%= t('La carte « pour nous » est signée') %></span></label>
+  </fieldset>
+  <fieldset class="choix-a choix-a--ligne"<%~ e.scopes ? ` aria-describedby="err-${k}-scopes"` : '' %>>
+    <legend><%= t('Usages acceptés') %></legend>
+<% it.SCOPES.forEach((s, i) => { %>    <label><input type="checkbox" name="scope_<%= s %>"<%~ i === 0 ? ` id="${k}-scope-site"` : '' %><%~ on(`scope_${s}`) ? ' checked' : '' %><%~ e.scopes ? ' aria-invalid="true"' : '' %> data-label="<%= SL[s] || it.SCOPE_LABELS[s] %>"><span><%= SL[s] || it.SCOPE_LABELS[s] %><%= s === 'instagram' ? ` ${t('(avec le site)')}` : '' %></span></label>
+<% }) %><%~ err('scopes') %>
+  </fieldset>
+  <div class="champ-a"><label for="<%= k %>-visage"><%= t('Photo de la personne') %></label><p class="aide" id="<%= k %>-visage-a"><%= t('visage, pour mettre un nom sur un visage · gardée en privé, avec son accord') %></p><input type="file" id="<%= k %>-visage" name="portrait" accept="image/jpeg,image/png,image/webp" capture="environment" aria-describedby="<%= k %>-visage-a"></div>
+  <div class="champ-a"><label for="<%= k %>-carte"><%= t('Photo de la carte signée') %></label><p class="aide" id="<%= k %>-carte-a"><%= t('preuve, gardée en privé · JPEG, PNG ou WebP') %></p><input type="file" id="<%= k %>-carte" name="card" accept="image/jpeg,image/png,image/webp" capture="environment" aria-describedby="<%= k %>-carte-a"></div>
+  <div class="form-pied"><span class="mod" role="status" data-modifs data-texte="<%= t('Modifié, pas encore enregistré :') %>" hidden></span><button class="btn" type="submit"><%= it.isNew ? t('Enregistrer la rencontre') : t('Enregistrer la carte') %></button></div>
+</form>

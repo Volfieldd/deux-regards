@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="<%= it.asset('admin/v2/tokens.css') %>">
   <link rel="stylesheet" href="<%= it.asset('admin/v2/admin-plus.css') %>">
   <link rel="stylesheet" href="<%= it.asset('admin/v2/v2.css') %>">
+<% /* Vague 3b (terrain et contenus : Personnes, une rencontre, Séries, Sorties, Voyages) : leurs règles à part. */ %>
+  <link rel="stylesheet" href="<%= it.asset('admin/v2/contenus-v2.css') %>">
 <% const masks = it.brand ? [it.brand.emblem, it.brand.icon, it.brand.logotype].filter(Boolean).join('.') : ''; %>
 <% if (masks) { %>
   <link rel="stylesheet" href="/brand.css?v=<%= masks %>">
