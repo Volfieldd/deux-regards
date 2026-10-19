@@ -222,7 +222,7 @@ $$('form[data-compte-form]').forEach(form => {
     const b = {};
     for (const [k, v] of new FormData(form)) {
       if (k === '_csrf') continue;
-      if (k === 'hero') (b.hero ||= []).push(v); else b[k] = v;
+      if (k === 'hero' || k === 'hero_tel') (b[k] ||= []).push(v); else b[k] = v;
     }
     return b;
   };
@@ -287,9 +287,10 @@ $$('form[data-compte-form]').forEach(form => {
     }
   });
 
-  // Ouverture de l'accueil : ← → ✕ et les cases de la réserve changent la liste sur place, puis enregistrent la page.
-  const box = $('[data-hero]', form);
-  if (!box) return;
+  // Ouvertures de l'accueil (hero, et hero_tel pour le téléphone en v3) : ← → ✕ et les cases de la réserve changent la
+  // liste sur place, puis enregistrent la page.
+  $$('[data-hero]', form).forEach(box => {
+  const NAME = box.dataset.name || 'hero';
   const list = $('[data-hero-chosen]', box);
   const pool = $('[data-hero-pool]', box);
   const max = Number(box.dataset.max) || 8;
@@ -315,8 +316,8 @@ $$('form[data-compte-form]').forEach(form => {
     const li = document.createElement('li');
     li.className = 'it'; li.dataset.slug = slug; li.dataset.title = title;
     const pic = $('picture, img', label)?.cloneNode(true);
-    const btn = (op, sym, aria) => `<button type="submit" name="hero_op" value="${op}:${esc(slug)}" aria-label="${esc(aria)}" data-hero-op="${op}">${sym}</button>`;
-    li.innerHTML = `<input type="hidden" name="hero" value="${esc(slug)}"><span class="n mono" aria-hidden="true"></span><span class="t">${esc(title)}</span>`
+    const btn = (op, sym, aria) => `<button type="submit" name="${NAME}_op" value="${op}:${esc(slug)}" aria-label="${esc(aria)}" data-hero-op="${op}">${sym}</button>`;
+    li.innerHTML = `<input type="hidden" name="${NAME}" value="${esc(slug)}"><span class="n mono" aria-hidden="true"></span><span class="t">${esc(title)}</span>`
       + `<span class="mv">${btn('left', '←', T('Avancer « {title} »', { title }))}${btn('right', '→', T('Reculer « {title} »', { title }))}${btn('remove', '✕', T('Retirer « {title} » de l’ouverture', { title }))}</span>`;
     if (pic) $('.n', li).after(pic);
     return li;
@@ -363,6 +364,7 @@ $$('form[data-compte-form]').forEach(form => {
     changed(before, Th('Ouverture : « {title} » ajoutée.', { title: label.dataset.title }), next ? $('input', next) : $('[data-hero-op="remove"]', list.lastElementChild));
   });
   sync();
+  });
 })();
 
 // ----- focus jamais caché, même en partie, par la barre d'onglets du téléphone (WCAG 2.4.11 et 2.4.12) : un champ haut

@@ -1,0 +1,74 @@
+{
+ "Point fort du cadrage": {
+  "en": "Focal point of the framing",
+  "de": "Schwerpunkt des Bildausschnitts"
+ },
+ "Ce que l’ouverture plein cadre de l’accueil (site public v3) garde quand elle recadre la photo, de 10 % au plus.": {
+  "en": "What the full-bleed opening slideshow of the home page (public site v3) keeps when it crops the photo, by 10 % at most.",
+  "de": "Was die randlose Start-Diashow der Startseite (öffentliche Website v3) behält, wenn sie das Foto um höchstens 10 % beschneidet."
+ },
+ "En haut à gauche": {
+  "en": "Top left",
+  "de": "Oben links"
+ },
+ "En haut": {
+  "en": "Top",
+  "de": "Oben"
+ },
+ "En haut à droite": {
+  "en": "Top right",
+  "de": "Oben rechts"
+ },
+ "À gauche": {
+  "en": "Left",
+  "de": "Links"
+ },
+ "Au centre": {
+  "en": "Centre",
+  "de": "Mitte"
+ },
+ "À droite": {
+  "en": "Right",
+  "de": "Rechts"
+ },
+ "En bas à gauche": {
+  "en": "Bottom left",
+  "de": "Unten links"
+ },
+ "En bas": {
+  "en": "Bottom",
+  "de": "Unten"
+ },
+ "En bas à droite": {
+  "en": "Bottom right",
+  "de": "Unten rechts"
+ },
+ "Point fort inconnu.": {
+  "en": "Unknown focal point.",
+  "de": "Unbekannter Schwerpunkt."
+ },
+ "Ouverture au téléphone (v3)": {
+  "en": "Opening slideshow on phones (v3)",
+  "de": "Start-Diashow auf dem Handy (v3)"
+ },
+ "Ouverture au téléphone": {
+  "en": "Opening slideshow on phones",
+  "de": "Start-Diashow auf dem Handy"
+ },
+ "Au téléphone, en v3, la photo prend toute la largeur : des verticales la remplissent. {n} photos au plus ; sans choix, le téléphone montre l’ouverture ci-dessus.": {
+  "en": "On a phone, in v3, the photo takes the full width: portrait photos fill it. {n} photos at most; with none chosen, phones show the slideshow above.",
+  "de": "Auf dem Handy nimmt das Foto in v3 die ganze Breite ein: Hochformate füllen sie. Höchstens {n} Fotos; ohne Auswahl zeigt das Handy die Diashow oben."
+ },
+ "Aucune photo choisie : au téléphone, l’ouverture est celle ci-dessus.": {
+  "en": "No photo chosen: on phones, the slideshow is the one above.",
+  "de": "Kein Foto gewählt: Auf dem Handy läuft die Diashow oben."
+ },
+ "Ajouter des photos verticales publiées": {
+  "en": "Add published portrait photos",
+  "de": "Veröffentlichte Hochformate hinzufügen"
+ },
+ "Aucune photo verticale publiée pour l’instant.": {
+  "en": "No published portrait photo yet.",
+  "de": "Noch kein veröffentlichtes Hochformat."
+ }
+}

@@ -303,7 +303,9 @@ document.querySelectorAll('[data-ouverture]').forEach(ouv => {
   const lire = ouv.querySelector('[data-ouv-lire]');
   if (points.length < 2 || !cadre || !cartel) return;
   const slides = [{ image: [...cadre.childNodes], cartel: [...cartel.childNodes] }];
-  document.querySelectorAll('template[data-ouv-diapo]').forEach(tp => { slides[Number(tp.dataset.ouvDiapo)] = tp; });
+  // Les photos suivantes : dans l'ouverture (v3, une par appareil), sinon dans la page (v2).
+  const tps = ouv.querySelectorAll('template[data-ouv-diapo]');
+  (tps.length ? tps : document.querySelectorAll('template[data-ouv-diapo]')).forEach(tp => { slides[Number(tp.dataset.ouvDiapo)] = tp; });
   const get = i => {
     if (slides[i] instanceof HTMLTemplateElement) {
       const c = document.importNode(slides[i].content, true);

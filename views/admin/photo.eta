@@ -127,7 +127,13 @@
       <label class="inline"><input type="radio" name="watermark" value="default"<%~ v.watermark !== 0 ? ' checked' : '' %>> <%~ t('Selon les {link}', { link: `<a href="/admin/images">${esc(t('réglages'))}</a>` }) %></label>
       <label class="inline"><input type="radio" name="watermark" value="none"<%~ v.watermark === 0 ? ' checked' : '' %>> <%= t('Jamais sur cette photo') %></label>
     </fieldset>
-    <p class="hint"><%~ t('Instagram : voir la rubrique {link}.', { link: '<a class="more" href="#instagram">Instagram</a>' }) %></p>
+    <label for="focal"><%= t('Point fort du cadrage') %></label>
+    <p class="hint" id="focal-aide"><%= t('Ce que l’ouverture plein cadre de l’accueil (site public v3) garde quand elle recadre la photo, de 10 % au plus.') %></p>
+<% const focalNow = v.focal || `${v.focal_x ?? 50} ${v.focal_y ?? 50}`; %>    <select id="focal" name="focal" aria-describedby="focal-aide<%= e.focal ? ' err-focal' : '' %>"<%~ e.focal ? ' aria-invalid="true"' : '' %>>
+<% it.FOCALS.forEach(([val, label]) => { %>      <option value="<%= val %>"<%~ val === focalNow ? ' selected' : '' %>><%= t(label) %></option>
+<% }) %>    </select>
+<% if (e.focal) { %>    <span class="err" id="err-focal" role="alert"><%= e.focal %></span>
+<% } %>    <p class="hint"><%~ t('Instagram : voir la rubrique {link}.', { link: '<a class="more" href="#instagram">Instagram</a>' }) %></p>
       </div>
     </details>
     <p class="actions"><button class="btn" type="submit"><%= t('Enregistrer') %></button></p>

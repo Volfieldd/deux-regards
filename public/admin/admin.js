@@ -1138,10 +1138,9 @@ const activity = (() => {
   }));
 })();
 
-// ----- ouverture : composer l'ordre du diaporama -----
-(function () {
-  const box = $('[data-hero]');
-  if (!box) return;
+// ----- ouverture : composer l'ordre du diaporama (deux listes : hero, et hero_tel pour le téléphone en v3) -----
+$$('[data-hero]').forEach(box => {
+  const NAME = box.dataset.name || 'hero';
   const MAX = Number(box.dataset.max);
   const strip = $('[data-hero-chosen]', box);
   const pool = $('[data-hero-pool]', box);
@@ -1167,11 +1166,11 @@ const activity = (() => {
     const li = document.createElement('li');
     li.className = 'it';
     li.dataset.slug = slug;
-    li.innerHTML = `<input type="hidden" name="hero" value="${esc(slug)}"><span class="n mono" aria-hidden="true"></span>`
+    li.innerHTML = `<input type="hidden" name="${NAME}" value="${esc(slug)}"><span class="n mono" aria-hidden="true"></span>`
       + `<span class="t">${esc(title)}</span><span class="mv">`
-      + `<button type="submit" name="hero_op" value="left:${esc(slug)}" aria-label="${tr('Avancer « {title} »', { title: esc(title) })}" data-hero-left>←</button>`
-      + `<button type="submit" name="hero_op" value="right:${esc(slug)}" aria-label="${tr('Reculer « {title} »', { title: esc(title) })}" data-hero-right>→</button>`
-      + `<button type="submit" name="hero_op" value="remove:${esc(slug)}" aria-label="${tr('Retirer « {title} » de l’ouverture', { title: esc(title) })}" data-hero-remove>✕</button></span>`;
+      + `<button type="submit" name="${NAME}_op" value="left:${esc(slug)}" aria-label="${tr('Avancer « {title} »', { title: esc(title) })}" data-hero-left>←</button>`
+      + `<button type="submit" name="${NAME}_op" value="right:${esc(slug)}" aria-label="${tr('Reculer « {title} »', { title: esc(title) })}" data-hero-right>→</button>`
+      + `<button type="submit" name="${NAME}_op" value="remove:${esc(slug)}" aria-label="${tr('Retirer « {title} » de l’ouverture', { title: esc(title) })}" data-hero-remove>✕</button></span>`;
     $('.n', li).after($('picture', label).cloneNode(true));
     wire(li);
     return li;
@@ -1190,7 +1189,7 @@ const activity = (() => {
     strip.insertBefore(dragging, target || null);
   });
   strip.addEventListener('click', e => {
-    const b = e.target.closest('button[name=hero_op]');
+    const b = e.target.closest(`button[name=${NAME}_op]`);
     if (!b) return;
     e.preventDefault();
     const li = b.closest('.it');
@@ -1221,7 +1220,7 @@ const activity = (() => {
     toast.show(tr('« {title} » ajoutée en place {pos} (pensez à enregistrer).', { title: label.dataset.title, pos: items().length }));
   });
   refresh();
-})();
+});
 
 // ----- villes proposées au fil de la frappe (fiche, photothèque) -----
 // Liste embarquée côté serveur (/admin/villes) ; ↑ ↓ pour choisir, Entrée pour valider, Échap pour fermer.

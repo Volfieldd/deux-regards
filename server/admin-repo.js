@@ -2,6 +2,10 @@ import path from 'node:path';
 import * as cities from './geo/cities.js';
 import { slugify } from './slug.js';
 import { monthYear } from './format.js';
+import { parseFocal } from './point-focal.js';
+
+// Les deux listes d'ouverture de l'accueil (réglages) : elles suivent le renommage et la suppression d'une photo.
+const HERO_KEYS = ['hero', 'hero_tel'];
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -224,10 +228,14 @@ export function createAdminRepo(db) {
       const tr = (field, max) => Object.fromEntries(['en', 'de'].map(l => [`${field}_${l}`, `${field}_${l}` in body ? text(body[`${field}_${l}`], max) : (before?.[`${field}_${l}`] ?? '')]));
       // Texte de remplacement, en trois langues, sur une ligne : gardé tel quel si le formulaire ne l'envoie pas.
       const alt = Object.fromEntries(['alt_text', 'alt_text_en', 'alt_text_de'].map(k => [k, k in body ? line(body[k], LIMITS.alt_text) : (before?.[k] ?? '')]));
+      // Point fort du cadrage (ouverture plein cadre de la v3) : gardé tel quel si le formulaire ne l'envoie pas.
+      const focal = 'focal' in body ? parseFocal(body.focal) : [before?.focal_x ?? 50, before?.focal_y ?? 50];
+      if (!focal) errors.focal = 'Point fort inconnu.';
       const values = { title, slug, category_id: categoryId, author_id: authorId, place: text(body.place, 120), taken_on: takenOn === undefined ? text(body.taken_on, 40) : takenOn, legend: text(body.legend, 2000), status, watermark,
         ...tr('title', 160), ...tr('legend', 2000), ...tr('place', 120), ...alt,
         keywords: 'keywords' in body ? normKeywords(body.keywords) : (before?.keywords ?? ''),
-        city_label: 'city_label' in body ? text(body.city_label, 120) : cities.labelOf(before), on_map: loc.on_map, show_time: showTime };
+        city_label: 'city_label' in body ? text(body.city_label, 120) : cities.labelOf(before), on_map: loc.on_map, show_time: showTime,
+        focal_x: focal ? focal[0] : 50, focal_y: focal ? focal[1] : 50, focal: focal ? focal.join(' ') : text(body.focal, 20) };
       if (Object.keys(errors).length) throw Object.assign(new ValidationError(errors), { values });
       db.transaction(() => {
         // Série changée sur la fiche : choisie à la main (plus de proposition).
@@ -235,13 +243,15 @@ export function createAdminRepo(db) {
           taken_on = @taken_on, legend = @legend, status = @status, watermark = @watermark,
           title_en = @title_en, title_de = @title_de, legend_en = @legend_en, legend_de = @legend_de, place_en = @place_en, place_de = @place_de,
           alt_text = @alt_text, alt_text_en = @alt_text_en, alt_text_de = @alt_text_de,
-          keywords = @keywords, show_time = @show_time, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
+          keywords = @keywords, show_time = @show_time, focal_x = @focal_x, focal_y = @focal_y, updated_at = datetime('now') WHERE id = @id`).run({ ...values, id });
         db.prepare(`UPDATE photos SET city_id = @city_id, city_name = @city_name, city_cc = @city_cc, city_lat = @city_lat, city_lon = @city_lon,
           city_source = @city_source, on_map = @on_map WHERE id = @id`).run({ ...loc, id });
         // L'ouverture désigne les photos par leur adresse : elle suit le renommage.
-        const hero = settings().hero;
-        if (before && before.slug !== slug && Array.isArray(hero) && hero.includes(before.slug)) {
-          q.setSetting.run('hero', JSON.stringify(hero.map(s => (s === before.slug ? slug : s))));
+        for (const key of HERO_KEYS) {
+          const list = settings()[key];
+          if (before && before.slug !== slug && Array.isArray(list) && list.includes(before.slug)) {
+            q.setSetting.run(key, JSON.stringify(list.map(s => (s === before.slug ? slug : s))));
+          }
         }
       })();
     },
@@ -254,7 +264,7 @@ export function createAdminRepo(db) {
       const merged = { ...p, taken_on: p.taken_on || '', watermark: p.watermark === 0 ? 'none' : 'default' };
       // Filigrane (« default » ou « none ») et adresse : la fiche de l'admin v2 les enregistre aussi champ par champ.
       for (const k of ['title', 'category_id', 'author_id', 'place', 'taken_on', 'legend', 'keywords', 'city_id', 'city_label', 'on_map', 'show_time',
-        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de', 'alt_text', 'alt_text_en', 'alt_text_de', 'watermark']) if (k in body) merged[k] = body[k];
+        'title_en', 'title_de', 'legend_en', 'legend_de', 'place_en', 'place_de', 'alt_text', 'alt_text_en', 'alt_text_de', 'watermark', 'focal']) if (k in body) merged[k] = body[k];
       // Brouillon dont l'adresse dérive encore du titre : elle suit le nouveau titre ; une adresse envoyée l'emporte.
       merged.slug = 'slug' in body ? body.slug : 'title' in body && p.status === 'draft' && p.slug === uniqueSlug('photos', p.title, id) ? '' : p.slug;
       this.updatePhoto(id, merged);
@@ -341,8 +351,10 @@ export function createAdminRepo(db) {
         db.prepare('DELETE FROM photos WHERE id = ?').run(id);
         // Journal Instagram (sans clé étrangère) : l'identifiant pourra être repris par une autre photo.
         db.prepare('UPDATE instagram_events SET photo_id = NULL WHERE photo_id = ?').run(id);
-        const hero = settings().hero;
-        if (Array.isArray(hero) && hero.includes(photo.slug)) q.setSetting.run('hero', JSON.stringify(hero.filter(s => s !== photo.slug)));
+        for (const key of HERO_KEYS) {
+          const list = settings()[key];
+          if (Array.isArray(list) && list.includes(photo.slug)) q.setSetting.run(key, JSON.stringify(list.filter(s => s !== photo.slug)));
+        }
       })();
       return photo.file;
     },
@@ -490,16 +502,21 @@ export function createAdminRepo(db) {
     // part : « site » ou « droits » n'enregistre que les champs de cette page ; absent, tous.
     saveSettings(body, part = null) {
       const published = new Set(db.prepare("SELECT slug FROM photos WHERE status = 'published'").pluck().all());
-      let hero = [...new Set([].concat(body.hero || []))].filter(s => published.has(s));
-      // Boutons ← → ✕ de l'ouverture (sans JavaScript) : « left:slug », « right:slug », « remove:slug ».
-      const [op, target] = String(body.hero_op || '').split(/:(.*)/s);
-      const i = hero.indexOf(target);
-      if (i !== -1 && op === 'remove') hero.splice(i, 1);
-      if (i !== -1 && (op === 'left' || op === 'right')) {
-        const j = i + (op === 'left' ? -1 : 1);
-        if (j >= 0 && j < hero.length) [hero[i], hero[j]] = [hero[j], hero[i]];
-      }
-      hero = hero.slice(0, 8);
+      // Deux listes d'ouverture : hero (toutes les versions) et hero_tel (le téléphone, en v3 ; des verticales de préférence).
+      // Boutons ← → ✕ (sans JavaScript) : « left:slug », « right:slug », « remove:slug » dans hero_op ou hero_tel_op.
+      const heroList = key => {
+        const list = [...new Set([].concat(body[key] || []))].filter(s => published.has(s));
+        const [op, target] = String(body[`${key}_op`] || '').split(/:(.*)/s);
+        const i = list.indexOf(target);
+        if (i !== -1 && op === 'remove') list.splice(i, 1);
+        if (i !== -1 && (op === 'left' || op === 'right')) {
+          const j = i + (op === 'left' ? -1 : 1);
+          if (j >= 0 && j < list.length) [list[i], list[j]] = [list[j], list[i]];
+        }
+        return list.slice(0, 8);
+      };
+      const hero = heroList('hero');
+      const heroTel = heroList('hero_tel');
       const values = {
         site_name: text(body.site_name, 60),
         tagline: text(body.tagline, 200), tagline_en: text(body.tagline_en, 200), tagline_de: text(body.tagline_de, 200),
@@ -515,7 +532,7 @@ export function createAdminRepo(db) {
         legal_host: body.legal_host === 'hebergeur' ? 'hebergeur' : 'editeurs', legal_host_name: text(body.legal_host_name, 200), legal_host_address: text(body.legal_host_address, 400), legal_host_phone: text(body.legal_host_phone, 40),
         map_page: body.map_page === 'on',
         search_page: body.search_page === 'on', keywords_shown: body.keywords_shown === 'on',
-        hero,
+        hero, hero_tel: heroTel,
       };
       const DROITS = /^(rights_|privacy_|legal_)/;
       const keep = k => !part || (part === 'droits' ? DROITS.test(k) : !DROITS.test(k));

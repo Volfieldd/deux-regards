@@ -87,7 +87,8 @@
    La photo d'abord, bord à bord, à la hauteur de l'écran ; l'en-tête posé dessus (au bureau). Décidé le 19 oct. 2026, et
    contraire à la lettre d'UX-F-17 (« sans recadrage ni voile ») : l'image perd au plus 10 % d'un côté, jamais plus, et le
    voile ne couvre que la bande du texte.
-   Le cadre prend le format le plus large de la liste d'ouverture (--r, posé par le gabarit), à 10 % près :
+   Le cadre prend le format le plus large de la liste d'ouverture (--r, de la classe .fmt-* posée par le gabarit : pas de
+   style en ligne, la CSP l'interdit), à 10 % près :
    largeur = min(écran, hauteur d'écran × r ÷ 0,9) ; hauteur = min(hauteur d'écran, largeur d'écran ÷ (r × 0,9)).
    1 440 × 900 et une liste d'horizontales 3:2 : cadre de 1 440 × 900, 96 % de la hauteur gardée ; 1 920 × 1 080 : 1 800 × 1 080,
    et le noir de part et d'autre. Une photo de ce format à 10 % près remplit le cadre (.plein-pic, recadrée au centre) ;
@@ -97,20 +98,29 @@
    Au téléphone (sous 768 px), rien n'est posé sur la photo : elle prend la largeur, au format du cadre, et le cartel et les
    commandes viennent dessous, sur le noir ; l'en-tête reste à sa place. */
 .plein-zone { background: var(--dark); color-scheme: dark; }
-.plein { --r: 1.5; --plein-texte: 216px; position: relative; margin: 0 auto; overflow: hidden; background: var(--dark);
-  width: min(100%, calc(100svh * var(--r) / .9)); height: min(100svh, calc(100vw / (var(--r) * .9)));
+.plein { --plein-texte: 216px; position: relative; margin: 0 auto; overflow: hidden; background: var(--dark);
+  width: min(100%, calc(100svh * var(--r, 1.5) / .9)); height: min(100svh, calc(100vw / (var(--r, 1.5) * .9)));
   color-scheme: dark; --paper: var(--dark); --ink: var(--dark-ink); --mute: var(--dark-mute); --rule: #2c2c2b; --field: #6e6c67;
   --safelight: #cbb68b; color: var(--ink); }
-.plein-cadre, .plein-cadre picture { display: block; width: 100%; height: 100%; }
-.plein-cadre img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.plein-cadre, .plein-photo, .plein-cadre picture { display: block; width: 100%; height: 100%; }
+/* Le point fort de chaque photo (--focal, réglé dans sa fiche, migration 059) : ce qui reste quand le cadre recadre. Une
+   classe par position (.focal-x-y), posée par le gabarit : pas de style en ligne (CSP). */
+.focal-0-0 { --focal: 0% 0%; } .focal-50-0 { --focal: 50% 0%; } .focal-100-0 { --focal: 100% 0%; }
+.focal-0-50 { --focal: 0% 50%; } .focal-50-50 { --focal: 50% 50%; } .focal-100-50 { --focal: 100% 50%; }
+.focal-0-100 { --focal: 0% 100%; } .focal-50-100 { --focal: 50% 100%; } .focal-100-100 { --focal: 100% 100%; }
+.plein-cadre img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--focal, 50% 50%); }
 .plein-pic--entiere img { object-fit: contain; }
 .plein::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to top, rgba(5, 5, 5, .9) 0, rgba(5, 5, 5, .7) var(--plein-texte), rgba(5, 5, 5, 0) calc(var(--plein-texte) + 120px)); }
 .plein-bas { position: absolute; inset: auto 0 0 0; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--esp-3); align-items: end;
   padding: 0 max(var(--gut), env(safe-area-inset-right)) var(--esp-6) max(var(--gut), env(safe-area-inset-left)); }
+/* Deux ouvertures (réglage « Ouverture au téléphone ») : chacune sur son appareil seulement ; celle de l'autre, cachée,
+   ne charge pas d'image (chargement différé). */
+@media (min-width: 768px) { .plein-zone--tel { display: none; } }
+@media (max-width: 767px) { .plein-zone--bureau { display: none; } }
 @media (max-width: 767px) {
   .plein { width: 100%; height: auto; }
-  .plein-cadre { height: auto; aspect-ratio: var(--r); }
+  .plein-cadre { height: auto; aspect-ratio: var(--r, 1.5); }
   .plein::after { content: none; }
   .plein-bas { position: static; grid-template-columns: minmax(0, 1fr); padding-top: var(--esp-3); padding-bottom: var(--esp-3); }
 }
