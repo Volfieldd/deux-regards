@@ -20,7 +20,7 @@ En tête de la page. La **v2** est la nouvelle présentation du site public, iss
    - En vue v1, les Carnets sont introuvables, comme pour un visiteur en v1 : sur une page des Carnets, le bouton dit **Voir l'accueil en v1** et ouvre l'accueil.
    - Le bouton n'apparaît pas sur les pages des invités des galeries privées.
    - Depuis cette section, **Voir le site en v2** (ou **en v1**, **en v3**) fait la même chose et ouvre l'accueil ; **Revenir à la version des visiteurs** oublie votre vue.
-2. **Avant d'appliquer la v2 à tous :** suivez la [liste de contrôle de la bascule](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (essais sur iPad, ordinateur et téléphone, sauvegarde récente, ce qu'il faut surveiller la première semaine).
+2. **Avant d'appliquer la v2 à tous :** suivez la [liste de contrôle de la bascule](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (essais sur iPad, ordinateur et téléphone, sauvegarde récente, ce qu'il faut surveiller la première semaine) ; pour la v3, sa [liste de contrôle](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v3), qui commence par préparer l'ouverture (photos du bureau et du téléphone, point fort de chacune).
 3. **L'appliquer à tous :** cochez **v2** (ou **v3**), puis **Enregistrer la version**. Revenir à la v1 se fait de la même façon, à tout moment.
 
 Chaque clic sur le bouton, et chaque changement de version, sont notés au [Journal](reglages#journal).

@@ -5,6 +5,7 @@
 - [Aide de l'administration](Aide) · [Help (EN)](Help) · [Hilfe (DE)](Hilfe)
 - [Apparence et thèmes](Apparence-et-thèmes)
 - [Bascule de la v2 pour tous](Bascule-v2)
+- [Bascule de la v3 pour tous](Bascule-v3)
 - [Filigrane et EXIF](Filigrane-et-EXIF)
 - [Preuves d'antériorité et droits](Preuves-et-droits)
 - [Publication sur Instagram](Instagram)
