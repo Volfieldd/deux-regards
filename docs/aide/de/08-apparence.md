@@ -20,7 +20,7 @@ Oben auf der Seite. **v2** ist die neue Gestaltung der öffentlichen Website, au
    - In der Ansicht v1 sind die Reisetagebücher nicht auffindbar, wie für einen Besucher in v1: Auf einer Seite der Reisetagebücher lautet die Schaltfläche **Startseite in v1 ansehen** und öffnet die Startseite.
    - Auf den Gastseiten der privaten Galerien erscheint die Schaltfläche nicht.
    - In diesem Abschnitt bewirkt **Website in v2 ansehen** (oder **in v1**, **in v3**) dasselbe und öffnet die Startseite; **Zurück zur Fassung der Besucher** vergisst Ihre Ansicht.
-2. **Bevor Sie v2 für alle aktivieren:** Folgen Sie der [Checkliste für die Umstellung](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (Tests auf iPad, Computer und Telefon, aktuelle Sicherung, was in der ersten Woche zu beobachten ist; auf Französisch).
+2. **Bevor Sie v2 für alle aktivieren:** Folgen Sie der [Checkliste für die Umstellung](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (Tests auf iPad, Computer und Telefon, aktuelle Sicherung, was in der ersten Woche zu beobachten ist; auf Französisch); für die v3 ihre [Checkliste](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v3), die mit der Vorbereitung der Start-Diashow beginnt (Fotos für Computer und Handy, Schwerpunkt jedes Fotos; auf Französisch).
 3. **Für alle aktivieren:** Kreuzen Sie **v2** (oder **v3**) an, dann **Fassung speichern**. Zurück zu v1 geht genauso, jederzeit.
 
 Jeder Klick auf die Schaltfläche und jeder Wechsel der Fassung werden im [Protokoll](reglages#journal) festgehalten.

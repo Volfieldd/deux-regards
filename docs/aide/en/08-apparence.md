@@ -20,7 +20,7 @@ At the top of the page. **v2** is the new design of the public site, from the us
    - In the v1 view, the Notebooks cannot be found, as for a visitor in v1: on a Notebooks page, the button says **View the home page in v1** and opens the home page.
    - The button does not appear on the guest pages of private galleries.
    - From this section, **View the site in v2** (or **in v1**, **in v3**) does the same and opens the home page; **Back to the visitors’ version** forgets your view.
-2. **Before applying v2 to everyone:** follow the [switch-over checklist](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (tries on iPad, computer and phone, recent backup, what to watch during the first week; in French).
+2. **Before applying v2 to everyone:** follow the [switch-over checklist](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (tries on iPad, computer and phone, recent backup, what to watch during the first week; in French); for v3, its [checklist](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v3), which starts with preparing the opening slideshow (computer and phone photos, the focal point of each; in French).
 3. **Apply it to everyone:** tick **v2** (or **v3**), then **Save the version**. Going back to v1 works the same way, at any time.
 
 Every click on the button, and every change of version, is recorded in the [Log](reglages#journal).
