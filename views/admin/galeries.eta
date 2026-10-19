@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/galeries.eta) */ %>
 <% /* Galeries privées : la liste (MQ-18, état 13). Une ligne par galerie : photos, photographe, accès ouverts sur total
       (un accès « ouvert » : son mot de passe a été accepté), dernière activité, état en symbole et en mot ; sous le nom, des
       signaux (sélection envoyée, accès en pause ou suspendu, lien ouvert sur plus de 3 appareils), qui ne sont pas des états. */ %>

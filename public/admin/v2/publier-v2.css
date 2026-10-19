@@ -1,0 +1,121 @@
+/* Admin v2, dernière vague, partie B (publier et terrain) : Instagram, et Carnets et Galeries privées dans la coquille v2.
+   Les composants de la planche MQ-00 (admin-plus.css) et des écrans précédents (v2.css) servent tels quels ; ce fichier
+   n'ajoute que ce que ces écrans demandent, sous .v2-publier (l'enveloppe de leur contenu) : il ne change rien aux autres
+   écrans. Chargé par leurs gabarits seulement (views/admin/v2/instagram.eta, _coquille-publier.eta). Grille : aucun texte
+   sous 12 px, aucun titre coupé, des cibles de 24 px au bureau et de 44 px au toucher, rien qui déborde de 320 px
+   (libellés allemands compris). Aucun style en ligne (CSP). */
+
+/* ---------- commun ---------- */
+.v2-publier .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; }
+.v2-publier .etat { white-space: normal; }
+.v2-publier .ep-titre h1 { overflow-wrap: anywhere; }
+.v2-publier .sec { color: var(--ink3); font-size: var(--at-petit); }
+.v2-publier .panel > h2 .sec, .v2-publier .panel-t .sec { margin-left: 6px; font-weight: 400; }
+.v2-publier .donnee { font-family: var(--mono); font-size: var(--at-petit); }
+.v2-publier .champ-a input:not([type="radio"]):not([type="checkbox"]), .v2-publier .champ-a select, .v2-publier .champ-a textarea { width: 100%; max-width: 100%; }
+.v2-publier code { overflow-wrap: anywhere; }
+.v2-publier .ligne-lien, .v2-publier .ep-retour { overflow-wrap: anywhere; }
+/* Au toucher : chaque cible fait 44 px (boutons, filtres, onglets, liens d'une ligne). */
+@media (max-width: 720px), (pointer: coarse) {
+  .v2-publier .btn, .v2-publier .chip, .v2-publier .seg a, .v2-publier .pill { min-height: 44px; }
+  .v2-publier .onglets a, .v2-publier .ep-retour, .help-link a { display: inline-flex; align-items: center; min-height: 44px; }
+  .v2-publier .ligne-lien { display: inline-flex; align-items: center; min-height: 44px; }
+  .v2-publier .choix-a label { min-height: 44px; }
+}
+
+/* ---------- Instagram ---------- */
+.v2-instagram .ig-chapo { max-width: 72ch; margin: -12px 0 16px; color: var(--ink2); }
+.v2-instagram .ig-sommaire ul { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0 0 18px; padding: 0; list-style: none; }
+.v2-instagram .ig-sommaire a { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
+.v2-instagram .ig-sommaire .n { font-family: var(--mono); font-size: var(--at-min); color: var(--ink3); }
+@media (max-width: 720px), (pointer: coarse) {
+  .v2-instagram .ig-sommaire a { min-height: 44px; min-width: 44px; }
+  .v2-instagram .ig-journal a { display: inline-flex; align-items: center; min-height: 44px; }
+}
+.v2-instagram .ig-grille { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: 16px; align-items: start; }
+.v2-instagram .ig-col { display: grid; gap: 16px; min-width: 0; }
+.v2-instagram .ig-col > .panel { margin: 0; }
+@media (max-width: 1100px) { .v2-instagram .ig-grille { grid-template-columns: minmax(0, 1fr); } }
+.v2-instagram #reglages, .v2-instagram #journal { margin-top: 16px; }
+
+/* Une ligne de la file : la vignette (aperçu exact), le texte, les actions. */
+.v2-instagram .ig-file { display: grid; gap: 0; margin: 8px 0 0; padding: 0; list-style: none; }
+.v2-instagram .ig-file > li { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 8px 14px; align-items: start; padding: 12px 0; border-top: 1px solid var(--line); }
+.v2-instagram .ig-file > li:first-child { border-top: 0; }
+.v2-instagram .ig-vignette { display: block; width: 72px; height: 72px; overflow: hidden; border-radius: 6px; background: var(--s2); }
+.v2-instagram .ig-vignette img, .v2-instagram .ig-vignette picture { display: block; width: 100%; height: 100%; object-fit: cover; }
+.v2-instagram .ig-vignette .ph { display: block; width: 100%; height: 100%; }
+.v2-instagram .ig-vignette--sm { width: 48px; height: 48px; }
+.v2-instagram .ig-file > li:has(.ig-vignette--sm) { grid-template-columns: 48px minmax(0, 1fr) auto; }
+.v2-instagram .ig-file .t { display: grid; gap: 4px; min-width: 0; }
+.v2-instagram .ig-file .t > p { margin: 0; }
+.v2-instagram .ig-titre { display: flex; align-items: baseline; gap: 8px; font-weight: 500; overflow-wrap: anywhere; }
+.v2-instagram .ig-rang { color: var(--ink3); }
+.v2-instagram .ig-legende { color: var(--ink2); font-size: var(--at-petit); overflow-wrap: anywhere; }
+.v2-instagram .ig-mot q { color: var(--ink2); font-style: italic; }
+.v2-instagram .ig-actes { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; align-items: center; max-width: 340px; }
+.v2-instagram .ig-actes form { margin: 0; }
+.v2-instagram .ig-fleche { min-width: 40px; padding-inline: 8px; }
+.v2-instagram .ig-progress { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: var(--at-petit); }
+.v2-instagram .ig-progress progress { width: min(220px, 100%); height: 8px; }
+.v2-instagram .ig-voir { justify-self: end; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; }
+.v2-instagram .cap-full { margin: 8px 0 0; padding: 10px 12px; border-radius: var(--r-admin); background: var(--s2); white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--at-petit); }
+@media (max-width: 720px) {
+  .v2-instagram .ig-file > li, .v2-instagram .ig-file > li:has(.ig-vignette--sm) { grid-template-columns: 56px minmax(0, 1fr); }
+  .v2-instagram .ig-vignette { width: 56px; height: 56px; }
+  .v2-instagram .ig-actes, .v2-instagram .ig-voir { grid-column: 1 / -1; justify-content: flex-start; justify-self: start; max-width: none; }
+  .v2-instagram .ig-fleche { min-width: 44px; }
+}
+
+/* Compte, rythme, consommation. */
+.v2-instagram .ig-compte { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 8px; }
+.v2-instagram .ig-adresse { display: block; margin-top: 4px; }
+.v2-instagram .ig-jauges { display: grid; gap: 10px; margin: 8px 0; padding: 0; list-style: none; }
+.v2-instagram .ig-jauges li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.v2-instagram .ig-jauges meter { flex: 1 1 100%; width: 100%; height: 8px; }
+.v2-instagram .ig-budget { display: flex; align-items: flex-start; gap: 6px; color: var(--ink); }
+.v2-instagram .ig-budget .ic { color: var(--warn); margin-top: 3px; }
+.v2-instagram .ig-top { display: grid; gap: 10px; margin: 8px 0 12px; padding-left: 20px; }
+.v2-instagram .ig-top li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
+.v2-instagram .ig-top .t { display: grid; gap: 2px; min-width: 0; }
+
+/* Réglages : un champ par ligne, les nombres côte à côte. */
+.v2-instagram .ig-reglages { display: grid; gap: 18px; }
+.v2-instagram .ig-reglages fieldset { margin: 0; min-width: 0; }
+.v2-instagram .ig-ligne { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px 16px; align-items: start; }
+.v2-instagram .ig-reglages .choix-a > label { flex-wrap: wrap; }
+/* Un champ dans un groupe de choix (les nombres de « Personnalisé », les hashtags d'une série) : son libellé au-dessus. */
+.v2-instagram .ig-reglages .choix-a .champ-a > label { display: block; min-height: 0; padding: 0; }
+.v2-instagram .ig-reglages .choix-a > label .sec { flex-basis: 100%; padding-left: 28px; }
+.v2-instagram .ig-reglages textarea { font-family: var(--mono); font-size: var(--at-petit); }
+html.js .v2-instagram .ig-reglages .sans-script { display: none; }
+.v2-instagram .ig-journal td, .v2-instagram .ig-journal th { overflow-wrap: anywhere; }
+
+/* ---------- Carnets et Galeries privées dans la coquille v2 ---------- */
+/* Leur contenu (views/admin/*.eta) a déjà les composants de la planche MQ-00 (en-tête de page, listes, pastilles d'état,
+   onglets) : la coquille v2 n'ajuste que ce qui diffère d'avec la mise en page v1. */
+.v2-publier .tablewrap, .v2-publier .liste-wrap { max-width: 100%; }
+.v2-publier .deux-col, .v2-publier .deux-col > * { min-width: 0; }
+.v2-publier .secret output, .v2-publier .courriel pre, .v2-publier .courriel p { overflow-wrap: anywhere; white-space: pre-wrap; }
+.v2-publier .gp-photos > li, .v2-publier .favoris-a > li, .v2-publier .gp-photo-t { min-width: 0; overflow-wrap: anywhere; }
+/* L'aperçu « comme sur le site » d'un billet : le focus d'un lien toujours visible, sur la nuit comme sur le jour. */
+.v2-carnets .apercu-site a:focus-visible, .v2-carnets .apercu-site [tabindex]:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.v2-carnets .apercu-site a:has(> picture, > img) { display: block; }
+@media (max-width: 720px) {
+  .v2-publier .ep-actions { justify-content: flex-start; }
+  .v2-publier .btns-ligne { flex-wrap: wrap; }
+}
+
+/* ---------- App de terrain : Mon QR et Merci (MQ-10, états 19 et 20) ; chargée après app.css et app-v2.css ---------- */
+.app-qr-v2 { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 14px; padding: 18px 16px 32px; text-align: center; }
+.app-qr-v2:focus, .app-merci-v2:focus { outline: none; }
+.app-qr-v2 > .msg { justify-self: stretch; text-align: left; }
+.qr-txt { display: grid; gap: 4px; justify-items: center; max-width: 36ch; color: #3f3b35; font-size: 15px; }
+.qr-txt p { margin: 0; }
+.qr-cadre { padding: 10px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px var(--rule); }
+.qr-cadre img { display: block; width: min(80vw, 360px); height: auto; }
+.qr-adresse { margin: 0; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; overflow-wrap: anywhere; }
+.app-merci-v2 .app-ref { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 15px; }
+.app-after .msg { margin: 0; }
+.app-next summary { display: flex; align-items: center; min-height: 44px; }
+.app-after .app-btn, .app-after .app-link { min-height: 44px; }

@@ -1,0 +1,130 @@
+{
+ "Aucun compte connecté": {
+  "en": "No account connected",
+  "de": "Kein Konto verbunden"
+ },
+ "Aucun compte n’est connecté : la publication sera refusée.": {
+  "en": "No account is connected: publishing will be refused.",
+  "de": "Kein Konto ist verbunden: Die Veröffentlichung wird abgelehnt."
+ },
+ "celui des réglages « Filigrane et EXIF »": {
+  "en": "the one set in “Watermark and EXIF”",
+  "de": "das aus den Einstellungen „Wasserzeichen und EXIF“"
+ },
+ "Chaque réglage s’enregistre quand vous le quittez ; « Défaire » remet le précédent.": {
+  "en": "Each setting is saved when you leave it; “Undo” restores the previous one.",
+  "de": "Jede Einstellung wird gespeichert, sobald Sie sie verlassen; „Rückgängig“ stellt die vorherige wieder her."
+ },
+ "Déconnecter…": {
+  "en": "Disconnect…",
+  "de": "Trennen…"
+ },
+ "Déconnecter le compte @{name} ?": {
+  "en": "Disconnect the account @{name}?",
+  "de": "Das Konto @{name} trennen?"
+ },
+ "Elle ne partira pas. Pour la remettre, « Ajouter à la file Instagram » sur sa fiche : elle repart en fin de file.": {
+  "en": "It will not be posted. To put it back, use “Add to the Instagram queue” on its page: it goes to the end of the queue.",
+  "de": "Es wird nicht veröffentlicht. Um es zurückzulegen, „Zur Instagram-Warteschlange hinzufügen“ auf seiner Seite: Es kommt ans Ende der Warteschlange."
+ },
+ "Filigrane par défaut": {
+  "en": "Watermark by default",
+  "de": "Wasserzeichen standardmäßig"
+ },
+ "Hashtags : {name}": {
+  "en": "Hashtags: {name}",
+  "de": "Hashtags: {name}"
+ },
+ "Jeton illisible": {
+  "en": "Unreadable token",
+  "de": "Token unlesbar"
+ },
+ "Journal de la file Instagram, le plus récent d’abord": {
+  "en": "Instagram queue log, most recent first",
+  "de": "Protokoll der Instagram-Warteschlange, neueste zuerst"
+ },
+ "Le jeton d’accès est effacé du serveur : plus rien ne part jusqu’à une nouvelle connexion. La file est gardée. Retirez aussi l’accès dans Instagram si besoin.": {
+  "en": "The access token is erased from the server: nothing is posted until you connect again. The queue is kept. Also remove the access in Instagram if needed.",
+  "de": "Das Zugangstoken wird vom Server gelöscht: Bis zu einer neuen Verbindung wird nichts mehr veröffentlicht. Die Warteschlange bleibt erhalten. Entfernen Sie den Zugang bei Bedarf auch in Instagram."
+ },
+ "Le jeton d’accès est gardé chiffré sur le serveur ; il n’est jamais affiché.": {
+  "en": "The access token is kept encrypted on the server; it is never shown.",
+  "de": "Das Zugangstoken wird verschlüsselt auf dem Server aufbewahrt; es wird nie angezeigt."
+ },
+ "Le post part tout de suite, hors des créneaux ; il ne se retire que depuis Instagram.": {
+  "en": "The post goes out right away, outside the time slots; it can only be removed from Instagram.",
+  "de": "Der Beitrag geht sofort hinaus, außerhalb der Zeitfenster; er lässt sich nur in Instagram entfernen."
+ },
+ "Mettre à jour la page": {
+  "en": "Refresh the page",
+  "de": "Seite aktualisieren"
+ },
+ "Mise en file automatique : {name}": {
+  "en": "Automatic queueing: {name}",
+  "de": "Automatisch in die Warteschlange: {name}"
+ },
+ "{n} photo dans la file": {
+  "en": "{n} photo in the queue",
+  "de": "{n} Foto in der Warteschlange"
+ },
+ "{n} photos dans la file": {
+  "en": "{n} photos in the queue",
+  "de": "{n} Fotos in der Warteschlange"
+ },
+ "{n} publications par jour": {
+  "en": "{n} posts a day",
+  "de": "{n} Beiträge pro Tag"
+ },
+ "Pas d’application Instagram": {
+  "en": "No Instagram app",
+  "de": "Keine Instagram-App"
+ },
+ "Propositions": {
+  "en": "Proposals",
+  "de": "Vorschläge"
+ },
+ "Propositions des photographes": {
+  "en": "Photographers’ proposals",
+  "de": "Vorschläge der Fotografen"
+ },
+ "Publier maintenant…": {
+  "en": "Publish now…",
+  "de": "Jetzt veröffentlichen…"
+ },
+ "Publier « {title} » sur Instagram maintenant ?": {
+  "en": "Publish “{title}” on Instagram now?",
+  "de": "„{title}“ jetzt auf Instagram veröffentlichen?"
+ },
+ "Réglages Instagram rétablis.": {
+  "en": "Instagram settings restored.",
+  "de": "Instagram-Einstellungen wiederhergestellt."
+ },
+ "Retirer « {title} » de la file ?": {
+  "en": "Remove “{title}” from the queue?",
+  "de": "„{title}“ aus der Warteschlange entfernen?"
+ },
+ "Rubriques de la page": {
+  "en": "Sections of the page",
+  "de": "Abschnitte der Seite"
+ },
+ "Suivi interrompu : rechargez la page pour voir où en est l’envoi.": {
+  "en": "Tracking stopped: reload the page to see how the upload is going.",
+  "de": "Verfolgung unterbrochen: Laden Sie die Seite neu, um den Stand des Hochladens zu sehen."
+ },
+ "« {title} » en place {n} dans la file.": {
+  "en": "“{title}” now in position {n} in the queue.",
+  "de": "„{title}“ jetzt an Stelle {n} der Warteschlange."
+ },
+ "« {title} » remise en place {n}.": {
+  "en": "“{title}” back in position {n}.",
+  "de": "„{title}“ wieder an Stelle {n}."
+ },
+ "une publication par jour": {
+  "en": "one post a day",
+  "de": "ein Beitrag pro Tag"
+ },
+ "QR de votre page, référence {ref}": {
+  "en": "QR code of your page, reference {ref}",
+  "de": "QR-Code Ihrer Seite, Referenz {ref}"
+ }
+}

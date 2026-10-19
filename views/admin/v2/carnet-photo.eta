@@ -1,0 +1,4 @@
+<% layout('./layout') %>
+<% /* Carnets (MQ-20) dans la coquille de l'admin v2 : le contenu de views/admin/carnet-photo.eta, ses formulaires et ses routes, tels quels
+      (views/admin/v2/_coquille-publier.eta). */ %>
+<%~ include('./_coquille-publier', { ...it, vue: 'carnet-photo' }) %>

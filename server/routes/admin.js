@@ -330,8 +330,9 @@ export default async function adminRoutes(app) {
     }
     const securite = data.securite === undefined ? securiteOf(request) : data.securite;
     const version = adminVersion.of(request.session.sub);
-    // data.v2 : le gabarit v2 d'un écran que la v1 rend avec un gabarit partagé (« settings » sert Site public et Droits).
-    const shown = adminVersion.template(request, data.v2 || template);
+    // data.v2 : le gabarit v2 d'un écran que la v1 rend avec un gabarit partagé (« settings » sert Site public et Droits) ;
+    // un nom seulement (les Carnets passent v2: vrai ou faux, la version du site public, pour leur propre usage).
+    const shown = adminVersion.template(request, typeof data.v2 === 'string' ? data.v2 : template);
     const v2 = shown.startsWith('admin/v2/');
     if (v2) request.typoV2 = true;
     return reply.render(v2 ? shown : `admin/${template}`, {
@@ -353,7 +354,8 @@ export default async function adminRoutes(app) {
       translate: app.translator.enabled, encountersNew: newEncounters(request), reportsNew: request.can('signalements.traiter') ? app.feedback.pending() : 0, urgent: app.todo.urgentCount(perm => request.scope(perm)) + (securite?.task?.level === 'urgent' ? 1 : 0), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
       // Billets proposés, à valider (Carnets) : pour qui publie tous les billets.
       carnetsPending: request.scope('carnet.publier')?.all ? app.carnet.countIn('propose') : 0,
-      t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
+      // adminLang : la langue de l'admin, que l'écran ne remplace pas (un billet passe la langue de son onglet dans lang).
+      t: request.t, lang: request.t.lang, adminLang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
   }
@@ -696,7 +698,12 @@ export default async function adminRoutes(app) {
       account: ig.account.get(), connected: ig.account.connected(),
       queue: withPhoto(ig.queue()), published: withPhoto(ig.published(10)).map(x => ({ ...x, engagement: ig.engagementOf(x.ig_media_id) })),
       failed: withPhoto(ig.failedLatest(20)), events: ig.events(50),
-      mostLiked: withPhoto(ig.mostLiked(10)), engagementState: ig.engagementState(), usage: ig.usage(), IG_PRESETS, IG_BOUNDS, ...extra,
+      mostLiked: withPhoto(ig.mostLiked(10)), engagementState: ig.engagementState(), usage: ig.usage(), IG_PRESETS, IG_BOUNDS,
+      // Admin v2 : les propositions des photographes sur la page Instagram aussi (les mêmes qu'« À valider », mêmes routes),
+      // pour qui gère toute la file.
+      proposals: request.scope('instagram.file')?.all ? ig.proposals().map(pr => { const photo = photos.get(pr.photo_id); return photo && { ...pr, photo: withReady(photo),
+        author: repo.authors().find(a => a.id === photo.author_id)?.name || '', caption: ig.captionOf({ photo_id: pr.photo_id, caption: pr.caption }), frameLabel: FRAMES[pr.frame] || pr.frame }; }).filter(Boolean) : null,
+      ...extra,
     });
   };
   app.get('/admin/instagram', P('instagram.voir'), async (request, reply) => igPage(request, reply));
@@ -722,6 +729,8 @@ export default async function adminRoutes(app) {
     // Une heure illisible est écartée : on le dit (sinon la file publierait à 18:30 sans prévenir).
     const { rejected } = parseTimes(request.body?.times);
     const ignored = rejected.length ? ` ${request.t('Heures ignorées (format HH:MM attendu) : {times}.', { times: rejected.join(', ') })}` : '';
+    // Admin v2 : le formulaire part à chaque geste et demande une réponse JSON (les réglages tels qu'enregistrés).
+    if (request.headers.accept?.includes('application/json')) return { ok: true, text: `${request.t('Réglages Instagram enregistrés.')}${ignored}`, rejected, times: app.instagram.settings().times };
     return done(reply, '/admin/instagram#reglages', `${request.t('Réglages Instagram enregistrés.')}${ignored}`);
   });
 
@@ -804,6 +813,8 @@ export default async function adminRoutes(app) {
         if (act === 'publier' && !request.headers.accept?.includes('text/html')) return reply.code(422).send({ error: request.t.msg(err.message), state: igState(request, id) });
         return failed(reply, back, request.t('Instagram : {error}.', { error: request.t.msg(err.message).replace(/\.$/, '') }));
       }
+      // Admin v2 : « Avancer », « Reculer » sans recharger (et « Défaire » par le geste inverse) ; réponse JSON sur demande.
+      if (act !== 'publier' && request.headers.accept?.includes('application/json')) return { ok: true, text: label ? label(request.t) : '', queue: app.instagram.queue().map(x => x.id) };
       return label ? done(reply, back, label(request.t)) : reply.redirect(back, 303);
     });
   }

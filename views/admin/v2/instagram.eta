@@ -1,0 +1,297 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e, s = it.s, a = it.account; %>
+<% /* Instagram (admin v2, dernière vague, partie B « publier et terrain »). Mêmes données, mêmes droits et mêmes routes que
+      la v1 (views/admin/instagram.eta ; POST /admin/instagram/reglages, /reprendre, /likes, /deconnexion, /:id/monter,
+      /descendre, /annuler, /reessayer, /publier, /propositions/:pid/valider et /renvoyer ; GET /connexion). La v2 :
+      l'en-tête dit l'état du compte et de la file ; la file, les propositions des photographes (les mêmes qu'« À valider »)
+      et les échecs d'abord, le compte, le rythme et la consommation à côté ; « Avancer » et « Reculer » sans recharger,
+      avec « Défaire » ; « Publier maintenant… », « Retirer… » et « Déconnecter… » passent par un dialogue (ils ne se
+      défont pas) ; les réglages s'enregistrent au geste, avec « Défaire » (MQ-09). Sans script : les formulaires de la
+      v1, les dialogues s'ouvrent dans la page (:target). Le jeton de l'API reste chiffré dans la base : jamais affiché. */ %>
+<% const hm = x => (it.lang === 'fr' ? x.replace(/:/g, ' h ') : x);
+   const fmtDate = ms => new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(ms));
+   const slotDay = d => (/^\d{4}-\d{2}-\d{2}$/.test(d || '') ? new Intl.DateTimeFormat(it.locale, { timeZone: 'UTC', day: 'numeric', month: 'long' }).format(new Date(`${d}T12:00:00Z`)) : d);
+   const days = a ? Math.round((a.expires_at - Date.now()) / 86400000) : 0;
+   // Raisons des accords : lues seulement par qui voit toutes les personnes (comme la v1).
+   const IG_HIDE = { 'bloquée': 'bloquée par un accord (détail réservé au photographe et aux administrateurs)', 'à vérifier': 'à vérifier : un accord manque (détail réservé au photographe et aux administrateurs)' };
+   const igErr = m => t.msg(it.canAll('personnes.voir') ? m : String(m || '').replace(/(^|: )(bloquée|à vérifier) : [\s\S]*$/, (x, pre, k) => pre + IG_HIDE[k]));
+   const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     encours: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>',
+     haut: '<path d="M12 19V5M6 11l6-6 6 6"/>', bas: '<path d="M12 5v14M6 13l6 6 6-6"/>', site: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+     pause: '<path d="M9 5v14M15 5v14"/>',
+   };
+   const ic = (k, sz = 12) => '<svg class="ic" width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const csrf = '<input type="hidden" name="_csrf" value="' + E(it.csrf) + '">';
+   const back = v => '<input type="hidden" name="back" value="' + v + '">';
+   const ext = '<span class="sr-only"> ' + E(t('(nouvel onglet)')) + '</span>' + ic('site', 12);
+   const u = it.usage, q = it.queue, P = it.proposals;
+   const canAccount = it.can('instagram.compte'), canQueue = it.can('instagram.file'), canAll = it.canAll('instagram.file');
+   const compte = !it.conf.configured || !it.conf.https ? ['arret', t('Pas d’application Instagram')] : a && !it.connected ? ['attention', t('Jeton illisible')] : a ? ['abouti', t('Connecté')] : ['afaire', t('Aucun compte connecté')]; %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/publier-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#instagram"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-publier v2-instagram">
+<header class="ep">
+  <div class="ep-titre"><h1>Instagram</h1><%~ etat(compte[0], compte[1]) %></div>
+  <p class="ep-meta"><% if (a && it.connected) { %><span>@<%= a.username %></span><% } %><span><%= q.length > 1 ? t('{n} photos dans la file', { n: q.length }) : t('{n} photo dans la file', { n: q.length }) %></span><span><%= s.times.length > 1 ? t('{n} publications par jour', { n: s.times.length }) : t('une publication par jour') %></span><span role="status" data-temoin></span></p>
+</header>
+<p class="ig-chapo"><%= t('Les photos publiées sur le site partent sur Instagram une par une, aux heures choisies, avec une légende tirée du modèle.') %></p>
+
+<% if (u.paused) { %>
+<div class="signal" role="status"><p class="signal-t"><%~ ic('pause', 14) %> <%= t('File en pause jusqu’{when} : {reason}.', { when: t.lang === 'fr' ? u.paused.when.replace(/^le /, 'au ') : u.whenText(u.paused.until, it.locale), reason: t.msg(u.paused.reason) }) %></p>
+<% if (canAccount) { %>  <div class="actions"><form method="post" action="/admin/instagram/reprendre"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Reprendre maintenant') %></button></form></div><% } %></div>
+<% } %>
+
+<nav class="ig-sommaire" aria-label="<%= t('Rubriques de la page') %>"><ul>
+  <li><a href="#file"><%= t('File d’attente') %> <span class="n"><%= q.length %></span></a></li>
+<% if (P) { %>  <li><a href="#propositions"><%= t('Propositions') %> <span class="n"><%= P.length %></span></a></li><% } %>
+<% if (it.failed.length) { %>  <li><a href="#echecs"><%= t('En échec') %> <span class="n"><%= it.failed.length %></span></a></li><% } %>
+  <li><a href="#compte"><%= t('Compte') %></a></li>
+<% if (canAccount) { %>  <li><a href="#reglages"><%= t('Réglages') %></a></li><% } %>
+  <li><a href="#journal"><%= t('Journal') %></a></li>
+</ul></nav>
+
+<div class="ig-grille">
+<div class="ig-col">
+<section class="panel" id="file" aria-labelledby="ig-file-t">
+  <h2 class="panel-t" id="ig-file-t"><%= t('File d’attente') %> <span class="sec"><%= q.length > 1 ? t('{n} photos', { n: q.length }) : t('{n} photo', { n: q.length }) %></span></h2>
+<% if (!q.length) { %>
+  <p class="hint"><%= s.autoSeries.length ? t('La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »), ou publiez-en une dans une série en mise en file automatique.') : t('La file est vide. Ajoutez une photo depuis sa fiche (section « Instagram »).') %></p>
+<% } else { %>
+  <ol class="ig-file" data-ig-file>
+<% q.forEach((p, i) => { const title = p.photo.title; %>
+    <li data-ig-item="<%= p.id %>" data-titre="<%= title %>">
+      <a class="ig-vignette" href="/admin/instagram/apercu.jpg?photo=<%= p.photo_id %>&amp;cadre=<%= p.frame %>&amp;filigrane=<%= p.watermark ? 1 : 0 %>" target="_blank" rel="noopener"><% if (p.photo.ready) { %><%~ it.picture(p.photo, { sizes: '72px', alt: '' }) %><% } else { %><span class="ph" aria-hidden="true"></span><% } %><span class="sr-only"><%= t('Aperçu exact de l’image envoyée (nouvel onglet)') %> : <%= title %></span></a>
+      <div class="t">
+        <p class="ig-titre"><span class="ig-rang donnee" data-ig-rang><%= i + 1 %></span> <a class="ligne-lien" href="/admin/photos/<%= p.photo_id %>#instagram"><%= title %></a></p>
+        <p class="sec"><%~ p.status === 'publishing' ? etat('encours', t('Envoi en cours')) : E(t('Prévue le {date} à {time}', { date: slotDay(p.slot.split(' ')[0]), time: hm(p.slot.split(' ')[1] || '') })) %> · <%= it.lang === 'de' ? t(it.FRAMES[p.frame]) : t(it.FRAMES[p.frame]).toLowerCase() %><%= p.watermark ? ` · ${t('filigrane')}` : '' %></p>
+        <p class="ig-legende"><%= p.caption.split('\n')[0] %>…</p>
+<% if (p.error) { %>        <p class="err"><span><b><%= t('Erreur :') %></b> <%= t('Dernier essai : {error} (essai {n} sur 3)', { error: igErr(p.error), n: p.attempts }) %></span></p>
+<% } %>        <div class="ig-progress" data-ig-progress<%~ p.status === 'publishing' ? ` data-ig-watch="${p.id}"` : ' hidden' %> role="status" aria-live="polite"><progress max="100" value="<%= p.status === 'publishing' ? 10 : 0 %>"></progress> <span data-ig-progress-label><%= p.status === 'publishing' ? t('Envoi en cours…') : '' %></span></div>
+      </div>
+<% if (p.status === 'queued' && canQueue) { %>
+      <div class="ig-actes">
+<% if (canAll) { %>        <form method="post" action="/admin/instagram/<%= p.id %>/monter" data-ig-deplacer="monter"><%~ csrf %><button class="btn ghost ig-fleche" type="submit"<%~ i === 0 ? ' disabled' : '' %>><%~ ic('haut', 16) %><span class="sr-only"><%= t('Avancer « {title} »', { title }) %></span></button></form>
+        <form method="post" action="/admin/instagram/<%= p.id %>/descendre" data-ig-deplacer="descendre"><%~ csrf %><button class="btn ghost ig-fleche" type="submit"<%~ i === q.length - 1 ? ' disabled' : '' %>><%~ ic('bas', 16) %><span class="sr-only"><%= t('Reculer « {title} »', { title }) %></span></button></form>
+<% } %><% if (it.can('instagram.publier')) { %>        <a class="btn" href="#dlg-publier-<%= p.id %>" data-ouvre="dlg-publier-<%= p.id %>"><%= t('Publier maintenant…') %><span class="sr-only"> « <%= title %> »</span></a>
+<% } %>        <a class="btn ghost" href="#dlg-retirer-<%= p.id %>" data-ouvre="dlg-retirer-<%= p.id %>"><%= t('Retirer…') %><span class="sr-only"> « <%= title %> »</span></a>
+      </div>
+<% } %>
+    </li>
+<% }) %>
+  </ol>
+<% } %>
+</section>
+
+<% if (P) { %>
+<section class="panel" id="propositions" aria-labelledby="ig-prop-t">
+  <h2 class="panel-t" id="ig-prop-t"><%= t('Propositions des photographes') %> <span class="sec"><%= P.length %></span></h2>
+  <p class="hint"><%= t('Les photos que les photographes proposent pour Instagram, avec leurs choix (cadre, filigrane, légende). Mettez-les dans la file telles quelles, ou renvoyez-les avec une remarque.') %></p>
+<% if (!P.length) { %>  <p class="hint"><%= t('Aucune photo proposée pour Instagram.') %></p><% } else { %>
+  <ul class="ig-file ig-props">
+<% P.forEach(r => { const p = r.photo; %>    <li>
+      <a class="ig-vignette" href="/admin/instagram/apercu.jpg?photo=<%= p.id %>&amp;cadre=<%= r.frame %>&amp;filigrane=<%= r.watermark ? 1 : 0 %>" target="_blank" rel="noopener"><% if (p.ready) { %><%~ it.picture(p, { sizes: '72px', alt: '' }) %><% } else { %><span class="ph" aria-hidden="true"></span><% } %><span class="sr-only"><%= t('Aperçu exact de l’image envoyée (nouvel onglet)') %> : <%= p.title %></span></a>
+      <div class="t">
+        <p class="ig-titre"><a class="ligne-lien" href="/admin/photos/<%= p.id %>#instagram"><%= p.title %></a></p>
+        <p class="sec"><%= r.author %> · <%= t('proposée le {date}', { date: fmtDate(r.at) }) %> · <%= it.lang === 'de' ? t(r.frameLabel) : t(r.frameLabel).toLowerCase() %><%= r.watermark ? ' · ' + t('filigrane') : '' %></p>
+<% if (r.message) { %>        <p class="ig-mot"><q><%= r.message %></q></p><% } %>
+        <details class="plier"><summary><%= t('Légende') %> <span class="sec"><%= r.caption.length %> / 2200</span></summary><pre class="cap-full"><%= r.caption %></pre></details>
+      </div>
+      <div class="ig-actes">
+        <form method="post" action="/admin/instagram/propositions/<%= r.id %>/valider"><%~ csrf %><%~ back('/admin/instagram#propositions') %><button class="btn" type="submit"><%= t('Mettre dans la file Instagram') %><span class="sr-only"> : « <%= p.title %> »</span></button></form>
+        <a class="btn ghost" href="#dlg-prop-<%= r.id %>" data-ouvre="dlg-prop-<%= r.id %>"><%= t('Renvoyer…') %><span class="sr-only"> « <%= p.title %> »</span></a>
+      </div>
+    </li>
+<% }) %>  </ul>
+<% } %>
+</section>
+<% } %>
+
+<% if (it.failed.length) { %>
+<section class="panel" id="echecs" aria-labelledby="ig-echecs-t">
+  <h2 class="panel-t" id="ig-echecs-t"><%~ ic('arret', 12) %> <%= t('En échec') %> <span class="sec"><%= it.failed.length > 1 ? t('{n} photos', { n: it.failed.length }) : t('{n} photo', { n: it.failed.length }) %></span></h2>
+  <ul class="ig-file">
+<% it.failed.forEach(p => { %>    <li>
+      <span class="ig-vignette ig-vignette--sm" aria-hidden="true"><% if (p.photo.ready) { %><%~ it.picture(p.photo, { sizes: '48px', alt: '' }) %><% } %></span>
+      <div class="t"><p class="ig-titre"><a class="ligne-lien" href="/admin/photos/<%= p.photo_id %>#instagram"><%= p.photo.title %></a></p>
+        <p class="err"><span><%= igErr(p.error) %></span></p>
+<% if (p.retry_requested_at) { %>        <p class="sec"><%~ etat('attention', t('Republication demandée')) %><%= p.retry_requested_by ? ` · ${p.retry_requested_by}` : '' %></p><% } %></div>
+<% if (canQueue) { %>      <div class="ig-actes"><form method="post" action="/admin/instagram/<%= p.id %>/reessayer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Réessayer') %><span class="sr-only"> « <%= p.photo.title %> »</span></button></form></div><% } %>
+    </li>
+<% }) %>  </ul>
+</section>
+<% } %>
+
+<section class="panel" id="publiees" aria-labelledby="ig-pub-t">
+  <h2 class="panel-t" id="ig-pub-t"><%= t('Dernières publications') %> <span class="sec"><%= t('les {n} plus récentes', { n: 10 }) %></span></h2>
+<% if (!it.published.length) { %>  <p class="hint"><%= t('Rien de publié sur Instagram pour l’instant.') %></p>
+<% } else { %>  <ul class="ig-file">
+<% it.published.forEach(p => { %>    <li>
+      <span class="ig-vignette ig-vignette--sm" aria-hidden="true"><% if (p.photo.ready) { %><%~ it.picture(p.photo, { sizes: '48px', alt: '' }) %><% } %></span>
+      <div class="t"><p class="ig-titre"><a class="ligne-lien" href="/admin/photos/<%= p.photo_id %>#instagram"><%= p.photo.title %></a></p>
+        <p class="sec"><%= t('publiée le {date}', { date: fmtDate(p.published_at) }) %><%= p.engagement ? ` · ${p.engagement.likes > 1 ? t('{n} likes', { n: p.engagement.likes }) : t('{n} like', { n: p.engagement.likes })}, ${t('{n} comm.', { n: p.engagement.comments })}` : '' %></p></div>
+<% if (p.permalink) { %>      <a class="more ig-voir" href="<%= p.permalink %>" target="_blank" rel="noopener"><%= t('Voir le post') %><span class="sr-only"> « <%= p.photo.title %> »</span><%~ ext %></a><% } %>
+    </li>
+<% }) %>  </ul>
+<% } %>
+</section>
+</div>
+
+<div class="ig-col ig-cote">
+<section class="panel" id="compte" aria-labelledby="ig-compte-t">
+  <h2 class="panel-t" id="ig-compte-t"><%= t('Compte') %></h2>
+<% if (!it.conf.configured) { %>
+  <p class="err"><span><%~ t('Le serveur n’a pas encore d’application Instagram : renseignez <code>INSTAGRAM_APP_ID</code> et <code>INSTAGRAM_APP_SECRET</code> dans sa configuration.') %></span></p>
+  <p class="hint"><%= t('Création du compte professionnel et de l’application Meta, pas à pas :') %> <a class="more" href="/admin/aide#instagram"><%= t('aide « Instagram »') %></a>.</p>
+<% } else if (!it.conf.https) { %>
+  <p class="err"><span><%~ t('Le site doit être en HTTPS (<code>PUBLIC_URL</code>) pour se connecter à Instagram : Meta refuse les adresses en http, et doit pouvoir télécharger les images.') %></span></p>
+<% } else if (a && !it.connected) { %>
+  <p class="err"><span><%= t('Le compte @{name} est enregistré, mais son jeton d’accès ne peut plus être lu : la clé de chiffrement a changé', { name: a.username }) %> (<code>INSTAGRAM_TOKEN_KEY</code> <%= t('ou') %> <code>COOKIE_SECRET</code>), <%= t('par exemple après une restauration sur un autre serveur.') %></span></p>
+<% if (canAccount) { %>  <p class="actions"><a class="btn" href="/admin/instagram/connexion"><%= t('Reconnecter le compte') %></a></p><% } %>
+<% } else if (a && it.connected) { %>
+  <p class="ig-compte"><%~ etat('abouti', t('Connecté')) %> <strong>@<%= a.username %></strong></p>
+  <p class="hint"><%= t('Accès valable jusqu’au {date} ({n} jours) ; renouvelé automatiquement avant expiration.', { date: fmtDate(a.expires_at), n: days }) %><%= days < 7 ? ` ${t('Il expire bientôt : reconnectez le compte si le renouvellement échoue.')}` : '' %></p>
+  <p class="hint"><%= t('Le jeton d’accès est gardé chiffré sur le serveur ; il n’est jamais affiché.') %></p>
+<% if (canAccount) { %>  <p class="actions"><a class="btn ghost" href="#dlg-deconnecter" data-ouvre="dlg-deconnecter"><%= t('Déconnecter…') %></a></p><% } %>
+<% } else { %>
+  <p><%= t('Aucun compte connecté. Les photos s’accumulent dans la file et partiront dès la connexion.') %></p>
+<% if (canAccount) { %>  <p class="actions"><a class="btn" href="/admin/instagram/connexion"><%= t('Connecter le compte Instagram') %></a></p>
+  <p class="hint"><%= t('Adresse de retour à déclarer dans l’application Meta :') %> <code class="ig-adresse"><%= it.conf.redirectUri %></code></p><% } %>
+<% } %>
+<% if (!canAccount) { %>  <p class="hint"><%= t('Le compte et les réglages Instagram sont gérés par un administrateur.') %></p><% } %>
+</section>
+
+<section class="panel" aria-labelledby="ig-rythme-t">
+  <h2 class="panel-t" id="ig-rythme-t"><%= t('Rythme de publication') %></h2>
+  <p><%= s.times.length > 1 ? t('{n} publications par jour, à {times} (heure de Paris).', { n: s.times.length, times: hm(s.times.join(', ')) }) : t('Une publication par jour, à {times} (heure de Paris).', { times: hm(s.times.join(', ')) }) %></p>
+<% const autoNames = it.categories.filter(c => s.autoSeries.includes(c.id)).map(c => c.name); %>
+  <p class="hint"><%= autoNames.length ? t('Mise en file automatique à la publication : {names}. Les autres séries seulement depuis la fiche de la photo.', { names: autoNames.join(', ') }) : t('Aucune mise en file automatique : une photo n’entre dans la file que si vous l’y ajoutez depuis sa fiche.') %></p>
+</section>
+
+<section class="panel" aria-labelledby="ig-conso-t">
+  <h2 class="panel-t" id="ig-conso-t"><%= t('Consommation') %> <span class="sec"><%= t('limites « {name} »', { name: t(it.IG_PRESETS[u.preset].label) }) %></span></h2>
+  <ul class="ig-jauges">
+    <li><span id="ig-m-posts"><%= t('Publications sur 24 h glissantes :') %></span> <strong class="donnee"><%= u.posts24h %> / <%= u.limits.postsPerDay %></strong><meter aria-labelledby="ig-m-posts" min="0" max="<%= u.limits.postsPerDay %>" value="<%= u.posts24h %>" high="<%= Math.max(1, u.limits.postsPerDay - 1) %>"></meter></li>
+    <li><span id="ig-m-calls"><%= t('Appels à l’API sur la dernière heure :') %></span> <strong class="donnee"><%= u.callsHour %> / <%= u.limits.callsPerHour %></strong><meter aria-labelledby="ig-m-calls" min="0" max="<%= u.limits.callsPerHour %>" value="<%= u.callsHour %>" high="<%= Math.round(u.limits.callsPerHour * 0.8) %>"></meter></li>
+<% if (u.liveQuota) { %>    <li><span><%= t('Quota lu chez Instagram :') %></span> <strong class="donnee"><%= u.liveQuota.usage %> / <%= u.liveQuota.total || '?' %></strong> <span class="sec"><%= t('sur 24 h') %></span></li><% } %>
+<% if (u.limits.minGapMinutes) { %>    <li><span><%= t('Au moins') %> <strong><%= t('{n} min', { n: u.limits.minGapMinutes }) %></strong> <%= t('entre deux publications') %></span></li><% } %>
+  </ul>
+  <p class="sec"><%= t('{n} appels à l’API sur 24 h', { n: u.calls24h }) %></p>
+<% if (!u.budget.ok && !u.paused) { %>  <p class="signal-t ig-budget"><%~ ic('attention', 12) %> <%= u.budget.key ? t(u.budget.key, { ...u.budget.params, when: u.whenText(u.budget.until, it.locale) }) : t.msg(u.budget.reason) %></p><% } %>
+</section>
+
+<% if (it.connected || it.mostLiked.length) { const es = it.engagementState; %>
+<section class="panel" id="likes" aria-labelledby="ig-likes-t">
+  <h2 class="panel-t" id="ig-likes-t"><%= t('Les plus aimées sur Instagram') %></h2>
+  <p class="hint"><%= t('Likes et commentaires des photos publiées depuis le site, relevés chaque matin (seulement des nombres : Instagram ne dit pas qui a aimé).') %>
+    <%= es.at ? t('Dernier relevé : {date} à {time}.', { date: fmtDate(es.at), time: new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(new Date(es.at)) }) : t('Pas encore de relevé.') %></p>
+<% if (es.error) { %>  <p class="err"><span><%= t('Dernier essai sans succès : {error}', { error: t.msg(es.error) }) %></span></p><% } %>
+<% if (it.mostLiked.length) { %>  <ol class="ig-top">
+<% it.mostLiked.forEach(m => { %>    <li><span class="t"><a class="ligne-lien" href="/admin/photos/<%= m.photo_id %>#instagram"><%= m.photo.title %></a><span class="sec"><%= t('publiée le {date}', { date: fmtDate(m.published_at) }) %> · <strong><%= m.likes %></strong> <%= m.likes > 1 ? t('likes') : t('like') %> · <%= t('{n} comm.', { n: m.comments }) %></span></span>
+<% if (m.permalink) { %>      <a class="more ig-voir" href="<%= m.permalink %>" target="_blank" rel="noopener"><%= t('Voir le post') %><span class="sr-only"> « <%= m.photo.title %> »</span><%~ ext %></a><% } %></li>
+<% }) %>  </ol><% } %>
+<% if (it.connected && canAccount) { %>  <form method="post" action="/admin/instagram/likes"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Relever maintenant') %></button></form><% } %>
+</section>
+<% } %>
+</div>
+</div>
+
+<% if (canAccount) { const L = s.limits; %>
+<section class="panel" id="reglages" aria-labelledby="ig-reg-t">
+  <h2 class="panel-t" id="ig-reg-t"><%= t('Réglages') %> <span class="sec"><%= t('limites, mise en file automatique, heures, cadre, légende, hashtags') %></span></h2>
+  <p class="hint js-seul"><%= t('Chaque réglage s’enregistre quand vous le quittez ; « Défaire » remet le précédent.') %></p>
+  <form class="form ig-reglages" method="post" action="/admin/instagram/reglages" novalidate data-ig-reglages>
+    <%~ csrf %>
+    <fieldset class="choix-a" id="limites" data-label="<%= t('Limites de l’API') %>"><legend><%= t('Limites de l’API') %></legend>
+      <p class="aide"><%= t('Meta ne vend pas de quota supplémentaire : on règle le rythme') %></p>
+<% Object.entries(it.IG_PRESETS).forEach(([k, p]) => { %>      <label><input type="radio" name="limits_preset" value="<%= k %>" data-mot="<%= t(p.label) %>"<%~ L.preset === k ? ' checked' : '' %>><span><%= t(p.label) %></span><% if (k !== 'custom') { %><span class="sec"><%= k === 'meta' ? t('quota lu chez Instagram (100 / 24 h aujourd’hui)') : `${p.postsPerDay} / 24 h` %>, <%= p.minGapMinutes ? t('{n} min entre deux', { n: p.minGapMinutes }) : t('sans écart minimal') %>, <%= t('{n} appels / h', { n: p.callsPerHour }) %></span><% } %></label>
+<% }) %>
+      <div class="ig-ligne">
+        <div class="champ-a"><label for="ig-posts"><%= t('Publications sur 24 h') %></label><p class="aide" id="ig-posts-a"><%= t('« {name} » · {range}', { name: t(it.IG_PRESETS.custom.label), range: it.IG_BOUNDS.postsPerDay.join('–') }) %></p><input type="number" id="ig-posts" name="limits_posts" value="<%= L.postsPerDay %>" min="<%= it.IG_BOUNDS.postsPerDay[0] %>" max="<%= it.IG_BOUNDS.postsPerDay[1] %>" aria-describedby="ig-posts-a" data-label="<%= t('Publications sur 24 h') %>"></div>
+        <div class="champ-a"><label for="ig-gap"><%= t('Minutes entre deux') %></label><p class="aide" id="ig-gap-a"><%= it.IG_BOUNDS.minGapMinutes.join('–') %></p><input type="number" id="ig-gap" name="limits_gap" value="<%= L.minGapMinutes %>" min="<%= it.IG_BOUNDS.minGapMinutes[0] %>" max="<%= it.IG_BOUNDS.minGapMinutes[1] %>" aria-describedby="ig-gap-a" data-label="<%= t('Minutes entre deux') %>"></div>
+        <div class="champ-a"><label for="ig-calls"><%= t('Appels par heure') %></label><p class="aide" id="ig-calls-a"><%= it.IG_BOUNDS.callsPerHour.join('–') %></p><input type="number" id="ig-calls" name="limits_calls" value="<%= L.callsPerHour %>" min="<%= it.IG_BOUNDS.callsPerHour[0] %>" max="<%= it.IG_BOUNDS.callsPerHour[1] %>" aria-describedby="ig-calls-a" data-label="<%= t('Appels par heure') %>"></div>
+      </div>
+      <p class="aide"><%= t('Hors budget, la photo attend dans la file (« Publier maintenant » refuse en expliquant pourquoi). Si Instagram signale une limite, la file se met en pause le temps indiqué (sinon 1 h, 2 h, 4 h…) sans compter d’essai, puis reprend à raison d’une photo par créneau.') %></p>
+    </fieldset>
+    <fieldset class="choix-a" id="auto"><legend><%= t('Mise en file automatique') %></legend>
+      <p class="aide"><%= t('Une photo publiée dans une série cochée entre seule dans la file. Pour les autres, utilisez « Ajouter à la file Instagram » sur la fiche de la photo. Les photos déjà dans la file y restent : retirez-les une par une si besoin.') %></p>
+<% it.categories.forEach(c => { %>      <label><input type="checkbox" name="auto_<%= c.id %>" data-label="<%= t('Mise en file automatique : {name}', { name: c.name }) %>"<%~ s.autoSeries.includes(c.id) ? ' checked' : '' %>><span><%= c.name %></span></label>
+<% }) %>
+    </fieldset>
+    <div class="ig-ligne">
+      <div class="champ-a"><label for="ig-heures"><%= t('Heures de publication') %></label><p class="aide" id="ig-heures-a"><%= t('heure de Paris, séparées par des virgules · 4 au plus') %></p><input type="text" id="ig-heures" name="times" value="<%= s.times.join(', ') %>" maxlength="40" aria-describedby="ig-heures-a" data-label="<%= t('Heures de publication') %>"></div>
+      <div class="champ-a"><label for="ig-cadre"><%= t('Cadre par défaut') %></label><select id="ig-cadre" name="frame" data-label="<%= t('Cadre par défaut') %>"><% Object.entries(it.FRAMES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ s.frame === k ? ' selected' : '' %>><%= t(l) %></option><% }) %></select></div>
+    </div>
+    <fieldset class="choix-a"><legend><%= t('Filigrane') %></legend>
+      <label><input type="checkbox" name="watermark" data-label="<%= t('Filigrane par défaut') %>"<%~ s.watermark ? ' checked' : '' %>><span><%= t('Filigrane par défaut') %></span><span class="sec"><%= t('celui des réglages « Filigrane et EXIF »') %></span></label>
+    </fieldset>
+    <div class="champ-a"><label for="ig-modele"><%= t('Modèle de légende') %></label><p class="aide" id="ig-modele-a"><%= t('Variables :') %> <code>{titre} {legende} {signature} {lieu} {date} {auteur} {serie} {site} {hashtags}</code> · <%= t('une ligne dont les variables sont vides disparaît ; sans {signature}, la signature du photographe se place sous la légende') %></p>
+      <textarea id="ig-modele" name="template" rows="9" maxlength="2200" aria-describedby="ig-modele-a" data-label="<%= t('Modèle de légende') %>"><%= s.template %></textarea></div>
+    <div class="champ-a"><label for="ig-tags"><%= t('Hashtags pour toutes les photos') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><input type="text" id="ig-tags" name="hashtags" value="<%= s.hashtags %>" maxlength="600" data-label="<%= t('Hashtags pour toutes les photos') %>"></div>
+    <fieldset class="choix-a"><legend><%= t('Hashtags par série') %></legend>
+      <p class="aide"><%= t('ajoutés à ceux de toutes les photos · 30 au plus en tout') %></p>
+      <div class="ig-ligne">
+<% it.categories.forEach(c => { %>        <div class="champ-a"><label for="ig-tags-<%= c.id %>"><%= c.name %> <span class="facultatif"><%= t('(facultatif)') %></span></label><input type="text" id="ig-tags-<%= c.id %>" name="hashtags_<%= c.id %>" value="<%= (s.seriesHashtags || {})[c.id] || '' %>" maxlength="300" data-label="<%= t('Hashtags : {name}', { name: c.name }) %>"></div>
+<% }) %>      </div>
+    </fieldset>
+    <div class="form-pied sans-script"><button class="btn" type="submit"><%= t('Enregistrer les réglages') %></button></div>
+  </form>
+</section>
+<% } %>
+
+<section class="panel" id="journal" aria-labelledby="ig-log-t">
+  <h2 class="panel-t" id="ig-log-t"><%= t('Journal') %> <span class="sec"><%= t('les {n} derniers événements · gardés 90 jours', { n: 50 }) %></span></h2>
+<% if (!it.events.length) { %>  <p class="hint"><%= t('Rien pour l’instant : chaque mise en file, envoi, publication ou échec s’inscrit ici.') %></p>
+<% } else { const LV = { ok: ['abouti', t('réussi')], error: ['arret', t('échec')], warn: ['attention', t('attention')], info: ['afaire', t('info')] };
+   const tf = new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); %>
+  <div class="tablewrap liste-wrap"><table class="liste-a ig-journal">
+    <caption class="sr-only"><%= t('Journal de la file Instagram, le plus récent d’abord') %></caption>
+    <thead><tr><th scope="col"><%= t('Quand') %></th><th scope="col"><%= t('État') %></th><th scope="col"><%= t('Photo') %></th><th scope="col"><%= t('Événement') %></th><th scope="col"><%= t('Par') %></th></tr></thead>
+    <tbody>
+<% it.events.forEach(e => { const [cls, word] = LV[e.level] || LV.info; %>      <tr><th scope="row" class="c-demi"><%= tf.format(new Date(e.at)) %></th><td class="c-etat"><%~ etat(cls, word) %></td><td class="c-demi" data-label="<%= t('Photo') %>"><% if (e.photo_id && e.title) { %><a href="/admin/photos/<%= e.photo_id %>#instagram"><%= e.title %></a><% } else { %>—<% } %></td><td data-label="<%= t('Événement') %>"><%= igErr(e.message) %></td><td class="c-demi" data-label="<%= t('Par') %>"><%= e.by_name || t('automatique') %></td></tr>
+<% }) %>    </tbody>
+  </table></div>
+<% } %>
+</section>
+</div>
+
+<% /* Dialogues : ce qui ne se défait pas (publier sur Instagram, retirer de la file, déconnecter le compte, renvoyer une
+      proposition) se confirme d'abord ; Annuler d'abord ; sans script, ils s'ouvrent dans la page (:target). */ %>
+<% if (canQueue) { q.filter(p => p.status === 'queued').forEach(p => { const title = p.photo.title; %>
+<% if (it.can('instagram.publier')) { %><dialog class="confirm cible" id="dlg-publier-<%= p.id %>" aria-labelledby="dp-<%= p.id %>-t" aria-describedby="dp-<%= p.id %>-d">
+  <form method="post" action="/admin/instagram/<%= p.id %>/publier" data-ig-publish="<%= p.id %>"><%~ csrf %>
+    <h2 id="dp-<%= p.id %>-t"><%= t('Publier « {title} » sur Instagram maintenant ?', { title }) %></h2>
+    <p id="dp-<%= p.id %>-d"><%= it.connected ? t('Le post part tout de suite, hors des créneaux ; il ne se retire que depuis Instagram.') : t('Aucun compte n’est connecté : la publication sera refusée.') %></p>
+    <div class="actions"><a class="btn ghost" href="#file" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Publier maintenant') %></button></div>
+  </form>
+</dialog><% } %>
+<dialog class="confirm cible" id="dlg-retirer-<%= p.id %>" aria-labelledby="dr-<%= p.id %>-t" aria-describedby="dr-<%= p.id %>-d">
+  <form method="post" action="/admin/instagram/<%= p.id %>/annuler"><%~ csrf %><%~ back('/admin/instagram#file') %>
+    <h2 id="dr-<%= p.id %>-t"><%= t('Retirer « {title} » de la file ?', { title }) %></h2>
+    <p id="dr-<%= p.id %>-d"><%= t('Elle ne partira pas. Pour la remettre, « Ajouter à la file Instagram » sur sa fiche : elle repart en fin de file.') %></p>
+    <div class="actions"><a class="btn ghost" href="#file" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Retirer de la file') %></button></div>
+  </form>
+</dialog>
+<% }) } %>
+<% ;(P || []).forEach(r => { %>
+<dialog class="confirm cible" id="dlg-prop-<%= r.id %>" aria-labelledby="dpr-<%= r.id %>-t">
+  <form method="post" action="/admin/instagram/propositions/<%= r.id %>/renvoyer" novalidate><%~ csrf %><%~ back('/admin/instagram#propositions') %>
+    <h2 id="dpr-<%= r.id %>-t"><%= t('Renvoyer « {title} » sans la mettre dans la file Instagram ?', { title: r.photo.title }) %></h2>
+    <div class="champ-a"><label for="dpr-<%= r.id %>-m"><%= t('Remarque pour {name}', { name: r.author || t('le photographe') }) %></label><textarea id="dpr-<%= r.id %>-m" name="message" rows="3" maxlength="1000" required></textarea></div>
+    <div class="actions"><a class="btn ghost" href="#propositions" data-annuler><%= t('Annuler') %></a><button class="btn" type="submit"><%= t('Renvoyer avec la remarque') %></button></div>
+  </form>
+</dialog>
+<% }) %>
+<% if (canAccount && a && it.connected) { %>
+<dialog class="confirm cible" id="dlg-deconnecter" aria-labelledby="dd-t" aria-describedby="dd-d">
+  <form method="post" action="/admin/instagram/deconnexion"><%~ csrf %>
+    <h2 id="dd-t"><%= t('Déconnecter le compte @{name} ?', { name: a.username }) %></h2>
+    <p id="dd-d"><%= t('Le jeton d’accès est effacé du serveur : plus rien ne part jusqu’à une nouvelle connexion. La file est gardée. Retirez aussi l’accès dans Instagram si besoin.') %></p>
+    <div class="actions"><a class="btn ghost" href="#compte" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%= t('Déconnecter') %></button></div>
+  </form>
+</dialog>
+<% } %>
+<%~ include('./_textes-publier', it) %>
+<script src="<%= it.asset('admin/v2/publier-v2.js') %>" defer></script>

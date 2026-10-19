@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/galerie.eta) */ %>
 <% /* Fiche d'une galerie privée, en onglets (MQ-18, état 14 ; étude § 2.8) : Accès, Photos, Sélections, Activité, Réglages
       (des liens, sans script). En tête : le retour, le titre et l'état, ce que contient la galerie et quand elle ferme ;
       « Voir comme un invité » (vue équipe, rien n'est noté) et « Nouvel accès ». */ %>
@@ -54,6 +54,7 @@
 <% } %>
 <% if (it.canManage && it.candidates.length) { %><form class="panel form" method="post" action="/admin/galeries/<%= s.id %>/photos"><%~ csrf %>
   <fieldset class="choix-a"><legend><%= t('Ajouter des photos') %></legend><p class="aide"><%= t('Une photo garde son statut (brouillon ou publiée). Une photo dont une personne a refusé la publication ne peut pas être ajoutée.') %></p>
+  <!-- [html-validate-disable-block form-dup-name: les cases forment un groupe, name="photos" répété ; le serveur en reçoit la liste] -->
   <ul class="gp-candidats"><% it.candidates.forEach(p => { %><li><label><input type="checkbox" name="photos" value="<%= p.id %>"><img src="<%= p.thumb %>" alt="" width="<%= p.width >= p.height ? 72 : Math.round(72 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(72 * p.height / p.width) : 72 %>" loading="lazy"><span><%= p.title %></span></label></li><% }) %></ul></fieldset>
   <div class="form-pied"><button class="btn" type="submit"><%= t('Ajouter les photos cochées') %></button></div>
 </form>

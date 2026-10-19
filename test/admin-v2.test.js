@@ -87,7 +87,7 @@ test('repli : un écran sans gabarit v2 s’affiche en v1, entier, identique à 
   const a = account(c, { sub: 'compte-a' });
   await a.get('/admin');
   const strip = html => html.replace(/\s*<form class="ver-choix"[\s\S]*?<\/form>/, '');
-  for (const url of ['/admin/signalements', '/admin/statistiques', '/admin/journal', '/admin/aide', '/admin/instagram', '/admin/circuit', '/admin/terrain', '/admin/carnet', '/admin/galeries']) {
+  for (const url of ['/admin/signalements', '/admin/statistiques', '/admin/journal', '/admin/aide', '/admin/circuit', '/admin/terrain', '/admin/rencontres/cartes']) {
     await a.version('v1');
     const v1 = (await a.get(url)).body;
     await a.version('v2');
@@ -98,7 +98,7 @@ test('repli : un écran sans gabarit v2 s’affiche en v1, entier, identique à 
     assert.equal(strip(res.body), strip(v1), `${url} : la v1 à l’octet près`);
   }
   // Les écrans de la v2 de ce lot.
-  for (const url of ['/admin', '/admin/droits', '/admin/images', '/admin/auteurs', '/admin/reglages/assistants', '/admin/compte', '/admin/photos/lot?ids=1,2', '/admin/photos', '/admin/photos/1', '/admin/a-valider']) {
+  for (const url of ['/admin', '/admin/droits', '/admin/images', '/admin/auteurs', '/admin/reglages/assistants', '/admin/compte', '/admin/photos/lot?ids=1,2', '/admin/photos', '/admin/photos/1', '/admin/a-valider', '/admin/instagram', '/admin/carnet', '/admin/galeries']) {
     const res = await a.get(url);
     assert.equal(res.statusCode, 200, url);
     assert.ok(isV2(res.body), `${url} en v2`);

@@ -19,6 +19,8 @@ Die Einrichtung erfolgt nur einmal: ein **professionelles Instagram-Konto**, ein
 - rechts die **fehlgeschlagenen** Fotos (mit **Erneut versuchen**) und die **10 letzten Veröffentlichungen**;
 - unten das **Protokoll**: Einreihen, Senden, Schritte, Veröffentlichungen, Fehlschläge, Pausen, Fortsetzungen, Anfragen zur erneuten Veröffentlichung. Für jedes Ereignis: das Datum, der Status (✓ erfolgreich, ✕ fehlgeschlagen, ▲ Achtung, Info), das Foto und wer es ausgelöst hat (sonst „automatisch“). Das Protokoll wird 90 Tage aufbewahrt.
 
+**In der Verwaltung v2** beginnt die Seite mit der Warteschlange, den Vorschlägen der Fotografen (für wen die ganze Warteschlange verwaltet) und den Fehlschlägen; Konto, Rhythmus und Verbrauch stehen daneben, Einstellungen und Protokoll darunter. **↑** und **↓** verschieben ein Foto, ohne die Seite neu zu laden (**Rückgängig** stellt es zurück); **Jetzt veröffentlichen…**, **Entfernen…** und **Trennen…** fragen zuerst nach einer Bestätigung; jede Einstellung wird beim Verlassen gespeichert, mit **Rückgängig**.
+
 Die **Einstellungen** sind unter dem Protokoll eingeklappt. Das Konto (verbinden, trennen), **Jetzt erfassen** und die Einstellungen sehen nur Konten, die sie verwalten (Administratoren); der Moderator sieht die Warteschlange, die Fehler, das Protokoll und den Rhythmus, mit dem Hinweis „von einem Administrator verwaltet“.
 
 Ein durch eine Einwilligung gesperrtes Foto zeigt seinen Grund („gesperrt: J-0042 lehnt die Veröffentlichung ab“) dem Fotografen und den Administratoren; der Moderator, der keine Personen sieht, liest nur „durch eine Einwilligung gesperrt“ (oder „zu prüfen: eine Einwilligung fehlt“), hier wie auf der Fotoseite.

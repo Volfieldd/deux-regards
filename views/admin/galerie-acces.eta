@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/galerie-acces.eta) */ %>
 <% /* Suivi d'un accès (MQ-18, état « 17 h 32 ») : quatre chiffres (ouvert, dernière visite, appareils, favoris), sa
       sélection (exporter, rouvrir), son activité (le journal, réseau et pays seulement), les réglages (fin, droits), lien et
       mot de passe (nouveaux, une seule fois), la pause ou la suspension avec « Débloquer », et ses données (effacées

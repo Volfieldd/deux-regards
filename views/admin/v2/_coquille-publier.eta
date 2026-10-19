@@ -1,0 +1,18 @@
+<%
+  // Carnets et Galeries privées dans la coquille de l'admin v2 (dernière vague, partie B) : le contenu de leur écran v1
+  // (views/admin/<it.vue>.eta, maquettes MQ-18 et MQ-20), ses formulaires, ses routes et ses données, repris tels quels
+  // (it.corps : sans la mise en page v1) ; la v2 n'ajoute que la mise en page (menu, en-tête, bandeaux de la Vigie) et
+  // l'harmonisation de publier-v2.css, sous .v2-publier. Les écrans des galeries ont déjà leur lien d'aide ; ceux des
+  // Carnets le reçoivent ici (les ancres de la v1).
+  const HELP = { carnets: 'carnets', carnet: 'carnets-écrire-un-billet', 'carnet-photo': 'carnets-écrire-un-billet', 'carnet-photo-reglages': 'carnets-les-photos-dun-billet', 'carnet-confirmer': 'carnets-le-circuit-de-publication', 'carnet-versions': 'carnets-écrire-un-billet' };
+  const famille = it.vue.startsWith('carnet') ? 'carnets' : 'galeries';
+%>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/publier-v2.css') %>">
+<div class="v2-publier v2-<%= famille %>" data-vue="<%= it.vue %>">
+<% if (HELP[it.vue]) { %>
+<p class="help-link"><a href="/admin/aide#<%= HELP[it.vue] %>"><%= it.t('Aide sur cette page') %></a></p>
+<% } %>
+<%~ include(`../${it.vue}`, { ...it, corps: true }) %>
+</div>
+<%~ include('./_textes-publier', it) %>
+<script src="<%= it.asset('admin/v2/publier-v2.js') %>" defer></script>
