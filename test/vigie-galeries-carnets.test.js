@@ -359,18 +359,22 @@ test('contrôle des rôles : rôles des comptes gardés pour le détecteur ; acc
   const v = vigieOf(t, { start: Date.now() });
   const backups = tmp(t);
   fs.mkdirSync(path.join(backups, 'db'));
+  const invite = (site, id, revoked) => site.prepare("INSERT INTO space_invites (id, space_id, token_hash, password_hash, label, expires_at, revoked_at, created_by, created_at) VALUES (?, 1, ?, 'scrypt$x', 'invité', ?, ?, 'test', 1)")
+    .run(id, `h${id}`, Date.now() + 864e5, revoked);
   const snap = (age, fill) => {
     const file = path.join(backups, 'db', snapshotName(Date.now() - age));
     const site = openDb(file);
     migrate(site);
-    // Table des accès de la PR #149 (migration 056), réduite à ce que lit la Vigie.
-    site.exec('CREATE TABLE IF NOT EXISTS space_invites (id INTEGER PRIMARY KEY, revoked_at INTEGER, expires_at INTEGER NOT NULL)');
+    // Une galerie (migration 056), à laquelle les accès sont rattachés (clés étrangères coupées : seules les colonnes lues
+    // par la Vigie comptent ici).
+    site.pragma('foreign_keys = OFF');
+    site.prepare("INSERT OR IGNORE INTO private_spaces (id, public_id, title, closes_at, created_by, created_at) VALUES (1, 'abcdefghijkl', 'Mariage', ?, 'test', 1)").run(Date.now() + 864e5);
     fill(site);
     site.close();
   };
   snap(3600e3, site => {
     site.prepare("INSERT INTO accounts (sub, name, roles, status, created_at, adjust) VALUES ('zitadel-admin', 'A', '[\"admin\"]', 'actif', 1, '{}'), ('zitadel-julien', 'J', '[\"photographe\"]', 'actif', 1, '{\"add\":[\"photos.publier\"]}')").run();
-    site.prepare('INSERT INTO space_invites (id, revoked_at, expires_at) VALUES (1, NULL, ?), (2, 5, ?)').run(Date.now() + 864e5, Date.now() + 864e5);
+    for (const [id, rev] of [[1, null], [2, 5]]) invite(site, id, rev);
   });
   v.add('sys_state', 'info', { composant: 'site · système', detail: { administrateurs: ['zitadel-admin'] } });
   const r1 = checkRoles({ store: v.store, siteBackupDir: backups });
@@ -382,7 +386,7 @@ test('contrôle des rôles : rôles des comptes gardés pour le détecteur ; acc
   exposition(v, 'cree', { acces: 3 });
   snap(60e3, site => {
     site.prepare("INSERT INTO accounts (sub, name, roles, status, created_at) VALUES ('zitadel-admin', 'A', '[\"admin\"]', 'actif', 1)").run();
-    site.prepare('INSERT INTO space_invites (id, revoked_at, expires_at) VALUES (1, NULL, ?), (3, NULL, ?), (4, NULL, ?)').run(Date.now() + 864e5, Date.now() + 864e5, Date.now() + 864e5);
+    for (const id of [1, 3, 4]) invite(site, id, null);
   });
   const r2 = checkRoles({ store: v.store, siteBackupDir: backups });
   assert.deepEqual(r2.accesSans, [4]);
