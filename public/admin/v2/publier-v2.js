@@ -15,11 +15,22 @@ const enFile = (() => { let chain = Promise.resolve(); return fn => (chain = cha
 
 // ----- Galeries privées (repris d'admin.js de la v1, que la coquille v2 ne charge pas) -----
 $$('.v2-publier [data-js-only]').forEach(el => { el.hidden = false; });
-if ($('.v2-publier .gp')) document.addEventListener('focusin', e => {
-  const bar = $('.tabbar');
-  if (!bar || getComputedStyle(bar).display === 'none' || !e.target.closest?.('.gp')) return;
-  const r = e.target.getBoundingClientRect(), top = bar.getBoundingClientRect().top;
-  if (r.bottom > top && r.top < top) window.scrollBy(0, r.bottom - top + 16);
+// Au téléphone, le champ qui prend le focus ne reste jamais sous les barres fixes (onglets, actions de l'en-tête) : un
+// champ en partie visible n'est pas défilé par le navigateur (WCAG 2.4.12). Étendu à tous les écrans de ce lot.
+if ($('.v2-publier')) document.addEventListener('focusin', e => {
+  const el = e.target;
+  if (!el.closest?.('.v2-publier') || el.closest('dialog')) return;
+  const clear = () => {
+    const bars = $$('.tabbar, .ep-actions').filter(b => getComputedStyle(b).position === 'fixed' && getComputedStyle(b).display !== 'none' && b.getBoundingClientRect().height > 0);
+    if (!bars.length) return;
+    const top = Math.min(...bars.map(b => b.getBoundingClientRect().top));
+    const r = el.getBoundingClientRect();
+    // Le bas du champ au-dessus des barres ; un champ plus haut que la place libre, son haut en tête de l'écran.
+    if (r.bottom > top - 8 && r.top < top) window.scrollBy(0, Math.min(r.bottom - top + 16, r.top - 16));
+  };
+  // Tout de suite, puis après le défilement que le navigateur fait lui-même.
+  clear();
+  requestAnimationFrame(clear);
 });
 $$('.v2-publier [data-copier]').forEach(b => b.addEventListener('click', async () => {
   const src = document.getElementById(b.dataset.copier);

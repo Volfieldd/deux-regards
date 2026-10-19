@@ -179,7 +179,7 @@
   <form method="dialog">
     <h2 id="choix-t" data-choix-titre data-photo="<%= t('Ajouter une photo') %>" data-galerie="<%= t('Ajouter une galerie') %>" data-interne="<%= t('Lien interne vers une photo') %>"><%= t('Ajouter une photo') %></h2>
     <label for="choix-q"><%= t('Rechercher dans vos photos') %></label>
-    <input type="search" id="choix-q" data-choix-q autocomplete="off">
+    <input type="search" id="choix-q" name="q" data-choix-q autocomplete="off">
     <ul data-choix-liste aria-label="<%= t('Photos') %>"></ul>
     <p class="hint" data-choix-aide><%= t('Une photo donne une figure ; plusieurs, une paire ou une galerie. Le texte de remplacement se règle ensuite dans « Photos du billet ».') %></p>
     <div class="actions"><button class="btn ghost" value="annuler" type="submit"><%= t('Annuler') %></button><button class="btn" value="ok" type="submit" data-choix-ok><%= t('Insérer') %></button></div>

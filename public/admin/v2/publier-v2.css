@@ -28,7 +28,10 @@
 .v2-instagram .ig-sommaire ul { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0 0 18px; padding: 0; list-style: none; }
 .v2-instagram .ig-sommaire a { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; }
 .v2-instagram .ig-sommaire .n { font-family: var(--mono); font-size: var(--at-min); color: var(--ink3); }
-@media (max-width: 720px), (pointer: coarse) { .v2-instagram .ig-sommaire a { min-height: 44px; } }
+@media (max-width: 720px), (pointer: coarse) {
+  .v2-instagram .ig-sommaire a { min-height: 44px; min-width: 44px; }
+  .v2-instagram .ig-journal a { display: inline-flex; align-items: center; min-height: 44px; }
+}
 .v2-instagram .ig-grille { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: 16px; align-items: start; }
 .v2-instagram .ig-col { display: grid; gap: 16px; min-width: 0; }
 .v2-instagram .ig-col > .panel { margin: 0; }
@@ -95,6 +98,9 @@ html.js .v2-instagram .ig-reglages .sans-script { display: none; }
 .v2-publier .deux-col, .v2-publier .deux-col > * { min-width: 0; }
 .v2-publier .secret output, .v2-publier .courriel pre, .v2-publier .courriel p { overflow-wrap: anywhere; white-space: pre-wrap; }
 .v2-publier .gp-photos > li, .v2-publier .favoris-a > li, .v2-publier .gp-photo-t { min-width: 0; overflow-wrap: anywhere; }
+/* L'aperçu « comme sur le site » d'un billet : le focus d'un lien toujours visible, sur la nuit comme sur le jour. */
+.v2-carnets .apercu-site a:focus-visible, .v2-carnets .apercu-site [tabindex]:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.v2-carnets .apercu-site a:has(> picture, > img) { display: block; }
 @media (max-width: 720px) {
   .v2-publier .ep-actions { justify-content: flex-start; }
   .v2-publier .btns-ligne { flex-wrap: wrap; }
