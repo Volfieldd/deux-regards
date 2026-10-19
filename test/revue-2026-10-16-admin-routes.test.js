@@ -270,7 +270,8 @@ test('« constructor », « __proto__ » ou « toString » dans un formulaire ou
   assert.equal(c.db.prepare("SELECT value FROM settings WHERE key = 'theme'").pluck().get(), before);
   assert.notEqual(c.app.appearance.brand().mode, '__proto__');
   assert.equal((await admin.post('/admin/apparence/marque/constructor/delete')).statusCode, 404);
-  assert.equal((await admin.json('/admin/apparence', { theme: ['nicephos-nuit'] })).statusCode, 303);   // tableau JSON : ignoré
+  // Tableau JSON : ignoré (la route répond en JSON à qui le demande, comme pour l'admin v2).
+  assert.equal((await admin.json('/admin/apparence', { theme: ['nicephos-nuit'] })).statusCode, 200);
   assert.equal(c.app.appearance.themeId(), before ? JSON.parse(before) : 'atelier');
   // Un réglage déjà corrompu retombe sur le thème par défaut.
   c.db.prepare("INSERT INTO settings (key, value) VALUES ('theme', '\"constructor\"') ON CONFLICT(key) DO UPDATE SET value = excluded.value").run();
