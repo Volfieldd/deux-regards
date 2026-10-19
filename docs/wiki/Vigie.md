@@ -148,7 +148,7 @@ Avec `VIGIE_CF_ZONE_ID` et un jeton à part (*Zone Settings : Edit* sur la seule
 
 ### Installer (instance de test d'abord, D19)
 
-Marche à suivre pas à pas, dans un ordre qui ne coupe jamais le site : [`vigie-phase-0.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/vigie-phase-0.md), **étape 3.7** (espace KV, clé partagée, jeton, `vigie.env`, `wrangler.toml` rempli par `bordure/remplir-wrangler.sh`, déploiement, routes, vérification, retour en arrière). En bref :
+Marche à suivre pas à pas, dans un ordre qui ne coupe jamais le site : [`vigie-phase-0.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/vigie-phase-0.md), **étape 3.7** (espace KV, clé partagée, jetons, `vigie.env`, déploiement par le service `bordure` du compose, routes, vérification, retour en arrière). Le Worker tourne **chez Cloudflare**, devant le tunnel (c'est ce qui lui fait bloquer avant le site et voir l'opérateur et l'empreinte TLS) ; le service `bordure` (profil du même nom, jamais démarré par `up`) ne fait que l'envoyer : `docker compose --profile bordure run --rm bordure [--essai | --desactiver | --reactiver]`, avec un jeton à part (« Edit Cloudflare Workers ») dans `NICEPHOS_DIR/bordure-secrets/cloudflare-deploiement`. En bref :
 
 - **Espace KV `vigie-blocages`** (Vigie → Worker) : son **identifiant** dans `VIGIE_CF_KV_NAMESPACE` et dans `wrangler.toml` ;
 - **jeu de données Analytics Engine `vigie_bordure`** (Worker → Vigie) : un **nom**, le même des deux côtés, créé par Cloudflare au premier point ; `VIGIE_CF_DATASET` n'est à mettre que pour un autre nom ;
@@ -159,7 +159,7 @@ Marche à suivre pas à pas, dans un ordre qui ne coupe jamais le site : [`vigie
 
 **Délais** : une décision (ou une levée) atteint la bordure en 4 à 5 minutes au plus (copie dans KV au plus toutes les 2 minutes, propagation de KV, cache du Worker d'une minute). Le site, lui, l'applique tout de suite.
 
-**Dernier recours** (adresse d'un administrateur bloquée par erreur, Worker qui dérange) : `DESACTIVE = "1"` dans `bordure/wrangler.toml` puis `npx wrangler@4 deploy` (tout passe, rien n'est compté), ou supprimer la route du Worker dans le tableau de bord. `VIGIE_APPLIQUER=0` ne concerne que le site.
+**Dernier recours** (adresse d'un administrateur bloquée par erreur, Worker qui dérange) : `docker compose --profile bordure run --rm bordure --desactiver` (tout passe, rien n'est compté), ou supprimer la route du Worker dans le tableau de bord. `VIGIE_APPLIQUER=0` ne concerne que le site.
 
 **En-têtes refusés par le site** (`edge_signature_invalid`) : motif « adresse différente » → l'adresse que voit le site n'est pas celle que voit Cloudflare (vérifier `TRUST_PROXY`, l'adresse de cloudflared) ; « signature fausse » → clé différente entre le Worker et le site, ou chemin transformé en route ; « en-têtes périmés » → horloge du serveur décalée. La règle (DS32) reste en mode « observer » tant que l'instance de test n'a pas validé.
 

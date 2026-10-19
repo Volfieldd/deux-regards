@@ -23,6 +23,9 @@ COPY --from=deps /app/vigie/node_modules ./vigie/node_modules
 COPY vigie ./vigie
 COPY server/securite/vocabulaire.js ./server/securite/vocabulaire.js
 COPY server/securite/adresses-ip.js ./server/securite/adresses-ip.js
+# Worker de bordure (trois fichiers, sans dépendance) : déployé chez Cloudflare par le service « bordure » du compose,
+# jamais exécuté par la Vigie.
+COPY bordure/worker.js bordure/decisions.js bordure/wrangler.toml.example bordure/deployer.mjs ./bordure/
 USER node
 EXPOSE 4100 4200
 STOPSIGNAL SIGTERM

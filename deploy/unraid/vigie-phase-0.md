@@ -261,9 +261,9 @@ Trois noms à ne pas confondre :
 
 L'ordre ci-dessous ne coupe jamais le site : sans en-têtes de la bordure, le site ne change rien ; sans liste dans KV, le Worker laisse tout passer.
 
-**Il faut** : une machine avec Node 20 ou plus et une copie du dépôt (votre ordinateur : Wrangler ne tourne pas sur Unraid), et `npx wrangler@4 login` une fois (ouvre le navigateur sur votre compte Cloudflare).
+**Tout se fait sur Unraid**, depuis le dossier de la pile (`/boot/config/plugins/compose.manager/projects/nicephos`) : le Worker tourne chez Cloudflare, mais il s'envoie par le service `bordure` du compose, une tâche lancée à la main qui s'arrête une fois le Worker en place (jamais démarrée par `up`, ne pas mettre `bordure` dans `COMPOSE_PROFILES`). Rien à installer : Wrangler, en version fixée, est téléchargé dans le conteneur à chaque lancement.
 
-1. **Espace KV** : `npx wrangler@4 kv namespace create vigie-blocages`, ou **Storage & Databases → Workers KV → Create** avec ce nom. Noter son **ID** (colonne ID de la liste des espaces, 32 caractères hexadécimaux).
+1. **Espace KV** : **Storage & Databases → Workers KV → Create**, nom `vigie-blocages`. Noter son **ID** (colonne ID de la liste des espaces, 32 caractères hexadécimaux).
 2. **Clé partagée entre le Worker et le site**, sur Unraid : `openssl rand -base64 32`, la valeur dans le `.env` du site : `VIGIE_BORDURE_KEY=…` (32 caractères au moins, **différente** de `VIGIE_INGEST_KEY`), puis `docker compose up -d site` dans le dossier de la pile.
 3. **Jeton pour la Vigie** : **My Profile → API Tokens → Create Token → Custom token**, nom « Vigie : bordure », *Permissions* : **Account → Account Analytics → Read** et **Account → Workers KV Storage → Edit** (plus **Account → Account Filter Lists → Edit** si vous ferez l'étape 3.4), *Account Resources* : votre compte seulement. Le jeton (une ligne) va dans `VIGIE_SECRETS_DIR/cloudflare-token`, `chmod 600`, propriétaire `99:100`. Le droit sur KV vaut pour tous les espaces du compte (Cloudflare ne permet pas mieux) : ce fichier ne va nulle part ailleurs.
 4. **`vigie.env`** : `VIGIE_CF_ACCOUNT_ID=…` (**Account ID** : page d'accueil du compte, ou colonne de droite de la zone) et `VIGIE_CF_KV_NAMESPACE=…` (l'ID de l'étape 1). Pas de `VIGIE_CF_DATASET`. Puis recréer la Vigie : `docker compose --profile vigie up -d vigie` (**pas** `docker restart`, qui garde l'ancien `vigie.env`), et lire `docker logs --tail 30 nicephos-vigie`. La Vigie refuse de démarrer sur une valeur fausse, en le disant :
@@ -275,22 +275,16 @@ L'ordre ci-dessous ne coupe jamais le site : sans en-têtes de la bordure, le si
    | `VIGIE_CF_TOKEN_FILE : jeton Cloudflare introuvable` | fichier de l'étape 3 absent de `VIGIE_SECRETS_DIR` |
    | `VIGIE_CF_DATASET : nom de jeu de données invalide` | ligne `VIGIE_CF_DATASET` à retirer (ou exactement `vigie_bordure`) |
 
-   À ce stade, la Vigie écrit sa liste dans KV et ne lit encore rien : la page **Santé** dit la bordure muette jusqu'à l'étape 6.
-5. **Remplir `wrangler.toml`**, sur votre ordinateur, dans le dépôt : copier `vigie.env` et le `.env` du site depuis Unraid (dossier de la pile), puis :
-
-   ```bash
-   ./bordure/remplir-wrangler.sh --secret ~/vigie.env ~/site.env
-   rm ~/vigie.env ~/site.env          # le .env du site contient des secrets
-   ```
-
-   Le script crée `bordure/wrangler.toml` (ignoré par Git) depuis le modèle, y met le compte, l'ID KV, le jeu de données et la clé publique des décisions (`VIGIE_DECISIONS_PUBKEY` du site), vérifie chaque valeur, et avec `--secret` pose `BORDURE_KEY` chez Cloudflare (la valeur de `VIGIE_BORDURE_KEY`, jamais affichée). Relancé, il met le fichier à jour (copie `wrangler.toml.bak`).
-6. **Déployer** : `cd bordure && npx wrangler@4 deploy`. **Le Worker est en service dès cette commande** : elle pose la route `nicephos.art/*`.
-7. **Routes**, tout de suite après (**Workers Routes** de la zone `nicephos.art`) :
+   À ce stade, la Vigie écrit sa liste dans KV et ne lit encore rien : la page **Santé** dit la bordure muette jusqu'à l'étape 7.
+5. **Jeton de déploiement**, à part de celui de la Vigie (lui seul peut changer le Worker) : **My Profile → API Tokens → Create Token**, modèle **« Edit Cloudflare Workers »**, *Account Resources* : votre compte, *Zone Resources* : `nicephos.art` seulement. Le jeton va dans `NICEPHOS_DIR/bordure-secrets/cloudflare-deploiement` (dossier à créer, `chmod 700` ; fichier d'une ligne, `chmod 600` ; propriétaire `99:100` pour les deux). Ce dossier n'est monté que dans le service `bordure`, jamais dans la Vigie ni le site.
+6. **Essai sans rien envoyer** : `docker compose --profile bordure run --rm bordure --essai`. Il remplit `wrangler.toml` depuis `vigie.env` et le `.env` de la pile (compte, ID KV, jeu de données, `VIGIE_DECISIONS_PUBKEY`), vérifie chaque valeur et assemble le Worker ; un refus dit quelle valeur manque.
+7. **Déployer** : `docker compose --profile bordure run --rm bordure`. Il envoie le Worker, puis pose son secret `BORDURE_KEY` (la valeur de `VIGIE_BORDURE_KEY`, jamais affichée). **Le Worker est en service dès cette commande** : elle pose la route `nicephos.art/*`. À relancer après chaque changement de `bordure/` (nouvelle image de la Vigie) ou de ces valeurs.
+8. **Routes**, tout de suite après (**Workers Routes** de la zone `nicephos.art`) :
    - la route `nicephos.art/*` → `vigie-bordure` : **Edit**, *Request limit failure mode* : **Fail open** (au-delà de 100 000 requêtes par jour, elles passent au lieu d'échouer) ;
    - **Add route** pour chacun de `nicephos.art/media/*`, `nicephos.art/static/*`, `nicephos.art/fonts/*`, `nicephos.art/partage/*`, `nicephos.art/admin/media/*`, *Worker* : **None** (images et fichiers ne comptent pas dans le quota ; le Worker les laisserait passer de toute façon).
-8. **Vérifier**, après 5 à 10 minutes de trafic : `docker exec nicephos-vigie node vigie/cli.js bordure` donne un **dernier battement du Worker** de moins de 5 minutes et une **dernière requête vue** ; la page **Santé** de la console ne dit plus la bordure muette ; aucun `edge_signature_invalid` dans le **Journal** de la console (sinon : motif « signature fausse » → `BORDURE_KEY` différente de `VIGIE_BORDURE_KEY`, relancer le script avec `--secret` ; « adresse différente » → `TRUST_PROXY` du site, étape 0). Ensuite, si vous voulez, l'étape 3.4.
+9. **Vérifier**, après 5 à 10 minutes de trafic : `docker exec nicephos-vigie node vigie/cli.js bordure` donne un **dernier battement du Worker** de moins de 5 minutes et une **dernière requête vue** ; la page **Santé** de la console ne dit plus la bordure muette ; aucun `edge_signature_invalid` dans le **Journal** de la console (sinon : motif « signature fausse » → relancer l'étape 7 ; « adresse différente » → `TRUST_PROXY` du site, étape 0). Ensuite, si vous voulez, l'étape 3.4.
 
-**Revenir en arrière** : effet immédiat avec `DESACTIVE = "1"` dans `bordure/wrangler.toml` puis `npx wrangler@4 deploy` (tout passe, rien n'est bloqué ni compté), ou supprimer la route `nicephos.art/*`. Pour tout retirer : la route, `VIGIE_BORDURE_KEY` du `.env` du site et les `VIGIE_CF_*` de `vigie.env` (sauf `VIGIE_CF_ZONE_ID` du mode urgence), puis `docker compose up -d site` et `docker compose --profile vigie up -d vigie`.
+**Revenir en arrière** : `docker compose --profile bordure run --rm bordure --desactiver` (tout passe, rien n'est bloqué ni compté ; `--reactiver` pour le remettre), ou supprimer la route `nicephos.art/*` dans le tableau de bord (effet immédiat, sans rien lancer). Pour tout retirer : la route, `VIGIE_BORDURE_KEY` du `.env` du site et les `VIGIE_CF_*` de `vigie.env` (sauf `VIGIE_CF_ZONE_ID` du mode urgence), puis `docker compose up -d site` et `docker compose --profile vigie up -d vigie`.
 
 ---
 
@@ -306,7 +300,7 @@ L'ordre ci-dessous ne coupe jamais le site : sans en-têtes de la bordure, le si
 | 2.1 à 2.6 Cloudflare | maintenant, une étape à la fois | ☐ |
 | Passerelle Signal ([`signal/README.md`](signal/README.md)) | maintenant | ☐ |
 | 3.1 à 3.3 Projet Vigie, Access, redirection | phase B | ☐ |
-| 3.7 Bordure Cloudflare (Worker, KV, jeton) | phase C3, facultative | ☐ |
+| 3.7 Bordure Cloudflare (KV, clé, jetons, service `bordure`, routes) | phase C3, facultative | ☐ |
 | 3.4 Liste des adresses bloquées chez Cloudflare (après 3.7) | phase E3, facultative | ☐ |
 | 3.6 Mode urgence | facultatif | ☐ |
 | Sorties réseau : mandataire, règles de l'hôte, journaux lus par la Vigie ([`reseau/README.md`](reseau/README.md)) | phase E4, instance de test d'abord | ☐ |

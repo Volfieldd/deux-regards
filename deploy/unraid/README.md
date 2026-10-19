@@ -6,7 +6,7 @@ Ce dossier contient tout le nécessaire :
 
 | Fichier | Rôle |
 |---|---|
-| `compose.yaml` | la pile complète : site, sauvegarde quotidienne, tunnel Cloudflare, traducteur LibreTranslate (**méthode recommandée**) ; en option, par profil, la Vigie et sa passerelle Signal |
+| `compose.yaml` | la pile complète : site, sauvegarde quotidienne, tunnel Cloudflare, traducteur LibreTranslate (**méthode recommandée**) ; en option, par profil, la Vigie et sa passerelle Signal, et la tâche `bordure` qui déploie le Worker de bordure chez Cloudflare (lancée à la main : `vigie-phase-0.md`, étape 3.7) |
 | `env.example` | les réglages, à copier en `.env` de la pile |
 | `signal/` | **facultatif** : enregistrer le numéro de la passerelle Signal de la Vigie (alertes de sécurité sur le téléphone ; service `signal` de la pile, profil `signal`) ; guide dans [`signal/README.md`](signal/README.md) |
 | `vigie-phase-0.md` | **facultatif** : réglages de Cloudflare et de Zitadel qui préparent la Vigie (second facteur, compte de lecture des événements, règles du WAF, Access) ; la partie « maintenant » sert aussi sans Vigie |
