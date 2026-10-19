@@ -1,0 +1,95 @@
+/* =====================================================================================================
+   App de terrain de la v2 (maquette MQ-10 de l'audit d'ergonomie du 16 oct. 2026). Chargée après admin/app.css (la v1,
+   qui garde ses couleurs, ses champs, la langue sans script par :has()) : n'ajoute que ce que la maquette change. Aucun
+   style en ligne (CSP).
+   ===================================================================================================== */
+[hidden] { display: none !important; }
+.skip { position: absolute; left: 12px; top: -80px; z-index: 10; padding: 10px 14px; border-radius: 8px; background: var(--ink); color: var(--paper); }
+.skip:focus { top: 8px; }
+.ic { flex: none; display: block; }
+/* Le focus ne passe jamais sous la barre collante d'« Enregistrer » (MQ-10, repère 10). */
+html { scroll-padding-bottom: 120px; }
+.app-bar h1 { flex: 1; margin: 0; font: 500 16px/1.3 Jost, -apple-system, sans-serif; }
+.app-bar .mono { font-size: 13px; }
+main:focus { outline: none; }
+.app-session { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 16px; background: #ebe7df; color: #3f3b35; font-size: 14px; }
+.app-session .ic { color: var(--ok); }
+.app-step h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+.app-step h2 .hint { font-family: Jost, sans-serif; font-style: normal; font-size: 14px; }
+.app-step h2:focus { outline: none; }
+.app-step h2:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* « Vous » : replié en une ligne avant de tendre le téléphone (MQ-10, repère 3). */
+.vous-plie > summary { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 4px 14px; padding-bottom: 8px; border-bottom: 1px solid var(--ink); cursor: pointer; list-style: none; }
+.vous-plie > summary::-webkit-details-marker { display: none; }
+.vous-plie > summary h2 { margin: 0; padding: 0; border: 0; }
+.vous-r { display: grid; gap: 2px; min-width: 0; font-size: 14px; color: #3f3b35; overflow-wrap: anywhere; }
+.vous-r .redo-r { color: var(--ko); font-weight: 500; }
+.vous-m { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
+.vous-plie[open] .vous-m, .vous-plie[open] .vous-r { visibility: hidden; }
+.vous-corps { display: grid; gap: 14px; padding: 14px 0 0; }
+.app-pos { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.app-photo img { display: block; width: 96px; height: 96px; object-fit: cover; margin: 8px auto 0; }
+.btn-app { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 6px 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: transparent; color: var(--ink); font: 500 15px/1.25 Jost, sans-serif; text-align: center; text-decoration: none; cursor: pointer; }
+.tendre { justify-self: stretch; }
+/* Langue de la personne : trois mots, sans drapeau (MQ-10, repère 5). */
+.langues { display: flex; gap: 8px; }
+.langues label { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 48px; border: 1px solid var(--field); border-radius: 10px; font-weight: 500; cursor: pointer; }
+.langues label:has(input:checked) { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.langues input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.langues label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 3px; }
+.pers-corps { display: grid; gap: 14px; }
+.pers-corps > * { margin: 0; }
+.pers-corps h3 { margin: 0; }
+/* Résumé des erreurs, dans la langue de la personne (MQ-10, repère 4). */
+.resume { display: grid; gap: 6px; padding: 12px 14px; border-radius: 10px; background: #fbeee8; box-shadow: inset 3px 0 0 var(--ko); }
+.resume:focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.resume-t { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 17px; font-weight: 500; color: var(--ko); }
+.resume ul { margin: 0; padding-left: 20px; }
+.resume a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+/* Groupes : la décision, puis ses usages dans un groupe imbriqué (MQ-10, repère 6) ; l'erreur sous la légende (repère 7). */
+.app-person fieldset { display: grid; gap: 2px; }
+.app-person legend { padding: 0; margin-bottom: 4px; font-size: 15px; font-weight: 500; }
+.app-person .sous { margin: 0 0 0 36px; }
+.app-person .sous legend { font-weight: 400; color: #3f3b35; font-size: 14px; }
+.groupe-err { padding-left: 12px; border-left: 3px solid var(--ko); }
+.champ-err { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 4px; color: var(--ko); font-size: 15px; }
+.champ-err .ic { margin-top: 3px; }
+.champ-l { display: block; font-size: 15px; }
+.champ-l .facultatif { color: var(--mute); font-weight: 400; }
+input[aria-invalid="true"]:not([type="radio"]):not([type="checkbox"]) { border: 2px solid var(--ko); }
+input[aria-invalid="true"]:not([type="radio"]):not([type="checkbox"]):focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+/* Signature : gardée après un refus du serveur, « Effacer » à 44 px et « Défaire » (MQ-10, repères 9 et 17). */
+.sig { display: grid; gap: 8px; }
+.sig > p { margin: 0; font-weight: 500; }
+.sig canvas { display: block; width: 100%; height: 150px; background: #fbfaf7; border: 1.5px solid var(--ink); border-radius: 12px; touch-action: none; }
+.sig.redo canvas { border: 2px solid var(--ko); }
+.sig .ligne { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sig .ligne > button { margin-left: auto; }
+.sig .ok { display: flex; align-items: center; gap: 6px; color: var(--ok); font-size: 14px; font-weight: 500; }
+.defaire { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 4px 4px 4px 16px; border-radius: 12px; background: var(--ink); color: var(--paper); font-size: 15px; }
+.defaire button { min-height: 44px; padding: 0 16px; border: 0; border-radius: 9px; background: var(--paper); color: var(--ink); font: 500 15px/1 Jost, sans-serif; cursor: pointer; }
+/* Sans script, la signature au doigt disparaît, et le photographe le sait. */
+html:not(.js) .js-seul { display: none !important; }
+html.js .sans-sig { display: none; }
+.msg { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px var(--rule); font-size: 15px; }
+.msg p { margin: 0; }
+.msg ul { margin: 0; padding-left: 18px; }
+.msg-err { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ko); }
+.msg-err > .ic { color: var(--ko); margin-top: 2px; }
+.msg-err > div { display: grid; gap: 10px; justify-items: start; }
+/* Envoi : progression, réseau coupé, session expirée (MQ-10, repères 14 à 16). */
+.app-actions { display: grid; gap: 8px; }
+.app-actions .hint { margin: 0; text-align: center; }
+.envoi { display: grid; gap: 6px; }
+.envoi p { margin: 0; font-size: 15px; }
+.envoi progress { width: 100%; height: 8px; }
+.app-save { font-size: 18px; }
+/* La personne lit ses textes dans sa langue : les mots des trois langues sont écrits, :has() montre les siens. */
+.app-form [data-l] { overflow-wrap: anywhere; }
+/* Accueil Terrain (MQ-10, état 13) : le titre dans la barre, la session, les usages sous le nom (le nom n'est plus coupé). */
+.app-bar h1 + .app-bar-link { margin-left: 0; }
+.app-session--home { margin: -16px -16px 0; }
+.app-people .who .app-tag { justify-self: start; margin-top: 4px; white-space: normal; }
+/* À 320 px, rien ne déborde : la colonne du formulaire ne s'élargit pas pour une adresse sans espace (confidentialité). */
+.app-form, .pers-corps, .vous-corps { grid-template-columns: minmax(0, 1fr); }
+.app-privacy, .app-consent { overflow-wrap: anywhere; }
