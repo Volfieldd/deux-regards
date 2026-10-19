@@ -97,7 +97,8 @@ $$('form[data-circuit]').forEach(form => {
   list.addEventListener('click', e => {
     const a = e.target.closest('a[href^="#"]');
     if (!a) return;
-    const el = document.getElementById(a.hash.slice(1));
+    const id = a.getAttribute('href').slice(1);               // (a.hash est encodé : « é » y devient %C3%A9)
+    const el = document.getElementById(id);
     if (!el) return;
     e.preventDefault();
     history.replaceState(null, '', a.hash);

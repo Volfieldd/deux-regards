@@ -110,7 +110,7 @@ test('signalements : « Supprimer… » par un dialogue (Annuler d’abord, Éch
 
 test('aide : la recherche liste les passages, le mot surligné dans l’extrait, un lien qui mène au titre', async ({ page }, info) => {
   await page.goto('/admin/aide');
-  const q = page.getByLabel('Rechercher dans l’aide');
+  const q = page.getByRole('searchbox', { name: 'Rechercher dans l’aide' });
   await q.fill('filigrane');
   await expect(page.locator('[data-aide-statut]')).toContainText(/passages? contien/);
   const first = page.locator('[data-aide-resultats] a').first();
@@ -123,7 +123,7 @@ test('aide : la recherche liste les passages, le mot surligné dans l’extrait,
   await expect(page.locator('[data-aide-resultats] a').first()).toBeFocused();
   const href = await page.locator('[data-aide-resultats] a').first().getAttribute('href');
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(new RegExp(`${href}$`));
+  await expect.poll(() => decodeURIComponent(new URL(page.url()).hash)).toBe(href);
   // Le focus est sur le titre visé (celui d'une rubrique, ou son sous-titre).
   const focused = await page.evaluate(id => { const a = document.activeElement, el = document.getElementById(id); return Boolean(a && el && (a === el || (el.matches('section') && a === el.querySelector('h2')))); }, href.slice(1));
   expect(focused).toBe(true);
