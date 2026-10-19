@@ -178,7 +178,7 @@ Pile Unraid (image publiée) : **Compose Pull** puis **Compose Up**. Pour reveni
 
 Pour plus de sûreté, faites d'abord une sauvegarde manuelle (voir plus haut).
 
-### Version 1.NNN : vignettes de 160 et 480 px
+### Version 1.181 : vignettes de 160 et 480 px
 
 **Rien à faire.** Au premier démarrage de cette version, le site crée en arrière-plan, pour chaque photo, les variantes de 160 et 480 px (AVIF et WebP) qui lui manquent, photos publiées d'abord ; il ne refait pas les autres et ne change pas les adresses des images. Le site reste en ligne pendant ce temps : une vignette pas encore créée est servie par la taille au-dessus (plus lourde, jamais cassée).
 
