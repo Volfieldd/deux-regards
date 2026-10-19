@@ -1,0 +1,79 @@
+<% const t = it.t, E = __eta.e, J = it.journal, f = it.filter; %>
+<% /* Journal (admin v2, vague 4 « suivi et aide » ; UX-A-19). Mêmes lignes, même droit (journal.voir), même route que la v1
+      (views/admin/journal.eta, GET /admin/journal : les 300 dernières actions, filtrées par compte et par mot). La v2 : un
+      libellé lisible pour chaque action (server/journal-libelles.js : plus de « POST /admin/… »), la cible nommée et
+      cliquable (« Photo n° 12 », jamais un nom lu en plus), les connexions d'un même jour regroupées, des filtres Type et
+      Période, 50 lignes par page, l'heure de Paris en toutes lettres ; un tableau titré (caption), en cartes sous 1 100 px. */ %>
+<% layout('./layout', { pageTitle: `${t('Journal')} · ${t('Administration')} · ${it.siteName}` }) %>
+<% const IC = {
+     abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>', arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>',
+     prec: '<path d="M15 6l-6 6 6 6"/>', suiv: '<path d="M9 6l6 6-6 6"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const PAR_PAGE = 50;
+   // Heure de Paris en toutes lettres (« 16 oct. 2026 », « 6 h 35 » en français).
+   const jourF = new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' });
+   const heureF = new Intl.DateTimeFormat(it.locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Paris' });
+   const heure = at => { const h = heureF.format(new Date(at)); return it.lang === 'fr' ? h.replace(/^0?(\d+):(\d\d)$/, '$1 h $2') : h; };
+   const now = Date.now();
+   const limite = f.periode ? now - Number(f.periode) * 864e5 : 0;
+   const lignes = J.regrouper(it.entries.filter(e => e.at >= limite && (!f.type || J.famille(e.action) === f.type)));
+   const pages = Math.max(1, Math.ceil(lignes.length / PAR_PAGE));
+   const page = Math.min(f.page || 1, pages);
+   const vues = lignes.slice((page - 1) * PAR_PAGE, page * PAR_PAGE);
+   /* Adresse de la page avec ces filtres (une valeur vide n'est pas écrite). */
+   const url = (o = {}) => { const p = { compte: f.sub, q: f.q, type: f.type, periode: f.periode, page: '', ...o }; const s = Object.entries(p).filter(([, v]) => v !== '' && v != null && v !== 1).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&'); return '/admin/journal' + (s ? '?' + s : ''); };
+   const nomAction = e => { const l = J.libelle(e.action); if (l) return t(l); const g = /^galerie privée : (.+)$/.exec(e.action); return g ? t('Galerie privée : {action}', { action: g[1] }) : e.action; };
+   const PERIODES = { '': t('Tout (13 mois)'), '1': t('Dernières 24 heures'), '7': t('7 derniers jours'), '30': t('30 derniers jours') };
+   const qui = it.accounts.find(a => a.sub === f.sub); %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/suivi-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#reglages-journal"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-suivi">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Journal') %></h1></div>
+  <p class="ep-meta"><span><%= lignes.length > 1 ? t('{n} lignes', { n: lignes.length }) : t('{n} ligne', { n: lignes.length }) %></span><span><%= t('heure de Paris') %></span><span><%= t('gardé 13 mois') %></span></p>
+</header>
+<p class="rub-intro"><%= t('Qui a fait quoi dans l’admin : connexions, modifications, publications, comptes, exports. Le choix de la langue et du thème n’y figure pas.') %></p>
+
+<form class="panel jr-filtres" method="get" action="/admin/journal" role="search" aria-label="<%= t('Filtrer le journal') %>">
+<% if (f.type) { %>  <input type="hidden" name="type" value="<%= f.type %>">
+<% } %>  <div class="champ-a"><label for="jr-compte"><%= t('Compte') %></label><select id="jr-compte" name="compte"><option value=""><%= t('Tous les comptes') %></option><% it.accounts.forEach(a => { %><option value="<%= a.sub %>"<%~ a.sub === f.sub ? ' selected' : '' %>><%= a.name || a.sub %></option><% }) %></select></div>
+  <div class="champ-a"><label for="jr-periode"><%= t('Période') %></label><select id="jr-periode" name="periode"><% Object.entries(PERIODES).forEach(([k, l]) => { %><option value="<%= k %>"<%~ k === f.periode ? ' selected' : '' %>><%= l %></option><% }) %></select></div>
+  <div class="champ-a jr-q"><label for="jr-q"><%= t('Rechercher') %> <span class="facultatif"><%= t('(action, cible, détail)') %></span></label><input type="search" id="jr-q" name="q" value="<%= f.q %>" maxlength="80"></div>
+  <p class="jr-ok"><button class="btn ghost" type="submit"><%= t('Filtrer') %></button></p>
+</form>
+
+<nav class="chips filtres-l" aria-label="<%= t('Type d’action') %>">
+  <a class="chip" href="<%= url({ type: '' }) %>"<%~ !f.type ? ' aria-current="page"' : '' %>><%= t('Toutes les actions') %></a>
+<% J.FAMILLES.forEach(k => { %>  <a class="chip" href="<%= url({ type: k }) %>"<%~ f.type === k ? ' aria-current="page"' : '' %>><%= t(J.FAMILLE_NOMS[k]) %></a>
+<% }) %></nav>
+
+<% if (!vues.length) { %>
+<p class="panel hint"><%= t('Rien dans le journal pour ces filtres.') %><% if (f.sub || f.q || f.type || f.periode) { %> <a class="lien-a" href="/admin/journal"><%= t('Voir tout le journal') %></a><% } %></p>
+<% } else { %>
+<table class="liste-a jr-liste">
+  <caption><%= [t(f.type ? J.FAMILLE_NOMS[f.type] : 'Toutes les actions'), qui ? (qui.name || qui.sub) : '', f.periode ? PERIODES[f.periode] : '', t('la plus récente d’abord'), pages > 1 ? t('page {n} sur {total}', { n: page, total: pages }) : ''].filter(Boolean).join(' · ') %></caption>
+  <thead><tr><th scope="col"><%= t('Quand') %></th><th scope="col"><%= t('Action') %></th><th scope="col"><%= t('Qui') %></th><th scope="col"><%= t('Cible') %></th><th scope="col"><%= t('Résultat') %></th></tr></thead>
+  <tbody>
+<% vues.forEach(e => { const ok = e.status == null || e.status < 400; const c = J.cible(e.action, e.target); const jr = jourF.format(new Date(e.at)); %>
+    <tr>
+      <td class="jr-quand"><time datetime="<%= new Date(e.at).toISOString() %>"><%= jr %>, <%= e.n > 1 ? t('de {debut} à {fin}', { debut: heure(e.first), fin: heure(e.at) }) : heure(e.at) %></time></td>
+      <th scope="row" class="jr-action"><%= nomAction(e) %><% if (e.n > 1) { %> <span class="jr-fois"><%= t('{n} fois ce jour-là', { n: e.n }) %></span><% } %><% if (e.detail) { %><span class="sec jr-detail"><%= e.detail %></span><% } %><% if (!J.libelle(e.action) && !e.action.startsWith('galerie privée')) { %><span class="sec"><%= t('action notée telle quelle') %></span><% } %></th>
+      <td class="jr-qui"><%= e.name || e.sub || '—' %></td>
+      <td class="jr-cible"><% if (!c) { %><span class="sec">—</span><% } else if (c.href) { %><a class="ligne-lien" href="<%= c.href %>"><%= t(c.kind, { id: c.id }) %></a><% } else { %><%= t(c.kind, { id: c.id }) %><% } %></td>
+      <td class="jr-res"><%~ ok ? etat('abouti', t('Fait')) : etat('arret', t('Refusé')) %></td>
+    </tr>
+<% }) %>
+  </tbody>
+</table>
+<% if (pages > 1) { %>
+<nav class="jr-pages" aria-label="<%= t('Pages du journal') %>">
+<% if (page > 1) { %>  <a class="btn ghost" href="<%= url({ page: page - 1 }) %>" rel="prev"><%~ ic('prec', 16) %><%= t('Plus récentes') %></a>
+<% } %>  <span class="jr-page"><%= t('Page {n} sur {total}', { n: page, total: pages }) %></span>
+<% if (page < pages) { %>  <a class="btn ghost" href="<%= url({ page: page + 1 }) %>" rel="next"><%= t('Plus anciennes') %><%~ ic('suiv', 16) %></a>
+<% } %></nav>
+<% } %>
+<p class="pied-liste"><span><%= t('Les 300 dernières actions du compte et du mot cherchés sont lues ; le type et la période trient parmi elles.') %></span></p>
+<% } %>
+</div>

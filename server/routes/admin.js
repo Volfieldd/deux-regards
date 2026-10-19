@@ -43,6 +43,7 @@ import { monthYear } from '../format.js';
 import { legalMissing } from '../legal.js';
 import { createAdminVersion, ADMIN_VERSIONS } from '../admin-version.js';
 import { typoHtml } from '../typo-html.js';
+import * as JOURNAL from '../journal-libelles.js';
 import { fileURLToPath } from 'node:url';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
@@ -1056,7 +1057,9 @@ export default async function adminRoutes(app) {
   // la reçoit ; le modérateur lit le message, et sait seulement qu'une adresse a été laissée.
   app.get('/admin/signalements', P('signalements.traiter'), async (request, reply) => {
     const contact = Boolean(request.scope('personnes.voir')?.all);
+    // etat : le filtre de la v2 (nouveaux, traités), appliqué à l'affichage ; les mêmes signalements sont lus.
     return render(request, reply, 'reports', {
+      etat: ['nouveau', 'traite'].includes(request.query.etat) ? request.query.etat : '',
       title: request.t('Signalements des visiteurs'), reports: app.feedback.reports().map(r => withReady({ ...r, id: r.pid, reportId: r.id, email: contact ? r.email : '', hasEmail: Boolean(r.email) })),
     });
   });
@@ -1212,9 +1215,14 @@ export default async function adminRoutes(app) {
     const q = String(request.query.q || '').slice(0, 80);
     // Heure de Paris, comme le reste de l'admin (le conteneur, lui, est en UTC) ; un seul formateur pour les 300 lignes.
     const f = new Intl.DateTimeFormat(request.t.locale, { dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Paris' });
+    // Admin v2 (UX-A-19) : les mêmes lignes, filtrées à l'affichage par famille et par période, 50 par page, avec un
+    // libellé lisible pour chaque action (server/journal-libelles.js) ; la v1 ignore ces paramètres.
+    const type = JOURNAL.FAMILLES.includes(request.query.type) ? request.query.type : '';
+    const periode = ownKey(JOURNAL.PERIODES, request.query.periode) ? request.query.periode : '';
+    const page = Math.min(6, Math.max(1, Number.parseInt(request.query.page, 10) || 1));
     return render(request, reply, 'journal', {
-      title: request.t('Journal'), entries: app.audit.list({ sub, q }), accounts: app.accounts.list(), filter: { sub, q },
-      when: at => f.format(new Date(at)),
+      title: request.t('Journal'), entries: app.audit.list({ sub, q }), accounts: app.accounts.list(), filter: { sub, q, type, periode, page },
+      when: at => f.format(new Date(at)), journal: JOURNAL,
     });
   });
 
@@ -1910,7 +1918,10 @@ export default async function adminRoutes(app) {
     app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'circuit réglé', target: a.name || a.sub, status: 303,
       detail: `publier sans validation : ${alone ? 'oui' : 'non'} ; modifier ses photos publiées : ${edit ? 'oui' : 'non'} ; Instagram sans validation : ${igAlone ? 'oui' : 'non'}` });
     request.audited = true;
-    return done(reply, '/admin/circuit', request.t('Réglages de {name} enregistrés.', { name: a.name || a.sub }));
+    const message = request.t('Réglages de {name} enregistrés.', { name: a.name || a.sub });
+    // Admin v2 : enregistré au geste ; l'état gardé, pour « Défaire » (qui renvoie l'état d'avant par cette route).
+    if (asJson(request)) return { ok: true, message, circuit: { publier: alone, modifier: edit, instagram: igAlone } };
+    return done(reply, '/admin/circuit', message);
   });
   // Préférence de chacun : être prévenu par e-mail (propositions, décisions).
   app.post('/admin/compte/notifications', W('admin.acceder'), async (request, reply) => {

@@ -1,0 +1,46 @@
+<% const t = it.t, E = __eta.e; %>
+<% /* Nouveautés (admin v2, vague 4 « suivi et aide »). Mêmes versions, mêmes notes (filtrées par les droits du compte), même
+      route que la v1 (views/admin/releases.eta ; GET /admin/nouveautes, server/releases.js) ; mêmes ancres (#v1.170.0).
+      La v2 : les dix versions les plus récentes en cartes ; les autres rangées par mois, repliées (la page en comptait plus
+      de 150 d'affilée) ; avec le script, une ancre vers une version repliée ouvre son mois. La fenêtre « Nouveau depuis
+      votre dernière visite » est celle de la mise en page v2 (views/admin/v2/layout.eta), jamais montrée sur cette page. */ %>
+<% layout('./layout', { pageTitle: `${t('Nouveautés')} · ${t('Administration')} · ${it.siteName}` }) %>
+<% const day = d => new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T12:00:00Z`));
+   const month = d => new Intl.DateTimeFormat(it.locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d.slice(0, 7)}-15T12:00:00Z`));
+   const chev = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
+   const RECENTES = 10;
+   const R = it.releases;
+   const first = R.slice(0, RECENTES);
+   const months = [];
+   R.slice(RECENTES).forEach(r => { const k = r.date.slice(0, 7); const m = months.at(-1); if (m && m.k === k) m.list.push(r); else months.push({ k, label: month(r.date), list: [r] }); });
+   const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+   const version = (r, h) => '<' + h + ' class="nv-titre"><span class="nv-v">' + E(r.version) + '</span> ' + E(r.title) + '</' + h + '>'
+     + '<p class="nv-date">' + E(day(r.date)) + (r.version === it.releaseCurrent ? ' · <span class="etat etat--abouti"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>' + E(t('version installée')) + '</span>' : '') + '</p>'
+     + '<ul>' + r.items.map(i => '<li>' + E(i) + '</li>').join('') + '</ul>'; %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/suivi-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#tableau-de-bord"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-suivi">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Nouveautés') %></h1></div>
+  <p class="ep-meta"><span><%= t('Version installée : {v}.', { v: it.releaseCurrent }) %></span><span><%= R.length > 1 ? t('{n} versions', { n: R.length }) : t('{n} version', { n: R.length }) %></span></p>
+</header>
+<p class="rub-intro"><%= t('Chaque version apporte ce qui suit ; la plus récente d’abord. Seules les notes qui concernent votre rôle sont montrées.') %></p>
+<!-- [html-validate-disable-block valid-id: les ancres #v1.170.0 de la v1, gardées pour les liens] -->
+<ol class="nv-liste" aria-label="<%= t('Les {n} versions les plus récentes', { n: first.length }) %>">
+<% first.forEach(r => { %>  <li class="panel nv" id="v<%= r.version %>"><%~ version(r, 'h2') %></li>
+<% }) %></ol>
+<% if (months.length) { %>
+<h2 class="nv-avant"><%= t('Versions précédentes') %></h2>
+<% months.forEach(m => { %>
+<!-- [html-validate-disable-block valid-id: les ancres #v1.170.0 de la v1, gardées pour les liens] -->
+<details class="panel plier-p nv-mois" data-nv-mois>
+  <summary><%~ chev %><span><span class="h"><%= cap(m.label) %></span><span class="sec"><%= m.list.length > 1 ? t('{n} versions, de {premiere} à {derniere}', { n: m.list.length, premiere: m.list.at(-1).version, derniere: m.list[0].version }) : t('{n} version : {v}', { n: 1, v: m.list[0].version }) %></span></span></summary>
+  <ol class="nv-liste nv-liste--mois">
+<% m.list.forEach(r => { %>    <li class="nv" id="v<%= r.version %>"><%~ version(r, 'h3') %></li>
+<% }) %>  </ol>
+</details>
+<% }) %>
+<% } %>
+</div>
+<%~ include('./_textes-suivi', it) %>
+<script src="<%= it.asset('admin/v2/suivi-v2.js') %>" defer></script>

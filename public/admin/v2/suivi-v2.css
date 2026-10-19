@@ -1,0 +1,198 @@
+/* Admin v2, vague 4 « suivi et aide » : Journal, Statistiques, Signalements des visiteurs, Circuit de publication, Aide,
+   Nouveautés. Les composants de la planche MQ-00 (admin-plus.css) et des écrans précédents (v2.css) servent tels quels ; ce
+   fichier n'ajoute que ce que ces écrans demandent, sous .v2-suivi (l'enveloppe de leur contenu) : il ne change rien aux
+   autres écrans. Chargé par leurs gabarits seulement (views/admin/v2/journal.eta, stats.eta, reports.eta, circuit.eta,
+   help.eta, releases.eta), après les feuilles de la mise en page.
+   Grille : aucun texte sous 12 px, aucun titre coupé, des cibles de 24 px au bureau et de 44 px au toucher, rien qui
+   déborde de 320 px (libellés allemands compris). */
+
+/* ---------- commun ---------- */
+.v2-suivi .sec { color: var(--ink3); font-size: var(--at-petit); font-weight: 400; }
+.v2-suivi .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; }
+.v2-suivi .etat { white-space: normal; }
+.v2-suivi .ep-titre h1 { overflow-wrap: anywhere; }
+.v2-suivi .chip { white-space: normal; text-align: left; }
+.v2-suivi .chips.filtres-l { justify-content: flex-start; gap: 8px; }
+.v2-suivi .chip-n { color: var(--ink3); font-size: var(--at-min); font-variant-numeric: tabular-nums; }
+.v2-suivi .chip[aria-current] .chip-n { color: inherit; }
+.v2-suivi .panel > h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: 0 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.v2-suivi .lien-a { overflow-wrap: anywhere; }
+.v2-suivi .hint { color: var(--ink2); }
+.v2-suivi .ligne-lien { overflow-wrap: anywhere; }
+
+/* ---------- Journal ---------- */
+.v2-suivi .jr-filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 12px 16px; align-items: end; margin: 0 0 16px; }
+.v2-suivi .jr-filtres .champ-a { margin: 0; }
+.v2-suivi .jr-filtres :is(select, input) { width: 100%; max-width: 100%; }
+.v2-suivi .jr-filtres .jr-q { grid-column: span 2; }
+.v2-suivi .jr-ok { margin: 0; }
+@media (max-width: 720px) { .v2-suivi .jr-filtres .jr-q { grid-column: auto; } .v2-suivi .jr-ok .btn { width: 100%; } }
+.v2-suivi .jr-liste .jr-quand { white-space: nowrap; color: var(--ink2); font-variant-numeric: tabular-nums; }
+.v2-suivi .jr-liste .jr-action { min-width: 14em; }
+.v2-suivi .jr-liste .jr-detail { font-family: var(--mono); font-size: var(--at-min); overflow-wrap: anywhere; }
+.v2-suivi .jr-fois { display: inline-block; margin-left: 4px; padding: 0 8px; border-radius: 999px; background: var(--s2); color: var(--ink2); font-size: var(--at-min); font-weight: 400; }
+.v2-suivi .jr-liste .jr-qui, .v2-suivi .jr-liste .jr-cible { overflow-wrap: anywhere; }
+@media (max-width: 1100px) {
+  /* Une carte par action : l'action et son résultat, puis quand et qui, puis la cible. */
+  .v2-suivi .jr-liste tr { grid-template-columns: minmax(0, 1fr) auto; }
+  .v2-suivi .jr-liste .jr-action { grid-column: 1; grid-row: 1; min-width: 0; }
+  .v2-suivi .jr-liste .jr-res { grid-column: 2; grid-row: 1; }
+  .v2-suivi .jr-liste .jr-quand { grid-column: 1 / -1; grid-row: 2; white-space: normal; }
+  .v2-suivi .jr-liste .jr-qui { grid-column: 1 / -1; grid-row: 3; color: var(--ink2); }
+  .v2-suivi .jr-liste .jr-cible { grid-column: 1 / -1; grid-row: 4; }
+  .v2-suivi .jr-liste .jr-cible:has(> .sec:only-child) { display: none; }
+}
+@media (max-width: 420px) { .v2-suivi .jr-liste tr { grid-template-columns: minmax(0, 1fr); } .v2-suivi .jr-liste .jr-res { grid-column: 1; grid-row: auto; } }
+.v2-suivi .jr-pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; margin: 16px 0 0; }
+.v2-suivi .jr-pages .btn { gap: 6px; }
+.v2-suivi .jr-page { color: var(--ink2); font-size: var(--at-petit); }
+
+/* ---------- Statistiques ---------- */
+.v2-suivi .st-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.v2-suivi .st-grille > .panel { margin: 0; min-width: 0; }
+.v2-suivi .st-large { grid-column: 1 / -1; }
+@media (max-width: 900px) { .v2-suivi .st-grille { grid-template-columns: minmax(0, 1fr); } }
+.v2-suivi .st-chiffres-s { min-width: 0; }
+.v2-suivi .st-chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.v2-suivi .st-chiffres li { display: grid; gap: 4px; align-content: start; margin: 0; min-width: 0; }
+.v2-suivi .st-n { font-size: 34px; font-weight: 300; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.v2-suivi .st-l { color: var(--ink2); font-size: var(--at-petit); }
+.v2-suivi .st-chiffres-s .hint { margin: 8px 0 0; font-size: var(--at-min); }
+.v2-suivi .st-delta { display: inline-flex; align-items: flex-start; gap: 6px; color: var(--ink2); font-size: var(--at-min); line-height: 1.4; }
+.v2-suivi .st-delta .ic { flex: none; margin-top: 3px; }
+.v2-suivi .st-delta--haut .ic { color: var(--ok); }
+.v2-suivi .st-delta--bas .ic { color: var(--warn); }
+.v2-suivi .st-legende { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: -4px 0 8px; color: var(--ink2); font-size: var(--at-min); }
+.v2-suivi .st-legende .key { margin-left: 0; }
+/* Graphique : le dessin du serveur (server/charts.js), sans ses textes (trop petits une fois réduits au téléphone) ; les
+   graduations à gauche et les dates dessous, en HTML. */
+.v2-suivi .st-graphe { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 8px; margin: 0; }
+.v2-suivi .st-graphe .chartbox { margin: 0; min-width: 0; }
+.v2-suivi .st-graphe .chart { display: block; width: 100%; height: 200px; }
+.v2-suivi .st-graphe .chart .c-axis { display: none; }
+.v2-suivi .st-axe { display: flex; flex-direction: column; justify-content: space-between; padding: 2px 0 14px; color: var(--ink3); font-size: var(--at-min); font-variant-numeric: tabular-nums; text-align: right; }
+.v2-suivi .st-dates { grid-column: 2; display: flex; justify-content: space-between; gap: 8px; margin: 2px 0 0; color: var(--ink3); font-size: var(--at-min); }
+@media (max-width: 720px) { .v2-suivi .st-graphe .chart { height: 160px; } }
+.v2-suivi .st-donnees { margin-top: 12px; }
+.v2-suivi .st-donnees > summary .h { font-size: var(--at-texte); }
+.v2-suivi .st-donnees .tablewrap { max-height: 420px; overflow: auto; margin-top: 8px; border-radius: var(--r); }
+.v2-suivi .st-table { width: 100%; border-collapse: collapse; font-size: var(--at-petit); }
+.v2-suivi .st-table caption { padding: 0 0 8px; text-align: left; color: var(--ink2); }
+.v2-suivi .st-table th, .v2-suivi .st-table td { padding: 6px 10px; border-top: 1px solid var(--line); text-align: left; }
+.v2-suivi .st-table thead th { color: var(--ink2); font-weight: 500; }
+.v2-suivi .st-table tbody th { font-weight: 400; white-space: nowrap; }
+.v2-suivi .st-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+/* Classements : position, vignette, titre en lien avec sa jauge, nombre écrit. */
+.v2-suivi .st-rang { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.v2-suivi .st-rang li { display: grid; grid-template-columns: 20px 56px minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.v2-suivi .st-rang li:first-child { border-top: 0; }
+.v2-suivi .st-rang--plat li { grid-template-columns: minmax(0, 1fr) auto; }
+.v2-suivi .st-pos { color: var(--ink3); font-size: var(--at-petit); font-variant-numeric: tabular-nums; }
+.v2-suivi .st-img picture { display: contents; }
+.v2-suivi .st-img img { display: block; width: 56px; height: 40px; object-fit: cover; border-radius: 5px; background: var(--photo-bg); }
+.v2-suivi .st-t { display: grid; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.v2-suivi .st-v { color: var(--ink2); font-size: var(--at-petit); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.v2-suivi .st-sous { margin: 16px 0 4px; font-size: var(--at-h3); font-weight: 500; }
+.v2-suivi .st-monde { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+.v2-suivi .st-monde .carte { display: block; width: 100%; height: auto; }
+@media (max-width: 900px) { .v2-suivi .st-monde { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 420px) { .v2-suivi .st-rang li { grid-template-columns: 16px 48px minmax(0, 1fr); } .v2-suivi .st-rang li .st-v { grid-column: 3; text-align: left; } .v2-suivi .st-img img { width: 48px; height: 34px; } .v2-suivi .st-rang--plat li { grid-template-columns: minmax(0, 1fr) auto; } .v2-suivi .st-rang--plat li .st-v { grid-column: auto; text-align: right; } }
+
+/* ---------- Signalements des visiteurs ---------- */
+.v2-suivi .sg-liste { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.v2-suivi .sg { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 4px 16px; margin: 0; }
+.v2-suivi .sg--nouveau { box-shadow: inset 3px 0 0 var(--warn); }
+.v2-suivi .sg-photo img, .v2-suivi .sg-vide { display: block; width: 96px; height: auto; border-radius: 6px; background: var(--photo-bg); }
+.v2-suivi .sg-vide { height: 64px; }
+.v2-suivi .sg-photo picture { display: contents; }
+.v2-suivi .sg-corps { display: grid; gap: 8px; min-width: 0; }
+.v2-suivi .sg-corps > * { margin: 0; }
+.v2-suivi .sg-titre { font-size: var(--at-h3); font-weight: 500; }
+.v2-suivi .sg-etats { display: flex; flex-wrap: wrap; gap: 6px; }
+.v2-suivi .sg-quand { color: var(--ink3); font-size: var(--at-petit); }
+.v2-suivi .sg-msg { margin: 0; padding: 10px 14px; border-radius: 0 var(--r) var(--r) 0; background: var(--s2); box-shadow: inset 3px 0 0 var(--line2); }
+.v2-suivi .sg-msg p { margin: 0; white-space: pre-line; overflow-wrap: anywhere; max-width: 72ch; }
+.v2-suivi .sg-mail .lien-a { gap: 6px; }
+.v2-suivi .sg-actions form { margin: 0; }
+.v2-suivi .sg-actions .btn { gap: 6px; }
+@media (max-width: 540px) { .v2-suivi .sg { grid-template-columns: minmax(0, 1fr); } .v2-suivi .sg-photo img { width: 120px; } .v2-suivi .sg-vide { display: none; } }
+
+/* ---------- Circuit de publication ---------- */
+.v2-suivi .ci-liste { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 16px; align-items: start; }
+.v2-suivi .ci { margin: 0; min-width: 0; }
+.v2-suivi .ci form { display: grid; gap: 0; }
+.v2-suivi .ci-tete { display: grid; gap: 2px; margin: 0 0 8px; }
+.v2-suivi .ci-tete h2 { margin: 0; font-size: var(--at-h2); font-weight: 500; overflow-wrap: anywhere; }
+.v2-suivi .ci-tete p { margin: 0; }
+.v2-suivi .ci-reg { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.v2-suivi .ci-txt p { margin: 0; }
+.v2-suivi .ci-nom { font-weight: 500; }
+.v2-suivi .ci-effet { color: var(--ink2); font-size: var(--at-petit); line-height: 1.45; max-width: 60ch; }
+.v2-suivi .ci-deja { display: block; margin-top: 4px; color: var(--ink2); font-style: italic; }
+.v2-suivi .ci .inter-mot { min-width: 2.5em; text-align: right; }
+.v2-suivi .ci .form-pied { margin-top: 4px; }
+
+/* ---------- Aide (UX-A-22) ---------- */
+.v2-suivi .aide { display: grid; gap: 24px; align-items: start; }
+@media (min-width: 1101px) { .v2-suivi .aide { grid-template-columns: 250px minmax(0, 1fr); } }
+.v2-suivi .aide-toc { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; padding-right: 4px; font-size: var(--at-petit); }
+.v2-suivi .aide-toc-t { margin: 0 0 8px; color: var(--ink3); font-size: var(--at-min); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+.v2-suivi :is(.aide-toc, .aide-toc-tel) ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; color: var(--ink2); }
+.v2-suivi :is(.aide-toc, .aide-toc-tel) ol ol { margin: 2px 0 4px; color: var(--ink3); }
+.v2-suivi :is(.aide-toc, .aide-toc-tel) a { display: inline-block; padding: 3px 0; min-height: 24px; color: inherit; }
+.v2-suivi :is(.aide-toc, .aide-toc-tel) a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 1100px) { .v2-suivi .aide-toc { display: none; } }
+@media (min-width: 1101px) { .v2-suivi .aide-toc-tel { display: none; } }
+@media (max-width: 720px), (pointer: coarse) { .v2-suivi .aide-toc-tel a { display: flex; align-items: center; min-height: 44px; padding: 0; } }
+.v2-suivi .aide-toc-tel { margin: 0 0 16px; }
+.v2-suivi .aide-toc-tel nav { margin-top: 8px; }
+.v2-suivi .aide-corps { min-width: 0; }
+.v2-suivi .aide-cherche { margin: 0 0 16px; }
+.v2-suivi .aide-cherche .champ-a { max-width: 520px; }
+.v2-suivi .aide-q { position: relative; }
+.v2-suivi .aide-q .ic { position: absolute; left: 10px; top: 50%; translate: 0 -50%; color: var(--ink3); pointer-events: none; }
+.v2-suivi .aide-q input { width: 100%; padding-left: 36px; }
+.v2-suivi .aide-statut { margin: 8px 0 0; color: var(--ink2); font-size: var(--at-petit); }
+.v2-suivi .aide-statut:empty { display: none; }
+.v2-suivi .aide-resultats { display: grid; gap: 0; margin: 8px 0 0; padding: 0; list-style: none; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); max-height: 420px; overflow: auto; }
+.v2-suivi .aide-resultats li + li { border-top: 1px solid var(--line); }
+.v2-suivi .aide-resultats a { display: grid; gap: 2px; padding: 10px 14px; color: var(--ink); }
+.v2-suivi .aide-resultats a:hover, .v2-suivi .aide-resultats a:focus-visible { background: var(--s2); }
+.v2-suivi .aide-r-t { font-weight: 500; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line2); }
+.v2-suivi .aide-r-x { color: var(--ink2); font-size: var(--at-petit); }
+.v2-suivi .aide-r-x mark, .v2-suivi .aide-section mark { background: var(--accent-soft); color: var(--ink); border-radius: 2px; }
+.v2-suivi .aide-section { margin: 0 0 16px; scroll-margin-top: 16px; }
+.v2-suivi .aide-section > h2 { font-size: 22px; font-weight: 400; }
+.v2-suivi .aide-section :is(h3, h4)[id] { scroll-margin-top: 16px; }
+.v2-suivi .aide-section :is(table, pre) { display: block; max-width: 100%; overflow-x: auto; }
+.v2-suivi .aide-section :is(p, li) { overflow-wrap: anywhere; }
+.v2-suivi .aide-section a:not(.btn) { overflow-wrap: anywhere; }
+.v2-suivi .aide-haut { margin: 16px 0 0; }
+::highlight(aide) { background-color: var(--accent-soft); color: var(--ink); }
+
+/* ---------- Nouveautés ---------- */
+.v2-suivi .nv-liste { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.v2-suivi .nv { margin: 0; min-width: 0; scroll-margin-top: 16px; }
+.v2-suivi .nv-titre { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0; font-size: var(--at-h2); font-weight: 500; overflow-wrap: anywhere; }
+.v2-suivi .nv-liste--mois .nv-titre { font-size: var(--at-h3); }
+.v2-suivi .nv-v { font-family: var(--mono); font-size: var(--at-petit); font-weight: 400; color: var(--ink2); }
+.v2-suivi .nv-date { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 4px 0 10px; color: var(--ink3); font-size: var(--at-petit); }
+.v2-suivi .nv ul { display: grid; gap: 4px; margin: 0; padding-left: 20px; color: var(--ink2); }
+.v2-suivi .nv li { overflow-wrap: anywhere; }
+.v2-suivi .nv-avant { margin: 32px 0 12px; font-size: var(--at-h2); font-weight: 500; }
+.v2-suivi .nv-mois { margin: 0 0 12px; }
+.v2-suivi .nv-liste--mois { gap: 0; }
+.v2-suivi .nv-liste--mois > .nv { padding: 14px 0; border-top: 1px solid var(--line); }
+.v2-suivi .nv-liste--mois > .nv:first-child { border-top: 0; padding-top: 4px; }
+
+/* Liens des cartes et des classements (hors tableau .liste-a) : 24 px au bureau, 44 au toucher. */
+.v2-suivi :is(.sg-titre, .st-t) a.ligne-lien { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .v2-suivi :is(.sg-titre, .st-t) a.ligne-lien { min-height: 44px; } }
+/* Sur la page Nouveautés, son entrée du pied est la courante (fond --s3) : le numéro de version y passe en --ink2 (4,5:1). */
+.admin .pied-liens a[aria-current] .nav-ver { color: var(--ink2); }
+/* Aide : un bloc de code passe à la ligne (plus de ligne qui défile sans suite visible) ; un tableau qui défile, atteint au
+   clavier (tabindex de server/help.js), s'arrête au-dessus de la barre d'onglets du téléphone (WCAG 2.4.11 et 2.4.12). */
+.v2-suivi .aide-section pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: visible; }
+@media (max-width: 720px) { .v2-suivi .aide-section table[tabindex] { scroll-margin-bottom: 96px; scroll-margin-top: 16px; max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); overflow: auto; } }
+/* Les cellules passent à la ligne (mots longs allemands compris) : le tableau tient dans la largeur, sans défilement caché. */
+.v2-suivi .aide-section :is(td, th) { overflow-wrap: anywhere; hyphens: auto; }

@@ -1,0 +1,830 @@
+{
+ "Galerie privée : {action}": {
+  "en": "Private gallery: {action}",
+  "de": "Private Galerie: {action}"
+ },
+ "Tout (13 mois)": {
+  "en": "All (13 months)",
+  "de": "Alles (13 Monate)"
+ },
+ "Dernières 24 heures": {
+  "en": "Last 24 hours",
+  "de": "Letzte 24 Stunden"
+ },
+ "7 derniers jours": {
+  "en": "Last 7 days",
+  "de": "Letzte 7 Tage"
+ },
+ "30 derniers jours": {
+  "en": "Last 30 days",
+  "de": "Letzte 30 Tage"
+ },
+ "{n} lignes": {
+  "en": "{n} entries",
+  "de": "{n} Einträge"
+ },
+ "{n} ligne": {
+  "en": "{n} entry",
+  "de": "{n} Eintrag"
+ },
+ "gardé 13 mois": {
+  "en": "kept 13 months",
+  "de": "13 Monate aufbewahrt"
+ },
+ "Qui a fait quoi dans l’admin : connexions, modifications, publications, comptes, exports. Le choix de la langue et du thème n’y figure pas.": {
+  "en": "Who did what in the admin: sign-ins, changes, publications, accounts, exports. Language and theme choices are not logged.",
+  "de": "Wer hat was in der Verwaltung getan: Anmeldungen, Änderungen, Veröffentlichungen, Konten, Exporte. Sprach- und Designwahl werden nicht protokolliert."
+ },
+ "Filtrer le journal": {
+  "en": "Filter the log",
+  "de": "Protokoll filtern"
+ },
+ "(action, cible, détail)": {
+  "en": "(action, target, detail)",
+  "de": "(Aktion, Ziel, Detail)"
+ },
+ "Type d’action": {
+  "en": "Type of action",
+  "de": "Art der Aktion"
+ },
+ "Toutes les actions": {
+  "en": "All actions",
+  "de": "Alle Aktionen"
+ },
+ "Voir tout le journal": {
+  "en": "See the whole log",
+  "de": "Ganzes Protokoll anzeigen"
+ },
+ "la plus récente d’abord": {
+  "en": "most recent first",
+  "de": "neueste zuerst"
+ },
+ "page {n} sur {total}": {
+  "en": "page {n} of {total}",
+  "de": "Seite {n} von {total}"
+ },
+ "de {debut} à {fin}": {
+  "en": "from {debut} to {fin}",
+  "de": "von {debut} bis {fin}"
+ },
+ "{n} fois ce jour-là": {
+  "en": "{n} times that day",
+  "de": "{n}-mal an diesem Tag"
+ },
+ "action notée telle quelle": {
+  "en": "action logged as is",
+  "de": "Aktion unverändert protokolliert"
+ },
+ "Refusé": {
+  "en": "Refused",
+  "de": "Abgelehnt"
+ },
+ "Pages du journal": {
+  "en": "Log pages",
+  "de": "Protokollseiten"
+ },
+ "Plus récentes": {
+  "en": "Newer",
+  "de": "Neuere"
+ },
+ "Page {n} sur {total}": {
+  "en": "Page {n} of {total}",
+  "de": "Seite {n} von {total}"
+ },
+ "Plus anciennes": {
+  "en": "Older",
+  "de": "Ältere"
+ },
+ "Les 300 dernières actions du compte et du mot cherchés sont lues ; le type et la période trient parmi elles.": {
+  "en": "The last 300 actions for the account and word searched are read; type and period sort among them.",
+  "de": "Gelesen werden die letzten 300 Aktionen für das gesuchte Konto und Wort; Art und Zeitraum filtern darunter."
+ },
+ "en français": {
+  "en": "in French",
+  "de": "auf Französisch"
+ },
+ "en anglais": {
+  "en": "in English",
+  "de": "auf Englisch"
+ },
+ "en allemand": {
+  "en": "in German",
+  "de": "auf Deutsch"
+ },
+ "{date} à {heure}": {
+  "en": "{date} at {heure}",
+  "de": "{date} um {heure}"
+ },
+ "aucun nouveau": {
+  "en": "none new",
+  "de": "keine neuen"
+ },
+ "{n} traités": {
+  "en": "{n} handled",
+  "de": "{n} erledigt"
+ },
+ "1 traité": {
+  "en": "1 handled",
+  "de": "1 erledigt"
+ },
+ "aucun traité": {
+  "en": "none handled",
+  "de": "keine erledigt"
+ },
+ "Filtrer les signalements": {
+  "en": "Filter reports",
+  "de": "Meldungen filtern"
+ },
+ "Nouveaux": {
+  "en": "New",
+  "de": "Neu"
+ },
+ "Traités": {
+  "en": "Handled",
+  "de": "Erledigt"
+ },
+ "Aucun nouveau signalement : tout est traité.": {
+  "en": "No new reports: everything has been handled.",
+  "de": "Keine neuen Meldungen: alles ist erledigt."
+ },
+ "Aucun signalement traité.": {
+  "en": "No handled reports.",
+  "de": "Keine erledigten Meldungen."
+ },
+ "{n} signalements": {
+  "en": "{n} reports",
+  "de": "{n} Meldungen"
+ },
+ "{n} signalement": {
+  "en": "{n} report",
+  "de": "{n} Meldung"
+ },
+ "Photo « {title} »": {
+  "en": "Photo “{title}”",
+  "de": "Foto „{title}“"
+ },
+ "Nouveau": {
+  "en": "New",
+  "de": "Neu"
+ },
+ "Sans message.": {
+  "en": "No message.",
+  "de": "Ohne Nachricht."
+ },
+ "Répondre à {email}": {
+  "en": "Reply to {email}",
+  "de": "{email} antworten"
+ },
+ "Marquer comme traité": {
+  "en": "Mark as handled",
+  "de": "Als erledigt markieren"
+ },
+ "Supprimer le signalement sur « {title} » ?": {
+  "en": "Delete the report on “{title}”?",
+  "de": "Meldung zu „{title}“ löschen?"
+ },
+ "Le message et l’adresse laissée sont effacés ; la photo ne change pas. Cette action est définitive.": {
+  "en": "The message and the address left are erased; the photo does not change. This cannot be undone.",
+  "de": "Nachricht und hinterlassene Adresse werden gelöscht; das Foto bleibt unverändert. Dies ist endgültig."
+ },
+ "Le message est effacé ; la photo ne change pas. Cette action est définitive.": {
+  "en": "The message is erased; the photo does not change. This cannot be undone.",
+  "de": "Die Nachricht wird gelöscht; das Foto bleibt unverändert. Dies ist endgültig."
+ },
+ "Supprimer le signalement": {
+  "en": "Delete the report",
+  "de": "Meldung löschen"
+ },
+ "Oui : ses photos partent en ligne dès qu’il les publie. Non : il les propose au modérateur, qui les valide.": {
+  "en": "Yes: their photos go online as soon as they publish them. No: they submit them to the moderator, who approves them.",
+  "de": "Ja: Die Fotos gehen online, sobald sie veröffentlicht werden. Nein: Sie werden dem Moderator vorgeschlagen, der sie freigibt."
+ },
+ "Oui : il corrige lui-même une photo en ligne. Non : une photo publiée ne change plus sans vous.": {
+  "en": "Yes: they correct an online photo themselves. No: a published photo no longer changes without you.",
+  "de": "Ja: Ein Online-Foto wird selbst korrigiert. Nein: Ein veröffentlichtes Foto ändert sich nicht mehr ohne Sie."
+ },
+ "Oui : ses photos entrent dans la file dès qu’il les y met. Non : il les propose pour Instagram au modérateur.": {
+  "en": "Yes: their photos enter the queue as soon as they add them. No: they submit them for Instagram to the moderator.",
+  "de": "Ja: Die Fotos kommen direkt in die Warteschlange. Nein: Sie werden dem Moderator für Instagram vorgeschlagen."
+ },
+ "Oui": {
+  "en": "Yes",
+  "de": "Ja"
+ },
+ "Non": {
+  "en": "No",
+  "de": "Nein"
+ },
+ "{n} photographes": {
+  "en": "{n} photographers",
+  "de": "{n} Fotografen"
+ },
+ "{n} photographe": {
+  "en": "{n} photographer",
+  "de": "{n} Fotograf"
+ },
+ "aucun compte Photographe": {
+  "en": "no Photographer account",
+  "de": "kein Fotografen-Konto"
+ },
+ "Chaque interrupteur s’enregistre dès que vous le basculez ; « Défaire » revient en arrière pendant 10 secondes.": {
+  "en": "Each switch is saved as soon as you flip it; “Undo” goes back for 10 seconds.",
+  "de": "Jeder Schalter wird gespeichert, sobald Sie ihn umlegen; „Rückgängig“ ist 10 Sekunden lang möglich."
+ },
+ "Aucun compte Photographe. Un compte reçoit ce rôle dans Comptes et rôles.": {
+  "en": "No Photographer account. An account receives this role in Accounts and roles.",
+  "de": "Kein Fotografen-Konto. Ein Konto erhält diese Rolle unter Konten und Rollen."
+ },
+ "Un autre rôle du compte le donne déjà : ce réglage n’y change rien.": {
+  "en": "Another role of the account already grants it: this setting changes nothing.",
+  "de": "Eine andere Rolle des Kontos gewährt dies bereits: Diese Einstellung ändert nichts."
+ },
+ "{n} rubriques": {
+  "en": "{n} chapters",
+  "de": "{n} Kapitel"
+ },
+ "Sommaire": {
+  "en": "Contents",
+  "de": "Inhalt"
+ },
+ "Chaque version apporte ce qui suit ; la plus récente d’abord. Seules les notes qui concernent votre rôle sont montrées.": {
+  "en": "Each version brings the following; the most recent first. Only the notes that concern your role are shown.",
+  "de": "Jede Version bringt Folgendes; die neueste zuerst. Nur die Hinweise, die Ihre Rolle betreffen, werden gezeigt."
+ },
+ "Les {n} versions les plus récentes": {
+  "en": "The {n} most recent versions",
+  "de": "Die {n} neuesten Versionen"
+ },
+ "Versions précédentes": {
+  "en": "Earlier versions",
+  "de": "Frühere Versionen"
+ },
+ "{n} versions, de {premiere} à {derniere}": {
+  "en": "{n} versions, from {premiere} to {derniere}",
+  "de": "{n} Versionen, von {premiere} bis {derniere}"
+ },
+ "{n} version : {v}": {
+  "en": "{n} version: {v}",
+  "de": "{n} Version: {v}"
+ },
+ "nouveau sur la période": {
+  "en": "new in the period",
+  "de": "neu im Zeitraum"
+ },
+ "stable par rapport aux {period} précédents": {
+  "en": "stable compared with the previous {period}",
+  "de": "stabil gegenüber den vorherigen {period}"
+ },
+ "{d} % par rapport aux {period} précédents": {
+  "en": "{d} % compared with the previous {period}",
+  "de": "{d} % gegenüber den vorherigen {period}"
+ },
+ "{n} vues": {
+  "en": "{n} views",
+  "de": "{n} Aufrufe"
+ },
+ "{n} vue": {
+  "en": "{n} view",
+  "de": "{n} Aufruf"
+ },
+ "mesure anonyme, sans cookie": {
+  "en": "anonymous measurement, no cookie",
+  "de": "anonyme Messung, ohne Cookie"
+ },
+ "Vos photos : ouvertures en grand et partages. La fréquentation du site entier est réservée à l’administrateur.": {
+  "en": "Your photos: full-size views and shares. Traffic for the whole site is reserved for the administrator.",
+  "de": "Ihre Fotos: Großansichten und Teilungen. Die Besucherzahlen der ganzen Website sind dem Administrator vorbehalten."
+ },
+ "Mesure anonyme, sans cookie ni service extérieur ; les visites de l’équipe et des robots ne sont pas comptées.": {
+  "en": "Anonymous measurement, without cookies or outside services; visits by the team and by robots are not counted.",
+  "de": "Anonyme Messung, ohne Cookies und ohne externe Dienste; Besuche des Teams und von Robotern werden nicht gezählt."
+ },
+ "des visiteurs sur téléphone": {
+  "en": "of visitors on a phone",
+  "de": "der Besucher auf dem Handy"
+ },
+ "Visiteurs : visiteurs différents chaque jour, additionnés sur la période.": {
+  "en": "Visitors: distinct visitors each day, added up over the period.",
+  "de": "Besucher: verschiedene Besucher pro Tag, über den Zeitraum addiert."
+ },
+ "Les données sont dans le tableau « Voir les données ».": {
+  "en": "The data are in the “View the data” table.",
+  "de": "Die Daten stehen in der Tabelle „Daten anzeigen“."
+ },
+ "Données de la fréquentation": {
+  "en": "Traffic data",
+  "de": "Besucherdaten"
+ },
+ "Pages vues et visiteurs, par mois, le plus récent d’abord.": {
+  "en": "Page views and visitors, by month, most recent first.",
+  "de": "Seitenaufrufe und Besucher, pro Monat, neueste zuerst."
+ },
+ "Pages vues et visiteurs, par jour, le plus récent d’abord.": {
+  "en": "Page views and visitors, by day, most recent first.",
+  "de": "Seitenaufrufe und Besucher, pro Tag, neueste zuerst."
+ },
+ "{n} visites": {
+  "en": "{n} visits",
+  "de": "{n} Besuche"
+ },
+ "{n} visite": {
+  "en": "{n} visit",
+  "de": "{n} Besuch"
+ },
+ "« {nom} » : {reglage} · {valeur}": {
+  "en": "“{nom}”: {reglage} · {valeur}",
+  "de": "„{nom}“: {reglage} · {valeur}"
+ },
+ "« {nom} » rétabli : {reglage} · {valeur}": {
+  "en": "“{nom}” restored: {reglage} · {valeur}",
+  "de": "„{nom}“ wiederhergestellt: {reglage} · {valeur}"
+ },
+ "Tapez au moins deux lettres.": {
+  "en": "Type at least two letters.",
+  "de": "Geben Sie mindestens zwei Buchstaben ein."
+ },
+ "{n} passages contiennent « {q} ».": {
+  "en": "{n} passages contain “{q}”.",
+  "de": "{n} Abschnitte enthalten „{q}“."
+ },
+ "{n} passage contient « {q} ».": {
+  "en": "{n} passage contains “{q}”.",
+  "de": "{n} Abschnitt enthält „{q}“."
+ },
+ "Les 30 premiers sont listés.": {
+  "en": "The first 30 are listed.",
+  "de": "Die ersten 30 werden aufgeführt."
+ },
+ "Aucun passage ne contient « {q} ». Essayez un autre mot, ou parcourez le sommaire.": {
+  "en": "No passage contains “{q}”. Try another word, or browse the contents.",
+  "de": "Kein Abschnitt enthält „{q}“. Versuchen Sie ein anderes Wort oder blättern Sie im Inhalt."
+ },
+ "Identité et apparence enregistrées": {
+  "en": "Identity and appearance saved",
+  "de": "Identität und Erscheinungsbild gespeichert"
+ },
+ "Vue du site public changée pour la session": {
+  "en": "Public site view changed for the session",
+  "de": "Ansicht der öffentlichen Website für die Sitzung geändert"
+ },
+ "Logo envoyé": {
+  "en": "Logo uploaded",
+  "de": "Logo hochgeladen"
+ },
+ "Logo retiré": {
+  "en": "Logo removed",
+  "de": "Logo entfernt"
+ },
+ "Photographe ajouté": {
+  "en": "Photographer added",
+  "de": "Fotograf hinzugefügt"
+ },
+ "Photographe modifié": {
+  "en": "Photographer changed",
+  "de": "Fotograf geändert"
+ },
+ "Photographe supprimé": {
+  "en": "Photographer deleted",
+  "de": "Fotograf gelöscht"
+ },
+ "Billet enregistré": {
+  "en": "Post saved",
+  "de": "Beitrag gespeichert"
+ },
+ "Aperçu d’un billet": {
+  "en": "Post preview",
+  "de": "Beitragsvorschau"
+ },
+ "Brouillon d’un billet enregistré": {
+  "en": "Post draft saved",
+  "de": "Beitragsentwurf gespeichert"
+ },
+ "Brouillon d’un billet écarté": {
+  "en": "Post draft discarded",
+  "de": "Beitragsentwurf verworfen"
+ },
+ "Photo d’un billet réglée": {
+  "en": "Post photo set",
+  "de": "Beitragsfoto eingestellt"
+ },
+ "Billet proposé": {
+  "en": "Post submitted",
+  "de": "Beitrag vorgeschlagen"
+ },
+ "Billet publié ou programmé": {
+  "en": "Post published or scheduled",
+  "de": "Beitrag veröffentlicht oder geplant"
+ },
+ "Billet supprimé": {
+  "en": "Post deleted",
+  "de": "Beitrag gelöscht"
+ },
+ "Traduction d’un billet demandée": {
+  "en": "Post translation requested",
+  "de": "Beitragsübersetzung angefordert"
+ },
+ "Version d’un billet rétablie": {
+  "en": "Post version restored",
+  "de": "Beitragsversion wiederhergestellt"
+ },
+ "Réglages des Carnets enregistrés": {
+  "en": "Notebook settings saved",
+  "de": "Einstellungen der Reisetagebücher gespeichert"
+ },
+ "Avis par e-mail réglés": {
+  "en": "Email notices set",
+  "de": "E-Mail-Benachrichtigungen eingestellt"
+ },
+ "Raccourcis d’une touche réglés": {
+  "en": "Single-key shortcuts set",
+  "de": "Ein-Tasten-Kürzel eingestellt"
+ },
+ "E-mail de test envoyé": {
+  "en": "Test email sent",
+  "de": "Test-E-Mail gesendet"
+ },
+ "Galerie privée créée": {
+  "en": "Private gallery created",
+  "de": "Private Galerie erstellt"
+ },
+ "Galerie privée modifiée": {
+  "en": "Private gallery changed",
+  "de": "Private Galerie geändert"
+ },
+ "Accès à une galerie privée créé": {
+  "en": "Private gallery access created",
+  "de": "Zugang zu einer privaten Galerie erstellt"
+ },
+ "Accès à une galerie privée modifié": {
+  "en": "Private gallery access changed",
+  "de": "Zugang zu einer privaten Galerie geändert"
+ },
+ "Photos d’une galerie privée réglées": {
+  "en": "Private gallery photos set",
+  "de": "Fotos einer privaten Galerie eingestellt"
+ },
+ "Galerie privée supprimée": {
+  "en": "Private gallery deleted",
+  "de": "Private Galerie gelöscht"
+ },
+ "Filigrane et EXIF enregistrés": {
+  "en": "Watermark and EXIF saved",
+  "de": "Wasserzeichen und EXIF gespeichert"
+ },
+ "Aperçu du filigrane": {
+  "en": "Watermark preview",
+  "de": "Wasserzeichen-Vorschau"
+ },
+ "Logo du filigrane envoyé": {
+  "en": "Watermark logo uploaded",
+  "de": "Wasserzeichen-Logo hochgeladen"
+ },
+ "Logo du filigrane retiré": {
+  "en": "Watermark logo removed",
+  "de": "Wasserzeichen-Logo entfernt"
+ },
+ "Compte Instagram déconnecté": {
+  "en": "Instagram account disconnected",
+  "de": "Instagram-Konto getrennt"
+ },
+ "J’aime Instagram relus": {
+  "en": "Instagram likes refreshed",
+  "de": "Instagram-Likes neu gelesen"
+ },
+ "Proposition Instagram renvoyée": {
+  "en": "Instagram submission returned",
+  "de": "Instagram-Vorschlag zurückgeschickt"
+ },
+ "Proposition Instagram validée": {
+  "en": "Instagram submission approved",
+  "de": "Instagram-Vorschlag freigegeben"
+ },
+ "Réglages Instagram enregistrés": {
+  "en": "Instagram settings saved",
+  "de": "Instagram-Einstellungen gespeichert"
+ },
+ "File Instagram reprise": {
+  "en": "Instagram queue resumed",
+  "de": "Instagram-Warteschlange fortgesetzt"
+ },
+ "Langue de l’admin changée": {
+  "en": "Admin language changed",
+  "de": "Sprache der Verwaltung geändert"
+ },
+ "Rencontre détachée d’une personne": {
+  "en": "Encounter detached from a person",
+  "de": "Begegnung von einer Person gelöst"
+ },
+ "Rapprochement écarté": {
+  "en": "Match dismissed",
+  "de": "Zuordnung verworfen"
+ },
+ "Personnes réunies": {
+  "en": "People merged",
+  "de": "Personen zusammengeführt"
+ },
+ "Photos liées à une personne": {
+  "en": "Photos linked to a person",
+  "de": "Fotos mit einer Person verknüpft"
+ },
+ "Rencontre rattachée à une personne": {
+  "en": "Encounter attached to a person",
+  "de": "Begegnung einer Person zugeordnet"
+ },
+ "Personne liée à une sortie": {
+  "en": "Person linked to an outing",
+  "de": "Person mit einem Ausflug verknüpft"
+ },
+ "Photos envoyées": {
+  "en": "Photos sent",
+  "de": "Fotos gesendet"
+ },
+ "Description suggérée demandée": {
+  "en": "Suggested description requested",
+  "de": "Vorgeschlagene Beschreibung angefordert"
+ },
+ "Demande d’accord Instagram": {
+  "en": "Instagram consent request",
+  "de": "Anfrage zur Instagram-Zustimmung"
+ },
+ "Proposition Instagram retirée": {
+  "en": "Instagram submission withdrawn",
+  "de": "Instagram-Vorschlag zurückgezogen"
+ },
+ "Photo déplacée": {
+  "en": "Photo moved",
+  "de": "Foto verschoben"
+ },
+ "Série de la photo changée": {
+  "en": "Photo series changed",
+  "de": "Serie des Fotos geändert"
+ },
+ "Accords de la photo confirmés": {
+  "en": "Photo consents confirmed",
+  "de": "Zustimmungen des Fotos bestätigt"
+ },
+ "Visages de la photo indiqués": {
+  "en": "Photo faces marked",
+  "de": "Gesichter des Fotos angegeben"
+ },
+ "Lot de photos enregistré": {
+  "en": "Photo batch saved",
+  "de": "Fotostapel gespeichert"
+ },
+ "Ordre des photos changé": {
+  "en": "Photo order changed",
+  "de": "Reihenfolge der Fotos geändert"
+ },
+ "Preuves d’antériorité relancées": {
+  "en": "Proofs of prior existence retried",
+  "de": "Existenznachweise erneut gestartet"
+ },
+ "Rencontre saisie sur le terrain": {
+  "en": "Encounter entered in the field",
+  "de": "Begegnung unterwegs erfasst"
+ },
+ "Récapitulatif d’une rencontre envoyé": {
+  "en": "Encounter summary sent",
+  "de": "Zusammenfassung einer Begegnung gesendet"
+ },
+ "Carte signée saisie": {
+  "en": "Signed card entered",
+  "de": "Unterschriebene Karte erfasst"
+ },
+ "Cartes d’accord préparées": {
+  "en": "Consent cards prepared",
+  "de": "Einverständniskarten vorbereitet"
+ },
+ "Rencontre modifiée": {
+  "en": "Encounter changed",
+  "de": "Begegnung geändert"
+ },
+ "Demande de droits traitée": {
+  "en": "Rights request handled",
+  "de": "Rechteanfrage bearbeitet"
+ },
+ "Photo offerte": {
+  "en": "Photo given",
+  "de": "Foto geschenkt"
+ },
+ "Photo offerte retirée": {
+  "en": "Gift photo withdrawn",
+  "de": "Geschenktes Foto zurückgezogen"
+ },
+ "Photos liées à une rencontre": {
+  "en": "Photos linked to an encounter",
+  "de": "Fotos mit einer Begegnung verknüpft"
+ },
+ "Photo retirée d’une rencontre": {
+  "en": "Photo removed from an encounter",
+  "de": "Foto aus einer Begegnung entfernt"
+ },
+ "Photo exclue de la rencontre": {
+  "en": "Photo excluded from the encounter",
+  "de": "Foto aus der Begegnung ausgeschlossen"
+ },
+ "Suivi d’une rencontre changé": {
+  "en": "Encounter follow-up changed",
+  "de": "Bearbeitungsstand einer Begegnung geändert"
+ },
+ "Rencontre supprimée": {
+  "en": "Encounter deleted",
+  "de": "Begegnung gelöscht"
+ },
+ "Série créée": {
+  "en": "Series created",
+  "de": "Serie erstellt"
+ },
+ "Assistant « Décrire les photos » réglé": {
+  "en": "“Describe photos” assistant set",
+  "de": "Assistent „Fotos beschreiben“ eingestellt"
+ },
+ "Série modifiée": {
+  "en": "Series changed",
+  "de": "Serie geändert"
+ },
+ "Série supprimée": {
+  "en": "Series deleted",
+  "de": "Serie gelöscht"
+ },
+ "Série déplacée": {
+  "en": "Series moved",
+  "de": "Serie verschoben"
+ },
+ "Ordre des séries changé": {
+  "en": "Series order changed",
+  "de": "Reihenfolge der Serien geändert"
+ },
+ "Assistant « Proposer une série » réglé": {
+  "en": "“Suggest a series” assistant set",
+  "de": "Assistent „Serie vorschlagen“ eingestellt"
+ },
+ "Signalement supprimé": {
+  "en": "Report deleted",
+  "de": "Meldung gelöscht"
+ },
+ "Sortie coupée en deux": {
+  "en": "Outing split in two",
+  "de": "Ausflug geteilt"
+ },
+ "Lieu d’une sortie enregistré": {
+  "en": "Outing place saved",
+  "de": "Ort eines Ausflugs gespeichert"
+ },
+ "Photos d’une sortie liées": {
+  "en": "Outing photos linked",
+  "de": "Fotos eines Ausflugs verknüpft"
+ },
+ "Sortie publiée": {
+  "en": "Outing published",
+  "de": "Ausflug veröffentlicht"
+ },
+ "Sorties réunies": {
+  "en": "Outings merged",
+  "de": "Ausflüge zusammengeführt"
+ },
+ "Sortie rangée dans un voyage": {
+  "en": "Outing added to a trip",
+  "de": "Ausflug einer Reise zugeordnet"
+ },
+ "Mode clair ou sombre changé": {
+  "en": "Light or dark mode changed",
+  "de": "Heller oder dunkler Modus geändert"
+ },
+ "Traduction proposée": {
+  "en": "Translation suggested",
+  "de": "Übersetzung vorgeschlagen"
+ },
+ "Version de l’admin choisie": {
+  "en": "Admin version chosen",
+  "de": "Version der Verwaltung gewählt"
+ },
+ "Voyage créé": {
+  "en": "Trip created",
+  "de": "Reise erstellt"
+ },
+ "Voyage modifié": {
+  "en": "Trip changed",
+  "de": "Reise geändert"
+ },
+ "Journées ajoutées à un voyage": {
+  "en": "Days added to a trip",
+  "de": "Tage zu einer Reise hinzugefügt"
+ },
+ "Journée retirée d’un voyage": {
+  "en": "Day removed from a trip",
+  "de": "Tag aus einer Reise entfernt"
+ },
+ "Photos d’un voyage proposées": {
+  "en": "Trip photos submitted",
+  "de": "Fotos einer Reise vorgeschlagen"
+ },
+ "Photos d’un voyage publiées": {
+  "en": "Trip photos published",
+  "de": "Fotos einer Reise veröffentlicht"
+ },
+ "Voyage supprimé": {
+  "en": "Trip deleted",
+  "de": "Reise gelöscht"
+ },
+ "Sélection d’une galerie privée exportée": {
+  "en": "Private gallery selection exported",
+  "de": "Auswahl einer privaten Galerie exportiert"
+ },
+ "Identité confirmée": {
+  "en": "Identity confirmed",
+  "de": "Identität bestätigt"
+ },
+ "Identité confirmée (test)": {
+  "en": "Identity confirmed (test)",
+  "de": "Identität bestätigt (Test)"
+ },
+ "Vérification d’identité refusée (authentification ancienne)": {
+  "en": "Identity check refused (old authentication)",
+  "de": "Identitätsprüfung abgelehnt (alte Authentifizierung)"
+ },
+ "Vérification d’identité refusée (autre compte)": {
+  "en": "Identity check refused (other account)",
+  "de": "Identitätsprüfung abgelehnt (anderes Konto)"
+ },
+ "Compte rétabli par l’administrateur du serveur": {
+  "en": "Account restored by the server administrator",
+  "de": "Konto vom Serveradministrator wiederhergestellt"
+ },
+ "Photos et publication": {
+  "en": "Photos and publishing",
+  "de": "Fotos und Veröffentlichung"
+ },
+ "Personnes et galeries": {
+  "en": "People and galleries",
+  "de": "Personen und Galerien"
+ },
+ "Comptes et droits": {
+  "en": "Accounts and permissions",
+  "de": "Konten und Rechte"
+ },
+ "Réglages du site": {
+  "en": "Site settings",
+  "de": "Website-Einstellungen"
+ },
+ "Exports et originaux": {
+  "en": "Exports and originals",
+  "de": "Exporte und Originale"
+ },
+ "Connexions": {
+  "en": "Sign-ins",
+  "de": "Anmeldungen"
+ },
+ "Photo n° {id}": {
+  "en": "Photo no. {id}",
+  "de": "Foto Nr. {id}"
+ },
+ "Série n° {id}": {
+  "en": "Series no. {id}",
+  "de": "Serie Nr. {id}"
+ },
+ "Voyage n° {id}": {
+  "en": "Trip no. {id}",
+  "de": "Reise Nr. {id}"
+ },
+ "Rencontre n° {id}": {
+  "en": "Encounter no. {id}",
+  "de": "Begegnung Nr. {id}"
+ },
+ "Personne n° {id}": {
+  "en": "Person no. {id}",
+  "de": "Person Nr. {id}"
+ },
+ "Billet n° {id}": {
+  "en": "Post no. {id}",
+  "de": "Beitrag Nr. {id}"
+ },
+ "Galerie n° {id}": {
+  "en": "Gallery no. {id}",
+  "de": "Galerie Nr. {id}"
+ },
+ "Signalement n° {id}": {
+  "en": "Report no. {id}",
+  "de": "Meldung Nr. {id}"
+ },
+ "Compte n° {id}": {
+  "en": "Account no. {id}",
+  "de": "Konto Nr. {id}"
+ },
+ "Photographe n° {id}": {
+  "en": "Photographer no. {id}",
+  "de": "Fotograf Nr. {id}"
+ },
+ "Remarque n° {id}": {
+  "en": "Remark no. {id}",
+  "de": "Anmerkung Nr. {id}"
+ },
+ "Sortie du {id}": {
+  "en": "Outing of {id}",
+  "de": "Ausflug vom {id}"
+ },
+ "Notes des versions": {
+  "en": "Release notes",
+  "de": "Versionshinweise"
+ }
+}

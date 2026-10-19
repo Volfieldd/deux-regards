@@ -1,0 +1,46 @@
+<% const t = it.t, E = __eta.e; %>
+<% /* Circuit de publication (admin v2, vague 4 « suivi et aide »). Mêmes comptes, même droit (circuit.regler), même route
+      que la v1 (views/admin/circuit.eta ; POST /admin/circuit/:id → app.accounts.setAdjust, ses tickets et le journal
+      « circuit réglé »). La v2 : une carte par photographe, trois interrupteurs qui disent leur effet (MQ-07 : le mot suit
+      la case, sans script) ; avec le script, le geste enregistre le formulaire entier par la même route (réponse JSON) et
+      « Défaire » renvoie l'état d'avant pendant 10 s (MQ-09 : ce qui se défait s'enregistre au geste) ; sans script, le
+      bouton « Enregistrer « nom » ». Un droit qu'un autre rôle du compte donne déjà est dit sous l'interrupteur. */ %>
+<% layout('./layout', { pageTitle: `${t('Circuit de publication')} · ${t('Administration')} · ${it.siteName}` }) %>
+<% const REGLAGES = [
+     ['publier', 'photos.publier', t('Publier ses photos sans validation'), t('Oui : ses photos partent en ligne dès qu’il les publie. Non : il les propose au modérateur, qui les valide.'), a => a.publishAlone],
+     ['modifier', 'photos.publiees.modifier', t('Modifier ses photos une fois publiées'), t('Oui : il corrige lui-même une photo en ligne. Non : une photo publiée ne change plus sans vous.'), a => a.editPublished],
+     ['instagram', 'instagram.file', t('Mettre ses photos dans la file Instagram sans validation'), t('Oui : ses photos entrent dans la file dès qu’il les y met. Non : il les propose pour Instagram au modérateur.'), a => a.igAlone],
+   ];
+   const inter = (id, name, on) => '<label class="inter"><span class="inter-mot" aria-hidden="true"><span class="inter-oui">' + E(t('Oui')) + '</span><span class="inter-non">' + E(t('Non')) + '</span></span><input type="checkbox" role="switch" name="' + name + '" value="1"' + (on ? ' checked' : '') + ' aria-labelledby="' + id + '-t" aria-describedby="' + id + '-e"><span class="inter-piste" aria-hidden="true"></span></label>'; %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/suivi-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#photos-le-circuit-de-publication"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-suivi">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Circuit de publication') %></h1></div>
+  <p class="ep-meta"><span><%= it.list.length > 1 ? t('{n} photographes', { n: it.list.length }) : it.list.length === 1 ? t('{n} photographe', { n: 1 }) : t('aucun compte Photographe') %></span><span role="status" data-temoin></span></p>
+</header>
+<p class="rub-intro"><%= t('Par défaut, un photographe propose ses photos (pour le site et pour Instagram) et le modérateur les valide ; il peut modifier ses photos une fois publiées. Ces droits se règlent ici, photographe par photographe.') %> <span class="js-seul"><%= t('Chaque interrupteur s’enregistre dès que vous le basculez ; « Défaire » revient en arrière pendant 10 secondes.') %></span></p>
+<% if (!it.list.length) { %>
+<p class="panel hint"><%= t('Aucun compte Photographe. Un compte reçoit ce rôle dans Comptes et rôles.') %><% if (it.can('comptes.gerer')) { %> <a class="lien-a" href="/admin/comptes"><%= t('Comptes et rôles') %></a><% } %></p>
+<% } else { %>
+<div class="ci-liste">
+<% it.list.forEach(a => { const nom = a.name || a.sub; %>
+  <article class="panel ci" aria-labelledby="ci-<%= a.id %>">
+    <form method="post" action="/admin/circuit/<%= a.id %>" data-circuit data-nom="<%= nom %>">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <header class="ci-tete"><h2 id="ci-<%= a.id %>"><%= nom %></h2><p class="sec"><%= a.author ? t('photographe lié : {name}', { name: a.author }) : t('aucun photographe lié') %></p></header>
+<% REGLAGES.forEach(([name, perm, label, effet, get]) => { const id = 'ci-' + a.id + '-' + name; %>
+      <div class="ci-reg">
+        <div class="ci-txt"><p class="ci-nom" id="<%= id %>-t"><%= label %></p><p class="ci-effet" id="<%= id %>-e"><%= effet %><% if (a.byRole.has(perm)) { %> <span class="ci-deja"><%= t('Un autre rôle du compte le donne déjà : ce réglage n’y change rien.') %></span><% } %></p></div>
+        <%~ inter(id, name, get(a)) %>
+      </div>
+<% }) %>
+      <p class="sans-script form-pied"><button class="btn" type="submit"><%= t('Enregistrer « {name} »', { name: nom }) %></button></p>
+    </form>
+  </article>
+<% }) %>
+</div>
+<% } %>
+</div>
+<%~ include('./_textes-suivi', it) %>
+<script src="<%= it.asset('admin/v2/suivi-v2.js') %>" defer></script>
