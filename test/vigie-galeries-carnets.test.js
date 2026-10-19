@@ -66,10 +66,14 @@ test('vocabulaire et règles : authn_login_lock (site · public), bordure_cache_
     'acces_pays_multiples', 'telechargements_en_masse', 'acces_nouvel_appareil_puis_siphonage', 'acces_apres_revocation', 'csrf_repetes_invite', 'acces_crees_en_masse',
     'acces_debloque_apres_suspension', 'acces_apres_session_reprise', 'acces_longue_echeance', 'ecriture_hors_portee', 'billet_construction_active', 'billet_apres_session_reprise',
     'billets_modifies_en_masse', 'bordure_cache_prive']) assert.ok(names.has(n), n);
-  // Premier mois (Tranché 5) : tout en « alerter » ; la réponse automatique n'est portée que par les règles de pays.
+  // Premier mois (Tranché 5) : tout en « alerter » ; la réponse automatique n'est portée que par les règles de pays. Seule
+  // exception, hors du Tranché 5 : billet_apres_session_reprise, en « bloquer » avec la réponse douce verifier_identite
+  // (décision du propriétaire du 19 octobre 2026).
   const fichier = [...rules, ...correlations].filter(r => r.file === '85-galeries-carnets.yml' && r.signal && (r.generate ?? true));
-  for (const r of fichier) assert.ok(['alerter', 'observer'].includes(r.mode) && r.mode !== 'bloquer', r.name);
-  assert.deepEqual(fichier.filter(r => r.reponse).map(r => r.name).sort(), ['acces_groupe_pays_multiples', 'acces_pays_multiples']);
+  for (const r of fichier.filter(x => x.name !== 'billet_apres_session_reprise')) assert.ok(['alerter', 'observer'].includes(r.mode) && r.mode !== 'bloquer', r.name);
+  const billet = fichier.find(r => r.name === 'billet_apres_session_reprise');
+  assert.deepEqual([billet.mode, billet.reponse], ['bloquer', 'verifier_identite']);
+  assert.deepEqual(fichier.filter(r => r.reponse && r.reponse !== 'verifier_identite').map(r => r.name).sort(), ['acces_groupe_pays_multiples', 'acces_pays_multiples']);
   // Garde-fous du chargement : préfixe d'entité, réponse suspendre_acces sur autre chose qu'un accès.
   const d = tmp({ after: () => {} });
   for (const [bad, err] of [

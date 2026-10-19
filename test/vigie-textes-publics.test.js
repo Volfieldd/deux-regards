@@ -43,6 +43,11 @@ test('textes publiés : un contact gagné est signalé sans le texte ; le nombre
   db.prepare('UPDATE photos SET alt_text = alt_text || ? WHERE id = ?').run(' (mis à jour)', id);
   app.securite.watchPublication('essai');
   assert.equal(emitted.filter(e => e.detail?.objet === 'texte_public').length, 0);
+  // Lieu et mots-clés : textes publics aussi (affichés sous la photo, cherchables).
+  emitted.length = 0;
+  db.prepare('UPDATE photos SET place = ?, keywords = ? WHERE id = ?').run('Paris, réservez sur www.lieu-piege.example', 'mer, contact@piege.example', id);
+  app.securite.watchPublication('essai');
+  assert.deepEqual(emitted.filter(e => e.detail?.objet === 'texte_public').map(e => `${e.detail.champ}:${e.detail.ajout}`).sort(), ['photos.keywords:email', 'photos.place:lien']);
   // Une photo brouillon : hors des textes publiés ; publiée ensuite, ses textes entrent (et un lien qu'ils portent).
   const brouillon = db.prepare("SELECT id FROM photos WHERE status != 'published' LIMIT 1").pluck().get();
   if (brouillon) {

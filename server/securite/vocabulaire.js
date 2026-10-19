@@ -19,6 +19,9 @@ export const EVENTS = {
   // du vocabulaire d'OWASP. « haut » pour une suspension. Avant ce type, le site envoyait authn_login_disabled avec
   // detail.type_attendu = 'authn_login_lock' : la Vigie lit les deux formes (vigie/regles/85-galeries-carnets.yml).
   authn_login_lock: E('moyen', 'site · public'),
+  // Vérification d'identité demandée par la Vigie (décision verifier_identite) : identité confirmée par une nouvelle
+  // connexion du même compte (prompt=login, auth_time récent).
+  authn_reauth_success: E('info', 'site · connexion'),
   // E4, E5, E6 : sessions
   session_created: E('info', 'site · connexion'),
   session_destroyed: E('info', 'site · connexion'),
@@ -29,6 +32,9 @@ export const EVENTS = {
   authz_fail: E('bas', 'site · admin'),
   authz_csrf_fail: E('moyen', 'site · admin'),
   authz_blocked: E('bas', 'site · public'),           // requête refusée par une décision de la Vigie (blocage, verrouillage)
+  // Écriture de l'admin arrêtée : la Vigie redemande l'identité du compte et la session est authentifiée d'avant (une fois
+  // par minute, par session et par route).
+  authz_reauth_required: E('bas', 'site · admin'),
   // E9, E10 : comptes et rôles
   privilege_permissions_changed: E('bas', 'site · admin'),
   // Ce qu'un compte fait une fois entré (registre des briques, BV-1 et BV-2)

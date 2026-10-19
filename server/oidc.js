@@ -1,6 +1,7 @@
 import * as client from 'openid-client';
 
 const ROLE_CLAIM = 'urn:zitadel:iam:org:project:roles';
+const REAUTH_MAX_AGE = 300;                     // secondes : vérification d'identité (comme la console de la Vigie)
 
 // Rôles Zitadel : { admin: { <orgId>: <domaine> }, ... }. Le claim propre au projet est
 // préféré au claim générique ; avec orgId, seuls les rôles donnés dans cette organisation comptent.
@@ -51,7 +52,9 @@ export function createOidc(config) {
     origin: configured ? new URL(oidc.issuer).origin : null,
 
     // Prépare une redirection vers l'IdP ; `tx` est à conserver jusqu'au retour.
-    async start({ prompt } = {}) {
+    // reauth : vérification d'identité demandée par la Vigie (décision verifier_identite) : prompt=login et max_age=300,
+    // comme la ré-authentification de la console (Zitadel redemande la clé d'accès, auth_time exigé).
+    async start({ prompt, reauth = false } = {}) {
       const cfg = await server();
       const tx = { verifier: client.randomPKCECodeVerifier(), state: client.randomState(), nonce: client.randomNonce() };
       const params = {
@@ -63,16 +66,18 @@ export function createOidc(config) {
         nonce: tx.nonce,
       };
       if (prompt) params.prompt = prompt;
+      if (reauth) Object.assign(params, { prompt: 'login', max_age: String(REAUTH_MAX_AGE) });
       return { url: client.buildAuthorizationUrl(cfg, params).href, tx };
     },
 
     // Échange le code ; state, nonce, PKCE, signature, émetteur et audience sont vérifiés par openid-client.
+    // Vérification d'identité (tx.reauth) : max_age vérifié par la bibliothèque (auth_time exigé et récent).
     async finish(query, tx) {
       const cfg = await server();
       const url = new URL(oidc.redirectUri);
       url.search = new URLSearchParams(query).toString();
       const tokens = await client.authorizationCodeGrant(cfg, url, {
-        pkceCodeVerifier: tx.verifier, expectedState: tx.state, expectedNonce: tx.nonce,
+        pkceCodeVerifier: tx.verifier, expectedState: tx.state, expectedNonce: tx.nonce, ...(tx.reauth ? { maxAge: REAUTH_MAX_AGE } : {}),
       });
       const idClaims = tokens.claims();
       // Zitadel ne met les rôles dans l'ID token que si l'option est cochée : on complète par userinfo.
@@ -82,7 +87,9 @@ export function createOidc(config) {
       }
       const claims = { ...userinfo, ...idClaims };
       const roles = rolesFrom(claims, oidc);
-      return { claims, roles, admin: isAdmin(claims, roles, oidc), listed: listedAdmin(claims, oidc), idToken: tokens.id_token };
+      // Heure de l'authentification chez Zitadel : lue dans le jeton d'identité seul (jamais dans userinfo).
+      const authTime = Number.isFinite(idClaims.auth_time) ? idClaims.auth_time * 1000 : null;
+      return { claims, roles, admin: isAdmin(claims, roles, oidc), listed: listedAdmin(claims, oidc), idToken: tokens.id_token, authTime };
     },
 
     // URL de déconnexion côté IdP (RP-initiated logout), ou null si l'IdP n'en propose pas.

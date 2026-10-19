@@ -14,7 +14,7 @@ export const MODES = { arret: 'Arrêt', observer: 'Observer', alerter: 'Alerter'
 export const ENTITES = { ip: 'adresse', reseau: 'réseau', compte: 'compte', session: 'session', appareil: 'appareil', site: 'site', vigie: 'la Vigie' };
 export const ENTITES_NOM = { ip: 'Adresse', reseau: 'Réseau', compte: 'Compte', session: 'Session', appareil: 'Appareil', site: 'Site', vigie: 'Vigie' };
 // Types de décisions (lexique § 1), dans l'ordre du formulaire « Nouvelle décision ».
-export const DECISIONS = { bloquer: 'Bloquer une adresse', revoquer_compte: 'Fermer les sessions d’un compte', geler: 'Geler un compte', revoquer_session: 'Fermer une session', verrouiller: 'Verrouiller l’admin', suspendre_acces: 'Suspendre un accès de galerie privée' };
+export const DECISIONS = { bloquer: 'Bloquer une adresse', verifier_identite: 'Redemander l’identité d’un compte', revoquer_compte: 'Fermer les sessions d’un compte', geler: 'Geler un compte', revoquer_session: 'Fermer une session', verrouiller: 'Verrouiller l’admin', suspendre_acces: 'Suspendre un accès de galerie privée' };
 // Portées d'un blocage (vigie/decisions.js, SCOPES).
 export const PORTEES = { tout: 'Tout le site', admin: 'L’admin et la connexion', auth: 'La connexion seulement' };
 // Classements d'une alerte close : ceux qu'admet la table alerts (contrainte CHECK, migration 003). Une alerte close par

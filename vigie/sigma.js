@@ -17,7 +17,7 @@ import { parseAllDocuments } from 'yaml';
 export const LEVELS = { informational: 'info', low: 'bas', medium: 'moyen', high: 'haut', critical: 'critique' };
 export const POINTS = { info: 0, bas: 0.5, moyen: 1.5, haut: 3, critique: 5 };
 const KINDS = ['ip', 'reseau', 'compte', 'session', 'appareil', 'site', 'vigie'];
-const RESPONSES = ['revoquer_compte', 'geler_et_revoquer', 'bloquer_ip', 'suspendre_acces'];
+const RESPONSES = ['revoquer_compte', 'geler_et_revoquer', 'bloquer_ip', 'suspendre_acces', 'verifier_identite'];
 const MODES = ['arret', 'observer', 'alerter', 'bloquer'];
 
 export class RuleError extends Error {}

@@ -20,7 +20,7 @@
    const otherErrors = Object.entries(e).filter(([k]) => !ERR[k]);
    const exp = it.session && it.session.expires_at ? new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(it.session.expires_at).reduce((o, p) => ({ ...o, [p.type]: p.value }), {}) : null;
    const until = exp ? (it.lang === 'fr' ? `${Number(exp.hour)} h ${exp.minute}` : `${exp.hour}:${exp.minute}`) : '';
-   const IC = { ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', pos: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>', session: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>' };
+   const IC = { ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', pos: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>', alerte: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>', session: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>', vigie: '<path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.1-7.5 9.5-4.3-1.4-7.5-4.9-7.5-9.5V6z"/>' };
    const ic = (k, s = 18) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${IC[k]}</svg>`;
    const errFor = k => (e[k] ? '<p class="champ-err" id="' + ERR[k][0] + '-e">' + ic('alerte', 16) + '<span>' + L.map(l => '<span data-l="' + l + '" lang="' + l + '"><b>' + E(TL[l]('Erreur :')) + '</b> ' + E(ERR[k][1](l)) + '</span>').join('') + '</span></p>' : ''); %>
 <html lang="<%= it.lang %>">
@@ -49,6 +49,8 @@
 </header>
 <main id="contenu" tabindex="-1">
 <% if (until) { %><p class="app-session"><%~ ic('session', 16) %><span><%= t('{name} · connecté jusqu’à {h}', { name: String(it.session.name || '').replace(/\s*\(test\)$/, ''), h: until }) %></span></p><% } %>
+<% if (it.identite) { const id = it.identite; /* vérification d'identité demandée par la Vigie (server/verification-identite.js) : avant de tendre le téléphone */ %>  <div class="msg msg-identite" role="status"><%~ ic('vigie') %><div><p><b><%= id.title %></b> <%= id.detail %></p><a class="btn-app" href="<%= id.href %>"><%= id.action %></a></div></div>
+<% } %>
 <form class="app-form" method="post" action="/admin/rencontre" enctype="multipart/form-data" novalidate data-app data-lang="<%= lang %>">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
 <% if (otherErrors.length) { %>  <div class="msg msg-err" role="alert"><%~ ic('alerte') %><ul><% otherErrors.forEach(([k, m]) => { %><li><%= t.msg(m) %></li><% }) %></ul></div>

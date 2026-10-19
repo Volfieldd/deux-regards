@@ -83,7 +83,9 @@ correlation:
   group-by: [sub]
   timespan: 1h
 level: high
-vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+# Une écriture a suivi la reprise : la même réponse douce que session_autre_appareil (verifier_identite), qui arrête
+# les écritures suivantes ; rien de plus si l'identité a été confirmée après la reprise (vigie/moteur.js).
+vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: bloquer, reponse: verifier_identite }
 ---
 # Textes publiés (BV-20, BV-21) : émis par server/securite/textes-publics.js après chaque écriture de l'admin et chaque
 # publication programmée (sub nul : entité « site »).
@@ -146,3 +148,39 @@ correlation:
   condition: { gte: 20 }
 level: medium
 vigie: { cas: DS9, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+---
+# ---------------------------------------------------------------------------------------------------------------------
+# Vérification d'identité (décision verifier_identite, 19 octobre 2026) : écritures de l'admin arrêtées par le site tant
+# que la session n'a pas confirmé son identité (authz_reauth_required, une fois par minute, par session et par route).
+title: Écriture de l'admin arrêtée, identité à confirmer
+name: ecriture_sans_identite
+id: 74df444e-b7a1-4a9b-82f9-57054001971b
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: authz_reauth_required
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Écritures de l'admin tentées en série sans confirmer l'identité demandée
+name: ecritures_sans_identite
+id: dec826f9-7e38-4b7e-b3c0-8681ef972826
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  La Vigie a redemandé l'identité du compte et une session authentifiée d'avant tente 5 écritures différentes en 15 minutes
+  sans la confirmer : la personne légitime confirme après une ou deux (l'enregistrement automatique d'un billet reste une
+  seule route) ; un voleur de cookie de session ne le peut pas et essaie ailleurs. Alerte haute : geler le compte se décide
+  à la main.
+tags: [attack.credential_access, attack.t1539, attack.defense_evasion, attack.t1550.004]
+correlation:
+  type: value_count
+  rules: [ecriture_sans_identite]
+  group-by: [sub]
+  timespan: 15m
+  condition: { gte: 5, field: route }
+level: high
+vigie: { cas: DS2, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }

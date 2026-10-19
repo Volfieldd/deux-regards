@@ -29,6 +29,7 @@ import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, parseTimes, captionWarning
 import { PRESETS as IG_PRESETS, BOUNDS as IG_BOUNDS } from '../instagram-limits.js';
 import * as cities from '../geo/cities.js';
 import { createVigieAdmin } from '../vigie-admin.js';
+import { createIdentityBanner } from '../verification-identite.js';
 import { LEVELS as TASK_LEVELS } from '../todo.js';
 import { TranslateError } from '../translate.js';
 import { registerEncounters } from './rencontres.js';
@@ -110,6 +111,9 @@ export default async function adminRoutes(app) {
   });
   app.addHook('preHandler', app.requireAdmin);
   app.addHook('preHandler', app.requirePermission);
+  // Vérification d'identité demandée par la Vigie : écritures arrêtées pour une session authentifiée avant la décision
+  // (server/auth.js), lectures permises avec un bandeau (server/verification-identite.js).
+  app.addHook('preHandler', app.requireFreshIdentity);
   // Portée « les miennes » : une photo, une rencontre, une personne, une sortie ou un QR qui n'est pas au photographe du
   // compte n'existe pas pour lui (404). Les listes, elles, sont filtrées dans chaque route.
   const encounterAuthor = app.db.prepare('SELECT author_id FROM encounters WHERE id = ?');
@@ -286,6 +290,7 @@ export default async function adminRoutes(app) {
   // La Vigie dans l'admin (MV-10) : seulement si elle est réglée côté site, et pour les seuls comptes securite.voir.
   const vigieView = app.decisions && app.config.vigie ? createVigieAdmin({ decisions: app.decisions, consoleUrl: app.config.vigie.consoleUrl }) : null;
   const securiteOf = request => (vigieView && request.can('securite.voir') ? vigieView(request.t) : null);
+  const identityOf = createIdentityBanner({ decisions: app.decisions, hrefOf: app.identityHref });
 
   // Admin v1 ou v2, au choix de chaque compte (server/admin-version.js) ; un écran sans gabarit v2 reste en v1.
   const adminVersion = createAdminVersion({ db: app.db, viewsDir: fileURLToPath(new URL('../../views/', import.meta.url)), cache: app.config.production });
@@ -329,7 +334,7 @@ export default async function adminRoutes(app) {
       adminVersion: version, adminV2: v2,
       // shortcuts : raccourcis d'une touche de la photothèque (préférence du compte, « Mon compte »).
       ...(v2 ? { settingsTabs: settingsTabs(request), roleNames: (request.session.roles || []).map(r => request.t(ROLES[r]?.label || r)), shortcuts: adminVersion.shortcuts(request.session.sub) } : {}),
-      releasePopup, releaseCurrent: RELEASE_CURRENT, securite,
+      releasePopup, releaseCurrent: RELEASE_CURRENT, securite, identite: identityOf(request),
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
       siteName, session: request.session, csrf: request.session.csrf, flash: takeFlash(request, reply), can: perm => Boolean(request.can(perm)), canAll: perm => Boolean(request.scope(perm)?.all),
@@ -2324,7 +2329,7 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- rencontres (page /bonjour, cartes) ----------
-  registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion });
+  registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion, identity: identityOf });
   registerOutings(app, { repo, render, P, W, done, failed, withReady });
   registerTrips(app, { repo, render, P, W, done, failed, withReady });
   registerGaleries(app, { repo, render, P, W, done, failed });

@@ -16,7 +16,7 @@
 <% if (it.switchAccount) { %>
     <p><a class="more eyebrow" href="/auth/login?prompt=select_account"><%= t('Utiliser un autre compte') %></a></p>
 <% } else if (it.retry) { %>
-    <p><a class="more eyebrow" href="/auth/login"><%= t('Réessayer') %></a></p>
+    <p><a class="more eyebrow" href="<%= it.retryHref || '/auth/login' %>"><%= t('Réessayer') %></a></p>
 <% } %>
 <% if (it.logoutCsrf) { %>
     <form method="post" action="/auth/logout"><input type="hidden" name="_csrf" value="<%= it.logoutCsrf %>"><p><button class="more eyebrow" type="submit"><%= t('Se déconnecter') %></button></p></form>

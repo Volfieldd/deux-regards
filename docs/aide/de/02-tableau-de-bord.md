@@ -28,4 +28,6 @@ Das ist die Seite **Heute**, auf der Sie landen. Oben **Website ansehen** und **
 
 **Roter Hinweis „… kritische Sicherheitswarnungen in der Vigie“**: oben auf jeder Seite, für Konten, die die Vigie sehen, solange eine kritische Warnung in der Konsole auf Übernahme wartet; **Warnung öffnen** öffnet sie in einem neuen Tab (siehe [Sicherheit](reglages#sécurité)).
 
+**Hinweis „Bestätigen Sie aus Sicherheitsgründen Ihre Identität, bevor Sie etwas ändern.“**: Die Vigie hat bemerkt, dass Ihre Sitzung von einem anderen Gerät aus benutzt wurde, und verlangt vor jeder Änderung eine neue Anmeldung. Sie können weiterhin alles ansehen (außer Exporten und Originalen der Fotos); Speichern führt zur Anmeldung (das gerade Eingegebene bleibt nicht erhalten). Klicken Sie auf **Meine Identität bestätigen**: Zitadel fragt erneut nach Ihrer Anmeldung und Ihrem Passkey und bringt Sie dann zur Seite zurück; der Hinweis verschwindet. Bestätigen Sie mit Ihrem eigenen Konto: Ein anderes Konto wird abgelehnt. Wenn Sie es nicht waren, informieren Sie die Person, die die Vigie verwaltet.
+
 **Banner „Bilder werden aktualisiert“**: Es erscheint nach einer Änderung von Wasserzeichen, EXIF, Autorenname… Der Zähler läuft von selbst weiter; siehe [Wasserzeichen und EXIF](filigrane-exif#mise-à-jour-des-images). Nur Konten, die das Wasserzeichen einstellen, sehen es.

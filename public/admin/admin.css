@@ -1218,6 +1218,9 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .sec-bandeau .t { display: block; font-weight: 500; }
 .sec-bandeau .sec { display: block; color: var(--ink2); font-size: 13px; }
 .sec-bandeau .btn { white-space: nowrap; }
+/* Vérification d'identité demandée par la Vigie : une demande, pas une alarme (ambre de l'accent, bouclier). */
+.sec-bandeau.identite { background: var(--accent-soft); box-shadow: inset 4px 0 0 var(--accent); }
+.sec-bandeau.identite > .ic { color: var(--accent-ink); }
 .btn .sec-ext { width: 14px; height: 14px; margin-left: -2px; }
 .main.wide > .sec-bandeau { margin: 16px 24px 0; }
 @media (max-width: 720px) {

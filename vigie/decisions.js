@@ -11,10 +11,14 @@ import { reseauDe } from '../server/securite/adresses-ip.js';
 // suspendre_acces : un accès d'une galerie privée (son numéro), suspendu par le site comme après 30 refus (registre des
 // briques, BV-18, « Tranché » 5). Le site l'applique une fois par décision ; lever la décision ne rouvre pas l'accès
 // (l'équipe le débloque dans l'admin du site).
-export const KINDS = ['bloquer', 'revoquer_session', 'revoquer_compte', 'geler', 'verrouiller', 'suspendre_acces'];
+// verifier_identite : un compte (sub) dont le site redemande l'identité (nouvelle connexion chez Zitadel, second facteur
+// compris) avant toute écriture dans l'admin, tant que sa session a été authentifiée avant la décision (décision du
+// propriétaire du 19 octobre 2026). Décision douce : la personne légitime passe en quelques secondes, un voleur de cookie
+// de session, non. 7 jours au plus, 24 h par défaut.
+export const KINDS = ['bloquer', 'revoquer_session', 'revoquer_compte', 'geler', 'verrouiller', 'suspendre_acces', 'verifier_identite'];
 export const SCOPES = ['tout', 'admin', 'auth'];
 const DAY = 864e5;
-export const MAX_DURATION = { bloquer: 30 * DAY, revoquer_session: 2 * DAY, revoquer_compte: 2 * DAY, geler: 30 * DAY, verrouiller: DAY, suspendre_acces: 30 * DAY };
+export const MAX_DURATION = { bloquer: 30 * DAY, revoquer_session: 2 * DAY, revoquer_compte: 2 * DAY, geler: 30 * DAY, verrouiller: DAY, suspendre_acces: 30 * DAY, verifier_identite: 7 * DAY };
 export const MAX_ACTIVE = 10_000;
 // Espace d'adresses IPv4 bloqué au total : l'équivalent d'un /8 au plus.
 export const MAX_IPV4 = 2 ** 24;
@@ -154,6 +158,9 @@ export function createDecisions({ store, privateKey, now = Date.now }) {
       // Accès des galeries privées à suspendre : « depuis » distingue deux décisions successives sur le même accès (le site
       // applique chacune une fois).
       acces: by('suspendre_acces').map(d => ({ id: Number(d.cible), depuis: d.cree_a, fin: d.fin })),
+      // Comptes dont l'identité est à redemander : toute session authentifiée avant « depuis » ne peut plus rien écrire
+      // dans l'admin sans une nouvelle authentification chez Zitadel. Jamais dans la liste de la bordure.
+      verifications: by('verifier_identite').map(d => ({ sub: d.cible, depuis: d.cree_a, fin: d.fin })),
       verrouillage: lock ? { fin: lock.fin, ...JSON.parse(lock.details) } : null,
     });
     return { payload, signature: crypto.sign(null, Buffer.from(payload), privateKey).toString('base64') };

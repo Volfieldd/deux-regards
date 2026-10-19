@@ -28,4 +28,6 @@ C’est la page **Aujourd’hui**, celle où l’on arrive. En haut, **Voir le s
 
 **Bandeau rouge « … alertes critiques dans la Vigie »** : en tête de toutes les pages, pour les comptes qui voient la Vigie, tant qu’une alerte critique attend sa prise en charge dans la console ; **Ouvrir l’alerte** l’ouvre dans un nouvel onglet (voir [Sécurité](reglages#sécurité)).
 
+**Bandeau « Par sécurité, confirmez votre identité avant de modifier quoi que ce soit »** : la Vigie a remarqué que votre session était utilisée depuis un autre appareil, et demande une nouvelle connexion avant toute modification. Vous pouvez tout consulter (sauf les exportations et les originaux des photos) ; un enregistrement, lui, mène à la connexion (ce que vous veniez de saisir n’est pas gardé). Cliquez **Confirmer mon identité** : Zitadel vous redemande votre connexion et votre clé d’accès, puis vous ramène à la page ; le bandeau disparaît. Confirmez avec votre propre compte : un autre compte est refusé. Si ce n’était pas vous, prévenez l’administrateur de la Vigie.
+
 **Bandeau « Mise à jour des images en cours »** : il apparaît après un changement de filigrane, d’EXIF, de nom d’auteur… Le compteur avance tout seul ; voir [Filigrane et EXIF](filigrane-exif#mise-à-jour-des-images). Seuls les comptes qui règlent le filigrane le voient.

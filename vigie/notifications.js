@@ -49,7 +49,7 @@ export function reducedText(d, { titreOf = id => id, t = Date.now() } = {}) {
 }
 
 // Réponse déjà faite, sans cible (ni compte ni adresse) : de quoi savoir à 23 h si l'urgence demeure.
-const DONE = { geler: 'compte gelé', revoquer_compte: 'sessions du compte fermées', revoquer_session: 'session fermée', bloquer: 'adresse bloquée', verrouiller: 'admin verrouillée' };
+const DONE = { geler: 'compte gelé', revoquer_compte: 'sessions du compte fermées', revoquer_session: 'session fermée', bloquer: 'adresse bloquée', verrouiller: 'admin verrouillée', suspendre_acces: 'accès suspendu', verifier_identite: 'identité redemandée' };
 // En heures jusqu'à 48 h (« 24 h » se lit mieux qu'« 1 j » à 23 h), en jours au-delà.
 const lengthOf = ms => (ms > 48 * 3600e3 + 60e3 ? `${Math.round(ms / 864e5)} j` : `${Math.round(ms / 3600e3)} h`);
 export const responseOf = decisions => (decisions.length ? `Réponse : ${decisions.map(d => `${DONE[d.kind] || d.kind}${d.kind === 'geler' || d.kind === 'bloquer' ? ` ${lengthOf(d.fin - d.cree_a)}` : ''}`).join(', ')}` : 'Aucune réponse automatique');

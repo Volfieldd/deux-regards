@@ -338,3 +338,50 @@ test('app de terrain v2 : titre, session lisible, langue sans drapeau ; la signa
   assert.doesNotMatch(res1.body, /data-sign-value value="data:/);
   assert.match(res1.body, /Faites signer de nouveau la personne/);
 });
+
+// Vérification d'identité demandée par la Vigie (décision verifier_identite) : le bandeau de la v2 (gabarit et app de
+// terrain), à la seule personne visée dont la session est plus ancienne que la décision ; écritures de la v2 arrêtées.
+test('vérification d’identité en v2 : bandeau (gabarit, app de terrain et son accueil) au compte visé, session ancienne ; écritures arrêtées ; choix v1 / v2 permis', async t => {
+  const c = await site(t, { env: VIGIE, vigieOptions: { send: async () => {}, timers: false, pollDecisions: false } });
+  const verifs = list => { const p = JSON.stringify({ usage: 'site', version: Date.now(), emis_a: Date.now(), blocages: [], sessions: [], comptes: [], gels: [], verrouillage: null, verifications: list }); return { payload: p, signature: crypto.sign(null, Buffer.from(p), VIGIE_KEYS.privateKey).toString('base64') }; };
+  const adm = account(c, { sub: 'adm', author: c.seb }), autre = account(c, { sub: 'autre', author: c.jul });
+  await adm.version('v2'); await autre.version('v2');
+  const PAGES = ['/admin', '/admin/compte', '/admin/rencontre', '/admin/rencontre/accueil'];
+  const banner = html => /<div class="sec-bandeau identite" role="status">[^]*?<\/div>|<div class="msg msg-identite" role="status">[^]*?<\/div><\/div>/.exec(html)?.[0] || null;
+  // Sans décision : rien.
+  for (const url of PAGES) assert.equal(banner((await adm.get(url)).body), null, url);
+  c.app.decisions.accept(verifs([{ sub: 'adm', depuis: Date.now() - 1000, fin: Date.now() + 864e5 }]));
+  // Gabarit de la v2 : le bandeau de la v1 (mêmes classes, role="status"), sans style en ligne ni script, retour à la page.
+  const home = (await adm.get('/admin')).body;
+  assert.ok(isV2(home));
+  assert.match(banner(home), /^<div class="sec-bandeau identite" role="status"><svg class="ic"[^>]*aria-hidden="true"[^>]*>[^]*?<\/svg><p><span class="t">Par sécurité, confirmez votre identité avant de modifier quoi que ce soit\.<\/span><span class="sec">Une nouvelle connexion est demandée pour ce compte[^<]*<\/span><\/p><a class="btn" href="\/auth\/verifier\?next=%2Fadmin">Confirmer mon identité<\/a><\/div>$/);
+  assert.match(banner((await adm.get('/admin/compte')).body), /href="\/auth\/verifier\?next=%2Fadmin%2Fcompte"/);
+  // App de terrain (formulaire et accueil) : avant de tendre le téléphone.
+  const app = (await adm.get('/admin/rencontre')).body;
+  assert.match(app, /\/static\/admin\/v2\/app-v2\.css/);
+  assert.match(banner(app), /^<div class="msg msg-identite" role="status"><svg class="ic"[^>]*aria-hidden="true"[^>]*>[^]*?<\/svg><div><p><b>Par sécurité, confirmez votre identité avant de modifier quoi que ce soit\.<\/b> [^<]+<\/p><a class="btn-app" href="\/auth\/verifier\?next=%2Fadmin%2Frencontre">Confirmer mon identité<\/a><\/div><\/div>$/);
+  assert.ok(app.indexOf('msg-identite') < app.indexOf('<form class="app-form"'), 'avant le formulaire');
+  assert.match(banner((await adm.get('/admin/rencontre/accueil')).body), /href="\/auth\/verifier\?next=%2Fadmin%2Frencontre%2Faccueil"/);
+  for (const url of PAGES) { const b = banner((await adm.get(url)).body); assert.ok(b, url); assert.doesNotMatch(b, /style=|<script|on[a-z]+=/, url); }
+  // Un autre compte, ou une session ouverte après la décision : pas de bandeau.
+  for (const url of PAGES) assert.equal(banner((await autre.get(url)).body), null, url);
+  c.db.prepare("UPDATE sessions SET auth_time = ? WHERE sub = 'adm'").run(Date.now());
+  for (const url of PAGES) assert.equal(banner((await adm.get(url)).body), null, url);
+  c.db.prepare("UPDATE sessions SET auth_time = NULL WHERE sub = 'adm'").run();
+  // Écritures de la v2 arrêtées : interrupteur des assistants (JSON), accord signé dans l'app (formulaire).
+  const j = await adm.json('/admin/series/propositions', { action: 'on', back: '/admin/reglages/assistants' });
+  assert.equal(j.statusCode, 403);
+  assert.match(j.json().verifier, /^\/auth\/verifier\?next=/);
+  const avant = c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get();
+  const r = await adm.post('/admin/rencontre', { author_id: String(c.seb), lang: 'fr', decision: 'refus' });
+  assert.equal(r.statusCode, 303);
+  assert.match(r.headers.location, /^\/auth\/verifier\?next=/);
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), avant, 'rien d’enregistré');
+  // Le choix v1 / v2 est une préférence d'affichage : laissé passer, et la v1 montre le même bandeau.
+  const v = await adm.post('/admin/version', { version: 'v1', back: '/admin' });
+  assert.equal(v.statusCode, 303);
+  assert.doesNotMatch(v.headers.location, /^\/auth\//);
+  const v1 = (await adm.get('/admin')).body;
+  assert.ok(!isV2(v1));
+  assert.match(v1, /class="sec-bandeau identite"/);
+});

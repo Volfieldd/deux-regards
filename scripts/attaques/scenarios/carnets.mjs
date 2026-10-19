@@ -43,19 +43,21 @@ export default [
     famille: 'carnets',
     titre: 'Session de l’admin reprise depuis un autre appareil, puis script dans un billet',
     cas: ['DS2', 'DS23'],
-    resume: 'Le cookie de Julien est copié ; l’attaquant l’utilise depuis un autre pays et un autre navigateur, et enregistre un billet contenant un script.',
+    resume: 'Le cookie de Julien est copié ; l’attaquant l’utilise depuis un autre pays et un autre navigateur ; la Vigie redemande '
+      + 'l’identité du compte : le billet piégé n’est pas enregistré.',
     async jouer(b) {
       const id = await nouveauBillet(b, b.julien, 'Les quais');
       const vol = b.equipe({ ip: '203.0.113.42', ua: b.UA.android, pays: 'BR' }).copierCookies(b.julien);
       await vol.lireCsrf();
       b.constat('reprise', 'la session volée ouvre l’admin', Boolean(vol.csrf), vol.csrf ? 'jeton CSRF lu' : 'pas de jeton');
-      await b.verifier('reprise', [{ alerte: 'sigma.session_autre_appareil', entite: `compte:${JULIEN}`, gravite: 'critique' },
-        { pasDecision: 'revoquer_compte', note: 'session_autre_appareil porte la réponse revoquer_compte, mais en mode Observer par défaut (10-preuves.yml) : aucune réponse' }]);
-      await vol.ecrire(`/admin/carnet/${id}`, { langue: 'fr', title: 'Les quais', body: ACTIF });
-      await b.verifier('script', [
-        { alerte: 'sigma.billet_construction_active', entite: `compte:${JULIEN}` },
-        { alerte: 'sigma.billet_apres_session_reprise', entite: `compte:${JULIEN}`, gravite: 'haut', mode: 'alerter' },
-      ]);
+      // Réponse douce de session_autre_appareil (mode « bloquer », décision du propriétaire du 19 octobre 2026).
+      await b.verifier('reprise', [{ alerte: 'sigma.session_autre_appareil', entite: `compte:${JULIEN}`, gravite: 'critique', mode: 'bloquer' },
+        { decision: 'verifier_identite', cible: JULIEN }, { pasDecision: 'revoquer_compte' }]);
+      const r = await vol.ecrire(`/admin/carnet/${id}`, { langue: 'fr', title: 'Les quais', body: ACTIF });
+      const corps = JSON.stringify(b.banc.db.prepare('SELECT * FROM posts WHERE id = ?').get(Number(id)) || {});
+      b.constat('script', 'billet piégé arrêté : nouvelle connexion demandée, rien d’enregistré', r.status === 303 && /^\/auth\/verifier\?/.test(r.location || '') && !/collecte\.example/.test(corps), `${r.status} → ${r.location}`);
+      await b.verifier('script', [{ pasAlerte: 'sigma.billet_construction_active', note: 'rien n’est rendu : l’écriture n’a pas eu lieu' },
+        { pasAlerte: 'sigma.billet_apres_session_reprise', note: 'corrélation gardée (mode bloquer, même réponse) pour une écriture passée avant la décision' }]);
     },
   },
 ];

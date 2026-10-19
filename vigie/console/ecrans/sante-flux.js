@@ -282,7 +282,7 @@ const DESC_AL ='De gauche à droite : l’origine de chaque alerte (qui), sa o
   + 'suit donne les mêmes informations.';
 const DESC_EV = 'De gauche à droite : les origines, les sources, les chemins (preuve directe, score d’une entité, corrélation, sans point) '
   + 'et les issues (alertes par gravité, sans alerte), à l’échelle des événements. Le tableau qui suit donne les mêmes nombres.';
-const MOTS_D = { bloquer: 'adresse bloquée', revoquer_session: 'session fermée', revoquer_compte: 'sessions du compte fermées', geler: 'compte gelé', verrouiller: 'admin verrouillée' };
+const MOTS_D = { bloquer: 'adresse bloquée', revoquer_session: 'session fermée', revoquer_compte: 'sessions du compte fermées', geler: 'compte gelé', verrouiller: 'admin verrouillée', suspendre_acces: 'accès suspendu', verifier_identite: 'identité redemandée' };
 
 // Tout ce que le gabarit flux.eta affiche, déjà mis en forme (les SVG sont rendus et échappés par flux.js).
 export function vueFlux({ db, now = Date.now, role, periode = PERIODE_DEFAUT, alerte = null, erreurs = [] }) {

@@ -39,7 +39,7 @@ export const DUREES_INTER = { autres: [['1h', `1${NBSP}h`], ['24h', `24${NBSP}h`
 
 const ENT = { ...ENTITES, entite: 'l’entité visée' };
 const REP = { geler_et_revoquer: `en Bloquer${FINE}: geler 24${NBSP}h, fermer les sessions`, revoquer_compte: `en Bloquer${FINE}: fermer les sessions du compte`,
-  bloquer_ip: `en Bloquer${FINE}: bloquer l’adresse 24${NBSP}h` };
+  bloquer_ip: `en Bloquer${FINE}: bloquer l’adresse 24${NBSP}h`, verifier_identite: `en Bloquer${FINE}: redemander l’identité 24${NBSP}h` };
 const CAS_CLAIR = { quorum: 'score', MV11: 'intégrité de la Vigie' };
 export const FIGEE = 'sigma.surveillance_reduite';
 
