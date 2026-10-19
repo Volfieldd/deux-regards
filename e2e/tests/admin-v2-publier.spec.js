@@ -9,6 +9,8 @@ import { effacerRencontre } from './terrain-donnees.js';
 const STATE = 'results/.auth/admin-v2.json';
 test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent');
 test.use({ storageState: STATE });
+// Les tests qui écrivent partagent la file et les réglages d'Instagram : l'un après l'autre.
+test.describe.configure({ mode: 'serial' });
 
 let errors = [];
 test.beforeEach(async ({ page }) => {

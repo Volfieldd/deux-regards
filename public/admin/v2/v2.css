@@ -421,6 +421,8 @@ dialog.confirm.cible:target:not([open]) { width: auto; max-width: 560px; }
 /* Vignette étroite (portrait, téléphone) : la légende garde le titre seul, qui passe à la ligne sans être rogné. */
 @container (max-width: 160px) { .lib-v2 .tile .cap small { display: none; } .lib-v2 .tile .cap { padding-top: 12px; } }
 @media (max-width: 720px) { .plist-v2 .etat { white-space: normal; } .plist-v2 li { column-gap: 10px; } }
+/* La file Instagram de la fiche d'une photo : l'état « Dans la file : prévue le … » se replie au téléphone (allemand compris). */
+@media (max-width: 720px) { #instagram .etat { white-space: normal; max-width: 100%; } }
 @media (max-width: 400px) { .plist-v2 li { grid-template-columns: 44px 64px minmax(0, 1fr) 44px; } .plist-v2 .thumb img, .plist-v2 .thumb .ph { width: 64px; height: 43px; } }
 /* Pied de l'inspecteur : les libellés longs (allemand) passent à la ligne, les deux boutons aussi s'il le faut. */
 .lib-v2 .insp-ft .two { flex-wrap: wrap; }
