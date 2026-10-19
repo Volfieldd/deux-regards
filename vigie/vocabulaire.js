@@ -40,6 +40,7 @@ export const OWN = {
   vigie_surveillance_reduite: E('moyen', 'vigie · contrôle'),
   vigie_decision: E('moyen', 'vigie · ligne de commande'),
   vigie_interrupteur: E('moyen', 'vigie · ligne de commande'),
+  vigie_urgence: E('haut', 'vigie · ligne de commande'),        // mode urgence de Cloudflare (« I'm Under Attack »)
   // Console (phase D3) : connexions, refus (DS30), arrivées et changements de droits (DS29). Constatés par la Vigie.
   vigie_console_connexion: E('info', 'vigie · console'),
   vigie_console_sortie: E('info', 'vigie · console'),

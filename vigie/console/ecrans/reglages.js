@@ -272,6 +272,14 @@ export function register(app, ctx) {
     // gabarit, qui le montre aussi en tête de page (layout).
     const message = ctx.isRefresh(req) ? null : ctx.sessions.takeMessage(req.moi.sid);
     const reglages = vueReglages({ db, store, engine, switches, notifications: ctx.notifications, now, role: req.moi.role, query: req.query || {}, message, authA: req.moi.authA });
-    return view(reply, req, 'reglages', { page: 'reglages', titre: 'Règles et réglages · Vigie', reglages, message });
+    // Mode urgence de Cloudflare (« I'm Under Attack ») : seulement s'il est réglé.
+    const u = ctx.urgence ? ctx.urgence.etat() : null;
+    const urgence = ctx.urgence ? {
+      actif: Boolean(u?.actif), jusqua: u?.actif ? dateHeure(u.jusqua) : null, depuis: u?.actif ? dateHeure(u.depuis) : null,
+      par: u?.par ? String(u.par).replace(/^console · /, '') : null, motif: u?.motif || null,
+      fin: !u?.actif && u?.fin ? `${dateHeure(u.fin)} (${u.fin_raison || 'levé'})` : null,
+      max: Math.round(ctx.urgence.maxMs / 3600e3), peut: can(req.moi.role, 'reglages'),
+    } : null;
+    return view(reply, req, 'reglages', { page: 'reglages', titre: 'Règles et réglages · Vigie', reglages, message, urgence });
   });
 }

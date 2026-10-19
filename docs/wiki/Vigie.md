@@ -141,6 +141,10 @@ Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, l
 
 Avec `VIGIE_CF_LISTE=vigie_bloquees`, la Vigie recopie dans une liste d'adresses du compte Cloudflare ses blocages **de tout le site, de 24 h et plus** (adresse IPv4 seule ou réseau /8 à /32 ; IPv6 ramenée à son /64 au plus fin) ; une règle du pare-feu de Cloudflare (`ip.src in $vigie_bloquees` → Block) les arrête avant le Worker, dont le quota gratuit est ainsi épargné, et le blocage tient si le Worker est coupé. Les blocages plus courts ou d'une partie du site restent au Worker et au site. Rapprochement toutes les 5 minutes et 30 s après chaque décision : ce que la Vigie ne connaît plus est retiré, mais seulement ses entrées (commentaire « Vigie #… ») ; une entrée ajoutée à la main n'est jamais touchée. Échec (droit manquant, liste pleine) : visible sur la page Santé, signalé une fois par heure (`vigie_bordure_erreur`, opération « liste »). Mise en place : [`vigie-phase-0.md`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/vigie-phase-0.md), étape 3.4.
 
+### Mode urgence de Cloudflare (« I'm Under Attack », facultatif)
+
+Avec `VIGIE_CF_ZONE_ID` et un jeton à part (*Zone Settings : Edit* sur la seule zone), la console (Règles et réglages ; Analyste ou Administrateur, identité redemandée, motif) et la ligne de commande (`urgence marche --duree 2h --motif "…"`, `urgence arret`, `urgence`) passent la zone en mode urgence : chaque visiteur est vérifié par Cloudflare avant le site. Toujours pour une durée (24 h au plus par défaut, `VIGIE_CF_URGENCE_MAX`, 7 jours au plus) ; à l'échéance, la Vigie remet le niveau de sécurité d'avant ; un niveau changé à la main chez Cloudflare n'est jamais écrasé (la Vigie note seulement la fin du mode). Activation et prolongation : alerte haute « Mode urgence de Cloudflare activé » (les Administrateurs sont prévenus). Mise en place : `vigie-phase-0.md`, étape 3.6.
+
 ### Installer (instance de test d'abord, D19)
 
 1. **Clé partagée** : `openssl rand -base64 32` → `VIGIE_BORDURE_KEY` dans le `.env` du site (différente de `VIGIE_INGEST_KEY`).
