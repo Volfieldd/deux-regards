@@ -40,6 +40,7 @@ import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
 import { legalMissing } from '../legal.js';
 import { createAdminVersion, ADMIN_VERSIONS } from '../admin-version.js';
+import { typoHtml } from '../typo-html.js';
 import { fileURLToPath } from 'node:url';
 
 // Carte des visiteurs (page Statistiques) : centre de chaque pays dans le repère 1000 × 520 du fond de carte
@@ -296,6 +297,9 @@ export default async function adminRoutes(app) {
     ['authors', '/admin/auteurs', 'Photographes', 'photographes.gerer'],
     ['assistants', '/admin/reglages/assistants', 'Assistants d’analyse', 'series.propositions'],
   ];
+  // Pages de la v2 en français : espaces insécables posées à l'envoi (server/typo-html.js).
+  app.decorateRequest('typoV2', false);
+  app.addHook('onSend', async (request, reply, payload) => (request.typoV2 && typeof payload === 'string' && String(reply.getHeader('content-type') || '').startsWith('text/html') ? typoHtml(payload) : payload));
   const settingsTabs = request => SETTINGS_TABS.filter(([, , , perm]) => request.can(perm))
     .map(([key, href, label, perm]) => ({ key, href, label: request.t(label), alert: key === 'droits' ? legalMissing(repo.settings()).length : 0, perm }));
 
@@ -318,6 +322,7 @@ export default async function adminRoutes(app) {
     // data.v2 : le gabarit v2 d'un écran que la v1 rend avec un gabarit partagé (« settings » sert Site public et Droits).
     const shown = adminVersion.template(request, data.v2 || template);
     const v2 = shown.startsWith('admin/v2/');
+    if (v2) request.typoV2 = true;
     return reply.render(v2 ? shown : `admin/${template}`, {
       // Choix de l'admin (menu du compte) ; en v2, les onglets des Réglages et le rôle affiché sous le nom.
       adminVersion: version, adminV2: v2,

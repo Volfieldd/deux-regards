@@ -13,7 +13,7 @@ import { createSessionStore } from '../server/sessions.js';
 const VIGIE = { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: 'cle-de-signature-vigie-0123456789abcdef', VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 };
 const signed = payload => { const p = JSON.stringify({ usage: 'resume', emis_a: Date.now(), ...payload }); return { payload: p, signature: crypto.sign(null, Buffer.from(p), VIGIE_KEYS.privateKey).toString('base64') }; };
 const MV10 = { ouvertes: { critique: 2, haut: 1, moyen: 1, bas: 0 }, plus_grave: { id: 413, gravite: 'critique', depuis: Date.now() - 60e3 }, critique_a_prendre: true };
-const side = html => html.slice(html.indexOf('<aside class="side"'), html.indexOf('</aside>'));
+const side = html => { const i = html.indexOf('<aside class="side"'); return html.slice(i, html.indexOf('</aside>', i)); };
 const entry = html => (/<a class="nav-sec"[\s\S]*?<\/a>/.exec(html) || [''])[0];
 const isV2 = html => html.includes('/static/admin/v2/v2.css');
 
@@ -24,8 +24,10 @@ function account(ctx, { sub, name = sub, roles = ['admin'], author = null }) {
   const token = createSessionStore(ctx.db).create({ sub, name, roles: [] });
   const csrf = ctx.db.prepare('SELECT csrf FROM sessions WHERE id = ?').pluck().get(crypto.createHash('sha256').update(token).digest('hex'));
   const cookies = { session: token };
-  const get = url => ctx.app.inject({ url, cookies, headers: { accept: 'text/html' } });
-  const post = (url, payload = {}, { token: tok = csrf, accept = 'text/html' } = {}) => ctx.app.inject({ method: 'POST', url, cookies, headers: { accept }, payload: { ...payload, ...(tok ? { _csrf: tok } : {}) } });
+  // Les pages de la v2 ont leurs espaces insécables (server/typo-html.js) : lues ici avec des espaces ordinaires.
+  const plain = r => Object.defineProperty(r, 'body', { value: r.body.replace(/[\u202f\u00a0]/g, ' ') });
+  const get = async url => plain(await ctx.app.inject({ url, cookies, headers: { accept: 'text/html' } }));
+  const post = async (url, payload = {}, { token: tok = csrf, accept = 'text/html' } = {}) => plain(await ctx.app.inject({ method: 'POST', url, cookies, headers: { accept }, payload: { ...payload, ...(tok ? { _csrf: tok } : {}) } }));
   const json = (url, payload) => ctx.app.inject({ method: 'POST', url, cookies, headers: { accept: 'application/json', 'x-csrf-token': csrf }, payload });
   const version = async v => { const r = await post('/admin/version', { version: v, back: '/admin' }); assert.equal(r.statusCode, 303); await get('/admin/aide'); return r; };
   return { sub, csrf, cookies, get, post, json, version };
@@ -102,12 +104,12 @@ test('repli : un écran sans gabarit v2 s’affiche en v1, entier, identique à 
     assert.equal(res.statusCode, 200, url);
     assert.ok(isV2(res.body), `${url} en v2`);
   }
-  // Le gabarit de la v1 : celui de main, plus le seul bloc du choix (marqué).
+  // Le gabarit de la v1 : celui de main (origin/main), hors du seul bloc du choix (marqué), que main l'ait ou non.
   let base = null;
-  try { base = execFileSync('git', ['show', '2b1a425:views/admin/layout.eta'], { cwd: new URL('..', import.meta.url), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { /* sans git : sauté */ }
+  try { base = execFileSync('git', ['show', 'origin/main:views/admin/layout.eta'], { cwd: new URL('..', import.meta.url), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { /* sans git : sauté */ }
   if (base) {
-    const now = fs.readFileSync(new URL('../views/admin/layout.eta', import.meta.url), 'utf8');
-    assert.equal(now.replace(/<% \/\* --- Choix de l'admin v1 \/ v2[^]*?: fin\. --- \*\/ %>\n/, ''), base);
+    const block = s => s.replace(/<% \/\* --- Choix de l'admin v1 \/ v2[^]*?: fin\. --- \*\/ %>\n/, '');
+    assert.equal(block(fs.readFileSync(new URL('../views/admin/layout.eta', import.meta.url), 'utf8')), block(base));
   }
 });
 
@@ -309,6 +311,7 @@ test('app de terrain v2 : titre, session lisible, langue sans drapeau ; la signa
   const parts = { _csrf: adm.csrf, author_id: String(c.jul), lang: 'en', decision: 'accord', scope_site: 'on', name: 'Inês', signature: sig };
   const body = Object.entries(parts).map(([k, v]) => `--${boundary}\r\nContent-Disposition: form-data; name="${k}"\r\n\r\n${v}\r\n`).join('') + `--${boundary}--\r\n`;
   const res = await c.app.inject({ method: 'POST', url: '/admin/rencontre', cookies: adm.cookies, headers: { 'content-type': `multipart/form-data; boundary=${boundary}`, accept: 'text/html' }, payload: body });
+  res.body = res.body.replace(/[\u202f\u00a0]/g, ' ');
   assert.equal(res.statusCode, 422);
   assert.match(res.body, new RegExp(`name="signature" value="${sig.replace(/[+/]/g, m => `\\${m}`)}" data-sign-value`));
   assert.match(res.body, /<section class="resume" tabindex="-1" aria-labelledby="res-p" data-resume>/);

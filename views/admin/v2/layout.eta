@@ -22,7 +22,7 @@
 <% const t = it.t; %>
 <a class="skip" href="#contenu"><%= t('Aller au contenu') %></a>
 <% if (it.local) { %>
-  <p class="testbar" role="note"><%= t('Connexion locale de test') %> — <%= it.session.name %></p>
+  <aside class="testbar" aria-label="<%= t('Connexion locale de test') %>"><p><%= t('Connexion locale de test') %> — <%= it.session.name %></p></aside>
 <% } %>
 <%
   // Icônes au trait de la planche (MQ-00) : 24 unités, trait de 1,6, décoratives (le mot est toujours écrit ou lu).
@@ -216,8 +216,9 @@
 <% /* Message d'action (MQ-00 § 6) : une région live toujours rendue, vide hors message. */ %>
 <div class="toast" role="status" aria-live="polite" data-toast></div>
 <dialog class="palette" data-cmdk aria-label="<%= t('Rechercher et agir') %>">
-  <div class="pal-in"><%~ ic('search', 20) %><input type="text" data-cmdk-input placeholder="<%= t('Rechercher une page, une photo ou une action') %>" aria-label="<%= t('Rechercher une page, une photo ou une action') %>" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list"><kbd><%= t('Échap') %></kbd></div>
+  <div class="pal-in"><%~ ic('search', 20) %><input type="text" name="q" data-cmdk-input placeholder="<%= t('Rechercher une page, une photo ou une action') %>" aria-label="<%= t('Rechercher une page, une photo ou une action') %>" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list"><kbd><%= t('Échap') %></kbd></div>
   <p class="pal-statut" role="status" data-cmdk-status></p>
+  <!-- [html-validate-disable-next prefer-native-element: la liste d’une combobox à filtrer (motif APG, comme la v1) ; un <select> ne filtre pas en tapant] -->
   <ul class="pal-list" id="cmdk-list" role="listbox" aria-label="<%= t('Résultats') %>" data-cmdk-list></ul>
   <p class="pal-ft"><span class="touches"><kbd>↑</kbd> <kbd>↓</kbd> <%= t('choisir') %> · <kbd>↵</kbd> <%= t('ouvrir') %> · <kbd><%= t('Échap') %></kbd> <%= t('fermer') %></span></p>
 </dialog>

@@ -8,7 +8,7 @@
 .skip:focus { top: 8px; }
 .ic { flex: none; display: block; }
 /* Le focus ne passe jamais sous la barre collante d'« Enregistrer » (MQ-10, repère 10). */
-html { scroll-padding-bottom: 120px; }
+html { scroll-padding-bottom: 170px; }
 .app-bar h1 { flex: 1; margin: 0; font: 500 16px/1.3 Jost, -apple-system, sans-serif; }
 .app-bar .mono { font-size: 13px; }
 main:focus { outline: none; }
@@ -28,6 +28,7 @@ main:focus { outline: none; }
 .vous-plie[open] .vous-m, .vous-plie[open] .vous-r { visibility: hidden; }
 .vous-corps { display: grid; gap: 14px; padding: 14px 0 0; }
 .app-pos { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.app-photo .apercu { display: block; }
 .app-photo img { display: block; width: 96px; height: 96px; object-fit: cover; margin: 8px auto 0; }
 .btn-app { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 6px 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: transparent; color: var(--ink); font: 500 15px/1.25 Jost, sans-serif; text-align: center; text-decoration: none; cursor: pointer; }
 .tendre { justify-self: stretch; }
@@ -93,3 +94,4 @@ html.js .sans-sig { display: none; }
 /* À 320 px, rien ne déborde : la colonne du formulaire ne s'élargit pas pour une adresse sans espace (confidentialité). */
 .app-form, .pers-corps, .vous-corps { grid-template-columns: minmax(0, 1fr); }
 .app-privacy, .app-consent { overflow-wrap: anywhere; }
+.app-link { display: inline-flex; align-items: center; min-height: 44px; }

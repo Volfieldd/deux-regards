@@ -94,6 +94,7 @@
     <colgroup><col class="col-chk"><col class="col-photo"><col class="col-titre"><col class="col-serie"><col class="col-lieu"><col class="col-date"><col class="col-etat"></colgroup>
     <thead><tr><th scope="col"><label class="chk-l js-seul"><input class="chk" type="checkbox" checked data-tout aria-label="<%= N > 1 ? t('Cocher les {n} photos', { n: N }) : t('Cocher la photo') %>"></label></th><th scope="col"><%= t('Photo') %></th><th scope="col" id="h-titre"><%= t('Titre') %></th><th scope="col" id="h-serie"><%= t('Série') %></th><th scope="col" id="h-lieu"><%= t('Lieu') %></th><th scope="col" id="h-date"><%= t('Date') %></th><th scope="col"><%= t('État') %></th></tr></thead>
     <tbody>
+      <!-- [html-validate-disable-block form-dup-name: les cases des lignes forment un groupe, name="ids" répété comme dans la v1 ; le serveur en reçoit la liste] -->
 <% it.photos.forEach(p => { const e = E[p.id] || {}, v = { ...p, ...(V[p.id] || {}) }; const [st, stLabel] = ETAT(p); const nTr = [p.title_en, p.title_de].filter(x => String(x || '').trim()).length;
    const sg = (p.suggest || []).find(x => x.id !== Number(v.category_id));
    const desc = (id, more) => [id, ...more].filter(Boolean).join(' '); %>

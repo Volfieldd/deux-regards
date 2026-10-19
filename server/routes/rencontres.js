@@ -140,9 +140,13 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   // Admin v2 (MQ-10) : l'écran de la v2 s'il existe et que le compte l'a choisie, sinon la v1 ; les textes de la personne
   // dans ses trois langues (traducteurs de l'admin) et l'heure de fin de la session (« connecté jusqu'à 3 h 24 »).
   const PERSON = Object.fromEntries(['fr', 'en', 'de'].map(l => [l, translator(l)]));
-  const appView = (reply, view, data) => reply.header('cache-control', 'no-store').render(adminVersion ? adminVersion.template(reply.request, view) : `admin/${view}`, { siteName: app.siteName(), UI, t: reply.request.t, lang: reply.request.t.lang, locale: reply.request.t.locale,
+  const appView = (reply, view, data) => {
+    const tpl = adminVersion ? adminVersion.template(reply.request, view) : `admin/${view}`;
+    if (tpl.startsWith('admin/v2/')) reply.request.typoV2 = true;
+    return reply.header('cache-control', 'no-store').render(tpl, { siteName: app.siteName(), UI, t: reply.request.t, lang: reply.request.t.lang, locale: reply.request.t.locale,
     tl: PERSON, session: reply.request.session, csrfToken: reply.request.session?.csrf, ...data,
     errors: Object.fromEntries(Object.entries(data.errors || {}).map(([k, v]) => [k, typeof v === 'string' ? reply.request.t.msg(v) : v])) });
+  };
   const authorOf = request => repo.authorBySub(request.session.sub) || null;
   function appPage(request, reply, extra = {}) {
     // Photographe : celui choisi sur l'accueil Terrain (?photographe=), sinon celui du compte.

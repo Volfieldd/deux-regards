@@ -6,6 +6,7 @@
    ===================================================================================================== */
 
 /* ---------- 1. Coquille et message d'action ---------- */
+.admin .testbar p { margin: 0; }
 /* Le pied de la barre : « Revenir à l'admin v1 » est une ligne du menu, au-dessus du compte (admin.css, .ver-choix). */
 .admin .side .ver-choix { padding: 0; }
 .admin .side .ver-choix button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: var(--ligne-menu); margin: 0; padding: 0 10px; color: var(--ink2); font-size: 13px; text-decoration: none; }
@@ -68,9 +69,12 @@ dialog.confirm[open]:not(:modal) { position: static; display: block; margin: 0 0
 .accueil-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
 .accueil-grille .panel { margin: 0; min-width: 0; }
 .accueil-grille .recent li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 0 12px; }
-.accueil-grille .recent li > :is(img, .ph, picture) { grid-row: span 2; }
-.accueil-grille .recent a { min-width: 0; overflow-wrap: anywhere; }
-.accueil-grille .recent .hint { grid-column: 2; font-size: 12px; }
+.accueil-grille .recent li img, .accueil-grille .recent li > .ph { grid-column: 1; grid-row: 1 / span 2; }
+.accueil-grille .recent li > a { grid-column: 2; grid-row: 1; }
+.accueil-grille .recent a { min-width: 0; overflow-wrap: anywhere; display: inline-flex; align-items: center; min-height: 24px; }
+.accueil-grille .figures a { min-width: 44px; }
+@media (max-width: 720px), (pointer: coarse) { .accueil-grille .recent a { min-height: 44px; } .accueil-grille .figures a { min-height: 44px; } }
+.accueil-grille .recent .hint { grid-column: 2; grid-row: 2; font-size: 12px; }
 .accueil-grille .recent .w { grid-column: 3; grid-row: 1; margin: 0; }
 
 /* ---------- 3. Réglages (MQ-07) ----------
@@ -223,3 +227,4 @@ dialog.confirm[open]:not(:modal) { position: static; display: block; margin: 0 0
 .compte-p { max-width: 720px; }
 .compte-p .form { display: grid; gap: 16px; }
 .compte-p .choix-a label > span b { font-weight: 500; }
+.admin .resume-a a { min-width: 44px; }

@@ -60,8 +60,12 @@ document.documentElement.classList.add('js');
   const file = $('[data-portrait]');
   const preview = $('[data-portrait-preview]');
   file.addEventListener('change', () => {
+    preview.replaceChildren();
     if (!file.files[0]) { preview.hidden = true; return; }
-    preview.src = URL.createObjectURL(file.files[0]);
+    const img = new Image();
+    img.alt = preview.dataset.alt || '';
+    img.src = URL.createObjectURL(file.files[0]);
+    preview.append(img);
     preview.hidden = false;
   });
   async function reduced() {
