@@ -113,7 +113,7 @@ detection:
   selection:
     type: config_public_changed
     detail.objet: textes_publics
-    detail.nombre|gte: 50
+    detail.textes|gte: 50
   condition: selection
 level: medium
 vigie: { cas: DS9, entite: { kind: compte, champ: sub, sinon: textes_publics }, source_unique: true, mode: alerter }

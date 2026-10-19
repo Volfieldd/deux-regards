@@ -35,7 +35,7 @@ test('textes publiés : un contact gagné est signalé sans le texte ; le nombre
   assert.ok(!JSON.stringify(contacts).includes('06 12'), 'jamais le numéro');
   const nb = emitted.filter(e => e.detail?.objet === 'textes_publics');
   assert.equal(nb.length, 1);
-  assert.equal(nb[0].detail.nombre, 1);
+  assert.equal(nb[0].detail.textes, 1);
   // Même texte relu : rien ; le même lien déjà présent : pas de nouvel ajout.
   emitted.length = 0;
   app.securite.watchPublication('essai');

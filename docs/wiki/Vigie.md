@@ -12,6 +12,7 @@ La Vigie est un composant **à part** du site : son propre conteneur, sa propre 
 | C2 | Règles au format Sigma, détecteurs comportementaux, listes de menaces, contrôle des rôles sur les sauvegardes, verdicts agrégés | fait |
 | C3 | Capteur en bordure (Cloudflare Worker) | à venir |
 | D | Notifications (e-mail, Signal) ; console `vigie.nicephos.art` (Cloudflare Access + Zitadel) et affichage dans l'admin | notifications faites ; console et affichage à venir |
+| E2 | Jeu d'attaques rejouable (`npm run attaques`) : scénarios joués contre un site et une Vigie neufs, alertes attendues vérifiées | fait |
 
 ---
 
@@ -223,6 +224,51 @@ Adresse : `https://vigie.nicephos.art`, servie par la Vigie elle-même sur le po
   docker run --rm --network none --user 99:100 -v "$NICEPHOS/vigie-banc":/banc \
     ghcr.io/volfieldd/deux-regards-vigie:latest node vigie/banc.js --dossier /banc --historique 1000000 --evenements 5000
   ```
+
+## Jeu d'attaques (phase E2)
+
+Un jeu de scénarios rejouable (`scripts/attaques/`) vérifie de bout en bout ce que la Vigie fait d'attaques réelles : pour chaque scénario, un **site et une Vigie neufs**, reliés, dans des dossiers temporaires, sur des ports libres de `127.0.0.1` (base de démonstration de `npm run seed`, listes de menaces coupées, aucun accès au réseau extérieur : jamais contre l'instance de test ni la démo). Les scénarios envoient de **vraies requêtes HTTP** au site ; chaque visiteur a son adresse et son pays, par `X-Forwarded-For` et `cf-ipcountry`, que le site croit parce que la requête vient du proxy de confiance (`TRUST_PROXY=127.0.0.1`, comme cloudflared). Le banc vide ensuite la file du site, attend que le moteur ait tout lu (`engine.drain`) et fait lire les décisions au site.
+
+**Lancer** :
+
+```bash
+npm run attaques                                   # tout le jeu (≈ 1 min)
+node scripts/attaques/index.mjs --liste            # scénarios, familles, cas
+node scripts/attaques/index.mjs --scenario cookie-rejoue --scenario galeries   # un scénario, ou une famille
+node scripts/attaques/index.mjs --scenario galeries --garder                   # dossiers gardés (chemin affiché)
+```
+
+Code de sortie : 0 si tout est vert, 1 sinon. `node --test test/vigie-attaques.test.js` joue tout le jeu dans la suite de tests.
+
+**Lire le rapport** : une ligne par scénario (✓ ou ✗, cas DS, durée), puis ses étapes. Chaque attente dit ce qui a été vérifié (`alerte <règle> sur <entité> (<gravité>) [<mode>]`, `signal`, `score`, `décision`, réponse du site) et ce qui a été trouvé ; « autres alertes de l'étape » liste ce qui s'est ouvert sans être attendu. `note :` explique un choix (quorum, mode de départ) ; `trou constaté :` décrit un écart connu entre l'attente et ce que font la Vigie ou le site, avec le fichier et la ligne en cause : le scénario reste rouge tant qu'il n'est pas comblé (dans la suite de tests, c'est un sous-test « todo »).
+
+Ce qu'il faut savoir pour lire les attentes : les règles qui déposent des **points** n'ouvrent une alerte qu'avec deux sources (quorum) ; le site seul produit donc un **signal** et un score, pas d'alerte. Le scénario `quorum-bordure` ajoute la seconde source (Worker Cloudflare simulé : Analytics Engine factice) et vérifie l'alerte, puis le blocage une fois la règle en mode Bloquer (403 sur l'adresse). Les règles en mode Alerter (galeries, Carnets, textes) ouvrent leur alerte sans réponse ; les réponses automatiques (cookie rejoué : sessions du compte fermées ; accès qui fuit : accès suspendu) sont vérifiées jusqu'à leur application par le site.
+
+**Ajouter un scénario** : dans le fichier de sa famille (`scripts/attaques/scenarios/<famille>.mjs`, ou un nouveau fichier ajouté à `scenarios/index.mjs`), un objet :
+
+```js
+{
+  nom: 'mon-scenario', famille: 'exploration', titre: 'Ce qu’il fait', cas: ['DS15'],
+  resume: 'Le déroulé, en une phrase.',
+  // preparerBase(db) { … }    données de départ, écrites avant le démarrage du site (facultatif)
+  // bordure: true             Worker Cloudflare simulé : b.banc.cf.ajouter({ ip, classe, statut, n })
+  async jouer(b) {
+    const n = b.nav({ ip: '203.0.113.9', ua: b.UA.linux, pays: 'DE' });   // visiteur ; b.equipe(…) pour l'admin
+    await n.get('/.env');                                                 // b.julien : l'administrateur, déjà connecté
+    await b.verifier('étape', [
+      { signal: 'sigma.piege', entite: 'ip:203.0.113.9' },
+      { alerte: 'sigma.x', entite: 'compte:local:julien', gravite: 'moyen', mode: 'alerter' },
+      { pasAlerte: 'entite.score', note: 'pourquoi' },
+    ]);
+    b.constat('étape', 'ce que le site a répondu', condition, 'détail');
+  },
+}
+```
+
+Attentes possibles : `alerte`, `pasAlerte`, `aucuneAlerte`, `signal`, `pasSignal`, `decision`, `pasDecision`, `score` (avec `min`, `sources`) ; chacune vaut pour ce qui s'est passé depuis l'étape précédente, et peut porter `note` ou `trou`. Les entités s'écrivent `ip:…`, `reseau:…`, `compte:<sub>`, `session:…`, `site:acces:<n°>`. Préparation commune : comptes de Julien (administrateur, `local:julien`, connecté depuis `192.0.2.10`) et de Sébastien (photographe, `zitadel-sebastien`), sauvegarde du site contrôlée par la Vigie (administrateurs connus, rôles pour le détecteur « rôle incohérent »).
+
+- **Ce que le jeu a révélé, et corrigé** (19 octobre 2026) : les textes publiés pesaient comme des résumés (« nombre » lu comme un poids : six traductions ouvraient « textes réécrits en série ») ; une corrélation ne se redéclenchait pas dans sa fenêtre (une attaque qui continue ne reprenait pas sa réponse, même après le passage de la règle en Bloquer) : elle repart désormais de zéro après chaque signal.
+- **Limite connue** : la force brute **répartie** contre un compte de l'admin n'est visible que par Zitadel (`zitadel_echec` porte le compte) ; un échec de connexion vu par le site ne dit pas quel compte était visé (l'identité n'est connue qu'après une connexion réussie).
 
 ## Garde-fous
 
