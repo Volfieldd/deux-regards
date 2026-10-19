@@ -1,5 +1,29 @@
 [
   {
+    "version": "1.173.0",
+    "date": "2026-10-19",
+    "pr": 173,
+    "title": {
+      "fr": "Site public v3 : le point fort et l’ouverture du téléphone",
+      "en": "Public site v3: focal point and the phone slideshow",
+      "de": "Öffentliche Website v3: Schwerpunkt und Start-Diashow auf dem Handy"
+    },
+    "items": [
+      {
+        "fr": "Dans la fiche d’une photo, « Point fort du cadrage » : ce que l’ouverture plein cadre de la v3 garde quand elle recadre la photo (au centre par défaut, ou un bord, ou un coin).",
+        "en": "In a photo’s record, “Focal point of the framing”: what the v3 full-bleed opening keeps when it crops the photo (centre by default, or an edge, or a corner).",
+        "de": "Im Datenblatt eines Fotos „Schwerpunkt des Bildausschnitts“: was der randlose Einstieg der v3 behält, wenn er das Foto beschneidet (standardmäßig die Mitte, ein Rand oder eine Ecke).",
+        "perm": "photos.modifier"
+      },
+      {
+        "fr": "Dans Site public, « Ouverture au téléphone (v3) » : une seconde liste, de photos verticales, pour l’ouverture de l’accueil au téléphone. Vide, le téléphone montre la même que le bureau.",
+        "en": "In Public site, “Opening slideshow on phones (v3)”: a second list, of portrait photos, for the home-page opening on phones. Empty, phones show the same one as computers.",
+        "de": "Unter Öffentliche Website „Start-Diashow auf dem Handy (v3)“: eine zweite Liste mit Hochformaten für den Einstieg der Startseite auf dem Handy. Leer zeigt das Handy dieselbe wie der Computer.",
+        "perm": "site.textes"
+      }
+    ]
+  },
+  {
     "version": "1.170.0",
     "date": "2026-10-19",
     "pr": 170,
