@@ -78,6 +78,14 @@ The next photo depends on the active filter: in “Street, by Julien”, you sta
 
 **Date and time**: the photo’s date as you entered it (to the month or to the day). The shooting time only appears if the record ticks **Show the time on the site** and the date is to the day: “1 May 2025, 2:32 pm” (“14 h 32”, “14:32 Uhr”), in the caption and the “Place, date and time” line. It is only shown on the photo’s page, never in the gallery, Nearby, the map or the sharing previews.
 
+## Visitor reports
+
+The **Visitor reports** page (sidebar, People group; administrators and moderators) receives what visitors send through a photo's **Report** link: the type (should not be online, suggestion for the text, something else), the message, the visitor's language, and the address left for a reply (visible to administrators only; the moderator only knows that an address was left). Message and address are encrypted and erased after 12 months. A report never unpublishes anything by itself: open the photo and decide.
+
+- **Mark as handled** files the report among the handled ones; the sidebar counter goes down.
+- **Delete…** erases the message and the address; in admin v2, a dialog asks first (Cancel comes first).
+- In admin v2, the **New** and **Handled** filters sort the list; each card names the photo, gives the type as a badge with a symbol and shows the message in its language.
+
 ## Other pages
 
 - **About:** full logo, tagline, text, authors’ biographies.
