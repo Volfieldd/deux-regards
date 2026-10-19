@@ -46,6 +46,24 @@ Während ein Import verarbeitet wird, erscheint unten in der Seitenleiste außer
 
 Jeder Bildschirm hat einen Link **„Hilfe zu dieser Seite“** (in der Fotothek: **Hilfe**, oben rechts), der direkt zum passenden Abschnitt führt.
 
+## Verwaltung v2
+
+Die Verwaltung gibt es in zwei Versionen nebeneinander. **v2** ist die neue, aus dem Ergonomie-Audit vom Oktober 2026; **v1** ist die, die Sie kennen. **Jedes Konto wählt seine eigene**: Ihre Wahl ändert nichts für andere, auch nicht für die öffentliche Website.
+
+- **v2 ausprobieren**: unten in der Seitenleiste, über Ihrem Namen, **Verwaltung v2 ausprobieren**. Ein Klick, und Sie sind dort.
+- **Zurück zu v1**: an derselben Stelle, **Zurück zur Verwaltung v1**. Ebenfalls ein Klick, wann Sie wollen. Die Wahl lässt sich auch unter **Mein Konto** einstellen (Klick auf Ihren Namen), zusammen mit den Benachrichtigungen per E-Mail.
+- **Ein noch nicht überarbeiteter Bildschirm** erscheint in v1, vollständig: Die Seitenleiste der v1 sagt es („Bildschirm noch nicht in v2“) und behält die Schaltfläche zum Zurückwechseln. Die anderen Bildschirme bleiben in v2.
+
+Was v2 ändert:
+
+- **Das Menü in vier Gruppen**: **Fotos** (Fotothek, Serien, Ausflüge, Reisen), **Personen** (Personen, Meldungen, Unterwegs-App), **Veröffentlichen** (Zu bestätigen oder Meine Vorschläge, Öffentliche Website, Reisetagebücher, Private Galerien, Instagram), **Team** (Konten und Rollen, Veröffentlichungsablauf, Protokoll, Sicherheit, Statistiken). Unten: Einstellungen, Hilfe, Website ansehen, Sprache, Neuigkeiten. Ein Eintrag erscheint nur, wenn Ihre Rolle die Seite öffnen darf.
+- **Einstellungen mit Registerkarten**: Identität und Erscheinungsbild, Wasserzeichen und EXIF, Impressum und Datenschutz, Fotografen, **Analyse-Assistenten** (die auf dem Server berechneten Hilfen, jede mit ihrem Schalter). Auf dem Telefon sind die Registerkarten Kästchen, alle sichtbar.
+- **Eine einzige Art zu speichern**: Was sich rückgängig machen lässt, wird gespeichert, wenn Sie das Feld verlassen oder den Schalter berühren; die Meldung unten bietet 10 Sekunden lang **Rückgängig** an (sie wartet, solange Maus oder Tastatur darauf sind). Die **Anzeige** unter dem Titel sagt „Gespeichert um 22:40“ oder „1 Feld nicht gespeichert“, mit einem Link zum Feld. Was öffentlich wirkt (Impressum, veröffentlichen, vorschlagen), behält eine Schaltfläche, die es sagt. Ohne JavaScript erscheint eine Schaltfläche **Speichern**.
+- **Vervollständigen und vorschlagen** (der Stapel eines Imports): englische und deutsche Titel unter jedem Titel eingeklappt, der Serienvorschlag mit einem Klick, **Für die angekreuzten Fotos** (Serie, Ort, Stadt der Karte, Datum), das vor **Anwenden** nichts ändert, die Filter **Zu korrigieren** und **Einwilligung zu prüfen**. **Vorschlagen** (oder **Veröffentlichen**, für wer veröffentlicht) zeigt zuerst, was noch zu prüfen ist — vorläufiger Titel, abgelehntes Datum, zu prüfende Einwilligung — und wird an Ort und Stelle korrigiert.
+- **Die Unterwegs-App**: ein Titel, das Ende Ihrer Sitzung, **Das Telefon der Person reichen**, das Ihren Teil einklappt, die Sprache der Person ohne Flaggen, Fehlendes in ihrer Sprache, die Unterschrift bleibt nach einem Fehler erhalten und **Löschen** lässt sich rückgängig machen; bricht die Verbindung ab oder läuft die Sitzung ab, bleibt die Einwilligung bis **Erneut versuchen** auf dem Bildschirm.
+
+Die Vigie ist dieselbe wie in v1: der Eintrag **Sicherheit** mit seinem Abzeichen, die Zeile oben in **Heute**, das Banner einer kritischen Warnung.
+
 ## Nach jeder Aktion
 
 Oben auf der Seite erscheint eine Meldung:

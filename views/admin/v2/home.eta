@@ -1,0 +1,97 @@
+<% layout('./layout') %>
+<% const t = it.t; %>
+<% // « Aujourd'hui » de la v2 (MQ-07, état 20) : une seule liste « À faire », par urgence, chaque ligne avec son action ; « photos
+   // à finir » se déplie en vignettes ; puis le site et les chiffres. La ligne de la Vigie est celle de la v1, à la même place
+   // (server/vigie-admin.js, posée en tête de son niveau d'urgence par la route).
+   const paris = new Intl.DateTimeFormat(it.locale, { timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', hourCycle: 'h23' }).formatToParts(new Date()).reduce((o, p) => ({ ...o, [p.type]: p.value }), {});
+   const h = Number(paris.hour);
+   const first = (it.me && it.me.name) || (it.session.name || '').split(' ')[0];
+   const photosN = n => (n > 1 ? t('{n} photos', { n }) : t('{n} photo', { n }));
+   const ago = iso => { const d = (Date.now() - new Date(iso.replace(' ', 'T') + 'Z')) / 1000; if (d < 3600) return t('il y a {n} min', { n: Math.max(1, Math.round(d / 60)) }); if (d < 86400) return t('il y a {n} h', { n: Math.round(d / 3600) }); if (d < 172800) return t('hier'); return t('il y a {n} j', { n: Math.round(d / 86400) }); };
+   const LEVEL = { urgent: t('urgent'), bientot: t('bientôt'), 'plus-tard': t('quand vous avez le temps') };
+   const SYM = {
+     urgent: '<path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2z"/><path d="M9 9l6 6M15 9l-6 6"/>',
+     bientot: '<path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/>',
+     'plus-tard': '<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>',
+   };
+   const sym = l => `<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${SYM[l]}</svg>`;
+   const extIc = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+   // Les photos à finir se complètent dans le lot (MQ-08), s'il est permis ; sinon dans la photothèque.
+   const lotHref = it.todo.length && it.can('photos.textes') ? `/admin/photos/lot?ids=${it.todoIds.join(',')}` : null;
+   const pr = it.proofs; %>
+<header class="ep accueil-tete">
+  <div class="ep-titre"><h1><%= h < 5 || h >= 18 ? t('Bonsoir') : t('Bonjour') %><%= first ? `, ${first}` : '' %>.</h1></div>
+  <p class="ep-meta"><span><%= t('{weekday} {day} {month}', { weekday: paris.weekday, day: paris.day, month: paris.month }) %></span></p>
+  <div class="accueil-actions">
+    <a class="btn ghost" href="/" target="_blank" rel="noopener"><%= t('Voir le site') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a>
+<% if (it.can('photos.importer')) { %>    <a class="btn" href="/admin/photos?importer#import"><%= t('Importer des photos') %></a>
+<% } %>  </div>
+</header>
+
+<section class="panel taches-p" aria-labelledby="af-t">
+  <h2 id="af-t"><%= t('À faire') %> <span class="hint"><%= it.tasks.length ? (it.tasks.length > 1 ? t('· {n}, les plus urgentes d’abord', { n: it.tasks.length }) : t('· 1, la plus urgente d’abord')) : t('· rien pour l’instant') %></span></h2>
+<% if (!it.tasks.length) { %>
+  <p class="hint"><%= t('Rien ne demande votre attention : ni demande à traiter, ni refus en attente, ni photo à finir.') %></p>
+<% } else { %>
+  <ul class="taches">
+<% it.tasks.forEach(task => { const out = task.external ? ' target="_blank" rel="noopener noreferrer"' : ''; const finir = task.href === '/admin/photos?statut=afinir'; %>
+    <li class="tache tache--<%= task.level %>">
+      <span class="u u-<%= task.level %>" aria-hidden="true"><%~ sym(task.level) %></span>
+      <span class="tt"><span class="tt-t"><%= task.title %></span><span class="q"><%= LEVEL[task.level] %><%= task.detail ? ` · ${task.detail}` : '' %></span></span>
+<% if (finir && lotHref) { %>      <a class="btn ghost" href="<%= lotHref %>"><%= t('Compléter dans le lot') %></a>
+<% } else { %>      <a class="btn ghost" href="<%= task.href %>"<%~ out %>><%= task.action %><% if (task.external) { %><span class="sr-only"> <%= t('(nouvel onglet)') %></span><%~ extIc %><% } %></a>
+<% } %>
+<% if (finir && it.todo.length) { %>
+      <ul class="vign" aria-label="<%= t('Photos à finir') %>">
+<% it.todo.forEach(p => { %>
+        <li><% if (p.ready) { %><%~ it.picture(p, { sizes: '64px', alt: '' }) %><% } else { %><span class="ph" aria-hidden="true"></span><% } %><span class="vt"><%= p.title %><small<%~ p.gate === 'warn' || p.gate === 'no' ? ' class="att"' : '' %>><%= p.provisional ? t('Brouillon · titre provisoire') : p.gate === 'no' ? t('Brouillon · bloquée par un accord') : p.gate === 'warn' ? t('Accord à vérifier') : t('Brouillon · prête à proposer') %></small></span>
+          <a class="btn ghost" href="/admin/photos/<%= p.id %><%= p.gate === 'warn' ? '#publication' : '' %>"><%= p.provisional ? t('Titrer') : p.gate === 'warn' ? t('Vérifier l’accord') : t('Finir') %><span class="sr-only"> : <%= p.title %></span></a></li>
+<% }) %>
+      </ul>
+<% } %>
+    </li>
+<% }) %>
+  </ul>
+<% } %>
+</section>
+
+<div class="accueil-grille">
+<% if (it.can('site.textes')) { %>
+  <section class="panel" aria-labelledby="site-t">
+    <h2 id="site-t"><%= t('Le site, en ce moment') %></h2>
+    <div class="filmstrip"><% it.hero.forEach(p => { %><%~ it.picture(p, { sizes: '140px', alt: '' }) %><% }) %></div>
+    <p class="hint"><%= it.heroChosen ? t('Ouverture : {photos}, dans l’ordre choisi', { photos: photosN(it.hero.length) }) : t('Ouverture : {photos} (les premières de la galerie)', { photos: photosN(it.hero.length) }) %> · <%= t('thème {theme}', { theme: it.themeLabel || '—' }) %> · <a class="lien-a" href="/admin/site#ouverture"><%= t('Modifier l’ouverture') %></a></p>
+  </section>
+<% } %>
+  <section class="panel" aria-labelledby="chiffres-t">
+    <h2 id="chiffres-t"><%= t('Chiffres') %></h2>
+    <div class="figures">
+<% if (it.visitorsToday != null) { %>      <a href="/admin/statistiques"><b><%= it.visitorsToday %></b><span><%= it.visitorsToday > 1 ? t('visiteurs aujourd’hui') : t('visiteur aujourd’hui') %></span></a>
+<% } %>      <a href="/admin/photos?statut=published"><b><%= it.counts.published %></b><span><%= t('photos publiées') %></span></a>
+      <a href="/admin/photos?statut=draft"><b><%= it.counts.draft %></b><span><%= t('brouillons') %></span></a>
+<% if (it.can('series.gerer')) { %>      <a href="/admin/series"><b><%= it.categories %></b><span><%= t('séries') %></span></a>
+<% } %>    </div>
+  </section>
+  <section class="panel" aria-labelledby="recent-t">
+    <h2 id="recent-t"><%= t('Dernières modifications') %></h2>
+    <ul class="recent">
+<% it.recent.forEach(p => { %>
+      <li><% if (p.ready) { %><%~ it.picture(p, { sizes: '40px', alt: '' }) %><% } else { %><span class="ph" aria-hidden="true"></span><% } %><a href="/admin/photos/<%= p.id %>"><%= p.title %></a><span class="hint"><%= p.status === 'published' ? t('publiée') : t('brouillon') %> · <%= p.author %></span><span class="w"><%= ago(p.updated_at) %></span></li>
+<% }) %>
+    </ul>
+  </section>
+<% if (it.can('photos.modifier') && it.allPhotos) { %>
+  <section class="panel" aria-labelledby="proofs-title">
+    <h2 id="proofs-title"><%= t('Preuves d’antériorité') %></h2>
+<% if (!it.tsa.url) { %>
+    <p class="hint"><%~ t('Horodatage désactivé sur ce serveur ({code}) : seules les empreintes des originaux sont calculées.', { code: '<code>TSA_URL=off</code>' }) %></p>
+<% } else { %>
+    <p><%~ pr.errors ? t('{ok} photo(s) sur {total} horodatée(s), {errors} en attente après une erreur.', { ok: `<strong>${__eta.e(pr.ok)}</strong>`, total: __eta.e(pr.photos), errors: __eta.e(pr.errors) }) : t('{ok} photo(s) sur {total} horodatée(s).', { ok: `<strong>${__eta.e(pr.ok)}</strong>`, total: __eta.e(pr.photos) }) %></p>
+<% if (pr.errors) { %>
+    <form method="post" action="/admin/preuves/reessayer"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin">
+      <button class="btn ghost" type="submit"><%= t('Réessayer maintenant') %></button></form>
+<% } %>
+<% } %>
+  </section>
+<% } %>
+</div>

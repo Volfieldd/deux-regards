@@ -1,0 +1,41 @@
+/* =====================================================================================================
+   Admin v2 : jetons de la direction artistique (planche MQ-00 de l'audit d'ergonomie du 16 oct. 2026), repris de
+   docs/audit-ergonomie-2026-10-16/maquettes/_commun/tokens.css. Les couleurs de l'admin (clair et « Chambre noire ») sont
+   celles d'admin.css, chargée avant ce fichier (views/admin/v2/layout.eta) : elles ne sont pas redéclarées ici. Ce fichier
+   ajoute ce que la planche demande en plus : familles, rayons, états, échelle typographique, lignes du menu.
+   Ordre de chargement : admin/admin.css → admin/v2/tokens.css → admin/v2/admin-plus.css → admin/v2/v2.css.
+   ===================================================================================================== */
+
+/* La police des données (numéro de version, références) : admin.css ne charge que Jost. */
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); }
+
+/* Familles et rayons (§ 1 de la planche). */
+:root {
+  --sans: Jost, 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+  --r-admin: 9px;          /* boutons, champs, pastilles carrées */
+  --r-admin-panneau: 14px; /* panneaux, dialogue, message d'action */
+}
+
+/* États, échelle et lignes du menu (§ 3 de la planche). Portée : la classe .admin, posée sur <body>. */
+.admin {
+  /* Le symbole porte le sens, la couleur le double, le mot le dit. Jamais l'un sans les autres. */
+  --st-afaire: var(--ink2);        /* ○ pas commencé : brouillon */
+  --st-encours: var(--accent-ink); /* ◐ en cours, attend quelqu'un : proposée */
+  --st-abouti: var(--ok);          /* ● abouti : publiée, active */
+  --st-attention: var(--warn);     /* ▲ demande votre attention : à vérifier */
+  --st-arret: var(--danger);       /* ✕ arrêté : refusée, retirée */
+
+  /* Échelle typographique de l'admin (Jost seul) : rien sous 12 px, touches de clavier comprises. */
+  --at-min: 12px;   /* méta, compteurs, kbd */
+  --at-petit: 13px; /* aide, libellés */
+  --at-texte: 14px; /* texte courant, champs */
+  --at-h3: 15px;
+  --at-h2: 18px;    /* 500 */
+  --at-h1: 34px;    /* 300 ; 28 px au téléphone */
+
+  /* Lignes du menu : 30 px au bureau (le menu tient dans 900 px), 44 px au toucher. */
+  --ligne-menu: 30px;
+  --barre-basse: 74px; /* barre d'onglets du téléphone (admin.css) */
+}
+@media (max-width: 720px), (pointer: coarse) { .admin { --ligne-menu: 44px; } }

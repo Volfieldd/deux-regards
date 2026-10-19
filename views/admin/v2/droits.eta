@@ -1,0 +1,80 @@
+<% layout('./layout') %>
+<% const t = it.t; const s = it.settings; %>
+<% // Réglages › Mentions et confidentialité (MQ-07, états 1 et 2 ; UX-T-03, UX-A-26) : les trois pages légales du site
+   // dans un seul formulaire (POST /admin/reglages, part=droits, le même que la v1 : un envoi enregistre toutes leurs
+   // rubriques). Les mentions d'abord, champ par champ, chacune obligatoire ; ce qui manque est dit en tête (un lien par
+   // rubrique) et sous le champ. Droits et Confidentialité sont repliés. Un bouton nomme l'effet (« Enregistrer et mettre
+   // en ligne ») ; « Revenir à la version enregistrée » oublie ce qui n'est pas encore envoyé (sans script : reset).
+   const hosted = s.legal_host === 'hebergeur';
+   const miss = new Set(it.legalMissing);
+   const alerte = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg>';
+   const chev = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
+   // Rubrique obligatoire : son libellé, ce que la loi demande, et l'erreur si elle manque.
+   const MISSING = {
+     names: ['ml-ed', t('Éditeurs du site'), t('indiquez qui édite le site : prénoms et noms.')],
+     address: ['ml-ad', t('Adresse postale'), t('indiquez une adresse postale où vous joindre.')],
+     email: ['ml-mail', t('E-mail de contact'), t('indiquez un e-mail de contact.')],
+     phone: ['ml-tel', t('Téléphone'), t('indiquez un téléphone.')],
+     director: ['ml-dir', t('Directeur de la publication'), t('indiquez le directeur ou la directrice de la publication, une personne.')],
+     host_name: ['ml-hn', t('Nom de l’hébergeur'), t('indiquez le nom de l’hébergeur.')],
+     host_address: ['ml-ha', t('Adresse de l’hébergeur'), t('indiquez l’adresse de l’hébergeur.')],
+     host_phone: ['ml-hp', t('Téléphone de l’hébergeur'), t('indiquez le téléphone de l’hébergeur.')],
+   };
+   const bad = k => (miss.has(k) ? ` aria-invalid="true" aria-describedby="${MISSING[k][0]}-a ${MISSING[k][0]}-e"` : ` aria-describedby="${MISSING[k][0]}-a"`);
+   const err = k => (miss.has(k) ? `<p class="err" id="${MISSING[k][0]}-e">${alerte}<span><b>${__eta.e(t('Erreur :'))}</b> ${__eta.e(MISSING[k][2])}</span></p>` : '');
+   const frOwn = Boolean(String(s.rights_text || '').trim()); %>
+<%~ include('./_reglages', { ...it, courant: 'droits' }) %>
+<div class="ml">
+<nav class="sur-onglet" aria-label="<%= t('Sur cet onglet') %>"><%= t('Sur cet onglet :') %> <a href="#mentions"><%= t('Mentions légales') %></a><a href="#droits"><%= t('Droits et licences') %></a><a href="#confidentialite"><%= t('Confidentialité') %></a></nav>
+<% if (miss.size) { %>
+<section class="resume-a" tabindex="-1" aria-labelledby="res-t" data-resume><h2 id="res-t"><%~ alerte %><%= miss.size > 1 ? t('Mentions incomplètes : {n} rubriques à remplir', { n: miss.size }) : t('Mentions incomplètes : 1 rubrique à remplir') %></h2>
+  <p class="hint"><%= t('La page publiée n’affiche que ce qui est rempli.') %></p>
+  <ul><% it.legalMissing.forEach(k => { %><li><a href="#<%= MISSING[k][0] %>"><%= MISSING[k][1] %></a></li><% }) %></ul></section>
+<% } %>
+<form class="form" action="/admin/reglages" method="post" data-garde aria-labelledby="mentions">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <input type="hidden" name="part" value="droits">
+  <h2 class="ml-titre" id="mentions"><%= t('Mentions légales') %> <span class="hint">· <%= t('page /mentions-legales (Impressum en allemand), liée en bas de chaque page') %></span></h2>
+  <p class="hint"><%= t('Tous les champs sont obligatoires, sauf mention « facultatif ». La loi les demande en France comme en Allemagne ; le site rédige la page dans les trois langues.') %></p>
+  <div class="champ-a"><label for="ml-ed"><%= t('Éditeurs du site') %></label><p class="aide" id="ml-ed-a"><%= t('Prénoms et noms, par exemple « Sébastien Exemple et Julien Exemple ».') %></p><input type="text" id="ml-ed" name="legal_names" value="<%= s.legal_names || '' %>" maxlength="200"<%~ bad('names') %>><%~ err('names') %></div>
+  <div class="champ-a"><label for="ml-ad"><%= t('Adresse postale') %></label><p class="aide" id="ml-ad-a"><%= t('Rue, code postal, ville, pays ; une ligne par ligne d’adresse. Elle est publiée sur la page.') %></p><textarea id="ml-ad" name="legal_address" rows="3" maxlength="400"<%~ bad('address') %>><%= s.legal_address || '' %></textarea><%~ err('address') %></div>
+  <div class="row">
+    <div class="champ-a"><label for="ml-mail"><%= t('E-mail de contact') %></label><p class="aide" id="ml-mail-a"><%= t('Publié en lien sur la page.') %></p><input id="ml-mail" name="legal_email" type="email" autocomplete="email" value="<%= s.legal_email || '' %>" maxlength="200"<%~ bad('email') %>><%~ err('email') %></div>
+    <div class="champ-a"><label for="ml-tel"><%= t('Téléphone') %></label><p class="aide" id="ml-tel-a"><%= hosted ? t('Dû par la loi pour une personne qui édite un site.') : t('Dû, puisque vous hébergez le site.') %></p><input type="text" id="ml-tel" name="legal_phone" inputmode="tel" autocomplete="tel" value="<%= s.legal_phone || '' %>" maxlength="40"<%~ bad('phone') %>><%~ err('phone') %></div>
+  </div>
+  <div class="champ-a"><label for="ml-dir"><%= t('Directeur de la publication') %></label><p class="aide" id="ml-dir-a"><%= t('La personne qui répond de ce qui est publié (LCEN, art. 1-1). En Allemagne : « Verantwortlich nach § 18 MStV ».') %></p><input type="text" id="ml-dir" name="legal_director" value="<%= s.legal_director || '' %>" maxlength="120"<%~ bad('director') %>><%~ err('director') %></div>
+  <fieldset class="choix-a host-pick" id="hebergement"><legend><%= t('Hébergement') %></legend>
+    <label><input type="radio" name="legal_host" value="editeurs"<%~ hosted ? '' : ' checked' %>><span><%= t('Par les éditeurs, sur leur serveur') %></span><span class="sec"><%= t('La page le dit, avec l’adresse et le téléphone ci-dessus.') %></span></label>
+    <label><input type="radio" name="legal_host" value="hebergeur"<%~ hosted ? ' checked' : '' %>><span><%= t('Chez un hébergeur') %></span><span class="sec"><%= t('Son nom, son adresse et son téléphone sont alors demandés.') %></span></label>
+    <div class="host-fields">
+      <div class="champ-a"><label for="ml-hn"><%= t('Nom de l’hébergeur') %></label><p class="aide" id="ml-hn-a"><%= t('Raison sociale.') %></p><input type="text" id="ml-hn" name="legal_host_name" value="<%= s.legal_host_name || '' %>" maxlength="200"<%~ bad('host_name') %>><%~ err('host_name') %></div>
+      <div class="champ-a"><label for="ml-ha"><%= t('Adresse de l’hébergeur') %></label><p class="aide" id="ml-ha-a"><%= t('Rue, code postal, ville, pays ; une ligne par ligne d’adresse.') %></p><textarea id="ml-ha" name="legal_host_address" rows="2" maxlength="400"<%~ bad('host_address') %>><%= s.legal_host_address || '' %></textarea><%~ err('host_address') %></div>
+      <div class="champ-a"><label for="ml-hp"><%= t('Téléphone de l’hébergeur') %></label><p class="aide" id="ml-hp-a"><%= t('Le standard de l’hébergeur.') %></p><input type="text" id="ml-hp" name="legal_host_phone" value="<%= s.legal_host_phone || '' %>" maxlength="40" inputmode="tel"<%~ bad('host_phone') %>><%~ err('host_phone') %></div>
+    </div>
+  </fieldset>
+
+  <details class="panel plier" id="droits"><summary><%~ chev %><span><span><%= t('Droits et licences') %> <span class="hint">· <%= t('page /droits, liée aux mentions IPTC des images') %></span></span><span class="sec"><%= t('Le texte des droits d’utilisation et l’adresse qui reçoit les demandes de licence.') %></span></span></summary>
+    <div class="plier-corps">
+      <p class="hint"><%= t('Le texte affiché ci-dessous est celui que lisent les visiteurs. Tant que vous gardez le texte par défaut, il suit les noms des auteurs ; modifié, il est enregistré tel quel.') %></p>
+<% it.rights.forEach(r => { const own = Boolean(String(s[r.setting] || '').trim()); %>
+      <div class="champ-a"><div class="lb-l"><label for="<%= r.setting %>"><%= r.name %></label><span class="compteur"><%= own ? t('Texte personnalisé') : t('Texte par défaut') %></span></div>
+<% if (r.lang !== 'fr' && frOwn && !own) { %>        <p class="avert"><%~ alerte %><%= t('Le texte français a été modifié : adaptez aussi cette traduction, sinon les visiteurs lisent la traduction du texte par défaut.') %></p>
+<% } %>        <textarea id="<%= r.setting %>" name="<%= r.setting %>" rows="<%= r.lang === 'fr' ? 7 : 6 %>" maxlength="10000" lang="<%= r.lang %>"><%= own ? s[r.setting] : it.rightsDefaults[r.lang] %></textarea></div>
+<% }) %>
+      <div class="champ-a"><label for="dr-contact"><%= t('Contact pour les demandes d’utilisation') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="dr-contact-a"><%= t('Adresse e-mail ou lien https://.') %></p><input id="dr-contact" name="rights_contact" value="<%= s.rights_contact || '' %>" maxlength="200" aria-describedby="dr-contact-a"></div>
+    </div>
+  </details>
+  <details class="panel plier" id="confidentialite"><summary><%~ chev %><span><span><%= t('Confidentialité') %> <span class="hint">· <%= t('page /confidentialite (RGPD), en trois langues') %></span></span><span class="sec"><%= t('Le contact des responsables, et deux cases à ne cocher que si c’est vrai.') %></span></span></summary>
+    <div class="plier-corps">
+      <p class="hint"><%= t('La page décrit ce que le site fait des données : responsables (les auteurs), données, durées, destinataires, droits. Elle suit le code : rien à rédiger ici, sauf le contact et deux cases qui ne doivent être cochées que lorsque c’est vrai.') %></p>
+      <div class="champ-a"><label for="cf-contact"><%= t('Contact des responsables') %> <span class="facultatif"><%= t('(facultatif)') %></span></label><p class="aide" id="cf-contact-a"><%= t('Adresse e-mail.') %></p><input id="cf-contact" name="privacy_contact" value="<%= s.privacy_contact || '' %>" maxlength="200" placeholder="info@nicephos.art" aria-describedby="cf-contact-a"></div>
+      <div class="choix-a">
+        <label><input type="checkbox" name="privacy_mfa"<%~ s.privacy_mfa ? ' checked' : '' %>><span><%= t('L’authentification à deux facteurs est activée pour tous les comptes de l’admin (Zitadel)') %></span></label>
+        <label><input type="checkbox" name="privacy_encrypted"<%~ s.privacy_encrypted ? ' checked' : '' %>><span><%= t('Les données et les sauvegardes sont sur des disques chiffrés') %></span></label>
+      </div>
+      <p class="<%= it.encrypted ? 'hint' : 'avert' %>"><% if (!it.encrypted) { %><%~ alerte %><% } %><span><b><%= t('Chiffrement des données personnelles dans la base') %></b> <%= t('(noms, adresses, signatures, photos de repère et de carte, messages, positions) :') %> <%= it.encrypted ? t('actif (clé DATA_KEY du serveur). Gardez une copie de la clé hors du serveur : perdue, ces données sont illisibles.') : t('inactif. Ajoutez DATA_KEY au fichier .env du serveur (voir le guide Unraid) : les données existantes seront chiffrées au redémarrage.') %></span></p>
+    </div>
+  </details>
+  <div class="form-pied"><span class="mod" role="status" data-modifs data-texte="<%= t('Modifié, pas encore en ligne :') %>" hidden></span><button class="btn ghost" type="reset"><%= t('Revenir à la version enregistrée') %></button><button class="btn" type="submit"><%= t('Enregistrer et mettre en ligne') %></button></div>
+</form>
+</div>

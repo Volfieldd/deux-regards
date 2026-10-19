@@ -1396,3 +1396,11 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 }
 /* Au téléphone, la barre d'onglets fixe du bas ne cache jamais le champ qui a le focus (WCAG 2.4.12). */
 @media (max-width: 720px) { html:has(.gp) { scroll-padding-bottom: 96px; } .gp :is(input, select, textarea, button, a) { scroll-margin-bottom: 96px; } }
+
+/* ---------- Choix de l'admin v1 / v2 (menu du compte, server/admin-version.js) ----------
+   Une ligne du pied de la barre, au-dessus du compte : un bouton qui dit où il mène ; pour un compte en v2 qui voit un écran
+   pas encore refait, la phrase le dit d'abord. 32 px au bureau, 44 au toucher. */
+.ver-choix { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; margin: 0; padding: 0 2px; color: var(--ink3); font-size: 12px; }
+.ver-choix button { display: inline-flex; align-items: center; min-height: 32px; padding: 0 8px; margin-left: -8px; border: 0; border-radius: 8px; background: none; color: var(--ink2); font: inherit; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.ver-choix button:hover { background: var(--s2); color: var(--ink); }
+@media (max-width: 720px), (pointer: coarse) { .ver-choix button { min-height: 44px; } }

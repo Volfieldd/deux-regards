@@ -1,0 +1,1170 @@
+{
+ "Pour le site et l’équipe": {
+  "en": "For the site and the team",
+  "de": "Für Website und Team"
+ },
+ "Rubriques des réglages": {
+  "en": "Settings sections",
+  "de": "Bereiche der Einstellungen"
+ },
+ "{n} rubriques obligatoires à remplir": {
+  "en": "{n} required items to fill in",
+  "de": "{n} Pflichtangaben fehlen"
+ },
+ "1 rubrique obligatoire à remplir": {
+  "en": "1 required item to fill in",
+  "de": "1 Pflichtangabe fehlt"
+ },
+ "Défaire": {
+  "en": "Undo",
+  "de": "Rückgängig"
+ },
+ "Enregistré à {h}": {
+  "en": "Saved at {h}",
+  "de": "Gespeichert um {h}"
+ },
+ "{n} champ non enregistré : {champs}": {
+  "en": "{n} field not saved: {champs}",
+  "de": "{n} Feld nicht gespeichert: {champs}"
+ },
+ "{n} champs non enregistrés : {champs}": {
+  "en": "{n} fields not saved: {champs}",
+  "de": "{n} Felder nicht gespeichert: {champs}"
+ },
+ "« {champ} » enregistré.": {
+  "en": "“{champ}” saved.",
+  "de": "„{champ}“ gespeichert."
+ },
+ "« {champ} » rétabli.": {
+  "en": "“{champ}” restored.",
+  "de": "„{champ}“ wiederhergestellt."
+ },
+ "Erreur : {msg}": {
+  "en": "Error: {msg}",
+  "de": "Fehler: {msg}"
+ },
+ "Réseau coupé : rien n’est enregistré. Réessayez quand le réseau revient.": {
+  "en": "No connection: nothing was saved. Try again when the connection is back.",
+  "de": "Keine Verbindung: Nichts wurde gespeichert. Versuchen Sie es erneut, sobald die Verbindung zurück ist."
+ },
+ "Session expirée : reconnectez-vous dans un nouvel onglet, puis réessayez ici.": {
+  "en": "Session expired: sign in again in a new tab, then try again here.",
+  "de": "Sitzung abgelaufen: Melden Sie sich in einem neuen Tab erneut an und versuchen Sie es dann hier noch einmal."
+ },
+ "« {champ} » de « {photo} »": {
+  "en": "“{champ}” of “{photo}”",
+  "de": "„{champ}“ von „{photo}“"
+ },
+ "Modification défaite.": {
+  "en": "Change undone.",
+  "de": "Änderung rückgängig gemacht."
+ },
+ "Défaire impossible : {msg}": {
+  "en": "Could not undo: {msg}",
+  "de": "Rückgängig nicht möglich: {msg}"
+ },
+ "Erreur {status}": {
+  "en": "Error {status}",
+  "de": "Fehler {status}"
+ },
+ "Aucun résultat pour « {q} ».": {
+  "en": "No results for “{q}”.",
+  "de": "Keine Ergebnisse für „{q}“."
+ },
+ "{n} résultats": {
+  "en": "{n} results",
+  "de": "{n} Ergebnisse"
+ },
+ "1 résultat": {
+  "en": "1 result",
+  "de": "1 Ergebnis"
+ },
+ "Chercher « {q} » dans l’aide": {
+  "en": "Search the help for “{q}”",
+  "de": "„{q}“ in der Hilfe suchen"
+ },
+ "Aller à": {
+  "en": "Go to",
+  "de": "Gehe zu"
+ },
+ "Actions": {
+  "en": "Actions",
+  "de": "Aktionen"
+ },
+ "Basculer en mode clair / sombre": {
+  "en": "Switch between light and dark mode",
+  "de": "Zwischen hellem und dunklem Modus wechseln"
+ },
+ "Voir le site public": {
+  "en": "View the public site",
+  "de": "Öffentliche Website ansehen"
+ },
+ "Revenir à l’admin v1": {
+  "en": "Back to admin v1",
+  "de": "Zurück zur Verwaltung v1"
+ },
+ "Pour les {n} photos cochées :": {
+  "en": "For the {n} ticked photos:",
+  "de": "Für die {n} angekreuzten Fotos:"
+ },
+ "Pour la photo cochée :": {
+  "en": "For the ticked photo:",
+  "de": "Für das angekreuzte Foto:"
+ },
+ "Aucune photo cochée : cochez-en une pour changer sa série, son lieu, sa ville ou sa date.": {
+  "en": "No photo ticked: tick one to change its series, place, town or date.",
+  "de": "Kein Foto angekreuzt: Kreuzen Sie eines an, um Serie, Ort, Stadt oder Datum zu ändern."
+ },
+ "Appliquer aux {n} photos": {
+  "en": "Apply to the {n} photos",
+  "de": "Auf die {n} Fotos anwenden"
+ },
+ "Appliquer à la photo": {
+  "en": "Apply to the photo",
+  "de": "Auf das Foto anwenden"
+ },
+ "Cocher les {n} photos": {
+  "en": "Tick all {n} photos",
+  "de": "Alle {n} Fotos ankreuzen"
+ },
+ "Quitter sans enregistrer ?": {
+  "en": "Leave without saving?",
+  "de": "Ohne Speichern verlassen?"
+ },
+ "Ce qui n’est pas enregistré sera perdu : {champs}. Le reste l’est déjà.": {
+  "en": "What is not saved will be lost: {champs}. Everything else already is.",
+  "de": "Nicht Gespeichertes geht verloren: {champs}. Alles andere ist bereits gespeichert."
+ },
+ "Quitter quand même": {
+  "en": "Leave anyway",
+  "de": "Trotzdem verlassen"
+ },
+ "Rester": {
+  "en": "Stay",
+  "de": "Bleiben"
+ },
+ "Signature effacée.": {
+  "en": "Signature cleared.",
+  "de": "Unterschrift gelöscht."
+ },
+ "Envoi…": {
+  "en": "Sending…",
+  "de": "Wird gesendet…"
+ },
+ "tableau de bord, accueil, à faire": {
+  "en": "dashboard, home, to do",
+  "de": "Übersicht, Start, zu erledigen"
+ },
+ "photos, images, galerie": {
+  "en": "photos, images, gallery",
+  "de": "Fotos, Bilder, Galerie"
+ },
+ "Photos à finir": {
+  "en": "Photos to finish",
+  "de": "Fotos fertigstellen"
+ },
+ "brouillons, titres provisoires": {
+  "en": "drafts, provisional titles",
+  "de": "Entwürfe, vorläufige Titel"
+ },
+ "thèmes, catégories": {
+  "en": "themes, categories",
+  "de": "Themen, Kategorien"
+ },
+ "journées de prise de vue": {
+  "en": "shooting days",
+  "de": "Aufnahmetage"
+ },
+ "carnet de route": {
+  "en": "travel log",
+  "de": "Reisetagebuch"
+ },
+ "rencontres, accords, droit à l’image, RGPD": {
+  "en": "encounters, consents, image rights, GDPR",
+  "de": "Begegnungen, Einwilligungen, Recht am eigenen Bild, DSGVO"
+ },
+ "plaintes, retraits": {
+  "en": "complaints, removals",
+  "de": "Beschwerden, Entfernungen"
+ },
+ "App de terrain": {
+  "en": "Field app",
+  "de": "Unterwegs-App"
+ },
+ "cartes d’accord, QR, téléphone": {
+  "en": "consent cards, QR, phone",
+  "de": "Einwilligungskarten, QR, Telefon"
+ },
+ "accord, signature": {
+  "en": "consent, signature",
+  "de": "Einwilligung, Unterschrift"
+ },
+ "propositions, modération, publier": {
+  "en": "proposals, moderation, publish",
+  "de": "Vorschläge, Moderation, veröffentlichen"
+ },
+ "textes, accroche, à propos, ouverture, carte du monde": {
+  "en": "texts, tagline, about, opening, world map",
+  "de": "Texte, Slogan, Über uns, Startbilder, Weltkarte"
+ },
+ "billets, blog, récits": {
+  "en": "posts, blog, stories",
+  "de": "Beiträge, Blog, Geschichten"
+ },
+ "clients, accès, mot de passe": {
+  "en": "clients, access, password",
+  "de": "Kunden, Zugang, Passwort"
+ },
+ "réseaux sociaux, file de publication": {
+  "en": "social media, publishing queue",
+  "de": "soziale Netzwerke, Veröffentlichungswarteschlange"
+ },
+ "utilisateurs, droits, permissions": {
+  "en": "users, rights, permissions",
+  "de": "Benutzer, Rechte, Berechtigungen"
+ },
+ "validation, modérateur": {
+  "en": "approval, moderator",
+  "de": "Freigabe, Moderator"
+ },
+ "historique, audit, qui a fait quoi": {
+  "en": "history, audit, who did what",
+  "de": "Verlauf, Prüfprotokoll, wer hat was getan"
+ },
+ "visiteurs, audience, vues": {
+  "en": "visitors, audience, views",
+  "de": "Besucher, Publikum, Aufrufe"
+ },
+ "Identité et apparence": {
+  "en": "Identity and appearance",
+  "de": "Identität und Erscheinungsbild"
+ },
+ "thème, logo, marque, emblème, version du site": {
+  "en": "theme, logo, brand, emblem, site version",
+  "de": "Thema, Logo, Marke, Emblem, Website-Version"
+ },
+ "Filigrane et EXIF": {
+  "en": "Watermark and EXIF",
+  "de": "Wasserzeichen und EXIF"
+ },
+ "watermark, métadonnées, signature des images": {
+  "en": "watermark, metadata, image signature",
+  "de": "Wasserzeichen, Metadaten, Bildsignatur"
+ },
+ "impressum, éditeur, directeur de la publication, hébergeur": {
+  "en": "impressum, publisher, editor in chief, host",
+  "de": "Impressum, Anbieter, Verantwortlicher, Hoster"
+ },
+ "Droits et licences": {
+  "en": "Rights and licences",
+  "de": "Rechte und Lizenzen"
+ },
+ "droits d’utilisation, licence, reproduction": {
+  "en": "terms of use, licence, reproduction",
+  "de": "Nutzungsrechte, Lizenz, Vervielfältigung"
+ },
+ "RGPD, données personnelles, vie privée": {
+  "en": "GDPR, personal data, privacy",
+  "de": "DSGVO, personenbezogene Daten, Privatsphäre"
+ },
+ "auteurs, biographie, préfixe des cartes": {
+  "en": "authors, biography, card prefix",
+  "de": "Autoren, Biografie, Kartenbuchstabe"
+ },
+ "Assistants d’analyse": {
+  "en": "Analysis assistants",
+  "de": "Analyse-Assistenten"
+ },
+ "intelligence artificielle, IA, suggestions, description automatique, mots-clés": {
+  "en": "artificial intelligence, AI, suggestions, automatic description, keywords",
+  "de": "künstliche Intelligenz, KI, Vorschläge, automatische Beschreibung, Schlagwörter"
+ },
+ "Mon compte": {
+  "en": "My account",
+  "de": "Mein Konto"
+ },
+ "e-mail des avis, version de l’admin, v1, v2": {
+  "en": "notification email, admin version, v1, v2",
+  "de": "Benachrichtigungs-E-Mail, Version der Verwaltung, v1, v2"
+ },
+ "mode d’emploi, documentation, questions": {
+  "en": "how-to, documentation, questions",
+  "de": "Anleitung, Dokumentation, Fragen"
+ },
+ "versions, changements": {
+  "en": "versions, changes",
+  "de": "Versionen, Änderungen"
+ },
+ "{name} · connecté jusqu’à {h}": {
+  "en": "{name} · signed in until {h}",
+  "de": "{name} · angemeldet bis {h}"
+ },
+ "Aller au formulaire": {
+  "en": "Skip to the form",
+  "de": "Zum Formular"
+ },
+ "photo de repère à reprendre": {
+  "en": "reference photo to retake",
+  "de": "Erinnerungsfoto neu aufnehmen"
+ },
+ "son visage, joint à son accord : pour savoir qui a signé et retrouver les bonnes images ; gardé en privé, aussi longtemps que l’accord, réduit à 1 600 px": {
+  "en": "their face, attached to their consent: to know who signed and find the right images; kept private, as long as the consent, reduced to 1,600 px",
+  "de": "das Gesicht, der Einwilligung beigefügt: um zu wissen, wer unterschrieben hat, und die richtigen Bilder zu finden; privat aufbewahrt, so lange wie die Einwilligung, auf 1.600 px verkleinert"
+ },
+ "Photo de repère": {
+  "en": "Reference photo",
+  "de": "Erinnerungsfoto"
+ },
+ "Tendre le téléphone à la personne": {
+  "en": "Hand the phone to the person",
+  "de": "Das Telefon der Person reichen"
+ },
+ "{n} points à corriger": {
+  "en": "{n} things to fix",
+  "de": "{n} Angaben fehlen"
+ },
+ "1 point à corriger": {
+  "en": "1 thing to fix",
+  "de": "1 Angabe fehlt"
+ },
+ "Votre décision": {
+  "en": "Your decision",
+  "de": "Ihre Entscheidung"
+ },
+ "J’accepte": {
+  "en": "I agree",
+  "de": "Ich bin einverstanden"
+ },
+ "J’accepte qu’elles soient utilisées :": {
+  "en": "I agree to them being used:",
+  "de": "Ich bin mit der Nutzung einverstanden:"
+ },
+ "Prénom et nom": {
+  "en": "Full name",
+  "de": "Vor- und Nachname"
+ },
+ "Nom du parent": {
+  "en": "Parent’s name",
+  "de": "Name des Elternteils"
+ },
+ "(si vous avez moins de 18 ans)": {
+  "en": "(if you are under 18)",
+  "de": "(wenn Sie unter 18 sind)"
+ },
+ "Signature gardée": {
+  "en": "Signature saved",
+  "de": "Unterschrift gespeichert"
+ },
+ "Sans JavaScript, ce téléphone ne prend pas la signature au doigt : enregistrez ici un refus ou une adresse pour envoyer la photo, et faites signer une carte d’accord papier (Personnes › Cartes d’accord).": {
+  "en": "Without JavaScript, this phone cannot take a finger signature: save a refusal or an address to send the photo here, and have a paper consent card signed (People › Consent cards).",
+  "de": "Ohne JavaScript nimmt dieses Telefon keine Unterschrift mit dem Finger an: Speichern Sie hier eine Ablehnung oder eine Adresse für das Foto, und lassen Sie eine Einwilligungskarte aus Papier unterschreiben (Personen › Einwilligungskarten)."
+ },
+ "Envoi de votre accord…": {
+  "en": "Sending your consent…",
+  "de": "Ihre Einwilligung wird gesendet…"
+ },
+ "Pas de réseau. Votre accord est gardé sur cet écran : rien n’est perdu. Réessayez quand le réseau revient.": {
+  "en": "No connection. Your consent is kept on this screen: nothing is lost. Try again when the connection is back.",
+  "de": "Keine Verbindung. Ihre Einwilligung bleibt auf diesem Bildschirm: Nichts geht verloren. Versuchen Sie es erneut, sobald die Verbindung zurück ist."
+ },
+ "Votre session a expiré. L’accord est gardé sur cet écran : rien n’est perdu. Reconnectez-vous dans un nouvel onglet, puis revenez ici et appuyez sur « Réessayer ».": {
+  "en": "Your session has expired. The consent is kept on this screen: nothing is lost. Sign in again in a new tab, then come back here and tap “Retry”.",
+  "de": "Ihre Sitzung ist abgelaufen. Die Einwilligung bleibt auf diesem Bildschirm: Nichts geht verloren. Melden Sie sich in einem neuen Tab an, kommen Sie dann hierher zurück und tippen Sie auf „Erneut versuchen“."
+ },
+ "Se reconnecter dans un nouvel onglet": {
+  "en": "Sign in again in a new tab",
+  "de": "In einem neuen Tab neu anmelden"
+ },
+ "Si le réseau coupe, vos réponses restent sur cet écran jusqu’à l’envoi.": {
+  "en": "If the connection drops, your answers stay on this screen until they are sent.",
+  "de": "Bricht die Verbindung ab, bleiben Ihre Antworten auf diesem Bildschirm, bis sie gesendet sind."
+ },
+ "Des aides facultatives, calculées sur ce serveur : aucune image n’en sort, aucune personne n’est reconnue. Elles suggèrent ; rien ne change sans votre clic.": {
+  "en": "Optional aids, computed on this server: no image leaves it, no person is recognised. They suggest; nothing changes without your click.",
+  "de": "Freiwillige Hilfen, auf diesem Server berechnet: Kein Bild verlässt ihn, keine Person wird erkannt. Sie schlagen vor; nichts ändert sich ohne Ihren Klick."
+ },
+ "Quand calculer": {
+  "en": "When to compute",
+  "de": "Wann berechnen"
+ },
+ "« Proposer une série » et « Suggérer des mots-clés » : dès l’import, une photo à la fois.": {
+  "en": "“Suggest a series” and “Suggest keywords”: on import, one photo at a time.",
+  "de": "„Serie vorschlagen“ und „Schlagwörter vorschlagen“: beim Import, ein Foto nach dem anderen."
+ },
+ "« Décrire les photos » : la nuit, de {from} h à {to} h, heure de Paris.": {
+  "en": "“Describe the photos”: at night, from {from}:00 to {to}:00, Paris time.",
+  "de": "„Fotos beschreiben“: nachts, von {from} bis {to} Uhr, Pariser Zeit."
+ },
+ "Une photo demandée depuis sa fiche passe tout de suite.": {
+  "en": "A photo requested from its page goes first, straight away.",
+  "de": "Ein über seine Seite angefordertes Foto kommt sofort an die Reihe."
+ },
+ "Pour une photo pas encore rangée, suggère la série qui lui ressemble le plus : « ✦ Suggestion : Rue ». Rien n’est classé sans votre clic.": {
+  "en": "For a photo not yet filed, suggests the series it most resembles: “✦ Suggestion: Street”. Nothing is filed without your click.",
+  "de": "Für ein noch nicht eingeordnetes Foto wird die ähnlichste Serie vorgeschlagen: „✦ Vorschlag: Straße“. Nichts wird ohne Ihren Klick eingeordnet."
+ },
+ "Téléchargement du modèle :": {
+  "en": "Downloading the model:",
+  "de": "Modell wird heruntergeladen:"
+ },
+ "Analyse en cours :": {
+  "en": "Analysis in progress:",
+  "de": "Analyse läuft:"
+ },
+ "photos": {
+  "en": "photos",
+  "de": "Fotos"
+ },
+ "Analyse des photos": {
+  "en": "Photo analysis",
+  "de": "Analyse der Fotos"
+ },
+ "Modèle indisponible :": {
+  "en": "Model unavailable:",
+  "de": "Modell nicht verfügbar:"
+ },
+ "Analyse faite :": {
+  "en": "Analysis done:",
+  "de": "Analyse abgeschlossen:"
+ },
+ "{done} photos sur {total}.": {
+  "en": "{done} of {total} photos.",
+  "de": "{done} von {total} Fotos."
+ },
+ "S’éteindra à l’enregistrement :": {
+  "en": "Will be switched off when saved:",
+  "de": "Wird beim Speichern ausgeschaltet:"
+ },
+ "le modèle et les empreintes des photos seront effacés.": {
+  "en": "the model and the photo fingerprints will be deleted.",
+  "de": "Modell und Bild-Fingerabdrücke werden gelöscht."
+ },
+ "Éteint :": {
+  "en": "Off:",
+  "de": "Aus:"
+ },
+ "rien n’est téléchargé ni calculé.": {
+  "en": "nothing is downloaded or computed.",
+  "de": "nichts wird heruntergeladen oder berechnet."
+ },
+ "Allumé :": {
+  "en": "On:",
+  "de": "An:"
+ },
+ "le modèle (≈ {n} Mo) se télécharge une fois, puis les photos sont analysées, une à la fois.": {
+  "en": "the model (≈ {n} MB) is downloaded once, then the photos are analysed, one at a time.",
+  "de": "das Modell (≈ {n} MB) wird einmal heruntergeladen, dann werden die Fotos einzeln analysiert."
+ },
+ "Pour l’administrateur du serveur": {
+  "en": "For the server administrator",
+  "de": "Für die Server-Administration"
+ },
+ "CLIP, libre, sur ce serveur ; ≈ {n} Mo téléchargés une fois": {
+  "en": "CLIP, open source, on this server; ≈ {n} MB downloaded once",
+  "de": "CLIP, frei, auf diesem Server; ≈ {n} MB, einmal heruntergeladen"
+ },
+ "Condition": {
+  "en": "Condition",
+  "de": "Bedingung"
+ },
+ "Au moins 3 photos rangées dans une série": {
+  "en": "At least 3 photos filed in a series",
+  "de": "Mindestens 3 Fotos in einer Serie"
+ },
+ "Éteindre": {
+  "en": "Switching off",
+  "de": "Ausschalten"
+ },
+ "Efface le modèle et toutes les empreintes d’images": {
+  "en": "Deletes the model and all image fingerprints",
+  "de": "Löscht das Modell und alle Bild-Fingerabdrücke"
+ },
+ "Suggérer des mots-clés": {
+  "en": "Suggest keywords",
+  "de": "Schlagwörter vorschlagen"
+ },
+ "Suggère quelques mots pour la recherche du site (« brume, quai, soir »), ajoutés d’un clic sur la fiche.": {
+  "en": "Suggests a few words for the site search (“mist, quay, evening”), added with one click on the photo page.",
+  "de": "Schlägt einige Wörter für die Suche der Website vor („Nebel, Kai, Abend“), mit einem Klick auf der Fotoseite hinzugefügt."
+ },
+ "Suit « Proposer une série » :": {
+  "en": "Follows “Suggest a series”:",
+  "de": "Folgt „Serie vorschlagen“:"
+ },
+ "le même modèle et la même analyse ; rien de plus à télécharger.": {
+  "en": "the same model and the same analysis; nothing more to download.",
+  "de": "dasselbe Modell und dieselbe Analyse; nichts weiter herunterzuladen."
+ },
+ "Propose une phrase factuelle par photo, sous son texte de remplacement. À relire ; jamais publiée seule.": {
+  "en": "Proposes one factual sentence per photo, under its alternative text. To be reviewed; never published on its own.",
+  "de": "Schlägt pro Foto einen sachlichen Satz vor, unter seinem Alternativtext. Zum Gegenlesen; nie allein veröffentlicht."
+ },
+ "Description en cours :": {
+  "en": "Describing:",
+  "de": "Beschreibung läuft:"
+ },
+ "Dernier essai sans succès :": {
+  "en": "Last attempt failed:",
+  "de": "Letzter Versuch fehlgeschlagen:"
+ },
+ "le modèle est effacé ; les descriptions déjà faites restent.": {
+  "en": "the model is deleted; descriptions already made remain.",
+  "de": "das Modell wird gelöscht; bereits erstellte Beschreibungen bleiben."
+ },
+ "le modèle se télécharge au premier calcul ; les photos sont décrites la nuit.": {
+  "en": "the model is downloaded at the first run; photos are described at night.",
+  "de": "das Modell wird bei der ersten Berechnung heruntergeladen; die Fotos werden nachts beschrieben."
+ },
+ "à (heure)": {
+  "en": "to (hour)",
+  "de": "bis (Uhr)"
+ },
+ "Calcul": {
+  "en": "Computation",
+  "de": "Berechnung"
+ },
+ "Une photo à la fois, sur un seul cœur": {
+  "en": "One photo at a time, on a single core",
+  "de": "Ein Foto nach dem anderen, auf einem einzigen Kern"
+ },
+ "Anglais, traduit en français et en allemand par le traducteur du site": {
+  "en": "English, translated into French and German by the site’s translator",
+  "de": "Englisch, vom Übersetzer der Website ins Französische und Deutsche übersetzt"
+ },
+ "Anglais (sans traducteur configuré, TRANSLATE_URL)": {
+  "en": "English (no translator configured, TRANSLATE_URL)",
+  "de": "Englisch (kein Übersetzer eingerichtet, TRANSLATE_URL)"
+ },
+ "Éteindre « Proposer une série » ?": {
+  "en": "Switch off “Suggest a series”?",
+  "de": "„Serie vorschlagen“ ausschalten?"
+ },
+ "Le modèle et les empreintes de toutes les photos sont effacés : il faudra les télécharger et les recalculer pour le rallumer. Les mots-clés suggérés s’arrêtent aussi.": {
+  "en": "The model and the fingerprints of all photos are deleted: they will have to be downloaded and recomputed to switch it back on. Suggested keywords stop too.",
+  "de": "Modell und Fingerabdrücke aller Fotos werden gelöscht: Zum Wiedereinschalten müssen sie neu heruntergeladen und berechnet werden. Auch die vorgeschlagenen Schlagwörter enden."
+ },
+ "Éteindre « Décrire les photos » ?": {
+  "en": "Switch off “Describe the photos”?",
+  "de": "„Fotos beschreiben“ ausschalten?"
+ },
+ "Le modèle est effacé ; les descriptions déjà faites restent sur les fiches.": {
+  "en": "The model is deleted; descriptions already made stay on the photo pages.",
+  "de": "Das Modell wird gelöscht; bereits erstellte Beschreibungen bleiben auf den Fotoseiten."
+ },
+ "Sa page : /auteur/{slug}": {
+  "en": "Their page: /auteur/{slug}",
+  "de": "Seine Seite: /auteur/{slug}"
+ },
+ "Son regard, une phrase sous son nom sur l’accueil du site ; {n} signes au plus.": {
+  "en": "Their eye, one sentence under their name on the home page; {n} characters at most.",
+  "de": "Sein Blick, ein Satz unter dem Namen auf der Startseite; höchstens {n} Zeichen."
+ },
+ "Sous la légende des photos qui en ont une, retirable photo par photo.": {
+  "en": "Under the caption of photos that have one, removable photo by photo.",
+  "de": "Unter der Bildunterschrift der Fotos, die eine haben, für jedes Foto entfernbar."
+ },
+ "Le compte de connexion de chaque photographe et ses droits se règlent dans « Comptes et rôles » ; ses cartes d’accord et son QR, dans l’app de terrain.": {
+  "en": "Each photographer’s sign-in account and rights are set in “Accounts and roles”; their consent cards and QR, in the field app.",
+  "de": "Anmeldekonto und Rechte jedes Fotografen werden unter „Konten und Rollen“ eingestellt; Einwilligungskarten und QR in der Unterwegs-App."
+ },
+ "Lettre {l}": {
+  "en": "Letter {l}",
+  "de": "Buchstabe {l}"
+ },
+ "Enregistrer « {name} »": {
+  "en": "Save “{name}”",
+  "de": "„{name}“ speichern"
+ },
+ "Le photographe n’a plus de photo ni de rencontre : sa fiche est effacée, et ne pourra pas être rétablie.": {
+  "en": "The photographer has no photos or encounters left: their record is deleted and cannot be restored.",
+  "de": "Der Fotograf hat keine Fotos oder Begegnungen mehr: Sein Eintrag wird gelöscht und kann nicht wiederhergestellt werden."
+ },
+ "Ajouter le photographe": {
+  "en": "Add the photographer",
+  "de": "Fotografen hinzufügen"
+ },
+ "Publier les {n} photos": {
+  "en": "Publish the {n} photos",
+  "de": "Die {n} Fotos veröffentlichen"
+ },
+ "Publier la photo": {
+  "en": "Publish the photo",
+  "de": "Das Foto veröffentlichen"
+ },
+ "Proposer les {n} photos": {
+  "en": "Propose the {n} photos",
+  "de": "Die {n} Fotos vorschlagen"
+ },
+ "Proposer la photo": {
+  "en": "Propose the photo",
+  "de": "Das Foto vorschlagen"
+ },
+ "{n} photos importées le {date}": {
+  "en": "{n} photos imported on {date}",
+  "de": "{n} Fotos, importiert am {date}"
+ },
+ "{n} photo importée le {date}": {
+  "en": "{n} photo imported on {date}",
+  "de": "{n} Foto, importiert am {date}"
+ },
+ "{n} champs non enregistrés": {
+  "en": "{n} fields not saved",
+  "de": "{n} Felder nicht gespeichert"
+ },
+ "1 champ non enregistré": {
+  "en": "1 field not saved",
+  "de": "1 Feld nicht gespeichert"
+ },
+ "Publier les {n} photos ?": {
+  "en": "Publish the {n} photos?",
+  "de": "Die {n} Fotos veröffentlichen?"
+ },
+ "Publier la photo ?": {
+  "en": "Publish the photo?",
+  "de": "Das Foto veröffentlichen?"
+ },
+ "Publier {ok} des {n} photos ?": {
+  "en": "Publish {ok} of the {n} photos?",
+  "de": "{ok} der {n} Fotos veröffentlichen?"
+ },
+ "Elles seront en ligne tout de suite. Avant, un point à revoir :": {
+  "en": "They will be online straight away. First, something to review:",
+  "de": "Sie sind sofort online. Vorher ist etwas zu prüfen:"
+ },
+ "Celles dont l’accord est à vérifier ou refusé restent en brouillon. À revoir :": {
+  "en": "Those whose consent is to be checked or refused stay as drafts. To review:",
+  "de": "Fotos mit zu prüfender oder verweigerter Einwilligung bleiben Entwürfe. Zu prüfen:"
+ },
+ "et": {
+  "en": "and",
+  "de": "und"
+ },
+ "Proposer les {n} photos à {who} ?": {
+  "en": "Propose the {n} photos to {who}?",
+  "de": "Die {n} Fotos {who} vorschlagen?"
+ },
+ "Proposer la photo à {who} ?": {
+  "en": "Propose the photo to {who}?",
+  "de": "Das Foto {who} vorschlagen?"
+ },
+ "Proposer les {n} photos à la modération ?": {
+  "en": "Propose the {n} photos for moderation?",
+  "de": "Die {n} Fotos der Moderation vorschlagen?"
+ },
+ "Proposer la photo à la modération ?": {
+  "en": "Propose the photo for moderation?",
+  "de": "Das Foto der Moderation vorschlagen?"
+ },
+ "{who} les publie ou vous les renvoie avec une remarque. À revoir d’abord, ici :": {
+  "en": "{who} publishes them or sends them back with a note. First review here:",
+  "de": "{who} veröffentlicht sie oder schickt sie mit einer Anmerkung zurück. Vorher hier prüfen:"
+ },
+ "La modération les publie ou vous les renvoie avec une remarque. À revoir d’abord, ici :": {
+  "en": "Moderation publishes them or sends them back with a note. First review here:",
+  "de": "Die Moderation veröffentlicht sie oder schickt sie mit einer Anmerkung zurück. Vorher hier prüfen:"
+ },
+ "date refusée": {
+  "en": "date rejected",
+  "de": "Datum abgelehnt"
+ },
+ "titre refusé": {
+  "en": "title rejected",
+  "de": "Titel abgelehnt"
+ },
+ "accord à vérifier": {
+  "en": "consent to check",
+  "de": "Einwilligung zu prüfen"
+ },
+ "refusée par une personne photographiée : elle ne partira pas": {
+  "en": "refused by a photographed person: it will not go",
+  "de": "von einer fotografierten Person abgelehnt: Es wird nicht gesendet"
+ },
+ "Écrivez par exemple « 14 oct. 2026 ».": {
+  "en": "Write for example “14 Oct 2026”.",
+  "de": "Schreiben Sie zum Beispiel „14. Okt. 2026“."
+ },
+ "Elle reste en brouillon : confirmez l’accord dans sa fiche.": {
+  "en": "It stays a draft: confirm the consent on its page.",
+  "de": "Es bleibt ein Entwurf: Bestätigen Sie die Einwilligung auf seiner Seite."
+ },
+ "Ouvrir sa fiche": {
+  "en": "Open its page",
+  "de": "Seite öffnen"
+ },
+ "Un mot pour la modération": {
+  "en": "A note for moderation",
+  "de": "Eine Nachricht an die Moderation"
+ },
+ "Proposer sans corriger": {
+  "en": "Propose without correcting",
+  "de": "Ohne Korrektur vorschlagen"
+ },
+ "Étape 3 sur 3 :": {
+  "en": "Step 3 of 3:",
+  "de": "Schritt 3 von 3:"
+ },
+ "Compléter et proposer": {
+  "en": "Complete and propose",
+  "de": "Vervollständigen und vorschlagen"
+ },
+ "Lot enregistré, sauf :": {
+  "en": "Batch saved, except:",
+  "de": "Stapel gespeichert, außer:"
+ },
+ "{champ} de « {photo} » : {msg}": {
+  "en": "{champ} of “{photo}”: {msg}",
+  "de": "{champ} von „{photo}“: {msg}"
+ },
+ "Changer la série, le lieu, la ville ou la date": {
+  "en": "Change the series, place, town or date",
+  "de": "Serie, Ort, Stadt oder Datum ändern"
+ },
+ "Celle de chaque photo": {
+  "en": "Each photo’s own",
+  "de": "Wie bei jedem Foto"
+ },
+ "Nouvelle série (nom ci-dessous)": {
+  "en": "New series (name below)",
+  "de": "Neue Serie (Name unten)"
+ },
+ "Celui de chaque photo": {
+  "en": "Each photo’s own",
+  "de": "Wie bei jedem Foto"
+ },
+ "Villes proposées": {
+  "en": "Suggested towns",
+  "de": "Vorgeschlagene Orte"
+ },
+ "Appliquer aux photos cochées": {
+  "en": "Apply to the ticked photos",
+  "de": "Auf die angekreuzten Fotos anwenden"
+ },
+ "Rien ne change avant « Appliquer ».": {
+  "en": "Nothing changes before “Apply”.",
+  "de": "Nichts ändert sich, bevor Sie „Anwenden“ wählen."
+ },
+ "Filtrer le lot": {
+  "en": "Filter the batch",
+  "de": "Stapel filtern"
+ },
+ "Les {n} photos": {
+  "en": "All {n} photos",
+  "de": "Alle {n} Fotos"
+ },
+ "La photo": {
+  "en": "The photo",
+  "de": "Das Foto"
+ },
+ "À corriger": {
+  "en": "To fix",
+  "de": "Zu korrigieren"
+ },
+ "Aucune photo n’attend de vérification d’accord.": {
+  "en": "No photo is waiting for a consent check.",
+  "de": "Kein Foto wartet auf eine Prüfung der Einwilligung."
+ },
+ "Rien à corriger : titres et dates sont là.": {
+  "en": "Nothing to fix: titles and dates are there.",
+  "de": "Nichts zu korrigieren: Titel und Daten sind vorhanden."
+ },
+ "Les photos du lot, une ligne par photo": {
+  "en": "The photos of the batch, one row per photo",
+  "de": "Die Fotos des Stapels, eine Zeile pro Foto"
+ },
+ "Cocher la photo": {
+  "en": "Tick the photo",
+  "de": "Foto ankreuzen"
+ },
+ "Anglais et allemand": {
+  "en": "English and German",
+  "de": "Englisch und Deutsch"
+ },
+ "2 sur 2": {
+  "en": "2 of 2",
+  "de": "2 von 2"
+ },
+ "1 sur 2": {
+  "en": "1 of 2",
+  "de": "1 von 2"
+ },
+ "à traduire": {
+  "en": "to translate",
+  "de": "zu übersetzen"
+ },
+ "Anglais": {
+  "en": "English",
+  "de": "Englisch"
+ },
+ "Titre anglais": {
+  "en": "English title",
+  "de": "Englischer Titel"
+ },
+ "Allemand": {
+  "en": "German",
+  "de": "Deutsch"
+ },
+ "Titre allemand": {
+  "en": "German title",
+  "de": "Deutscher Titel"
+ },
+ "Suggestion : {name}": {
+  "en": "Suggestion: {name}",
+  "de": "Vorschlag: {name}"
+ },
+ "Accepter": {
+  "en": "Accept",
+  "de": "Übernehmen"
+ },
+ "Accepter la suggestion : {name}": {
+  "en": "Accept the suggestion: {name}",
+  "de": "Vorschlag übernehmen: {name}"
+ },
+ "14 oct. 2026": {
+  "en": "14 Oct 2026",
+  "de": "14. Okt. 2026"
+ },
+ "Lu : {date}": {
+  "en": "Read as: {date}",
+  "de": "Erkannt: {date}"
+ },
+ "Accord refusé": {
+  "en": "Consent refused",
+  "de": "Einwilligung verweigert"
+ },
+ "Erreur, {champ} de « {photo} » :": {
+  "en": "Error, {champ} of “{photo}”:",
+  "de": "Fehler, {champ} von „{photo}“:"
+ },
+ "titre": {
+  "en": "title",
+  "de": "Titel"
+ },
+ "date": {
+  "en": "date",
+  "de": "Datum"
+ },
+ "série": {
+  "en": "series",
+  "de": "Serie"
+ },
+ "lieu": {
+  "en": "place",
+  "de": "Ort"
+ },
+ "Écrivez par exemple « 14 oct. 2026 » ; la date n’est pas enregistrée.": {
+  "en": "Write for example “14 Oct 2026”; the date is not saved.",
+  "de": "Schreiben Sie zum Beispiel „14. Okt. 2026“; das Datum ist nicht gespeichert."
+ },
+ "Enregistrer le lot": {
+  "en": "Save the batch",
+  "de": "Stapel speichern"
+ },
+ "Légende, filigrane et texte de remplacement : dans la fiche de chaque photo (clic sur son titre depuis la Photothèque).": {
+  "en": "Caption, watermark and alternative text: on each photo’s page (click its title in the Photo library).",
+  "de": "Bildunterschrift, Wasserzeichen und Alternativtext: auf der Seite jedes Fotos (Klick auf seinen Titel in der Fotothek)."
+ },
+ "Version de l’admin": {
+  "en": "Admin version",
+  "de": "Version der Verwaltung"
+ },
+ "La v2 est la nouvelle administration, issue de l’audit d’ergonomie : un menu en quatre groupes, des Réglages à onglets, un lot qui se complète et se propose sur place. Un écran qui n’est pas encore refait s’affiche en v1. Ce choix ne vaut que pour votre compte ; vous pouvez revenir quand vous voulez.": {
+  "en": "v2 is the new admin, from the usability audit: a menu in four groups, tabbed Settings, a batch you complete and propose in place. A screen not yet redone is shown in v1. This choice applies to your account only; you can switch back whenever you like.",
+  "de": "v2 ist die neue Verwaltung aus dem Ergonomie-Audit: ein Menü in vier Gruppen, Einstellungen mit Registerkarten, ein Stapel, der an Ort und Stelle vervollständigt und vorgeschlagen wird. Ein noch nicht überarbeiteter Bildschirm erscheint in v1. Diese Wahl gilt nur für Ihr Konto; Sie können jederzeit zurückwechseln."
+ },
+ "Admin": {
+  "en": "Admin",
+  "de": "Verwaltung"
+ },
+ "la nouvelle administration": {
+  "en": "the new admin",
+  "de": "die neue Verwaltung"
+ },
+ "Changer de version": {
+  "en": "Change version",
+  "de": "Version wechseln"
+ },
+ "Avis par e-mail": {
+  "en": "Email notifications",
+  "de": "Benachrichtigungen per E-Mail"
+ },
+ "Vide : {email}, l’adresse du compte.": {
+  "en": "Empty: {email}, the account’s address.",
+  "de": "Leer: {email}, die Adresse des Kontos."
+ },
+ "Obligatoire pour recevoir les e-mails.": {
+  "en": "Required to receive emails.",
+  "de": "Erforderlich, um E-Mails zu erhalten."
+ },
+ "Enregistrer les avis": {
+  "en": "Save notifications",
+  "de": "Benachrichtigungen speichern"
+ },
+ "Langue et thème : au pied du menu, à côté de votre nom ; ils changent tout de suite.": {
+  "en": "Language and theme: at the bottom of the menu, next to your name; they change straight away.",
+  "de": "Sprache und Modus: unten im Menü, neben Ihrem Namen; sie ändern sich sofort."
+ },
+ "Éditeurs du site": {
+  "en": "Publishers of the site",
+  "de": "Anbieter der Website"
+ },
+ "indiquez qui édite le site : prénoms et noms.": {
+  "en": "say who publishes the site: first and last names.",
+  "de": "Geben Sie an, wer die Website anbietet: Vor- und Nachnamen."
+ },
+ "indiquez une adresse postale où vous joindre.": {
+  "en": "give a postal address where you can be reached.",
+  "de": "Geben Sie eine Postanschrift an, unter der Sie erreichbar sind."
+ },
+ "indiquez un e-mail de contact.": {
+  "en": "give a contact email.",
+  "de": "Geben Sie eine Kontakt-E-Mail an."
+ },
+ "indiquez un téléphone.": {
+  "en": "give a phone number.",
+  "de": "Geben Sie eine Telefonnummer an."
+ },
+ "indiquez le directeur ou la directrice de la publication, une personne.": {
+  "en": "give the editor in chief, a person.",
+  "de": "Geben Sie die verantwortliche Person an."
+ },
+ "indiquez le nom de l’hébergeur.": {
+  "en": "give the host’s name.",
+  "de": "Geben Sie den Namen des Hosters an."
+ },
+ "indiquez l’adresse de l’hébergeur.": {
+  "en": "give the host’s address.",
+  "de": "Geben Sie die Adresse des Hosters an."
+ },
+ "indiquez le téléphone de l’hébergeur.": {
+  "en": "give the host’s phone number.",
+  "de": "Geben Sie die Telefonnummer des Hosters an."
+ },
+ "Sur cet onglet": {
+  "en": "On this tab",
+  "de": "Auf dieser Registerkarte"
+ },
+ "Sur cet onglet :": {
+  "en": "On this tab:",
+  "de": "Auf dieser Registerkarte:"
+ },
+ "Mentions incomplètes : {n} rubriques à remplir": {
+  "en": "Legal notice incomplete: {n} items to fill in",
+  "de": "Impressum unvollständig: {n} Angaben fehlen"
+ },
+ "Mentions incomplètes : 1 rubrique à remplir": {
+  "en": "Legal notice incomplete: 1 item to fill in",
+  "de": "Impressum unvollständig: 1 Angabe fehlt"
+ },
+ "La page publiée n’affiche que ce qui est rempli.": {
+  "en": "The published page shows only what is filled in.",
+  "de": "Die veröffentlichte Seite zeigt nur Ausgefülltes."
+ },
+ "page /mentions-legales (Impressum en allemand), liée en bas de chaque page": {
+  "en": "page /mentions-legales (Impressum in German), linked at the bottom of every page",
+  "de": "Seite /mentions-legales (Impressum auf Deutsch), unten auf jeder Seite verlinkt"
+ },
+ "Tous les champs sont obligatoires, sauf mention « facultatif ». La loi les demande en France comme en Allemagne ; le site rédige la page dans les trois langues.": {
+  "en": "All fields are required unless marked “optional”. The law requires them in France as in Germany; the site writes the page in all three languages.",
+  "de": "Alle Felder sind Pflicht, außer „freiwillig“. Das Gesetz verlangt sie in Frankreich wie in Deutschland; die Website verfasst die Seite in den drei Sprachen."
+ },
+ "Prénoms et noms, par exemple « Sébastien Exemple et Julien Exemple ».": {
+  "en": "First and last names, for example “Sébastien Exemple and Julien Exemple”.",
+  "de": "Vor- und Nachnamen, z. B. „Sébastien Exemple und Julien Exemple“."
+ },
+ "Rue, code postal, ville, pays ; une ligne par ligne d’adresse. Elle est publiée sur la page.": {
+  "en": "Street, postcode, town, country; one line per address line. It is published on the page.",
+  "de": "Straße, Postleitzahl, Ort, Land; eine Zeile pro Adresszeile. Sie wird auf der Seite veröffentlicht."
+ },
+ "La personne qui répond de ce qui est publié (LCEN, art. 1-1). En Allemagne : « Verantwortlich nach § 18 MStV ».": {
+  "en": "The person answerable for what is published (LCEN, art. 1-1). In Germany: “Verantwortlich nach § 18 MStV”.",
+  "de": "Die Person, die für das Veröffentlichte einsteht (LCEN, Art. 1-1). In Deutschland: „Verantwortlich nach § 18 MStV“."
+ },
+ "Son nom, son adresse et son téléphone sont alors demandés.": {
+  "en": "Its name, address and phone number are then required.",
+  "de": "Dann werden Name, Adresse und Telefonnummer verlangt."
+ },
+ "Raison sociale.": {
+  "en": "Company name.",
+  "de": "Firmenname."
+ },
+ "Rue, code postal, ville, pays ; une ligne par ligne d’adresse.": {
+  "en": "Street, postcode, town, country; one line per address line.",
+  "de": "Straße, Postleitzahl, Ort, Land; eine Zeile pro Adresszeile."
+ },
+ "Le standard de l’hébergeur.": {
+  "en": "The host’s switchboard.",
+  "de": "Die Zentrale des Hosters."
+ },
+ "page /droits, liée aux mentions IPTC des images": {
+  "en": "page /droits, linked from the images’ IPTC notices",
+  "de": "Seite /droits, mit den IPTC-Angaben der Bilder verknüpft"
+ },
+ "Le texte des droits d’utilisation et l’adresse qui reçoit les demandes de licence.": {
+  "en": "The terms-of-use text and the address that receives licence requests.",
+  "de": "Der Text der Nutzungsrechte und die Adresse für Lizenzanfragen."
+ },
+ "Adresse e-mail ou lien https://.": {
+  "en": "Email address or https:// link.",
+  "de": "E-Mail-Adresse oder https://-Link."
+ },
+ "page /confidentialite (RGPD), en trois langues": {
+  "en": "page /confidentialite (GDPR), in three languages",
+  "de": "Seite /confidentialite (DSGVO), in drei Sprachen"
+ },
+ "Le contact des responsables, et deux cases à ne cocher que si c’est vrai.": {
+  "en": "The controllers’ contact, and two boxes to tick only if true.",
+  "de": "Kontakt der Verantwortlichen und zwei Kästchen, nur anzukreuzen, wenn zutreffend."
+ },
+ "Adresse e-mail.": {
+  "en": "Email address.",
+  "de": "E-Mail-Adresse."
+ },
+ "Modifié, pas encore en ligne :": {
+  "en": "Changed, not online yet:",
+  "de": "Geändert, noch nicht online:"
+ },
+ "Revenir à la version enregistrée": {
+  "en": "Back to the saved version",
+  "de": "Zur gespeicherten Fassung zurückkehren"
+ },
+ "Enregistrer et mettre en ligne": {
+  "en": "Save and put online",
+  "de": "Speichern und veröffentlichen"
+ },
+ "· {n}, les plus urgentes d’abord": {
+  "en": "· {n}, most urgent first",
+  "de": "· {n}, die dringendsten zuerst"
+ },
+ "· 1, la plus urgente d’abord": {
+  "en": "· 1, most urgent first",
+  "de": "· 1, die dringendste zuerst"
+ },
+ "· rien pour l’instant": {
+  "en": "· nothing for now",
+  "de": "· vorerst nichts"
+ },
+ "Compléter dans le lot": {
+  "en": "Complete in the batch",
+  "de": "Im Stapel vervollständigen"
+ },
+ "Brouillon · titre provisoire": {
+  "en": "Draft · provisional title",
+  "de": "Entwurf · vorläufiger Titel"
+ },
+ "Brouillon · bloquée par un accord": {
+  "en": "Draft · blocked by a consent",
+  "de": "Entwurf · durch eine Einwilligung blockiert"
+ },
+ "Brouillon · prête à proposer": {
+  "en": "Draft · ready to propose",
+  "de": "Entwurf · bereit zum Vorschlagen"
+ },
+ "Vérifier l’accord": {
+  "en": "Check the consent",
+  "de": "Einwilligung prüfen"
+ },
+ "Modifier l’ouverture": {
+  "en": "Edit the opening",
+  "de": "Startbilder bearbeiten"
+ },
+ "à envoyer d’abord dans « Identité et apparence »": {
+  "en": "upload first in “Identity and appearance”",
+  "de": "zuerst unter „Identität und Erscheinungsbild“ hochladen"
+ },
+ "Modifié, pas encore enregistré :": {
+  "en": "Changed, not saved yet:",
+  "de": "Geändert, noch nicht gespeichert:"
+ },
+ "Envoyer le logo": {
+  "en": "Upload the logo",
+  "de": "Logo hochladen"
+ },
+ "Afficher les {n} séries": {
+  "en": "Show the {n} series",
+  "de": "Die {n} Serien anzeigen"
+ },
+ "Afficher la série": {
+  "en": "Show the series",
+  "de": "Die Serie anzeigen"
+ },
+ "vos {n} séries": {
+  "en": "your {n} series",
+  "de": "Ihre {n} Serien"
+ },
+ "votre série": {
+  "en": "your series",
+  "de": "Ihre Serie"
+ },
+ "Mes propositions": {
+  "en": "My proposals",
+  "de": "Meine Vorschläge"
+ },
+ "Équipe": {
+  "en": "Team",
+  "de": "Team"
+ },
+ "Menu de l’administration": {
+  "en": "Admin menu",
+  "de": "Menü der Verwaltung"
+ },
+ "Réglages et aide": {
+  "en": "Settings and help",
+  "de": "Einstellungen und Hilfe"
+ },
+ "Aide et site": {
+  "en": "Help and site",
+  "de": "Hilfe und Website"
+ },
+ "mon compte": {
+  "en": "my account",
+  "de": "mein Konto"
+ },
+ "Rechercher une page, une photo ou une action": {
+  "en": "Search for a page, a photo or an action",
+  "de": "Seite, Foto oder Aktion suchen"
+ },
+ "Résultats": {
+  "en": "Results",
+  "de": "Ergebnisse"
+ },
+ "ouvrir": {
+  "en": "open",
+  "de": "öffnen"
+ },
+ "Écran pas encore en v2.": {
+  "en": "Screen not yet in v2.",
+  "de": "Bildschirm noch nicht in v2."
+ },
+ "Essayer l’admin v2": {
+  "en": "Try admin v2",
+  "de": "Verwaltung v2 ausprobieren"
+ },
+ "Version de l’admin inconnue : rien n’a changé.": {
+  "en": "Unknown admin version: nothing changed.",
+  "de": "Unbekannte Version der Verwaltung: Nichts wurde geändert."
+ },
+ "Vous êtes dans l’admin v2. Pour revenir à la v1 : « Revenir à l’admin v1 », au pied du menu.": {
+  "en": "You are in admin v2. To go back to v1: “Back to admin v1”, at the bottom of the menu.",
+  "de": "Sie sind in der Verwaltung v2. Zurück zu v1: „Zurück zur Verwaltung v1“, unten im Menü."
+ },
+ "Vous êtes de retour dans l’admin v1. La v2 reste à un clic : « Essayer l’admin v2 », au pied du menu.": {
+  "en": "You are back in admin v1. v2 is one click away: “Try admin v2”, at the bottom of the menu.",
+  "de": "Sie sind zurück in der Verwaltung v1. v2 ist einen Klick entfernt: „Verwaltung v2 ausprobieren“, unten im Menü."
+ },
+ "Rien à appliquer : choisissez une série, un lieu, une date ou une ville.": {
+  "en": "Nothing to apply: choose a series, a place, a date or a town.",
+  "de": "Nichts anzuwenden: Wählen Sie eine Serie, einen Ort, ein Datum oder eine Stadt."
+ },
+ "série « {name} »": {
+  "en": "series “{name}”",
+  "de": "Serie „{name}“"
+ },
+ "ville de la carte": {
+  "en": "map town",
+  "de": "Stadt der Karte"
+ },
+ "{what} : appliqué à {photos}.": {
+  "en": "{what}: applied to {photos}.",
+  "de": "{what}: auf {photos} angewendet."
+ }
+}

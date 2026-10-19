@@ -1,0 +1,106 @@
+<% layout('./layout') %>
+<% const t = it.t; const sg = it.suggest; const ds = it.describe; const DM = it.describeModels || {}; %>
+<% // Réglages › Assistants d'analyse (MQ-07, écran principal ; UX-A-17) : trois aides facultatives, calculées sur ce serveur.
+   // Un interrupteur par assistant, une phrase d'effet, son état ; le jargon du serveur replié. Allumer s'enregistre au geste
+   // avec « Défaire » ; éteindre efface le modèle (on ne le défait pas) : un dialogue le dit d'abord. Sans script, les
+   // interrupteurs sont des cases et « Enregistrer » envoie le formulaire ; la phrase d'état suit la case (:has()).
+   const I = {
+     ok: '<svg class="ic ok" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.3" fill="currentColor"/></svg>',
+     cours: '<svg class="ic cours" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.7a9.3 9.3 0 0 1 0 18.6z" fill="currentColor"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>',
+     af: '<svg class="ic af" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>',
+     err: '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg>',
+     chev: '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>',
+   };
+   const inter = (id, name, on, extra = '') => `<label class="inter"><span class="inter-mot" aria-hidden="true"><span class="inter-oui">${__eta.e(t('Allumé'))}</span><span class="inter-non">${__eta.e(t('Éteint'))}</span></span><input type="checkbox" role="switch" name="${name}" value="on"${on ? ' checked' : ''} aria-labelledby="${id}-t" aria-describedby="${id}-e"${extra}><span class="inter-piste" aria-hidden="true"></span></label>`;
+   const mb = n => Math.round(n / 1e6); %>
+<%~ include('./_reglages', { ...it, courant: 'assistants' }) %>
+<div class="rub">
+  <div>
+    <h2 class="rub-titre"><%= t('Assistants d’analyse') %></h2>
+    <p class="rub-intro"><%= t('Des aides facultatives, calculées sur ce serveur : aucune image n’en sort, aucune personne n’est reconnue. Elles suggèrent ; rien ne change sans votre clic.') %></p>
+  </div>
+  <div class="rub-cote"><section class="panel" aria-labelledby="quand-t">
+    <h3 id="quand-t"><%= t('Quand calculer') %></h3>
+    <p><%= t('« Proposer une série » et « Suggérer des mots-clés » : dès l’import, une photo à la fois.') %></p>
+    <p><%= t('« Décrire les photos » : la nuit, de {from} h à {to} h, heure de Paris.', { from: ds.from, to: ds.to }) %></p>
+    <p class="hint"><%= t('Une photo demandée depuis sa fiche passe tout de suite.') %></p>
+  </section></div>
+  <div class="assist-form">
+
+    <article class="panel assist" aria-labelledby="a1-t">
+      <form method="post" action="/admin/series/propositions" data-inter data-nom="<%= t('Proposer une série') %>" data-confirmer-arret="arret-series">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/reglages/assistants"><input type="hidden" name="action" value="off">
+        <div class="assist-tete"><h3 id="a1-t"><%= t('Proposer une série') %></h3><%~ inter('a1', 'action', sg.enabled) %></div>
+        <p class="assist-effet" id="a1-e"><%= t('Pour une photo pas encore rangée, suggère la série qui lui ressemble le plus : « ✦ Suggestion : Rue ». Rien n’est classé sans votre clic.') %></p>
+<% if (sg.enabled) { %>
+        <div class="assist-etat si-coche" role="status" data-suivi="<%= sg.status === 'downloading' || sg.status === 'analysing' ? '/admin/series/propositions' : '' %>">
+<% if (sg.status === 'downloading') { %>          <p><%~ I.cours %><b><%= t('Téléchargement du modèle :') %></b> <span data-suivi-texte><%= mb(sg.download.got) %> / <%= mb(sg.download.total) %> Mo</span></p>
+          <progress class="bar avancement" max="<%= sg.download.total || 1 %>" value="<%= sg.download.got %>" aria-label="<%= t('Téléchargement du modèle') %>"></progress>
+<% } else if (sg.status === 'analysing') { %>          <p><%~ I.cours %><b><%= t('Analyse en cours :') %></b> <span data-suivi-texte><%= sg.done %> / <%= sg.total %></span> <%= t('photos') %></p>
+          <progress class="bar avancement" max="<%= sg.total || 1 %>" value="<%= sg.done %>" aria-label="<%= t('Analyse des photos') %>"></progress>
+<% } else if (sg.status === 'error') { %>          <p class="att"><%~ I.err %><b><%= t('Modèle indisponible :') %></b> <%= t.msg(sg.error) %></p>
+<% } else { %>          <p><%~ I.ok %><b><%= t('Analyse faite :') %></b> <%= t('{done} photos sur {total}.', { done: sg.done, total: sg.total }) %></p>
+<% } %>        </div>
+        <p class="assist-etat si-decoche"><%~ I.af %><b><%= t('S’éteindra à l’enregistrement :') %></b> <%= t('le modèle et les empreintes des photos seront effacés.') %></p>
+<% } else { %>
+        <p class="assist-etat si-decoche"><%~ I.af %><b><%= t('Éteint :') %></b> <%= t('rien n’est téléchargé ni calculé.') %></p>
+        <p class="assist-etat si-coche"><%~ I.cours %><b><%= t('Allumé :') %></b> <%= t('le modèle (≈ {n} Mo) se télécharge une fois, puis les photos sont analysées, une à la fois.', { n: mb(sg.modelBytes) }) %></p>
+<% } %>
+        <details class="assist-serveur"><summary><%~ I.chev %><%= t('Pour l’administrateur du serveur') %></summary>
+          <dl><dt><%= t('Modèle') %></dt><dd><%= t('CLIP, libre, sur ce serveur ; ≈ {n} Mo téléchargés une fois', { n: mb(sg.modelBytes) }) %></dd><dt><%= t('Condition') %></dt><dd><%= t('Au moins 3 photos rangées dans une série') %></dd><dt><%= t('Éteindre') %></dt><dd><%= t('Efface le modèle et toutes les empreintes d’images') %></dd></dl>
+        </details>
+        <p class="sans-script"><button class="btn ghost" type="submit"><%= t('Enregistrer') %></button></p>
+      </form>
+    </article>
+
+    <article class="panel assist" aria-labelledby="a2-t">
+      <div class="assist-tete"><h3 id="a2-t"><%= t('Suggérer des mots-clés') %></h3><span class="etat <%= sg.enabled ? 'etat--abouti' : 'etat--afaire' %>"><%~ sg.enabled ? I.ok : I.af %><%= sg.enabled ? t('Allumé') : t('Éteint') %></span></div>
+      <p class="assist-effet"><%= t('Suggère quelques mots pour la recherche du site (« brume, quai, soir »), ajoutés d’un clic sur la fiche.') %></p>
+      <p class="assist-etat"><%~ sg.enabled ? I.ok : I.af %><b><%= t('Suit « Proposer une série » :') %></b> <%= t('le même modèle et la même analyse ; rien de plus à télécharger.') %></p>
+    </article>
+
+<% if (ds) { %>
+    <article class="panel assist" aria-labelledby="a3-t">
+      <form method="post" action="/admin/series/descriptions" data-inter data-nom="<%= t('Décrire les photos') %>" data-confirmer-arret="arret-desc">
+        <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="/admin/reglages/assistants"><input type="hidden" name="action" value="off">
+        <div class="assist-tete"><h3 id="a3-t"><%= t('Décrire les photos') %></h3><%~ inter('a3', 'action', ds.on) %></div>
+        <p class="assist-effet" id="a3-e"><%= t('Propose une phrase factuelle par photo, sous son texte de remplacement. À relire ; jamais publiée seule.') %></p>
+<% if (ds.on) { %>
+        <div class="assist-etat si-coche" role="status">
+<% if (ds.busy) { %>          <p><%~ I.cours %><b><%= t('Description en cours :') %></b> <%= t('{done} photos décrites sur {total}', { done: ds.done, total: ds.total }) %></p>
+<% } else if (ds.error) { %>          <p class="att"><%~ I.err %><b><%= t('Dernier essai sans succès :') %></b> <%= t.msg(ds.error) %></p>
+<% } else { %>          <p><%~ I.ok %><b><%= t('Allumé :') %></b> <%= t('{done} photos décrites sur {total}', { done: ds.done, total: ds.total }) %></p>
+<% } %>        </div>
+        <p class="assist-etat si-decoche"><%~ I.af %><b><%= t('S’éteindra à l’enregistrement :') %></b> <%= t('le modèle est effacé ; les descriptions déjà faites restent.') %></p>
+<% } else { %>
+        <p class="assist-etat si-decoche"><%~ I.af %><b><%= t('Éteint :') %></b> <%= t('rien n’est téléchargé ni calculé.') %></p>
+        <p class="assist-etat si-coche"><%~ I.cours %><b><%= t('Allumé :') %></b> <%= t('le modèle se télécharge au premier calcul ; les photos sont décrites la nuit.') %></p>
+<% } %>
+        <details class="assist-serveur"><summary><%~ I.chev %><%= t('Pour l’administrateur du serveur') %></summary>
+          <fieldset class="choix-a"><legend><%= t('Modèle') %></legend>
+<% Object.entries(DM).forEach(([k, m]) => { const ok = ds.fits[k]; %>            <label<%~ ok ? '' : ' class="inactif"' %>><input type="radio" name="model" value="<%= k %>" data-label="<%= t('Modèle') %>"<%~ (ds.effective || 'base') === k && ok ? ' checked' : '' %><%~ ok ? '' : ' disabled' %>><span><b><%= k === 'large' ? t('Précis') : t('Léger') %></b></span><span class="sec"><%= t('Florence-2 {k} · ≈ {mb} Mo à télécharger · ≈ {ram} Go de mémoire pendant le calcul', { k, mb: m.mb, ram: m.ram }) %><%= ok ? '' : ` · ${t('mémoire insuffisante')}` %></span></label>
+<% }) %>            <p class="aide"><%= t('Mémoire du site : {x} Go.', { x: (ds.memory / 2 ** 30).toFixed(1) }) %></p>
+          </fieldset>
+          <div class="heures">
+            <div class="champ-a"><label for="d-from"><%= t('La nuit, de') %></label><input type="number" id="d-from" name="from" min="0" max="23" value="<%= ds.from %>" data-label="<%= t('La nuit, de') %>"></div>
+            <div class="champ-a"><label for="d-to"><%= t('à (heure)') %></label><input type="number" id="d-to" name="to" min="0" max="23" value="<%= ds.to %>" data-label="<%= t('à (heure)') %>"></div>
+          </div>
+          <dl><dt><%= t('Calcul') %></dt><dd><%= t('Une photo à la fois, sur un seul cœur') %></dd><dt><%= t('Langue') %></dt><dd><%= it.translate ? t('Anglais, traduit en français et en allemand par le traducteur du site') : t('Anglais (sans traducteur configuré, TRANSLATE_URL)') %></dd></dl>
+        </details>
+        <p class="sans-script"><button class="btn ghost" type="submit"><%= t('Enregistrer') %></button></p>
+      </form>
+    </article>
+<% } %>
+  </div>
+</div>
+
+<dialog class="confirm" id="arret-series" aria-labelledby="arret-series-t" aria-describedby="arret-series-d">
+  <h2 id="arret-series-t"><%= t('Éteindre « Proposer une série » ?') %></h2>
+  <p id="arret-series-d"><%= t('Le modèle et les empreintes de toutes les photos sont effacés : il faudra les télécharger et les recalculer pour le rallumer. Les mots-clés suggérés s’arrêtent aussi.') %></p>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn danger" type="button" data-confirmer-ok><%= t('Éteindre et effacer') %></button></div>
+</dialog>
+<dialog class="confirm" id="arret-desc" aria-labelledby="arret-desc-t" aria-describedby="arret-desc-d">
+  <h2 id="arret-desc-t"><%= t('Éteindre « Décrire les photos » ?') %></h2>
+  <p id="arret-desc-d"><%= t('Le modèle est effacé ; les descriptions déjà faites restent sur les fiches.') %></p>
+  <div class="actions"><button class="btn ghost" type="button" data-annuler><%= t('Annuler') %></button><button class="btn danger" type="button" data-confirmer-ok><%= t('Éteindre et effacer') %></button></div>
+</dialog>

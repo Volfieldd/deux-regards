@@ -1,0 +1,63 @@
+<!doctype html>
+<% const t = it.t; %>
+<% /* Accueil Terrain de la v2 (MQ-10, état 13) : un titre, la session lisible, la prochaine carte, ma sortie du jour avec les
+      usages de chacun sous son nom. Les données et les liens de la v1 (server/routes/rencontres.js). */ %>
+<% const a = it.author; const LABELS = { site: t('site'), instagram: 'Instagram', print: t('tirages'), name: t('prénom') };
+   const q = a ? `?photographe=${a.id}` : '';
+   const exp = it.session && it.session.expires_at ? new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(it.session.expires_at).reduce((o, p) => ({ ...o, [p.type]: p.value }), {}) : null;
+   const until = exp ? (it.lang === 'fr' ? `${Number(exp.hour)} h ${exp.minute}` : `${exp.hour}:${exp.minute}`) : '';
+   const b = it.brand || {}; %>
+<html lang="<%= it.lang %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1d1c1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rencontre">
+  <link rel="manifest" href="/rencontre.webmanifest">
+<% if (b.favicon180) { %>  <link rel="apple-touch-icon" href="/brand/<%= b.favicon180 %>">
+<% } %>  <title><%= it.title %> · <%= it.siteName %></title>
+  <link rel="stylesheet" href="<%= it.asset('admin/app.css') %>">
+  <link rel="stylesheet" href="<%= it.asset('admin/v2/app-v2.css') %>">
+</head>
+<body>
+<a class="skip" href="#contenu"><%= t('Aller au contenu') %></a>
+<header class="app-bar">
+  <span class="app-face" aria-hidden="true"><%= a ? a.name.charAt(0).toUpperCase() : '?' %></span>
+  <h1><%= t('Terrain') %></h1>
+  <a class="app-bar-link" href="/admin"><%= t('Admin complet') %></a>
+</header>
+<main class="app-home" id="contenu" tabindex="-1">
+<% if (until) { %>  <p class="app-session app-session--home"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg><span><%= t('{name} · connecté jusqu’à {h}', { name: String(it.session.name || '').replace(/\s*\(test\)$/, ''), h: until }) %></span></p>
+<% } %>
+<% if (!a || it.authors.length > 1) { %>
+  <nav class="app-who" aria-label="<%= t('Photographe') %>">
+<% it.authors.forEach(x => { %>    <a href="/admin/rencontre/accueil?photographe=<%= x.id %>"<%~ a && x.id === a.id ? ' aria-current="true"' : '' %>><%= x.name %></a>
+<% }) %>  </nav>
+<% } %>
+<% if (a) { %>
+  <a class="app-big primary" href="/admin/rencontre<%= q %>"><strong>＋ <%= t('Nouvelle rencontre') %></strong><span><%= t('prochaine carte :') %> <span class="mono"><%= it.next %></span></span></a>
+  <a class="app-big" href="/admin/rencontre/qr<%= q %>"><strong><%= t('Montrer mon QR') %></strong><span><%= t('la personne le scanne sur votre écran, sans carte') %></span></a>
+  <section class="app-today" aria-labelledby="today-title">
+    <h2 id="today-title"><%= t('Ma sortie du jour') %><% if (it.place) { %> <span class="hint">· <%= it.place %></span><% } %></h2>
+    <p class="hint"><%= it.people.length > 1 ? t('{n} personnes rencontrées', { n: it.people.length }) : t('{n} personne rencontrée', { n: it.people.length }) %> · <%= it.photos > 1 ? t('{n} photos importées', { n: it.photos }) : t('{n} photo importée', { n: it.photos }) %></p>
+<% if (it.people.length) { %>
+    <ul class="app-people">
+<% it.people.forEach(e => { %>      <li><% if (e.hasPortrait) { %><img src="/admin/rencontres/<%= e.id %>/portrait?mini=1" alt="" width="40" height="40"><% } else { %><span class="app-face small" aria-hidden="true"><%= (e.name || e.ref || '?').charAt(0).toUpperCase() %></span><% } %>
+        <span class="who"><%= e.name || e.ref || t('Sans carte') %><small class="mono"><%= e.ref || '' %><%= e.met_time ? ` · ${e.met_time}` : '' %></small>
+        <% if (e.refused) { %><span class="app-tag no">✕ <%= t('refus') %></span><% } else if (e.consent) { %><span class="app-tag ok">✓ <%= Object.keys(LABELS).filter(s => e.consent[s]).map(s => LABELS[s]).join(', ') %></span><% } else { %><span class="app-tag"><%= t('en attente') %></span><% } %></span></li>
+<% }) %>    </ul>
+<% } else { %>
+    <p class="hint"><%= t('Personne pour l’instant. Avant de redemander un accord, regardez ici : la personne a peut-être déjà signé.') %></p>
+<% } %>
+<% if (it.outingUrl) { %>    <p><a class="app-link" href="<%= it.outingUrl %>"><%= t('Ouvrir la sortie dans l’admin') %></a></p><% } %>
+  </section>
+<% } else { %>
+  <p class="hint"><%= t('Choisissez votre nom ci-dessus (votre compte n’est lié à aucun photographe).') %></p>
+<% } %>
+</main>
+</body>
+</html>

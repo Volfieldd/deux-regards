@@ -1,0 +1,230 @@
+/* =====================================================================================================
+   Admin v2 : les écrans (maquettes MQ-07 à MQ-09 de l'audit d'ergonomie du 16 oct. 2026). Les composants communs sont
+   dans admin/v2/admin-plus.css (planche MQ-00) ; ici, ce qui est propre à un écran, repris des styles « locaux » des
+   maquettes, et ce que le code demande en plus (le message d'action animé, le dialogue de sortie). Aucun style en ligne.
+   1 coquille et message d'action · 2 Aujourd'hui · 3 Réglages · 4 le lot · 5 Mon compte
+   ===================================================================================================== */
+
+/* ---------- 1. Coquille et message d'action ---------- */
+.admin .testbar p { margin: 0; }
+/* Le pied de la barre : « Revenir à l'admin v1 » est une ligne du menu, au-dessus du compte (admin.css, .ver-choix). */
+.admin .side .ver-choix { padding: 0; }
+.admin .side .ver-choix button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: var(--ligne-menu); margin: 0; padding: 0 10px; color: var(--ink2); font-size: 13px; text-decoration: none; }
+.admin .side .ver-choix button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ep-meta > [data-temoin]:empty { display: none; }
+/* Le nom du compte passe à la ligne au lieu d'être coupé (MQ-07, repère 9). */
+.admin .me .who { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+/* Message d'action : la barre de temps se vide en 10 s (pause au survol et au focus, admin-plus.css § 6). */
+.admin .toast:empty { display: none; }
+.admin .toast { display: flex; align-items: center; }
+.admin .toast .toast-in { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.admin .toast .toast-temps { animation: toast-temps 10s linear forwards; }
+.admin .toast.pause .toast-temps { animation-play-state: paused; background: var(--ink2); }
+@keyframes toast-temps { from { width: 100%; } to { width: 0; } }
+@media (prefers-reduced-motion: reduce) { .admin .toast .toast-temps { animation: none; } }
+/* Le dialogue de confirmation (admin-plus.css § 8), rendu ouvert par le serveur sans script : posé dans la page. */
+dialog.confirm[open]:not(:modal) { position: static; display: block; margin: 0 0 24px; }
+.confirm .actions { display: flex; gap: 8px 10px; }
+.confirm form { margin: 0; }
+/* Palette Ctrl K : un résultat sur deux lignes (le nom, puis où il mène ou ses autres noms) ; groupes nommés. */
+.admin .pal-list ul { margin: 0; padding: 0; list-style: none; }
+.admin .pal-list [role="option"] > span { display: grid; gap: 2px; min-width: 0; }
+.admin .pal-list [role="option"] small { color: var(--ink3); font-size: 12px; }
+.admin .pal-list .sec { display: block; }
+.admin .pal-statut { margin: 0; padding: 8px 18px 0; color: var(--ink2); font-size: 12px; }
+.admin .pal-statut:empty { display: none; }
+.admin .pal-statut .btn { margin-top: 8px; }
+@media (max-width: 720px), (pointer: coarse) { .admin .pal-ft .touches { display: none; } }
+
+/* ---------- 2. Aujourd'hui (MQ-07, état 20) ---------- */
+.accueil-tete { grid-template-areas: "titre actions" "meta actions"; }
+.accueil-actions { grid-area: actions; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; align-self: end; }
+@media (max-width: 720px) { .accueil-tete { grid-template-areas: "titre" "meta"; } .accueil-actions { display: none; } }
+.taches-p { margin: 0 0 24px; }
+.main .taches-p > h2 { font-size: 17px; }
+.taches-p h2 .hint { font-weight: 400; font-size: 13px; }
+.taches { list-style: none; margin: 0; padding: 0; }
+.taches > li { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.taches > li:first-child { border-top: 0; }
+.taches .u { display: grid; place-items: center; }
+.taches .u-urgent { color: var(--danger); } .taches .u-bientot { color: var(--warn); } .taches .u-plus-tard { color: var(--ink2); }
+.taches .tt { display: grid; gap: 2px; min-width: 0; }
+.taches .tt-t { color: var(--ink); overflow-wrap: anywhere; }
+.taches .q { display: block; color: var(--ink2); font-size: 12.5px; overflow-wrap: anywhere; }
+.taches .btn .ic { margin-left: 4px; }
+.taches .vign { grid-column: 2 / -1; display: grid; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none; }
+.taches .vign li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.taches .vign picture { display: contents; }
+.taches .vign img, .taches .vign .ph { width: 64px; height: 43px; object-fit: cover; border-radius: 5px; display: block; background: var(--s3); }
+.taches .vign .vt { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.taches .vign small { display: block; color: var(--ink2); font-size: 12px; }
+.taches .vign small.att { display: flex; color: var(--warn); }
+@media (max-width: 540px) {
+  .taches > li { grid-template-columns: 20px minmax(0, 1fr); }
+  .taches > li > .btn { grid-column: 2; justify-self: start; }
+  .taches .vign li { grid-template-columns: 56px minmax(0, 1fr); }
+  .taches .vign li .btn { grid-column: 2; justify-self: start; }
+  .taches .vign img, .taches .vign .ph { width: 56px; height: 37px; }
+}
+.accueil-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+.accueil-grille .panel { margin: 0; min-width: 0; }
+.accueil-grille .recent li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 0 12px; }
+.accueil-grille .recent li img, .accueil-grille .recent li > .ph { grid-column: 1; grid-row: 1 / span 2; }
+.accueil-grille .recent li > a { grid-column: 2; grid-row: 1; }
+.accueil-grille .recent a { min-width: 0; overflow-wrap: anywhere; display: inline-flex; align-items: center; min-height: 24px; }
+.accueil-grille .figures a { min-width: 44px; }
+@media (max-width: 720px), (pointer: coarse) { .accueil-grille .recent a { min-height: 44px; } .accueil-grille .figures a { min-height: 44px; } }
+.accueil-grille .recent .hint { grid-column: 2; grid-row: 2; font-size: 12px; }
+.accueil-grille .recent .w { grid-column: 3; grid-row: 1; margin: 0; }
+
+/* ---------- 3. Réglages (MQ-07) ----------
+   Une rubrique : son titre et son intro, la colonne d'appui à droite dès 1 200 px (collante), puis les panneaux. */
+.rub { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 40px; align-items: start; }
+@media (min-width: 1200px) { .rub { grid-template-columns: minmax(0, 720px) 320px; } .rub-cote { grid-column: 2; grid-row: 1 / span 3; position: sticky; top: 24px; } }
+.main .rub-titre { margin: 0 0 6px; font-size: 22px; font-weight: 400; }
+.rub-intro { margin: 0 0 24px; color: var(--ink2); max-width: 64ch; }
+.rub-cote .panel { margin: 0 0 24px; display: grid; gap: 8px; }
+.rub-cote .panel p { margin: 0; color: var(--ink2); }
+.main .rub-cote .panel > h3 { margin: 0; font-size: 17px; font-weight: 500; }
+.assist-form { display: grid; gap: 16px; min-width: 0; }
+.assist-form > .panel { margin: 0; }
+.assist form { display: grid; gap: 10px; }
+.assist-effet { text-wrap: pretty; }
+.assist-etat p { margin: 0; }
+.assist-etat .att { color: var(--warn); font-size: 13px; }
+.avancement { width: min(320px, 100%); margin-top: 6px; }
+.assist-serveur .choix-a { margin: 8px 0 12px; }
+.assist-serveur .heures { display: flex; flex-wrap: wrap; gap: 12px 16px; margin: 0 0 12px; }
+.assist-serveur .heures .champ-a { flex: 0 1 140px; }
+
+/* Mentions et confidentialité (MQ-07, états 1 et 2) : un seul formulaire, les mentions d'abord, le reste replié. */
+.ml { max-width: 880px; }
+.ml .form { display: grid; gap: 16px; }
+.ml .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.ml .row > .champ-a { flex: 1 1 240px; }
+.main .ml-titre { margin: 0; font-size: 17px; font-weight: 500; }
+.ml-titre .hint { font-weight: 400; }
+.ml .form > .hint { margin: 0; }
+.ml .plier { margin: 0; }
+.ml .plier > summary { align-items: flex-start; }
+.ml .plier > summary > span { display: grid; gap: 2px; }
+.ml .plier > summary .hint { font-weight: 400; }
+.ml .plier-corps { display: grid; gap: 14px; margin-top: 14px; }
+.ml .plier-corps > p { margin: 0; }
+.ml .host-pick .host-fields { padding-left: 32px; margin-top: 8px; }
+.ml .avert { align-items: flex-start; }
+
+/* Photographes (MQ-07, état 21) : une carte par auteur ; « Modifier » déplie son formulaire sur toute la carte. */
+.cartes-p { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; align-items: start; margin: 0 0 16px; }
+.cartes-p .panel { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: center; }
+.main .cartes-p .panel > h2 { margin: 0; font-size: 17px; font-weight: 500; }
+.cartes-p .panel > p { grid-column: 2; margin: 0; color: var(--ink2); font-size: 13px; }
+.cartes-p .av { width: 40px; height: 40px; grid-row: span 2; }
+.cartes-p .modif { grid-column: 1 / -1; margin-top: 8px; }
+.cartes-p .form, .nouveau .form { display: grid; gap: 14px; margin-top: 12px; }
+.cartes-p .row, .nouveau .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+.cartes-p .row > .champ-a, .nouveau .row > .champ-a { flex: 1 1 200px; }
+.cartes-p .lettre { width: 4em; font-family: var(--mono); text-transform: uppercase; }
+.cartes-p .modif .plier { margin-top: 8px; }
+.cartes-p .modif .plier form { display: grid; gap: 8px; justify-items: start; margin-top: 8px; }
+.nouveau { margin: 0; max-width: 720px; }
+
+/* Filigrane et EXIF : l'aperçu, puis le formulaire et le logo ; une colonne. */
+.fil { display: grid; gap: 16px; max-width: 880px; }
+.fil-apercu { margin: 0; max-width: 640px; }
+.fil-apercu img { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--photo-bg); }
+.fil-apercu figcaption { margin-top: 6px; color: var(--ink3); font-size: 12px; }
+.fil-form { display: grid; gap: 16px; }
+.fil-form > .panel { margin: 0; }
+.fil .champs { display: grid; gap: 14px; }
+.fil .row { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: flex-start; }
+.fil .row > .champ-a { flex: 1 1 180px; }
+.fil .apercu-l { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; }
+.fil .apercu-l .champ-a { flex: 1 1 240px; }
+.fil-logo { margin: 0; }
+.fil-logo .logo { max-width: 240px; max-height: 120px; background: var(--s3); border-radius: 8px; padding: 8px; }
+.fil-logo .logo-f { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-top: 12px; }
+
+/* ---------- 4. Le lot (MQ-08) ---------- */
+/* Étapes : au téléphone, une ligne « Étape 3 sur 3 : … ». */
+.steps .et-sur { display: none; }
+@media (max-width: 720px) { .steps { flex-direction: row; } .steps li.done { display: none; } .steps .et-sur { display: inline; } .steps li .n { display: none; } }
+/* Barre « Pour les photos cochées » : ses champs sur une ligne au bureau, repliée derrière un bouton au téléphone. */
+.bulk-l { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; }
+.bulk-l > strong { flex: 0 1 9em; align-self: center; font-weight: 500; }
+.main:not(.wide) .bulk.bulk-l { align-items: end; }
+.bulk-l .bulk-groups { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; flex: 1 1 600px; }
+.bulk-l .bulk-groups .champ-a { flex: 1 1 150px; min-width: 150px; }
+.bulk-l .champ-a > label { font-size: 12.5px; }
+.bulk-l .bulk-groups .hint { flex-basis: 100%; margin: 0; color: var(--ink2); }
+.bulk-l .b-nouvelle { margin-top: 6px; }
+.bulk-l .champ-a:not(:has(option[value="new"]:checked)) .b-nouvelle { display: none; }
+.bulk-l select, .bulk-l input[type="text"] { width: 100%; }
+.bulk-toggle .ic { margin-left: 4px; }
+@media (min-width: 721px) { .bulk-l .bulk-toggle { display: none !important; } }
+@media (max-width: 720px) {
+  .bulk-l .bulk-groups .champ-a { min-width: 0; flex: 1 1 100%; }
+  html.js .bulk-l:not(.open) .bulk-groups { display: none; }
+  .bulk-l .bulk-groups { display: grid; gap: 10px; flex-basis: 100%; }
+  .bulk-l .bulk-toggle { justify-content: space-between; width: 100%; }
+}
+.ville-l { position: relative; }
+.ville-pop { position: absolute; left: 0; right: 0; top: 100%; z-index: 20; margin: 4px 0 0; padding: 6px; list-style: none; border-radius: 12px; background: var(--s1); box-shadow: var(--shadow), inset 0 0 0 1px var(--line2); }
+.ville-pop li button { display: flex; align-items: center; width: 100%; min-height: 40px; padding: 4px 10px; border: 0; border-radius: 8px; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.ville-pop li button:hover, .ville-pop li button:focus-visible { background: var(--s2); }
+@media (max-width: 720px), (pointer: coarse) { .ville-pop li button { min-height: 44px; } }
+.filtre-lot { margin: 0 0 12px; }
+/* Le tableau : une ligne par photo, nommée par sa vignette (th scope="row") ; colonnes fixes au bureau. */
+.lot { table-layout: fixed; }
+.lot td, .lot th { vertical-align: top; }
+.lot thead th { vertical-align: bottom; }
+.lot .c-thumb { font-weight: 400; }
+.lot .c-thumb img, .lot .c-thumb .ph { width: 96px; height: 64px; object-fit: cover; border-radius: 5px; display: grid; place-items: center; background: var(--s3); font-size: 12px; color: var(--ink2); }
+.lot .fic { display: block; margin-top: 6px; font: 400 12px var(--mono); color: var(--ink2); overflow-wrap: anywhere; }
+.lot .cell { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.lot .cell p { margin: 0; }
+.lot input[type="text"], .lot select { width: 100%; min-width: 0; }
+.lot .cell > .att { justify-self: start; }
+.lot .sugg-l { display: grid; gap: 6px; justify-items: start; }
+.lot .sugg { white-space: normal; text-align: left; }
+.lot .chk-ligne { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 13px; }
+.lot .lu { font-size: 12px; }
+.lot .lu:empty { display: none; }
+.lot .etat-c { display: grid; gap: 6px; justify-items: start; }
+.lot .etat-c .enreg { font-size: 12px; }
+.lot .tr > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; color: var(--ink2); font-size: 12.5px; cursor: pointer; list-style: none; }
+.lot .tr > summary::-webkit-details-marker { display: none; }
+.lot .tr[open] > summary .ic { transform: rotate(90deg); }
+.lot .tr .cell { margin-top: 4px; }
+.lot .tr label { display: grid; gap: 4px; font-size: 12px; }
+.lot tr.err-ligne td { padding-top: 0; padding-left: 178px; }
+.lot tr.err-ligne .err + .err { margin-top: 4px; }
+.col-chk { width: 44px; } .col-photo { width: 124px; } .col-titre { width: 26%; } .col-serie { width: 16%; } .col-lieu { width: 15%; } .col-date { width: 15%; } .col-etat { width: 168px; }
+.lb-cell { display: none; }
+@media (max-width: 720px), (pointer: coarse) { .lot .tr > summary { min-height: 44px; } .lot .chk-ligne { min-height: 44px; } }
+@media (max-width: 720px) {
+  .lot { table-layout: auto; }
+  .lot tr { grid-template-columns: 44px 104px minmax(0, 1fr); grid-template-areas: "chk thumb state" "title title title" "cat cat cat" "place place place" "date date date"; }
+  .lot td[data-label]::before { content: none; }
+  .lot th, .lot td { border: 0; }
+  .lot th.c-thumb { display: block; padding: 0; min-width: 0; }
+  .lb-cell { display: block; margin-bottom: 4px; color: var(--ink2); font-size: 12.5px; }
+  .lot tr.err-ligne { display: block; }
+  .lot tr.err-ligne td { padding-left: 0; }
+}
+.suite { margin: 12px 0 0; color: var(--ink2); font-size: 12.5px; }
+/* Dialogue « Proposer » ou « Publier » : chaque photo à revoir avec ce qui la retient, et de quoi la corriger sur place. */
+.confirm .liste-c { display: grid; gap: 14px; margin: 16px 0 0; padding: 0; list-style: none; }
+.confirm .liste-c > li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start; }
+.confirm .liste-c img, .confirm .liste-c .ph { width: 64px; height: 43px; object-fit: cover; border-radius: 5px; display: block; background: var(--s3); }
+.confirm .liste-c p { margin: 0; color: var(--ink); font-size: 14px; }
+.confirm .liste-c .champ-a, .confirm .liste-c .choix-a { margin-top: 8px; }
+.confirm textarea { min-height: 64px; }
+.lot-dlg { width: min(640px, calc(100vw - 32px)); }
+.lot-dlg .champ-a { margin-top: 12px; }
+
+/* ---------- 5. Mon compte (MQ-07, état 18) ---------- */
+.compte-p { max-width: 720px; }
+.compte-p .form { display: grid; gap: 16px; }
+.compte-p .choix-a label > span b { font-weight: 500; }
+.admin .resume-a a { min-width: 44px; }
