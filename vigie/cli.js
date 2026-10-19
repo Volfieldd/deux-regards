@@ -113,6 +113,7 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
           `Chaîne : ${v ? `${v.ok ? 'intacte' : `ROMPUE (${v.rupture?.raison}, ligne ${v.rupture?.seq})`}, vérifiée le ${new Date(v.at).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais vérifiée'}`,
           `Événements des dernières 24 h : ${day.map(r => `${r.severity} ${r.n}`).join(', ') || 'aucun'}`,
           `Zitadel : ${z ? `lu le ${new Date(z).toISOString().slice(0, 16).replace('T', ' ')} UTC` : 'jamais lu (ou non configuré)'}`,
+          ...(() => { const q = store.setting.get('zitadel_quota'); return q && q.mois === new Date(now()).toISOString().slice(0, 7) ? [`API de Zitadel ce mois (${q.mois}) : ${q.n} requête(s)${config.zitadel?.quota ? ` sur ${config.zitadel.quota}` : ''} (${Object.entries(q.par || {}).map(([a, n]) => `${a} ${n}`).join(', ')})`] : []; })(),
           // Abaques (docs/etudes/vigie-capacite.md) : retard d'analyse, lignes gardées, taille de la base.
           `Analyse : ${engine.lag()} événement(s) en attente ; base : ${db.prepare('SELECT COUNT(*) FROM events').pluck().get()} lignes, ${Math.round((db.pragma('page_count', { simple: true }) * db.pragma('page_size', { simple: true })) / 1048576)} Mo`,
           `Interrupteurs : ${Object.entries(switches.state()).map(([n, s]) => `${n} ${s.marche ? 'marche' : `ARRÊT${s.jusqua ? ` jusqu'au ${new Date(s.jusqua).toISOString().slice(0, 16).replace('T', ' ')} UTC` : ''}`}`).join(', ')}`,

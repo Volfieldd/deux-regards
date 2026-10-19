@@ -206,7 +206,7 @@ VIGIE_ACCESS_AUD=<Application Audience (AUD) Tag>
 VIGIE_ADMIN_SUBS=<sub Zitadel des deux administrateurs, séparés par une virgule>
 ```
 
-Le **Client Secret** va dans un fichier, jamais dans `vigie.env` : `VIGIE_SECRETS_DIR/console-secret` (une ligne, `chmod 600`, propriétaire 99:100). Le sub d'un compte se lit dans Zitadel (**Users →** le compte, champ *ID*). La console exige aussi la lecture des événements (`VIGIE_ZITADEL_ISSUER` et `zitadel.json`, étape 1.3) : elle relit les rôles `vigie.*` toutes les 5 minutes par ce compte de service.
+Le **Client Secret** va dans un fichier, jamais dans `vigie.env` : `VIGIE_SECRETS_DIR/console-secret` (une ligne, `chmod 600`, propriétaire 99:100). Le sub d'un compte se lit dans Zitadel (**Users →** le compte, champ *ID*). La console exige aussi la lecture des événements (`VIGIE_ZITADEL_ISSUER` et `zitadel.json`, étape 1.3) : elle relit les rôles `vigie.*` toutes les 5 minutes par ce compte de service. Chaque relecture compte deux requêtes dans le quota mensuel de l'API de Zitadel Cloud (offre gratuite : 5 000) ; la Vigie compte ce qu'elle consomme et prévient à 80 % (wiki, « Quota de l'API de Zitadel Cloud »).
 
 Première connexion : vérifier que la console vous laisse entrer avec la clé d'accès. Un refus « clé d'accès exigée » veut dire que le jeton ne porte pas `mfa` dans `amr` : revoir l'étape 1.1, et me transmettre la ligne `vigie_console_refus` du journal (`docker exec nicephos-vigie node vigie/cli.js console`), qui donne le contenu de `amr`.
 

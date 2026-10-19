@@ -185,6 +185,9 @@ test('Zitadel : jeton par clé JWT, événements suivis seulement, charge rédui
     if (body.event_types.length > 30) return new Response(JSON.stringify({ code: 3, message: 'invalid ListEventsRequest.EventTypes: value must contain no more than 30 item(s)' }), { status: 400 });
     return new Response(JSON.stringify({ events: events.filter(e => body.event_types.includes(e.type.type) || e.type.type === 'org.policy.label.changed') }), { status: 200 });
   };
+  // Repli par lots de 30 types (quand Zitadel refuse la requête sans filtre) : forcé ici ; la lecture en une requête a
+  // son propre test.
+  v.store.setting.set('zitadel_par_lots', true);
   const z = createZitadelReader({ issuer: 'https://exemple.zitadel.cloud', keyFile: null, readKey: () => keyJson, store: v.store, fetchImpl, now: () => clock });
   assert.equal(await z.run(), 2);
   // Tous les types suivis demandés, par lots de 30 au plus.
@@ -449,6 +452,7 @@ test('Zitadel : lot inachevé, le curseur reste où il s’est arrêté ; erreur
     }
     return new Response(JSON.stringify({ events: [{ aggregate: { id: 'b', type: 'user' }, sequence: 1, creationDate: new Date(clock - 1000).toISOString(), type: { type: body.event_types[0] } }] }));
   };
+  v.store.setting.set('zitadel_par_lots', true);
   const z = createZitadelReader({ issuer: 'https://z.example', keyFile: null, readKey: () => key, store: v.store, fetchImpl, now: () => clock });
   await z.run();
   const cursor = Date.parse(v.store.setting.get('zitadel_curseur'));
@@ -538,4 +542,43 @@ test('arrêt (audit D3-D16) : close() annule aussi les minuteries de démarrage 
     globalThis.clearTimeout = ct;
     await vigie?.close();
   }
+});
+
+
+test('Zitadel : une requête par passage (sans filtre, types triés ici), repli par lots sur refus ; quota mensuel compté, alertes à 80 et 95 %', async t => {
+  let clock = Date.parse('2026-10-17T12:00:00Z');
+  const v = vigieOf(t, { now: () => clock });
+  const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const keyJson = { keyId: 'k', key: privateKey.export({ type: 'pkcs8', format: 'pem' }), userId: 'u' };
+  let refuseSansFiltre = false;
+  const bodies = [];
+  const fetchImpl = async (url, init) => {
+    if (url.endsWith('/oauth/v2/token')) return new Response(JSON.stringify({ access_token: 'j', expires_in: 3600 }));
+    const body = JSON.parse(init.body || '{}');
+    bodies.push(body);
+    if (refuseSansFiltre && !body.event_types) return new Response(JSON.stringify({ code: 3, message: 'filtre exigé' }), { status: 400 });
+    return new Response(JSON.stringify({ events: [
+      { aggregate: { id: 'user-1', type: 'user' }, sequence: 1, creationDate: '2026-10-17T11:59:00Z', type: { type: 'user.grant.added' }, payload: {} },
+      { aggregate: { id: 'x', type: 'org' }, sequence: 2, creationDate: '2026-10-17T11:59:10Z', type: { type: 'org.policy.label.changed' }, payload: {} },
+    ].filter(e => !body.event_types || body.event_types.includes(e.type.type)) }));
+  };
+  const z = createZitadelReader({ issuer: 'https://z.example', keyFile: null, readKey: () => keyJson, store: v.store, fetchImpl, now: () => clock, quota: 10 });
+  assert.equal(await z.run(), 1, 'type non suivi écarté ici');
+  assert.equal(bodies.length, 1, 'une seule requête');
+  assert.equal(bodies[0].event_types, undefined);
+  assert.equal(z.usage().n, 1, 'le jeton (/oauth) ne compte pas');
+  // Zitadel refuse la requête sans filtre : repli par lots, gardé.
+  refuseSansFiltre = true;
+  bodies.length = 0;
+  await z.run();
+  assert.equal(v.store.setting.get('zitadel_par_lots'), true);
+  assert.ok(bodies.slice(1).every(b => b.event_types.length <= 30));
+  // Quota (10 ici) : alerte à 80 %, puis à 95 %, une fois chacune ; ralentissement au-delà.
+  for (let i = 0; i < 3; i++) await z.api('/management/v1/users/x', { method: 'GET', usage: 'plafond' }).catch(() => {});
+  const alertes = v.db.prepare("SELECT severity, detail FROM events WHERE type = 'vigie_zitadel_quota' ORDER BY seq").all();
+  assert.deepEqual(alertes.map(a => [a.severity, JSON.parse(a.detail).seuil]), [['moyen', 80], ['haut', 95]]);
+  assert.ok(z.usage().par.plafond >= 3);
+  // Mois suivant : remis à zéro.
+  clock = Date.parse('2026-11-01T00:00:01Z');
+  assert.equal(z.usage().n, 0);
 });

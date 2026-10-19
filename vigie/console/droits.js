@@ -48,14 +48,14 @@ export function createCeilingReader({ api, projectId, orgId }) {
   return async function read(sub) {
     // Compte supprimé chez Zitadel (404) : aucun plafond, comme un compte désactivé (audit D3-A6), et non une panne.
     let user;
-    try { user = await api(`/management/v1/users/${encodeURIComponent(sub)}`, { method: 'GET', org: orgId }); } catch (err) {
+    try { user = await api(`/management/v1/users/${encodeURIComponent(sub)}`, { method: 'GET', org: orgId, usage: 'plafond' }); } catch (err) {
       if (err.status === 404) return null;
       throw err;
     }
     const state = user?.user?.state;
     if (state && state !== 'USER_STATE_ACTIVE' && state !== 'USER_STATE_INITIAL') return null;
     const r = await api('/management/v1/users/grants/_search', {
-      org: orgId,
+      org: orgId, usage: 'plafond',
       body: { query: { limit: 50 }, queries: [{ userIdQuery: { userId: sub } }, { projectIdQuery: { projectId } }] },
     });
     const roles = (Array.isArray(r?.result) ? r.result : [])

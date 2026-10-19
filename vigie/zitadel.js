@@ -52,11 +52,34 @@ function minimize(payload) {
 // Adresse de l'agent (navigateur) quand Zitadel la joint (userAgent.ip / user_agent.ip / ip) : sert au voyage impossible.
 const agentIp = p => { const ip = p?.userAgent?.ip ?? p?.user_agent?.ip ?? p?.ip; return net.isIP(String(ip || '')) ? String(ip) : null; };
 
-export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = fetch, now = Date.now, readKey = () => JSON.parse(fs.readFileSync(keyFile, 'utf8')) }) {
+export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = fetch, now = Date.now, quota = 5000, readKey = () => JSON.parse(fs.readFileSync(keyFile, 'utf8')) }) {
   let token = null, tokenUntil = 0;
   const { setting } = store;
+  // Quota de l'API de gestion de Zitadel Cloud (offre gratuite : 5 000 requêtes par mois ; toute requête autorisée sur
+  // /admin, /management, /v2 ; jamais /oauth) : compté par mois (UTC) et par usage, gardé dans les réglages (santé de la
+  // console, ligne de commande « etat ») ; alerte à 80 % puis à 95 % (une fois chacune par mois) ; au-delà de 95 %, la
+  // lecture des événements ralentit d'elle-même (toutes les 4 heures) jusqu'au mois suivant. quota = 0 : pas de quota.
+  const mois = () => new Date(now()).toISOString().slice(0, 7);
+  const usage = () => { const u = setting.get('zitadel_quota', null); return u && u.mois === mois() ? u : { mois: mois(), n: 0, par: {}, alertes: [] }; };
+  function compter(pathname, usageName) {
+    if (!/^\/(admin|management|v2|zitadel\.)/.test(pathname)) return;
+    const u = usage();
+    u.n += 1;
+    u.par[usageName] = (u.par[usageName] || 0) + 1;
+    setting.set('zitadel_quota', u);
+    if (!quota) return;
+    for (const seuil of [80, 95]) {
+      if (u.n >= (quota * seuil) / 100 && !u.alertes.includes(seuil)) {
+        u.alertes.push(seuil);
+        setting.set('zitadel_quota', u);
+        store.own('vigie_zitadel_quota', { emetteur: 'vigie/zitadel.js', severity: seuil >= 95 ? 'haut' : 'moyen', detail: { seuil, requetes: u.n, quota, mois: u.mois, par: u.par } });
+      }
+    }
+  }
+  const presqueEpuise = () => quota > 0 && usage().n >= quota * 0.95;
   // Réponse lue par morceaux, abandonnée au-delà de 5 Mo (jamais tout en mémoire d'abord).
-  const bounded = async (url, init) => {
+  const bounded = async (url, init, usageName = 'autre') => {
+    compter(new URL(url).pathname, usageName);
     const res = await fetchImpl(url, { ...init, redirect: 'manual', signal: AbortSignal.timeout(15000) });
     const text = await readLimited(res, 5 * 1024 * 1024);
     if (res.status === 401) token = null;                                    // jeton refusé : redemandé au passage suivant
@@ -91,8 +114,8 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
       const r = await bounded(`${issuer}/admin/v1/events/_search`, {
         method: 'POST',
         headers: { authorization: `Bearer ${await accessToken()}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ asc: true, limit: 500, creation_date: from.toISOString(), event_types: types }),
-      });
+        body: JSON.stringify({ asc: true, limit: 500, creation_date: from.toISOString(), ...(types ? { event_types: types } : {}) }),
+      }, 'evenements');
       const list = Array.isArray(r.events) ? r.events : [];
       const rows = [];
       for (const e of list) {
@@ -141,7 +164,24 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
     // Curseur suivant : date du dernier événement lu ; si un lot n'est pas allé au bout, la plus petite date où un lot
     // s'est arrêté, pour que le passage suivant reprenne là (les doublons sont écartés).
     let added = 0, seen = null, held = null;
-    for (const types of LOTS) {
+    // Une seule requête par page : tous les événements, triés ici par la liste des types suivis (le quota de l'offre
+    // gratuite compte chaque requête ; par lots de 30 types, il en fallait 7 par passage). Si Zitadel refuse la
+    // requête sans filtre, repli sur les lots de 30 types (gardé pour le passage suivant).
+    let lots = setting.get('zitadel_par_lots', false) ? LOTS : [null];
+    if (!lots[0]) {
+      try {
+        const lot = await readLot(null, start);
+        added += lot.added;
+        if (!lot.finished) held = lot.last ?? start;
+        else if (lot.last !== null) seen = lot.last;
+        lots = [];
+      } catch (err) {
+        if (err.status !== 400) throw err;
+        setting.set('zitadel_par_lots', true);
+        lots = LOTS;
+      }
+    }
+    for (const types of lots) {
       const lot = await readLot(types, start);
       added += lot.added;
       if (!lot.finished) held = Math.min(held ?? Infinity, lot.last ?? start);
@@ -155,18 +195,19 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
 
   // Appel en lecture à l'API de Zitadel avec le même compte de service (console : relecture du plafond des droits).
   // Chemin relatif à l'émetteur, jamais une adresse complète ; org : en-tête x-zitadel-orgid de l'API de gestion.
-  async function api(apiPath, { method = 'POST', body, org } = {}) {
+  async function api(apiPath, { method = 'POST', body, org, usage: usageName = 'console' } = {}) {
     if (!/^\/(?:management|admin|v2)\/[A-Za-z0-9/_.-]+$/.test(apiPath)) throw new Error('Zitadel : chemin d’API refusé');
     const headers = { authorization: `Bearer ${await accessToken()}` };
     if (body !== undefined) headers['content-type'] = 'application/json';
     if (org) headers['x-zitadel-orgid'] = org;
-    return bounded(`${issuer}${apiPath}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+    return bounded(`${issuer}${apiPath}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) }, usageName);
   }
 
   let timer = null, failures = 0, stopped = false;
   return {
     run,
     api,
+    usage,
     start(intervalMs) {
       const tick = async () => {
         if (stopped) return;
@@ -175,7 +216,8 @@ export function createZitadelReader({ issuer, keyFile, store, log, fetchImpl = f
           try { if (failures === 1 || failures % 30 === 0) store.own('vigie_zitadel_erreur', { emetteur: 'vigie/zitadel.js', detail: { erreur: clean(err.message, 200), echecs: failures } }); } catch { /* base indisponible */ }
           log?.warn({ err: err.message }, 'Zitadel : lecture impossible');
         }
-        if (!stopped) { timer = setTimeout(tick, intervalMs); timer.unref(); }
+        // Quota presque épuisé : une lecture toutes les 4 heures jusqu'au mois suivant (l'historique gratuit est d'un jour).
+        if (!stopped) { timer = setTimeout(tick, presqueEpuise() ? Math.max(intervalMs, 4 * 3600e3) : intervalMs); timer.unref(); }
       };
       timer = setTimeout(tick, 1000); timer.unref();
     },
