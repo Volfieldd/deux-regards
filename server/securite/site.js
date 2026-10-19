@@ -76,7 +76,7 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   app.decorate('securite', sec);
   // Décisions de la Vigie (blocages, révocations, gels, verrouillage), lues et appliquées par le site.
   const decisions = createDecisionsClient({ url: config.vigie.url, key: config.vigie.ingestKey, pubkey: config.vigie.decisionsPubkey, storageDir: config.storageDir,
-    log: app.log, apply: config.vigie.apply, adminSubs: config.adminSubs || [], ...(decisionsFetch ? { fetchImpl: decisionsFetch } : {}) });
+    log: app.log, apply: config.vigie.apply, adminSubs: config.adminSubs || [], spaces: () => app.spaces, ...(decisionsFetch ? { fetchImpl: decisionsFetch } : {}) });
   app.decorate('decisions', decisions);
   if (!config.vigie.apply) app.log.warn('VIGIE_APPLIQUER=0 : les décisions de la Vigie ne sont pas appliquées');
 
@@ -287,8 +287,8 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   //     privacy_exposure_changed.
   // Quelle que soit la route (aucun emit à ajouter route par route) ; ce qui change hors de l'admin (ligne de commande)
   // est vu à l'écriture suivante.
-  const WATCHED = /^(public_version|site_name|tagline(_en|_de)?|hero|theme|exif|rights_contact|privacy_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
-  const CONTACT = new Set(['rights_contact', 'privacy_contact', 'legal_email', 'legal_phone', 'legal_address', 'legal_names', 'legal_director']);
+  const WATCHED = /^(public_version|site_name|tagline(_en|_de)?|hero|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
+  const CONTACT = new Set(['rights_contact', 'privacy_contact', 'carnet_contact', 'legal_email', 'legal_phone', 'legal_address', 'legal_names', 'legal_director']);
   const PLAIN = new Set(['public_version', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host']);
   const settingsRows = db.prepare('SELECT key, value FROM settings');
   const shownTimes = db.prepare('SELECT COUNT(*) FROM photos WHERE show_time = 1').pluck();

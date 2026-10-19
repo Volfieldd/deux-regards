@@ -55,3 +55,34 @@ test('textes publiés : un contact gagné est signalé sans le texte ; le nombre
     assert.equal(emitted.find(e => e.detail?.objet === 'texte_public')?.detail.domaine, 'ailleurs.example');
   }
 });
+
+test('Carnets : le corps d’un aperçu ou d’un brouillon (vigie.corps = rendu) n’est pas scanné comme une saisie brute ; un billet publié qui gagne un lien est signalé', async t => {
+  const TOKEN = 'jeton-de-test-0123456789';
+  const events = [];
+  const { app, db } = await setup(t, { seeded: true, env: { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: 'cle-de-signature-vigie-0123456789abcdef', VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64, LOCAL_AUTH_TOKEN: TOKEN },
+    vigieOptions: { send: async body => { events.push(...JSON.parse(body).lot); }, timers: false, pollDecisions: false } });
+  const res = await app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien', next: '/admin' } });
+  const cookies = Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
+  const piege = '<script>alert(document.cookie)</script> UNION SELECT password FROM users';
+  for (const route of ['apercu', 'brouillon']) await app.inject({ method: 'POST', url: `/admin/carnet/999/${route}`, cookies, payload: { body: piege, _csrf: 'x' } });
+  await app.inject({ method: 'POST', url: '/admin/reglages', cookies, payload: { tagline: piege, _csrf: 'x' } });
+  app.securite.runTasks(); await app.securite.flush();
+  const hits = events.filter(e => e.type === 'malicious_input');
+  assert.ok(hits.some(e => (e.route || '').startsWith('/admin/reglages')), 'témoin : un formulaire ordinaire est scanné');
+  assert.ok(!hits.some(e => (e.route || '').includes('/admin/carnet/')), 'corps rendu : pas scanné');
+  // Billet publié : ses textes entrent dans l'instantané.
+  const cols = new Set(db.prepare('PRAGMA table_info(posts)').all().map(c => c.name));
+  assert.ok(cols.has('body') && cols.has('state'), 'table posts des Carnets');
+  const emitted = [];
+  const orig = app.securite.emit;
+  app.securite.emit = (type, opts) => { emitted.push({ type, ...opts }); return orig(type, opts); };
+  app.securite.watchPublication('essai');
+  const post = db.prepare("SELECT id FROM posts WHERE state = 'publie' LIMIT 1").pluck().get();
+  if (post) {
+    db.prepare('UPDATE posts SET body = body || ? WHERE id = ?').run(' Écrivez-moi : pirate@exemple.org', post);
+    app.securite.watchPublication('essai');
+    const c = emitted.find(e => e.detail?.objet === 'texte_public');
+    assert.equal(c?.detail.champ, 'posts.body');
+    assert.equal(c?.detail.ajout, 'email');
+  }
+});

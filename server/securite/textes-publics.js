@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 
 // Textes publiés (registre des besoins de la Vigie, BV-20 et BV-21) : titres, légendes et textes de remplacement des
 // photos publiées, noms et textes d'intention des séries, noms, présentations et descriptions courtes des
-// photographes. Instantané comparé à l'état d'avant après chaque écriture de l'admin et chaque publication
+// photographes, billets publiés des Carnets. Instantané comparé à l'état d'avant après chaque écriture de l'admin et chaque publication
 // programmée :
 //   - BV-20 : un texte qui GAGNE un lien, une adresse e-mail ou un numéro de téléphone (vecteur d'hameçonnage, comme un
 //     contact remplacé, DS9) ; jamais le texte ni le contact dans l'événement : la nature, le domaine, le champ, l'objet ;
@@ -13,6 +13,8 @@ export const SOURCES = [
   { table: 'photos', where: "status = 'published'", champs: ['title', 'title_en', 'title_de', 'legend', 'legend_en', 'legend_de', 'alt_text', 'alt_text_en', 'alt_text_de'] },
   { table: 'categories', where: '1', champs: ['name', 'name_en', 'name_de', 'intent', 'intent_en', 'intent_de'] },
   { table: 'authors', where: '1', champs: ['name', 'bio', 'bio_en', 'bio_de', 'short_bio', 'short_bio_en', 'short_bio_de'] },
+  // Billets des Carnets publiés (un billet retiré sort de l'instantané : compté comme textes changés, BV-21).
+  { table: 'posts', where: "state = 'publie'", champs: ['title', 'title_en', 'title_de', 'dek', 'dek_en', 'dek_de', 'body', 'body_en', 'body_de', 'mention', 'mention_en', 'mention_de', 'reply', 'reply_en', 'reply_de'] },
 ];
 
 const URL_RE = /\b(?:https?:\/\/|www\.)[^\s<>"'()\]]+/gi;

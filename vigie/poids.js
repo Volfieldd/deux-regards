@@ -24,10 +24,19 @@ export const BY_TYPE = {
 };
 // Propres au canal : l'échec d'un mot de passe de galerie privée (composant public) n'est pas une force brute sur la
 // connexion de l'admin ; ses propres règles (BV-16 : échecs par adresse, essais répartis, suspension) le comptent.
-const BY_CANAL = { 'authn_login_fail|site · public': 0 };
+const detailObjet = row => { try { return (typeof row.detail === 'string' ? JSON.parse(row.detail) : row.detail)?.objet; } catch { return null; } };
+const BY_CANAL = {
+  'authn_login_fail|site · public': 0,
+  'authn_login_disabled|site · public': 0,      // forme provisoire du palier des galeries (type_attendu authn_login_lock)
+  'authn_login_lock|site · public': 0,
+  'bordure_cache_prive|bordure': 0,             // faute de configuration du cache, pas de l'invité : sa règle le dit (BV-26)
+};
 export const pointsOf = row => {
   const k = `${row.type}|${row.composant}`;
   if (Object.hasOwn(BY_CANAL, k)) return BY_CANAL[k];
+  // Billet des Carnets : un constat « bas » (HTML inoffensif, image externe) est gardé pour l'enquête, sans point ; une
+  // construction active (moyen ou plus) garde ses points (BV-12).
+  if (row.type === 'malicious_input' && row.severity === 'bas' && detailObjet(row) === 'billet') return 0;
   return Object.hasOwn(BY_TYPE, row.type) ? BY_TYPE[row.type] : BY_SEVERITY[row.severity] ?? 0;
 };
 
