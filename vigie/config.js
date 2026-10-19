@@ -45,6 +45,19 @@ export function loadVigieConfig(env = process.env) {
     if (liste && !/^[a-z0-9_]{1,50}$/.test(liste)) throw new Error('VIGIE_CF_LISTE : nom de liste en minuscules, chiffres et _ (vigie_bloquees)');
     bordure = { accountId: env.VIGIE_CF_ACCOUNT_ID, kvNamespace: env.VIGIE_CF_KV_NAMESPACE, dataset, tokenFile, liste };
   }
+  // Mode urgence de Cloudflare (« I'm Under Attack », phase E) : facultatif, jeton à part (Zone Settings : Edit, sur la
+  // seule zone), ouvert par VIGIE_CF_ZONE_ID ; durée maximale réglable (VIGIE_CF_URGENCE_MAX, 24h par défaut, 7j au plus).
+  let urgence = null;
+  if (env.VIGIE_CF_ZONE_ID) {
+    if (!/^[0-9a-f]{32}$/.test(env.VIGIE_CF_ZONE_ID)) throw new Error('VIGIE_CF_ZONE_ID : identifiant de zone Cloudflare (32 caractères hexadécimaux)');
+    const tokenFile = path.resolve(env.VIGIE_CF_URGENCE_TOKEN_FILE || '/secrets/cloudflare-urgence');
+    if (!fs.existsSync(tokenFile)) throw new Error(`VIGIE_CF_URGENCE_TOKEN_FILE : jeton du mode urgence introuvable (${tokenFile})`);
+    const max = env.VIGIE_CF_URGENCE_MAX || '24h';
+    const m = /^(\d{1,3})(h|j)$/.exec(max);
+    if (!m) throw new Error('VIGIE_CF_URGENCE_MAX : durée en heures ou en jours (24h, 3j)');
+    const maxMs = Math.min(Number(m[1]) * (m[2] === 'h' ? 3600e3 : 864e5), 7 * 864e5);
+    urgence = { zoneId: env.VIGIE_CF_ZONE_ID, tokenFile, maxMs };
+  }
   // Notifications (phase D) : Signal (passerelle du réseau interne nicephos-vigie-signal), e-mail en secours.
   let signal = null, mail = null;
   if (env.VIGIE_SIGNAL_NUMERO) {
@@ -94,6 +107,7 @@ export function loadVigieConfig(env = process.env) {
     notifications: { signal, mail, consoleUrl },
     console: consoleCfg,
     bordure,
+    urgence,
     dataDir,
     databasePath: path.resolve(env.VIGIE_DATABASE || path.join(dataDir, 'vigie.db')),
     host: env.VIGIE_HOST || '0.0.0.0',

@@ -9,6 +9,7 @@ import { createEngine } from './moteur.js';
 import { createThreats } from './menaces.js';
 import { testChannel } from './notifications.js';
 import { setTrust, runRolesCheck } from './reglages.js';
+import { createUrgence } from './cloudflare-urgence.js';
 import { createRights, LABELS } from './console/droits.js';
 
 // Secours en ligne de commande (annexe architecture, section 6.4), dans le conteneur :
@@ -44,6 +45,7 @@ const HELP = `Commandes :
   bordure                                  état de la bordure Cloudflare : copie des blocages, battement, en-têtes
                                            refusés par le site, stabilité des empreintes TLS (essai, phase C3)
   notifier essai <signal|email>            envoie un message d'essai sur le canal
+  urgence [marche --duree 2h --motif "…" | arret]   mode urgence de Cloudflare (« I'm Under Attack ») ; sans argument : état
   console                                  droits de la console (plafond, attribution, effectif), sessions ouvertes,
                                            dix dernières connexions refusées (raison, amr)`;
 
@@ -180,6 +182,15 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         });
         return [config.console ? 'Console réglée.' : 'Console non réglée (VIGIE_CONSOLE_CLIENT_ID absent).', 'Droits :', ...(droits.length ? droits : ['  aucun compte connu']),
           `Sessions ouvertes : ${ouvertes}`, 'Connexions refusées (10 dernières) :', ...(refus.length ? refus : ['  aucune'])].join('\n');
+      }
+      case 'urgence': {
+        if (!config.urgence) throw new DecisionError('mode urgence non réglé (VIGIE_CF_ZONE_ID, VIGIE_CF_URGENCE_TOKEN_FILE)');
+        const u = createUrgence({ store, ...config.urgence, now });
+        const iso = t => new Date(t).toISOString().slice(0, 16).replace('T', ' ');
+        if (rest[0] === 'marche') return u.activer({ duree: opt.duree, par, motif }).then(e => `Mode urgence actif jusqu'au ${iso(e.jusqua)} UTC (niveau d'avant : ${e.avant}).`);
+        if (rest[0] === 'arret') return u.desactiver({ par, raison: 'levé' }).then(e => (e ? `Mode urgence levé : niveau ${e.avant} remis.` : 'Le mode urgence n’était pas actif.'));
+        const e = u.etat();
+        return e?.actif ? `Mode urgence actif jusqu'au ${iso(e.jusqua)} UTC, par ${e.par} : « ${e.motif} ».` : `Mode urgence inactif${e?.fin ? ` (dernier terminé le ${iso(e.fin)} UTC, ${e.fin_raison})` : ''}.`;
       }
       case 'bordure': {
         // Grille de lecture de l'essai sur l'instance de test (docs/wiki/Vigie.md, bordure).

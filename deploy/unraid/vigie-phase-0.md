@@ -236,6 +236,14 @@ La Vigie recopie ses blocages de tout le site de 24 h et plus dans une liste d'a
 
 Ce que la Vigie ne touche jamais : une entrée ajoutée à la main dans la liste (sans commentaire « Vigie #… »). Pour arrêter : retirer `VIGIE_CF_LISTE` (les entrées de la Vigie restent jusqu'à ce que vous vidiez la liste) ou désactiver la règle.
 
+### 3.6 Mode urgence depuis la console (« I'm Under Attack », facultatif)
+
+Le mode urgence fait passer chaque visiteur par une vérification de son navigateur chez Cloudflare (quelques secondes) avant le site : utile contre une attaque massive. La console (Règles et réglages, Analyste ou Administrateur, identité redemandée) l'active pour une durée (24 h au plus par défaut, `VIGIE_CF_URGENCE_MAX`) ; à la fin, la Vigie remet le niveau de sécurité d'avant. Chaque activation ouvre une alerte haute (les Administrateurs sont prévenus).
+
+1. **Jeton à part** (droit plus large que celui de la bordure : il ne sert qu'à ça) : **My Profile → API Tokens → Create Token → Custom token**, nom « Vigie : mode urgence », *Permissions* : **Zone → Zone Settings → Edit**, *Zone Resources* : **Specific zone → nicephos.art**, filtrage par adresse si l'adresse d'Unraid est fixe, *TTL* : un an.
+2. Le jeton va dans `VIGIE_SECRETS_DIR/cloudflare-urgence` (une ligne, `chmod 600`, propriétaire 99:100) ; l'identifiant de la zone (page d'accueil de la zone, colonne de droite, *Zone ID*) dans `vigie.env` : `VIGIE_CF_ZONE_ID=…`. Redémarrer la Vigie.
+3. Essai : `docker exec nicephos-vigie node vigie/cli.js urgence marche --duree 1h --motif "essai"`, ouvrir le site (la page de vérification de Cloudflare apparaît), puis `… urgence arret`.
+
 ---
 
 ## Récapitulatif

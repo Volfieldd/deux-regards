@@ -222,6 +222,21 @@ export function register(app, ctx) {
     return `Adresse ${texte(body.ip, 64)} retirée des adresses de confiance.`;
   });
 
+  // Mode urgence de Cloudflare (« I'm Under Attack ») : Analyste, ré-authentification ; toujours pour une durée.
+  action('/urgence', 'reglages', { reauth: true, libelle: 'Mode urgence de Cloudflare', retour: '/reglages#urgence' }, async (req, body) => {
+    if (!ctx.urgence) throw new ActionError('mode urgence non réglé (VIGIE_CF_ZONE_ID)');
+    if (body.etat === 'arret') {
+      const e = await ctx.urgence.desactiver({ par: par(req), raison: 'levé' });
+      return e ? 'Mode urgence levé : niveau de sécurité d’avant remis.' : 'Le mode urgence n’était pas actif.';
+    }
+    if (body.etat !== 'marche') throw new ActionError('état : marche ou arrêt', 'etat');
+    if (!texte(body.motif)) throw new ActionError('motif obligatoire : il dit aux autres pourquoi', 'motif');
+    const d = duree(body);
+    if (!d) throw new ActionError('durée obligatoire (2h, 12h…)', 'duree');
+    const e = await ctx.urgence.activer({ duree: d, par: par(req), motif: texte(body.motif, 200) });
+    return `Mode urgence actif jusqu’au ${new Date(e.jusqua).toISOString().slice(0, 16).replace('T', ' ')} UTC : chaque visiteur passe par la vérification de Cloudflare.`;
+  });
+
   // ---------- Vérifications (Analyste) ----------
   action('/reglages/canaux/:canal/essai', 'verifications', { retour: '/reglages' }, async req => {
     const canal = req.params.canal === 'email' ? 'email' : req.params.canal === 'signal' ? 'signal' : null;

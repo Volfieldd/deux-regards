@@ -10,6 +10,7 @@ import { checkRoles } from './controle-roles.js';
 import { createSwitches } from './interrupteurs.js';
 import { createEdge } from './bordure.js';
 import { createCfList } from './cloudflare-liste.js';
+import { createUrgence } from './cloudflare-urgence.js';
 import { createNotifier } from './notifications.js';
 import { createConsole } from './console/server.js';
 import { canoniserReseaux } from './reseaux.js';
@@ -105,6 +106,9 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   // Liste d'adresses bloquées chez Cloudflare (phase E3, facultative).
   const cfList = config.bordure && listeName ? createCfList({ store, decisions, accountId: bordureCfg.accountId, tokenFile: bordureCfg.tokenFile, name: listeName, fetchImpl, now, log }) : null;
   cfList?.start();
+  // Mode urgence de Cloudflare (facultatif) : fin vérifiée chaque minute.
+  const urgence = config.urgence ? createUrgence({ store, ...config.urgence, fetchImpl, now, log }) : null;
+  urgence?.start();
   if (edge) {
     plusTard(() => { edge.push({ force: true }).catch(() => {}); }, 5e3);
     timers.push(setInterval(() => { edge.read().catch(err => log.warn({ err: err.message }, 'Vigie : bordure')); edge.push().catch(() => {}); }, 60e3));
@@ -115,7 +119,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
 
   // Console (phase D3) : son propre port, sur le réseau du tunnel ; la réception reste sur le réseau interne.
   const consoleApp = config.console ? createConsole({ config: config.console, store, engine, switches, decisions, zitadel, logger, fetchImpl, now,
-    notifications: config.notifications || {}, edge, siteBackupDir: config.siteBackupDir, verifyChain: verifyShared }) : null;
+    notifications: config.notifications || {}, edge, urgence, siteBackupDir: config.siteBackupDir, verifyChain: verifyShared }) : null;
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
   // La console est facultative : si elle ne peut pas écouter (adresse absente du conteneur, port pris), la réception, le
@@ -129,8 +133,8 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     }
   }
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats, edge, cfList, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
-    async close() { for (const t of timers) clearInterval(t); for (const t of delais) clearTimeout(t); zitadel?.stop(); edge?.stop(); cfList?.stop(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
+    store, decisions, ingest, zitadel, engine, switches, threats, edge, cfList, urgence, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
+    async close() { for (const t of timers) clearInterval(t); for (const t of delais) clearTimeout(t); zitadel?.stop(); edge?.stop(); cfList?.stop(); urgence?.stop(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
   };
 }
 

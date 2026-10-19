@@ -29,6 +29,27 @@ const aj = g.ajout, ra = aj.refus;
 <p class="vg-compte">Arrêter affaiblit la surveillance<%= FN %>: un motif, une durée de 7 jours au plus, votre identité redemandée s’il le faut, et l’alerte « Surveillance réduite » part vers les autres Administrateurs. Chaque interrupteur se rallume seul à la fin.</p>
 </section>
 
+<% if (it.urgence) { const u = it.urgence; const er = it.message && it.message.k === 'erreur' && it.message.valeurs && it.message.valeurs.formulaire === 'urgence' ? it.message : null; %>
+<section class="panel vg-bloc" id="urgence" aria-labelledby="t-urgence"><h2 class="panel-t" id="t-urgence">Mode urgence de Cloudflare</h2>
+<p class="aide-panel">« I’m Under Attack »<%= FN %>: chaque visiteur passe quelques secondes par la vérification de son navigateur chez Cloudflare avant le site. Pour une attaque massive que les blocages ne suffisent pas à arrêter. Toujours pour une durée (<%= u.max %><%= ' ' %>h au plus)<%= FN %>; à la fin, le niveau de sécurité d’avant revient seul. Les Administrateurs sont prévenus.</p>
+<% if (u.actif) { %>
+<p class="note-a"><%~ include('./_ic', { icone: 'info' }) %><span><b>Actif jusqu’au <%= u.jusqua %></b>, depuis le <%= u.depuis %><% if (u.par) { %>, par <%= u.par %><% } %><% if (u.motif) { %><%= FN %>: « <%= u.motif %> »<% } %>.</span></p>
+<% if (u.peut) { %><form class="vg-form" method="post" action="/urgence"><%~ include('./_reg-cache', { csrf: it.csrf, retour: '/reglages#urgence', formulaire: 'urgence' }) %><input type="hidden" name="etat" value="arret"><div class="form-pied"><button class="btn ghost" type="submit">Lever le mode urgence maintenant</button></div></form><% } %>
+<% } else { %>
+<% if (u.fin) { %><p class="vg-sans">Dernier mode urgence terminé le <%= u.fin %>.</p><% } %>
+<% if (u.peut) { %>
+<details class="plier"<% if (er) { %> open<% } %>><summary>Activer le mode urgence…</summary>
+<form class="vg-form" method="post" action="/urgence"><%~ include('./_reg-cache', { csrf: it.csrf, retour: '/reglages#urgence', formulaire: 'urgence' }) %><input type="hidden" name="etat" value="marche">
+<div class="champ-a"><label for="u-motif">Motif</label><input id="u-motif" name="motif" type="text" maxlength="200" required autocomplete="off"<% if (er && er.valeurs.motif) { %> value="<%= er.valeurs.motif %>"<% } %><% if (er && er.champ === 'motif') { %> aria-invalid="true" aria-describedby="u-motif-err"<% } %>><% if (er && er.champ === 'motif') { %><%~ include('./_reg-err', { errId: 'u-motif-err', texte: er.texte }) %><% } %></div>
+<div class="champ-a"><label for="u-duree">Durée</label><select id="u-duree" name="duree"><option value="1h">1 h</option><option value="2h" selected>2 h</option><option value="6h">6 h</option><option value="12h">12 h</option><option value="24h">24 h</option></select></div>
+<% if (er && er.champ !== 'motif') { %><%~ include('./_reg-err', { texte: er.texte }) %><% } %>
+<div class="form-pied"><p class="hint">Votre identité vous sera redemandée s’il le faut.</p><button class="btn danger" type="submit">Activer le mode urgence</button></div>
+</form></details>
+<% } %>
+<% } %>
+</section>
+<% } %>
+
 <div class="vg-trois vg-bloc">
 <section class="panel" id="seuils" aria-labelledby="t-seuils"><h2 class="panel-t" id="t-seuils">Seuils du score</h2>
 <p class="aide-panel">Deux sources au moins<%= FN %>: Moyenne au seuil, Haute au double. Le score perd la moitié de sa valeur chaque heure.</p>
