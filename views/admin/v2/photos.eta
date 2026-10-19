@@ -31,7 +31,7 @@
 <section class="lib" aria-labelledby="lib-title">
   <header class="ep lib-ep">
     <div class="ep-titre"><h1 id="lib-title"><%= t('Photothèque') %></h1></div>
-    <p class="ep-meta"><span><%= it.photos.length > 1 ? t('{n} photos', { n: it.photos.length }) : t('{n} photo', { n: it.photos.length }) %><%= it.filtered ? ' ' + t('sur {n}', { n: it.totals.all }) : '' %></span><span role="status" data-temoin></span></p>
+    <p class="ep-meta"><span><%= it.photos.length > 1 ? t('{n} photos', { n: it.photos.length }) : t('{n} photo', { n: it.photos.length }) %><%= it.filtered ? ' ' + t('sur {n}', { n: it.totals.all }) : '' %></span><span><a class="lien-a" href="/admin/aide#photos-la-planche-contact"><%= t('Aide sur cette page') %></a></span><span role="status" data-temoin></span></p>
     <div class="ep-actions">
       <a class="btn ghost ep-secondaire" href="/" target="_blank" rel="noopener"><%= t('Voir le site') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a>
 <% if (imp) { %>      <a class="btn" href="/admin/photos?importer#import" data-import-open><%~ ic('upload', 16) %><%= t('Importer des photos') %></a>

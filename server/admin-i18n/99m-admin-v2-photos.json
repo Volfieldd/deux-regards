@@ -337,7 +337,7 @@
  },
  "Elles seront en ligne tout de suite ; celles dont un accord est à vérifier ou refusé restent en brouillon. « Défaire » les dépublie.": {
   "en": "They go online right away; those with a consent to check or refused stay as drafts. “Undo” unpublishes them.",
-  "de": "Sie gehen sofort online; Fotos mit zu prüfender oder verweigerter Einwilligung bleiben Entwürfe. „Rückgängig“ nimmt sie wieder offline."
+  "de": "Sie gehen sofort online; Fotos mit zu prüfender oder verweigerter Einwilligung bleiben Entwürfe. „Rückgängig“ zieht die Veröffentlichung zurück."
  },
  "Corriger dans sa fiche": {
   "en": "Correct it in its record",
@@ -477,7 +477,7 @@
  },
  "Dépublier…": {
   "en": "Unpublish…",
-  "de": "Offline nehmen…"
+  "de": "Veröffentlichung zurückziehen…"
  },
  "Publier…": {
   "en": "Publish…",
@@ -613,7 +613,7 @@
  },
  "En ligne. « Dépublier… » demande une raison, que le photographe reçoit.": {
   "en": "Online. “Unpublish…” asks for a reason, which the photographer receives.",
-  "de": "Online. „Offline nehmen…“ verlangt einen Grund, den der Fotograf erhält."
+  "de": "Online. „Veröffentlichung zurückziehen…“ verlangt einen Grund, den der Fotograf erhält."
  },
  "Confirmer les accords…": {
   "en": "Confirm the consents…",
@@ -641,7 +641,7 @@
  },
  "Dépublier « {title} » ?": {
   "en": "Unpublish “{title}”?",
-  "de": "„{title}“ offline nehmen?"
+  "de": "Veröffentlichung von „{title}“ zurückziehen?"
  },
  "La photo quitte la galerie, sa série et la carte ; son adresse mène à la galerie. {name} reçoit la raison. « Publier » la remettra en ligne.": {
   "en": "The photo leaves the gallery, its series and the map; its address leads to the gallery. {name} receives the reason. “Publish” will put it back online.",
@@ -653,7 +653,7 @@
  },
  "Dépublier la photo": {
   "en": "Unpublish the photo",
-  "de": "Foto offline nehmen"
+  "de": "Veröffentlichung zurückziehen"
  },
  "Confirmer les accords de « {title} » ?": {
   "en": "Confirm the consents for “{title}”?",
@@ -681,7 +681,7 @@
  },
  "Elle sera en ligne tout de suite, ou à la date choisie ; « Dépublier » la retirera.": {
   "en": "It will be online right away, or on the chosen date; “Unpublish” will take it down.",
-  "de": "Es geht sofort oder zum gewählten Datum online; „Offline nehmen“ zieht es zurück."
+  "de": "Es geht sofort oder zum gewählten Datum online; „Veröffentlichung zurückziehen“ nimmt es wieder offline."
  },
  "Programmer : le jour et l’heure ci-dessous (heure de Paris)": {
   "en": "Schedule: the day and time below (Paris time)",
@@ -864,7 +864,7 @@
   "de": "Beschreibung bereit: prüfen, dann „Diesen Text übernehmen“."
  },
  "Elles partiront en ligne à l’heure dite ; d’ici là, « Annuler la programmation » les retient.": {
-  "en": "They will go online at the set time; until then, “Cancel scheduling” holds them back.",
+  "en": "They will go online at the set time; until then, “Cancel the schedule” holds them back.",
   "de": "Sie gehen zur festgelegten Zeit online; bis dahin hält „Planung aufheben“ sie zurück."
  },
  "{n} gardent le nom du fichier comme titre : l’adresse de leur page se fige à la publication. Renvoyez-les plutôt au photographe, ou publiez quand même.": {

@@ -16,6 +16,7 @@
    const P = it.pending, S = it.scheduled, IG = it.instagram;
    const hour = time => (it.lang === 'fr' ? time.replace(':', ' h ') : time);
    const ready = P.filter(r => r.ready).length; %>
+<p class="help-link"><a href="/admin/aide#photos-le-circuit-de-publication"><%= t('Aide sur cette page') %></a></p>
 <header class="ep">
   <div class="ep-titre"><h1><%= t('À valider') %></h1></div>
   <p class="ep-meta"><span><%= P.length > 1 ? t('{n} photos proposées', { n: P.length }) : t('{n} photo proposée', { n: P.length }) %></span><span><%= S.length > 1 ? t('{n} programmées', { n: S.length }) : t('{n} programmée', { n: S.length }) %></span><% if (IG) { %><span><%= IG.length > 1 ? t('{n} pour Instagram', { n: IG.length }) : t('{n} pour Instagram', { n: IG.length }) %></span><% } %></p>

@@ -59,6 +59,7 @@
    const time = it.time;
    const exifHour = time ? (it.read ? t('L’appareil indique le {date} à {time}.', { date: it.read, time }) : t('L’appareil indique {time}.', { time })) : '';
    const published = P.published_at && P.status === 'published' ? day(new Date(String(P.published_at).replace(' ', 'T') + 'Z')) : ''; %>
+<p class="help-link"><a href="/admin/aide#photos-la-fiche-dune-photo"><%= t('Aide sur cette page') %></a></p>
 <header class="ep">
   <a class="ep-retour" href="/admin/photos"><%~ ic('retour') %><%= t('Photothèque') %></a>
   <div class="ep-titre"><h1 data-fiche-titre><%= P.title %></h1><span class="etat etat--<%= ETAT[0] %>"><%~ ic(ETAT[0], 12) %><%= ETAT[1] %></span></div>
