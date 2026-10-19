@@ -151,6 +151,8 @@ Le workflow [`.github/workflows/image.yml`](https://github.com/Volfieldd/deux-re
 | `latest` | dernière version de `main` (jamais posée depuis une autre branche) |
 | `sha-xxxxxxx` | version d'un commit précis (7 premiers caractères) : pour revenir en arrière ou figer une version |
 
+Les images, comme le dépôt, sont **privées** (code propriétaire, voir [`LICENSE`](https://github.com/Volfieldd/deux-regards/blob/main/LICENSE)) : ne les passez jamais en *Public*. Le serveur qui les télécharge se connecte une fois au registre avec un jeton `read:packages` (pas à pas dans le [Guide Unraid](Unraid#1-image-docker)).
+
 Les constructions passent une à une, dans l'ordre des fusions : `latest` désigne toujours la dernière. Les actions GitHub sont épinglées sur un commit (une étiquette déplacée en amont ne change rien), et Dependabot ([`.github/dependabot.yml`](https://github.com/Volfieldd/deux-regards/blob/main/.github/dependabot.yml)) en propose les mises à jour, à relire comme toute PR.
 
 L'image ([`Dockerfile`](https://github.com/Volfieldd/deux-regards/blob/main/Dockerfile)) part de `node:22-bookworm-slim`, tourne sous l'utilisateur `node`, sans compilateur, et contient seulement le code, les gabarits, les fichiers publics, `assets/`, `seed/` et `docs/aide/` (sans le script d'installation d'ONNX Runtime, déjà passé, ni ses dépendances). Elle fixe `NODE_ENV=production`, `HOST=0.0.0.0`, `PORT=3000`, `STORAGE_DIR=/data`, `DATABASE_PATH=/data/site.db` et `REQUIRE_PERSISTENT_STORAGE=1`, et vérifie sa santé sur `/healthz`. Elle n'a pas d'instruction `VOLUME` : sans montage de `/data`, le serveur refuse de démarrer.

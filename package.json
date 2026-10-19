@@ -2,6 +2,8 @@
   "name": "site-photo",
   "version": "1.166.0",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Sébastien Wojcicki",
   "description": "Site photo de Sébastien et Julien : galerie publique et admin OIDC",
   "type": "module",
   "engines": {

@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Site public v2 : amélioration progressive. Tout marche sans ce script (liens, formulaires POST, <details>, pages
 // Partager et Signaler) ; il ajoute le clavier, le glissé, le plein écran, J'aime et Partager sans rechargement ; sur
 // l'accueil, la galerie et les séries : le diaporama de l'ouverture (à l'arrêt par défaut), la hauteur de la barre de

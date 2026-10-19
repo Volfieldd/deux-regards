@@ -1,6 +1,8 @@
 {
   "name": "site-photo-e2e",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Sébastien Wojcicki",
   "description": "Tests de bout en bout dans un navigateur, lancés dans le conteneur Playwright (voir run.sh)",
   "type": "module",
   "devDependencies": {

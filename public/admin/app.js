@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Textes de l'écran, dans la langue de l'admin du photographe (<html lang>) ; le français est la clé.
 const I18N = {
   'Position : indisponible sur cet appareil (indiquez le lieu).': { en: 'Location: not available on this device (enter the place).', de: 'Standort: auf diesem Gerät nicht verfügbar (Ort angeben).' },

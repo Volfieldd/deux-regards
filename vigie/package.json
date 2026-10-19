@@ -2,6 +2,8 @@
   "name": "deux-regards-vigie",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Sébastien Wojcicki",
   "type": "module",
   "description": "Vigie : journalisation de sécurité de Nicephos (facultative)",
   "dependencies": {

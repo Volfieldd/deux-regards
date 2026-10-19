@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Éditeur d'un billet des Carnets (maquette MQ-20 ; étude B28 à B40), par amélioration progressive : sans ce script, le
 // formulaire classique marche (« Enregistrer et voir l'aperçu », photos à cocher). Avec lui :
 //   - barre de mise en forme en vrais boutons, raccourcis avec une touche de modification (Ctrl/Cmd + B, I, K, S) ;

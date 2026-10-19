@@ -18,7 +18,7 @@ Les marches à suivre, pas à pas, pour les opérations ponctuelles. Les gestes 
 
 ## 1. Déployer une mise à jour
 
-Chaque fusion dans `main` publie une image `ghcr.io/volfieldd/deux-regards` (étiquettes `latest` et `sha-xxxxxxx`).
+Chaque fusion dans `main` publie une image privée `ghcr.io/volfieldd/deux-regards` (étiquettes `latest` et `sha-xxxxxxx`). Unraid doit être connecté au registre ([Guide Unraid](Unraid#1-image-docker)) : un `denied` au téléchargement veut dire connexion perdue ou jeton expiré.
 
 1. **Sauvegarde fraîche** : vérifiez la date de `last.json` dans le dossier des sauvegardes (ou attendez la sauvegarde du jour).
 2. **Si le fichier de la pile a changé** (nouveau conteneur, comme LibreTranslate) : dans *Compose Manager*, remplacez le contenu de la pile par le nouveau [`deploy/unraid/compose.yaml`](https://github.com/Volfieldd/deux-regards/blob/main/deploy/unraid/compose.yaml). Le `.env` ne change pas, sauf mention contraire dans la PR.
