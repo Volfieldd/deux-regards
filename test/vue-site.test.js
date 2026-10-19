@@ -14,10 +14,13 @@ const PHOTO = '/photo/brume-sur-la-loire';
 const isV2 = body => /class="wrap vis-scene/.test(body);
 const isV1 = body => /<main class="viewer"/.test(body);
 const BUTTON = /<aside class="vue-site/;
-// Le formulaire du bouton : { vue, vers, bouton, etat }.
+// Les boutons : { vue, vers, bouton, etat } du premier (celui que l'on attend), et autres : les suivants (v1, v2, v3).
 const form = body => {
-  const m = /<aside class="vue-site[^"]*" aria-label="[^"]+"><form method="post" action="\/admin\/apparence\/apercu-v2"><input type="hidden" name="_csrf" value="([^"]+)"><input type="hidden" name="vue" value="([^"]+)"><input type="hidden" name="vers" value="([^"]*)"><p class="vue-site-t">([^<]+)<\/p><button class="vue-site-b" type="submit">([^<]+)<\/button><\/form><\/aside>/.exec(body);
-  return m && { csrf: m[1], vue: m[2], vers: m[3].replace(/&#39;/g, "'").replace(/&amp;/g, '&'), etat: m[4], bouton: m[5] };
+  const a = /<aside class="vue-site[^"]*" aria-label="[^"]+"><p class="vue-site-t">([^<]+)<\/p>((?:<form method="post" action="\/admin\/apparence\/apercu-v2">.*?<\/form>)+)<\/aside>/.exec(body);
+  if (!a) return null;
+  const forms = [...a[2].matchAll(/<form method="post" action="\/admin\/apparence\/apercu-v2"><input type="hidden" name="_csrf" value="([^"]+)"><input type="hidden" name="vue" value="([^"]+)"><input type="hidden" name="vers" value="([^"]*)"><button class="vue-site-b" type="submit">([^<]+)<\/button><\/form>/g)]
+    .map(m => ({ csrf: m[1], vue: m[2], vers: m[3].replace(/&#39;/g, "'").replace(/&amp;/g, '&'), bouton: m[4] }));
+  return forms.length ? { ...forms[0], etat: a[1], autres: forms.slice(1) } : null;
 };
 
 async function site(t) {
@@ -76,7 +79,7 @@ test('administrateur : bouton, vue v1 et vue v2 dans les deux réglages, retour 
   let page = await a.get(PHOTO);
   assert.ok(isV1(page.body));
   let f = form(page.body);
-  assert.deepEqual({ ...f, csrf: undefined }, { csrf: undefined, vue: 'v2', vers: PHOTO, etat: 'Vous voyez la v1, comme les visiteurs.', bouton: 'Voir en v2' });
+  assert.deepEqual({ ...f, csrf: undefined, autres: undefined }, { csrf: undefined, autres: undefined, vue: 'v2', vers: PHOTO, etat: 'Vous voyez la v1, comme les visiteurs.', bouton: 'Voir en v2' });
   assert.equal(f.csrf, a.csrf);
   assert.match(page.body, /<aside class="vue-site" aria-label="Version du site, visible par vous seul">/);
   // Clic : vue v2, retour à la même page.
@@ -129,7 +132,7 @@ test('route de la vue : CSRF et permission exigés, valeur inconnue refusée, re
   assert.equal((await raw({ vue: 'v2' })).statusCode, 403, 'sans jeton CSRF');
   assert.equal((await raw({ vue: 'v2', _csrf: 'faux' })).statusCode, 403, 'faux jeton');
   assert.ok(isV1((await a.get(PHOTO)).body));
-  for (const vue of ['v3', '', 'V2', 'suivre ', '1']) assert.equal((await a.post('/admin/apparence/apercu-v2', { vue })).statusCode, 400, `vue=${vue}`);
+  for (const vue of ['v4', '', 'V2', 'suivre ', '1']) assert.equal((await a.post('/admin/apparence/apercu-v2', { vue })).statusCode, 400, `vue=${vue}`);
   assert.ok(isV1((await a.get(PHOTO)).body));
   assert.equal((await a.post('/admin/apparence/apercu-v2', { vue: 'v2', vers: 'https://ailleurs.example/' })).headers.location, '/');
   assert.equal((await a.post('/admin/apparence/apercu-v2', { vue: 'v2', vers: '/admin/photos' })).headers.location, '/');
@@ -191,8 +194,8 @@ test('Carnets : introuvables en vue v1 (comme pour un visiteur) ; sur une page d
   assert.doesNotMatch((await a.get('/')).body, /href="\/carnet"/, 'aucun lien vers les Carnets en vue v1');
   // Vue « suivre » (v2) : le billet ; le bouton n'y mène pas en v1, il ouvre l'accueil et le dit.
   await a.post('/admin/apparence/apercu-v2', { vue: 'suivre' });
-  for (const [url, home, bouton, note] of [['/carnet/lisbonne-et-porto', '/', 'Voir l’accueil en v1', 'Cette page n’existe qu’en v2.'],
-    ['/en/carnet', '/en', 'View the home page in v1', 'This page only exists in v2.'], ['/de/carnet', '/de', 'Startseite in v1 ansehen', 'Diese Seite gibt es nur in v2.']]) {
+  for (const [url, home, bouton, note] of [['/carnet/lisbonne-et-porto', '/', 'Voir l’accueil en v1', 'Cette page n’existe pas en v1.'],
+    ['/en/carnet', '/en', 'View the home page in v1', 'This page does not exist in v1.'], ['/de/carnet', '/de', 'Startseite in v1 ansehen', 'Diese Seite gibt es in v1 nicht.']]) {
     const page = await a.get(url);
     assert.equal(page.statusCode, 200, url);
     const f = form(page.body);
@@ -263,7 +266,7 @@ test('page Apparence : explique le bouton, montre la vue de la session et la cha
   const c = await site(t);
   const a = c.admin();
   let page = (await a.get('/admin/apparence')).body;
-  assert.match(page, /un petit bouton « Voir en v1 » ou « Voir en v2 », visible par vous seul/);
+  assert.match(page, /de petits boutons « Voir en v1 », « Voir en v2 » ou « Voir en v3 », visibles par vous seul/);
   assert.match(page, /Votre vue suit ce réglage, comme les visiteurs\./);
   assert.match(page, /<input type="hidden" name="vue" value="v2">\s*<input type="hidden" name="vers" value="\/">/);
   assert.match(page, /Voir le site en v2/);

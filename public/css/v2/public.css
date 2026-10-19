@@ -624,8 +624,8 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
    de l'en-tête, dans le flux (jamais collée, jamais posée sur le contenu) ; la phrase dit ce que voient les visiteurs, le
    bouton filet ce que fait le clic. Vue forcée (autre version que les visiteurs) : un filet sable à gauche, et la phrase
    le dit (la couleur n'est jamais seule). Cible de 32 px, 44 px au toucher. */
-.vue-site { padding: 0 var(--gut); background: var(--paper); color: var(--mute); border-bottom: 1px solid var(--rule); font: 400 var(--t-petit)/1.4 var(--sans); }
-.vue-site form { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0 var(--esp-2); margin: 0; padding-block: 4px; }
+.vue-site { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0 var(--esp-2); padding: 4px var(--gut); background: var(--paper); color: var(--mute); border-bottom: 1px solid var(--rule); font: 400 var(--t-petit)/1.4 var(--sans); }
+.vue-site form { margin: 0; }
 .vue-site-t { margin: 0; padding-block: 4px; min-width: 0; overflow-wrap: anywhere; }
 .vue-site-b { display: inline-flex; align-items: center; min-height: 32px; padding: 0 var(--esp-2); border: 1px solid var(--ink); border-radius: var(--r-site);
   background: transparent; color: var(--ink); font: 500 var(--t-petit)/1.2 var(--sans); white-space: nowrap; cursor: pointer; }

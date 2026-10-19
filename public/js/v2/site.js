@@ -319,6 +319,9 @@ document.querySelectorAll('[data-ouverture]').forEach(ouv => {
     cadre.replaceChildren(...s.image);
     cartel.replaceChildren(...s.cartel);
     points.forEach((b, k) => b.setAttribute('aria-pressed', String(k === cur)));
+    // v3 : la position écrite à l'écran (« 2 / 6 »), lue par les boutons.
+    const pos = ouv.querySelector('[data-ouv-pos]');
+    if (pos) pos.textContent = `${cur + 1} / ${points.length}`;
   };
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const label = () => {

@@ -1,0 +1,32 @@
+<% /* v3 · ouverture de l'accueil en plein cadre (docs/maquettes-v3, MQ-01 ; css/v3/v3.css § 6). Mêmes données que la v2
+      (réglage « Ouverture », settings.hero) et même script (js/v2/site.js : data-ouverture…, À L'ARRÊT par défaut).
+      Le cadre prend le format le plus large de la liste et l'écran, à 10 % près ; une photo de ce format, à 10 % près,
+      le remplit (recadrée de 10 % au plus, au centre) ; une photo d'un autre format y est entière, sur le noir. Au bureau,
+      l'en-tête et le cartel sont posés sur la photo (voile limité à leur bande) ; au téléphone, le cartel vient dessous.
+      La promesse (H1) suit la photo. */ %>
+<% const t = it.t, v = it.v2, ic = v.ic, hero = it.hero, n = hero.length;
+   const frame = hero.reduce((a, p) => (v.fmt(p).r > v.fmt(a).r ? p : a), hero[0]), F = v.fmt(frame);
+   const sizes = `(max-width: 767px) 100vw, min(100vw, ${(F.r / 0.9 * 100).toFixed(1)}vh)`;
+   const remplit = p => { const k = v.fmt(p).r / F.r; return k >= 0.9 && k <= 1 / 0.9; };
+   const pic = (p, eager) => it.picture(p, { sizes, eager, alt: '', className: remplit(p) ? 'plein-pic' : 'plein-pic plein-pic--entiere' });
+   const cartel = p => `<a href="${it.photoUrl(p.slug)}"><span class="cartel-t">${v.nobr(p.title)}</span><span class="cartel-m">${v.esc([p.author, p.place, v.date(p.taken_on)].filter(Boolean).join(' · '))}&nbsp;· <span class="plein-voir">${v.esc(t.seePhoto)}</span></span></a>`; %>
+<div class="plein-zone">
+  <section class="plein" style="--r: <%= F.r %>" aria-labelledby="ouv-cartel"<% if (n > 1) { %> aria-roledescription="<%= t.v2.slideshow %>"<% } %> data-ouverture>
+    <div class="plein-cadre" data-ouv-cadre><%~ pic(hero[0], true) %></div>
+    <div class="plein-bas">
+      <div class="cartel plein-cartel" id="ouv-cartel" aria-live="polite" data-ouv-cartel><%~ cartel(hero[0]) %></div>
+<% if (n > 1) { %>
+      <div class="plein-ctl js-seul">
+        <p class="plein-pos" aria-hidden="true" data-ouv-pos>1 / <%= n %></p>
+        <ul class="ouverture-points" aria-label="<%= t.v2.slidePoints(n) %>">
+<% hero.forEach((p, i) => { %>          <li><button class="ouverture-point" type="button" aria-pressed="<%= i === 0 %>" aria-label="<%= t.v2.slidePoint(i + 1, n, p.title) %>" data-ouv-point="<%= i %>"></button></li>
+<% }) %>        </ul>
+        <button class="bascule ouverture-pause" type="button" data-ouv-lire><span class="ouv-lire"><%~ ic('lire', { size: 18 }) %><%= t.v2.play %><span class="sr-only"><%= t.v2.playMore %></span></span><span class="ouv-pause" hidden><%~ ic('pause', { size: 18 }) %><%= t.v2.pause %></span></button>
+      </div>
+<% } %>
+    </div>
+  </section>
+</div>
+<% hero.slice(1).forEach((p, i) => { %><template data-ouv-diapo="<%= i + 1 %>"><div data-image><%~ pic(p, false) %></div><div data-cartel><%~ cartel(p) %></div></template>
+<% }) %>
+<div class="wrap promesse"><h1 class="promesse-h1" id="acc-h1"><%= it.promise %></h1><p class="promesse-sous"><%= it.promiseSub %></p></div>

@@ -1,19 +1,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Site public en deux versions, côte à côte : v1 (les gabarits de views/) et v2 (ceux de views/v2/, la refonte issue de
-// l'audit d'ergonomie du 16 oct. 2026). Le réglage « Site public » (Réglages → Apparence) choisit la version de tous
-// les visiteurs ; v1 par défaut. Une page qui n'a pas encore de gabarit v2 s'affiche en v1 (repli automatique).
+// Site public en trois versions, côte à côte : v1 (les gabarits de views/), v2 (ceux de views/v2/, la refonte issue de
+// l'audit d'ergonomie du 16 oct. 2026) et v3 (les gabarits v2, redessinés : css/v3/v3.css, accueil en plein cadre,
+// views/v3/ ; maquettes de docs/maquettes-v3/). Le réglage « Site public » (Réglages → Apparence) choisit la version de
+// tous les visiteurs ; v1 par défaut. Une page qui n'a pas encore de gabarit v2 s'affiche en v1 (repli automatique), en
+// v2 comme en v3 : la v3 n'a pas de page à elle, seulement un autre dessin des pages v2.
 //
-// Vue de la session : un administrateur (permission site.apparence) peut voir le site public dans l'autre version que celle
-// des visiteurs, d'un clic sur le bouton « Voir en v1 / Voir en v2 » des pages publiques (server/vue-site.js). Trois états :
-// aucune vue (il suit le réglage, comme les visiteurs), « v1 » ou « v2 » (forcée pour lui). La vue est gardée ici, en
+// Vue de la session : un administrateur (permission site.apparence) peut voir le site public dans une autre version que
+// celle des visiteurs, d'un clic sur un bouton « Voir en v1 / v2 / v3 » des pages publiques (server/vue-site.js) : aucune
+// vue (il suit le réglage, comme les visiteurs), ou « v1 », « v2 », « v3 » (forcée pour lui). La vue est gardée ici, en
 // mémoire, pour sa session (l'empreinte de son jeton) : ni cookie, ni paramètre d'adresse, rien que le navigateur puisse
 // fabriquer. Elle tombe avec la session (déconnexion, expiration, droit retiré) et au redémarrage du serveur. C'est une
 // préférence d'affichage de la session, pas un réglage du site : les visiteurs voient toujours le réglage.
 // Toute réponse publique faite à une session (bouton, jeton CSRF, vue forcée) est « private, no-store » (voir app.js) :
 // rien de ce que voit un administrateur ne peut entrer dans un cache partagé (Cloudflare) et être servi à un visiteur.
-export const VERSIONS = ['v1', 'v2'];
+export const VERSIONS = ['v1', 'v2', 'v3'];
+// La v2 et la v3 servent les mêmes pages (gabarits de views/v2/) : Carnets, menu, repli sur la v1, tout ce qui dépend de
+// « la refonte » vaut pour les deux.
+export const usesV2 = v => v === 'v2' || v === 'v3';
 const KEY = 'public_version';
 const PERM = 'site.apparence';
 const MAX_VIEWS = 64;                      // borne de la mémoire : au-delà, les plus anciennes vues sont oubliées
@@ -25,7 +30,7 @@ export const ONLY_V2 = /^prive-[a-z]+$/;
 export function createPublicVersion({ db, viewsDir, cache = false }) {
   const read = db.prepare('SELECT value FROM settings WHERE key = ?').pluck();
   const write = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
-  const views = new Map();                   // empreinte du jeton de session → { vue: 'v1' | 'v2', expires }
+  const views = new Map();                   // empreinte du jeton de session → { vue: 'v1' | 'v2' | 'v3', expires }
   const known = new Map();                   // gabarit → existe-t-il en v2 ? (gardé en production seulement)
   const knownV1 = new Map();                 // gabarit → existe-t-il en v1 ?
 
@@ -38,7 +43,7 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
   // Cette requête peut-elle changer de vue ? Session valide et droit d'apparence, relu à chaque requête.
   const canSwitch = request => Boolean(request.session?.id && request.can?.(PERM));
 
-  // Vue posée pour cette session (« v1 », « v2 »), ou null : aucune, échue, ou droit retiré.
+  // Vue posée pour cette session (« v1 », « v2 », « v3 »), ou null : aucune, échue, ou droit retiré.
   const viewOf = request => {
     const s = request.session;
     if (!s?.id || !views.has(s.id)) return null;
@@ -54,7 +59,7 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
     viewOf,
     // La session voit-elle une autre version que les visiteurs ?
     forcedOn: request => { const v = viewOf(request); return Boolean(v) && v !== setting(); },
-    // vue : « v1 », « v2 », ou « suivre » (oublier la vue : suivre le réglage). Seulement pour une session qui a le droit.
+    // vue : « v1 », « v2 », « v3 », ou « suivre » (oublier la vue : suivre le réglage). Seulement pour une session qui a le droit.
     setView(request, vue) {
       const s = request.session;
       if (!canSwitch(request) || !(VERSIONS.includes(vue) || vue === 'suivre')) return false;

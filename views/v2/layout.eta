@@ -52,6 +52,7 @@
 <% } %>
 <% if (it.formulaires || it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/formulaires.css') %>">
 <% } %><% if (it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/prive.css') %>">
+<% } %><% if (it.v3) { /* v3 : le dessin de la v3, chargé en dernier (docs/maquettes-v3, server/version-publique.js) */ %>  <link rel="stylesheet" href="<%= it.asset('css/v3/v3.css') %>">
 <% } %><% if (brand.favicon64) { %>
   <link rel="icon" type="image/png" href="/brand/<%= brand.favicon64 %>">
   <link rel="apple-touch-icon" href="/brand/<%= brand.favicon180 %>">

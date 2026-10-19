@@ -45,7 +45,7 @@ async function admin(browser, info, options = {}) {
 const isV2 = page => page.locator('.vis-scene').count().then(n => n > 0);
 // Le bouton : visible, assez grand, focus visible, jamais sous un autre élément, aucun débordement de la page.
 async function verifie(page, { coarse = false } = {}) {
-  const b = page.locator('.vue-site-b');
+  const b = page.locator('.vue-site-b').first();
   await expect(b).toBeVisible();
   const m = await b.evaluate(el => {
     const r = el.getBoundingClientRect();
@@ -91,8 +91,8 @@ for (const width of [320, 1440]) {
         found = await page.evaluate(() => document.activeElement?.classList.contains('vue-site-b'));
       }
       expect(found, `bouton atteint au clavier en ${from}`).toBe(true);
-      await expect(page.locator('.vue-site-b')).toHaveText(label);
-      const focus = await page.locator('.vue-site-b').evaluate(el => { const s = getComputedStyle(el); return { style: s.outlineStyle, w: parseFloat(s.outlineWidth) }; });
+      await expect(page.locator('.vue-site-b').first()).toHaveText(label);
+      const focus = await page.locator('.vue-site-b').first().evaluate(el => { const s = getComputedStyle(el); return { style: s.outlineStyle, w: parseFloat(s.outlineWidth) }; });
       expect(focus.style, 'focus visible').not.toBe('none');
       expect(focus.w).toBeGreaterThanOrEqual(2);
       await verifie(page);

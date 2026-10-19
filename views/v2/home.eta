@@ -11,7 +11,7 @@
      : page === 'serie' ? `${serieBy ? t.v2.serieTitle(S.name, serieBy) : S.name} · ${site}`
      : t.nav.gallery + (label ? `, ${label} (${t.photos(it.photos.length)})` : '') + ` · ${site}`; %>
 <% layout('./layout', { pageTitle }) %>
-<%~ include('./_entete', { ...it, courant: page === 'serie' ? 'series' : page === 'galerie' ? 'galerie' : null }) %>
+<%~ include('./_entete', { ...it, courant: page === 'serie' ? 'series' : page === 'galerie' ? 'galerie' : null, surPhoto: it.v3 && page === 'accueil' && it.hero.length > 0 }) %>
 <main id="contenu">
 <% if (page === 'serie' && S) { %>
 <%~ include('./_serie', it) %>

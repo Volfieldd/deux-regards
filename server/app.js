@@ -44,7 +44,7 @@ import { createImageModel, createSeriesSuggest } from './series-suggest.js';
 import { createShares } from './share.js';
 import { truncateIp } from './ip.js';
 import { TRAP_PATH } from './securite/piege.js';
-import { createPublicVersion } from './version-publique.js';
+import { createPublicVersion, usesV2 } from './version-publique.js';
 import { createCarnet } from './carnet.js';
 import { createRepo } from './repo.js';
 
@@ -155,19 +155,22 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     // Pages des galeries privées : toujours en v2 (elles n'ont pas de v1), sans le bouton de la vue (pages neutres).
     const only = app.publicVersion.onlyV2(template);
     const pv = only || /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
-    const v2 = only || (pv?.version === 'v2' && app.publicVersion.hasV2(template));
+    const v2 = only || (usesV2(pv?.version) && app.publicVersion.hasV2(template));
+    // v3 : les gabarits v2, redessinés (css/v3/v3.css, accueil en plein cadre : views/v3/). Pas les pages des galeries
+    // privées, qui gardent leur dessin quel que soit le réglage.
+    const v3 = !only && v2 && pv?.version === 'v3';
     // Page sans gabarit v1 (née avec la v2, comme les Carnets) servie en v1 : introuvable, jamais une erreur.
     if (pv && !v2 && !app.publicVersion.hasV1(template)) return this.callNotFound();
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
       // Lien « Carnets » du menu et du pied de page v2 : au moins un billet publié (le menu v1 ne change pas).
-      carnetPage: pv?.version === 'v2' && app.carnet.publishedCount() > 0,
+      carnetPage: usesV2(pv?.version) && app.carnet.publishedCount() > 0, v3,
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
       authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '',
       // Bouton « Voir en v1 / Voir en v2 » (server/vue-site.js ; formulaire POST, jeton CSRF de la session), pour
       // l'administrateur qui a le droit d'apparence seulement, en v2 comme sur une page restée en v1 faute de gabarit v2.
       vueSite: pv?.switcher ? vueSite({ pv, lang: data?.lang || splitLang(this.request.url).lang, url: this.request.url, csrf: this.request.session.csrf,
-        rendu: v2 ? 'v2' : 'v1', sansV1: !app.publicVersion.hasV1(template) }) : null };
+        rendu: v3 ? 'v3' : v2 ? 'v2' : 'v1', sansV1: !app.publicVersion.hasV1(template) }) : null };
     return this.type('text/html; charset=utf-8').send(eta.render(v2 ? `./v2/${template}` : `./${template}`, { ...common, ...data }));
   });
 

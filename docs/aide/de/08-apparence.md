@@ -1,23 +1,25 @@
 # Erscheinungsbild
 
-Das Erscheinungsbild der **öffentlichen Website**: Fassung (v1 oder v2), Theme, Logo und Symbol. Die Verwaltung behält immer ihr eigenes.
+Das Erscheinungsbild der **öffentlichen Website**: Fassung (v1, v2 oder v3), Theme, Logo und Symbol. Die Verwaltung behält immer ihr eigenes.
 
 ## Öffentliche Website: v1 oder v2
 
 Oben auf der Seite. **v2** ist die neue Gestaltung der öffentlichen Website, aus dem Ergonomie-Audit vom Oktober 2026. Sie umfasst alle öffentlichen Seiten (siehe [Die Website aus Sicht der Besucher](site-public)) außer den Fehler- und Anmeldeseiten, die die Gestaltung von v1 behalten. Die Verwaltung ändert sich nicht.
 
-**v1 bleibt erhalten**, dauerhaft: Sie bleibt jederzeit ein möglicher Weg zurück und erhält Sicherheits- und Barrierefreiheitskorrekturen. Neues (Reisetagebücher, private Galerien) gibt es nur in v2.
+**v1 bleibt erhalten**, dauerhaft: Sie bleibt jederzeit ein möglicher Weg zurück und erhält Sicherheits- und Barrierefreiheitskorrekturen. Neues (Reisetagebücher, private Galerien) gibt es nur in v2 und v3.
 
-1. **Zwischen den Fassungen wechseln, nur für Sie:** Oben auf jeder Seite der öffentlichen Website ändert eine kleine Schaltfläche **In v2 ansehen** (oder **In v1 ansehen**) die Fassung, die Sie sehen; ein Klick, und dieselbe Seite erscheint in der anderen Fassung.
+**v3** übernimmt die Seiten von v2 und ihre Regeln zur Barrierefreiheit, mit einer anderen Gestaltung: auf der Startseite das Foto randlos (von Rand zu Rand, höchstens um 10 % beschnitten; am Computer liegen Kopfzeile und Fototitel darauf, am Handy steht der Titel darunter), die Fotografen über ihre Fotos vorgestellt, größere Überschriften, Fotodaten in einer dicktengleichen Schrift, Schaltflächen ohne Rahmen. Eine Seite ohne v2 erscheint in v1, in v3 wie in v2. Kein Shop: weder „Kunstdrucke“ noch eine Kaufschaltfläche.
+
+1. **Zwischen den Fassungen wechseln, nur für Sie:** Oben auf jeder Seite der öffentlichen Website ändern zwei kleine Schaltflächen, **In v1 ansehen**, **In v2 ansehen** oder **In v3 ansehen** (die beiden Fassungen, die Sie nicht sehen), die Fassung, die Sie sehen; ein Klick, und dieselbe Seite erscheint in der anderen Fassung.
    - Daneben erinnert ein Satz daran, was die Besucher sehen: „Sie sehen v1, wie die Besucher“ oder „Nur Sie sehen v2; die Besucher sehen v1“.
    - **Nur Sie** sehen diese Schaltfläche und diese Ansicht, in dieser Sitzung (dieses Gerät, dieser Browser), bis zu einem neuen Klick, zur Abmeldung oder zum Ende der Sitzung. Dafür ist das Recht für das Erscheinungsbild nötig.
    - Die Besucher sehen immer die hier gewählte Fassung, was immer sie senden (Cookie, Adresse): Ihre Ansicht wird auf dem Server gespeichert, nie im Browser.
    - Solange Sie angemeldet sind, werden Ihre Seiten in keinem Cache gespeichert (auch nicht bei Cloudflare): Ein Besucher kann weder die Seite, die Sie sehen, noch die Schaltfläche erhalten.
    - In der Ansicht v1 sind die Reisetagebücher nicht auffindbar, wie für einen Besucher in v1: Auf einer Seite der Reisetagebücher lautet die Schaltfläche **Startseite in v1 ansehen** und öffnet die Startseite.
    - Auf den Gastseiten der privaten Galerien erscheint die Schaltfläche nicht.
-   - In diesem Abschnitt bewirkt **Website in v2 ansehen** (oder **in v1**) dasselbe und öffnet die Startseite; **Zurück zur Fassung der Besucher** vergisst Ihre Ansicht.
+   - In diesem Abschnitt bewirkt **Website in v2 ansehen** (oder **in v1**, **in v3**) dasselbe und öffnet die Startseite; **Zurück zur Fassung der Besucher** vergisst Ihre Ansicht.
 2. **Bevor Sie v2 für alle aktivieren:** Folgen Sie der [Checkliste für die Umstellung](https://github.com/Volfieldd/deux-regards/wiki/Bascule-v2) (Tests auf iPad, Computer und Telefon, aktuelle Sicherung, was in der ersten Woche zu beobachten ist; auf Französisch).
-3. **Für alle aktivieren:** Kreuzen Sie **v2** an, dann **Fassung speichern**. Zurück zu v1 geht genauso, jederzeit.
+3. **Für alle aktivieren:** Kreuzen Sie **v2** (oder **v3**) an, dann **Fassung speichern**. Zurück zu v1 geht genauso, jederzeit.
 
 Jeder Klick auf die Schaltfläche und jeder Wechsel der Fassung werden im [Protokoll](reglages#journal) festgehalten.
 
