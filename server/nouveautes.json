@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.176.0",
+    "date": "2026-10-19",
+    "pr": 176,
+    "title": {
+      "fr": "La liste de contrôle de la bascule v3",
+      "en": "The v3 switch-over checklist",
+      "de": "Die Checkliste für die Umstellung auf v3"
+    },
+    "items": [
+      {
+        "fr": "Avant de faire voir la v3 à tous : une liste de contrôle, liée depuis l’aide d’Apparence, qui commence par préparer l’ouverture (photos du bureau et du téléphone, point fort de chacune), puis les essais, la bascule et la première semaine.",
+        "en": "Before showing v3 to everyone: a checklist, linked from the Appearance help, that starts with preparing the opening slideshow (computer and phone photos, the focal point of each), then the trials, the switch-over and the first week.",
+        "de": "Bevor die v3 für alle sichtbar wird: eine Checkliste, verlinkt in der Hilfe zum Erscheinungsbild, die mit der Vorbereitung der Start-Diashow beginnt (Fotos für Computer und Handy, Schwerpunkt jedes Fotos), dann Tests, Umstellung und die erste Woche.",
+        "perm": "site.apparence"
+      }
+    ]
+  },
+  {
     "version": "1.175.0",
     "date": "2026-10-19",
     "pr": 175,
