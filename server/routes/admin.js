@@ -15,7 +15,7 @@ import { createAdminRepo, ValidationError, titleFromFilename, LIMITS } from '../
 import { createImportTracker } from '../imports.js';
 import { variantName, widthsFor } from '../images.js';
 import { importOriginal, removePhotoFiles, ImportError, MAX_FILE_BYTES } from '../media.js';
-import { picture } from '../picture.js';
+import { picture, tileRatio, tileSizes } from '../picture.js';
 import { sameToken, safeNext } from '../auth.js';
 import { pad } from '../format.js';
 import sharp from 'sharp';
@@ -363,14 +363,16 @@ export default async function adminRoutes(app) {
   }
 
   const byId = id => (Number.isInteger(Number(id)) ? Number(id) : -1);
-  // Variantes prêtes : la plus petite existe (les brouillons tout juste envoyés n'en ont pas encore).
+  // Variantes prêtes : la plus grande existe (les brouillons tout juste envoyés n'en ont pas encore). La plus grande, pas la
+  // plus petite : une photo d'avant les tailles de 160 et 480 px reste prête pendant leur rattrapage de fond (ses vignettes
+  // sont alors servies par une plus grande, server/repli-variantes.js).
   const rendered = p => {
     const job = tracker.get(p.id);
     if (job && (job.state === 'waiting' || job.state === 'processing')) return false;
-    return fs.existsSync(path.join(storageDir, 'variants', variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)));
+    return fs.existsSync(path.join(storageDir, 'variants', variantName(p.file, widthsFor(p.width).at(-1), 'webp', p.variant_key)));
   };
   const withReady = p => p && { ...p, ready: rendered(p) };
-  // Images de l'admin : vignette (la plus petite variante) et grande image (1280 px au plus).
+  // Images de l'admin : vignette (la plus petite variante, 160 px : listes de 18 à 64 px) et grande image (1280 px au plus).
   const thumb = p => `/admin/media/${variantName(p.file, widthsFor(p.width)[0], 'webp', p.variant_key)}`;
   const large = p => { const ws = widthsFor(p.width); return `/admin/media/${variantName(p.file, ws.filter(w => w <= 1280).at(-1) ?? ws[0], 'webp', p.variant_key)}`; };
   // Heure de prise de vue dans l'admin (« 14 h 32 » en français, « 14:32 » sinon), toujours montrée avec la date.
@@ -389,7 +391,7 @@ export default async function adminRoutes(app) {
   const suggestOf = (list, names = catNames(), thumbs = false, request = null) => (list || []).map(x => ({ id: x.category_id, name: names.get(x.category_id) || '', votes: x.votes, size: x.size,
     ...(thumbs ? { like: x.like.map(id => withReady(repo.photo(id))).filter(q => q?.ready && (!request || request.owns('photos.voir', q.author_id))).map(q => ({ id: q.id, title: q.title, thumb: thumb(q) })) } : {}) }));
   // Classe de format (« ar-150 » = 3:2) : planche contact justifiée sans style en ligne (CSP).
-  const ratioClass = p => (p.width > 0 && p.height > 0 ? `ar-${Math.min(300, Math.max(40, Math.round((p.width / p.height) * 20) * 5))}` : 'ar-150');
+  const ratioClass = p => `ar-${Math.round(tileRatio(p) * 100)}`;
 
   // ---------- accueil ----------
   app.get('/admin', P('admin.acceder'), async (request, reply) => {
@@ -463,7 +465,7 @@ export default async function adminRoutes(app) {
     // Données de l'inspecteur (une photo choisie) : lues par admin.js, jamais exécutées.
     const data = photos.map(p => dataOf(p, request.t.lang));
     return render(request, reply, 'photos', {
-      title: request.t('Photothèque'), photos, filter, authors, categories: repo.categories(), ratioClass, altMax: LIMITS.alt_text,
+      title: request.t('Photothèque'), photos, filter, authors, categories: repo.categories(), ratioClass, tileSizes, altMax: LIMITS.alt_text,
       json: JSON.stringify(data).replace(/</g, '\\u003c'),
       filtered: Boolean(filter.q || filter.author || filter.category || filter.status || todo || missing), todo,
       missing: missing ? { key: missing, label: MISSING[missing].label } : null,

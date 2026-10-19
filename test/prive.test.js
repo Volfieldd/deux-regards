@@ -532,3 +532,23 @@ test('Vigie : émissions des invités, types du vocabulaire, composant public, j
   assert.match(created[0].origine.reference, /^visiteur:[0-9a-f]{12}$/);
   assert.deepEqual([created[0].detail.appareil_n, created[0].detail.groupe, created[0].detail.se_souvenir], [1, false, false]);
 });
+
+test('images : une taille de 160 ou 480 px pas encore créée (photo d’avant leur ajout) est servie par une plus grande, sans rien ouvrir d’autre', async t => {
+  const c = await site(t);
+  const g = await gallery(c, { n: 2 });
+  const { cookie } = await enter(c, g);
+  await c.app.variants.idle();
+  const inside = c.db.prepare('SELECT p.* FROM space_items i JOIN photos p ON p.id = i.photo_id WHERE i.space_id = ? ORDER BY i.position').get(g.s.id);
+  const dir = path.join(c.config.storageDir, 'variants');
+  const name = w => variantName(inside.file, w, 'webp', inside.variant_key);
+  // La page de la galerie cite les vignettes de 160 et 480 px.
+  assert.match((await c.app.inject({ url: `/prive/${g.s.public_id}`, headers: { cookie } })).body, new RegExp(`/m/${name(160)} 160w, /prive/${g.s.public_id}/m/${name(480)} 480w`));
+  fs.rmSync(path.join(dir, name(160)));
+  const res = await c.app.inject({ url: `/prive/${g.s.public_id}/m/${name(160)}`, headers: { cookie } });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.rawPayload, fs.readFileSync(path.join(dir, name(480))));
+  assert.equal(res.headers['cache-control'], 'private, no-cache');
+  // Sans session, ou une largeur que la photo n'a pas : 404.
+  assert.equal((await c.app.inject(`/prive/${g.s.public_id}/m/${name(160)}`)).statusCode, 404);
+  assert.equal((await c.app.inject({ url: `/prive/${g.s.public_id}/m/${name(999)}`, headers: { cookie } })).statusCode, 404);
+});

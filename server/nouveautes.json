@@ -1,5 +1,34 @@
 [
   {
+    "version": "1.181.0",
+    "date": "2026-10-19",
+    "pr": 181,
+    "title": {
+      "fr": "Des vignettes plus légères",
+      "en": "Lighter thumbnails",
+      "de": "Leichtere Vorschaubilder"
+    },
+    "items": [
+      {
+        "fr": "Chaque photo a désormais aussi des images de 160 et 480 px de large : les vignettes du site et de l’admin (galerie, séries, « À proximité », partage, carte, photothèque) ne chargent plus l’image de 640 px. Une visite de la galerie au bureau pèse environ un quart de moins.",
+        "en": "Each photo now also has 160 and 480 px wide images: thumbnails on the site and in the admin (gallery, series, “Nearby”, sharing, map, photo library) no longer load the 640 px image. A gallery visit on a computer weighs about a quarter less.",
+        "de": "Jedes Foto hat jetzt auch Bilder mit 160 und 480 px Breite: Die Vorschaubilder auf der Website und in der Verwaltung (Galerie, Serien, „In der Nähe“, Teilen, Karte, Fotothek) laden nicht mehr das 640-px-Bild. Ein Galeriebesuch am Computer ist etwa ein Viertel leichter."
+      },
+      {
+        "fr": "Rien à faire : au premier démarrage, le site crée ces images pour les photos déjà en ligne, en arrière-plan, sans refaire les autres ; en attendant, une vignette s’affiche avec l’image au-dessus. Le filigrane suit le réglage « Appliquer aux tailles » : « Toutes les tailles » marque aussi les nouvelles, « 1280 px et plus » les épargne.",
+        "en": "Nothing to do: on first start, the site creates these images for the photos already online, in the background, without redoing the others; meanwhile, a thumbnail shows with the next size up. The watermark follows the “Apply to sizes” setting: “All sizes” also marks the new ones, “1280 px and above” spares them.",
+        "de": "Nichts zu tun: Beim ersten Start erstellt die Website diese Bilder für die bereits veröffentlichten Fotos im Hintergrund, ohne die anderen neu zu berechnen; bis dahin erscheint ein Vorschaubild in der nächstgrößeren Größe. Das Wasserzeichen folgt der Einstellung „Auf Größen anwenden“: „Alle Größen“ markiert auch die neuen, „Ab 1280 px“ nimmt sie aus.",
+        "perm": "photos.modifier"
+      },
+      {
+        "fr": "Photothèque : le curseur « Taille » de la planche choisit aussi la bonne image pour la nouvelle taille des vignettes (nette en grand, légère en petit).",
+        "en": "Photo library: the contact sheet’s “Size” slider also picks the right image for the new thumbnail size (sharp when large, light when small).",
+        "de": "Fotothek: Der Regler „Größe“ des Kontaktbogens wählt auch das passende Bild für die neue Größe der Vorschaubilder (scharf, wenn groß, leicht, wenn klein).",
+        "perm": "photos.voir"
+      }
+    ]
+  },
+  {
     "version": "1.180.0",
     "date": "2026-10-19",
     "pr": 180,

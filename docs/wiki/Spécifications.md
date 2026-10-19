@@ -110,10 +110,11 @@ Source : [`docs/specs/`](https://github.com/Volfieldd/deux-regards/tree/main/doc
 
 | Id | Règle |
 |---|---|
-| I1 | Originaux jamais servis ; variantes AVIF et WebP en 640, 1280 et 2000 px, sans agrandissement. |
+| I1 | Originaux jamais servis ; variantes AVIF et WebP en 160, 480, 640, 1280 et 2000 px, sans agrandissement ; les vignettes (40 à 320 px affichés) chargent 160 ou 480 px, pas 640 (UX-T-07, RGESN). |
 | I2 | Orientation EXIF appliquée aux pixels et aux dimensions. |
 | I3 | Aucune métadonnée par défaut ; mentions IPTC (XMP) dans les modes signés. |
-| I4 | Variantes servies seulement pour les photos publiées, en cache long ; leur nom porte l'empreinte des réglages. |
+| I4 | Variantes servies seulement pour les photos publiées, en cache long ; leur nom porte l'empreinte des réglages. Une taille pas encore créée (rattrapage des photos d'avant une nouvelle largeur) est servie par une plus grande de la même photo, en cache court : jamais d'image cassée. |
+| I6 | Une nouvelle largeur ne refait pas les images : le passage du démarrage crée seulement les fichiers manquants, photo par photo, photos publiées d'abord. |
 | I5 | Empreinte SHA-256 de chaque original, horodatée RFC 3161 et vérifiable sans le site. |
 
 ### Exigences transverses

@@ -25,8 +25,8 @@ La spécification complète est dans [`docs/specs/filigrane-et-exif.md`](https:/
 4. Choisir la **police** (Jost, Cormorant Garamond italique ou IBM Plex Mono), la **teinte** (claire, sombre, ou automatique : claire sur les photos sombres, sombre sur les photos claires) et la **position** (neuf emplacements, mosaïque ou plein cadre).
 5. Régler l'**opacité**, la **largeur** (en % de la largeur de l'image) et la **marge**.
 6. Choisir **Appliquer aux tailles** :
-   - toutes ;
-   - 1280 px et plus, pour épargner les vignettes de la grille ;
+   - toutes : les vignettes de 160 et 480 px comprises (le filigrane y est à la même place et à la même proportion, en plus petit) ;
+   - 1280 px et plus, pour épargner les vignettes (160, 480 et 640 px) ;
    - 2000 px seulement, pour ne marquer que la plus grande image.
 
    Dans tous les cas, la plus grande image produite pour une photo est marquée, même si l'original est plus petit que le seuil.

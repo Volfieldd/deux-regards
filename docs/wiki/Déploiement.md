@@ -178,6 +178,15 @@ Pile Unraid (image publiée) : **Compose Pull** puis **Compose Up**. Pour reveni
 
 Pour plus de sûreté, faites d'abord une sauvegarde manuelle (voir plus haut).
 
+### Version 1.181 : vignettes de 160 et 480 px
+
+**Rien à faire.** Au premier démarrage de cette version, le site crée en arrière-plan, pour chaque photo, les variantes de 160 et 480 px (AVIF et WebP) qui lui manquent, photos publiées d'abord ; il ne refait pas les autres et ne change pas les adresses des images. Le site reste en ligne pendant ce temps : une vignette pas encore créée est servie par la taille au-dessus (plus lourde, jamais cassée).
+
+- **Durée :** ~1,4 s par photo sur le serveur d'essai (16 cœurs) ; une vingtaine de minutes pour 1 000 photos. Le journal dit `tailles manquantes créées (photos déjà rendues)` avec leur nombre, à la fin ; **Réglages → Filigrane et métadonnées** montre l'avancement du passage.
+- **Disque :** les quatre fichiers de plus par photo pèsent environ 5 % des variantes existantes (mesure : 3 Mo de plus pour 36 photos, sur 63 Mo).
+- **Facultatif :** `docker compose exec site npm run variants` fait le même rattrapage au premier plan (seulement les tailles manquantes) ; inutile si le site a démarré. Ne lancez pas `-- --force`, qui refait toutes les images.
+- **Cloudflare :** rien à changer ; les réponses de repli ont un cache de cinq minutes.
+
 ## Serveur de test (réseau local, HTTP)
 
 Pour un serveur de test sur le réseau local, sans tunnel ni Zitadel :

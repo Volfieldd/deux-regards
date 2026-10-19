@@ -69,14 +69,15 @@ test('envoi d’une photo : réponse immédiate, traitement suivi étape par ét
   assert.equal(title, 'DSCF0241');
   const r = await untilReady(ctx, [id]);
   assert.equal(r.photos[0].state, 'ready');
-  assert.match(r.photos[0].thumb, /^\/admin\/media\/[0-9a-f-]+-640\.webp$/);
+  assert.match(r.photos[0].thumb, /^\/admin\/media\/[0-9a-f-]+-160\.webp$/);
   assert.equal(r.active, 0);
   const row = ctx.db.prepare('SELECT * FROM photos WHERE id = ?').get(id);
   assert.equal(row.status, 'draft');
   assert.equal(row.source_name, 'DSCF0241.jpg');
   // Variantes écrites, rien ne reste dans tmp/.
   const stem = path.parse(row.file).name;
-  assert.equal(fs.readdirSync(path.join(ctx.config.storageDir, 'variants')).filter(f => f.startsWith(stem)).length, 6);
+  // Cinq largeurs (160, 480, 640, 1280 et la sienne, plus petite que 2000 px), en AVIF et en WebP.
+  assert.equal(fs.readdirSync(path.join(ctx.config.storageDir, 'variants')).filter(f => f.startsWith(stem)).length, 10);
   assert.deepEqual(fs.readdirSync(path.join(ctx.config.storageDir, 'tmp')), []);
   // Liste : titre provisoire signalé.
   assert.match((await ctx.as({ url: '/admin/photos?statut=draft' })).body, /Titre provisoire \(nom du fichier\)/);

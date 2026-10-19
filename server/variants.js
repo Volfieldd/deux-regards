@@ -8,6 +8,9 @@ import { shownTime } from './format.js';
 
 // Version du rendu : à incrémenter si le code de rendu change, pour régénérer toutes les variantes.
 const PIPELINE = 2;                // 2 : mentions IPTC (XMP) dans les modes signés
+// Une nouvelle largeur dans WIDTHS (server/images.js) ne change PAS l'empreinte : les fichiers existants restent valides, et
+// le passage du démarrage crée seulement les tailles qui manquent (render, « complement »). Pause entre deux photos rendues.
+const PAUSE_MS = 50;
 
 export const EXIF_MODES = {
   none: { label: 'Aucune métadonnée', help: 'Tout est retiré (recommandé). Comportement par défaut.' },
@@ -105,7 +108,8 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
   const SELECT = `SELECT p.id, p.file, p.width, p.height, p.title, p.taken_on, p.taken_time, p.show_time, p.show_shot, p.created_at, p.watermark, p.variant_key, a.name AS author
     FROM photos p JOIN authors a ON a.id = p.author_id`;
   const q = {
-    ids: db.prepare('SELECT id FROM photos ORDER BY position, id').pluck(),
+    // Photos publiées d'abord : un passage qui rattrape des tailles manquantes sert d'abord les pages publiques.
+    ids: db.prepare("SELECT id FROM photos ORDER BY status = 'published' DESC, position, id").pluck(),
     photo: db.prepare(`${SELECT} WHERE p.id = ?`),
     files: db.prepare('SELECT file FROM photos').pluck(),
     setKey: db.prepare('UPDATE photos SET variant_key = ? WHERE id = ?'),
@@ -154,11 +158,14 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
 
   // Rend une photo si son empreinte a changé ou si des fichiers manquent ; bascule puis nettoie.
   // La ligne est relue sous verrou : réglages, auteur ou suppression faits entre-temps sont pris en compte.
+  // Fichiers manquants sous la même empreinte (une taille ajoutée à WIDTHS, comme 160 et 480 px en 2026) : seuls ceux-là
+  // sont rendus (renderVariants saute les fichiers présents) ; retour « complement » au lieu de true.
   async function render(id, ctx, { force = false, onStep = null } = {}) {
     const p = q.photo.get(id);
     if (!p) return false;
     const { key, mark, meta } = specFor(p, ctx);
-    if (!force && key === p.variant_key && hasVariants(storageDir, p, key)) return false;
+    const sameKey = !force && key === p.variant_key;
+    if (sameKey && hasVariants(storageDir, p, key)) return false;
     // Photo supprimée pendant le rendu (son identifiant a même pu être repris par une nouvelle photo, d'où la
     // comparaison du fichier) : on efface ce qui a déjà été écrit.
     const gone = () => q.photo.get(id)?.file !== p.file;
@@ -169,6 +176,7 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
       throw err;
     }
     if (gone()) { removeVariants(storageDir, p.file); return false; }
+    if (sameKey) return 'complement';             // même empreinte : rien à basculer ni à nettoyer
     q.setKey.run(key, p.id);                      // les pages pointent désormais vers les nouvelles variantes
     removeVariants(storageDir, p.file, { keep: key });
     return true;
@@ -226,13 +234,19 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
         const ids = q.ids.all();
         Object.assign(state, { running: true, total: ids.length, done: 0, errors: [] });
         let changed = 0;
+        let completed = 0;
         try {
           for (const id of ids) {
             if (stopping) break;
             try {
               // Contexte relu à chaque photo : un réglage changé en cours de passage s'applique aux suivantes
               // (et un nouveau passage, déjà demandé, reprend les précédentes).
-              if (await withLock(id, () => render(id, context(), { force: forced }))) changed++;
+              const done = await withLock(id, () => render(id, context(), { force: forced }));
+              if (done === 'complement') completed++;
+              else if (done) changed++;
+              // Une photo à la fois, puis une courte pause : un import, une page et le service des images passent entre
+              // deux photos (le passage du démarrage peut avoir toute la photothèque à compléter).
+              if (done && PAUSE_MS) await new Promise(resolve => setTimeout(resolve, PAUSE_MS));
             } catch (err) {
               // Message fixe et traduisible : celui de libvips (anglais, chemin absolu de l'original) va au journal.
               const p = q.photo.get(id);
@@ -247,6 +261,7 @@ export function createVariantService({ db, storageDir, siteName, log, publicUrl 
           state.running = false;
         }
         if (changed) log?.info({ changed }, 'variantes régénérées');
+        if (completed) log?.info({ completed }, 'tailles manquantes créées (photos déjà rendues)');
       });
     },
 

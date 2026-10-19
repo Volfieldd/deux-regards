@@ -39,7 +39,7 @@
 <% if (it.exifAll) { %><div class="signal" role="alert"><p class="signal-t"><span aria-hidden="true">▲</span> <%= t('Réglage « Tout l’EXIF de l’original » actif : les invités ne voient aucune photo') %></p><p><%= t('Avec ce réglage, les images gardent la position GPS : la galerie privée ne les sert pas. Choisissez un autre mode dans Filigrane & EXIF.') %></p></div><% } %>
 <% if (!it.items.length) { %><p class="empty"><%= t('Aucune photo dans la galerie pour l’instant.') %></p>
 <% } else { %><ol class="gp-photos">
-<% it.items.forEach((p, k) => { %>  <li id="photo-<%= p.item_id %>"><img src="<%= p.thumb %>" alt="" width="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(96 * p.height / p.width) : 96 %>" loading="lazy">
+<% it.items.forEach((p, k) => { %>  <li id="photo-<%= p.item_id %>"><img src="<%= p.thumb %>" srcset="<%= p.thumbSet %>" sizes="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>px" alt="" width="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(96 * p.height / p.width) : 96 %>" loading="lazy">
     <div class="gp-photo-t"><span class="t"><%= p.n %>. <%= p.title %></span><span class="sec"><%= p.author %> · <%= p.status === 'published' ? t('publiée') : t('brouillon') %></span>
       <span class="etat etat--<%= p.level === 'ok' ? 'abouti' : p.level === 'warn' ? 'attention' : 'arret' %>"><span aria-hidden="true"><%= p.level === 'ok' ? '●' : p.level === 'warn' ? '▲' : '✕' %></span><%= t('usage privé : {level}', { level: p.levelText }) %></span>
 <% if (p.level !== 'ok' && p.reasons.length) { %>      <span class="sec"><%= p.reasons.join(' ; ') %><% if (p.confirmed_at) { %> · <%= t('confirmé par {name}', { name: p.confirmed_by }) %><% } else { %> · <b><%= t('cachée aux invités') %></b><% } %></span><% } %></div>
@@ -55,7 +55,7 @@
 <% if (it.canManage && it.candidates.length) { %><form class="panel form" method="post" action="/admin/galeries/<%= s.id %>/photos"><%~ csrf %>
   <fieldset class="choix-a"><legend><%= t('Ajouter des photos') %></legend><p class="aide"><%= t('Une photo garde son statut (brouillon ou publiée). Une photo dont une personne a refusé la publication ne peut pas être ajoutée.') %></p>
   <!-- [html-validate-disable-block form-dup-name: les cases forment un groupe, name="photos" répété ; le serveur en reçoit la liste] -->
-  <ul class="gp-candidats"><% it.candidates.forEach(p => { %><li><label><input type="checkbox" name="photos" value="<%= p.id %>"><img src="<%= p.thumb %>" alt="" width="<%= p.width >= p.height ? 72 : Math.round(72 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(72 * p.height / p.width) : 72 %>" loading="lazy"><span><%= p.title %></span></label></li><% }) %></ul></fieldset>
+  <ul class="gp-candidats"><% it.candidates.forEach(p => { %><li><label><input type="checkbox" name="photos" value="<%= p.id %>"><img src="<%= p.thumb %>" srcset="<%= p.thumbSet %>" sizes="<%= p.width >= p.height ? 72 : Math.round(72 * p.width / p.height) %>px" alt="" width="<%= p.width >= p.height ? 72 : Math.round(72 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(72 * p.height / p.width) : 72 %>" loading="lazy"><span><%= p.title %></span></label></li><% }) %></ul></fieldset>
   <div class="form-pied"><button class="btn" type="submit"><%= t('Ajouter les photos cochées') %></button></div>
 </form>
 <% } %>
@@ -63,7 +63,7 @@
 <% if (!it.selections.length) { %><p class="empty"><%= t('Aucun favori pour l’instant.') %></p>
 <% } else { it.selections.forEach(i => { %><section class="panel" aria-labelledby="sel-<%= i.id %>"><h2 class="panel-t" id="sel-<%= i.id %>"><a class="ligne-lien" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>"><%= i.label %></a> · <%= i.nFav > 1 ? t('{n} favoris', { n: i.nFav }) : t('{n} favori', { n: i.nFav }) %></h2>
 <% if (i.selection_sent_at) { %><p class="lu"><%= t('Sélection envoyée') %></p><% } %>
-<ul class="favoris-a"><% i.favs.forEach(p => { %><li><img src="<%= p.thumb %>" alt="" height="80" width="<%= Math.round(80 * p.width / p.height) %>" loading="lazy"><span class="t"><%= p.title %></span><% if (p.source_name) { %><span class="sec"><%= p.source_name %></span><% } %></li><% }) %></ul>
+<ul class="favoris-a"><% i.favs.forEach(p => { %><li><img src="<%= p.thumb %>" srcset="<%= p.thumbSet %>" sizes="<%= Math.round(80 * p.width / p.height) %>px" alt="" height="80" width="<%= Math.round(80 * p.width / p.height) %>" loading="lazy"><span class="t"><%= p.title %></span><% if (p.source_name) { %><span class="sec"><%= p.source_name %></span><% } %></li><% }) %></ul>
 <div class="btns-ligne"><a class="btn ghost" href="/admin/galeries/<%= s.id %>/acces/<%= i.id %>/selection.csv"><%= t('Exporter la sélection (CSV)') %></a></div></section>
 <% }) } %>
 <% } else if (tab === 'activite') { %>

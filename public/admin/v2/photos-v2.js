@@ -40,7 +40,14 @@
     const saved = Number(localStorage.getItem('planche-taille'));
     if (saved) density.value = saved;
     const wide = matchMedia('(min-width: 721px)');
-    const apply = () => { if (wide.matches) contact.style.setProperty('--rowh', `${density.value}px`); else contact.style.removeProperty('--rowh'); };
+    // sizes des tuiles à la hauteur choisie (même formule que server/picture.js, tileSizes) : sans eux, le navigateur
+    // garderait les fichiers choisis pour 190 px, flous à 320 px, trop lourds à 110 px.
+    const resize = h => contact.querySelectorAll('.tile').forEach(li => {
+      const r = Number(/\bar-(\d+)/.exec(li.className)?.[1] || 150) / 100;
+      const sizes = `(max-width: 720px) min(calc(100vw - 20px), ${Math.ceil(1.6 * 120 * r)}px), ${Math.ceil(1.3 * h * r)}px`;
+      li.querySelectorAll('source, img').forEach(el => { if (el.getAttribute('sizes') !== sizes) el.setAttribute('sizes', sizes); });
+    });
+    const apply = () => { if (wide.matches) contact.style.setProperty('--rowh', `${density.value}px`); else contact.style.removeProperty('--rowh'); resize(Number(density.value) || 190); };
     wide.addEventListener('change', apply);
     apply();
     density.addEventListener('input', () => { apply(); localStorage.setItem('planche-taille', density.value); });
