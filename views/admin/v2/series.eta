@@ -59,7 +59,7 @@
 <% C.forEach((c, i) => { const ed = it.editErrors && it.editErrors.id === c.id ? it.editErrors : null; const v = ed ? ed.values : c; const errs = ed ? ed.errors : {}; const board = (it.boards && it.boards[c.id]) || []; %>
   <li class="panel serie-c" id="serie-<%= c.id %>" data-id="<%= c.id %>" data-nom="<%= c.name %>">
     <div class="serie-couv<%= board.length === 1 ? ' une' : board.length === 2 ? ' deux' : '' %>" aria-hidden="true">
-<% if (board.length) { board.forEach((p, k) => { %>      <%~ it.picture(p, { sizes: k ? '120px' : '240px', alt: '' }) %>
+<% if (board.length) { board.forEach((p, k) => { %>      <%~ it.picture(p, { sizes: k && board.length > 2 ? '(max-width: 720px) calc(50vw - 36px), 120px' : k ? '(max-width: 720px) calc(100vw - 72px), 120px' : '(max-width: 720px) calc(100vw - 72px), 240px', alt: '' }) %>
 <% }) } else { %>      <span class="vide"><%= t('Aucune photo') %></span>
 <% } %>    </div>
     <div class="serie-corps">

@@ -21,6 +21,7 @@
 .v2-terrain .plier > summary { overflow-wrap: anywhere; }
 .v2-terrain .plier > form, .v2-terrain .plier > .form, .v2-terrain .plier > ul, .v2-terrain .plier > p { margin-top: 12px; }
 .v2-terrain .lien-a { overflow-wrap: anywhere; }
+@media (max-width: 720px), (pointer: coarse) { .v2-terrain .lien-a { min-width: 44px; } }
 .v2-terrain fieldset.vign-choix { margin: 0; padding: 0; border: 0; min-width: 0; }
 .v2-terrain .fiche-danger { margin-top: 8px; }
 
@@ -66,9 +67,9 @@
 .v2-terrain .liste-a .ligne-lien { font-weight: 500; overflow-wrap: anywhere; }
 @media (max-width: 1100px) { .v2-terrain .liste-a .c-quand { white-space: normal; } }
 .v2-terrain .sorties-filtres { flex-direction: column; align-items: flex-start; }
-.v2-terrain .sortie-photos { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.v2-terrain .sortie-photos { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; min-width: 0; }
 .v2-terrain .sortie-photos > span:last-child { display: grid; }
-.v2-terrain .sortie-bande { flex-wrap: nowrap; gap: 4px; }
+.v2-terrain .sortie-bande { flex-wrap: wrap; gap: 4px; min-width: 0; max-width: 100%; }
 .v2-terrain .sortie-bande img { height: 40px; width: auto; max-width: 60px; object-fit: cover; }
 .v2-terrain .sortie-visages { display: flex; gap: 4px; margin-bottom: 6px; }
 .v2-terrain .sortie-visages .pers-visage { width: 26px; height: 26px; }
@@ -143,6 +144,8 @@
 .v2-terrain .voyage-corps { display: grid; gap: 4px; min-width: 0; }
 .v2-terrain .voyage-corps p { margin: 0; }
 .main .v2-terrain .voyage-corps h2 { margin: 0; font-size: var(--at-h2); overflow-wrap: anywhere; }
+.v2-terrain .voyage-corps .ligne-lien { display: inline-flex; align-items: center; min-height: 24px; color: var(--ink); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
+@media (max-width: 720px), (pointer: coarse) { .v2-terrain .voyage-corps .ligne-lien { min-height: 44px; } }
 .v2-terrain .voyage-jours { display: grid; margin: 0; padding: 0; list-style: none; }
 .v2-terrain .voyage-jours > li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto; gap: 6px 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
 .v2-terrain .voyage-jours > li:first-child { border-top: 0; }
