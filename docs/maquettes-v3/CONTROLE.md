@@ -1,13 +1,15 @@
 # Contrôle des maquettes v3 : une seule passe (19 oct. 2026)
 
+Refait après le retrait de la boutique (MQ-13 à MQ-15 sortis de la v3 ; prix, boutons d'achat, « Tirages » et panier retirés des onze autres) : mêmes outils, mêmes résultats.
+
 Une passe de mesures outillées, puis une notation unique sur la [grille de l'audit](../audit-ergonomie-2026-10-16/maquettes/GRILLE.md), sans jury ni passe de reprise. Chromium de Playwright 1.64 en conteneur ; outils de `dr-work/outils/` lancés sur ce dossier (`MQ_RACINE`).
 
 ## Mesures
 
 | Contrôle | Outil | Résultat |
 |---|---|---|
-| axe-core (WCAG 2.2 A et AA, bonnes pratiques), au bureau (1 440 × 900) et sur Pixel 7 | `consol-final.mjs` | **0 violation** sur les 14 maquettes |
-| axe-core sur la page dont on a retiré tous les `inert` et `.is-focus` (chaque état actif) | `consol-final.mjs` | **0 violation** sur les 14 |
+| axe-core (WCAG 2.2 A et AA, bonnes pratiques), au bureau (1 440 × 900) et sur Pixel 7 | `consol-final.mjs` | **0 violation** sur les 11 maquettes |
+| axe-core sur la page dont on a retiré tous les `inert` et `.is-focus` (chaque état actif) | `consol-final.mjs` | **0 violation** sur les 11 |
 | Débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l'en-tête allemand du code | `consol-final.mjs` | **aucun** |
 | Textes coupés d'une ellipse ; lignes qui défilent sans suite visible | `consol-final.mjs` | **aucun** ; **aucune** |
 | Textes rendus sous 13 px (SVG à l'échelle de leur viewBox) | `consol-final.mjs` | **aucun** |
@@ -32,7 +34,7 @@ La grille note de 0 à 10 ; la note d'une maquette est la plus basse de ses note
 | 3 | Contrôle explicite | 10 | Diaporama toujours à l'arrêt, « Lire » visible. |
 | 4 | Adaptabilité | 9 | Sans script, allemand, 320 px : vérifiés ; le plein cadre suit l'écran avec ses bandes au-delà de 1 667 px pour 1 000. |
 | 5 | Gestion des erreurs | 10 | Formulaires inchangés (MQ-05, MQ-06, MQ-15, MQ-16). |
-| 6 | Homogénéité | 8 | Un seul fichier de dessin pour les 14 écrans ; mais MQ-03 garde la liste à filets « La même série, un seul regard », que l'accueil a quittée. |
+| 6 | Homogénéité | 8 | Un seul fichier de dessin pour les 11 écrans ; mais MQ-03 garde la liste à filets « La même série, un seul regard », que l'accueil a quittée. |
 | 7 | Signifiance | 9 | Mots inchangés ; bascules sans cadre, toujours icône et verbe. |
 | 8 | Compatibilité | 9 | Plein cadre et en-tête sur la photo : la convention des sites de photographes. |
 | 9 | Accessibilité | 9 | Mesures ci-dessus sans défaut ; le texte sur la photo repose sur un voile calculé au pire et mesuré. |
@@ -40,6 +42,6 @@ La grille note de 0 à 10 ; la note d'une maquette est la plus basse de ses note
 | 11 | Direction artistique | 9 | La photo d'abord, du relief, de la chaleur : à toi d'en juger sur les rendus. |
 | 12 | Fidélité et faisabilité | 8 | Un fichier CSS à reporter ; à créer : point focal par photo, deuxième liste d'ouverture (`hero_tel`, déjà demandée par la v2), en-tête posé sur la photo. |
 | 13 | Couverture des constats | 7 | UX-F-17 revu à dessein (recadrage de 10 % au plus, voile sous le texte), sur décision du 19 oct. |
-| 14 | Lisibilité de la maquette | 7 | Seules MQ-00 et MQ-01 ont des encarts réécrits ; les 12 autres gardent leurs repères v2, avec une ligne v3 en tête. Sur l'accueil, les pastilles 2, 3, 5 et 6 sont sur la photo, faute d'autre place en plein cadre. |
+| 14 | Lisibilité de la maquette | 7 | Seules MQ-00 et MQ-01 ont des encarts réécrits ; les 9 autres gardent leurs repères v2, avec une ligne v3 en tête. Sur l'accueil, les pastilles 2, 3, 5 et 6 sont sur la photo, faute d'autre place en plein cadre. |
 
 **Note de l'ensemble : 7/10**, tirée par deux choix assumés (le constat UX-F-17 revu et des annotations allégées), et non par un défaut d'accessibilité ou de rendu.
