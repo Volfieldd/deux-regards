@@ -1,5 +1,29 @@
 [
   {
+    "version": "1.180.0",
+    "date": "2026-10-19",
+    "pr": 180,
+    "title": {
+      "fr": "La prise de vue dans la visionneuse",
+      "en": "Camera and settings in the viewer",
+      "de": "Aufnahmedaten im Betrachter"
+    },
+    "items": [
+      {
+        "fr": "La visionneuse montre la prise de vue de chaque photo, lue dans l’EXIF de l’original : « Fujifilm X-T5 · 23 mm · 1/1000 s · f/11 · ISO 160 » (boîtier, objectif, focale, vitesse, ouverture, ISO), en v2 et v3 dans les données de la photo, en v1 sur une seconde ligne. Jamais le lieu, l’heure, le numéro de série ni le propriétaire de l’appareil.",
+        "en": "The viewer shows each photo’s camera and settings, read from the EXIF of the original: “Fujifilm X-T5 · 23 mm · 1/1000 s · f/11 · ISO 160” (camera, lens, focal length, shutter speed, aperture, ISO), in v2 and v3 in the photo’s data, in v1 on a second line. Never the place, the time, the serial number or the camera’s owner.",
+        "de": "Der Betrachter zeigt die Aufnahmedaten jedes Fotos, aus den EXIF-Daten des Originals gelesen: „Fujifilm X-T5 · 23 mm · 1/1000 s · f/11 · ISO 160“ (Kamera, Objektiv, Brennweite, Belichtungszeit, Blende, ISO), in v2 und v3 in den Angaben zum Foto, in v1 in einer zweiten Zeile. Nie der Ort, die Uhrzeit, die Seriennummer oder der Besitzer der Kamera.",
+        "perm": "photos.modifier"
+      },
+      {
+        "fr": "Montrée par défaut ; la case « Montrer la prise de vue sur le site » de la fiche la cache, sur la page et dans les images servies en métadonnées « Prise de vue ». La fiche la rappelle sous l’aperçu ; les photos déjà importées sont lues une fois, en arrière-plan.",
+        "en": "Shown by default; the record’s “Show the camera and settings on the site” box hides it, on the page and in the images served with “Shooting data” metadata. The record recalls it under the preview; photos already imported are read once, in the background.",
+        "de": "Standardmäßig gezeigt; das Kästchen „Aufnahmedaten auf der Website zeigen“ im Datenblatt blendet sie aus, auf der Seite und in den ausgelieferten Bildern mit den Metadaten „Aufnahmedaten“. Das Datenblatt zeigt sie unter der Vorschau; bereits importierte Fotos werden einmal im Hintergrund gelesen.",
+        "perm": "photos.modifier"
+      }
+    ]
+  },
+  {
     "version": "1.176.0",
     "date": "2026-10-19",
     "pr": 176,
