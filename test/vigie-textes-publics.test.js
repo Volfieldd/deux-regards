@@ -59,6 +59,21 @@ test('textes publiés : un contact gagné est signalé sans le texte ; le nombre
     app.securite.watchPublication('publication programmée');
     assert.equal(emitted.find(e => e.detail?.objet === 'texte_public')?.detail.domaine, 'ailleurs.example');
   }
+  // Textes des réglages affichés sur le site : « À propos », introduction, sous-titre de la marque (objet JSON).
+  emitted.length = 0;
+  const set = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
+  set.run('about_en', JSON.stringify('Write to us: contact@piege.example'));
+  set.run('intro', JSON.stringify('Voir www.intro-piege.example'));
+  set.run('brand', JSON.stringify({ mode: 'texte', subtitle: 'tél. +33 6 12 34 56 78' }));
+  app.securite.watchPublication('essai');
+  assert.deepEqual(emitted.filter(e => e.detail?.objet === 'texte_public').map(e => `${e.detail.champ}:${e.detail.ajout}`).sort(),
+    ['reglages.about_en:email', 'reglages.brand_subtitle:telephone', 'reglages.intro:lien']);
+  assert.equal(emitted.find(e => e.detail?.objet === 'textes_publics')?.detail.textes, 3);
+  // Le reste de la marque (mode, fichiers) n'est pas un texte : rien.
+  emitted.length = 0;
+  set.run('brand', JSON.stringify({ mode: 'logo', subtitle: 'tél. +33 6 12 34 56 78' }));
+  app.securite.watchPublication('essai');
+  assert.equal(emitted.length, 0);
 });
 
 test('Carnets : le corps d’un aperçu ou d’un brouillon (vigie.corps = rendu) n’est pas scanné comme une saisie brute ; un billet publié qui gagne un lien est signalé', async t => {

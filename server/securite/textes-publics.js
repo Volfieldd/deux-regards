@@ -2,7 +2,8 @@ import crypto from 'node:crypto';
 
 // Textes publiés (registre des besoins de la Vigie, BV-20 et BV-21) : titres, légendes et textes de remplacement des
 // photos publiées (et leurs lieux et mots-clés, affichés sous la photo et cherchables), noms et textes d'intention des séries, noms, présentations et descriptions courtes des
-// photographes, billets publiés des Carnets. Instantané comparé à l'état d'avant après chaque écriture de l'admin et chaque publication
+// photographes, billets publiés des Carnets, textes des réglages affichés sur le site (accueil, « À propos », droits,
+// sous-titre de la marque). Instantané comparé à l'état d'avant après chaque écriture de l'admin et chaque publication
 // programmée :
 //   - BV-20 : un texte qui GAGNE un lien, une adresse e-mail ou un numéro de téléphone (vecteur d'hameçonnage, comme un
 //     contact remplacé, DS9) ; jamais le texte ni le contact dans l'événement : la nature, le domaine, le champ, l'objet ;
@@ -15,6 +16,14 @@ export const SOURCES = [
   { table: 'authors', where: '1', champs: ['name', 'bio', 'bio_en', 'bio_de', 'short_bio', 'short_bio_en', 'short_bio_de'] },
   // Billets des Carnets publiés (un billet retiré sort de l'instantané : compté comme textes changés, BV-21).
   { table: 'posts', where: "state = 'publie'", champs: ['title', 'title_en', 'title_de', 'dek', 'dek_en', 'dek_de', 'body', 'body_en', 'body_de', 'mention', 'mention_en', 'mention_de', 'reply', 'reply_en', 'reply_de'] },
+];
+
+// Textes des réglages affichés sur le site public (accueil, « À propos », droits, sous-titre de la marque) : une seule
+// ligne (« reglages#1 »), un champ par réglage. Valeurs en JSON dans la table settings ; la marque est un objet (son
+// sous-titre seul est un texte).
+export const REGLAGES = [
+  ...['site_name', 'tagline', 'tagline_en', 'tagline_de', 'intro', 'intro_en', 'intro_de', 'about', 'about_en', 'about_de', 'rights_text', 'rights_text_en', 'rights_text_de'].map(k => ({ champ: k, cle: k, chemin: '$' })),
+  { champ: 'brand_subtitle', cle: 'brand', chemin: '$.subtitle' },
 ];
 
 const URL_RE = /\b(?:https?:\/\/|www\.)[^\s<>"'()\]]+/gi;
@@ -63,6 +72,10 @@ export function createPublicTexts({ db, ownHosts = [] }) {
     const expr = champs.map(c => `coalesce(${c}, '')`).join(` || char(31) || `);
     return { src, champs, stmt: db.prepare(`SELECT id, ${expr} FROM ${src.table} WHERE ${src.where}`).raw() };
   }).filter(Boolean);
+  try {
+    const expr = REGLAGES.map(r => `coalesce((SELECT CASE WHEN json_valid(value) THEN json_extract(value, '${r.chemin}') END FROM settings WHERE key = '${r.cle}'), '')`).join(` || char(31) || `);
+    stmts.push({ src: { table: 'reglages' }, champs: REGLAGES.map(r => r.champ), stmt: db.prepare(`SELECT 1, ${expr}`).raw() });
+  } catch { /* base sans réglages */ }
   const byTable = new Map(stmts.map(x => [x.src.table, x.champs]));
   // Instantané : « table#id » → champs assemblés.
   function snapshot() {

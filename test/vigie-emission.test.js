@@ -635,7 +635,10 @@ test('ce qu’un compte fait une fois entré : réglage public, contact remplac�
   await write();
   await write();                                                       // rien de changé : rien d'émis
   const v = await c.flush();
-  const pub = v.of('config_public_changed');
+  // L'accroche est aussi un texte publié (BV-21) : un événement « textes_publics » à part, sans le texte.
+  const pub = v.of('config_public_changed').filter(e => !e.detail.objet);
+  const textes = v.of('config_public_changed').filter(e => e.detail.objet === 'textes_publics');
+  assert.deepEqual(textes.map(e => e.detail.champs), [['reglages.tagline']]);
   assert.equal(pub.length, 3);
   assert.deepEqual(pub[0].detail.cles, ['public_version', 'tagline']);
   assert.deepEqual(pub[0].detail.valeurs, { public_version: { avant: null, apres: 'v2' } }, 'valeur seulement pour un réglage sans donnée personnelle');
