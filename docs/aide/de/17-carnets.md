@@ -1,6 +1,6 @@
 # Reisetagebücher
 
-Die **Reisetagebücher** sind die Beiträge der Website: Reiseberichte und Werkstattnotizen, datiert und signiert, mit Fotos aus der Fotothek. Sie werden in der Verwaltung geschrieben (Seitenleiste, Gruppe „Veröffentlichen“, **Reisetagebücher**); auf der öffentlichen Website erscheinen sie **nur in Version 2**: Solange v1 angewendet ist (Einstellungen → Darstellung), sind ihre Seiten nur in der Vorschau der v2 sichtbar.
+Die **Reisetagebücher** sind die Beiträge der Website: Reiseberichte und Werkstattnotizen, datiert und signiert, mit Fotos aus der Fotothek. Sie werden in der Verwaltung geschrieben (Seitenleiste, Gruppe „Veröffentlichen“, **Reisetagebücher**); auf der öffentlichen Website erscheinen sie **nur in Version 2**: Solange v1 angewendet ist (Einstellungen → Darstellung), sind ihre Seiten nur für Administratoren in der Ansicht v2 sichtbar (Schaltfläche **In v2 ansehen** oben auf den Seiten der Website).
 
 Die Seite **Reisetagebücher** listet die Beiträge, die neuesten zuerst, mit ihrem Status (○ Entwurf, ◐ Vorgeschlagen oder Geplant, ▲ Zu überarbeiten, ● Veröffentlicht, ✕ Zurückgezogen), ihren Signaturen, ihrer Rubrik und ihrem Datum. **Neuer Beitrag**: ein Titel, eine Rubrik (Reisen oder Werkstattnotizen) und eine oder zwei Signaturen; ein Fotograf signiert seine Beiträge immer selbst.
 

@@ -1,6 +1,6 @@
 # Carnets
 
-Les **Carnets** sont les billets du site : récits de voyage et notes d'atelier, datés et signés, avec les photos de la photothèque. On les écrit dans l'administration (barre latérale, groupe « Publier », **Carnets**) ; ils paraissent sur le site public **en version 2 seulement** : tant que la v1 est appliquée (Réglages → Apparence), leurs pages ne sont visibles que dans l'aperçu de la v2.
+Les **Carnets** sont les billets du site : récits de voyage et notes d'atelier, datés et signés, avec les photos de la photothèque. On les écrit dans l'administration (barre latérale, groupe « Publier », **Carnets**) ; ils paraissent sur le site public **en version 2 seulement** : tant que la v1 est appliquée (Réglages → Apparence), leurs pages ne sont visibles que des administrateurs en vue v2 (bouton **Voir en v2** en haut des pages du site).
 
 La page **Carnets** liste les billets, le plus récent d'abord, avec leur état (○ Brouillon, ◐ Proposé ou Programmé, ▲ À reprendre, ● Publié, ✕ Retiré), leurs signatures, leur rubrique et leur date. **Nouveau billet** : un titre, une rubrique (Voyages ou Notes d'atelier) et une ou deux signatures ; un photographe signe toujours ses billets.
 
