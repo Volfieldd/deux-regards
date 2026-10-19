@@ -192,6 +192,7 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
         const seen = db.prepare("SELECT type, COUNT(*) n FROM events WHERE composant = 'bordure' AND recu_a > ? GROUP BY type").all(day);
         return [
           `Blocages copiés dans KV : ${kv ? `version ${kv.version}, le ${iso(kv.at)}` : 'jamais (VIGIE_CF_* non réglées ?)'}`,
+          ...(() => { const l = store.setting.get('cf_liste'); return l ? [`Liste chez Cloudflare (${l.liste || '—'}) : ${l.ok === false ? `EN ÉCHEC le ${iso(l.at_echec)} : ${l.erreur}` : `${l.total} adresse(s), rapprochée le ${iso(l.at)} (+${l.ajoutees}, −${l.retirees})`}`] : []; })(),
           `Dernier battement du Worker : ${beat ? `${iso(beat.at)} (${beat.etat || '—'})` : 'jamais'} ; dernière requête vue : ${iso(store.setting.get('bordure_derniere_donnee'))} ; minute lue jusqu'à : ${iso(store.setting.get('bordure_curseur'))}`,
           `Constats de la bordure (24 h) : ${seen.map(r => `${r.type} ${r.n}`).join(', ') || 'aucun'}`,
           `En-têtes refusés par le site (24 h) : ${refused.map(r => `${r.r} ${r.n}`).join(', ') || 'aucun'}${refused.some(r => r.r === 'adresse différente') ? ' → vérifier TRUST_PROXY (adresse vue par le site)' : ''}`,

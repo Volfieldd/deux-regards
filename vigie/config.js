@@ -39,7 +39,11 @@ export function loadVigieConfig(env = process.env) {
     if (!fs.existsSync(tokenFile)) throw new Error(`VIGIE_CF_TOKEN_FILE : jeton Cloudflare introuvable (${tokenFile})`);
     const dataset = env.VIGIE_CF_DATASET || 'vigie_bordure';
     if (!/^[a-z_][a-z0-9_]{0,63}$/.test(dataset)) throw new Error('VIGIE_CF_DATASET : nom de jeu de données invalide');
-    bordure = { accountId: env.VIGIE_CF_ACCOUNT_ID, kvNamespace: env.VIGIE_CF_KV_NAMESPACE, dataset, tokenFile };
+    // Liste d'adresses bloquées chez Cloudflare (phase E3) : facultative, ouverte par VIGIE_CF_LISTE (nom de la liste,
+    // « vigie_bloquees » conseillé) ; le jeton doit avoir en plus « Account Filter Lists : Edit ».
+    const liste = env.VIGIE_CF_LISTE && env.VIGIE_CF_LISTE !== '0' ? env.VIGIE_CF_LISTE : null;
+    if (liste && !/^[a-z0-9_]{1,50}$/.test(liste)) throw new Error('VIGIE_CF_LISTE : nom de liste en minuscules, chiffres et _ (vigie_bloquees)');
+    bordure = { accountId: env.VIGIE_CF_ACCOUNT_ID, kvNamespace: env.VIGIE_CF_KV_NAMESPACE, dataset, tokenFile, liste };
   }
   // Notifications (phase D) : Signal (passerelle du réseau interne nicephos-vigie-signal), e-mail en secours.
   let signal = null, mail = null;

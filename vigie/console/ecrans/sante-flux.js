@@ -517,6 +517,10 @@ export function vueSante({ db, engine, switches, now = Date.now, role, retention
       if (silence) faits = `Bordure muette${beat?.at ? `${FINE}: dernier battement ${aQuand(beat.at, t)}` : ''}.`;
       kv.push({ dt: 'Battement du Worker', t: beat?.at ? quand(beat.at, t) : 'aucun', sec: beat?.etat ? `toutes les 5${NBSP}min · état${D}${guillemets(typo(masquer(beat.etat, role)))}` : `toutes les 5${NBSP}min` });
       if (kvL) kv.push({ dt: 'Liste des blocages', t: `${kvL.version != null ? `version ${kvL.version}, ` : ''}copiée ${kvL.at ? aQuand(kvL.at, t) : '—'}` });
+      // Liste d'adresses bloquées chez Cloudflare (phase E3, facultative).
+      const cfl = reg('cf_liste');
+      if (cfl) kv.push({ dt: 'Liste chez Cloudflare', t: cfl.ok === false ? `en échec ${cfl.at_echec ? aQuand(cfl.at_echec, t) : ''}` : `${nombre(cfl.total || 0)} ${pluriel(cfl.total || 0, 'adresse')}, rapprochée ${cfl.at ? aQuand(cfl.at, t) : '—'}`,
+        sec: cfl.ok === false ? typo(masquer(String(cfl.erreur || ''), role)) : `blocages de tout le site de 24${NBSP}h et plus ; liste ${guillemets(cfl.liste || 'vigie_bloquees')}` });
       if (curseur) kv.push({ dt: 'Lue jusqu’à', t: quand(curseur, t), sec: donnee ? `dernière requête vue ${aQuand(donnee, t)}` : 'aucune requête vue' });
       const par = Object.fromEntries(q.parType.all(t - 864e5).map(r => [r.type, r.n]));
       const n = k => par[k] || 0;
