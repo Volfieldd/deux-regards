@@ -25,7 +25,7 @@ async function photoFormat(buf) { try { return PHOTO_FORMATS.includes((await sha
 // Champs des formulaires multipart : noms simples seulement, qui commencent par une lettre (rien comme « __proto__ »).
 const FIELD = /^[a-z][a-z_]{0,29}$/;
 
-export function registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion = null }) {
+export function registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion = null, identity = null }) {
   // ---------- portée « les miennes » ----------
   // L'accord est donné par sortie et par photographe : un photographe ne voit que ses rencontres, ses photos, et une
   // personne seulement avec ce qui le concerne. Agir sur une personne partagée avec l'autre photographe (rapprocher,
@@ -139,12 +139,13 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   // Erreurs de saisie de l'app : dans la langue de l'admin du photographe (la page de la personne, elle, a sa langue).
   // Admin v2 (MQ-10) : l'écran de la v2 s'il existe et que le compte l'a choisie, sinon la v1 ; les textes de la personne
   // dans ses trois langues (traducteurs de l'admin) et l'heure de fin de la session (« connecté jusqu'à 3 h 24 »).
+  // identite : le bandeau de la vérification d'identité demandée par la Vigie (server/verification-identite.js).
   const PERSON = Object.fromEntries(['fr', 'en', 'de'].map(l => [l, translator(l)]));
   const appView = (reply, view, data) => {
     const tpl = adminVersion ? adminVersion.template(reply.request, view) : `admin/${view}`;
     if (tpl.startsWith('admin/v2/')) reply.request.typoV2 = true;
     return reply.header('cache-control', 'no-store').render(tpl, { siteName: app.siteName(), UI, t: reply.request.t, lang: reply.request.t.lang, locale: reply.request.t.locale,
-    tl: PERSON, session: reply.request.session, csrfToken: reply.request.session?.csrf, ...data,
+    tl: PERSON, session: reply.request.session, csrfToken: reply.request.session?.csrf, identite: identity ? identity(reply.request) : null, ...data,
     errors: Object.fromEntries(Object.entries(data.errors || {}).map(([k, v]) => [k, typeof v === 'string' ? reply.request.t.msg(v) : v])) });
   };
   const authorOf = request => repo.authorBySub(request.session.sub) || null;

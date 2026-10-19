@@ -235,7 +235,8 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   // Préférences d'affichage et aperçu d'un billet : n'écrivent rien que la Vigie protège, laissés passer.
   // Lectures arrêtées elles aussi : les exportations et originaux (routes notées au journal, config.audit), qu'un voleur
   // de cookie de session emporterait en une requête (export d'une personne, sélection d'une galerie, original d'une photo).
-  const NO_WRITE = new Set(['/admin/langue', '/admin/theme', '/admin/carnet/:id/apercu']);
+  // Le choix v1 / v2 (account_prefs) en est une aussi : la personne peut revenir à l'admin qu'elle connaît.
+  const NO_WRITE = new Set(['/admin/langue', '/admin/theme', '/admin/version', '/admin/carnet/:id/apercu']);
   app.decorate('requireFreshIdentity', async function (request, reply) {
     const read = request.method === 'GET' || request.method === 'HEAD';
     if (!request.session || (read && !request.routeOptions.config?.audit) || (!read && NO_WRITE.has(request.routeOptions.url))) return;

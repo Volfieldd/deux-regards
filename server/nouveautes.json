@@ -52,6 +52,40 @@
     ]
   },
   {
+    "version": "1.163.0",
+    "date": "2026-10-19",
+    "pr": 163,
+    "title": {
+      "fr": "Confirmer votre identité, si on vous le demande",
+      "en": "Confirming your identity, when asked",
+      "de": "Ihre Identität bestätigen, wenn danach gefragt wird"
+    },
+    "items": [
+      {
+        "fr": "En cas de doute sur votre compte (une session reprise sur un autre appareil, par exemple), un bandeau ambré vous demande de confirmer votre identité : une nouvelle connexion, clé d’accès comprise, puis vous revenez à votre page.",
+        "en": "If there is a doubt about your account (a session picked up on another device, for example), an amber banner asks you to confirm your identity: a new login, passkey included, then you are back on your page.",
+        "de": "Bei Zweifeln an Ihrem Konto (etwa einer auf einem anderen Gerät übernommenen Sitzung) bittet Sie ein bernsteinfarbenes Banner, Ihre Identität zu bestätigen: eine neue Anmeldung, Passkey inbegriffen, danach sind Sie wieder auf Ihrer Seite."
+      },
+      {
+        "fr": "En attendant, vous pouvez tout consulter, mais rien ne s’enregistre ; les exports et les fichiers originaux attendent aussi la confirmation. Le choix entre admin v1 et v2 reste possible.",
+        "en": "Until then you can look at everything, but nothing is saved; exports and original files also wait for the confirmation. Switching between admin v1 and v2 still works.",
+        "de": "Bis dahin können Sie alles ansehen, aber nichts wird gespeichert; auch Exporte und Originaldateien warten auf die Bestätigung. Der Wechsel zwischen Verwaltung v1 und v2 bleibt möglich."
+      },
+      {
+        "fr": "Le bandeau s’affiche en v1, en v2 et dans l’app de terrain, avant de tendre le téléphone.",
+        "en": "The banner shows in v1, in v2 and in the field app, before you hand over the phone.",
+        "de": "Das Banner erscheint in v1, in v2 und in der Feld-App, bevor Sie das Telefon weiterreichen.",
+        "perm": "terrain.app"
+      },
+      {
+        "fr": "Dans la console de la Vigie, « Redemander l’identité » vise un compte pour 7 jours au plus ; la Vigie le fait d’elle-même quand une session est reprise ailleurs.",
+        "en": "In the Vigie console, “Ask for identity again” targets one account for 7 days at most; the Vigie does it on its own when a session is picked up elsewhere.",
+        "de": "In der Konsole der Vigie gilt „Identität erneut abfragen“ für ein Konto höchstens 7 Tage; die Vigie tut es von selbst, wenn eine Sitzung anderswo übernommen wird.",
+        "perm": "securite.voir"
+      }
+    ]
+  },
+  {
     "version": "1.160.0",
     "date": "2026-10-19",
     "pr": 160,
@@ -136,6 +170,36 @@
         "en": "Publish › Private galleries: share photos with someone through a link and a password, shown only once. Extend, change the password or revoke at any time; photos to check stay hidden until confirmed.",
         "de": "Veröffentlichen › Private Galerien: Fotos über einen Link und ein Passwort teilen, die nur einmal angezeigt werden. Jederzeit verlängern, Passwort ändern oder widerrufen; zu prüfende Fotos bleiben verborgen, bis sie bestätigt sind.",
         "perm": "galeries.voir"
+      }
+    ]
+  },
+  {
+    "version": "1.143.0",
+    "date": "2026-10-18",
+    "pr": 143,
+    "title": {
+      "fr": "La Vigie dans l’admin",
+      "en": "The Vigie in the admin",
+      "de": "Die Vigie in der Verwaltung"
+    },
+    "items": [
+      {
+        "fr": "Une entrée « Sécurité » dans le menu, après Journal, ouvre la console de la Vigie dans un nouvel onglet. Son badge compte les alertes ouvertes : ▲ et le nombre pour les hautes et critiques.",
+        "en": "A “Security” entry in the menu, after Log, opens the Vigie console in a new tab. Its badge counts open alerts: ▲ and the number for high and critical ones.",
+        "de": "Ein Eintrag „Sicherheit“ im Menü, nach Protokoll, öffnet die Konsole der Vigie in einem neuen Tab. Sein Abzeichen zählt die offenen Warnungen: ▲ und die Zahl für hohe und kritische.",
+        "perm": "securite.voir"
+      },
+      {
+        "fr": "« Aujourd’hui » montre une ligne Sécurité avec les alertes ouvertes, et un bandeau rouge reste en tête des pages tant qu’une alerte critique attend quelqu’un.",
+        "en": "“Today” shows a Security line with open alerts, and a red banner stays at the top of pages while a critical alert is waiting for someone.",
+        "de": "„Heute“ zeigt eine Zeile Sicherheit mit den offenen Warnungen, und ein rotes Banner bleibt oben auf den Seiten, solange eine kritische Warnung auf jemanden wartet.",
+        "perm": "securite.voir"
+      },
+      {
+        "fr": "Si la Vigie ne répond plus, l’admin dit ce qu’elle savait et depuis quand, jamais un faux « aucune alerte ».",
+        "en": "If the Vigie stops answering, the admin says what it knew and since when, never a false “no alerts”.",
+        "de": "Antwortet die Vigie nicht mehr, sagt die Verwaltung, was sie wusste und seit wann – nie ein falsches „keine Warnungen“.",
+        "perm": "securite.voir"
       }
     ]
   },

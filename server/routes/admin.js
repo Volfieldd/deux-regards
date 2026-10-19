@@ -2329,7 +2329,7 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- rencontres (page /bonjour, cartes) ----------
-  registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion });
+  registerEncounters(app, { repo, render, P, W, done, failed, withReady, adminVersion, identity: identityOf });
   registerOutings(app, { repo, render, P, W, done, failed, withReady });
   registerTrips(app, { repo, render, P, W, done, failed, withReady });
   registerGaleries(app, { repo, render, P, W, done, failed });
