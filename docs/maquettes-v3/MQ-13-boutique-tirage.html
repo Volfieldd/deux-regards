@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="fr" class="theme-nicephos mode-nuit">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex">
+<title>Brume sur la Loire, tirage d’art · Nicephos (maquette MQ-13, v3)</title>
+<meta name="description" content="Tirage d’art signé et numéroté de « Brume sur la Loire », de Sébastien : édition de 15 exemplaires, deux formats, 180 € et 290 €.">
+<link rel="stylesheet" href="_commun/site.css">
+<link rel="stylesheet" href="_commun/tokens.css">
+<link rel="stylesheet" href="_commun/public.css">
+<link rel="stylesheet" href="_commun/v3.css">
+<link rel="stylesheet" href="_commun/annotations.css">
+<style>
+/* MQ-13 · page d'un tirage. Composants de la planche (_commun/public.css : § 25 .formats, .signature, .mur, qui suit le format
+   coché dans une page .suit-format ; § 22 .fiche, .def ; § 18 .rangees--etiree et .rangees--par-deux) ; ci-dessous, la mise en
+   page de la page et deux classes de présentation des états. Aucun jeton redéclaré, aucune --h locale. */
+.t-ariane { padding-top: var(--esp-2); }
+.tirage { display: grid; gap: var(--esp-3) var(--esp-8); grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "note" "achat" "mur"; padding-top: var(--esp-2); }
+.t-photo { grid-area: photo; } .t-achat { grid-area: achat; } .t-mur { grid-area: mur; } .t-note { grid-area: note; }
+@media (min-width: 1024px) {
+  .tirage { grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr); grid-template-areas: "photo achat" "note achat" "mur achat"; align-items: start; row-gap: 0; }
+  .t-note { margin-bottom: var(--esp-6) !important; }
+}
+.t-photo .photo { position: relative; }
+.t-note { margin: calc(var(--esp-1) - var(--esp-3)) 0 var(--esp-2); font-size: var(--t-meta); color: var(--mute); max-width: 62ch; }
+@media (min-width: 1024px) { .t-note { margin-top: var(--esp-1); } }
+.t-achat { display: grid; gap: var(--esp-3); align-content: start; }
+.t-achat > * { margin: 0; }
+.t-tete { display: grid; gap: var(--esp-1); }
+.t-tete .cartel-m { font-size: var(--t-petit); }
+.t-edition { display: grid; gap: 2px; padding-block: var(--esp-2); border-block: 1px solid var(--rule); }
+.t-edition p { margin: 0; }
+.t-edition .dispo { font-size: var(--t-titre-3); line-height: 1.3; color: var(--ink); }
+.t-edition .dispo b { font-weight: 500; }
+.t-edition .prov { font-size: var(--t-meta); color: var(--mute); }
+.t-form { display: grid; gap: var(--esp-3); }
+.t-vendeur { display: grid; gap: 0; font-size: var(--t-petit); color: var(--prose); }
+.t-vendeur p { margin: 0; }
+.t-vendeur .actions { gap: 0 var(--esp-3); }
+/* Bas de page */
+.t-recit { display: grid; gap: var(--esp-2) var(--esp-8); grid-template-columns: minmax(0, 1fr); padding-top: var(--esp-12); align-items: end; }
+@media (min-width: 1024px) { .t-recit { grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr); } }
+.t-recit h2 { grid-column: 1 / -1; }
+.t-bas { display: grid; gap: var(--esp-6) var(--esp-8); grid-template-columns: minmax(0, 1fr); padding-top: var(--esp-8); }
+@media (min-width: 1024px) { .t-bas { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.t-recit h2, .t-bas h2 { margin: 0 0 var(--esp-2); font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.t-legende { margin: 0; font: 300 var(--t-titre-1)/var(--i-serre) var(--sans); color: var(--ink); max-width: 20ch; text-wrap: balance; }
+.t-recit .pl-texte { margin: 0 0 var(--esp-1); color: var(--prose); max-width: 56ch; }
+.t-autres { padding-top: var(--esp-10); }
+.t-autres .prix-v { font-size: var(--t-meta); color: var(--prose); }
+/* Autres états : un cadre « page entière » (.e-plein, annotations.css) ou deux colonnes. */
+.e-msg { max-width: 640px; padding-block: var(--esp-2) var(--esp-1); }
+.etat-deux { display: grid; gap: var(--esp-4); grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 900px) { .etat-deux { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
+.mq-etats .t-achat { grid-area: auto; }
+.btn-note { margin: var(--esp-1) 0 0; font-size: var(--t-meta); color: var(--mute); }
+</style>
+</head>
+<body>
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="mode-nuit">
+<header class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <nav class="sh-nav" aria-label="Navigation">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages" aria-current="true">Tirages</a></li></ul>
+    </nav>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>1<span class="sh-par">)</span></span><span class="sr-only"> tirage</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – Langue : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Langue">
+          <li><a href="/langue/fr?vers=%2Ftirages%2Fbrume-sur-la-loire" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li><li><a href="/langue/en?vers=%2Ftirages%2Fbrume-sur-la-loire" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Ftirages%2Fbrume-sur-la-loire" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <nav class="sh-panneau" aria-label="Navigation (téléphone)">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages" aria-current="true">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+</div>
+<main id="contenu" class="wrap">
+  <nav class="ariane t-ariane mq-a" aria-label="Fil d’Ariane"><span class="mq-pin" aria-hidden="true">1</span><ol><li><a href="/tirages">Tirages</a></li><li aria-current="page">Brume sur la Loire</li></ol></nav>
+
+  <div class="tirage suit-format">
+    <div class="t-photo"><figure class="photo"><span class="mq-pin" aria-hidden="true">2</span><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 720px, (min-width: 1024px) 56vw, calc(100vw - 48px)" width="900" height="600" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." fetchpriority="high"><span class="signature" aria-hidden="true">© Sébastien</span></figure></div>
+    <p class="t-note">La photo entière, telle qu’elle sera tirée. La signature « ©&nbsp;Sébastien » n’existe qu’à l’écran : le tirage n’en porte aucune, Sébastien le signe au crayon dans la marge.</p>
+
+    <div class="t-achat">
+      <div class="t-tete"><p class="etiquette">Tirage d’art</p><h1 class="titre-page">Brume sur la Loire</h1><p class="cartel-m">Sébastien · Anjou · mars 2024</p></div>
+      <div class="t-edition mq-a"><span class="mq-pin" aria-hidden="true">3</span>
+          <p class="dispo"><b>10 disponibles</b> sur 15</p>
+          <p class="prov">Édition limitée à 15 exemplaires, tous formats confondus, signés et numérotés. Déjà vendus : 4 à l’exposition d’Angers, en juin 2026, et 1 ici.</p>
+        </div>
+      <form class="t-form mq-a" method="post" action="/tirages/brume-sur-la-loire/ajouter"><span class="mq-pin" aria-hidden="true">4</span>
+          <fieldset class="groupe formats" aria-describedby="f-aide">
+            <legend>Format</legend>
+            <p class="champ-aide" id="f-aide">Les deux sur Hahnemühle Photo Rag 308 g, 100 % coton, avec une marge blanche pour la signature.</p>
+            <label class="choix"><input type="radio" name="format" value="petit" checked><span>Petit format<span class="choix-d">image 24 × 36 cm · feuille 30 × 40</span></span><span class="prix">180&nbsp;€</span></label>
+            <label class="choix"><input type="radio" name="format" value="grand"><span>Grand format<span class="choix-d">image 40 × 60 cm · feuille 50 × 70</span></span><span class="prix">290&nbsp;€</span></label>
+          </fieldset>
+        <div class="mq-a"><span class="mq-pin" aria-hidden="true">5</span><dl class="def def--petit">
+            <dt>France métropolitaine</dt><dd>15&nbsp;€ · reçu du 30 oct. au 6 nov.</dd>
+            <dt>Union européenne</dt><dd>25&nbsp;€ · reçu du 3 au 10 nov.</dd>
+          </dl>
+          <p class="tva">TVA non applicable, art. 293 B du CGI.</p></div>
+        <div class="mq-a"><span class="mq-pin" aria-hidden="true">6</span><button class="btn btn--large" type="submit">Ajouter au panier</button></div>
+      </form>
+      <div class="t-vendeur">
+        <p>Vendu, signé et expédié par <b>Sébastien Exemple</b>, en son nom.</p>
+        <p>14 jours pour changer d’avis après réception.</p>
+        <div class="actions"><a class="lien" href="/conditions-de-vente#sebastien">Conditions de vente</a><a class="lien" href="/a-propos#contact">Une question ? Écrire à Sébastien</a></div>
+      </div>
+    </div>
+
+    <div class="t-mur mq-a"><span class="mq-pin" aria-hidden="true">7</span>
+      <figure class="mur" aria-labelledby="mur-t">
+        <div class="mur-scene" role="img" aria-labelledby="mur-t">
+          <div class="mur-feuille"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/160/brume.webp 160w, _commun/photos/480/brume.webp 480w" sizes="(min-width: 1024px) 270px, 38vw" data-taille="plus-grand-etat" width="480" height="320" alt="" loading="lazy" decoding="async"></div>
+          <div class="mur-console"></div><p class="mur-cote" aria-hidden="true">console de 120 cm</p>
+        </div>
+        <figcaption id="mur-t"><b>À l’échelle</b> · <span class="si-petit">petit format, feuille de 30 × 40 cm</span><span class="si-grand">grand format, feuille de 50 × 70 cm</span>, accroché 20 cm au-dessus d’une console de 120 cm. Le dessin suit le format choisi.</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <section class="t-recit" aria-labelledby="t-photo-h">
+    <h2 id="t-photo-h">La photo</h2>
+    <p class="t-legende">Six heures, le fleuve fume encore.</p>
+    <div>
+      <p class="pl-texte">Prise en mars 2024, en Anjou, avant que le soleil ne lève la brume. Série Paysage. Sébastien raconte pourquoi il ne la recadre pas dans <a class="lien" style="display:inline;min-height:0" href="/carnet/pourquoi-nous-ne-recadrons-pas">Pourquoi nous ne recadrons pas</a>.</p>
+      <div class="actions"><a class="lien" href="/photo/brume-sur-la-loire">Voir la photo dans la galerie</a><a class="lien" href="/serie/paysage">La série Paysage</a></div>
+    </div>
+  </section>
+
+  <div class="t-bas">
+    <section class="mq-a" aria-labelledby="t-recu-h"><span class="mq-pin" aria-hidden="true">8</span>
+      <h2 id="t-recu-h">Ce que vous recevez</h2>
+      <dl class="fiche">
+        <div><dt>Le tirage</dt><dd>Pigmentaire, sur Hahnemühle Photo Rag 308 g, 100 % coton, mat. L’image entière, au format 3:2, jamais recadrée.</dd></div>
+        <div><dt>La signature</dt><dd>Au crayon, dans la marge blanche, de la main de Sébastien, avec le numéro de l’exemplaire (par exemple 6/15).</dd></div>
+        <div><dt>Le certificat</dt><dd>Titre, numéro d’inventaire (S25-001), numéro de l’exemplaire, dates de la prise de vue et du tirage, format, papier, laboratoire ; empreinte de l’original et horodatage, vérifiables ; signé à la main.</dd></div>
+        <div><dt>La fabrication</dt><dd>Un laboratoire d’art de l’Union européenne tire l’épreuve ; Sébastien la reçoit, la vérifie et la signe avant de vous l’envoyer. Il raconte le papier dans <a href="/carnet/tirer-sur-photo-rag">Tirer sur Photo Rag</a>.</dd></div>
+        <div><dt>L’entretien</dt><dd>À l’abri du soleil direct ; à encadrer sous verre anti-UV, avec un passe-partout sans acide.</dd></div>
+        <div><dt>Le fabricant</dt><dd>Sébastien Exemple, 12 rue de l’Exemple, 49000 Angers · <a href="mailto:contact@example.org">contact@example.org</a></dd></div>
+      </dl>
+    </section>
+    <section aria-labelledby="t-liv-h">
+      <h2 id="t-liv-h">Livraison et retours</h2>
+      <dl class="fiche">
+        <div><dt>Où et combien</dt><dd>France métropolitaine : 15 € ; Union européenne : 25 € ; par envoi.</dd></div>
+        <div><dt>Quand</dt><dd>Du 30 oct. au 6 nov. en France pour une commande passée aujourd’hui : tirage, contrôle, signature, puis transport.</dd></div>
+        <div><dt>Comment</dt><dd>À plat, entre deux cartons rigides ; suivi, assuré et remis contre signature.</dd></div>
+        <div><dt>Changer d’avis</dt><dd>14 jours après la réception, sans avoir à vous justifier ; le retour est à vos frais : <a href="/renoncer">Renoncer à une commande</a>.</dd></div>
+        <div><dt>Plusieurs tirages</dt><dd>Un envoi par photographe : chacun signe et expédie ses propres tirages, depuis Angers.</dd></div>
+      </dl>
+    </section>
+  </div>
+
+  <section class="t-autres mq-a" aria-labelledby="t-autres-h"><span class="mq-pin" aria-hidden="true">9</span>
+    <div class="partie-tete"><h2 id="t-autres-h" class="titre-3">Les autres tirages de Sébastien</h2><a class="lien" href="/tirages">Tous les tirages (9)</a></div>
+    <ul class="rangees rangees--etiree rangees--par-deux"><li style="--r:1.5"><a class="vignette" href="/tirages/cais-do-sodre-maree-basse"><img src="_commun/photos/480/cais.webp" srcset="_commun/photos/480/cais.webp 480w, _commun/photos/cais.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Une rangée de pieux dans l’eau grise du Tage, un pêcheur seul au loin." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Cais do Sodré, marée basse</span><span class="cartel-m">Lisbonne · 10 oct. 2026</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/foz-la-barre"><img src="_commun/photos/480/foz.webp" srcset="_commun/photos/480/foz.webp 480w, _commun/photos/foz.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="La houle de l’Atlantique roule vers un petit phare allumé." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Foz, la barre</span><span class="cartel-m">Porto · 11 oct. 2026</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/silence-blanc"><img src="_commun/photos/480/neige.webp" srcset="_commun/photos/480/neige.webp 480w, _commun/photos/neige.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Ciel blanc au-dessus de crêtes grises enneigées." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Silence blanc</span><span class="cartel-m">Vercors · févr. 2025</span><span class="prix-v">À partir de 180&nbsp;€</span></span></a></li><li style="--r:1.5"><a class="vignette" href="/tirages/le-ciel-s-est-ouvert"><img src="_commun/photos/480/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(min-width: 1280px) 330px, (min-width: 1024px) 260px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 48px)" width="480" height="320" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." loading="lazy" decoding="async"><span class="cartel cartel--ligne"><span class="cartel-t">Le ciel s’est ouvert</span><span class="cartel-m">Anjou · oct. 2025</span><span class="prix-v">Épuisé : 15 sur 15 vendus</span></span></a></li></ul>
+  </section>
+</main>
+<footer class="sf sf--complet wrap">
+  <div class="sf-in">
+    <div>
+      <p class="sf-marque"><b>Nicephos</b> · photographies de Sébastien et Julien</p>
+      <p class="sf-note">Toutes les images sont les nôtres et restent protégées par le droit d’auteur. Pour un usage, un tirage ou un bonjour : <a href="mailto:contact@example.org">contact@example.org</a>.</p>
+    </div>
+    <nav class="sf-groupes" aria-label="Pied de page">
+      <div>
+        <h2 id="sf-site">Le site</h2>
+        <ul aria-labelledby="sf-site">
+          <li><a href="/a-propos#contact">Contact</a></li>
+          <li><a href="/droits">Droits et licences</a></li>
+          <li><a href="/carnet/flux.xml">Flux RSS des carnets</a></li>
+          <li><a href="https://www.instagram.com/" rel="me">Instagram<span class="sr-only"> (site externe)</span></a></li>
+          <li><a href="/confidentialite">Confidentialité</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 id="sf-tirages">Tirages</h2>
+        <ul aria-labelledby="sf-tirages">
+          <li><a href="/conditions-de-vente">Conditions de vente</a></li>
+          <li><a href="/livraison">Livraison et retours</a></li>
+          <li><a href="/renoncer">Renoncer à une commande</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</footer>
+<aside class="mq-etats wrap" aria-label="Autres états de l’écran (maquette)">
+<section class="mq-ecran mq-fond e-plein" inert aria-labelledby="e-ajout">
+  <p class="mq-etat" id="e-ajout"><span class="mq-pin" aria-hidden="true">10</span>État · juste après l’ajout : la page revient, le message a le focus, l’en-tête compte 2 tirages</p>
+  <div class="sh sh--site">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/" aria-label="Nicephos, accueil">Nicephos</a>
+    <div class="sh-nav">
+      <ul><li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-sep"><a href="/tirages" aria-current="true">Tirages</a></li></ul>
+    </div>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Rechercher</span></a>
+      <a class="sh-outil sh-panier" href="/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Panier</span><span class="sh-compte"><span class="sh-par">(</span>2<span class="sh-par">)</span></span><span class="sr-only"> tirages</span></a>
+      <details class="lang-pick">
+        <summary><span>FR</span><span class="sr-only"> – Langue : français</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Langue">
+          <li><a href="/langue/fr?vers=%2Ftirages%2Fbrume-sur-la-loire" hreflang="fr" lang="fr" aria-current="true">Français<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li><li><a href="/langue/en?vers=%2Ftirages%2Fbrume-sur-la-loire" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Ftirages%2Fbrume-sur-la-loire" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menu</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menu</span></span></summary>
+        <div class="sh-panneau">
+          <ul>
+            <li><a href="/galerie">Galerie</a></li><li><a href="/series">Séries</a></li><li><a href="/carnet">Carnets</a></li><li><a href="/carte">Carte</a></li><li><a href="/a-propos">À propos</a></li><li class="sh-panneau-sep"><a href="/tirages" aria-current="true">Tirages</a></li>
+            <li><a href="/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Rechercher</a></li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+  <div class="wrap">
+    <div class="ariane t-ariane"><ol><li><a href="/tirages">Tirages</a></li><li aria-current="page">Brume sur la Loire</li></ol></div>
+    <div class="e-msg"><div class="msg msg--ok is-focus" role="status" tabindex="-1"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p><b>Ajouté au panier :</b> Brume sur la Loire, petit format, 180&nbsp;€. <a href="/panier">Voir le panier (2)</a></p></div></div>
+    <div class="tirage suit-format">
+      <div class="t-photo"><figure class="photo"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 720px, (min-width: 1024px) 56vw, calc(100vw - 48px)" width="900" height="600" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." loading="lazy" decoding="async"><span class="signature" aria-hidden="true">© Sébastien</span></figure></div>
+      <div class="t-achat">
+        <div class="t-tete"><p class="etiquette">Tirage d’art</p><p class="titre-page">Brume sur la Loire</p><p class="cartel-m">Sébastien · Anjou · mars 2024</p></div>
+        <div class="t-edition">
+          <p class="dispo"><b>10 disponibles</b> sur 15</p>
+          <p class="prov">Édition limitée à 15 exemplaires, tous formats confondus, signés et numérotés. Déjà vendus : 4 à l’exposition d’Angers, en juin 2026, et 1 ici.</p>
+        </div>
+        <div class="t-form">
+          <fieldset class="groupe formats" aria-describedby="e1-aide">
+            <legend>Format</legend>
+            <p class="champ-aide" id="e1-aide">Les deux sur Hahnemühle Photo Rag 308 g, 100 % coton, avec une marge blanche pour la signature.</p>
+            <label class="choix"><input type="radio" name="e1-format" value="petit" checked><span>Petit format<span class="choix-d">image 24 × 36 cm · feuille 30 × 40</span></span><span class="prix">180&nbsp;€</span></label>
+            <label class="choix"><input type="radio" name="e1-format" value="grand"><span>Grand format<span class="choix-d">image 40 × 60 cm · feuille 50 × 70</span></span><span class="prix">290&nbsp;€</span></label>
+          </fieldset>
+          <button class="btn btn--large" type="button">Ajouter au panier</button>
+          <p class="btn-note" style="margin-top:calc(-1 * var(--esp-2))">Un second exemplaire est possible ; deux au plus par photo dans un panier.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mq-ecran mq-fond" inert aria-labelledby="e-epuise">
+  <p class="mq-etat" id="e-epuise"><span class="mq-pin" aria-hidden="true">11</span>État · l’édition s’épuise entre-temps (« Le ciel s’est ouvert »)</p>
+  <div class="etat-deux">
+    <figure class="photo" style="max-width:480px"><img src="_commun/photos/480/ciel.webp" srcset="_commun/photos/480/ciel.webp 480w, _commun/photos/ciel.webp 900w" sizes="(min-width: 900px) 480px, calc(100vw - 48px)" width="480" height="320" alt="Ciel rose et mauve, soleil rond posé sur des collines violettes." loading="lazy" decoding="async"></figure>
+    <div class="t-achat">
+      <div class="t-tete"><p class="etiquette">Tirage d’art</p><p class="titre-page">Le ciel s’est ouvert</p><p class="cartel-m">Sébastien · Anjou · oct. 2025</p></div>
+      <div class="msg msg--erreur" role="alert" tabindex="-1"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.8L2.8 20h18.4z"/><path d="M12 10v4.6M12 17.4v.2"/></svg><p><b>Erreur :</b> le dernier exemplaire vient d’être vendu, pendant que vous choisissiez. Rien n’a été ajouté à votre panier.</p></div>
+      <div class="t-edition"><p class="dispo"><b>Épuisé</b> : 15 sur 15 vendus</p><p class="prov">L’édition est close : cette photo ne sera plus tirée, dans aucun format.</p></div>
+      <div><button class="btn btn--large" type="button" aria-disabled="true" aria-describedby="ciel-note">Ajouter au panier</button><p class="btn-note" id="ciel-note">Indisponible : les 15 exemplaires sont vendus.</p></div>
+      <div class="actions"><a class="lien" href="/tirages">Voir les 8 tirages disponibles</a><a class="lien" href="/photo/le-ciel-s-est-ouvert">Voir la photo dans la galerie</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="mq-ecran mq-fond" inert aria-labelledby="e-grand">
+  <p class="mq-etat" id="e-grand"><span class="mq-pin" aria-hidden="true">12</span>État · grand format coché : le dessin à l’échelle suit</p>
+  <div class="etat-deux">
+    <div class="t-achat"><fieldset class="groupe formats" aria-describedby="e3-aide">
+            <legend>Format</legend>
+            <p class="champ-aide" id="e3-aide">Les deux sur Hahnemühle Photo Rag 308 g, 100 % coton, avec une marge blanche pour la signature.</p>
+            <label class="choix"><input type="radio" name="e3-format" value="petit"><span>Petit format<span class="choix-d">image 24 × 36 cm · feuille 30 × 40</span></span><span class="prix">180&nbsp;€</span></label>
+            <label class="choix"><input type="radio" name="e3-format" value="grand" checked><span>Grand format<span class="choix-d">image 40 × 60 cm · feuille 50 × 70</span></span><span class="prix">290&nbsp;€</span></label>
+          </fieldset></div>
+    <div><figure class="mur mur--grand" aria-labelledby="mur3-t">
+        <div class="mur-scene" role="img" aria-labelledby="mur3-t">
+          <div class="mur-feuille"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/160/brume.webp 160w, _commun/photos/480/brume.webp 480w" sizes="(min-width: 1024px) 270px, 38vw" data-taille="plus-grand-etat" width="480" height="320" alt="" loading="lazy" decoding="async"></div>
+          <div class="mur-console"></div><p class="mur-cote" aria-hidden="true">console de 120 cm</p>
+        </div>
+        <figcaption id="mur3-t"><b>À l’échelle</b> · <span class="si-petit">petit format, feuille de 30 × 40 cm</span><span class="si-grand">grand format, feuille de 50 × 70 cm</span>, accroché 20 cm au-dessus d’une console de 120 cm. Le dessin suit le format choisi.</figcaption>
+      </figure></div>
+  </div>
+</section>
+
+<section class="mq-ecran mq-fond e-plein" inert aria-labelledby="e-de" lang="de">
+  <p class="mq-etat" id="e-de" lang="fr"><span class="mq-pin" aria-hidden="true">13</span>État · en allemand (/de/tirages/brume-sur-la-loire), en-tête compris</p>
+  <div class="sh sh--site" lang="de">
+  <div class="sh-bar">
+    <a class="sh-marque" href="/de/" aria-label="Nicephos, Startseite">Nicephos</a>
+    <div class="sh-nav">
+      <ul><li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-sep"><a href="/de/tirages" aria-current="true">Kunstdrucke</a></li></ul>
+    </div>
+    <div class="sh-outils">
+      <a class="sh-outil sh-recherche" href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="sh-outil-t">Suchen</span></a>
+      <a class="sh-outil sh-panier" href="/de/panier"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span class="sh-outil-t">Warenkorb</span><span class="sh-compte"><span class="sh-par">(</span>1<span class="sh-par">)</span></span><span class="sr-only"> Kunstdruck</span></a>
+      <details class="lang-pick">
+        <summary><span>DE</span><span class="sr-only"> – Sprache: Deutsch</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <ul aria-label="Sprache">
+          <li><a href="/langue/fr?vers=%2Fde%2Ftirages%2Fbrume-sur-la-loire" hreflang="fr" lang="fr">Français</a></li><li><a href="/langue/en?vers=%2Fde%2Ftirages%2Fbrume-sur-la-loire" hreflang="en" lang="en">English</a></li><li><a href="/langue/de?vers=%2Fde%2Ftirages%2Fbrume-sur-la-loire" hreflang="de" lang="de" aria-current="true">Deutsch<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a></li>
+        </ul>
+      </details>
+      <details class="sh-menu">
+        <summary><span class="sh-ouvrir"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="sh-menu-t">Menü</span></span><span class="sh-fermer"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="sh-menu-t">Menü</span></span></summary>
+        <div class="sh-panneau">
+          <ul>
+            <li><a href="/de/galerie">Galerie</a></li><li><a href="/de/series">Serien</a></li><li><a href="/de/carnet">Reisetagebücher</a></li><li><a href="/de/carte">Karte</a></li><li><a href="/de/a-propos">Über uns</a></li><li class="sh-panneau-sep"><a href="/de/tirages" aria-current="true">Kunstdrucke</a></li>
+            <li><a href="/de/recherche"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Suchen</a></li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+  <div class="wrap">
+    <div class="ariane t-ariane"><ol><li><a href="/de/tirages">Kunstdrucke</a></li><li aria-current="page">Nebel über der Loire</li></ol></div>
+    <div class="tirage suit-format">
+      <div class="t-photo"><figure class="photo"><img src="_commun/photos/480/brume.webp" srcset="_commun/photos/480/brume.webp 480w, _commun/photos/brume.webp 900w" sizes="(min-width: 1280px) 720px, (min-width: 1024px) 56vw, calc(100vw - 48px)" width="900" height="600" alt="Collines grises sous un ciel de brume, le fleuve invisible au pied." loading="lazy" decoding="async"><span class="signature" aria-hidden="true">© Sébastien</span></figure></div>
+      <div class="t-achat">
+        <div class="t-tete"><p class="etiquette">Kunstdruck</p><p class="titre-page">Nebel über der Loire</p><p class="cartel-m">Sébastien · Anjou · März 2024</p></div>
+        <div class="t-edition"><p class="dispo"><b>10 verfügbar</b> von 15</p><p class="prov">Limitierte Auflage von 15 Exemplaren, alle Formate zusammen, signiert und nummeriert.</p></div>
+        <div class="t-form">
+          <fieldset class="groupe formats" aria-describedby="e4-aide">
+            <legend>Format</legend>
+            <p class="champ-aide" id="e4-aide">Beide auf Hahnemühle Photo Rag 308 g, 100 % Baumwolle, mit weißem Rand für Signatur und Nummer.</p>
+            <label class="choix"><input type="radio" name="e4-format" value="petit" checked><span>Kleines Format<span class="choix-d">Bild 24 × 36 cm · Blatt 30 × 40</span></span><span class="prix">180&nbsp;€</span></label>
+            <label class="choix"><input type="radio" name="e4-format" value="grand"><span>Großes Format<span class="choix-d">Bild 40 × 60 cm · Blatt 50 × 70</span></span><span class="prix">290&nbsp;€</span></label>
+          </fieldset>
+          <dl class="def def--petit"><dt>Frankreich (Festland)</dt><dd>15&nbsp;€ · Ankunft 30. Okt. bis 6. Nov.</dd><dt>Europäische Union</dt><dd>25&nbsp;€ · Ankunft 3. bis 10. Nov.</dd></dl>
+          <p class="tva">Gemäß Art. 293 B CGI wird keine Umsatzsteuer berechnet.</p>
+          <button class="btn btn--large" type="button">In den Warenkorb</button>
+        </div>
+        <div class="t-vendeur"><p>Verkauft, signiert und versandt von <b>Sébastien Exemple</b>, in eigenem Namen.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+</aside>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MQ-13 · site public · Tirages, page d’un tirage · thème Nicephos nuit (production) · bureau 1 440 × 900 et Pixel 7 · v2, passe 5 du 17 oct. 2026, sur la planche MQ-00</p>
+  <h2 id="mq-t">Ce qui change</h2>
+  <p class="mq-lead"><b>v3 (19 oct. 2026) :</b> même écran, mêmes mots et mêmes règles d’accessibilité que la v2, redessiné par <code>_commun/v3.css</code> : titres plus grands, méta du cartel en Plex Mono, étiquettes en sable, bascules et « Menu » sans cadre, en-tête sans filet, plus d’air entre les parties et les rangées. Les repères ci-dessous sont ceux de la v2 ; leurs mesures ne valent plus, la passe unique de la v3 est dans <code>CONTROLE.md</code>.</p>
+  <p class="mq-lead">Vendredi 16 oct. 2026, un peu avant 10 h : Claire Exemple a déjà mis « Escaliers des Guindais », de Julien, dans son panier (« Panier (1) ») ; elle choisit le petit format de « Brume sur la Loire », de Sébastien, et l’ajoute. Données : LEXIQUE-ET-DONNEES.md, § 4.4, 4.5 et 4.9 ; prix, édition et délais sont ceux du référentiel.</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Où l’on est, d’où l’on vient</b><p>Fil d’Ariane « Tirages / Brume sur la Loire », cibles de 44 px ; « Tirages » souligné de sable dans l’en-tête Site ; le panier dit déjà « Panier (1) ».</p><span class="mq-ref">UX-T-16 · RGAA 12.6 · MQ-00 § 1, § 14</span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>La photo entière, signée sans être masquée</b><p>« © Sébastien » en coin, à 42 %, en 13 px au moins (la règle de la planche) ; une phrase, juste sous la photo à toutes les largeurs, dit que le tirage, lui, est signé au crayon.</p><span class="mq-ref">UX-F-15 · MQ-00 « La photo d’abord » · public.css § 25</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Une édition honnête</b><p>« 10 disponibles sur 15 », le chiffre exact, et d’où viennent les 5 vendus. Ni compte à rebours ni « derniers exemplaires ».</p><span class="mq-ref">UX-T-17 · étude S5, S12 · LEXIQUE § 4.4</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Deux formats, le papier dit une fois</b><p>Boutons radio dessinés, prix de vitrine en face (« 180 € », « 290 € ») ; le papier, commun aux deux, passe dans l’aide du groupe.</p><span class="mq-ref">RGAA 11.5, 11.6 · LEXIQUE § 2</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>Frais, dates et TVA avant le panier</b><p>Les deux zones, leurs frais et leurs dates de réception ; une seule mention de TVA, sous le premier prix.</p><span class="mq-ref">Baymard : le port cherché sur la fiche · étude S25</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>Un seul bouton plein</b><p>« Ajouter au panier », un formulaire POST ordinaire : il marche sans script. Juste sous les formats, au téléphone aussi ; pas de barre collante.</p><span class="mq-ref">UX-F-11 · étude S20</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>À l’échelle d’un mur</b><p>Le tirage au-dessus d’une console de 120 cm ; le dessin suit le format coché (CSS <code>:has</code>, sans script). Plus d’aplat gris : le dessin seul, sur le papier de la page, posé sur un trait de sol.</p><span class="mq-ref">Jury v1 critère 11 · RGESN 4.5 (un dessin CSS, aucune image de plus)</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Ce que vous recevez, dit simplement</b><p>Signature, certificat (avec le numéro d’inventaire <span style="white-space:nowrap">S25-001</span>), fabrication, fabricant (sécurité des produits), livraison et retours ; deux billets des Carnets en lien.</p><span class="mq-ref">UX-T-05 · UX-T-17 · étude S11</span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Les autres tirages du même auteur</b><p>Une rangée étirée (planche, § 18), sans recadrage ; chaque vignette chargée à sa taille (<code>sizes</code> de la rangée étirée). L’édition close est dite en mots.</p><span class="mq-ref">MQ-00 rangées · LEXIQUE § 4 · étude S12</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>Après l’ajout, la page entière</b><p>La page revient (POST puis 303) : l’en-tête dit « Panier (2) », le message « Ajouté au panier » reçoit le focus, juste sous le fil d’Ariane, avec un lien vers le panier. Aucune fenêtre surgissante.</p><span class="mq-ref">WCAG 4.1.3 · B&amp;S 1.3 · jury v1 critère 14</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>L’édition s’épuise entre-temps</b><p>Le serveur relit le stock à l’ajout : rien n’est ajouté, le message le dit, le bouton reste visible avec sa raison, et un chemin mène aux 8 tirages disponibles.</p><span class="mq-ref">Étude S24 · WCAG 3.3.1</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Grand format coché</b><p>La feuille de 50 × 70 cm remplace celle de 30 × 40 au-dessus de la console, et la légende le dit.</p><span class="mq-ref">B&amp;S 1.3 Retour d’information</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>En allemand</b><p>« Kunstdrucke », « Warenkorb (1) », « Nebel über der Loire », « Großes Format », « In den Warenkorb » : tout tient, au bureau comme au téléphone.</p><span class="mq-ref">Critère 4 · LEXIQUE § 4.1 (titres allemands)</span></li>
+  </ol>
+  <p style="margin-top:24px"><b>Au téléphone</b>, même ordre : la photo et, juste dessous, la phrase sur la signature qu’elle montre ; puis le titre, l’édition, les formats ; la livraison et le bouton suivent aussitôt ; le dessin à l’échelle vient après. <b>Sans JavaScript</b>, tout marche : formulaire POST, dessin en CSS, menu et langue en <code>details</code>. <b>Composants de la planche</b> (<code>_commun/public.css</code>, montrés dans MQ-00) : .formats, .signature, .mur (§ 25), .fiche, .def (§ 22), .rangees--etiree et .rangees--par-deux (§ 18) ; .e-plein (<code>annotations.css</code>). Versés dans la planche à la passe 3 : le mur sans aplat, posé sur un trait de sol, réduit au pan de la console au petit format et qui suit le format coché (<code>.suit-format</code>, § 25) ; deux photos par rangée sur tablette pour « Les autres tirages » (<code>.rangees--par-deux</code>). <b>Styles locaux</b>, construits avec les jetons : la mise en page (.tirage, .t-achat, .t-edition, .t-recit, .t-bas) et une classe de présentation des états (.etat-deux).</p>
+  <p style="margin-top:12px"><b>Passe 2 (jury v1)</b> : pied de page avant les états et l’encart, cadres <code>inert</code> ; état « après l’ajout » en page entière ; mur sans aplat ; <code>/serie/paysage</code> ; images en <code>srcset</code> partout (photo épuisée en 480 et 900 px, vignettes selon le format) ; la signature passe à 13 px dans la planche ; titre allemand du lexique ; insécables. Relecture : de 768 à 1 023 px, les autres tirages vont deux par rangée, avec un <code>sizes</code> qui le dit (à 820 px, la dernière vignette, seule et étirée sur 740 px, chargeait un fichier de 480 px) ; la langue renvoie à la page du tirage ; « Écrire à Sébastien » mène au contact du site (<code>/a-propos#contact</code>).</p>
+  <p style="margin-top:12px"><b>Passe 4 (jury v2)</b> : « Suchen » dans l’en-tête allemand, comme <code>server/i18n.js</code>, et les noms lus en allemand pris au code (« Sprache: Deutsch », « Sprache ») ; le menu du téléphone s’appelle « Navigation (téléphone) », comme dans MQ-01 à MQ-06 ; au téléphone, la phrase sur la signature d’écran passe juste sous la photo qu’elle commente (elle tombait après le bloc d’achat) ; « deux au plus par photo dans un panier » (état 10) est la règle de l’étude S23 (« quantité plafonnée par œuvre : 2 ») ; le lexique ne l’écrit pas encore (son § 4.4 attribue à S23 les deux formats) : à y ajouter ; dates allemandes insécables (« 30. Okt. »).</p>
+  <p style="margin-top:12px"><b>À créer</b> (lexique § 2, « Évolutions à créer ») : toute la boutique (<code>/tirages</code>, la page d’un tirage, son <code>POST …/ajouter</code>, le panier, la commande, les conditions de vente, la livraison et la rétractation) ; l’en-tête Site de la planche, avec « Carnets », « Tirages » et « Panier (1) » ; le numéro d’inventaire <span style="white-space:nowrap">S25-001</span> du certificat (UX-T-05 ; le code affiche « N°11 ») ; les variantes de 160 et 480 px des vignettes (UX-T-07).</p>
+  <p style="margin-top:12px"><b>Adresses</b> (lexique, § 2) : <code>/tirages</code>, <code>/tirages/brume-sur-la-loire</code> et son <code>POST …/ajouter</code>, <code>/panier</code>, <code>/conditions-de-vente</code>, <code>/livraison</code>, <code>/renoncer</code>, <code>/carnet/…</code>, <code>/galerie</code> et <code>/series</code> (à créer) ; <code>/photo/brume-sur-la-loire</code>, <code>/serie/paysage</code>, <code>/a-propos</code>, <code>/recherche</code>, <code>/carte</code> et <code>/langue/:lang</code> existent.</p>
+  <p style="margin-top:12px"><b>Passe 5 (jury final, 17 oct. 2026)</b> : les noms lus de l’en-tête sont ceux du code en français aussi (<code>server/i18n.js</code>) : la navigation « Navigation », le bouton de langue « FR – Langue : français », sa liste « Langue » ; le panneau du téléphone « Navigation (téléphone) ». Sous « Les autres tirages de Sébastien », le lien dit ce qu’il compte : « Tous les tirages (9) », les tirages des deux (lexique § 1).</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> (passe 4, 16 oct. 2026 ; Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils consol-final.mjs, consol-sans.py, controle-annotations.mjs, p3-images.mjs, focus-colle.mjs, radios-cadres.py, insecables.py ; html-validate 11 et contrôle d’espacement du texte du jury v2) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900) et sur Pixel 7, et 0 « sans inert » (la page dont on a retiré tous les inert et les .is-focus : chaque état est sans défaut une fois actif) · débordements à 320, 412, 820, 1 024 et 1 440 px, en français et avec l’en-tête allemand du code (« Suchen ») : aucun ; aucune ellipse ; aucune ligne qui défile sans suite visible · espacement du texte (WCAG 1.4.12) à 1 440, 412 et 320 px : rien ne sort ni n’est coupé · annotations à 1 440, 412 et 320 px : rien à redire (pastilles dans l’écran, hors des photos et des textes ; étiquettes entières ; cadres inert ; pied de page avant les états ; un seul bloc de mesures ; sans annotations, 0 élément déplacé) · sans annotations : 0 pixel changé hors du magenta, au bureau comme sur Pixel 7 · images : toutes à la taille d’affichage, avec ou sans srcset, états compris, à 1 440, 1 024, 820, Pixel 7 et 320 px · scènes de nuit et de contre-jour : aucune dans une première rangée (p3-sombres.mjs, 9 largeurs) · clavier : 37 arrêts au bureau, 31 sur Pixel 7 et à 320 × 640, aucun caché, même en partie, par un élément collant (focus-colle.mjs, Tab et Maj+Tab, en continu et au bord) · html-validate : 0 erreur (chaque repère a un nom unique, cadres d’état compris) · radios : un nom de groupe par cadre · insécables : 0 à poser · poids après défilement complet : 240 ko au bureau, 266 ko au téléphone ; aucun script, aucune ressource tierce · textes sous 13 px, ceux des SVG mesurés à leur taille rendue (échelle du viewBox) : aucun, au bureau, sur Pixel 7 et de 320 à 1 440 px · listes en rangées mesurées sur Pixel 7 (<code>sizes-tel-ecrire.py</code>) : toutes à la largeur de la page, aucun sizes à réécrire.</p>
+</aside>
+</body>
+</html>

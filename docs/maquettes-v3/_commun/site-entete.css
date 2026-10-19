@@ -1,0 +1,63 @@
+/* En-tête et pied de page cibles du site public (MQ-01), communs à toutes les maquettes du site public :
+   lien d'évitement, en-tête sur une ligne (marque, menu aligné à droite, filet puis « Tirages » plus pâle, loupe, langue ;
+   sur téléphone : marque, loupe, langue, bouton « Menu » encadré), pied de page complet. */
+/* Lien d'évitement (UX-F-06) : hors écran, révélé au focus, premier élément de la page */
+.skip { position: absolute; left: -9999px; top: 0; }
+.skip:focus, .skip.is-focus { position: static; display: inline-flex; align-items: center; min-height: 44px; margin: 10px 0 0 var(--gut);
+  padding: 0 18px; background: var(--ink); color: var(--paper); font: 500 14px/1 var(--sans); letter-spacing: .02em;
+  outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* En-tête sur une ligne (UX-F-36, UX-T-16) : marque, menu, filet, Tirages, recherche, langue */
+.site-h { display: flex; align-items: center; gap: 12px 28px; min-height: 72px; position: relative; z-index: 20; }
+.site-h .wordmark { display: inline-flex; align-items: center; min-height: 44px; margin-right: auto; color: var(--ink);
+  font: 300 15px/1 var(--sans); letter-spacing: .42em; text-transform: uppercase; white-space: nowrap; }
+.site-nav ul, .site-tools { display: flex; align-items: center; list-style: none; margin: 0; padding: 0; }
+.site-nav ul { gap: 0 clamp(14px, 2vw, 30px); }
+.site-nav a, .site-tools .tool, .lang > summary { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; font-weight: 400;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--ink); white-space: nowrap; }
+.site-nav a:hover { text-decoration: underline; text-underline-offset: 8px; }
+.site-nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+.site-nav .soft { display: flex; align-items: center; gap: clamp(14px, 2vw, 30px); }
+.site-nav .soft::before { content: ''; width: 1px; height: 18px; background: var(--mute); }
+.site-nav .soft a { color: var(--mute); }
+.site-tools { gap: 6px 18px; }
+.site-tools .tool { color: var(--ink); }
+.lang { position: relative; }
+.lang > summary { list-style: none; cursor: pointer; padding-inline: 4px; }
+.lang > summary::-webkit-details-marker { display: none; }
+.lang > summary svg { transition: transform .2s; }
+.lang[open] > summary svg { transform: rotate(180deg); }
+.lang ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 184px; margin: 0; padding: 6px 0; list-style: none;
+  background: var(--paper); border: 1px solid var(--field); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
+.lang li a { display: flex; align-items: center; min-height: 44px; padding: 0 18px; color: var(--ink); font-size: 15px; letter-spacing: .02em; }
+.lang li a:hover { background: var(--frame); }
+.lang li a[aria-current] span { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.lang li a[aria-current]::after { content: '✓'; display: inline-block; margin-left: auto; padding-left: 14px; color: var(--mute); text-decoration: none; }
+.menu-btn { display: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--field); color: var(--ink);
+  font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+.cart-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
+@media (max-width: 760px) {
+  .site-h { min-height: 64px; gap: 4px 10px; }
+  .site-h .wordmark { font-size: 13px; letter-spacing: .34em; }
+  .site-nav { display: none; }
+  .site-tools { gap: 2px 8px; }
+  .site-tools .tool-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .site-tools .tool { min-width: 44px; justify-content: center; }
+  .menu-btn { display: inline-flex; }
+}
+
+/* Pied de page cible (UX-F-34, UX-F-23, UX-T-03) : liens soulignés, cibles de 44 px, liste verticale sur téléphone */
+.site-f { display: flex; justify-content: space-between; align-items: center; gap: 4px 24px; flex-wrap: wrap; margin-top: 72px;
+  padding-block: 28px calc(env(safe-area-inset-bottom, 0px) + 36px); border-top: 1px solid var(--rule); color: var(--mute);
+  font: 400 13px/1.5 var(--mono); letter-spacing: .03em; }
+.site-f p { margin: 0; }
+.site-f ul { display: flex; flex-wrap: wrap; gap: 0 20px; list-style: none; margin: 0; padding: 0; }
+.site-f a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 4px;
+  text-decoration-color: var(--mute); }
+.site-f a:hover { text-decoration-color: var(--ink); }
+@media (max-width: 640px) { .site-f { flex-direction: column; align-items: flex-start; } .site-f ul { flex-direction: column; } }
+.site-nav .soft a[aria-current] { color: var(--ink); }
+.cart-link[aria-current] { text-decoration: underline; text-decoration-color: var(--safelight); text-decoration-thickness: 2px; text-underline-offset: 8px; }
+.mono { font-size: 13px; }
+@media (max-width: 760px) { .cart-link { white-space: nowrap; letter-spacing: .1em; } .site-tools .cart-link + .pin { margin-left: 2px; } }
+.site-tools li, .site-nav li { display: flex; align-items: center; }
