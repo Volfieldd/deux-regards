@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/carnet-photo.eta) */ %>
 <% /* Une photo ouverte depuis l'aperçu d'un billet (MQ-20, état 15) : la visionneuse du billet, aux jetons du site (nuit),
       « ← titre du billet », « 2 / 3 · photos du billet », ses voisines du billet, son cartel ; une photo non publiée le dit. */ %>
 <% const t = (k, x) => it.ty(it.t(k, x)), p = it.p, post = it.post, q = it.lang !== 'fr' ? `?langue=${it.lang}` : '';

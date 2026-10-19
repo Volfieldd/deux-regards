@@ -1,0 +1,12 @@
+<%
+  // Textes de publier-v2.js (Instagram, Carnets et Galeries privées dans la coquille v2), traduits par le serveur : un bloc
+  // de données, jamais exécuté (CSP), réuni par admin-v2.js à ceux de views/admin/v2/_textes.eta. La clé est le texte français.
+  const t = it.t;
+  const tk = k => [k, t(k)];
+  const out = Object.fromEntries([
+    tk('« {title} » en place {n} dans la file.'), tk('« {title} » remise en place {n}.'), tk('Envoi en cours…'), tk('Voir le post'),
+    tk('Mettre à jour la page'), tk('Suivi interrompu : rechargez la page pour voir où en est l’envoi.'),
+    tk('Heures ignorées (format HH:MM attendu) : {times}.'), tk('Réglages Instagram rétablis.'),
+  ]);
+%>
+<script type="application/json" id="v2-textes-page"><%~ JSON.stringify({ t: out }).replace(/</g, '\\u003c') %></script>

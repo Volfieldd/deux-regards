@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/galerie-confirmer.eta) */ %>
 <% /* Confirmation d'un geste sur une galerie ou un accès (MQ-18, repères 18 et 19), sans script : la question sur une page,
       qui nomme la personne ou la galerie ; « Annuler » d'abord ; ce qui part, ce qui reste. */ %>
 <% const t = it.t; %>

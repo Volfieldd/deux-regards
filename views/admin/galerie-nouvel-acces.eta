@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/galerie-nouvel-acces.eta) */ %>
 <% /* Nouvel accès (MQ-18, état principal) : pour qui (le nom ne sert qu'à l'équipe ; personnel ou de groupe, G5), langue,
       fin (30 jours par défaut, 6 mois au plus, jamais après la fermeture ; saisie libre, relue en toutes lettres ; deux choix
       rapides en boutons d'envoi, qui marchent sans script), droits (favoris, téléchargement 2 048 px ou jusqu'à 4 000 px),

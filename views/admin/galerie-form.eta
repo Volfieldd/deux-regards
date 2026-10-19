@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/galerie-form.eta) */ %>
 <% /* Nouvelle galerie privée (étude § 2.4, parcours de l'équipe, 1) : titre, mot d'accueil (trois langues), photographe
       (portée « tout » : un photographe, ou commune), fermeture. Puis les photos, puis les accès. */ %>
 <% const t = it.t, v = it.values || {}; %>

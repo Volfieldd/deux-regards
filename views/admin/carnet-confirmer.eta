@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/carnet-confirmer.eta) */ %>
 <% /* Renvoyer un billet (remarque obligatoire), le retirer du site (raison obligatoire, 410) ou le supprimer (jamais publié) :
       une page de confirmation, comme le dialogue de la planche (titre = la question avec l'objet, conséquences, Annuler, l'action). */ %>
 <% const t = (k, x) => it.ty(it.t(k, x)), post = it.post, a = it.action;

@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/carnet.eta) */ %>
 <% /* Éditeur d'un billet (maquette MQ-20 ; étude § 1.5 et § 1.6). En tête, l'en-tête de page type : retour, titre, état,
       méta (dont l'enregistrement automatique), une seule commande de publication. Colonne de gauche : le formulaire du
       billet dans la langue de l'onglet (titre, chapô, texte en Markdown restreint, une photo par ligne), puis l'aperçu

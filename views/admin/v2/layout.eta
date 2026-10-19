@@ -9,6 +9,10 @@
 <% /* Admin v2 (maquettes MQ-07 à MQ-10) : admin.css de la v1, puis les jetons et les composants de la planche MQ-00, puis
       les écrans de la v2. Aucun style ni script en ligne (CSP). */ %>
   <link rel="stylesheet" href="<%= it.asset('admin/admin.css') %>">
+<% if (it.carnetAssets) { /* Carnets (dernière vague, partie B) : l'éditeur de billet (MQ-20), sa feuille avant celles de la v2, son script. */ %>
+  <link rel="stylesheet" href="<%= it.asset('admin/carnet.css') %>">
+  <script src="<%= it.asset('admin/carnet.js') %>" defer></script>
+<% } %>
   <link rel="stylesheet" href="<%= it.asset('admin/v2/tokens.css') %>">
   <link rel="stylesheet" href="<%= it.asset('admin/v2/admin-plus.css') %>">
   <link rel="stylesheet" href="<%= it.asset('admin/v2/v2.css') %>">

@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/carnets.eta) */ %>
 <% /* Carnets (étude, § 1.5 ; planche MQ-00, administration) : la liste des billets, le plus récent d'abord, avec leur état
       (pastille ○ ◐ ● ▲ ✕ de la planche), leurs signatures, leur rubrique et leur date ; un billet neuf ; l'adresse de
       « Écrire aux auteurs ». En cartes sous 1 100 px (.liste-a). */ %>

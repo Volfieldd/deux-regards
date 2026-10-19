@@ -1,4 +1,4 @@
-<% layout('./layout') %>
+<% if (!it.corps) layout('./layout') /* it.corps : le contenu seul, repris dans la coquille de l'admin v2 (views/admin/v2/galerie.eta) */ %>
 <% /* Fiche d'une galerie privée, en onglets (MQ-18, état 14 ; étude § 2.8) : Accès, Photos, Sélections, Activité, Réglages
       (des liens, sans script). En tête : le retour, le titre et l'état, ce que contient la galerie et quand elle ferme ;
       « Voir comme un invité » (vue équipe, rien n'est noté) et « Nouvel accès ». */ %>
