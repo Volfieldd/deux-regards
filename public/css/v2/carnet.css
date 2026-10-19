@@ -1,0 +1,232 @@
+/* =====================================================================================================
+   Carnets (site public v2, maquettes MQ-11 et MQ-12) : les composants de la planche MQ-00 (maquettes/_commun/public.css),
+   § 7 (diptyque) et § 21 (carnet), repris tels quels, puis la mise en page propre aux deux pages (leur <style> de maquette).
+   Chargée seulement par les pages des Carnets (views/v2/carnets.eta, carnet.eta). Écarts, tous dus à la CSP (aucun style en
+   ligne) : le format d'une photo (--r) vient de sa classe .fmt-* (css/v2/public.css), la hauteur d'une verticale du récit
+   (--photo-h) est celle de la planche par défaut, et la carte au trait du sommaire reçoit ses épaisseurs et sa taille de
+   texte du serveur (attributs SVG, à l'échelle de son cadrage).
+   ===================================================================================================== */
+/* ---------- 7. Diptyque : deux regards, même hauteur, un titre commun ---------- */
+.diptyque { margin: 0; display: grid; gap: var(--esp-2); }
+.diptyque-t { display: grid; gap: var(--esp-demi); }
+.diptyque-t h2, .diptyque-t h3, .diptyque-t p { margin: 0; }
+.diptyque-t .titre { font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); }
+.diptyque-paire { display: flex; flex-wrap: wrap; gap: var(--esp-3) var(--esp-4); }
+/* Côte à côte dès que deux horizontales de 210 px tiennent (bloc de 452 px et plus), l'une sous l'autre en dessous (téléphone) ;
+   passe 3 : la base de 240 px empilait le diptyque de l'accueil à 1 024 px, dans sa colonne de 495 px. */
+.diptyque-paire > .photo { flex: var(--r) 1 calc(var(--r) * 140px); }
+.diptyque-paire img { aspect-ratio: var(--r); }
+
+/* ---------- 21. Carnet ----------
+   Liste : .billets, une planche de deux colonnes ; .billet-e, la couverture d'abord, au format de la photo et à hauteur
+   commune (règle des rangées), jamais recadrée, puis le texte ; tout l'encart est le lien (titre étendu).
+   .billet-e--cote : la couverture verticale à côté du texte (liste des carnets, accueil), jamais seule en haut d'une colonne
+   avec un vide à sa droite ; dans une liste .billets, le titre garde la taille des autres billets (titre 2) et le texte se
+   cale en bas de la photo ; au téléphone, la photo prend 5/12 de la largeur, la rubrique et le titre à sa droite, le chapô
+   et la méta dessous, sur toute la largeur. sizes : "(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 42px),
+   (min-width: 768px) calc(40vw - 45px), calc(42vw - 27px)". Abonnement : .abo ; pagination : .pages.
+   Billet : .billet, grille de 12 colonnes au-delà de 1 024 px ; le texte tient les colonnes 4 à 9 (environ 65 signes) ;
+   une photo prend l'une des trois tailles de l'éditeur : normale, .f-large (2 à 11), .f-ecran (1 à 12) ; .f-cote (4 à 12).
+   Ouverture (.billet-ouv), signature (.auteurs), méta (.billet-meta), sommaire et carte au trait (.sommaire), journée (.jour),
+   paire de photos sans titre commun (.paire), citation dans une autre langue (.citation), billets voisins (.voisins). */
+.billets { list-style: none; margin: var(--esp-5) 0 0; padding: 0; display: grid; gap: var(--esp-8); }
+@media (min-width: 768px) { .billets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 768px) and (max-width: 899px) { .billets:has(.billet-e--cote) { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 1280px) { .billets { gap: var(--esp-10) var(--esp-8); } }
+.billet-e { --h: 300px; position: relative; display: grid; gap: var(--esp-2); align-content: start; }
+@media (min-width: 1280px) { .billet-e { --h: 380px; } }
+.billet-e-txt { display: grid; gap: var(--esp-1); align-content: start; max-width: 60ch; }
+.billet-e-titre { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: -.003em; text-wrap: balance; }
+.billet-e-titre a { color: var(--ink); }
+.billet-e-titre a::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+.billet-e:hover .billet-e-titre a { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.billet-e-titre a:focus-visible { outline: 0; }
+.billet-e:has(.billet-e-titre a:focus-visible), .billet-e.is-focus { outline: var(--focus-l) solid var(--ink); outline-offset: 12px; }
+.billet-e-chapo { margin: 0; font-size: var(--t-texte); line-height: 1.6; color: var(--prose); text-wrap: pretty; }
+.billet-e-meta { margin: var(--esp-1) 0 0; font-size: var(--t-petit); color: var(--mute); }
+.billet-e-meta b { font-weight: 400; color: var(--ink); }
+.billet-e-img { margin: 0 0 var(--esp-1); order: -1; }
+.billet-e-img img { display: block; width: min(100%, calc(var(--h) * var(--r))); height: auto; aspect-ratio: var(--r); background: var(--frame); }
+.billet-e--cote { grid-template-columns: minmax(96px, 2fr) minmax(0, 3fr); gap: var(--esp-3); align-items: end; }
+.billet-e--cote .billet-e-img { margin: 0; }
+.billet-e--cote .billet-e-img img { width: 100%; }
+.billet-e--cote .billet-e-titre { font: 400 var(--t-titre-3)/1.3 var(--sans); letter-spacing: 0; }
+.billet-e--cote .billet-e-titre a:hover, .billet-e--cote:hover .billet-e-titre a { text-underline-offset: 5px; }
+/* En liste (passe 3, d'après MQ-11) */
+.billets .billet-e--cote .billet-e-titre { font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: -.003em; }
+@media (min-width: 768px) { .billets .billet-e--cote { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); column-gap: var(--esp-4); } }
+/* De 768 à 899 px, une liste qui a des couvertures verticales passe sur une colonne : une couverture horizontale y prend
+   toute la largeur. Au bureau, la verticale a la hauteur commune des couvertures (380 px) : 253 px de large. */
+@media (min-width: 768px) and (max-width: 899px) { .billets:has(.billet-e--cote) .billet-e:not(.billet-e--cote) { --h: 520px; } }
+@media (min-width: 1280px) { .billets .billet-e--cote { grid-template-columns: calc(380px * 2 / 3) minmax(0, 1fr); } }
+@media (max-width: 767px) {
+  .billets .billet-e--cote { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: 1fr auto auto auto auto auto; gap: var(--esp-1) var(--esp-2); align-items: end; }
+  .billets .billet-e--cote .billet-e-txt { display: contents; }
+  .billets .billet-e--cote .billet-e-img { grid-column: 1; grid-row: 1 / span 3; }
+  .billets .billet-e--cote .etiquette { grid-column: 2; grid-row: 2; }
+  .billets .billet-e--cote .billet-e-titre { grid-column: 2; grid-row: 3; }
+  .billets .billet-e--cote .billet-e-chapo { grid-column: 1 / -1; grid-row: 4; margin-top: var(--esp-1); }
+  .billets .billet-e--cote .billet-e-meta { grid-column: 1 / -1; grid-row: 5; }
+  .billets .billet-e--cote .billet-e-txt > :nth-child(n+5) { grid-column: 1 / -1; grid-row: 6; }
+}
+.abo { display: grid; gap: var(--esp-1); margin-top: var(--esp-10); padding-top: var(--esp-4); border-top: 1px solid var(--rule); max-width: 60ch; }
+.abo p { margin: 0; color: var(--prose); }
+.abo .lien { font-size: var(--t-texte); }
+.abo .ic { color: var(--mute); }
+.pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--esp-1) var(--esp-4); padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.pages p { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+/* Le billet */
+.billet { font-size: var(--t-prose); line-height: 1.7; color: var(--prose); }
+.billet > * { margin-inline: auto; max-width: 640px; }
+.billet > .f-large, .billet > .f-ecran { max-width: none; }
+@media (min-width: 1024px) {
+  .billet { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--esp-3); }
+  .billet > * { grid-column: 4 / 10; max-width: none; margin-inline: 0; }
+  .billet > .f-large { grid-column: 2 / 12; }
+  .billet > .f-ecran { grid-column: 1 / 13; }
+  .billet > .f-cote { grid-column: 4 / 13; }
+}
+.billet p { margin-block: 0 1.1em; text-wrap: pretty; }
+.billet p a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.billet p a:hover { text-decoration-thickness: 2px; }
+@media (max-width: 767px) { .billet { font-size: 17px; } }
+.billet figure { margin-block: var(--esp-6); }
+.billet figure figure { margin: 0; }
+.billet .photo a { display: block; }
+.billet .photo a:hover + .cartel .cartel-t, .billet .photo a:focus-visible + .cartel .cartel-t { text-decoration: underline; text-underline-offset: 4px; }
+.billet figure.f-large > a img { width: min(100%, calc(84vh * 1.5)); height: auto; }
+.billet .photo--cote { --photo-h: min(80vh, 720px); }
+@media (max-width: 899px) { .billet .photo--cote img { width: auto; height: auto; max-width: 100%; max-height: 82vh; } }
+@media (min-width: 900px) { .billet .photo--cote { grid-template-columns: max-content minmax(220px, 300px); justify-content: start; } }
+.billet .diptyque { margin-block: var(--esp-8); }
+.billet .diptyque-t p { margin: 0; }
+.billet-ouv { display: grid; gap: var(--esp-4); padding-block: var(--esp-3) var(--esp-8); }
+.billet-ouv-t { display: flex; flex-direction: column; gap: var(--esp-2); }
+.billet-ouv-t > * { margin-block: 0; }
+.billet-ouv-t .chapo { max-width: 34ch; }
+.billet-ouv-photo { margin: 0; }
+.billet-ouv-photo img { width: auto; height: auto; max-width: 100%; max-height: 82vh; }
+@media (min-width: 900px) {
+  .billet-ouv { grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); align-items: stretch; column-gap: var(--esp-6); padding-top: var(--esp-4); }
+  .billet-ouv-t { padding-top: var(--esp-6); }
+  .billet-ouv-t .sommaire { margin-top: auto; }
+  .billet-ouv-photo { justify-self: end; }
+  .billet-ouv-photo img { width: auto; height: min(74vh, 680px); }
+}
+.auteurs { margin: var(--esp-1) 0 0; font-size: var(--t-texte); color: var(--ink); }
+.auteurs a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--field); }
+.billet-meta { margin: 0; font-size: var(--t-petit); line-height: 1.6; color: var(--mute); }
+.sommaire { display: flex; gap: var(--esp-3); align-items: center; margin-top: var(--esp-2); padding-top: var(--esp-2); border-top: 1px solid var(--rule); }
+.sommaire .carte { flex: none; width: 128px; height: auto; color: var(--mute); }
+.sommaire .carte .cote { fill: none; stroke: currentColor; }
+.sommaire .carte .trajet { fill: none; stroke: var(--ink); }
+.sommaire .carte .pt { fill: var(--ink); }
+.sommaire .carte text { fill: var(--ink); font-family: var(--sans); font-weight: 400; }
+/* Passe 5 : 116 px au téléphone (92 px avant), pour que les noms de ville (17 unités sur 150) restent à 13 px rendus (116 × 17 / 150 = 13,1). */
+@media (max-width: 479px) { .sommaire { gap: var(--esp-2); } .sommaire .carte { width: 116px; } }
+.sommaire-t { margin: 0 0 var(--esp-demi); font-size: var(--t-petit); color: var(--mute); }
+.sommaire ol { list-style: none; margin: 0; padding: 0; }
+.sommaire a { display: flex; align-items: baseline; gap: var(--esp-1); min-height: var(--cible); padding-block: 10px; color: var(--ink); }
+.sommaire a:hover .s-nom { text-decoration: underline; text-underline-offset: 4px; }
+.sommaire .s-n { min-width: 1.2em; color: var(--mute); font-variant-numeric: tabular-nums; }
+.sommaire .s-d { color: var(--mute); font-size: var(--t-petit); }
+.jour { margin-block: var(--esp-6) var(--esp-3); padding-top: var(--esp-3); border-top: 1px solid var(--rule); font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); color: var(--ink); scroll-margin-top: var(--esp-3); }
+.jour .s-n { margin-right: var(--esp-1); color: var(--mute); }
+.paire { display: flex; flex-wrap: wrap; gap: var(--esp-4) var(--esp-2); margin-block: var(--esp-6); }
+.paire > .photo { flex: var(--r) 1 calc(var(--r) * 240px); margin: 0; }
+.paire img { aspect-ratio: var(--r); }
+.citation { margin: var(--esp-5) 0; padding-left: var(--esp-3); border-left: 1px solid var(--field); }
+.citation blockquote { margin: 0; font: 300 var(--t-titre-3)/1.45 var(--sans); color: var(--ink); }
+.citation blockquote p { margin: 0; }
+.citation .trad { margin: var(--esp-1) 0 0; font-size: var(--t-texte); color: var(--prose); }
+.citation figcaption { margin-top: var(--esp-1); font-size: var(--t-petit); color: var(--mute); }
+.voisins { display: grid; gap: var(--esp-3); padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+@media (min-width: 768px) { .voisins { grid-template-columns: 1fr 1fr; } .voisins .suiv { text-align: right; justify-items: end; } }
+.voisins a { display: grid; gap: var(--esp-demi); min-height: var(--cible); padding-block: var(--esp-1); color: var(--ink); }
+.voisins .sens { font-size: var(--t-petit); color: var(--mute); }
+.voisins .t { font: 300 var(--t-titre-3)/1.3 var(--sans); }
+.voisins a:hover .t { text-decoration: underline; text-underline-offset: 5px; }
+.voisins .m { font-size: var(--t-petit); color: var(--mute); }
+/* Impression d'un billet (UX-F-35) : noir sur blanc quel que soit le thème, sans menu ni actions ; chaque cartel suivi de
+   son adresse (data-adresse) ; l'adresse du billet en pied (à poser par la page : main[data-adresse]). Les adresses en 10 pt
+   (13,3 px) : rien sous 13 px, même sur papier (passe 3). */
+@media print {
+  @page { margin: 16mm 18mm; }
+  body:has(.billet) { background: #fff; color: #111; }
+  body:has(.billet) :is(.sh, .skip, .ariane, .sommaire, .fin-actions, .fin, footer.sf) { display: none !important; }
+  .billet { display: block; font-size: 11pt; line-height: 1.55; color: #111; }
+  .billet > * { max-width: none; }
+  .billet figure, .billet-ouv-photo, .citation { break-inside: avoid; }
+  .billet img, .billet-ouv-photo img { max-height: 120mm !important; width: auto !important; }
+  .cartel[data-adresse]::after { content: attr(data-adresse); font-size: 10pt; color: #444; }
+  .billet-ouv { display: block; padding: 0; }
+  main[data-adresse]::after { content: attr(data-adresse); display: block; margin-top: 8mm; font-size: 10pt; }
+}
+
+/* ---------- Liste des carnets (MQ-11, <style> de la maquette) ---------- */
+.compte { margin: var(--esp-3) 0 0; font-size: var(--t-petit); color: var(--mute); }
+.compte .lien { display: inline; min-height: 0; }
+.nur-fr { margin: var(--esp-1) 0 0; font-size: var(--t-meta); color: var(--mute); }
+
+/* ---------- Un billet (MQ-12, <style> de la maquette) ---------- */
+.ariane { padding-top: var(--esp-2); }
+.fin-signe { margin-top: var(--esp-2); color: var(--ink); }
+.fin-actions { margin-block: var(--esp-4) 0; }
+.fin { margin-top: var(--esp-12); display: grid; gap: var(--esp-10); }
+.fin h2 { margin: 0 0 var(--esp-3); font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); color: var(--ink); }
+.fin-liens { margin-top: var(--esp-4); }
+/* Ouverture : en double page au bureau, le titre et le chapô en haut de la colonne de gauche, calés sur le milieu de la photo ;
+   les auteurs, la méta et le sommaire juste dessous. Au téléphone, l'ordre du document : titre, chapô, la photo, puis auteurs
+   et sommaire ; l'ordre de lecture et de tabulation est le même partout. */
+.billet-ouv-suite { display: flex; flex-direction: column; gap: var(--esp-2); }
+.billet-ouv-suite > * { margin-block: 0; }
+@media (max-width: 899px) { .billet-ouv { gap: var(--esp-3); grid-template-columns: minmax(0, 1fr); } }
+.billet-ouv .sommaire > div { min-width: 0; }
+@media (min-width: 900px) {
+  .billet-ouv { grid-template-rows: 1fr 1fr; row-gap: var(--esp-3); }
+  .billet-ouv-t { grid-column: 1; grid-row: 1; align-self: end; padding-top: 0; }
+  .billet-ouv-photo { grid-column: 2; grid-row: 1 / span 2; }
+  .billet-ouv-suite { grid-column: 1; grid-row: 2; align-self: start; }
+  .billet-ouv-suite .sommaire { margin-top: var(--esp-3); }
+}
+/* Sans couverture : le texte de l'ouverture prend la colonne. */
+.billet-ouv:not(:has(.billet-ouv-photo)) { grid-template-rows: auto; }
+@media (min-width: 900px) { .billet-ouv:not(:has(.billet-ouv-photo)) .billet-ouv-suite { grid-row: 2; } }
+/* Les noms des auteurs sous le titre : cible de 44 px de haut sans déplacer la ligne. */
+.billet-ouv-suite .auteurs a { padding-block: 11px; }
+@media print { .pages-note { display: none !important; } }
+
+/* ---------- Ce que la maquette ne montre pas, au dessin de la planche ---------- */
+/* Mention commerciale (B14) : en tête, avant le texte, une étiquette puis la phrase. */
+.mention { margin: 0; font-size: var(--t-petit); color: var(--prose); }
+.mention .etiquette { margin-right: var(--esp-1); }
+/* Réponse (droit de réponse, B82), après le billet, sous un filet. */
+.billet .reponse { margin-top: var(--esp-6); padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.billet .reponse h2 { margin: 0 0 var(--esp-1); }
+/* Le voyage lié (B11). */
+.billet .voyage-lie { margin-top: var(--esp-4); }
+/* Légende d'une photo dans le billet (réglage du billet) : sous la méta du cartel. */
+.cartel .cartel-l { display: block; margin-top: var(--esp-demi); font-size: var(--t-petit); line-height: 1.5; color: var(--prose); }
+/* Galerie de 3 à 12 photos dans le texte : les rangées de la planche, dans la colonne large. */
+.billet > .galerie { margin-block: var(--esp-6); }
+/* Citation simple (sans langue ni source), intertitres de niveau 3 et 4, listes, tableaux et code du texte. */
+.billet blockquote { margin: 0; }
+.billet h3, .billet h4 { margin: var(--esp-5) 0 var(--esp-2); font: 400 var(--t-titre-3)/1.3 var(--sans); color: var(--ink); scroll-margin-top: var(--esp-3); }
+.billet :is(ul, ol):not(.rangees) { margin-block: 0 1.1em; padding-left: 1.4em; }
+.billet :is(ul, ol):not(.rangees) > li { margin-block: .3em; }
+.billet .tableau { overflow-x: auto; margin-block: var(--esp-4); }
+.billet table { border-collapse: collapse; font-size: var(--t-texte); }
+.billet th, .billet td { padding: var(--esp-1) var(--esp-2); border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.billet pre { overflow-x: auto; margin-block: var(--esp-4); padding: var(--esp-2); background: var(--frame); color: var(--ink); font: 14px/1.6 var(--mono, monospace); }
+.billet code { font-family: var(--mono, monospace); font-size: .9em; }
+.billet hr { margin-block: var(--esp-6); border: 0; border-top: 1px solid var(--rule); }
+.billet :is(ul, ol):not(.rangees) li a, .billet td a, .billet .citation a, .billet .reponse a { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+/* Contrôles de la grille sur la page réelle (focus et cibles) : le lien de la couverture est un bloc (son contour suit la
+   photo), et le titre d'une carte, seul lien de la carte, se souligne aussi au focus (le cadre de la carte reste) ; au
+   toucher, il fait 44 px de haut au moins, même sur une ligne. */
+.billet-ouv-photo a { display: block; }
+.billet-ouv-photo a:hover + .cartel .cartel-t, .billet-ouv-photo a:focus-visible + .cartel .cartel-t { text-decoration: underline; text-underline-offset: 4px; }
+.billet-e-titre a:focus-visible { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+@media (max-width: 767px) { .billet-e-titre a { display: inline-flex; align-items: center; min-height: var(--cible); } }
+/* Un choix de filtre court (« Alle 4 ») garde 44 px de large au toucher. */
+.filtres .filtre { min-width: var(--cible); }

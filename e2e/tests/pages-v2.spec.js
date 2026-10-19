@@ -184,3 +184,92 @@ test('sans JavaScript : pages lisibles, sommaire, recherche par le formulaire, c
   }
   await ctx.close();
 });
+
+// Carnets (maquettes MQ-11 et MQ-12) : la liste et le premier billet, dans la même session d'aperçu ; ignoré si le serveur
+// n'a aucun billet publié (le jeu de démonstration n'en a pas : docs/wiki/Tests.md).
+async function carnet(browser, info, options = {}) {
+  const { ctx, page } = await apercu(browser, info, options);
+  const r = await page.goto('/carnet');
+  test.skip(r.status() === 404, 'aucun billet publié sur ce serveur');
+  return { ctx, page, billet: await page.locator('.billet-e-titre a').first().getAttribute('href') };
+}
+
+test.describe('Carnets, bureau', () => {
+  test.beforeEach(({}, info) => test.skip(info.project.name !== 'desktop', 'mesures au bureau : projet desktop'));
+
+  test('liste et billet : aucun débordement horizontal à 320, 412, 1032 × 1250, 1376 × 900 et 1440 px, en français et en allemand', async ({ browser }, info) => {
+    test.setTimeout(240000);
+    const { ctx, page, billet } = await carnet(browser, info);
+    const pages = ['/carnet', billet];
+    for (const [width, height] of [[320, 640], [412, 915], [1032, 1250], [1376, 900], [1440, 900]]) {
+      await page.setViewportSize({ width, height });
+      for (const url of [...pages, ...pages.map(u => `/de${u}`)]) {
+        await page.goto(url);
+        await expect(page.locator('link[href*="css/v2/carnet.css"]'), `${url} en v2`).toHaveCount(1);
+        const debord = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+        expect(debord, `${url} à ${width} × ${height}`).toBeLessThanOrEqual(0);
+      }
+    }
+    await ctx.close();
+  });
+
+  test('billet : sommaire, photos qui mènent à la visionneuse dans le contexte du billet, retour à la photo dans le texte ; une seule image prioritaire', async ({ browser }, info) => {
+    const { ctx, page, billet } = await carnet(browser, info, { viewport: { width: 1440, height: 900 } });
+    await page.goto(billet);
+    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.locator('img[fetchpriority="high"]')).toHaveCount(1);
+    const link = page.locator('.billet-ouv-photo a[href*="?carnet="], .billet a[href*="?carnet="]').first();
+    test.skip(!(await link.count()), 'billet sans photo dans le texte');
+    await link.click();
+    await expect(page).toHaveURL(/\/photo\/[^?]+\?carnet=/);
+    await expect(page.locator('.vis-pos')).toContainText('/');
+    // Sans script, le retour mène à la photo dans le texte (#photo-n) ; avec, la visionneuse revient en arrière dans
+    // l'historique (site.js) : la même page, au même endroit.
+    const back = await page.locator('.sh-retour').getAttribute('href');
+    expect(back).toMatch(/\/carnet\/[^#]+#photo-\d+$/);
+    await page.locator('.sh-retour').click();
+    await expect(page).toHaveURL(new RegExp(`${billet}(#photo-\\d+)?$`));
+    await expect(page.locator(`[id="${back.split('#')[1]}"]`)).toBeInViewport();
+    await ctx.close();
+  });
+
+  test('sans JavaScript : filtres en liens, billet lisible, menu en <details>', async ({ browser }, info) => {
+    const { ctx, page, billet } = await carnet(browser, info, { javaScriptEnabled: false, viewport: { width: 412, height: 915 } });
+    const filtre = page.locator('.filtres a.filtre').nth(1);
+    if (await filtre.count()) {
+      const href = await filtre.getAttribute('href');
+      await filtre.click();
+      await expect(page).toHaveURL(new RegExp(href.replace(/[?]/g, '\\?')));
+      await expect(page.locator('.filtres a[aria-current="page"]').first()).toBeVisible();
+    }
+    await page.goto(billet);
+    await expect(page.locator('.billet p').first()).toBeVisible();
+    await page.getByText('Menu', { exact: true }).first().click();
+    await expect(page.locator('.sh-panneau a[href$="/carnet"]')).toBeVisible();
+    await ctx.close();
+  });
+
+});
+
+test.describe('Carnets, téléphone', () => {
+  test.beforeEach(({}, info) => test.skip(info.project.name !== 'mobile', 'Pixel 7 : projet mobile'));
+
+  test('Pixel 7 : liste et billet sans débordement, couverture verticale à côté du titre, cibles de 44 px dans l’en-tête', async ({ browser }, info) => {
+    const { ctx, page, billet } = await carnet(browser, info);
+    for (const url of ['/carnet', billet, '/de/carnet']) {
+      await page.goto(url);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), url).toBeLessThanOrEqual(0);
+    }
+    await page.goto('/carnet');
+    const cote = page.locator('.billet-e--cote').first();
+    if (await cote.count()) {
+      const img = await cote.locator('img').boundingBox(), title = await cote.locator('.billet-e-titre').boundingBox();
+      expect(title.x).toBeGreaterThan(img.x + img.width - 1);
+    }
+    for (const el of await page.locator('.sh-bar a, .sh-bar summary').all()) {
+      const b = await el.boundingBox();
+      if (b && b.width) expect(b.height, await el.innerText()).toBeGreaterThanOrEqual(44);
+    }
+    await ctx.close();
+  });
+});

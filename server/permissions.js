@@ -46,6 +46,12 @@ export const PERMISSIONS = {
   'galeries.partager': { scoped: true },
   'taches.adresser': {},               // faire remonter un élément à traiter à un photographe
   'circuit.regler': {},                // régler, photographe par photographe, « publier sans validation » et « modifier ses photos publiées »
+  // Carnets (billets du site, server/carnet.js) : portée « les miennes » = les billets qu'il signe (l'un des auteurs).
+  'carnet.voir': { scoped: true },
+  'carnet.ecrire': { scoped: true },    // créer, écrire, régler et proposer ses billets ; supprimer un brouillon
+  'carnet.textes': {},                  // corriger les textes de tous les billets (relecture), sans les régler
+  'carnet.publier': { scoped: true },   // publier, programmer, renvoyer, retirer et republier (droit à part, comme les photos)
+  'carnet.publies.modifier': { scoped: true }, // modifier un billet déjà publié (réglable par photographe)
   'site.textes': {},
   'site.apparence': {},
   'site.filigrane': {},
@@ -74,6 +80,7 @@ export const ROLES = {
       'personnes.voir': OWN, 'personnes.gerer': OWN, 'personnes.refus': OWN, 'personnes.demandes': OWN, 'personnes.offrir': OWN,
       'statistiques.voir': OWN,
       'galeries.voir': OWN, 'galeries.gerer': OWN, 'galeries.partager': OWN,
+      'carnet.voir': OWN, 'carnet.ecrire': OWN, 'carnet.publies.modifier': OWN,
     },
   },
   moderateur: {
@@ -81,10 +88,12 @@ export const ROLES = {
     // Le modérateur ne retouche pas les photos : il valide, programme, dépublie, ou renvoie avec une remarque. Ni lui ni le
   // relecteur n'ont accès aux galeries privées (décision D16 de l'étude).
     perms: all(['admin.acceder', 'photos.voir', 'photos.publier', 'series.gerer', 'instagram.voir', 'instagram.file',
-      'instagram.publier', 'signalements.traiter', 'statistiques.voir', 'taches.adresser', 'circuit.regler', 'site.textes']),
+      'instagram.publier', 'signalements.traiter', 'statistiques.voir', 'taches.adresser', 'circuit.regler', 'site.textes',
+      'carnet.voir', 'carnet.publier']),
   },
   // Le relecteur corrige les textes, y compris ceux des photos déjà en ligne (photos.textes reste sa seule écriture).
-  relecteur: { label: 'Relecteur', perms: all(['admin.acceder', 'photos.voir', 'photos.textes', 'photos.publiees.modifier', 'site.textes']) },
+  relecteur: { label: 'Relecteur', perms: all(['admin.acceder', 'photos.voir', 'photos.textes', 'photos.publiees.modifier', 'site.textes',
+    'carnet.voir', 'carnet.textes', 'carnet.publies.modifier']) },
 };
 export const SCOPES = { ALL, OWN };
 
@@ -94,6 +103,8 @@ export const ADJUSTABLE = {
   'photos.publier': 'Publier ses photos sans validation',
   'photos.publiees.modifier': 'Modifier ses photos une fois publiées',
   'instagram.file': 'Mettre ses photos dans la file Instagram sans validation',
+  'carnet.publier': 'Publier ses billets sans validation',
+  'carnet.publies.modifier': 'Modifier ses billets une fois publiés',
 };
 // Droits d'un ensemble de rôles : permission → « tout » ou « les miennes » (la plus large l'emporte), puis les
 // réglages du compte (adjust : { add: [...], remove: [...] }, seulement des droits de ADJUSTABLE). Ces réglages sont

@@ -1,0 +1,18 @@
+<% /* Billet retiré par ses auteurs (410, B49) : la page le dit, et mène à la liste des billets s'il en reste, sinon à l'accueil.
+      Aucune donnée du billet n'est montrée (ni titre ni raison). */ %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), description: '' }) %>
+<% const t = it.t, tc = it.tc, ic = it.v2.ic; %>
+<%~ include('./_entete', { ...it, courant: 'carnets' }) %>
+<main id="contenu">
+  <div class="wrap tete-page">
+    <h1 class="titre-page"><%= tc.retired %></h1>
+    <p class="chapo"><%= it.v2.typo(tc.retiredText) %></p>
+  </div>
+  <div class="wrap introuvable">
+    <ul class="liste-liens">
+<% if (it.totalAll) { %>      <li><a href="<%= it.u('/carnet') %>"><span class="liste-liens-n"><%= tc.allPosts(it.totalAll) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+<% } %>      <li><a href="<%= it.u('/') %>#galerie"><span class="liste-liens-n"><%= t.backHome %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+    </ul>
+  </div>
+</main>
+<%~ include('./_pied', it) %>

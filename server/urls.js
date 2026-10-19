@@ -9,7 +9,10 @@ export function galleryUrl({ regard, serie, ordre } = {}) {
   return o ? `${base}?ordre=${o}` : base;
 }
 
-export function photoUrl(slug, { regard, serie, ordre } = {}) {
+// carnet : la photo ouverte depuis un billet des Carnets (?carnet=<billet>) : retour au billet, voisines du billet ; il
+// remplace les filtres de la galerie.
+export function photoUrl(slug, { regard, serie, ordre, carnet } = {}) {
+  if (carnet) return `/photo/${encodeURIComponent(slug)}?carnet=${encodeURIComponent(carnet)}`;
   const qs = new URLSearchParams();
   if (regard) qs.set('regard', regard);
   if (serie) qs.set('serie', serie);

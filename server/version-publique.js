@@ -24,6 +24,7 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
   const write = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
   const previews = new Map();                // empreinte du jeton de session → échéance de la session
   const known = new Map();                   // gabarit → existe-t-il en v2 ? (gardé en production seulement)
+  const knownV1 = new Map();                 // gabarit → existe-t-il en v1 ?
 
   const setting = () => {
     let v = null;
@@ -67,6 +68,15 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
       if (cache && known.has(template)) return known.get(template);
       const ok = fs.existsSync(path.join(viewsDir, 'v2', `${template}.eta`));
       if (cache) known.set(template, ok);
+      return ok;
+    },
+    // Le gabarit v1 de cette page existe-t-il ? Une page née avec la v2 (les Carnets) n'en a pas : en v1, elle n'existe pas
+    // (404), et le rendu ne tombe jamais sur un gabarit absent.
+    hasV1(template) {
+      if (!/^[a-z][\w-]*$/i.test(template)) return true;
+      if (cache && knownV1.has(template)) return knownV1.get(template);
+      const ok = fs.existsSync(path.join(viewsDir, `${template}.eta`));
+      if (cache) knownV1.set(template, ok);
       return ok;
     },
   };

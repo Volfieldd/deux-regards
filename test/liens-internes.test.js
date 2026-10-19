@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { setup } from './helpers.js';
 import { TRAP_PATH } from '../server/securite/piege.js';
 import { search } from '../server/geo/cities.js';
+import { billet } from './carnet-helpers.js';
 
 // Aucun lien interne vers une page introuvable (registre docs/etudes/vigie-besoins-des-briques.md, BV-5) : la Vigie
 // compte les 404 par adresse (malicious_excess_404, score d'adresse DS22) ; un lien cassé du site en ferait compter à des
@@ -94,7 +95,9 @@ async function crawl(app, { origin, starts = ['/', '/en', '/de'], cookie = null,
   return { broken, pages, urls: seen.size, trapSeen, seen };
 }
 
-// Site de démonstration avec toutes les pages facultatives ouvertes : carte, recherche, mots-clés, un voyage publié.
+// Site de démonstration avec toutes les pages facultatives ouvertes : carte, recherche, mots-clés, un voyage publié, et des
+// billets des Carnets (v2 seulement : en v1, aucune page n'y mène) : publiés, traduits, liés entre eux, à une série et au
+// voyage ; un billet retiré et un brouillon, vers lesquels aucun lien ne doit mener.
 async function world(t, version) {
   const c = await setup(t, { seeded: true });
   await c.app.ready();
@@ -112,6 +115,12 @@ async function world(t, version) {
   c.app.trips.update(trip, { intro: 'Deux jours.' });
   c.app.trips.addDays(trip, [{ author_id: ids[0].author_id, day: '2026-09-01' }, { author_id: ids[1].author_id, day: '2026-09-02' }]);
   c.db.prepare('UPDATE trips SET public = 1 WHERE id = ?').run(trip);
+  const first = await billet(c, { title: 'Lisbonne et Porto', authors: ['sebastien', 'julien'], body: `Texte.\n\nphoto:${ids[0].id}\n\n## Lisbonne\n\nphoto:${ids[1].id}\nphoto:${ids[2].id}\n\n## Porto\n\nVoir [la série](serie:1) et [le voyage](voyage:${trip}).\n\nphoto:${ids[3].id}\nphoto:${ids[4].id}\nphoto:${ids[5].id}`,
+    extra: { trip_id: trip, title_en: 'Lisbon and Porto', dek_en: 'Two days.', body_en: `Text.\n\nphoto:${ids[0].id}`, langs: ['en'] } });
+  await billet(c, { title: 'Notes d’atelier', rubrique: 'atelier', authors: ['julien'], body: `Lire [le billet](carnet:${first.id}).\n\nphoto:${ids[6].id}` });
+  const gone = await billet(c, { title: 'Billet retiré', body: `photo:${ids[7].id}` });
+  c.app.carnet.retire(gone.id, { sub: 'x', name: 'x' }, 'test');
+  await billet(c, { title: 'Brouillon', publish: false });
   c.app.publicVersion.save(version);
   // Une galerie privée ouverte, avec un accès : aucune page publique n'y mène (G35).
   const space = c.app.spaces.createSpace({ title: 'Galerie privée de test', closes: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10) }, { authorId: ids[0].author_id, by: 'test' });
@@ -136,6 +145,14 @@ for (const version of ['v1', 'v2']) {
     }
     assert.ok([...r.seen.keys()].some(u => u.startsWith('/media/')), 'images suivies');
     assert.ok([...r.seen.keys()].some(u => u.startsWith('/voyage/')), 'voyage suivi');
+    // Les Carnets : parcourus en v2 (liste, filtres, billets, traduction, visionneuse ?carnet=, flux), jamais en v1.
+    const carnet = [...r.seen.keys()].filter(u => /^(?:\/en|\/de)?\/carnet|[?&]carnet=/.test(u));
+    if (version === 'v2') {
+      for (const u of ['/carnet', '/en/carnet', '/de/carnet', '/carnet/lisbonne-et-porto', '/en/carnet/lisbonne-et-porto', '/carnet/notes-d-atelier', '/carnet?rubrique=atelier', '/carnet?par=julien', '/carnet/flux.xml', '/carnet/lisbonne-et-porto/partager'])
+        assert.ok(r.seen.has(u), `${u} parcourue`);
+      assert.ok(carnet.some(u => u.startsWith('/photo/') && u.includes('?carnet=lisbonne-et-porto')), 'visionneuse dans le contexte du billet');
+      assert.ok(!carnet.some(u => /billet-retire|\/carnet\/brouillon/.test(u)), 'aucun lien vers un billet retiré ou un brouillon');
+    } else assert.deepEqual(carnet, [], 'v1 : aucun lien vers les Carnets');
     assert.ok(r.pages > 50, `${r.pages} pages lues`);
     // Bien la version demandée (feuilles de style de la v2 seulement en v2).
     assert.equal([...r.seen.keys()].some(u => u.startsWith('/static/css/v2/')), version === 'v2');

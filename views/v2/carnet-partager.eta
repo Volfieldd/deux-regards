@@ -1,0 +1,14 @@
+<% /* « Partager ce billet » sans script (/carnet/<slug>/partager, B57) : la fenêtre de partage de la v2 (views/v2/_partage.eta)
+      en page, sous l'en-tête Contexte qui ramène au billet. Des liens ; avec le script, « Copier le lien » passe par
+      POST /carnet/<slug>/partage, qui vérifie l'envoi et ne compte rien. */ %>
+<% const t = it.t, s = it.share.s, back = it.u(`/carnet/${it.post.slug}`); %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), formulaires: true }) %>
+<%~ include('./_contexte', { ...it, retour: { href: back, label: it.title } }) %>
+<main id="contenu" class="wrap">
+  <div class="partage-page" data-share-page data-share-url="<%= it.share.url %>" data-share-title="<%= it.share.title %>" data-share-count="<%= it.u(`/carnet/${it.post.slug}/partage`) %>">
+    <h1 class="titre-page"><%= it.tc.share %></h1>
+    <%~ include('./_partage', it) %>
+    <p class="pf-suite"><a class="lien" href="<%= back %>"><%= it.tc.shareBack %></a></p>
+  </div>
+</main>
+<%~ include('./_pied', it) %>

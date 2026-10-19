@@ -1,0 +1,64 @@
+<% /* Carnets, la liste des billets (maquette MQ-11) : en-tête Site, « Carnets » actif ; un H1 et une promesse qui nomme les
+      deux voix ; des filtres qui sont des liens et qui comptent (Rubrique, Regard : décision 8) ; les billets, du plus récent
+      au plus ancien, chacun avec sa couverture au format de la photo (une verticale se pose à côté du texte, .billet-e--cote) ;
+      la pagination au-delà de 12 billets ; s'abonner au flux. Le titre est le seul lien, étendu à toute la carte. */ %>
+<% layout('./layout', { pageTitle: it.v2.typo(it.pageTitle), description: it.v2.typo(it.description) }) %>
+<% const t = it.t, tc = it.tc, v = it.v2, ic = v.ic, f = it.filter;
+   const cur = (a, b) => ((a || null) === (b || null) ? ' aria-current="page"' : '');
+   const lang = it.lang;
+   // sizes d'une couverture (planche § 21) : verticale à côté du texte (2/5 de la colonne, 253 px au bureau), horizontale à
+   // hauteur commune (300 px, 380 au bureau), dans la largeur de sa colonne.
+   const sizesOf = g => (g.vertical
+     ? '(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 42px), (min-width: 768px) calc(40vw - 45px), calc(42vw - 27px)'
+     : `(min-width: 1280px) min(${Math.round(380 * g.r)}px, calc(50vw - 104px)), (min-width: 900px) min(${Math.round(300 * g.r)}px, calc(50vw - 72px)), (min-width: 768px) min(${Math.round(520 * g.r)}px, calc(100vw - 80px)), min(${Math.round(300 * g.r)}px, calc(100vw - 48px))`); %>
+<%~ include('./_entete', { ...it, courant: 'carnets' }) %>
+<main id="contenu" class="wrap">
+  <div class="tete-page">
+    <h1 class="titre-page"><%= tc.title %></h1>
+    <p class="chapo"><%= v.typo(tc.lead) %> <a href="<%= it.u('/a-propos') %>"><%= v.typo(tc.who) %></a></p>
+  </div>
+<% if (it.rubriques.length > 2 || it.regards.length > 2) { %>
+  <nav class="filtres" aria-label="<%= tc.filters %>">
+<% if (it.rubriques.length > 2) { %>    <div class="filtres-groupe">
+      <p class="etiquette" id="f-rub"><%= tc.rubrique %></p>
+      <ul aria-labelledby="f-rub">
+<% it.rubriques.forEach(r => { %>        <li><a class="filtre" href="<%= r.href %>"<%~ cur(r.slug, f.rubrique) %>><span class="filtre-nom"><%= v.typo(r.name) %></span> <span class="filtre-n"><%= r.count %></span></a></li>
+<% }) %>      </ul>
+    </div>
+<% } %><% if (it.regards.length > 2) { %>    <div class="filtres-groupe">
+      <p class="etiquette" id="f-reg"><%= tc.regard %></p>
+      <ul aria-labelledby="f-reg">
+<% it.regards.forEach(r => { %>        <li><a class="filtre" href="<%= r.href %>"<%~ cur(r.slug, f.par) %>><span class="filtre-nom"><%= r.name %></span> <span class="filtre-n"><%= r.count %></span></a></li>
+<% }) %>      </ul>
+    </div>
+<% } %>  </nav>
+<% } %>
+  <p class="compte"><%= v.typo(it.author ? tc.countBy(it.total, it.author.name, it.two) : f.rubrique ? tc.countIn(it.total, it.rubriques.find(r => r.slug === f.rubrique)?.name || '') : tc.count(it.total)) %><% if (f.rubrique || f.par) { %> <a class="lien" href="<%= it.u('/carnet') %>"><%= tc.seeAll(it.totalAll) %></a><% } %></p>
+  <ol class="billets" aria-label="<%= it.author ? tc.listBy(it.author.name) : tc.list %>">
+<% it.list.forEach((b, i) => { const g = b.cover ? v.fmt(b.cover) : null; const la = b.onlyFr ? ' lang="fr"' : ''; %>
+    <li>
+      <article class="billet-e<%= g && g.vertical ? ' billet-e--cote' : '' %>" aria-labelledby="b-<%= b.slug %>">
+        <div class="billet-e-txt">
+          <p class="etiquette"><%= v.typo(b.rubrique) %></p>
+          <h2 class="billet-e-titre" id="b-<%= b.slug %>"<%~ la %>><a href="<%= it.u(`/carnet/${b.slug}`) %>"<%~ b.onlyFr ? ' hreflang="fr"' : '' %>><%~ v.nobr(v.typo(b.title)) %></a></h2>
+<% if (b.dek) { %>          <p class="billet-e-chapo"<%~ la %>><%= v.typo(b.dek) %></p>
+<% } %>          <p class="billet-e-meta"><b><%= b.by %></b>&nbsp;· <time datetime="<%= b.day %>"><%= b.date %></time><% if (b.photos) { %>&nbsp;· <%= it.v2.typo(t.photos(b.photos)).replace(' ', '\u00a0') %><% } %>&nbsp;· <%= tc.minutes(b.minutes).replace(/ /g, '\u00a0') %></p>
+<% if (b.onlyFr) { %>          <p class="nur-fr"><%= tc.onlyFr %></p>
+<% } %>        </div>
+<% if (b.cover) { %>        <figure class="billet-e-img <%= g.cls %>"><%~ it.picture(b.cover, { sizes: sizesOf(g), eager: i === 0, alt: '' }) %></figure>
+<% } %>      </article>
+    </li>
+<% }) %>  </ol>
+<% if (it.pages > 1) { %>
+  <nav class="pages" aria-label="<%= tc.pagesLabel %>">
+    <p><%= v.typo(tc.pages(it.page, it.pages, it.from, it.to, it.total)) %></p>
+<% if (it.prevHref) { %>    <a class="lien" href="<%= it.prevHref %>" rel="prev"><%~ ic('retour', { size: 18 }) %><%= tc.newer %></a>
+<% } %><% if (it.nextHref) { %>    <a class="lien" href="<%= it.nextHref %>" rel="next"><%= tc.older %><%~ ic('fleche', { size: 18 }) %></a>
+<% } %>  </nav>
+<% } %>
+  <div class="abo">
+    <p><%= v.typo(tc.abo) %></p>
+    <a class="lien" href="<%= it.feed.href %>" type="application/atom+xml"><%~ ic('flux', { size: 18 }) %><%= v.typo(tc.aboLink) %></a>
+  </div>
+</main>
+<%~ include('./_pied', it) %>
