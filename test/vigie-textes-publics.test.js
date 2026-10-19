@@ -69,6 +69,14 @@ test('textes publiés : un contact gagné est signalé sans le texte ; le nombre
   assert.deepEqual(emitted.filter(e => e.detail?.objet === 'texte_public').map(e => `${e.detail.champ}:${e.detail.ajout}`).sort(),
     ['reglages.about_en:email', 'reglages.brand_subtitle:telephone', 'reglages.intro:lien']);
   assert.equal(emitted.find(e => e.detail?.objet === 'textes_publics')?.detail.textes, 3);
+  // Voyage : seulement en ligne (public = 1).
+  emitted.length = 0;
+  const trip = db.prepare("INSERT INTO trips (slug, name, intro, public, created_at) VALUES ('essai-vigie', 'Essai', 'Réservez sur https://voyage-piege.example', 0, 0)").run().lastInsertRowid;
+  app.securite.watchPublication('essai');
+  assert.equal(emitted.length, 0, 'voyage hors ligne : rien');
+  db.prepare('UPDATE trips SET public = 1 WHERE id = ?').run(trip);
+  app.securite.watchPublication('essai');
+  assert.deepEqual(emitted.filter(e => e.detail?.objet === 'texte_public').map(e => `${e.detail.champ}#${e.detail.id}:${e.detail.domaine}`), [`trips.intro#${trip}:voyage-piege.example`]);
   // Le reste de la marque (mode, fichiers) n'est pas un texte : rien.
   emitted.length = 0;
   set.run('brand', JSON.stringify({ mode: 'logo', subtitle: 'tél. +33 6 12 34 56 78' }));
