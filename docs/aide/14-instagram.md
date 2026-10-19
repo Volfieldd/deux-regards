@@ -19,6 +19,8 @@ La mise en place se fait une seule fois : un **compte Instagram professionnel**,
 - à droite, les photos **en échec** (avec **Réessayer**) et les **10 dernières publications** ;
 - en bas, le **journal** : mises en file, envois, étapes, publications, échecs, pauses, reprises, demandes de republication. Pour chaque événement : la date, l’état (✓ réussi, ✕ échec, ▲ attention, info), la photo et qui l’a déclenché (sinon « automatique »). Le journal est gardé 90 jours.
 
+**En admin v2**, la page commence par la file, les propositions des photographes (pour qui gère toute la file) et les échecs ; le compte, le rythme et la consommation sont à côté, les réglages et le journal dessous. **↑** et **↓** déplacent une photo sans recharger la page (**Défaire** la remet) ; **Publier maintenant…**, **Retirer…** et **Déconnecter…** demandent d’abord une confirmation ; chaque réglage s’enregistre quand vous le quittez, avec **Défaire**.
+
 Les **réglages** sont repliés sous le journal. Le compte (connexion, déconnexion), **Relever maintenant** et les réglages ne sont montrés qu'aux comptes qui les gèrent (administrateurs) ; le modérateur voit la file, les échecs, le journal et le rythme, avec la mention « gérés par un administrateur ».
 
 Une photo bloquée par un accord affiche sa raison (« bloquée : J-0042 refuse la publication ») au photographe et aux administrateurs ; le modérateur, qui ne voit pas les personnes, lit seulement « bloquée par un accord » (ou « à vérifier : un accord manque »), ici comme sur la fiche.

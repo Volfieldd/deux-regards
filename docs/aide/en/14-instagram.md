@@ -19,6 +19,8 @@ Setting it up is done only once: a **professional Instagram account**, a **Meta 
 - on the right, the **failed** photos (with **Try again**) and the **10 latest posts**;
 - at the bottom, the **log**: queueing, sending, steps, posts, failures, pauses, resumes, repost requests. For each event: the date, the status (✓ success, ✕ failed, ▲ warning, info), the photo and who triggered it (otherwise “automatic”). The log is kept 90 days.
 
+**In admin v2**, the page starts with the queue, the photographers’ proposals (for whoever manages the whole queue) and the failures; the account, the pace and the usage are alongside, the settings and the log below. **↑** and **↓** move a photo without reloading the page (**Undo** puts it back); **Publish now…**, **Remove…** and **Disconnect…** ask for a confirmation first; each setting is saved when you leave it, with **Undo**.
+
 The **settings** are folded below the log. The account (connect, disconnect), **Collect now** and the settings are only shown to the accounts that manage them (administrators); the moderator sees the queue, the failures, the log and the rhythm, with the note “managed by an administrator”.
 
 A photo blocked by a consent shows its reason (“blocked: J-0042 refuses publication”) to the photographer and administrators; the moderator, who does not see people, only reads “blocked by a consent” (or “to check: a consent is missing”), here as on the photo’s page.
