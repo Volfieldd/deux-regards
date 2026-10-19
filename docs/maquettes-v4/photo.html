@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Une photographie — Nicephos · Maquette</title>
+<link rel="stylesheet" href="chambre.css">
+<script defer src="data.js">
+</script>
+<script defer src="chambre.js">
+</script>
+</head>
+<body class="photo" data-piste="obscura">
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="prototype">
+<a href="index.html">Études V4 · chambre noire</a>
+<span>Images générées · lieux et récits fictifs</span>
+</div>
+<header class="header">
+<a class="brand" href="index.html" aria-label="Nicephos, les six propositions">nicephos<span class="brand-dot">.</span>
+</a>
+<button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu</button>
+<nav id="navigation" aria-label="Navigation principale">
+<a href="galerie.html">Photographies</a>
+<a href="voyages.html">Voyages</a>
+<a href="carnets.html">Carnets</a>
+<button id="calm" aria-pressed="false">Mode calme</button>
+</nav>
+</header>
+<main id="main">
+<section class="viewer">
+<div class="viewer-toolbar">
+<a id="back" href="galerie.html">← La collection</a>
+<span id="photo-counter" class="mono">
+</span>
+<button id="enlarge">Agrandir ⤢</button>
+</div>
+<div class="viewer-image">
+<button id="photo-prev" aria-label="Photo précédente">←</button>
+<img id="main-image" alt="" fetchpriority="high">
+<button id="photo-next" aria-label="Photo suivante">→</button>
+</div>
+<div class="viewer-caption">
+<div>
+<p id="photo-theme" class="eyebrow">
+</p>
+<h1 id="photo-title">
+</h1>
+<p id="photo-note">
+</p>
+</div>
+<p class="generated-label">Image générée pour cette étude.<br>Aucun lieu ni auteur réel attribué.</p>
+</div>
+</section>
+<section class="photo-more">
+<div>
+<p class="eyebrow">LE LIEU COMME POINT DE DÉPART</p>
+<h2>Quelque part,<br>
+<em>dans le récit.</em>
+</h2>
+<div class="mini-map">
+<svg viewBox="0 0 400 190" role="img" aria-labelledby="map-label">
+<title id="map-label">Schéma fictif : le rivage, la forêt puis les cimes. Aucune coordonnée réelle.</title>
+<path class="map-land" d="M0 20Q100 45 90 110T200 190H400V0Z"/>
+<path class="map-path" d="M90 85 Q155 130 215 74 T340 55"/>
+<circle cx="90" cy="85" r="5"/>
+<circle cx="215" cy="74" r="5"/>
+<circle cx="340" cy="55" r="5"/>
+<text x="42" y="66">Rivage</text>
+<text x="190" y="54">Forêt</text>
+<text x="314" y="34">Cimes</text>
+</svg>
+<p>Carte schématique de démonstration · lieux imaginaires</p>
+</div>
+<a href="voyage.html">Retrouver le voyage ↗</a>
+</div>
+<div>
+<p class="eyebrow">UNE IMAGE EN APPELLE UNE AUTRE</p>
+<h2>Prolonger <em>le regard.</em>
+</h2>
+<div class="related" id="related">
+</div>
+<p class="muted">Sélection éditoriale de la collection imaginaire.</p>
+</div>
+</section>
+</main>
+<footer>
+<a class="brand small" href="index.html">nicephos.</a>
+<span>Étude de direction artistique · images de substitution générées</span>
+<div>
+<a href="index.html">Les six pistes</a>
+<a href="admin.html">L’atelier</a>
+</div>
+</footer>
+<dialog id="lightbox" aria-label="Image agrandie">
+<button class="close-lightbox" autofocus>Fermer ×</button>
+<img alt="">
+<p>
+</p>
+</dialog>
+<p class="sr-only" id="announcement" role="status">
+</p>
+</body>
+</html>

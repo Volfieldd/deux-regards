@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Panoramique — Nicephos · Maquette</title>
+<link rel="stylesheet" href="chambre.css">
+<script defer src="data.js">
+</script>
+<script defer src="chambre.js">
+</script>
+</head>
+<body class="panoramique" data-piste="panoramique">
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="prototype">
+<a href="index.html">Études V4 · chambre noire</a>
+<span>Images générées · lieux et récits fictifs</span>
+</div>
+<header class="header">
+<a class="brand" href="index.html" aria-label="Nicephos, les six propositions">nicephos<span class="brand-dot">.</span>
+</a>
+<button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu</button>
+<nav id="navigation" aria-label="Navigation principale">
+<a href="galerie.html">Photographies</a>
+<a href="voyages.html">Voyages</a>
+<a href="carnets.html">Carnets</a>
+<button id="calm" aria-pressed="false">Mode calme</button>
+</nav>
+</header>
+<main id="main">
+<section class="cinema">
+<div class="cinema-top">
+<h1>Grand dehors.</h1>
+<span class="mono">02 / PANORAMIQUE</span>
+</div>
+<a class="screen" href="photo.html?id=cimes" data-main-photo>
+<img src="assets/cimes.webp" alt="Des sommets enneigés et un lac reflètent un ciel bleu et abricot au crépuscule." width="1536" height="1024" fetchpriority=high>
+</a>
+<div class="cinema-caption">
+<div>
+<p class="eyebrow">Une traversée de la lumière</p>
+<h2 id="frame-title">Avant que le jour s’efface</h2>
+</div>
+<a href="photo.html?id=cimes" data-screen-link class="round-link" aria-label="Ouvrir l’image entière">↗</a>
+</div>
+<div class="filmstrip" aria-label="Choisir une image">
+<button data-frame="maree" aria-pressed="false">
+<img src="assets/maree.webp" alt="Une vague argentée se déploie sur une plage de sable noir, sous un ciel de fin de jour." width="1536" height="1024" loading=lazy>
+<span class="mono">01 — Littoral</span>
+</button>
+<button data-frame="dune" aria-pressed="false">
+<img src="assets/dune.webp" alt="Une dune ocre dessine une arête entre la lumière et une ombre brune." width="1536" height="1024" loading=lazy>
+<span class="mono">02 — Désert</span>
+</button>
+<button data-frame="foret" aria-pressed="false">
+<img src="assets/foret.webp" alt="Un sentier traverse une forêt de grands arbres dont les cimes disparaissent dans la brume." width="1024" height="1536" loading=lazy>
+<span class="mono">03 — Forêt</span>
+</button>
+<button data-frame="cimes" aria-pressed="true">
+<img src="assets/cimes.webp" alt="Des sommets enneigés et un lac reflètent un ciel bleu et abricot au crépuscule." width="1536" height="1024" loading=lazy>
+<span class="mono">04 — Montagne</span>
+</button>
+</div>
+</section>
+<section class="onward">
+<div>
+<p class="eyebrow">Prolonger le regard</p>
+<h2>Il y a une histoire<br>
+<em>derrière chaque image.</em>
+</h2>
+</div>
+<a href="voyages.html" class="story-link">
+<img src="assets/cimes.webp" alt="Des sommets enneigés et un lac reflètent un ciel bleu et abricot au crépuscule." width="1536" height="1024" loading=lazy>
+<span>
+<small>Les voyages</small>Suivre le chemin <b>↗</b>
+</span>
+</a>
+<a href="carnets.html" class="story-link">
+<img src="assets/foret.webp" alt="Un sentier traverse une forêt de grands arbres dont les cimes disparaissent dans la brume." width="1024" height="1536" loading=lazy>
+<span>
+<small>Les carnets</small>Prendre le temps <b>↗</b>
+</span>
+</a>
+</section>
+<aside class="direction-note">
+<p class="eyebrow">Piste 02 · Panoramique</p>
+<p>Un écran large, une bande de vues, une navigation de salle de cinéma. Aucun défilement automatique.</p>
+<details>
+<summary>L’intention et le compromis</summary>
+<p>Le plus immersif. Le cadrage d’accueil est panoramique ; la visionneuse restitue toujours l’image entière.</p>
+</details>
+<a href="index.html">Comparer les six pistes ↗</a>
+</aside>
+</main>
+<footer>
+<a class="brand small" href="index.html">nicephos.</a>
+<span>Étude de direction artistique · images de substitution générées</span>
+<div>
+<a href="index.html">Les six pistes</a>
+<a href="admin.html">L’atelier</a>
+</div>
+</footer>
+<dialog id="lightbox" aria-label="Image agrandie">
+<button class="close-lightbox" autofocus>Fermer ×</button>
+<img alt="">
+<p>
+</p>
+</dialog>
+<p class="sr-only" id="announcement" role="status">
+</p>
+</body>
+</html>

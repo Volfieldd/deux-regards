@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Photographies — Nicephos · Maquette</title>
+<link rel="stylesheet" href="chambre.css">
+<script defer src="data.js">
+</script>
+<script defer src="chambre.js">
+</script>
+</head>
+<body class="gallery" data-piste="obscura">
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="prototype">
+<a href="index.html">Études V4 · chambre noire</a>
+<span>Images générées · lieux et récits fictifs</span>
+</div>
+<header class="header">
+<a class="brand" href="index.html" aria-label="Nicephos, les six propositions">nicephos<span class="brand-dot">.</span>
+</a>
+<button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu</button>
+<nav id="navigation" aria-label="Navigation principale">
+<a href="galerie.html">Photographies</a>
+<a href="voyages.html">Voyages</a>
+<a href="carnets.html">Carnets</a>
+<button id="calm" aria-pressed="false">Mode calme</button>
+</nav>
+</header>
+<main id="main">
+<section class="page-intro">
+<p class="eyebrow">LA COLLECTION IMAGINAIRE</p>
+<h1>Prendre le temps<br>
+<em>de regarder.</em>
+</h1>
+</section>
+<form id="filters" role="search">
+<label for="query">Chercher une image<input type="search" id="query" placeholder="Un titre, une matière…">
+</label>
+<label for="theme">Un univers<select id="theme">
+<option value="">Tous les univers</option>
+<option>Littoral</option>
+<option>Désert</option>
+<option>Forêt</option>
+<option>Montagne</option>
+</select>
+</label>
+<button type="reset">Tout voir</button>
+</form>
+<p class="results" id="result-count" role="status">4 images</p>
+<div id="gallery-grid" class="gallery-grid">
+</div>
+<div class="empty" id="empty" hidden>
+<h2>Aucune image pour cette recherche.</h2>
+<p>Essayez un autre mot ou revenez à la collection entière.</p>
+<button id="reset-search">Réinitialiser la recherche</button>
+</div>
+</main>
+<footer>
+<a class="brand small" href="index.html">nicephos.</a>
+<span>Étude de direction artistique · images de substitution générées</span>
+<div>
+<a href="index.html">Les six pistes</a>
+<a href="admin.html">L’atelier</a>
+</div>
+</footer>
+<dialog id="lightbox" aria-label="Image agrandie">
+<button class="close-lightbox" autofocus>Fermer ×</button>
+<img alt="">
+<p>
+</p>
+</dialog>
+<p class="sr-only" id="announcement" role="status">
+</p>
+</body>
+</html>

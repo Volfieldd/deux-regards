@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>L’atelier — Nicephos · Maquette</title>
+<link rel="stylesheet" href="chambre.css">
+<script defer src="data.js">
+</script>
+<script defer src="chambre.js">
+</script>
+</head>
+<body class="admin" data-piste="obscura">
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="prototype">
+<a href="index.html">Études V4 · chambre noire</a>
+<span>Images générées · lieux et récits fictifs</span>
+</div>
+<header class="header">
+<a class="brand" href="index.html" aria-label="Nicephos, les six propositions">nicephos<span class="brand-dot">.</span>
+</a>
+<button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu</button>
+<nav id="navigation" aria-label="Navigation principale">
+<a href="galerie.html">Photographies</a>
+<a href="voyages.html">Voyages</a>
+<a href="carnets.html">Carnets</a>
+<button id="calm" aria-pressed="false">Mode calme</button>
+</nav>
+</header>
+<main id="main">
+<div class="admin-layout">
+<aside class="admin-sidebar">
+<p class="eyebrow">L’ATELIER</p>
+<h1>Vos images.<br>Vos histoires.</h1>
+<nav aria-label="Administration">
+<span>CRÉER</span>
+<a href="#photos">Photographies</a>
+<a href="#voyages">Voyages & sorties</a>
+<a href="#carnets">Carnets</a>
+<span>PUBLIER</span>
+<a href="#publication">À vérifier</a>
+<span>GÉRER</span>
+<a href="#reglages">Réglages</a>
+</nav>
+<p>Maquette indépendante.<br>Tout reste dans cet onglet.</p>
+</aside>
+<section class="admin-content">
+<p class="eyebrow">BONJOUR · ESPACE DE DÉMONSTRATION</p>
+<h2 id="admin-title">Photographies</h2>
+<p class="muted" id="admin-description">Retrouvez vos images et complétez leur fiche avant de les partager.</p>
+<div id="admin-surface">
+</div>
+<p id="admin-status" role="status">
+</p>
+</section>
+</div>
+<dialog id="edit-photo" aria-labelledby="edit-title">
+<form id="edit-form">
+<h2 id="edit-title">La fiche de l’image</h2>
+<label for="edit-name">Titre<input id="edit-name" required maxlength="120">
+</label>
+<label for="edit-description">Description<textarea id="edit-description" rows="4" required>
+</textarea>
+</label>
+<p>Modification simulée, conservée dans cet onglet uniquement.</p>
+<div class="dialog-actions">
+<button type="button" id="cancel-edit">Annuler</button>
+<button type="submit">Enregistrer la fiche</button>
+</div>
+</form>
+</dialog>
+</main>
+<footer>
+<a class="brand small" href="index.html">nicephos.</a>
+<span>Étude de direction artistique · images de substitution générées</span>
+<div>
+<a href="index.html">Les six pistes</a>
+<a href="admin.html">L’atelier</a>
+</div>
+</footer>
+<dialog id="lightbox" aria-label="Image agrandie">
+<button class="close-lightbox" autofocus>Fermer ×</button>
+<img alt="">
+<p>
+</p>
+</dialog>
+<p class="sr-only" id="announcement" role="status">
+</p>
+</body>
+</html>

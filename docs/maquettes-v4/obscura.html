@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Obscura — Nicephos · Maquette</title>
+<link rel="stylesheet" href="chambre.css">
+<script defer src="data.js">
+</script>
+<script defer src="chambre.js">
+</script>
+</head>
+<body class="obscura" data-piste="obscura">
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="prototype">
+<a href="index.html">Études V4 · chambre noire</a>
+<span>Images générées · lieux et récits fictifs</span>
+</div>
+<header class="header">
+<a class="brand" href="index.html" aria-label="Nicephos, les six propositions">nicephos<span class="brand-dot">.</span>
+</a>
+<button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu</button>
+<nav id="navigation" aria-label="Navigation principale">
+<a href="galerie.html">Photographies</a>
+<a href="voyages.html">Voyages</a>
+<a href="carnets.html">Carnets</a>
+<button id="calm" aria-pressed="false">Mode calme</button>
+</nav>
+</header>
+<main id="main">
+<section class="obscura-stage">
+<div class="vertical-label mono">01 / OBSCURA — LE TIRAGE</div>
+<div class="obscura-print">
+<a href="photo.html?id=maree" data-main-photo>
+<img src="assets/maree.webp" alt="Une vague argentée se déploie sur une plage de sable noir, sous un ciel de fin de jour." width="1536" height="1024" fetchpriority=high>
+</a>
+<div class="print-caption">
+<div>
+<span class="eyebrow">Collection imaginaire / Littoral</span>
+<h1 id="frame-title">La respiration du large</h1>
+</div>
+<div class="frame-controls">
+<span id="frame-count" class="mono" aria-live="polite">01 / 04</span>
+<button data-step="-1" aria-label="Image précédente">←</button>
+<button data-step="1" aria-label="Image suivante">→</button>
+</div>
+</div>
+</div>
+</section>
+<div class="subline">
+<p>Un peu de noir.<br>Tout l’espace pour regarder.</p>
+<a href="galerie.html" class="text-link">Entrer dans la collection ↗</a>
+</div>
+<section class="onward">
+<div>
+<p class="eyebrow">Prolonger le regard</p>
+<h2>Il y a une histoire<br>
+<em>derrière chaque image.</em>
+</h2>
+</div>
+<a href="voyages.html" class="story-link">
+<img src="assets/cimes.webp" alt="Des sommets enneigés et un lac reflètent un ciel bleu et abricot au crépuscule." width="1536" height="1024" loading=lazy>
+<span>
+<small>Les voyages</small>Suivre le chemin <b>↗</b>
+</span>
+</a>
+<a href="carnets.html" class="story-link">
+<img src="assets/foret.webp" alt="Un sentier traverse une forêt de grands arbres dont les cimes disparaissent dans la brume." width="1024" height="1536" loading=lazy>
+<span>
+<small>Les carnets</small>Prendre le temps <b>↗</b>
+</span>
+</a>
+</section>
+<aside class="direction-note">
+<p class="eyebrow">Piste 01 · Obscura</p>
+<p>Une image entière, suspendue dans le noir. On avance à son rythme, comme de tirage en tirage.</p>
+<details>
+<summary>L’intention et le compromis</summary>
+<p>Le plus juste pour contempler. Une seule image au premier écran : la découverte de la collection vient ensuite.</p>
+</details>
+<a href="index.html">Comparer les six pistes ↗</a>
+</aside>
+</main>
+<footer>
+<a class="brand small" href="index.html">nicephos.</a>
+<span>Étude de direction artistique · images de substitution générées</span>
+<div>
+<a href="index.html">Les six pistes</a>
+<a href="admin.html">L’atelier</a>
+</div>
+</footer>
+<dialog id="lightbox" aria-label="Image agrandie">
+<button class="close-lightbox" autofocus>Fermer ×</button>
+<img alt="">
+<p>
+</p>
+</dialog>
+<p class="sr-only" id="announcement" role="status">
+</p>
+</body>
+</html>
