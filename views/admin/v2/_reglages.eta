@@ -1,0 +1,11 @@
+<% /* En-tête des Réglages de la v2 (MQ-07) : un titre, la méta (avec le témoin d'enregistrement), puis les onglets. Les
+      onglets sont des liens vers les pages de réglage (utilisables sans script) ; l'onglet courant porte aria-current ;
+      « Mentions et confidentialité » compte les rubriques légales qui manquent. it.courant : la clé de l'onglet. */ %>
+<% const t = it.t; %>
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Réglages') %></h1></div>
+  <p class="ep-meta"><span><%= t('Pour le site et l’équipe') %></span><span role="status" data-temoin></span></p>
+</header>
+<nav class="onglets" aria-label="<%= t('Rubriques des réglages') %>"><ul>
+<% (it.settingsTabs || []).forEach(o => { %>  <li><a href="<%= o.href %>"<%~ o.key === it.courant ? ' aria-current="page"' : '' %>><%= o.label %><% if (o.alert) { %><span class="onglet-alerte"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor"/></svg><%= o.alert %><span class="sr-only"> : <%= o.alert > 1 ? t('{n} rubriques obligatoires à remplir', { n: o.alert }) : t('1 rubrique obligatoire à remplir') %></span></span><% } %></a></li>
+<% }) %></ul></nav>
