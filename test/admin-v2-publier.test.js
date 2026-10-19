@@ -390,3 +390,14 @@ test('Vigie sur les écrans de la partie B : entrée « Sécurité », badge, ba
   assert.equal(r.statusCode, 403);
   assert.notDeepEqual(c.app.instagram.settings().times, ['07:00']);
 });
+
+test('l’éditeur d’un billet dans la coquille v2 : la page dans la langue de l’admin, le billet dans celle de son onglet', async t => {
+  const c = await site(t);
+  const adm = await c.account('adm', { author: 'julien' });
+  await adm.post('/admin/langue', { lang: 'de', back: '/admin' });         // gardée sur le photographe lié
+  const p = await billet(c, { title: 'Brume', authors: ['julien'], publish: false });
+  const html = (await adm.get(`/admin/carnet/${p.id}`)).body;
+  assert.match(html, /^<!doctype html>\n<html lang="de"/);
+  assert.match(html, /<details class="lang-pick admin-lang">\s*<summary>[^]*?<span>DE<\/span>/);
+  assert.match(html, /name="langue" value="fr"|lang="fr"/, 'le billet garde la langue de son onglet');
+});

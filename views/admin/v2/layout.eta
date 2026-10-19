@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="<%= it.lang || 'fr' %>"<%~ it.adminTheme ? ` data-theme="${it.adminTheme}"` : '' %>>
+<html lang="<%= it.adminLang || it.lang || 'fr' %>"<%~ it.adminTheme ? ` data-theme="${it.adminTheme}"` : '' %>>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -145,9 +145,9 @@
       <a href="/" target="_blank" rel="noopener"><%~ ic('site', 16) %><%= t('Voir le site') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span></a>
       <details class="lang-pick admin-lang">
 <% /* Nom lu : le code visible, puis son nom (pas d'aria-label, qui masquerait « FR » : WCAG 2.5.3). */ %>
-        <summary><%~ ic('langue', 16) %><span><%= it.lang.toUpperCase() %></span><span class="sr-only"> – <%= t('Langue de l’administration') %> : <%= it.langNames[it.lang] %></span></summary>
+        <summary><%~ ic('langue', 16) %><span><%= (it.adminLang || it.lang).toUpperCase() %></span><span class="sr-only"> – <%= t('Langue de l’administration') %> : <%= it.langNames[(it.adminLang || it.lang)] %></span></summary>
         <ul aria-label="<%= t('Langue de l’administration') %>">
-<% it.adminLangs.forEach(l => { %>          <li><form method="post" action="/admin/langue"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><button type="submit" name="lang" value="<%= l %>" lang="<%= l %>"<%~ l === it.lang ? ' aria-current="true"' : '' %>><%= it.langNames[l] %></button></form></li>
+<% it.adminLangs.forEach(l => { %>          <li><form method="post" action="/admin/langue"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="back" value="<%= it.currentPath %>"><button type="submit" name="lang" value="<%= l %>" lang="<%= l %>"<%~ l === (it.adminLang || it.lang) ? ' aria-current="true"' : '' %>><%= it.langNames[l] %></button></form></li>
 <% }) %>        </ul>
       </details>
       <a class="pied-large" href="/admin/nouveautes"<%~ cur(['releases']) %>><%~ ic('star', 16) %><%= t('Nouveautés') %><span class="nav-ver"><%= it.releaseCurrent %></span></a>

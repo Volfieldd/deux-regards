@@ -354,7 +354,8 @@ export default async function adminRoutes(app) {
       translate: app.translator.enabled, encountersNew: newEncounters(request), reportsNew: request.can('signalements.traiter') ? app.feedback.pending() : 0, urgent: app.todo.urgentCount(perm => request.scope(perm)) + (securite?.task?.level === 'urgent' ? 1 : 0), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
       // Billets proposés, à valider (Carnets) : pour qui publie tous les billets.
       carnetsPending: request.scope('carnet.publier')?.all ? app.carnet.countIn('propose') : 0,
-      t: request.t, lang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
+      // adminLang : la langue de l'admin, que l'écran ne remplace pas (un billet passe la langue de son onglet dans lang).
+      t: request.t, lang: request.t.lang, adminLang: request.t.lang, locale: request.t.locale, adminLangs: ADMIN_LANGS, langNames: ADMIN_LANG_NAMES,
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
   }
