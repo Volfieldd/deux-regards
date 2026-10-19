@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// Accueil (MQ-01), galerie en rangées et filtres (MQ-02), page d'une série (MQ-03) en v2, vus dans l'aperçu de la v2 :
+// Accueil (MQ-01), galerie en rangées et filtres (MQ-02), page d'une série (MQ-03) en v2, vus dans la vue v2 :
 // chaque test ouvre sa propre session d'administrateur (connexion locale de test) et y ouvre l'aperçu ; les visiteurs
 // et les autres tests gardent la v1. Rien n'est écrit dans les données.
 let errors = [];
@@ -13,7 +13,7 @@ test.beforeEach(() => { errors = []; });
 test.afterEach(() => { expect(errors, 'erreurs console / CSP').toEqual([]); });
 
 async function apercu(browser, info, options = {}) {
-  test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent : l’aperçu de la v2 demande une session d’administrateur');
+  test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent : la vue v2 demande une session d’administrateur');
   const ctx = await browser.newContext({ ...info.project.use, storageState: { cookies: [], origins: [] }, ...options });
   const page = await ctx.newPage();
   // Connexion avec le script (formulaire de test) ; le contexte sans script, lui, n'en a pas besoin pour la suite.
@@ -26,7 +26,7 @@ async function apercu(browser, info, options = {}) {
   await expect(lp).toHaveURL(/\/admin\/apparence$/);
   const news = lp.getByRole('dialog', { name: /Nouveau depuis votre dernière visite/ });
   if (await news.isVisible()) await news.getByRole('button', { name: 'C’est noté' }).click();
-  await lp.getByRole('button', { name: 'Ouvrir l’aperçu de la v2' }).click();
+  await lp.getByRole('button', { name: 'Voir le site en v2' }).click();
   if (login !== ctx) { await ctx.addCookies(await login.cookies()); await login.close(); }
   watch(page);
   return { ctx, page };

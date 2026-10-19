@@ -252,9 +252,9 @@ test.describe('parcours d’une photo', () => {
       await expect(visitor.locator('main')).not.toContainText(SHORT);
       await visitor.close();
 
-      // L'administrateur, dans l'aperçu de la v2.
+      // L'administrateur, dans la vue v2.
       await page.goto('/admin/apparence');
-      await page.getByRole('button', { name: 'Ouvrir l’aperçu de la v2' }).click();
+      await page.getByRole('button', { name: 'Voir le site en v2' }).click();
       await page.goto('/serie/paysage');
       await expect(page.locator('.ser-txt .ser-int').first()).toHaveText(`${INTENT[0]} ${INTENT[1]}`.replace(' :', ' :'));
       await expect(page.locator('.ser-txt .que-bureau')).toBeVisible();
@@ -273,7 +273,7 @@ test.describe('parcours d’une photo', () => {
       await expect(page.locator('dl.def dt', { hasText: 'Inventaire' })).toHaveCount(1);
       await expect(page.locator('dl.def dd.donnee')).toHaveText(inventory);
       await page.goto('/admin/apparence');
-      await page.getByRole('button', { name: 'Quitter l’aperçu' }).click();
+      await page.getByRole('button', { name: 'Revenir à la version des visiteurs' }).click();
     } finally {
       await saveTexts('', '', '');
     }

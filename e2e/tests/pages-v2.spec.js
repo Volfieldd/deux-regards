@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Pages v2 sans formulaire d'envoi (À propos, Droits, Mentions légales, Confidentialité, Recherche, Carte, Voyages, page
-// introuvable), vues dans l'aperçu de la v2 : chaque test ouvre sa propre session d'administrateur (connexion locale de test)
+// introuvable), vues dans la vue v2 : chaque test ouvre sa propre session d'administrateur (connexion locale de test)
 // et y ouvre l'aperçu ; les visiteurs et les autres tests gardent la v1. Rien n'est écrit dans les données. La carte et les
 // voyages ne sont mesurés que si le serveur en a (jeu de démonstration enrichi) : sinon leur adresse répond par la page
 // introuvable, mesurée elle aussi.
@@ -18,7 +18,7 @@ test.afterEach(() => { expect(errors, 'erreurs console / CSP').toEqual([]); });
 // chaque test ; les connexions locales sont limitées (AUTH_RATE_LIMIT, 30 par 10 minutes), et toute la suite en ouvre.
 let session = null;
 async function apercu(browser, info, options = {}) {
-  test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent : l’aperçu de la v2 demande une session d’administrateur');
+  test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent : la vue v2 demande une session d’administrateur');
   if (!session) {
     const login = await browser.newContext({ ...info.project.use, storageState: { cookies: [], origins: [] } });
     const lp = await login.newPage();
@@ -29,7 +29,7 @@ async function apercu(browser, info, options = {}) {
     await expect(lp).toHaveURL(/\/admin\/apparence$/);
     const news = lp.getByRole('dialog', { name: /Nouveau depuis votre dernière visite/ });
     if (await news.isVisible()) await news.getByRole('button', { name: 'C’est noté' }).click();
-    await lp.getByRole('button', { name: 'Ouvrir l’aperçu de la v2' }).click();
+    await lp.getByRole('button', { name: 'Voir le site en v2' }).click();
     session = await login.storageState();
     await login.close();
   }

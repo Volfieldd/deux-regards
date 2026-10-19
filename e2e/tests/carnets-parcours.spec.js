@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Carnets, parcours qui modifie les données (projet « parcours », E2E_ALLOW_WRITES=1) : écrire un billet dans l'éditeur
-// (MQ-20), le publier, le voir sur le site dans l'aperçu de la v2 (MQ-12), avec sa photo qui mène à la visionneuse du
+// (MQ-20), le publier, le voir sur le site dans la vue v2 (MQ-12), avec sa photo qui mène à la visionneuse du
 // billet ; un visiteur, lui, reste en v1 (404). À la fin, le billet est retiré du site et l'aperçu fermé.
 const STATE = 'results/.auth/admin.json';
 test.skip(!process.env.E2E_LOCAL_AUTH, 'E2E_LOCAL_AUTH absent');
@@ -38,9 +38,9 @@ test('écrire, publier, voir : un billet de bout en bout', async ({ page, browse
   await expect(page.locator('.ep-titre .etat')).toContainText('Publié');
   const slug = (await page.locator('#publication .donnee').innerText()).replace('/carnet/', '');
 
-  // Sur le site, dans l'aperçu de la v2 de cette session.
+  // Sur le site, dans la vue v2 de cette session.
   await page.goto('/admin/apparence');
-  const open = page.getByRole('button', { name: 'Ouvrir l’aperçu de la v2' });
+  const open = page.getByRole('button', { name: 'Voir le site en v2' });
   const opened = Boolean(await open.count());
   if (opened) await open.click();
   await page.goto(`/carnet/${slug}`);
@@ -57,13 +57,13 @@ test('écrire, publier, voir : un billet de bout en bout', async ({ page, browse
   expect((await vp.goto(`/carnet/${slug}`)).status()).toBe(404);
   await visitor.close();
 
-  // Remise en état : le billet est retiré du site (un billet publié ne se supprime pas), l'aperçu refermé.
+  // Remise en état : le billet est retiré du site (un billet publié ne se supprime pas), la vue v2 refermée.
   await page.goto(`/admin/carnet/${id}/retirer`);
   await page.getByLabel('Pourquoi le retirer').fill('Billet de test du parcours.');
   await page.getByRole('button', { name: 'Retirer du site' }).click();
   await expect(page.locator('.ep-titre .etat')).toContainText('Retiré');
   if (opened) {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Quitter l’aperçu' }).click();
+    await page.getByRole('button', { name: 'Voir en v1' }).click();
   }
 });
