@@ -80,7 +80,8 @@ test('fiche sans JavaScript : « Enregistrer la fiche » envoie le formulaire ; 
   const ctx = await browser.newContext({ ...info.project.use, storageState: STATE, javaScriptEnabled: false });
   const page = await ctx.newPage();
   await page.goto('/admin/photos');
-  const id = await page.locator('.tile').first().getAttribute('data-id');
+  // La troisième photo : la première sert au test avec script, qui tourne en même temps.
+  const id = await page.locator('.tile').nth(2).getAttribute('data-id');
   await page.goto(`/admin/photos/${id}`);
   const legend = page.locator('#legend');
   const before = await legend.inputValue();
