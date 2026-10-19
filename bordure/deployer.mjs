@@ -79,7 +79,7 @@ export function main(argv = process.argv.slice(2), env = process.env) {
   wrangler(['secret', 'put', 'BORDURE_KEY'], { dossier, env: enfant, entree: cle });
   console.log(desactive
     ? 'Worker DÉSACTIVÉ : tout passe, rien n’est bloqué ni compté. Pour le remettre : … run --rm bordure --reactiver'
-    : 'Worker déployé et BORDURE_KEY posée. Routes à vérifier (étape 3.7, point 7), puis : docker exec nicephos-vigie node vigie/cli.js bordure');
+    : 'Worker déployé et BORDURE_KEY posée. Routes à poser ou vérifier (étape 3.7, point 8), puis : docker exec nicephos-vigie node vigie/cli.js bordure');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
