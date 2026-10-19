@@ -320,7 +320,9 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     }
     // BV-21 : combien de textes publiés ce geste a changés (défacement : beaucoup, d'un coup ou en série).
     sec.emit('config_public_changed', { request, emetteur: `${emetteur} · textes publiés`,
-      detail: { objet: 'textes_publics', nombre: changes.length, champs: [...new Set(changes.map(k => k.split('#')[0]))].slice(0, 20), contacts_ajoutes: ajouts.length || undefined } });
+      // « textes » et non « nombre » : la Vigie lit detail.nombre comme le poids d'un résumé (corrélations, points), un
+      // geste qui traduit 4 textes compterait pour 5 (faux positif trouvé par le jeu d'attaques, E2).
+      detail: { objet: 'textes_publics', textes: changes.length, champs: [...new Set(changes.map(k => k.split('#')[0]))].slice(0, 20), contacts_ajoutes: ajouts.length || undefined } });
   };
   // Aussi appelé par les publications programmées (sans compte : request null, sub null), qui mettent des textes en
   // ligne sans écriture de l'admin (photos du circuit ; billets des Carnets à leur arrivée).

@@ -237,11 +237,15 @@ export function createCorrelator(correlations, { now = Date.now, maxGroups = 10_
         : c.type === 'value_count' ? new Set(g.hits.map(h => h.v).filter(v => v != null)).size
           : new Set(g.hits.map(h => h.rule)).size === c.rules.length ? 1 : 0;
       const ok = c.type === 'temporal' ? n === 1 : ('gte' in c.cond ? n >= c.cond.gte : n > c.cond.gt);
-      // Une fois par fenêtre et par groupe (pas un signal par événement suivant).
-      if (ok && t - g.fired > c.span) {
+      // Satisfaite : un signal, puis le compte repart de zéro (jamais un signal par événement suivant ; mais une attaque qui
+      // continue la satisfait de nouveau et la réponse reprend, même si la règle est passée en Bloquer entre-temps ou si
+      // la décision a été levée : avant, plus rien pendant toute la fenêtre, constat du jeu d'attaques E2).
+      if (ok) {
         g.fired = t;
         out.push({ correlation: c, key, valeur: n, evenements: g.hits.map(h => h.seq).filter(Boolean).slice(-50),
           sources: [...new Set(g.hits.map(h => h.source).filter(Boolean))].sort() });
+        total -= g.hits.length;
+        g.hits = [];
       }
     }
     return out;
