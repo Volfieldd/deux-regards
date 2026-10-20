@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Note de conception, aucune ligne de code. Décisions D31 à D39 à prendre (section 13). |
+| Statut | Note de conception, aucune ligne de code. Décisions D31 à D39 prises le 20 octobre 2026 (section 13), avec une précision du propriétaire : la vue ATT&CK complète est conservée ; les huit phases servent aux dossiers, pas à la détection (section 3.1). |
 | Date | 20 octobre 2026, d'après le code de `main` à ea0528b (Vigie après #186). |
 | Demande | « Est-ce que ce ne serait pas plus pertinent de travailler tout ça avec la vue « case » qui prendrait un artefact en origine (asset : ip, hostname source, dest, session utilisateur ou nom d'utilisateur) qui viendrait regrouper tous les événements suspects connexes en se servant d'une mécanique de pondération interne pour donner une idée du niveau de l'alerte ? Une corrélation automatique inter entités, avec une représentation de la timeline et une possibilité d'explorer (drill down) de la même façon les liens entre case et autres assets. » Puis : « je veux particulièrement bien détailler le côté « phase d'attaque » ». Point de départ : détecter l'accès aux données personnelles et leur sortie, en corrélant les lectures avec les authentifications et les signaux faibles (adresses multiples, adresse ou heure inhabituelle, empreinte différente). |
 | Base | [`recadrage-vigie-edge-wake.md`](recadrage-vigie-edge-wake.md) (entités, score, quorum), [`journalisation-securite.md`](journalisation-securite.md) (cas DS1 à DS32), [`vigie-besoins-des-briques.md`](vigie-besoins-des-briques.md) (BV-1 à BV-30), `vigie/moteur.js`, `vigie/detecteurs.js`, `vigie/regles/*.yml`. |
@@ -12,7 +12,8 @@
 ## En bref
 
 - **Un dossier** (« case ») rassemble tout ce qui touche une même attaque probable : les alertes, les signaux qui n'en ont pas déclenché, les faits ordinaires qui deviennent suspects dans ce contexte, et les entités qui les relient (adresse, réseau, appareil, session, compte, accès de galerie, objet lu). Aujourd'hui, une alerte correspond à **une règle et une seule entité**. Une même attaque se lit donc en quatre ou cinq alertes séparées, et l'analyste fait le lien à la main.
-- **Les phases d'attaque sont le cœur du dossier.** Chaque signal reçoit une phase parmi huit : **repérage, tentative, accès, exploration, ancrage, collecte, exfiltration, impact**. Deux marqueurs hors chaîne s'y ajoutent : la **dissimulation** (aveugler la Vigie) et l'**atteinte à la disponibilité**. La phase vient d'abord de la technique MITRE ATT&CK, plus précise que la tactique. Un champ explicite la remplace quand la technique trompe. Un test bloque toute règle non classée. Classement des 88 règles et des 10 détecteurs actuels : section 4.7.
+- **Deux niveaux, ATT&CK complet partout.** La détection, les règles, les signaux et les alertes gardent MITRE ATT&CK tel quel : 14 tactiques, techniques et sous-techniques (section 3.1). Les phases ne sont qu'une **projection** propre aux dossiers. Le dossier montre les deux : la frise par phases et la matrice ATT&CK complète. La console gagne aussi une vue ATT&CK de toute la détection (couverture et observé).
+- **Les phases d'attaque sont le cœur du dossier.** Dans un dossier, chaque signal reçoit une phase parmi huit : **repérage, tentative, accès, exploration, ancrage, collecte, exfiltration, impact**. Deux marqueurs hors chaîne s'y ajoutent : la **dissimulation** (aveugler la Vigie) et l'**atteinte à la disponibilité**. La phase vient d'abord de la technique MITRE ATT&CK, plus précise que la tactique. Un champ explicite la remplace quand la technique trompe. Un test bloque toute règle non classée. Classement des 88 règles et des 10 détecteurs actuels : section 4.7.
 - **Distinguer les jalons des indices.** Un **jalon** prouve qu'une phase a eu lieu (lectures en masse, export, rôle donné). Un **indice** ne fait pas avancer l'attaque : il dit seulement qu'un accès est **douteux** (heure inhabituelle, nouvel appareil, pays inédit, adresses multiples, voyage impossible). Les indices règlent la **confiance**, les jalons la **progression**. C'est la réponse à la question de départ : une lecture ordinaire devient un jalon de collecte dès que l'accès qui la porte est douteux.
 - **Trois axes pour la gravité**, lisibles chacun en une ligne :
   - **progression** : la phase la plus avancée, et combien de phases se suivent dans l'ordre ;
@@ -67,7 +68,27 @@ MITRE ATT&CK Enterprise compte 14 tactiques. Les reprendre telles quelles dans l
 3. **Une même tactique mélange l'échec et la réussite.** Avec la technique T1078 (comptes valides), « Initial Access » couvre aussi bien une connexion refusée qu'une connexion réussie. La phase doit les séparer : c'est toute la différence entre **tentative** et **accès**.
 4. **« Defense Evasion » n'est pas une étape.** Effacer ses traces ou couper la surveillance peut arriver n'importe quand. Ce n'est pas un degré de progression : c'est un **aggravant**.
 
-Les huit phases retenues suivent l'ordre d'une attaque contre une application web à comptes, comme ce site. Le détail des techniques MITRE reste visible sur chaque signal : rien n'est perdu pour qui lit l'ATT&CK.
+Les huit phases retenues suivent l'ordre d'une attaque contre une application web à comptes, comme ce site. Elles **s'ajoutent** à ATT&CK, elles ne le remplacent pas.
+
+### 3.1 Deux niveaux : ATT&CK complet dans la détection, phases dans les dossiers
+
+Décision du propriétaire (20 octobre 2026) : « je veux conserver la vue ATT&CK complète, même si on garde 8 tactiques dans les dossiers, pas dans la détection ».
+
+| Niveau | Référentiel | Où |
+|---|---|---|
+| **Détection** : règles Sigma, détecteurs, signaux, alertes, notifications | **MITRE ATT&CK Enterprise complet** : les 14 tactiques, techniques et sous-techniques, avec leurs identifiants (TA0001…, T1078, T1550.004) | `tags` des règles (inchangés), `vigie_signal`, fiche d'une alerte (déjà : tactiques en français et techniques, `vigie/console/ecrans/alertes.js:33`) |
+| **Dossiers** : progression, cohérence, frise, gravité | **Huit phases et deux marqueurs**, calculés à partir des étiquettes ATT&CK du signal | `dossier_signaux.phase` seulement |
+
+Conséquences :
+
+- **Les étiquettes ATT&CK restent la seule vérité.** La phase se déduit d'elles et ne les modifie jamais. Une règle n'est jamais réétiquetée pour obtenir la phase voulue : si la projection trompe, c'est le champ propre au dossier qui corrige (`vigie: { phase_dossier: … }`, section 4.5), pas les étiquettes.
+- **ATT&CK doit donc être complet et juste.** Un référentiel `vigie/attack.js` recense les 14 tactiques et les techniques employées par les règles, avec leur nom en français et en anglais et leurs tactiques officielles. Aujourd'hui, 39 techniques et 13 tactiques sont employées ; « Développement de ressources » ne l'est pas, car la Vigie ne peut pas l'observer. Un test vérifie :
+  - que chaque règle qui émet un signal porte au moins une tactique et une technique ;
+  - que chaque technique est rattachée à l'une de ses tactiques officielles.
+
+  Les 6 règles qui n'ont qu'une technique reçoivent leur tactique (section 1).
+- **Les signaux ne portent pas la phase.** `vigie_signal` garde ses étiquettes ATT&CK ; le moteur des dossiers calcule la phase au rattachement. Changer la projection (la table de la section 4.5) ne touche ni la détection ni la chaîne, et recalcule les dossiers ouverts.
+- **Chaque dossier a aussi sa matrice ATT&CK complète** (section 8.2). La console gagne une **vue ATT&CK** de toute la détection (section 8.3).
 
 ---
 
@@ -152,7 +173,7 @@ Deux règles de plus :
 
 L'ordre de priorité est le suivant, et le premier qui répond l'emporte :
 
-1. **Le champ explicite** de la règle : `vigie: { phase: exfiltration }`, ou `nature: indice`. Il sert quand la technique trompe : 20 règles sur 88 (section 4.7).
+1. **Le champ explicite propre au dossier** dans le bloc `vigie` de la règle : `phase_dossier: exfiltration`, ou `nature_dossier: indice`. Il sert quand la technique trompe : 20 règles sur 88 (section 4.7). Il ne change ni les étiquettes ATT&CK ni la détection (section 3.1).
 2. **La table des techniques** (`vigie/phases.js`, à créer). La technique est plus précise que la tactique : T1078 veut dire « accès réussi », T1110 « tentative ». C'est elle qui sépare l'échec de la réussite.
 3. **La table des tactiques**, en dernier recours.
 4. **Plusieurs phases trouvées** : on retient la plus avancée. Exemple : `exports_nombreux`, étiquetée collection et exfiltration, est une exfiltration. Les marqueurs dissimulation et disponibilité s'ajoutent sans compter dans la progression. Par exemple, `messages_effaces_en_masse` est un impact, avec le marqueur dissimulation (T1070).
@@ -174,7 +195,7 @@ Table des techniques proposée :
 
 Un **test bloquant** vérifie que chaque règle qui émet un signal, et chaque détecteur, reçoit une phase ou une nature. Une règle ajoutée sans classement fait échouer `npm run test:vigie`, comme le registre des briques l'exige déjà pour les permissions surveillées.
 
-Les détecteurs portent leur phase dans `DETECTEURS` (`vigie/detecteurs.js:12`) : la même source sert au moteur et à l'écran des réglages.
+Les détecteurs gardent leurs étiquettes ATT&CK ; leur projection (phase ou nature dans le dossier) est notée dans `vigie/phases.js`, à côté de la table des techniques.
 
 | Détecteur | Phase ou nature |
 |---|---|
@@ -481,9 +502,25 @@ Maquettes à faire, en une seule passe de contrôle : MV-12 « Dossiers » et MV
    - un clic sur une entité ouvre sa fiche (MV-04 existante), qui reçoit une section « Dossiers » ;
    - un clic sur un satellite ouvre l'autre dossier ;
    - un clic sur un objet ouvre « qui l'a lu » (périmètre, 10.3).
-5. **Signaux** en tableau (équivalent de la frise), **entités** en tableau (équivalent du graphe), **journal du dossier** (ouverture, rattachements, fusions, gestes de l'analyste).
+5. **Matrice ATT&CK du dossier**, en onglet à côté de la frise :
+   - les 14 tactiques en colonnes, dans l'ordre de MITRE, y compris celles que la Vigie n'observe pas (grisées, avec la mention « non observable ici ») ;
+   - les techniques et sous-techniques vues dans le dossier, avec leur identifiant, leur nom, le nombre de signaux et le numéro d'ordre de leur première apparition (1, 2, 3…), ce qui donne le chemin de l'attaque dans la matrice ;
+   - un clic sur une technique filtre la frise et le tableau des signaux sur elle ;
+   - sous chaque technique, la phase de dossier qu'elle donne : le lien entre les deux vues reste lisible.
+6. **Signaux** en tableau (équivalent de la frise et de la matrice), **entités** en tableau (équivalent du graphe), **journal du dossier** (ouverture, rattachements, fusions, gestes de l'analyste).
 
-**Accessibilité** : la frise et le graphe ont chacun un tableau équivalent, se parcourent au clavier et ne codent jamais une information par la seule couleur. **Téléphone** : la frise devient verticale (une phase par bloc) et le graphe se replie en liste par rôle.
+**Accessibilité** : la frise, la matrice et le graphe ont chacun un tableau équivalent, se parcourent au clavier et ne codent jamais une information par la seule couleur. **Téléphone** : la frise devient verticale (une phase par bloc) et le graphe se replie en liste par rôle.
+
+### 8.3 Vue ATT&CK de la détection
+
+Un écran de la console, indépendant des dossiers : la matrice ATT&CK Enterprise complète (14 tactiques) pour toute la détection.
+
+- **Couverture** : pour chaque technique, les règles et les détecteurs qui la portent, leur mode (arrêt, observer, alerter, bloquer) et leur cas DS. Une technique sans règle reste visible, en vide : c'est là que la détection manque.
+- **Observé** : le nombre de signaux et d'alertes par technique sur une période (24 h, 7 jours, 30 jours), et les dossiers qui la contiennent.
+- **Exploration** : technique → ses règles → leurs alertes et leurs dossiers ; règle → sa fiche dans les réglages.
+- **Export** : un calque au format d'ATT&CK Navigator (JSON), pour la couverture et pour l'observé. On l'ouvre dans l'outil public de MITRE ou dans une instance locale, sans rien envoyer depuis la Vigie.
+
+Maquette MV-14, dans la même passe que MV-12 et MV-13. Équivalent en tableau (tactique, technique, règles, signaux) ; au téléphone, une tactique par bloc repliable.
 
 ---
 
@@ -547,7 +584,7 @@ CREATE INDEX events_session ON events (session, recu_a);
 
 Les gestes sur un dossier sont des événements chaînés `vigie_dossier` (ouverture, rattachement, fusion, aggravation, détachement, scission, classement). Le dossier se reconstruit à partir de la chaîne, comme les alertes.
 
-`vigie_signal` porte désormais `phase` et `nature` dans son détail. Le dédoublonnage des signaux (une note par règle, par entité et par 10 minutes) ne change pas. Le dossier référence la note ; les points continuent de tous compter.
+`vigie_signal` ne change pas : il garde ses étiquettes ATT&CK, et la phase n'existe que dans `dossier_signaux` (section 3.1). Le dédoublonnage des signaux (une note par règle, par entité et par 10 minutes) ne change pas. Le dossier référence la note ; les points continuent de tous compter.
 
 ---
 
@@ -598,22 +635,24 @@ Registre des briques : la PR E proposera **BV-31** (catégories de données pers
 
 | PR | Contenu | Taille |
 |---|---|---|
-| **A. Phases** | `vigie/phases.js` (tables des techniques et des tactiques) ; champs `phase` et `nature` dans le bloc `vigie` des règles (20 règles) ; phases des détecteurs dans `DETECTEURS` ; tactique ajoutée aux 6 règles qui n'ont qu'une technique ; test bloquant ; `vigie_signal` porte la phase ; la console montre la phase sur une alerte et un signal | petite |
+| **A. ATT&CK et phases** | `vigie/attack.js` (14 tactiques, techniques employées, noms en français et en anglais, tactiques officielles) ; tactique ajoutée aux 6 règles qui n'ont qu'une technique ; test de complétude et de cohérence ATT&CK ; `vigie/phases.js` (projection : tables des techniques et des tactiques, détecteurs) ; champs `phase_dossier` et `nature_dossier` (20 règles) ; test bloquant de projection ; la fiche d'une alerte nomme ses techniques (identifiant et nom). Détection inchangée | petite |
 | **B. Moteur des dossiers** | migration (section 9) ; ouverture, rattachement, rattachement rétroactif, fusion, cycle de vie ; confiance, contre-indices, lectures sous accès douteux (4.6) ; enjeu par objet ; grille et explication ; `chaine_attaque` calculée sur le dossier ; ligne de commande `dossiers` ; les cinq scénarios en tests et au banc | la plus grosse |
-| **C. Maquettes** | MV-12 et MV-13, bureau et téléphone, une seule passe de contrôle | moyenne |
-| **D. Console** | liste, fiche, frise, graphe, exploration, gestes de l'analyste, section « Dossiers » de la fiche d'entité, vue d'ensemble | moyenne |
+| **C. Maquettes** | MV-12 (dossiers), MV-13 (un dossier : frise, matrice ATT&CK, graphe), MV-14 (vue ATT&CK de la détection), bureau et téléphone, une seule passe de contrôle | moyenne |
+| **D. Console** | liste, fiche, frise, matrice ATT&CK du dossier, graphe, exploration, gestes de l'analyste, section « Dossiers » de la fiche d'entité, vue d'ensemble ; vue ATT&CK de la détection et export au format Navigator | moyenne |
 | **E. Données personnelles** | site et Vigie (section 11) ; BV-31 | moyenne |
 
 Chaque PR est suivie d'une revue de code et de sécurité, avant la suivante. Après la PR B, un mois d'observation (mode « observer ») sert à recaler les seuils et la grille, avant toute réponse automatique au niveau du dossier.
 
 ---
 
-## 13. Décisions à prendre
+## 13. Décisions (prises le 20 octobre 2026)
 
-| N° | Décision | Proposition |
+Toutes les propositions sont validées par le propriétaire, D31 avec une précision.
+
+| N° | Décision | Retenu |
 |---|---|---|
-| D31 | Découpage des phases | Huit phases ordonnées et deux marqueurs (dissimulation, disponibilité) ; les techniques MITRE restent affichées sur chaque signal |
-| D32 | Origine de la phase | Champ explicite, puis technique, puis tactique ; la plus avancée l'emporte ; test bloquant pour toute règle non classée |
+| D31 | Découpage des phases | Huit phases ordonnées et deux marqueurs (dissimulation, disponibilité), **dans les dossiers seulement**. La détection garde ATT&CK complet (14 tactiques, techniques), la vue ATT&CK complète est conservée : matrice dans chaque dossier, vue ATT&CK de la détection, export Navigator (section 3.1) |
+| D32 | Origine de la phase | Champ explicite propre au dossier (`phase_dossier`), puis technique, puis tactique ; la plus avancée l'emporte ; test bloquant pour toute règle non classée ; les étiquettes ATT&CK ne sont jamais modifiées pour la projection |
 | D33 | Signaux faibles | Un indice seul n'ouvre jamais de dossier ; il règle la confiance d'un accès |
 | D34 | Liens faibles | Un saut, 72 h, jamais par une adresse privée, de confiance, vue avec un administrateur, ou partagée par plus de 5 comptes ; cibles jamais traversées ; 40 entités au plus |
 | D35 | Gravité | Grille progression × confiance ; enjeu ordinaire −1 cran, critique +1 ; dissimulation +1 ; plancher à l'alerte la plus grave ; pas de score affiché |
