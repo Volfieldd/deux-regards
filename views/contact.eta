@@ -7,7 +7,7 @@
   <%~ include('./brand', it) %>
   <%~ include('./nav', it) %>
 </header>
-<main class="about wrap hello report-page">
+<main class="about wrap hello report-page contact-page">
 <% if (it.sent) { %>
   <h1 id="merci-t" tabindex="-1" autofocus><%= c.thanks %></h1>
   <p class="prose"><%= c.thanksText %></p>

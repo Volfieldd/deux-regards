@@ -502,3 +502,8 @@ footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wr
 .vmap text { fill: var(--dark-mute); font-family: var(--mono); dominant-baseline: central; paint-order: stroke; stroke: #17171a; stroke-width: 3px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .vmap .vmap-me-t { fill: var(--dark-ink); text-anchor: middle; }
 .vmap-o:hover text, .vmap-o:focus-visible text { fill: var(--dark-ink); }
+/* Contact et demande de licence (views/contact.eta, views/licence.eta) : le bouton d'envoi en 12 px au moins, et les liens
+   seuls sur leur ligne assez hauts pour le doigt (44 px au toucher). */
+.contact-page .hello-send { font-size: 12px; }
+.contact-page a.more.cible { display: inline-flex; align-items: center; min-height: 24px; }
+@media (pointer: coarse), (max-width: 720px) { .contact-page a.more.cible { min-height: 44px; } }

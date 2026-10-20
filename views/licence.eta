@@ -7,7 +7,7 @@
   <%~ include('./brand', it) %>
   <%~ include('./nav', it) %>
 </header>
-<main class="about wrap hello report-page">
+<main class="about wrap hello report-page contact-page">
 <% if (it.sent) { %>
   <h1 id="merci-t" tabindex="-1" autofocus><%= c.thanks %></h1>
   <p class="prose"><%= l.thanksText(it.author && it.author.name) %></p>
@@ -22,9 +22,9 @@
       <legend><%= l.photo %></legend>
 <% if (p) { %>      <input type="hidden" name="photo" value="<%= p.slug %>">
       <p class="prose"><a class="more" href="<%= it.photoUrl(p.slug) %>"><%= p.title %></a><%= p.author ? ` · ${p.author}` : '' %></p>
-      <p><a class="more" href="<%= it.u('/') %>#galerie"><%= l.other %></a></p>
+      <p><a class="more cible" href="<%= it.u('/') %>#galerie"><%= l.other %></a></p>
 <% } else { %>      <p class="prose"><%= l.noPhoto %></p>
-      <p><a class="more" href="<%= it.u('/') %>#galerie"><%= l.choose %></a></p>
+      <p><a class="more cible" href="<%= it.u('/') %>#galerie"><%= l.choose %></a></p>
 <% } %>    </fieldset>
     <fieldset<%~ bad('usage') %>>
       <legend><%= l.usage %></legend>
@@ -39,7 +39,7 @@
       <label><%= c.email %> <span class="hint"><%= c.emailHint %></span><input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ bad('email') %>></label>
     </fieldset>
     <div class="hello-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
-    <p class="report-actions"><button class="hello-send eyebrow" type="submit"><%= l.send %></button> <a class="more" href="<%= it.u('/droits') %>"><%= l.detail %></a></p>
+    <p class="report-actions"><button class="hello-send eyebrow" type="submit"><%= l.send %></button> <a class="more cible" href="<%= it.u('/droits') %>"><%= l.detail %></a></p>
     <p class="hint"><%= l.privacy %> <a href="<%= it.u('/confidentialite') %>"><%= it.t.footer.privacy %></a></p>
   </form>
 <% } %>

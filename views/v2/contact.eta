@@ -92,7 +92,7 @@
 <% if (it.carnetPage) { %>    <h2><%= c.follow %></h2>
     <p class="suivre"><a class="lien" href="<%= it.u('/carnet/flux.xml') %>" type="application/atom+xml"><%= t.carnet.feed %></a></p>
 <% } %><% if (it.legal.names) { %>    <p class="editeurs"><%= c.editors %><%= t.v2.colon %> <%= it.legal.names %><% if (it.legal.director) { %> · <%= c.director %><%= t.v2.colon %> <%= it.legal.director %><% } %> · <a href="<%= it.u('/mentions-legales') %>"><%= t.footer.legal %></a></p>
-<% } else { %>    <p class="editeurs"><a href="<%= it.u('/mentions-legales') %>"><%= t.footer.legal %></a></p>
+<% } else { %>    <p class="editeurs"><a class="editeurs-seul" href="<%= it.u('/mentions-legales') %>"><%= t.footer.legal %></a></p>
 <% } %>  </aside>
 </div>
 <% } %>

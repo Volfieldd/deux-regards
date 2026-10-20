@@ -180,3 +180,6 @@
 .dl-bref dd { margin: 2px 0 0; color: var(--prose); line-height: 1.55; }
 .dl-bref p { margin: var(--esp-3) 0 0; }
 .photo-ref p { margin: 0; }
+/* Le lien des Mentions légales seul sur sa ligne (éditeurs pas encore réglés) : une cible de 44 px au toucher. */
+.editeurs .editeurs-seul { display: inline-flex; align-items: center; min-height: 24px; }
+@media (pointer: coarse), (max-width: 720px) { .editeurs .editeurs-seul { min-height: var(--cible); } }
