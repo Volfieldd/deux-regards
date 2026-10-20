@@ -280,7 +280,7 @@ test('A051 et A057 : les réglages du circuit ne valent que pour le rôle Photog
 
 test('A004 : exports RGPD et originaux téléchargés vont au Journal, avec le compte', async t => {
   const ctx = await setup(t, { seeded: true });
-  await ctx.app.inject({ method: 'POST', url: '/bonjour', remoteAddress: '203.0.113.7', payload: { ref: 'J-0142', wants_photo: 'on', email: 'alice@exemple.fr', name: 'Alice' } });
+  await ctx.app.inject({ method: 'POST', url: '/bonjour', remoteAddress: '203.0.113.7', payload: { ref: 'J-0142', wants_photo: 'on', adult: 'oui', email: 'alice@exemple.fr', name: 'Alice' } });
   const e = ctx.db.prepare("SELECT id, person_id FROM encounters WHERE ref = 'J-0142'").get();
   const photo = ctx.db.prepare('SELECT id FROM photos LIMIT 1').pluck().get();
   const a = as(ctx, 'coadmin', ['admin']);

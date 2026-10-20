@@ -74,16 +74,16 @@ test('demandes : validations expliquées, piège à robots, carte vérifiée, ch
   assert.equal(r.statusCode, 422);
   assert.match(r.body, /Sans carte, indiquez au moins la date et le lieu/);
   assert.match(r.body, /Dites-nous ce que vous souhaitez/);
-  r = await c.hello({ ref: 'J-0142', wants_photo: 'on' });
+  r = await c.hello({ ref: 'J-0142', wants_photo: 'on', adult: 'oui' });
   assert.match(r.body, /Indiquez votre e-mail/);
   r = await c.hello({ ref: 'J-0142', decision: 'accord', adult: 'oui', email: 'a@exemple.fr', name: 'Alice' });
   assert.match(r.body, /Cochez au moins un usage/);
   const good = c.app.encounters.codeOf('J-0142');
   const wrong = (good[0] === 'A' ? 'B' : 'A') + good.slice(1);
-  r = await c.hello({ ref: `J-0142-${wrong}`, wants_photo: 'on', email: 'a@exemple.fr' });
+  r = await c.hello({ ref: `J-0142-${wrong}`, wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' });
   assert.equal(r.statusCode, 422);
   assert.match(r.body, /Le code de la carte ne correspond pas/);
-  assert.equal((await c.hello({ ref: 'J-0142', wants_photo: 'on', email: 'a@exemple.fr', website: 'http://spam' })).statusCode, 303);
+  assert.equal((await c.hello({ ref: 'J-0142', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr', website: 'http://spam' })).statusCode, 303);
   assert.equal(count(), 0);                                                              // rien d'enregistré jusqu'ici
   // Carte en main (code bon) : veut la photo et accepte site + Instagram.
   const code = c.app.encounters.codeOf('J-0142');
@@ -106,7 +106,7 @@ test('demandes : validations expliquées, piège à robots, carte vérifiée, ch
   assert.deepEqual([e.refused, e.email, e.rights_request], [1, 'alice@exemple.fr', 'acces']);   // demande de droits signalée, identité à vérifier
   assert.match(c.app.encounters.events(e.id).at(-1).detail.non_verifiee ? 'ok' : '', /ok/);
   // Sans carte : date et lieu suffisent.
-  r = await c.hello({ met_on: '2026-10-11', place: 'Angers, place du Ralliement', details: 'veste rouge', wants_photo: 'on', email: 'bob@exemple.fr' }, '203.0.113.9');
+  r = await c.hello({ met_on: '2026-10-11', place: 'Angers, place du Ralliement', details: 'veste rouge', wants_photo: 'on', adult: 'oui', email: 'bob@exemple.fr' }, '203.0.113.9');
   assert.equal(r.headers.location, '/bonjour/merci');
   assert.equal(count(), 2);
 });
@@ -122,7 +122,7 @@ test('anti-abus : 8 demandes par heure et par adresse', async t => {
 test('admin : liste, fiche, photos liées ; un refus empêche toute publication et s’applique aux photos déjà publiées', async t => {
   const c = await ctxOf(t);
   assert.notEqual((await c.app.inject('/admin/rencontres')).statusCode, 200);          // réservé aux admins
-  await c.hello({ ref: 'J-0142', wants_photo: 'on', email: 'alice@exemple.fr', message: 'Merci pour la photo !' });
+  await c.hello({ ref: 'J-0142', wants_photo: 'on', adult: 'oui', email: 'alice@exemple.fr', message: 'Merci pour la photo !' });
   const id = c.db.prepare("SELECT id FROM encounters WHERE ref = 'J-0142'").pluck().get();
   const list = (await c.as({ url: '/admin/rencontres' })).body;
   assert.match(list, /J-0142/);
@@ -173,7 +173,7 @@ test('carte signée saisie dans l’admin : accord, photo de la carte (privée),
   assert.equal((await c.post(`/admin/rencontres/${e.id}/supprimer`)).statusCode, 303);
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), 0);
   // Purge : sans accord ni refus et sans nouvelle depuis plus de 12 mois.
-  await c.hello({ met_on: '2025-01-02', place: 'Nantes', wants_photo: 'on', email: 'old@exemple.fr' });
+  await c.hello({ met_on: '2025-01-02', place: 'Nantes', wants_photo: 'on', adult: 'oui', email: 'old@exemple.fr' });
   await c.hello({ ref: 'J-0001', decision: 'refus' });
   c.db.prepare('UPDATE encounters SET updated_at = ?').run(Date.now() - 400 * 864e5);
   assert.equal(c.app.encounters.purge(), 1);

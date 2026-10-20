@@ -87,7 +87,7 @@ test('mêmes champs, même méthode, même action, même champ piège en v1 et e
     }
     // Après un envoi refusé (erreurs, saisie gardée) : toujours les mêmes champs.
     const form = formOf((await c.app.inject('/bonjour')).body, '/bonjour');
-    const res = await post(c.app, '/bonjour', payloadOf(form, { email: 'a,b', wants_photo: true }), { ip: `198.51.100.${version === 'v1' ? 2 : 3}` });
+    const res = await post(c.app, '/bonjour', payloadOf(form, { email: 'a,b', wants_photo: true, adult: 'oui' }), { ip: `198.51.100.${version === 'v1' ? 2 : 3}` });
     assert.equal(res.statusCode, 422);
     (seen['bonjour 422'] ??= {})[version] = formOf(res.body, '/bonjour').sig;
   }
@@ -96,7 +96,7 @@ test('mêmes champs, même méthode, même action, même champ piège en v1 et e
   // Âge et nom du parent (les champs de l'app de terrain), date en texte libre : les mêmes en v1 et en v2 (registre de la
   // Vigie, « Bonjour : mineurs et date libre »).
   assert.deepEqual(seen['/bonjour'].v2, ['checkbox:scope_instagram', 'checkbox:scope_name', 'checkbox:scope_print', 'checkbox:scope_site', 'checkbox:wants_photo',
-    'email:email', 'radio:adult=non', 'radio:adult=oui', 'radio:decision=', 'radio:decision=accord', 'radio:decision=refus', 'radio:rights=', 'radio:rights=acces', 'radio:rights=effacement',
+    'email:email', 'email:guardian_email', 'radio:adult=moins15', 'radio:adult=non', 'radio:adult=oui', 'radio:decision=', 'radio:decision=accord', 'radio:decision=refus', 'radio:rights=', 'radio:rights=acces', 'radio:rights=effacement',
     'text:details', 'text:guardian', 'text:met_on', 'text:met_time', 'text:name', 'text:place', 'text:ref', 'text:website', 'textarea:message']);
   assert.ok(seen['/bonjour/J'].v2.includes('hidden:photographer=J'), 'QR d’un photographe : champ caché gardé');
   assert.deepEqual(seen[`/photo/${SLUG}/signaler`].v2, ['email:email', 'radio:kind=autre', 'radio:kind=inapproprie', 'radio:kind=texte', 'text:website', 'textarea:message']);
@@ -110,7 +110,7 @@ for (const version of VERSIONS) {
     const c = await site(t, version, { vigie: true });
     const count = () => c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get();
     const form = formOf((await c.app.inject('/bonjour')).body, '/bonjour');
-    const ok = { ref: 'J-0142', wants_photo: true, email: 'alice@exemple.fr' };
+    const ok = { ref: 'J-0142', wants_photo: true, adult: 'oui', email: 'alice@exemple.fr' };
     // Envoi ordinaire, construit depuis les champs de la page : accepté et enregistré.
     let r = await post(c.app, '/bonjour', payloadOf(form, ok), { ip: '198.51.100.10' });
     assert.deepEqual([r.statusCode, r.headers.location], [303, '/bonjour/merci?ref=J-0142']);
@@ -209,7 +209,7 @@ for (const version of VERSIONS) {
     const c = await site(t, version, { vigie: 'off' });
     assert.equal(c.app.securite.enabled, false);
     const form = formOf((await c.app.inject('/bonjour')).body, '/bonjour');
-    const ok = { ref: 'J-0142', wants_photo: true, email: 'alice@exemple.fr' };
+    const ok = { ref: 'J-0142', wants_photo: true, adult: 'oui', email: 'alice@exemple.fr' };
     assert.equal((await post(c.app, '/bonjour', payloadOf(form, { ...ok, website: 'x' }))).headers.location, '/bonjour/merci');
     assert.equal((await post(c.app, '/bonjour', payloadOf(form, ok), { origin: 'https://ailleurs.example' })).headers.location, '/bonjour/merci');
     assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), 0);
@@ -222,7 +222,7 @@ test('v2 · /bonjour : erreurs de la planche (résumé dès deux points, focus s
   const c = await site(t, 'v2');
   const form = formOf((await c.app.inject('/bonjour')).body, '/bonjour');
   // Deux points : le résumé en tête prend le focus ; un lien par point, vers son champ ; le titre de l'onglet le dit.
-  let r = await post(c.app, '/bonjour', payloadOf(form, { email: 'claire@example,org', wants_photo: true, message: 'Nous étions deux.' }), { ip: '198.51.100.40' });
+  let r = await post(c.app, '/bonjour', payloadOf(form, { email: 'claire@example,org', wants_photo: true, adult: 'oui', message: 'Nous étions deux.' }), { ip: '198.51.100.40' });
   let b = nb(r.body);
   assert.equal(r.statusCode, 422);
   assert.match(b, /<title>Erreur : 2 points à corriger · Je vous ai photographié · Test<\/title>/);
@@ -235,7 +235,7 @@ test('v2 · /bonjour : erreurs de la planche (résumé dès deux points, focus s
   assert.match(b, />Nous étions deux\.<\/textarea>/);
   assert.match(b, /<input id="bj-photo" type="checkbox" name="wants_photo" checked>/);
   // Un seul point : pas de résumé, le champ prend le focus ; le titre nomme le champ.
-  r = await post(c.app, '/de/bonjour', payloadOf(formOf((await c.app.inject('/de/bonjour')).body, '/de/bonjour'), { ref: 'J-0142', wants_photo: true }), { ip: '198.51.100.41' });
+  r = await post(c.app, '/de/bonjour', payloadOf(formOf((await c.app.inject('/de/bonjour')).body, '/de/bonjour'), { ref: 'J-0142', wants_photo: true, adult: 'oui' }), { ip: '198.51.100.41' });
   b = nb(r.body);
   assert.match(b, /<title>Fehler: Ihre E-Mail · Ich habe Sie fotografiert · Test<\/title>/);
   assert.doesNotMatch(b, /class="resume"/);
@@ -253,7 +253,7 @@ test('v2 · /bonjour : erreurs de la planche (résumé dès deux points, focus s
   assert.doesNotMatch(b, /autofocus/);
   assert.doesNotMatch(b, /\sstyle=/);
   assert.doesNotMatch(b, /<script(?![^>]*\ssrc=)/);
-  assert.equal(b.match(/name="(?:adult|guardian)"/g).length, 3, 'âge (deux réponses) et nom du parent, rien d’autre de nouveau');
+  assert.equal(b.match(/name="(?:adult|guardian|guardian_email)"/g).length, 5, 'âge (trois réponses), nom et adresse du parent, rien d’autre de nouveau');
   // Carte reconnue (QR) : la référence et le photographe, sans rien dire du code.
   const code = c.app.encounters.codeOf('J-0142');
   assert.match(nb((await c.app.inject(`/bonjour/J-0142-${code}`)).body), /<p class="pf-carte"><span class="donnee">J-0142<\/span>&nbsp;· Carte de Julien : merci de l’avoir gardée\.<\/p>/);

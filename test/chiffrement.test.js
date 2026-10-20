@@ -34,7 +34,7 @@ test('coffre : aller-retour texte et binaire, mauvaise clé ou clé absente sans
 
 test('avec DATA_KEY : demandes et rencontres chiffrées dans la base, en clair dans l’admin ; données existantes chiffrées', async t => {
   const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN, DATA_KEY: KEY } });
-  await ctx.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0142', wants_photo: 'on', email: 'alice@exemple.fr', name: 'Alice', message: 'Super photo', met_on: '2026-10-14', place: 'Angers' } });
+  await ctx.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0142', wants_photo: 'on', adult: 'oui', email: 'alice@exemple.fr', name: 'Alice', message: 'Super photo', met_on: '2026-10-14', place: 'Angers' } });
   const raw = ctx.db.prepare("SELECT * FROM encounters WHERE ref = 'J-0142'").get();
   assert.match(raw.email, /^enc1:/);
   assert.match(raw.name, /^enc1:/);
@@ -80,7 +80,7 @@ test('avec DATA_KEY : demandes et rencontres chiffrées dans la base, en clair d
 
 test('sans DATA_KEY : rien n’est chiffré, et Réglages le signale', async t => {
   const ctx = await setup(t, { seeded: true, env: { LOCAL_AUTH_TOKEN: TOKEN } });
-  await ctx.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0001', wants_photo: 'on', email: 'z@exemple.fr' } });
+  await ctx.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0001', wants_photo: 'on', adult: 'oui', email: 'z@exemple.fr' } });
   assert.equal(ctx.db.prepare("SELECT email FROM encounters WHERE ref = 'J-0001'").pluck().get(), 'z@exemple.fr');
   const res = await ctx.app.inject({ method: 'POST', url: '/auth/local', payload: { token: TOKEN, author: 'julien', next: '/admin' } });
   assert.match((await ctx.app.inject({ url: '/admin/droits', cookies: cookiesOf(res) })).body, /: inactif\. Ajoutez DATA_KEY/);

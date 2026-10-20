@@ -53,7 +53,9 @@ const SEALED_BLOB = ['card_jpeg', 'portrait_jpeg', 'signature_png'];
 const SEALED_NUM = ['lat', 'lon', 'adult'];
 // Âge : les deux réponses de l'app et de la page (« oui » : 18 ans ou plus ; « non » : moins de 18 ans) ; autre chose :
 // non renseigné.
-export const ADULT = { oui: 1, non: 0 };
+// « moins15 » (page /bonjour seulement, proposé avec « Recevoir la photo ») : moins de 15 ans, une personne mineure (0)
+// dont l'adresse n'est jamais gardée : celle d'un parent la remplace (email_parent, migration 062).
+export const ADULT = { oui: 1, non: 0, moins15: 0 };
 export const adultOf = v => (typeof v === 'string' && Object.hasOwn(ADULT, v) ? ADULT[v] : null);
 
 export function createEncounters({ db, now = () => Date.now(), vault = createVault(null) }) {
@@ -178,21 +180,28 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const scopes = scopesOf(body);
     if (decision === 'accord' && !SCOPES.slice(0, 3).some(s => scopes[s])) errors.scopes = 'scopes';
     else if (decision === 'accord' && instagramWithoutSite(scopes)) errors.scopes = 'instagram';
-    const email = text(body.email, 200);
-    const name = text(body.name, 80);
-    const message = text(body.message, 2000);
-    if (email && !EMAIL.test(email)) errors.email = 'email';
-    // Un refus peut rester anonyme ; recevoir la photo, accepter ou attendre une réponse demande une adresse.
-    else if (!email && (wantsPhoto || decision === 'accord' || rights === 'acces' || (message && decision !== 'refus'))) errors.email = 'email_required';
-    if (decision === 'accord' && !name) errors.name = 'name';
     // Âge, comme dans l'app : demandé avec un accord ; avant 18 ans, le nom du parent qui remplit le formulaire avec la
     // personne. Sans lui, l'accord n'est pas enregistré (une personne mineure n'accepte pas seule une publication ; un
-    // refus, si). Sans accord, ni l'âge ni le parent ne sont gardés (minimisation : la page dit « nécessaire si vous
-    // acceptez une publication »).
-    const adult = decision === 'accord' ? adultOf(body.adult) : null;
+    // refus, si). Demandé aussi pour recevoir la photo (décision du propriétaire, 20 octobre 2026) : avant 15 ans (« moins
+    // de 15 ans », proposé avec « Recevoir la photo »), l'adresse d'un parent remplace celle de la personne (RGPD art. 8,
+    // loi Informatique et libertés art. 45) ; la sienne n'est jamais gardée. Ni accord ni photo : ni l'âge ni le parent
+    // ne sont gardés (minimisation).
+    const needAge = decision === 'accord' || wantsPhoto;
+    const adult = needAge ? adultOf(body.adult) : null;
+    const under15 = adult === 0 && body.adult === 'moins15';
     const guardian = adult === 0 ? text(body.guardian, 80) : '';
-    if (decision === 'accord' && adult === null) errors.adult = 'adult';
+    if (needAge && adult === null) errors.adult = decision === 'accord' ? 'adult' : 'adult_photo';
     else if (decision === 'accord' && adult === 0 && !guardian) errors.guardian = 'guardian';
+    // L'adresse qui sert à répondre : celle de la personne, ou avant 15 ans celle du parent.
+    const parentEmail = under15 ? text(body.guardian_email, 200) : '';
+    const email = under15 ? parentEmail : text(body.email, 200);
+    const emailKey = under15 ? 'guardian_email' : 'email';
+    const name = text(body.name, 80);
+    const message = text(body.message, 2000);
+    if (email && !EMAIL.test(email)) errors[emailKey] = 'email';
+    // Un refus peut rester anonyme ; recevoir la photo, accepter ou attendre une réponse demande une adresse.
+    else if (!email && (wantsPhoto || decision === 'accord' || rights === 'acces' || (message && decision !== 'refus'))) errors[emailKey] = under15 ? 'guardian_email' : 'email_required';
+    if (decision === 'accord' && !name) errors.name = 'name';
     if (!wantsPhoto && !decision && !message && !rights) errors.what = 'what';
     if (Object.keys(errors).length) throw new EncounterError(errors);
 
@@ -200,9 +209,9 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const detail = { wants_photo: wantsPhoto, decision, rights: rights || undefined, scopes: decision === 'accord' ? scopes : undefined, message: message || undefined,
       email: email || undefined, name: name || undefined, met_on: metOn || undefined, met_time: normTime(body.met_time) || undefined,
       place: place || undefined, details: text(body.details, 500) || undefined, code: c ? (c.verified ? 'ok' : 'absent') : undefined,
-      adult: adult ?? undefined, guardian: guardian || undefined };
+      adult: adult ?? undefined, guardian: guardian || undefined, email_parent: under15 || undefined };
     const recap = { ref: c?.ref ?? null, met_on: metOn || null, met_time: normTime(body.met_time) || null, place: place || null, wants_photo: wantsPhoto,
-      decision, scopes: decision === 'accord' ? scopes : null, rights: rights || null, message: Boolean(message), adult, email: Boolean(email) };
+      decision, scopes: decision === 'accord' ? scopes : null, rights: rights || null, message: Boolean(message), adult, under15, email: Boolean(email) };
     // Une demande de droits en cours garde son type et son échéance (le délai légal court depuis la première) : une
     // nouvelle demande ne la remplace pas, elle est seulement gardée dans l'historique. Avec le code de la carte, la
     // personne peut en changer le type.
@@ -262,7 +271,8 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
         || (decision === 'accord' && e.refused) || (rights && e.rights_request && !e.rights_done_at));
       const set = { status: 'nouvelle', updated_at: t, verified: e.verified || (c?.verified ? 1 : 0), ...rightsSet(e, Boolean(c?.verified)) };
       if (!unverified) set.lang = lang;
-      if (email && !(unverified && e.email)) Object.assign(set, { email: S(email), email_hash: emailHash(email) });
+      // Adresse d'un parent (moins de 15 ans) : marquée, sans empreinte (elle ne rapproche pas deux enfants d'une famille).
+      if (email && !(unverified && e.email)) Object.assign(set, { email: S(email), email_hash: under15 ? null : emailHash(email), email_parent: under15 ? 1 : 0 });
       if (name && !(unverified && e.name)) set.name = S(name);
       // Âge et parent : comme le nom, jamais remplacés sans le code de la carte ; 18 ans ou plus efface le nom du parent.
       if (adult !== null && !(unverified && e.adult != null)) Object.assign(set, { adult: sealAdult(adult), ...(adult === 1 ? { guardian: S('') } : {}) });
@@ -545,7 +555,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const iso = ms => (ms ? new Date(ms).toISOString() : null);
     return {
       data: {
-        reference: e.ref, photographe: e.author, langue: e.lang, nom: e.name || null, email: e.email || null,
+        reference: e.ref, photographe: e.author, langue: e.lang, nom: e.name || null, email: e.email || null, email_du_parent: Boolean(e.email_parent),
         rencontre: { date: e.met_on || null, heure: e.met_time || null, lieu: e.place || null, details: e.details || null,
           position: e.lat != null ? { latitude: e.lat, longitude: e.lon, precision: '≈ 100 m' } : null },
         session: (s => (s.day ? { photographe: e.author, jour: s.day, photos_couvertes: s.photos.filter(p => !p.excluded).map(p => p.title) } : null))(session(id)),
@@ -575,7 +585,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     db.transaction(() => {
       if (!keepRefusal) { db.prepare('DELETE FROM encounters WHERE id = ?').run(id); return; }
       db.prepare(`UPDATE encounters SET ref = NULL, email = '', email_hash = NULL, person_id = NULL, name = '', details = '', place = '', met_time = '', consent = NULL, consent_source = NULL,
-        consent_at = NULL, wants_photo = 0, card_jpeg = NULL, portrait_jpeg = NULL, signature_png = NULL, lat = NULL, lon = NULL, adult = NULL, guardian = '',
+        consent_at = NULL, wants_photo = 0, email_parent = 0, card_jpeg = NULL, portrait_jpeg = NULL, signature_png = NULL, lat = NULL, lon = NULL, adult = NULL, guardian = '',
         rights_request = NULL, rights_done_at = ?, anonymized = 1, verified = 0, status = 'traitee', updated_at = ? WHERE id = ?`).run(now(), now(), id);
       db.prepare('DELETE FROM encounter_events WHERE encounter_id = ?').run(id);
       db.prepare('DELETE FROM encounter_shares WHERE encounter_id = ?').run(id);

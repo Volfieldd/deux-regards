@@ -9,8 +9,8 @@
 <% const t = it.t, h = it.h, F = t.v2form, B = F.hello, ic = it.v2.ic, ty = it.v2.typo;
    const v = it.values || {}, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true;
    // Les points à corriger, dans l'ordre de la page ; chacun mène au premier champ qui le concerne.
-   const ORDER = ['ref', 'met_on', 'where', 'adult', 'guardian', 'what', 'scopes', 'email', 'name'];
-   const TARGET = { ref: 'bj-ref', met_on: 'bj-date', where: !v.met_on || e.met_on ? 'bj-date' : 'bj-lieu', adult: 'bj-age-oui', guardian: 'bj-parent', what: 'bj-photo', scopes: 'bj-scope-site', email: 'bj-email', name: 'bj-nom' };
+   const ORDER = ['ref', 'met_on', 'where', 'adult', 'guardian', 'guardian_email', 'what', 'scopes', 'email', 'name'];
+   const TARGET = { ref: 'bj-ref', met_on: 'bj-date', where: !v.met_on || e.met_on ? 'bj-date' : 'bj-lieu', adult: 'bj-age-oui', guardian: 'bj-parent', guardian_email: 'bj-parent-email', what: 'bj-photo', scopes: 'bj-scope-site', email: 'bj-email', name: 'bj-nom' };
    const text = k => ty(F.errors[e[k]] || h.errors[e[k]] || String(e[k]));
    const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => !['limit', 'form'].includes(k) && !ORDER.includes(k))];
    const formErr = e.form ? text('form') : '';
@@ -55,7 +55,7 @@
 <% if (it.sentRef) { %>        <dt><%= B.sentRef %></dt><dd class="donnee"><%= it.sentRef %></dd>
 <% } %><% if (met) { %>        <dt><%= B.recapMet %></dt><dd><%= ty(met) %></dd>
 <% } %>        <dt><%= B.recapWish %></dt><dd><%= ty(wishes.join(' ; ')) %></dd>
-<% if (r.adult === 1 || r.adult === 0) { %>        <dt><%= B.recapAge %></dt><dd><%= r.adult === 1 ? B.recapAdult : r.decision === 'accord' ? B.recapMinorAgree : B.recapMinor %></dd>
+<% if (r.adult === 1 || r.adult === 0) { %>        <dt><%= B.recapAge %></dt><dd><%= ty(r.adult === 1 ? B.recapAdult : r.under15 ? B.recapUnder15 : r.decision === 'accord' ? B.recapMinorAgree : B.recapMinor) %></dd>
 <% } %>      </dl>
       <p class="champ-aide"><%= ty(B.recapNote) %></p>
     </section>
@@ -98,8 +98,13 @@
 <%~ err('adult') %>
       <label class="choix"><input id="bj-age-oui" type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %><%~ bad('adult') %><%~ af('bj-age-oui') %>><span><%= h.adult %></span></label>
       <label class="choix"><input id="bj-age-non" type="radio" name="adult" value="non" data-revele<%~ v.adult === 'non' ? ' checked' : '' %><%~ bad('adult') %>><span><%= ty(h.minor) %></span></label>
-      <div class="champ revele"><label for="bj-parent"><%= h.guardian %></label><p class="champ-aide" id="bj-parent-aide"><%= h.guardianHint %></p>
+<% /* « Moins de 15 ans » : proposé seulement avec « Recevoir la photo » (sans script, par :has ; toujours là sur un vieux
+      navigateur) : l'adresse d'un parent remplace alors celle de la personne. */ %>
+      <label class="choix si-photo"><input id="bj-age-15" type="radio" name="adult" value="moins15" data-revele data-revele15<%~ v.adult === 'moins15' ? ' checked' : '' %><%~ bad('adult') %>><span><%= ty(h.under15) %></span></label>
+      <div class="champ revele"><label for="bj-parent"><%= h.guardian %></label><p class="champ-aide" id="bj-parent-aide"><%= ty(h.guardianHint) %></p>
         <input id="bj-parent" name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"<%~ desc(ek('guardian'), 'bj-parent-aide') %><%~ bad('guardian') %><%~ af('bj-parent') %>><%~ err('guardian') %></div>
+      <div class="champ revele-15"><label for="bj-parent-email"><%= h.guardianEmail %></label><p class="champ-aide" id="bj-parent-email-aide"><%= ty(h.guardianEmailHint) %></p>
+        <input id="bj-parent-email" type="email" name="guardian_email" value="<%= v.guardian_email || '' %>" maxlength="200" autocomplete="off"<%~ desc(ek('guardian_email'), 'bj-parent-email-aide') %><%~ bad('guardian_email') %><%~ af('bj-parent-email') %>><%~ err('guardian_email') %></div>
     </fieldset>
     <fieldset class="bloc"<%~ desc('bj-souhait-aide', ek('what')) %>><legend><%= h.wish %></legend>
       <p class="champ-aide" id="bj-souhait-aide"><%= B.wishHelp %></p>
@@ -123,7 +128,7 @@
       <div class="champ"><label for="bj-message"><%= B.message %> <%~ opt %></label><textarea id="bj-message" name="message" rows="4" maxlength="2000"><%= v.message || '' %></textarea></div>
     </fieldset>
     <fieldset class="bloc"><legend><%= h.contact %></legend>
-      <div class="champ"><label for="bj-email"><%= h.email %></label><p class="champ-aide" id="bj-email-aide"><%= B.emailHint %></p>
+      <div class="champ"><label for="bj-email"><%= h.email %></label><p class="champ-aide" id="bj-email-aide"><%= B.emailHint %><span class="si-15"> <%= ty(h.emailUnder15) %></span></p>
         <input id="bj-email" type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ desc(ek('email'), 'bj-email-aide') %><%~ bad('email') %><%~ af('bj-email') %>><%~ err('email') %></div>
       <div class="champ"><label for="bj-nom"><%= h.name %></label><p class="champ-aide" id="bj-nom-aide"><%= B.nameHint %></p>
         <input id="bj-nom" name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="name"<%~ desc(ek('name'), 'bj-nom-aide') %><%~ bad('name') %><%~ af('bj-nom') %>><%~ err('name') %></div>

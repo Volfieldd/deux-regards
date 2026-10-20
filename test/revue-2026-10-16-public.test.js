@@ -38,7 +38,7 @@ test('A019 : /bonjour/<réf> ne dit plus si le code est bon (même page, code pr
   }
   assert.match((await app.inject(`/bonjour/J-0142-${bad}`)).body, /J-0142 · Carte de Julien : merci de l’avoir gardée\./);
   // Page « trop de demandes » (429) : la même, code bon ou faux.
-  const flood = ref => app.inject({ method: 'POST', url: '/bonjour', payload: { ref, wants_photo: 'on', email: 'x@exemple.fr' }, remoteAddress: '198.51.100.30' });
+  const flood = ref => app.inject({ method: 'POST', url: '/bonjour', payload: { ref, wants_photo: 'on', adult: 'oui', email: 'x@exemple.fr' }, remoteAddress: '198.51.100.30' });
   for (let i = 0; i < 8; i++) await flood('J-0999');
   const a = await flood(`J-0142-${good}`), b = await flood(`J-0142-${bad}`);
   assert.deepEqual([a.statusCode, b.statusCode], [429, 429]);
@@ -71,7 +71,7 @@ test('A019 : 5 codes faux par référence en 24 h, d’où qu’ils viennent ; a
   assert.equal(last.verified, 0);
   // Une autre référence n'est pas touchée.
   const other = app.encounters.codeOf('J-0008');
-  assert.equal((await app.inject({ method: 'POST', url: '/bonjour', payload: { ref: `J-0008-${other}`, wants_photo: 'on', email: 'b@exemple.fr' }, remoteAddress: '203.0.113.90' })).statusCode, 303);
+  assert.equal((await app.inject({ method: 'POST', url: '/bonjour', payload: { ref: `J-0008-${other}`, wants_photo: 'on', adult: 'oui', email: 'b@exemple.fr' }, remoteAddress: '203.0.113.90' })).statusCode, 303);
   assert.equal(db.prepare("SELECT verified FROM encounters WHERE ref = 'J-0008'").pluck().get(), 1);
   // 24 h plus tard : le bon code vérifie de nouveau.
   db.prepare('UPDATE card_code_failures SET at = at - ?').run(25 * 3600 * 1000);
@@ -79,7 +79,7 @@ test('A019 : 5 codes faux par référence en 24 h, d’où qu’ils viennent ; a
   e = app.encounters.get(id);
   assert.deepEqual([e.consent_source, e.verified], ['en_ligne', 1]);
   // Essais périmés effacés au passage (au prochain code faux, quelle que soit la référence).
-  await app.inject({ method: 'POST', url: '/bonjour', payload: { ref: `J-0008-${wrong.find(c => c !== other)}`, wants_photo: 'on', email: 'b@exemple.fr' }, remoteAddress: '203.0.113.91' });
+  await app.inject({ method: 'POST', url: '/bonjour', payload: { ref: `J-0008-${wrong.find(c => c !== other)}`, wants_photo: 'on', adult: 'oui', email: 'b@exemple.fr' }, remoteAddress: '203.0.113.91' });
   assert.equal(db.prepare('SELECT COUNT(*) FROM card_code_failures').pluck().get(), 1);
 });
 

@@ -123,8 +123,8 @@ test('accord : âge exigé ; avant 18 ans, le nom du parent ; un mineur n’acce
   assert.equal(r.statusCode, 303);
   e = c.row('J-0302');
   assert.deepEqual([e.refused, e.adult, e.guardian], [1, null, '']);
-  r = await c.hello({ ref: 'J-0303', wants_photo: 'on', email: 'x@exemple.fr', adult: 'oui' });
-  assert.equal(c.row('J-0303').adult, null, 'recevoir la photo : âge non gardé');
+  r = await c.hello({ ref: 'J-0303', message: 'Bonjour', email: 'x@exemple.fr', adult: 'oui' });
+  assert.equal(c.row('J-0303').adult, null, 'un message seul : âge non gardé');
   // L'historique et l'export disent la tranche d'âge, comme pour l'app.
   const ev = c.app.encounters.events(c.row('J-0300').id).at(-1);
   assert.deepEqual([ev.kind, ev.detail.adult, ev.detail.guardian], ['visiteur', 0, 'Anne Martin (mère)']);
@@ -174,12 +174,12 @@ test('sans le code de la carte : l’âge et le parent d’une rencontre établi
 test('date libre sur la page : lue, enregistrée en AAAA-MM-JJ, erreurs sous le champ', async t => {
   const c = await site(t);
   const thisYear = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(Date.now()).slice(0, 4);
-  let r = await c.hello({ photographer: 'J', met_on: '2/1', place: 'Angers', wants_photo: 'on', email: 'a@exemple.fr' });
+  let r = await c.hello({ photographer: 'J', met_on: '2/1', place: 'Angers', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' });
   assert.equal(r.statusCode, 303);
   const met = c.db.prepare("SELECT met_on FROM encounters ORDER BY id DESC LIMIT 1").pluck().get();
   assert.match(met, new RegExp(`^(${thisYear}|${Number(thisYear) - 1})-01-02$`), '« 2/1 » : le 2 janvier');
   // Date illisible : l'erreur la nomme, sous le champ, et le dépliant est ouvert ; la saisie est gardée.
-  r = await c.hello({ met_on: 'mardi prochain', place: 'Angers', wants_photo: 'on', email: 'a@exemple.fr' });
+  r = await c.hello({ met_on: 'mardi prochain', place: 'Angers', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' });
   assert.equal(r.statusCode, 422);
   let b = nb(r.body);
   assert.match(b, /<title>Erreur : date de la rencontre · Je vous ai photographié · Test<\/title>/);
@@ -188,13 +188,13 @@ test('date libre sur la page : lue, enregistrée en AAAA-MM-JJ, erreurs sous le 
   assert.match(b, /<p class="champ-err" id="err-met_on">.*<b>Erreur :<\/b> date illisible : écrivez-la par exemple 14\/10\/2026/);
   assert.doesNotMatch(b, /id="err-where"/, 'le lieu est donné : seule la date est en cause');
   // En anglais, une date ambiguë demande le mois en lettres.
-  r = await c.hello({ met_on: '03/12/2025', place: 'Angers', wants_photo: 'on', email: 'a@exemple.fr' }, { url: '/en/bonjour' });
+  r = await c.hello({ met_on: '03/12/2025', place: 'Angers', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' }, { url: '/en/bonjour' });
   assert.match(nb(r.body), /Ambiguous date: write the month in words/);
   // En allemand, une date à venir.
-  r = await c.hello({ met_on: '24.12.2099', place: 'Köln', wants_photo: 'on', email: 'a@exemple.fr' }, { url: '/de/bonjour' });
+  r = await c.hello({ met_on: '24.12.2099', place: 'Köln', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' }, { url: '/de/bonjour' });
   assert.match(nb(r.body), /Dieses Datum liegt in der Zukunft/);
   // Sans lieu ni carte, avec une date illisible : les deux points.
-  r = await c.hello({ met_on: 'xyz', wants_photo: 'on', email: 'a@exemple.fr' });
+  r = await c.hello({ met_on: 'xyz', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' });
   b = nb(r.body);
   assert.deepEqual([...b.match(/<section class="resume"[\s\S]*?<\/section>/)[0].matchAll(/href="#([\w-]+)"/g)].map(m => m[1]), ['bj-date', 'bj-date']);
 });
@@ -243,7 +243,7 @@ test('récapitulatif après l’envoi : rien dans l’adresse, un cookie de 15 m
   assert.equal(await shown(held), await shown(fresh));
   // En anglais et en allemand, la date en toutes lettres.
   for (const [url, re] of [['/en/bonjour', /Wednesday, 14 October 2026, around 18:15/], ['/de/bonjour', /Mittwoch, 14\. Oktober 2026, gegen 18:15 Uhr/]]) {
-    const res = await c.hello({ photographer: 'J', met_on: '14/10/2026', met_time: '18:15', place: 'Angers', wants_photo: 'on', email: 'a@exemple.fr' }, { url });
+    const res = await c.hello({ photographer: 'J', met_on: '14/10/2026', met_time: '18:15', place: 'Angers', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' }, { url });
     assert.equal(res.headers.location, `${url}/merci`);
     assert.match(cookieOf(res).header, new RegExp(`Path=${url.replace(/\//g, '\\/')}`));
     assert.match(nb((await c.app.inject({ url: res.headers.location, cookies: { bonjour_recap: cookieOf(res).value } })).body), re);
@@ -280,10 +280,10 @@ test('Vigie : âge hors liste et saisies plus longues que la page (BV-31, DS12),
   const before = ev.length;
   let r = await c.hello({ ref: 'J-0360', decision: 'accord', scope_site: 'on', name: 'X', email: 'x@exemple.fr', adult: '16 ans' });
   assert.equal(r.statusCode, 422);
-  r = await c.hello({ ref: 'J-0361', wants_photo: 'on', email: 'x@exemple.fr', adult: 'mineur' });
-  assert.equal(r.statusCode, 303, 'sans accord, l’envoi suit son cours');
+  r = await c.hello({ ref: 'J-0361', message: 'Bonjour', email: 'x@exemple.fr', adult: 'mineur' });
+  assert.equal(r.statusCode, 303, 'ni accord ni photo : l’envoi suit son cours');
   // Date et nom du parent plus longs que la page ne le permet.
-  r = await c.hello({ photographer: 'J', met_on: `14/10/2026${' '.repeat(60)}`, place: 'Angers', wants_photo: 'on', email: 'x@exemple.fr' });
+  r = await c.hello({ photographer: 'J', met_on: `14/10/2026${' '.repeat(60)}`, place: 'Angers', wants_photo: 'on', adult: 'oui', email: 'x@exemple.fr' });
   assert.equal(r.statusCode, 422);
   await c.hello({ ref: 'J-0362', decision: 'accord', scope_site: 'on', name: 'X', email: 'x@exemple.fr', adult: 'non', guardian: 'P'.repeat(200) });
   ev = (await c.flush()).slice(before);
@@ -341,7 +341,8 @@ test('la page en v1, v2 et v3, en trois langues : âge, parent, date libre, mêm
     for (const [p, [age, adult, parent]] of Object.entries(L)) {
       const b = nb((await c.app.inject(`${p}/bonjour`)).body);
       assert.ok(b.includes(age) && b.includes(adult) && b.includes(parent), `${version} ${p || '/'} : libellés`);
-      assert.equal(b.match(/<input[^>]*type="radio" name="adult" value="(?:oui|non)"/g)?.length, 2, `${version} ${p} : deux réponses`);
+      assert.equal(b.match(/<input[^>]*type="radio" name="adult" value="(?:oui|non|moins15)"/g)?.length, 3, `${version} ${p} : trois réponses`);
+      assert.match(b, /<input[^>]*type="email" name="guardian_email"[^>]*maxlength="200"/, `${version} ${p} : adresse du parent`);
       assert.match(b, /<input[^>]*name="guardian"[^>]*maxlength="80" autocomplete="off"/, `${version} ${p} : parent`);
       assert.match(b, /<input(?![^>]*type="date")[^>]*name="met_on"[^>]*maxlength="40"/, `${version} ${p} : date en texte libre`);
       assert.doesNotMatch(b, /type="date"/);
@@ -484,4 +485,69 @@ test('revue : seulement des textes dans le formulaire (JSON forgé) : 422 et DS1
   // La date libre elle-même n'appelle jamais String() sur autre chose qu'un texte.
   assert.deepEqual(readDay({ toString: 1 }, { today: TODAY }), { error: 'date' });
   assert.deepEqual(readDay(['14/10/2026'], { today: TODAY }), { error: 'date' });
+});
+
+// ---------- recevoir la photo avant 15 ans (décision du propriétaire du 20 octobre 2026) ----------
+
+test('recevoir la photo : l’âge est demandé ; avant 15 ans, l’adresse d’un parent remplace la sienne, qui n’est jamais gardée', async t => {
+  const c = await site(t, { vigie: true });
+  // Sans âge : refusé, l'erreur dit pourquoi.
+  let r = await c.hello({ ref: 'J-0500', wants_photo: 'on', email: 'enfant@exemple.fr' });
+  assert.equal(r.statusCode, 422);
+  assert.match(nb(r.body), /<b>Erreur :<\/b> dites-nous votre âge pour recevoir la photo : avant 15 ans, elle est envoyée à un parent/);
+  // Moins de 15 ans sans adresse de parent : refusé, l'erreur sous le champ du parent (la sienne ne compte pas).
+  r = await c.hello({ ref: 'J-0500', wants_photo: 'on', email: 'enfant@exemple.fr', adult: 'moins15' });
+  assert.equal(r.statusCode, 422);
+  assert.match(r.body, /id="err-guardian_email"/);
+  assert.match(r.body, /<input id="bj-age-15" type="radio" name="adult" value="moins15" data-revele data-revele15 checked/);
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), 0);
+  r = await c.hello({ ref: 'J-0500', wants_photo: 'on', adult: 'moins15', guardian_email: 'pas-une-adresse' });
+  assert.match(nb(r.body), /<b>Erreur :<\/b> adresse e-mail invalide/);
+  // Avec l'adresse du parent : la photo part au parent ; l'adresse de l'enfant n'est gardée nulle part.
+  r = await c.hello({ ref: 'J-0500', wants_photo: 'on', email: 'enfant@exemple.fr', adult: 'moins15', guardian_email: 'parent@exemple.fr', guardian: 'Anne Parent' });
+  assert.equal(r.statusCode, 303);
+  const e = c.row('J-0500');
+  assert.deepEqual([e.email, e.email_parent, e.email_hash, e.adult, e.guardian, e.wants_photo], ['parent@exemple.fr', 1, null, 0, 'Anne Parent', 1]);
+  const raw = c.db.prepare('SELECT email FROM encounters WHERE id = ?').pluck().get(e.id);
+  assert.match(raw, /^enc1:/, 'adresse du parent chiffrée');
+  const everything = JSON.stringify([c.db.prepare('SELECT * FROM encounters').all(), c.app.encounters.events(e.id), c.app.encounters.exportData(e.id).data]);
+  assert.ok(!everything.includes('enfant@exemple.fr'), 'adresse de l’enfant jamais gardée');
+  assert.equal(c.app.encounters.exportData(e.id).data.email_du_parent, true);
+  // Le récapitulatif le dit, sans aucune adresse.
+  const k = [].concat(r.headers['set-cookie']).find(h => h.startsWith('bonjour_recap=')).split(';')[0].split('=')[1];
+  const page = nb((await c.app.inject({ url: r.headers.location, cookies: { bonjour_recap: k } })).body);
+  assert.match(page, /<dt>Âge<\/dt><dd>moins de 15 ans : la photo est envoyée à votre parent<\/dd>/);
+  assert.ok(!page.includes('parent@exemple.fr') && !page.includes('enfant@exemple.fr') && !page.includes('Anne Parent'));
+  // 15 à 17 ans : sa propre adresse, comme avant ; 18 ans ou plus aussi.
+  await c.hello({ ref: 'J-0501', wants_photo: 'on', email: 'ado@exemple.fr', adult: 'non' });
+  assert.deepEqual([c.row('J-0501').email, c.row('J-0501').email_parent, c.row('J-0501').adult], ['ado@exemple.fr', 0, 0]);
+  // Publication avant 15 ans : le nom du parent, et son adresse (jamais celle de l'enfant).
+  r = await c.hello({ ref: 'J-0502', wants_photo: 'on', decision: 'accord', scope_site: 'on', name: 'Zoé', email: 'zoe@exemple.fr', adult: 'moins15', guardian_email: 'pere@exemple.fr' });
+  assert.match(r.body, /id="err-guardian"/, 'nom du parent exigé pour la publication');
+  r = await c.hello({ ref: 'J-0502', wants_photo: 'on', decision: 'accord', scope_site: 'on', name: 'Zoé', email: 'zoe@exemple.fr', adult: 'moins15', guardian: 'Paul Père', guardian_email: 'pere@exemple.fr' });
+  assert.equal(r.statusCode, 303);
+  assert.deepEqual([c.row('J-0502').email, c.row('J-0502').email_parent], ['pere@exemple.fr', 1]);
+  // Vigie : adresse de parent trop longue signalée sans valeur ; aucune adresse dans un événement.
+  await c.hello({ ref: 'J-0503', wants_photo: 'on', adult: 'moins15', guardian_email: `${'a'.repeat(220)}@exemple.fr` });
+  const ev = await c.flush();
+  assert.deepEqual(ev.filter(x => x.type === 'input_validation_fail').map(x => [x.detail.champ, x.detail.raison, x.detail.valeur]), [['guardian_email', 'saisie hors formulaire', undefined]]);
+  assert.deepEqual(ev.filter(x => x.type === 'malicious_input'), []);
+  const all = JSON.stringify(ev);
+  for (const v of ['parent@exemple.fr', 'enfant@exemple.fr', 'pere@exemple.fr', 'Anne Parent', 'Paul Père', 'moins15']) assert.ok(!all.includes(v), `« ${v} » dans un événement`);
+});
+
+test('moins de 15 ans : proposé seulement avec « Recevoir la photo » (sans script) ; phrase des deux parents sous le nom du parent (fr, en, de)', async t => {
+  const c = await site(t, { dataKey: false });
+  const css = (await import('node:fs')).readFileSync(new URL('../public/css/v2/formulaires.css', import.meta.url), 'utf8');
+  assert.match(css, /\.form:not\(:has\(#bj-photo:checked\)\) \.si-photo:not\(:has\(input:checked\)\) \{ display: none; \}/);
+  assert.match(css, /\.revele-si:not\(:has\(input\[data-revele15\]:checked\)\) \.revele-15 \{ display: none; \}/);
+  const PHRASE = { '': 'avec l’accord des deux parents (ou du parent qui exerce seul l’autorité parentale)', '/en': 'with the consent of both parents (or of the parent who alone exercises parental authority)', '/de': 'mit Zustimmung beider Eltern erfolgt (oder des Elternteils, der das Sorgerecht allein ausübt)' };
+  for (const version of ['v1', 'v2', 'v3']) {
+    c.app.publicVersion.save(version);
+    for (const [p, phrase] of Object.entries(PHRASE)) {
+      const b = nb((await c.app.inject(`${p}/bonjour`)).body);
+      assert.ok(b.includes(phrase), `${version} ${p || '/'} : phrase des deux parents`);
+      if (version !== 'v1') assert.match(b, /<label class="choix si-photo"><input id="bj-age-15"/);
+    }
+  }
 });

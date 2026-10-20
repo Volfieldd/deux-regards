@@ -46,7 +46,7 @@ test('demande sur ses données depuis /bonjour : accès (adresse exigée) ou eff
 
 test('export : archive ZIP avec toutes ses données, sa signature et les photos liées ; réservé aux admins', async t => {
   const c = await ctxOf(t);
-  await c.hello({ ref: 'J-0142', wants_photo: 'on', email: 'alice@exemple.fr', name: 'Alice', message: 'Merci !' });
+  await c.hello({ ref: 'J-0142', wants_photo: 'on', adult: 'oui', email: 'alice@exemple.fr', name: 'Alice', message: 'Merci !' });
   const e = c.enc('J-0142');
   c.db.prepare('UPDATE encounters SET signature_png = ? WHERE id = ?').run(Buffer.from('\x89PNG fausse signature'), e.id);
   await c.post(`/admin/rencontres/${e.id}/photos`, { photo: String(c.photo('quai-7h12').id) });
@@ -67,7 +67,7 @@ test('export : archive ZIP avec toutes ses données, sa signature et les photos 
 test('effacement : rencontre effacée ; refus gardé sans identité si des photos restent ; photos supprimées sur demande', async t => {
   const c = await ctxOf(t);
   // Sans refus : tout disparaît.
-  await c.hello({ ref: 'J-0001', wants_photo: 'on', email: 'a@exemple.fr' });
+  await c.hello({ ref: 'J-0001', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' });
   assert.equal((await c.post(`/admin/rencontres/${c.enc('J-0001').id}/effacer`)).statusCode, 303);
   assert.equal(c.enc('J-0001'), undefined);
   // Refus et photo gardée : trace anonyme, publication toujours impossible.

@@ -69,13 +69,14 @@ test('aucun débordement horizontal à 320, 412, 1032 × 1250, 1376 × 900 et 14
 test('sans JavaScript : envoi refusé, résumé focalisé et visible, lien vers le champ ; un seul point : le champ prend le focus', async ({ browser }, info) => {
   test.skip(info.project.name !== 'desktop', 'une fois suffit (limites de débit du serveur)');
   const { ctx, page } = await apercu(browser, info, { javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
-  // Deux points (sans carte ni date et lieu ; e-mail faux) : le résumé prend le focus, visible ; la saisie est gardée.
+  // Trois points (sans carte ni date et lieu ; âge, demandé pour recevoir la photo ; e-mail faux) : le résumé prend le
+  // focus, visible ; la saisie est gardée.
   await page.goto('/bonjour');
   await expect(page.locator('#resume')).toHaveCount(0);
   await page.getByLabel('Recevoir la photo par e-mail').check();
   await page.getByLabel('Votre e-mail').fill('claire@example,org');
   await page.getByRole('button', { name: 'Envoyer' }).click();
-  await expect(page).toHaveTitle(/^Erreur\s:\s2 points à corriger\s·\sJe vous ai photographié\s·\s/);
+  await expect(page).toHaveTitle(/^Erreur\s:\s3 points à corriger\s·\sJe vous ai photographié\s·\s/);
   await expect.poll(() => focused(page)).toEqual({ id: 'resume', visible: true });
   await expect(page.getByLabel('Votre e-mail')).toHaveValue('claire@example,org');
   await expect(page.getByLabel('Recevoir la photo par e-mail')).toBeChecked();
@@ -84,8 +85,9 @@ test('sans JavaScript : envoi refusé, résumé focalisé et visible, lien vers 
   await expect.poll(() => focused(page)).toEqual({ id: 'bj-date', visible: true });
   await expect(page.locator('#bj-date')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.locator('#err-where')).toBeVisible();
-  // Un seul point (carte donnée, e-mail manquant) : pas de résumé, le champ en erreur prend le focus, visible.
+  // Un seul point (carte et âge donnés, e-mail manquant) : pas de résumé, le champ en erreur prend le focus, visible.
   await page.getByLabel('Référence de la carte').fill('J-0142');
+  await page.getByLabel('J’ai 18 ans ou plus').check();
   await page.getByLabel('Votre e-mail').fill('');
   await page.getByRole('button', { name: 'Envoyer' }).click();
   await expect(page.locator('#resume')).toHaveCount(0);

@@ -990,6 +990,9 @@ nouveaux champs.
   commun a déjà signalé la valeur (DS11), ni au piège, ni à l'autre site, ni à la limite (rien n'est lu).
 - **Réponse** : âge hors liste : lu comme « non renseigné » (un accord est alors refusé, 422) ; date trop longue : 422,
   « date illisible » ; nom du parent trop long : coupé, comme le nom.
+- **Adresse du parent** (décision du 20 octobre 2026, moins de 15 ans qui reçoit la photo) : champ libre `body.guardian_email`
+  (200 signes) ; au-delà : `raison: 'saisie hors formulaire'`, `champ: 'guardian_email'`, `longueur` ; `adult` accepte
+  aussi `moins15`. Jamais l'adresse dans un événement (testé).
 - **Type inattendu** (revue de sécurité de la PR #187) : un champ qui n'est pas un texte (objet ou tableau d'un envoi
   JSON, champ répété) : `raison: 'type inattendu'`, `champ` (le premier), `type` (`object`, `tableau`…), `nombre` ;
   réponse 422, rien n'est lu ni enregistré.

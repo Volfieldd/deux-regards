@@ -14,5 +14,13 @@
  "Âge ou parent différents de ceux de la fiche : rien n’est appliqué (un refus, si), à décider par vous.": {
   "en": "Age or parent different from the record: nothing is applied (a refusal is), for you to decide.",
   "de": "Alter oder Elternteil weichen vom Datensatz ab: Nichts wird übernommen (eine Ablehnung schon), Sie entscheiden."
+ },
+ "E-mail du parent": {
+  "en": "Parent’s email",
+  "de": "E-Mail des Elternteils"
+ },
+ "moins de 15 ans, adresse d’un parent": {
+  "en": "under 15, a parent’s address",
+  "de": "unter 15, Adresse eines Elternteils"
  }
 }

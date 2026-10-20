@@ -42,12 +42,14 @@
       </details>
     </fieldset>
     <% /* Âge, comme l'app de terrain (server/encounters.js) : demandé avec un accord ; avant 18 ans, le nom du parent. */ %>
-    <fieldset<%~ bad('adult', 'guardian') %>>
+    <fieldset<%~ bad('adult', 'guardian', 'guardian_email') %>>
       <legend><%= h.age %></legend>
       <p class="hint"><%= h.ageHint %></p>
       <label class="check"><input type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %>> <%= h.adult %></label>
       <label class="check"><input type="radio" name="adult" value="non"<%~ v.adult === 'non' ? ' checked' : '' %>> <%= h.minor %></label>
+      <label class="check"><input type="radio" name="adult" value="moins15"<%~ v.adult === 'moins15' ? ' checked' : '' %>> <%= h.under15 %></label>
       <label><%= h.guardian %> <span class="hint"><%= h.guardianHint %></span> <input name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"></label>
+      <label><%= h.guardianEmail %> <span class="hint"><%= h.guardianEmailHint %></span> <input type="email" name="guardian_email" value="<%= v.guardian_email || '' %>" maxlength="200" autocomplete="off"<%~ bad('guardian_email') %>></label>
     </fieldset>
     <fieldset<%~ bad('what') %>>
       <legend><%= h.wish %></legend>

@@ -677,7 +677,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/public.js · bonjour', detail: { raison, formulaire: 'bonjour', champ, longueur: String(raw).length } });
     };
     if (body.adult != null && body.adult !== '' && !Object.hasOwn(ADULT, body.adult)) emit('valeur hors liste', 'adult', body.adult);
-    for (const [champ, max] of [['met_on', MAX_DATE], ['guardian', 80]]) if (body[champ] != null && String(body[champ]).length > max) emit('saisie hors formulaire', champ, body[champ]);
+    for (const [champ, max] of [['met_on', MAX_DATE], ['guardian', 80], ['guardian_email', 200]]) if (body[champ] != null && String(body[champ]).length > max) emit('saisie hors formulaire', champ, body[champ]);
   };
   // Carte affichée en tête du formulaire : d'après la référence seule (lettre du photographe, publique), jamais d'après
   // le résultat du code de contrôle (la page deviendrait un oracle pour le deviner).

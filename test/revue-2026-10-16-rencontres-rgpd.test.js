@@ -280,7 +280,7 @@ test('A138 : SMTP chiffré exigé hors relais local (délais vraiment appliqués
 
 test('A140 : date impossible refusée sur /bonjour et dans la fiche ; anciennes dates impossibles vidées par la migration', async t => {
   const c = await world(t);
-  const r = await c.hello({ photographer: 'J', met_on: '2025-02-30', place: 'Angers', wants_photo: 'on', email: 'a@exemple.fr' });
+  const r = await c.hello({ photographer: 'J', met_on: '2025-02-30', place: 'Angers', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' });
   assert.equal(r.statusCode, 422);
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), 0);
   const id = c.enc.saveCard(null, { ref: 'J-0010', author_id: c.jul, met_on: '2026-00-10', session_day: '2025-02-29' });
@@ -297,7 +297,7 @@ test('A140 : date impossible refusée sur /bonjour et dans la fiche ; anciennes 
 
 test('A141, A155 : carte saisie sur une demande reçue : on complète ; case décochée : accord retiré ; refus jamais levé par la fiche', async t => {
   const c = await world(t);
-  await c.hello({ ref: 'J-0005', wants_photo: 'on', email: 'alice@exemple.fr', name: 'Alice', place: 'Angers', met_on: '2026-10-11' });
+  await c.hello({ ref: 'J-0005', wants_photo: 'on', adult: 'oui', email: 'alice@exemple.fr', name: 'Alice', place: 'Angers', met_on: '2026-10-11' });
   const id = c.enc.saveCard(null, { ref: 'J-0005', signed: 'on', scope_site: 'on' });
   let e = c.enc.get(id);
   assert.deepEqual([e.email, e.name, e.place, e.met_on, e.consent_source], ['alice@exemple.fr', 'Alice', 'Angers', '2026-10-11', 'carte']);
@@ -416,7 +416,7 @@ test('A154, A156, A038 : cartes au nom de ce site ; export sans données de tier
   assert.deepEqual(TEXTS.scopes('test.example')[0], 'site test.example');
   // Export : la demande d'un tiers (référence tapée sans code) n'y apporte ni son adresse, ni son nom, ni son message.
   const id = c.enc.saveCard(null, { ref: 'J-0142', signed: 'on', scope_site: 'on', author_id: c.jul, email: 'alice@exemple.fr', name: 'Alice' });
-  await c.hello({ ref: 'J-0142', wants_photo: 'on', email: 'autre@exemple.org', name: 'Paul', message: 'Message de Paul' });
+  await c.hello({ ref: 'J-0142', wants_photo: 'on', adult: 'oui', email: 'autre@exemple.org', name: 'Paul', message: 'Message de Paul' });
   const data = JSON.stringify(c.enc.exportData(id).data);
   assert.match(data, /alice@exemple\.fr/);
   assert.doesNotMatch(data, /autre@exemple\.org|Paul/);
