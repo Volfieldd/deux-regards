@@ -58,15 +58,18 @@ export function lru(max) {
   };
 }
 
-// Rôle incohérent étendu aux galeries privées et aux Carnets (registre des briques, « Permissions et contrôle des
-// rôles », BV-23 ; PR #149 et #151) : ce que chaque rôle de départ donne de ces permissions, et leur portée (« tout » ou
-// « les miennes »). Copie voulue de server/permissions.js : la Vigie ne lit pas le code du site qu'elle surveille ;
+// Rôle incohérent étendu aux galeries privées, aux Carnets (registre des briques, « Permissions et contrôle des
+// rôles », BV-23 ; PR #149 et #151) et à la boîte des messages (BV-30, PR #183) : ce que chaque rôle de départ donne de
+// ces permissions, et leur portée (« tout » ou « les miennes »). Copie voulue de server/permissions.js : la Vigie ne lit pas le code du site qu'elle surveille ;
 // test/vigie-galeries-carnets.test.js vérifie l'accord avec le catalogue du site dès qu'il contient ces permissions.
 const TOUT = 'tout', MIENNES = 'les miennes';
-export const PERMISSIONS_SURVEILLEES = ['galeries.voir', 'galeries.gerer', 'galeries.partager', 'carnet.voir', 'carnet.ecrire', 'carnet.textes', 'carnet.publier', 'carnet.publies.modifier'];
+// Boîte des messages (page Contact et demande de licence, registre BV-30, PR #183) : messages.traiter, « tout » pour
+// l'administrateur, « les miennes » pour le photographe (ceux qui lui sont adressés et ceux adressés aux deux) ; ni le
+// modérateur ni le relecteur (ils ne voient pas les adresses des personnes).
+export const PERMISSIONS_SURVEILLEES = ['galeries.voir', 'galeries.gerer', 'galeries.partager', 'carnet.voir', 'carnet.ecrire', 'carnet.textes', 'carnet.publier', 'carnet.publies.modifier', 'messages.traiter'];
 export const ROLES_SURVEILLES = {
   admin: Object.fromEntries(PERMISSIONS_SURVEILLEES.map(p => [p, TOUT])),
-  photographe: { 'galeries.voir': MIENNES, 'galeries.gerer': MIENNES, 'galeries.partager': MIENNES, 'carnet.voir': MIENNES, 'carnet.ecrire': MIENNES, 'carnet.publies.modifier': MIENNES },
+  photographe: { 'galeries.voir': MIENNES, 'galeries.gerer': MIENNES, 'galeries.partager': MIENNES, 'carnet.voir': MIENNES, 'carnet.ecrire': MIENNES, 'carnet.publies.modifier': MIENNES, 'messages.traiter': MIENNES },
   moderateur: { 'carnet.voir': TOUT, 'carnet.publier': TOUT },
   relecteur: { 'carnet.voir': TOUT, 'carnet.textes': TOUT, 'carnet.publies.modifier': TOUT },
 };
@@ -93,6 +96,11 @@ function exige(row, d) {
   }
   if (row.type === 'sensitive_read' && /^server\/routes\/galeries\.js/.test(row.emetteur || '')) return { toutes: ['galeries.voir'], objet: 'galerie' };
   if (row.type === 'sensitive_export' && (/^\/admin\/galeries\//.test(String(d.cible || '')) || (d.portail === 'galerie_privee' && d.nature === 'telechargement'))) return { toutes: ['galeries.voir'], objet: 'galerie' };
+  // Message d'un visiteur ouvert dans l'admin (le nom, l'adresse et le message déchiffrés). La portée ne se juge pas ici :
+  // l'événement ne dit pas à quel photographe le message est adressé, et le site refuse lui-même un message hors portée
+  // (404 et authz_fail « hors portée », règles exploration_droits et ecriture_hors_portee). Marquer traité et supprimer
+  // n'émettent rien vers la Vigie (journal d'audit seulement) : rien à juger.
+  if (row.type === 'sensitive_read' && d.objet === 'message' && /^\/admin\/messages\//.test(String(d.cible || ''))) return { toutes: ['messages.traiter'], objet: 'message' };
   if (row.type === 'malicious_input' && d.objet === 'billet') return { toutes: ['carnet.voir'], une_de: ['carnet.ecrire', 'carnet.textes', 'carnet.publier', 'carnet.publies.modifier'], objet: 'billet' };
   if (row.type === 'config_public_changed' && d.objet === 'textes_publics' && champs.some(c => String(c).startsWith('posts.'))) return { toutes: ['carnet.voir'], une_de: ['carnet.publier', 'carnet.publies.modifier'], objet: 'billet' };
   return null;
