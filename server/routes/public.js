@@ -1,5 +1,6 @@
 import { createRepo } from '../repo.js';
-import { galleryUrl, photoUrl, ORDRES } from '../urls.js';
+import { galleryUrl, galerieUrl, photoUrl, ORDRES } from '../urls.js';
+import { usesV2 } from '../version-publique.js';
 import { widthsFor, variantName } from '../images.js';
 import { pad, shortDate } from '../format.js';
 import * as v2 from '../v2-vues.js';
@@ -198,7 +199,8 @@ export default async function publicRoutes(app) {
     const day = d => (d ? d.slice(0, 10) : undefined);
     const pagesList = [
       { loc: '/', lastmod: day(latest) },
-      ...(app.publicVersion.designSettings() ? [{ loc: '/galerie', lastmod: day(latest) }] : []),
+      // Galerie et Séries : pages de la v2 et de la v3 seulement (en v1, introuvables, comme les Carnets).
+      ...(usesV2(app.publicVersion.versionForSection('galerie')) ? [{ loc: '/galerie', lastmod: day(latest) }, { loc: '/series', lastmod: day(latest) }] : []),
       ...repo.categories().filter(c => photos.some(p => p.category_slug === c.slug)).map(c => ({ loc: galleryUrl({ serie: c.slug }) })),
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
@@ -234,7 +236,9 @@ const clip = (text, max) => { const s = String(text || '').trim(); return s.leng
 // Aides des gabarits pour une langue : textes, adresses préfixées, photos et vignettes.
 function helpers(lang) {
   const u = path => localize(path, lang);
-  return { picture, pad, lang, t: UI[lang], u, galleryUrl: f => u(galleryUrl(f)), photoUrl: (slug, f) => u(photoUrl(slug, f)),
+  // galerieUrl : la même vue quand la page /galerie existe (v2, v3) ; le rendu (server/app.js) la met à la place de
+  // galleryUrl pour la requête qui y a droit.
+  return { picture, pad, lang, t: UI[lang], u, galleryUrl: f => u(galleryUrl(f)), galerieUrl: f => u(galerieUrl(f)), photoUrl: (slug, f) => u(photoUrl(slug, f)),
     // Gabarits v2 (views/v2/) : icônes, formats, tailles d'images, date abrégée.
     v2: { ...v2, date: takenOn => shortDate(takenOn, lang), typo: s => v2.typo(s, lang) } };
 }
@@ -243,8 +247,11 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   const finder = createSearch({ db: app.db });
   const t = UI[lang];
   const base = helpers(lang);
-  const originalGalleryUrl = base.galleryUrl;
-  base.galleryUrl = filter => { const url = originalGalleryUrl(filter); return app.publicVersion.designSettings() && url === base.u('/') ? base.u('/galerie') : url; };
+  // Pages /galerie et /series (MQ-02, index des séries) : seulement quand la rubrique Galerie est servie en v2 ou en v3 à
+  // cette requête (réglage, ou vue de la session d'un administrateur) ; en v1, introuvables, comme les Carnets.
+  const galerieOpen = request => usesV2(app.publicVersion.forRequest(request, 'galerie').version);
+  // Adresse d'une vue de la galerie pour cette requête : sur /galerie quand la page existe.
+  const galleryFor = request => (galerieOpen(request) ? base.galerieUrl : base.galleryUrl);
   const trusted = Boolean(app.config.trustProxy);
 
   // Arrivée sur une page française : la langue choisie avec le sélecteur, sinon celle du pays et du navigateur
@@ -273,28 +280,41 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   const seenLately = app.db.prepare('SELECT 1 FROM stats_pages WHERE page = ? AND day >= ? LIMIT 1').pluck();
   // emetteur, page : les Carnets (BV-13) reprennent la même fonction avec leur émetteur (« · carnet ») et, pour ?par=, la page
   // d'un photographe (« auteur: ») comme preuve d'une adresse ancienne.
-  const ignored = (request, champ, emetteur = 'server/routes/public.js · filtres', page = { regard: 'auteur', serie: 'serie' }[champ]) => {
+  // invalid : la valeur hors liste de ce champ ({ champ, valeur }), ou null (vide, saisie malveillante, adresse ancienne).
+  const invalid = (request, champ, page = { regard: 'auteur', serie: 'serie' }[champ]) => {
     const value = request.query[champ];
-    if (!app.securite.enabled || value == null || value === '') return undefined;
+    if (!app.securite.enabled || value == null || value === '') return null;
     const valeur = String(value);
-    if (scanValue('query', `query.${champ}`, valeur)) return undefined;
-    if (page && seenLately.get(`${page}:${valeur}`, parisDay(new Date(Date.now() - RECENT)))) return undefined;
-    app.securite.emit('input_validation_fail', { request, emetteur, detail: { raison: 'valeur de filtre hors liste', champ, valeur: valeur.slice(0, 60) } });
-    return undefined;
+    if (scanValue('query', `query.${champ}`, valeur)) return null;
+    if (page && seenLately.get(`${page}:${valeur}`, parisDay(new Date(Date.now() - RECENT)))) return null;
+    return { champ, valeur: valeur.slice(0, 60) };
   };
-  const readOrdre = request => (ORDRES.includes(request.query.ordre) ? request.query.ordre : ignored(request, 'ordre'));
+  // Un seul signalement par requête, quel que soit le nombre de champs hors liste (un vieux lien partagé ne pèse pas comme
+  // un scanner) : le premier champ et sa valeur, et la liste des champs quand il y en a plusieurs.
+  const signal = (request, found, emetteur = 'server/routes/public.js · filtres') => {
+    const list = found.filter(Boolean);
+    if (!list.length) return;
+    app.securite.emit('input_validation_fail', { request, emetteur, detail: { raison: 'valeur de filtre hors liste', champ: list[0].champ, valeur: list[0].valeur,
+      ...(list.length > 1 ? { champs: list.map(x => x.champ) } : {}) } });
+  };
+  const ignored = (request, champ, emetteur = 'server/routes/public.js · filtres', page) => { signal(request, [invalid(request, champ, page)], emetteur); return undefined; };
+  const orderOf = request => (ORDRES.includes(request.query.ordre) ? request.query.ordre : undefined);
+  const readOrdre = request => orderOf(request) ?? ignored(request, 'ordre');
   function readFilter(request, authors, categories) {
     const { regard, serie } = request.query;
-    return {
-      regard: authors.some(a => a.slug === regard) ? regard : ignored(request, 'regard'),
-      serie: categories.some(c => c.slug === serie) ? serie : ignored(request, 'serie'),
-      ordre: readOrdre(request),
+    const filter = {
+      regard: authors.some(a => a.slug === regard) ? regard : undefined,
+      serie: categories.some(c => c.slug === serie) ? serie : undefined,
+      ordre: orderOf(request),
     };
+    signal(request, ['regard', 'serie', 'ordre'].filter(k => filter[k] === undefined).map(k => invalid(request, k)));
+    return filter;
   }
 
   // page : la page v2 qui montre cette vue (views/v2/home.eta) ; la v1 (views/home.eta) l'ignore. « accueil » : / sans
   // filtre ni ordre ; « serie » : /serie/:slug ; « galerie » : toute autre vue filtrée ou ordonnée.
-  function renderGallery(reply, filter, page = filter.regard || filter.serie || filter.ordre ? 'galerie' : 'accueil') {
+  // template : « galerie » pour la page /galerie (views/v2/galerie.eta, sans gabarit v1), « series » pour /series.
+  function renderGallery(reply, filter, page = filter.regard || filter.serie || filter.ordre ? 'galerie' : 'accueil', template = 'home') {
     // Le nom du site est réglable dans l'admin : relu à chaque page.
     const siteName = app.siteName();
     const authors = repo.authors(lang);
@@ -328,11 +348,13 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
 
     const title = [activeSerie?.name, activeAuthor && t.by(activeAuthor.name)].filter(Boolean).join(', ');
     const tagline = pick(settings, 'tagline', lang);
-    return reply.render('home', {
+    const open = galerieOpen(reply.request);
+    return reply.render(template, {
       ...base, filter, settings, tagline, intro: pick(settings, 'intro', lang), hero, heroTel, series, regards, photos, total: all.length,
-      categoriesCount: categories.length, activeAuthor, activeSerie, page, seriesAll,
+      categoriesCount: categories.length, activeAuthor, activeSerie, page, seriesAll, photosAll: all,
       pageTitle: title ? `${title} · ${siteName}` : siteName, siteName,
-      canonical: page === 'galerie' && !filter.regard && !filter.serie && app.publicVersion.designSettings() ? '/galerie' : galleryUrl({ regard: filter.regard, serie: filter.serie }),   // même contenu, quel que soit l'ordre
+      // Même contenu, quel que soit l'ordre ; sur /galerie quand la page existe (la galerie entière, deux filtres ensemble).
+      canonical: template === 'series' ? '/series' : page === 'accueil' ? '/' : (open ? galerieUrl : galleryUrl)({ regard: filter.regard, serie: filter.serie }),
       description: tagline,
       ogImage: hero[0] && `/media/${variantName(hero[0].file, widthsFor(hero[0].width).at(-1), 'webp', hero[0].variant_key)}`,
     });
@@ -344,11 +366,20 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     return renderGallery(reply, filter);
   });
 
+  // Galerie (MQ-02) et index des séries : v2 et v3 seulement. En v1 (hors vue v2 ou v3 d'un administrateur), introuvables
+  // avant toute lecture des paramètres : ni mesure d'audience, ni signalement. Deux routes exactes, aucun sous-chemin : le
+  // chemin piège /galerie/tout-telecharger (server/securite/piege.js) reste une 404 qui alerte la Vigie.
   app.get('/galerie', async (request, reply) => {
-    if (!app.publicVersion.designSettings() && !app.publicVersion.forRequest(request).darkroom) return reply.callNotFound();
+    if (!galerieOpen(request)) return reply.callNotFound();
     const filter = readFilter(request, repo.authors(), repo.categories());
-    app.stats.hit(request, { page: 'galerie' });
-    return renderGallery(reply, filter, 'galerie');
+    app.stats.hit(request, { page: filter.serie ? `serie:${filter.serie}` : filter.regard ? `auteur:${filter.regard}` : 'galerie' });
+    return renderGallery(reply, filter, 'galerie', 'galerie');
+  });
+
+  app.get('/series', async (request, reply) => {
+    if (!galerieOpen(request)) return reply.callNotFound();
+    app.stats.hit(request, { page: 'series' });
+    return renderGallery(reply, {}, 'series', 'series');
   });
 
   app.get('/serie/:slug', async (request, reply) => {
@@ -394,7 +425,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const next = list[(i + 1) % list.length];
     return reply.render('photo', {
       ...base, siteName, filter, photo, prev, next, position: i + 1, count: list.length,
-      backUrl: fromPost ? `${base.u(`/carnet/${fromPost.post.slug}`)}#photo-${i + 1}` : `${base.galleryUrl(filter)}#galerie`,
+      backUrl: fromPost ? `${base.u(`/carnet/${fromPost.post.slug}`)}#photo-${i + 1}` : `${galleryFor(request)(filter)}#galerie`,
       carnet: fromPost ? { title: fromPost.title, lang: fromPost.lang, href: base.u(`/carnet/${fromPost.post.slug}`) } : null,
       pageTitle: `${photo.title} · ${siteName}`,
       canonical: photoUrl(photo.slug),

@@ -19,8 +19,8 @@
       </div>
     </form>
 <% } %>    <ul class="liste-liens">
-      <li><a href="<%= home %>#galerie"><span class="liste-liens-n"><%= t.backHome %></span><%~ ic('fleche', { size: 18 }) %></a></li>
-      <li><a href="<%= home %>#series"><span class="liste-liens-n"><%= t.nav.series %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+      <li><a href="<%= it.galerieHref %>"><span class="liste-liens-n"><%= t.backHome %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+      <li><a href="<%= it.seriesHref %>"><span class="liste-liens-n"><%= t.nav.series %></span><%~ ic('fleche', { size: 18 }) %></a></li>
       <li><a href="<%= it.u('/a-propos') %>"><span class="liste-liens-n"><%= t.nav.about %></span><%~ ic('fleche', { size: 18 }) %></a></li>
     </ul>
   </div>

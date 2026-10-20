@@ -316,6 +316,16 @@ export const UI = {
       seriePhotos: n => (n === 1 ? 'La photo' : `Les ${n} photos`), oneRegard: 'La même série, un seul regard', otherSeries: 'Autres séries',
       // Texte d'intention d'une série (MQ-03), numéro d'inventaire de la visionneuse (MQ-04, UX-T-05).
       readMore: 'Lire la suite', readMoreOf: ' du texte de la série', inventory: 'Inventaire', shot: 'Prise de vue',
+      // Pages /galerie et /series (MQ-02, index des séries), aperçu de la galerie sur l'accueil. Titres de 30 à 60 signes,
+      // descriptions de 110 à 155 (audit SEO du 16 oct. 2026) ; la liste des séries quitte la description si elle est trop longue.
+      galleryTitle: names => `Galerie — les photos de ${names}`,
+      galleryDescription: (n, names) => `Les ${n} photos de ${names}, à parcourir par regard, par série, ou des plus récentes aux plus anciennes\u202f; chaque vue a sa propre adresse.`,
+      seriesTitle: names => `Séries photographiques de ${names}`,
+      seriesDescription: (k, names, list) => { const s = `${k === 1 ? 'La série' : `Les ${k} séries`} de ${names}\u202f: ${list}. Chacune avec ses photos, ses regards et son intention.`; return s.length <= 155 ? s : `${k === 1 ? 'La série' : `Les ${k} séries`} de ${names}, chacune avec ses photos, ses regards et son intention, dans l’ordre que nous avons choisi.`; },
+      seriesLead: (k, names) => `${k === 1 ? 'La série' : `Les ${k} séries`} de ${names}, dans l’ordre que nous avons choisi. Chacune s’ouvre sur ses photos.`,
+      seriesList: k => (k === 1 ? 'La série' : `Les ${k} séries`),
+      allGallery: n => `Toute la galerie (${n >= 2 ? `${n} photos` : `${n} photo`})`,
+      previewLead: (k, n) => (k >= n ? `${n >= 2 ? `Les ${n} photos` : 'La photo'}, dans l’ordre que nous avons choisi.` : `${k} photos parmi les ${n}, dans l’ordre que nous avons choisi.`),
     },
     search: {
       title: 'Rechercher', label: 'Mots-clés', placeholder: 'brume, Loire, portrait…', submit: 'Chercher',
@@ -580,6 +590,15 @@ export const UI = {
       breadcrumb: 'Breadcrumb', serieBrief: 'The series at a glance', serieTitle: (name, names) => `${name} — series by ${names}`,
       seriePhotos: n => (n === 1 ? 'The photo' : `The ${n} photos`), oneRegard: 'The same series, one photographer', otherSeries: 'Other series',
       readMore: 'Read more', readMoreOf: ' about the series', inventory: 'Inventory number', shot: 'Camera and settings',
+      // /galerie, /series and the gallery preview on the home page.
+      galleryTitle: names => `Gallery — photographs by ${names}`,
+      galleryDescription: (n, names) => `All ${n} photos by ${names}, to browse by photographer, by series, or newest first; each view has its own address to share.`,
+      seriesTitle: names => `Photo series by ${names}`,
+      seriesDescription: (k, names, list) => { const s = `${k === 1 ? 'The series' : `The ${k} series`} by ${names}: ${list}. Each with its photos, its photographers and its intent.`; return s.length <= 155 ? s : `${k === 1 ? 'The series' : `The ${k} series`} by ${names}, each with its photos, its photographers and its intent, in the order we chose.`; },
+      seriesLead: (k, names) => `${k === 1 ? 'The series' : `The ${k} series`} by ${names}, in the order we chose. Each one opens on its photos.`,
+      seriesList: k => (k === 1 ? 'The series' : `The ${k} series`),
+      allGallery: n => `The whole gallery (${n === 1 ? '1 photo' : `${n} photos`})`,
+      previewLead: (k, n) => (k >= n ? `${n === 1 ? 'The photo' : `All ${n} photos`}, in the order we chose.` : `${k} of the ${n} photos, in the order we chose.`),
     },
     search: {
       title: 'Search', label: 'Keywords', placeholder: 'mist, Loire, portrait…', submit: 'Search',
@@ -843,6 +862,15 @@ export const UI = {
       breadcrumb: 'Brotkrümelnavigation', serieBrief: 'Die Serie im Überblick', serieTitle: (name, names) => `${name} — Serie von ${names}`,
       seriePhotos: n => (n === 1 ? 'Das Foto' : `Die ${n} Fotos`), oneRegard: 'Dieselbe Serie, ein Blick', otherSeries: 'Weitere Serien',
       readMore: 'Weiterlesen', readMoreOf: ' (Text der Serie)', inventory: 'Inventarnummer', shot: 'Aufnahmedaten',
+      // /galerie, /series und die Vorschau der Galerie auf der Startseite.
+      galleryTitle: names => `Galerie — Fotos von ${names}`,
+      galleryDescription: (n, names) => `Alle ${n} Fotos von ${names}, nach Blick, nach Serie oder die neuesten zuerst; jede Ansicht hat ihre eigene Adresse zum Teilen.`,
+      seriesTitle: names => `Fotoserien von ${names}`,
+      seriesDescription: (k, names, list) => { const s = `${k === 1 ? 'Die Serie' : `Die ${k} Serien`} von ${names}: ${list}. Jede mit ihren Fotos, ihren Blicken und ihrer Absicht.`; return s.length <= 155 ? s : `${k === 1 ? 'Die Serie' : `Die ${k} Serien`} von ${names}, jede mit ihren Fotos, ihren Blicken und ihrer Absicht, in der von uns gewählten Reihenfolge.`; },
+      seriesLead: (k, names) => `${k === 1 ? 'Die Serie' : `Die ${k} Serien`} von ${names}, in der von uns gewählten Reihenfolge. Jede beginnt mit ihren Fotos.`,
+      seriesList: k => (k === 1 ? 'Die Serie' : `Die ${k} Serien`),
+      allGallery: n => `Die ganze Galerie (${n === 1 ? '1 Foto' : `${n} Fotos`})`,
+      previewLead: (k, n) => (k >= n ? `${n === 1 ? 'Das Foto' : `Alle ${n} Fotos`}, in der von uns gewählten Reihenfolge.` : `${k} der ${n} Fotos, in der von uns gewählten Reihenfolge.`),
     },
     search: {
       title: 'Suchen', label: 'Stichwörter', placeholder: 'Nebel, Loire, Porträt…', submit: 'Suchen',

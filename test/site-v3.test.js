@@ -63,7 +63,7 @@ test('accueil v3 : les regards par l’image (deux photographes, trois horizonta
   const section = body.slice(body.indexOf('id="regards"'), body.indexOf('</section>', body.indexOf('id="regards"')));
   if (cartes) {
     assert.equal((section.match(/<li class="regard">/g) || []).length, 3);
-    assert.match(section, /<h3 class="regard-n"><a href="\/#galerie">/);
+    assert.match(section, /<h3 class="regard-n"><a href="\/galerie">/);
     assert.match(section, /<a href="\/(?:auteur\/[a-z-]+|\?regard=[a-z-]+)#filtres">/);
     assert.equal((section.match(/<picture/g) || []).length, 6);
   } else {

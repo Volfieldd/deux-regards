@@ -206,7 +206,8 @@ test('page introuvable v2 : 404, issues (recherche, galerie, séries), langue ve
     const b = v2.body;
     assert.match(b, /<h1 class="titre-page">(Page introuvable|Page not found|Seite nicht gefunden)<\/h1>/);
     assert.match(b, /<form class="recherche" method="get" action="(\/en|\/de)?\/recherche" role="search">/);
-    assert.match(b, /class="liste-liens"[\s\S]*#galerie[\s\S]*#series/);
+    // Vers la page /galerie et l'index /series (v2), jamais vers un sous-chemin de /galerie/.
+    assert.match(b, /class="liste-liens"[\s\S]*href="(?:\/en|\/de)?\/galerie"[\s\S]*href="(?:\/en|\/de)?\/series"/);
     // Le sélecteur de langue mène à l'accueil de chaque langue, jamais à la même adresse introuvable.
     const langs = [...b.matchAll(/href="\/langue\/(fr|en|de)\?vers=([^"]+)"/g)].map(m => m[2]);
     assert.deepEqual(langs, ['%2F', '%2F', '%2F'], url);

@@ -166,6 +166,14 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const v3 = !only && v2 && pv?.version === 'v3';
     // Page sans gabarit v1 (née avec la v2, comme les Carnets) servie en v1 : introuvable, jamais une erreur.
     if (pv && !v2 && !app.publicVersion.hasV1(template)) return this.callNotFound();
+    // Pages /galerie et /series (v2 et v3) : existent-elles pour cette requête ? Le menu, l'accueil et les gabarits y mènent
+    // alors (it.galerieHref, it.seriesHref), sinon aux ancres de l'accueil (/#galerie, /#series) ; les vues de la galerie
+    // passent sur /galerie (data.galerieUrl, server/routes/public.js). Jamais pour l'admin ni les galeries privées.
+    const galeriePage = Boolean(pv) && usesV2(app.publicVersion.forRequest(this.request, 'galerie').version);
+    const lang = data?.lang || splitLang(this.request.url).lang;
+    const galerieLinks = { galeriePage, galerieHref: galeriePage ? localize('/galerie', lang) : `${localize('/', lang)}#galerie`,
+      seriesHref: galeriePage ? localize('/series', lang) : `${localize('/', lang)}#series`,
+      ...(galeriePage && typeof data?.galerieUrl === 'function' ? { galleryUrl: data.galerieUrl } : {}) };
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
       // Disponibilité des Carnets selon leur rubrique, y compris depuis un accueil V1 dans le système de thèmes.
       carnetPage: usesV2(app.publicVersion.forRequest(this.request, 'carnets').version) && app.carnet.publishedCount() > 0, v3, darkroom, designRowSizes, sectionThemes: Boolean(pv?.configured || pv?.darkroom), designSection: pv?.section,
@@ -176,7 +184,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
       // l'administrateur qui a le droit d'apparence seulement, en v2 comme sur une page restée en v1 faute de gabarit v2.
       vueSite: pv?.switcher ? vueSite({ pv, lang: data?.lang || splitLang(this.request.url).lang, url: this.request.url, csrf: this.request.session.csrf,
         rendu: v3 ? 'v3' : v2 ? 'v2' : 'v1', sansV1: !app.publicVersion.hasV1(template) }) : null };
-    return this.type('text/html; charset=utf-8').send(eta.render(v2 ? `./v2/${template}` : `./${template}`, { ...common, ...data }));
+    return this.type('text/html; charset=utf-8').send(eta.render(v2 ? `./v2/${template}` : `./${template}`, { ...common, ...data, ...galerieLinks }));
   });
 
   await app.register(fastifyStatic, {

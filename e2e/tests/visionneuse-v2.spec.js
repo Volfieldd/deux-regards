@@ -94,7 +94,7 @@ test.describe('bureau et tablette', () => {
     await expect(page.getByRole('button', { name: 'Plein écran' })).toBeFocused();
     // Échap hors dialogue : retour à la galerie.
     await page.keyboard.press('Escape');
-    await expect(page).toHaveURL(/\/(#galerie)?$/);
+    await expect(page).toHaveURL(/\/(galerie)?(#galerie)?$/);
     await ctx.close();
   });
 

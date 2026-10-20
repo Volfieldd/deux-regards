@@ -22,7 +22,7 @@ Exemple : Obscura partout, V1 pour l’accueil et Résonances pour les Carnets. 
 
 Les rubriques sont : accueil, galeries/séries/recherche, visionneuse, carte, voyages, Carnets, regards, contact et informations. Les listes et leurs détails partagent un choix. Une visionneuse utilise la rubrique Photos et conserve les fonctions existantes, notamment le contexte du Carnet, les connexes et la mini-carte lorsqu’un lieu est publié.
 
-Le choix concerne une **rubrique de pages**, pas chaque bloc d’une page. Une galerie intégrée dans l’accueil garde le thème de l’accueil ; le menu Galerie ouvre `/galerie`, qui utilise le thème des galeries. Cette nouvelle adresse est disponible lorsque le système est activé, ou dans l’aperçu d’une chambre noire. Les filtres, les séries et les regards existants restent disponibles à leurs adresses.
+Le choix concerne une **rubrique de pages**, pas chaque bloc d’une page. Une galerie intégrée dans l’accueil garde le thème de l’accueil ; le menu Galerie ouvre `/galerie`, qui utilise le thème des galeries. Cette adresse, comme l’index `/series`, existe quand la rubrique Galerie est servie en V2, en V3 ou dans une chambre noire (réglage ou aperçu de la session) ; en V1, elles répondent 404, comme les Carnets du système historique (PR « /galerie et /series »). Les filtres, les séries et les regards existants restent disponibles à leurs adresses.
 
 Les six chambres noires partagent les fonctions V2 et la même administration. Elles ne publient aucun contenu, ne changent pas les permissions et n’activent pas la carte si celle-ci est désactivée. Les galeries privées gardent leur présentation dédiée ; les pages d’authentification restent hors de ce système. Les pages sans gabarit V2 conservent leur repli historique.
 

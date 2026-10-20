@@ -1,12 +1,12 @@
 /*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 /* =====================================================================================================
    Site public v2 : pages sans formulaire d'envoi (À propos, Droits d'utilisation, Mentions légales, Confidentialité,
-   Recherche, Carte, Voyages, un voyage, page introuvable). Chargé après css/v2/tokens.css et css/v2/public.css
+   Recherche, Carte, Voyages, un voyage, page introuvable, index des séries). Chargé après css/v2/tokens.css et css/v2/public.css
    (views/v2/layout.eta) ; n'emploie que leurs jetons et leurs composants (planche MQ-00 : tête de page, chapô, parties,
    listes à filets, fil d'Ariane, rangées, cartel, boutons, messages, sommaire du billet). Aucune de ces pages n'a de
    maquette dédiée : leur mise en page applique la planche.
    1. Lecture longue (sommaire, ancres, lignes de 65 signes)  2. À propos  3. Recherche et page introuvable
-   4. Carte du monde  5. Voyages et un voyage  6. Impression des pages de texte (UX-F-35)
+   4. Carte du monde  5. Voyages et un voyage  6. Impression des pages de texte (UX-F-35)  7. Index des séries (/series)
    Rien ici n'exige JavaScript ; ce qui n'a de sens qu'avec lui porte la classe .js-seul (public.css § 0).
    ===================================================================================================== */
 
@@ -207,3 +207,43 @@
   .lecture-partie { break-inside: avoid-page; }
   .lecture-texte a[href^="mailto:"]::after, .lecture-texte a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 10pt; color: #444; }
 }
+
+/* ---------- 7. Index des séries (/series, v2 et v3) ----------
+   La planche des couvertures de la liste des Carnets (MQ-11, css/v2/carnet.css § 21), pour les séries : deux colonnes dès
+   768 px ; la couverture d'abord, au format de la photo, à hauteur commune (300 px, 380 au bureau), jamais recadrée ; une
+   verticale se pose à côté du texte (.ser-e--cote : 2/5 de la carte ; au téléphone, 5/12, le nom à sa droite, le texte
+   d'intention et la fiche dessous). Le nom est le seul lien, étendu à toute la carte ; au toucher, 44 px de haut au moins.
+   sizes : ceux des couvertures des Carnets (views/v2/series.eta). */
+.ser-index { list-style: none; margin: var(--esp-5) 0 0; padding: 0; display: grid; gap: var(--esp-8); }
+@media (min-width: 768px) { .ser-index { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 768px) and (max-width: 899px) { .ser-index:has(.ser-e--cote) { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 1280px) { .ser-index { gap: var(--esp-10) var(--esp-8); } }
+.ser-e { --h: 300px; position: relative; display: grid; gap: var(--esp-2); align-content: start; }
+@media (min-width: 1280px) { .ser-e { --h: 380px; } }
+@media (min-width: 768px) and (max-width: 899px) { .ser-index:has(.ser-e--cote) .ser-e:not(.ser-e--cote) { --h: 520px; } }
+.ser-e-txt { display: grid; gap: var(--esp-1); align-content: start; max-width: 60ch; }
+.ser-e-titre { margin: 0; font: 300 var(--t-titre-2)/var(--i-serre) var(--sans); letter-spacing: -.003em; text-wrap: balance; }
+.ser-e-titre a { color: var(--ink); }
+.ser-e-titre a::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+.ser-e:hover .ser-e-titre a, .ser-e-titre a:focus-visible { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.ser-e-titre a:focus-visible { outline: 0; }
+.ser-e:has(.ser-e-titre a:focus-visible) { outline: var(--focus-l) solid var(--ink); outline-offset: 12px; }
+@media (max-width: 767px) { .ser-e-titre a { display: inline-flex; align-items: center; min-height: var(--cible); } }
+.ser-e-int { margin: 0; font-size: var(--t-texte); line-height: 1.6; color: var(--prose); text-wrap: pretty; }
+.ser-e-meta { margin: var(--esp-1) 0 0; font-size: var(--t-petit); color: var(--mute); }
+.ser-e-meta b { font-weight: 400; color: var(--ink); }
+.ser-e-img { margin: 0 0 var(--esp-1); order: -1; }
+.ser-e-img img { display: block; width: min(100%, calc(var(--h) * var(--r))); height: auto; aspect-ratio: var(--r); background: var(--frame); }
+.ser-e--cote { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); column-gap: var(--esp-4); align-items: end; }
+.ser-e--cote .ser-e-img { margin: 0; }
+.ser-e--cote .ser-e-img img { width: 100%; }
+@media (min-width: 1280px) { .ser-e--cote { grid-template-columns: calc(380px * 2 / 3) minmax(0, 1fr); } }
+@media (max-width: 767px) {
+  .ser-e--cote { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: 1fr auto auto auto; gap: var(--esp-1) var(--esp-2); }
+  .ser-e--cote .ser-e-txt { display: contents; }
+  .ser-e--cote .ser-e-img { grid-column: 1; grid-row: 1 / span 2; }
+  .ser-e--cote .ser-e-titre { grid-column: 2; grid-row: 2; }
+  .ser-e--cote .ser-e-int { grid-column: 1 / -1; grid-row: 3; margin-top: var(--esp-1); }
+  .ser-e--cote .ser-e-meta { grid-column: 1 / -1; grid-row: 4; }
+}
+.series-fin { margin-top: var(--esp-8); }

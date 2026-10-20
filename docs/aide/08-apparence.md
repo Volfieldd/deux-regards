@@ -12,7 +12,7 @@ Les choix sont V1 — Originale, V2 — Essentielle, V3 — Plein cadre, et les 
 
 Exemple : **Obscura** pour le thème général, **V1 — Originale** pour l’accueil, **Résonances** pour les Carnets. Cliquez sur **Appliquer les thèmes au site**. Les autres rubriques suivent Obscura. Une rubrique réglée sur **Suivre le thème général** suivra vos prochains changements ; une exception reste en place jusqu’à son retrait.
 
-Les rubriques sont l’accueil, les galeries/séries/recherche, la visionneuse, la carte, les voyages, les Carnets, la présentation des regards, le contact et les informations. Ce sont des pages et leurs pages de détail, pas les blocs d’une même page : les aperçus de galerie présents dans l’accueil gardent le thème de l’accueil. Le menu Galerie ouvre une page distincte avec son propre choix.
+Les rubriques sont l’accueil, les galeries/séries/recherche, la visionneuse, la carte, les voyages, les Carnets, la présentation des regards, le contact et les informations. Ce sont des pages et leurs pages de détail, pas les blocs d’une même page : les aperçus de galerie présents dans l’accueil gardent le thème de l’accueil. Le menu Galerie ouvre une page distincte (`/galerie`), et le menu Séries l'index des séries (`/series`), avec le choix de la rubrique des galeries ; en V1, ces deux pages n'existent pas.
 
 **Découvrir les thèmes sans les appliquer** ouvre un aperçu pour votre session seulement. Les visiteurs gardent leurs thèmes ; **Revenir au thème des visiteurs** met fin à l’aperçu. Un changement de thème ne publie pas de photo ou de billet et n’active pas une carte désactivée. Les galeries privées conservent leur présentation dédiée.
 

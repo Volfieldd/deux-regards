@@ -8,7 +8,7 @@ L’apparence peut varier selon la rubrique : accueil, galeries, photos, carte, 
 
 Dans une chambre noire, les images d’ouverture se choisissent manuellement, sans défilement automatique. **Mode calme**, en pied de page, réduit les mouvements facultatifs ; le réglage de réduction des animations de l’appareil est toujours respecté. La photo conserve ses connexes et sa mini-carte lorsqu’un lieu est publié. Les voyages et les Carnets gardent leurs fonctions. Les galeries privées conservent leur présentation dédiée.
 
-Quand les thèmes par rubrique sont activés, le menu Galerie ouvre `/galerie`, avec son propre thème. Les Carnets restent accessibles même avec un thème général V1 ; ils utilisent alors la présentation V2. Les descriptions des accueils ci-dessous concernent les présentations historiques V1 et V2.
+Quand la rubrique Galerie est en v2, en v3 ou dans une chambre noire, le menu Galerie ouvre `/galerie` et le menu Séries `/series`, avec le thème des galeries ; si la rubrique Galerie est en V1, ces deux pages n'existent pas et le menu ramène aux parties de l'accueil. Les Carnets restent accessibles même avec un thème général V1 ; ils utilisent alors la présentation V2. Les descriptions des accueils ci-dessous concernent les présentations historiques V1 et V2.
 
 ## Langues
 
@@ -44,12 +44,15 @@ Le site existe en **français** (adresses habituelles, `/photo/…`), **anglais*
 Quand la **v2** est appliquée (Apparence → Site public : v1 ou v2), ces pages changent ainsi :
 
 - **Ouverture :** la photo **entière**, à la hauteur de l'écran, sans voile ni texte posé dessus ; dessous, votre accroche en titre et son cartel (titre, auteur, lieu, date, **Voir la photo**). Le diaporama est **à l'arrêt** : les points choisissent une photo, **Lire** le lance (une photo toutes les 6 secondes), **Pause** l'arrête ; il attend sous la souris, s'arrête dès que le clavier entre dans l'ouverture et ne tourne pas si le visiteur a demandé moins d'animations. Seule la première photo est chargée avec la page. Le cadre prend le format le plus large de vos photos d'ouverture : une verticale parmi des horizontales y tient entière, plus étroite.
-- **Deux regards :** « Les deux » mène à la galerie de l'accueil, un photographe à sa galerie (`/auteur/julien`).
-- **Séries :** une rangée de couvertures (la première photo de chaque série), chacune vers la page de sa série.
-- **Galerie :** en bas de l'accueil (`/#galerie`). Une barre de **filtres** (le regard, l'**Ordre** dans un menu, les séries avec leur couverture et leur nombre de photos) ; chaque choix ouvre une page qui a sa propre adresse, à partager, sans script. Au-delà du téléphone, la barre reste en haut de l'écran pendant qu'on fait défiler.
+- **Deux regards :** « Les deux » mène à la galerie (`/galerie`), un photographe à sa galerie (`/auteur/julien`).
+- **Séries :** une rangée de couvertures (la première photo de chaque série), chacune vers la page de sa série ; **Toutes les séries** ouvre l'index des séries (`/series`).
+- **Galerie, sur l'accueil :** un aperçu, les douze premières photos dans l'ordre de la photothèque, puis **Toute la galerie** (l'ancre `/#galerie` des anciens liens y mène encore).
+- **Galerie** (`/galerie`, `/en/galerie`, `/de/galerie`) : toutes les photos, avec une barre de **filtres** (le regard, l'**Ordre** dans un menu, les séries avec leur couverture et leur nombre de photos) ; chaque choix ouvre une page qui a sa propre adresse, à partager, sans script (`/galerie?regard=julien&serie=rue`, `/galerie?ordre=recentes` ; un photographe seul ou une série seule gardent leur page, `/auteur/julien`, `/serie/rue`). Au-delà du téléphone, la barre reste en haut de l'écran pendant qu'on fait défiler.
+- **Séries** (`/series`) : chaque série qui a une photo publiée, dans l'ordre de la page Séries de l'admin, avec sa couverture, son nombre de photos, ses photographes, ses années et le début de son **texte d'intention** (ses deux premières phrases) ; le nom ouvre la page de la série.
+- **En v1**, `/galerie` et `/series` n'existent pas (page introuvable), et aucun lien n'y mène ; un administrateur en vue v2 ou v3 (bouton « Voir en v2 ») les voit.
 - **Rangées :** chaque photo garde son format (une verticale reste verticale), à hauteur commune, et **dans l'ordre de la photothèque** : la première rangée se lit de gauche à droite, puis la suivante ; le clavier suit le même ordre. Au téléphone, deux photos au plus par rangée.
 - **Deux filtres sans photo commune** (une adresse partagée, par exemple « Voyage, par Julien ») : la page le dit et propose la série entière ou toutes les photos du photographe ; chaque filtre se retire d'un geste (**✕**).
-- **Page d'une série** (`/serie/rue`) : son nom en titre, le nombre de photos, les photographes et les années, puis les photos dès le premier écran (sans grande couverture), « La même série, un seul regard » et les autres séries.
+- **Page d'une série** (`/serie/rue`) : le fil d'Ariane « Séries / Rue » (vers `/series`), son nom en titre, le nombre de photos, les photographes et les années, puis les photos dès le premier écran (sans grande couverture), « La même série, un seul regard » et les autres séries.
 
 ## Formulaires en v2 (« Je vous ai photographié », Signaler, Partager)
 

@@ -1,7 +1,8 @@
 <% /* La galerie (MQ-02) : la barre de filtres, puis le titre de la grille qui dit ce qu'on voit (« Les deux regards ·
       12 photos », « Les photos de Julien · 6 sur 12 », l'ordre dit une fois), les étiquettes ✕ quand deux filtres se
       cumulent, les rangées dans l'ordre composé dans l'admin, et une fin de liste qui dit où aller. Partagée par
-      l'accueil (/#galerie) et les vues filtrées (/auteur/<slug>, /?regard=&serie=, ?ordre=recentes).
+      la page /galerie (v2, v3), l'accueil quand cette page n'existe pas (/#galerie), et les vues filtrées (/auteur/<slug>,
+      /galerie?regard=&serie=, ?ordre=recentes).
       it.gridId : l'id de la grille (« galerie » hors de l'accueil : la visionneuse y ramène, /…#galerie). */ %>
 <% const t = it.t, v = it.v2, ic = v.ic, f = it.filter, A = it.activeAuthor, S = it.activeSerie;
    const nAuthors = it.regards.length - 1, n = it.photos.length;
@@ -20,7 +21,7 @@
 <% } %>
 <% if (n) { %>
 <%~ include('./_rangees', { ...it, list: it.photos, labelledby: 'g-h', eager: it.page === 'galerie' ? 4 : 0 }) %>
-    <div class="gal-fin"><p><%= t.v2.shown(n) %></p><% if (nSeries) { %><a class="lien" href="<%= it.u('/') %>#series"><%= t.v2.seeSeries(nSeries) %><%~ ic('fleche', { size: 18 }) %></a><% } %><% if (it.mapPage) { %><a class="lien" href="<%= it.u('/carte') %>"><%= t.v2.seeMap %><%~ ic('fleche', { size: 18 }) %></a><% } %></div>
+    <div class="gal-fin"><p><%= t.v2.shown(n) %></p><% if (nSeries) { %><a class="lien" href="<%= it.seriesHref %>"><%= t.v2.seeSeries(nSeries) %><%~ ic('fleche', { size: 18 }) %></a><% } %><% if (it.mapPage) { %><a class="lien" href="<%= it.u('/carte') %>"><%= t.v2.seeMap %><%~ ic('fleche', { size: 18 }) %></a><% } %></div>
 <% } else { %>
     <div class="gal-vide">
       <div class="msg"><%~ ic('info', { size: 18 }) %><p><b><%= A && S ? t.v2.emptyMsg(A.name, S.name) : t.emptyGallery %></b></p></div>

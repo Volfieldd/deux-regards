@@ -990,6 +990,8 @@ export default async function adminRoutes(app) {
   const periods = t => ({ 30: t('30 jours'), 90: t('3 mois'), 365: t('12 mois') });
   const pageLabel = (page, categories, authors, t) => {
     if (page === 'accueil') return t('Accueil');
+    if (page === 'galerie') return t('Galerie');
+    if (page === 'series') return t('Séries');
     if (page === 'a-propos') return t('À propos');
     if (page === 'droits') return t('Droits d’utilisation');
     if (page === 'carte') return t('Carte');
