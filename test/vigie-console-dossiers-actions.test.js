@@ -52,7 +52,10 @@ test('gestes des dossiers : détachement motivé, rattachement manuel, fusion ve
   await poster(v, cookie, id, 'rattacher', { type: 'ip', cle: '198.51.100.7' });
   assert.equal(v.db.prepare("SELECT force FROM dossier_entites WHERE dossier_id = ? AND kind = 'ip'").pluck().get(id), 'manuel');
   await poster(v, cookie, id, 'fusionner', { autre: String(id) }); assert.equal(message(v, cookie).k, 'erreur');
-  const r = await poster(v, cookie, id, 'fusionner', { autre: String(ancien) });
+  const apercu = await poster(v, cookie, id, 'fusionner', { autre: String(ancien) });
+  assert.equal(apercu.statusCode, 200); assert.match(apercu.body, /Fusion à confirmer/);
+  assert.equal(lire(v, id).fusionne_dans, null);
+  const r = await poster(v, cookie, id, 'fusionner', { autre: String(ancien), confirme: 'oui', revisionAutre: revision(v.db, ancien) });
   assert.equal(r.headers.location, `/dossiers/${ancien}`); assert.equal(lire(v, id).fusionne_dans, ancien);
   assert.equal(v.db.prepare('SELECT dossier_id FROM alerts WHERE id = ?').pluck().get(a), ancien);
   assert.equal(v.store.verify().ok, true);
@@ -101,4 +104,38 @@ test('classement légitime : aucun apprentissage confirmé sur une liste coupée
   await poster(v, cookie, id, 'classer', { classement: 'legitime', note: 'confirmation forcée' });
   assert.equal(lire(v, id).statut, 'ouvert'); assert.match(message(v, cookie).texte, /200 indices/);
   assert.equal(v.store.setting.get('dossiers_appris'), null);
+});
+
+test('fusion : les deux dossiers sont confirmés, une modification de la cible impose un nouvel aperçu', async t => {
+  const v = environnement(t), id = v.dossier(), autre = v.dossier();
+  v.entite(id, 'compte', 'a'); v.entite(autre, 'compte', 'b');
+  v.signal(id); v.signal(autre, { sub: 'b' });
+  const { cookie } = await v.login(), body = { autre: String(autre) };
+  const page = await poster(v, cookie, id, 'fusionner', body);
+  assert.equal(page.statusCode, 200); assert.match(page.body, /1 entité active, 1 signal et 0 alertes/);
+  assert.match(page.body, /&lt;img/); assert.doesNotMatch(page.body, /<img src=x/);
+  const empreinte = revision(v.db, autre);
+  v.signal(autre, { sub: 'b', seq: 99 });
+  await poster(v, cookie, id, 'fusionner', { ...body, confirme: 'oui', revisionAutre: empreinte });
+  assert.match(message(v, cookie).texte, /l’autre dossier a changé/);
+  assert.equal(lire(v, autre).fusionne_dans, null);
+  // Une confirmation fabriquée, sans l'empreinte du second dossier, ne suffit pas non plus.
+  await poster(v, cookie, id, 'fusionner', { ...body, confirme: 'oui' });
+  assert.equal(lire(v, autre).fusionne_dans, null);
+  const nouvelApercu = await poster(v, cookie, id, 'fusionner', body);
+  assert.match(nouvelApercu.body, /2 signaux/);
+  await poster(v, cookie, id, 'fusionner', { ...body, confirme: 'oui', revisionAutre: revision(v.db, autre) });
+  assert.equal(lire(v, autre).fusionne_dans, id);
+  assert.equal(v.store.verify().ok, true);
+});
+
+test('scission : une sélection issue d’un autre dossier est refusée sans mutation', async t => {
+  const v = environnement(t), id = v.dossier(), autre = v.dossier();
+  v.entite(id, 'compte', 'a'); v.entite(id, 'compte', 'b'); v.signal(id); v.signal(id);
+  v.entite(autre, 'compte', 'c'); const signal = v.signal(autre, { sub: 'c' });
+  const { cookie } = await v.login(), avant = revision(v.db, id), avantAutre = revision(v.db, autre);
+  await poster(v, cookie, id, 'scinder', { entites: 'compte:b', signaux: String(signal), motif: 'essai', confirme: 'oui' });
+  assert.equal(message(v, cookie).k, 'erreur');
+  assert.equal(revision(v.db, id), avant); assert.equal(revision(v.db, autre), avantAutre);
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM dossier_separations').pluck().get(), 0);
 });

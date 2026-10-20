@@ -81,3 +81,15 @@ test('dossiers : 404 propres et compteurs excluant clos et fusionnés', async t 
   const r = await v.get(cookie, '/'); assert.match(r.body, /3 dossiers non clos/);
   assert.match(r.body, /Dossiers[\s\S]*?3 non clos/);
 });
+
+test('dossiers : la limite des alertes est annoncée sans perdre leur compte réel', async t => {
+  const v = environnement(t), id = v.dossier();
+  for (let i = 0; i < 201; i++) v.alerte(id);
+  const { cookie } = await v.login(), r = await v.get(cookie, `/dossiers/${id}`);
+  assert.match(r.body, /Les 200 premières alertes sont affichées/);
+  assert.match(r.body, /Aucune entité rattachée/);
+  assert.match(r.body, /Aucun signal à cette position/);
+  assert.doesNotMatch(r.body, /<table/);
+  assert.equal((r.body.match(/Alerte #\d+ ·/g) || []).length, 200);
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM alerts WHERE dossier_id = ?').pluck().get(id), 201);
+});

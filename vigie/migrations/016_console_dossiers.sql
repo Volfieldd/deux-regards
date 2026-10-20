@@ -15,6 +15,10 @@ CREATE TABLE dossier_signaux_ecartes (
   dossier_id INTEGER NOT NULL REFERENCES dossiers(id) ON DELETE CASCADE,
   seq INTEGER NOT NULL,                  -- 0 : signal sans événement source
   regle TEXT NOT NULL,
-  PRIMARY KEY (dossier_id, seq, regle)
+  -- Sans événement, seule cette occurrence est écartée : jamais les suivantes de la même règle.
+  survenu_a INTEGER NOT NULL DEFAULT 0,
+  entite_kind TEXT NOT NULL DEFAULT '',
+  entite_key TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (dossier_id, seq, regle, survenu_a, entite_kind, entite_key)
 );
 CREATE INDEX dossier_separations_droite ON dossier_separations (droite);

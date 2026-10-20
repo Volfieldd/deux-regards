@@ -466,3 +466,67 @@ test('scissions successives : les séparations suivent une nouvelle branche puis
   assert.ok(v.fiche(nb).signaux.some(s => s.objet === 'personne:52'));
   assert.equal(v.store.verify().ok, true);
 });
+
+// Régression de la revue D1 : seq=null ne désigne pas toutes les occurrences d’une même règle.
+test('scission : les anciens signaux périodiques restent écartés, les occurrences futures entrent dans chaque branche', t => {
+  const v = vigieOf(t), D = v.D, debut = v.clock.t;
+  const reseaux = ['198.51.100.0', '203.0.113.0'];
+  const ids = reseaux.map(key => {
+    const id = Number(v.db.prepare("INSERT INTO dossiers (piste,graine_kind,graine_key,ouvert_a,derniere) VALUES ('externe','reseau',?,?,?)").run(key, debut, debut).lastInsertRowid);
+    v.db.prepare("INSERT INTO dossier_entites (dossier_id,kind,key,role,force,ajoute_a) VALUES (?,'reseau',?,'acteur','graine',?)").run(id, key, debut);
+    return id;
+  });
+  for (let i = 12; i >= 1; i--) {
+    v.clock.t = debut - i * 3600e3;
+    v.store.add(reseaux.map((ip_net) => ({ id: crypto.randomUUID(), type: 'input_validation_fail', severity: 'bas',
+      recu_a: v.clock.t, survenu_a: v.clock.t, composant: 'site', canal: 'ingestion signée', confiance: 'rapporté', ip_net })));
+  }
+  v.clock.t = debut;
+  v.engine.tick();
+  const regle = 'detecteur.exploration_lente';
+  const projetes = () => v.db.prepare('SELECT * FROM signaux_projetes WHERE regle = ? ORDER BY id').all(regle);
+  assert.equal(projetes().length, 2);
+  assert.ok(projetes().every(s => s.seq == null));
+  const garde = D.fusionner(...ids, { par: 'essai' });
+  const selection = D.fiche(garde).signaux.filter(s => s.entite_key === reseaux[1]).map(s => s.id);
+  const nouveau = D.scinder(garde, { entites: ['reseau:' + reseaux[1]], signaux: selection, motif: 'Réseaux indépendants', par: 'essai' });
+  const n = id => v.db.prepare('SELECT COUNT(*) FROM dossier_signaux WHERE dossier_id = ? AND regle = ?').pluck().get(id, regle);
+  const avant = [n(garde), n(nouveau)];
+  v.clock.t += 864e5;
+  v.engine.tick();
+  assert.equal(projetes().length, 4, 'deux nouvelles explorations sont bien détectées et projetées');
+  assert.deepEqual([n(garde), n(nouveau)], avant.map(n => n + 1), 'chaque nouvelle occurrence rejoint son dossier');
+  // Le rattachement manuel peut revoir l’ancien réseau, mais pas reprendre son occurrence déplacée.
+  D.rattacher(garde, 'reseau', reseaux[1], { par: 'essai' });
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM dossier_signaux WHERE dossier_id = ? AND regle = ? AND entite_key = ? AND survenu_a = ?').pluck().get(garde, regle, reseaux[1], debut), 0);
+  const reunis = D.fusionner(garde, nouveau, { par: 'essai' });
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM dossier_signaux_ecartes WHERE dossier_id = ?').pluck().get(reunis), 0, 'les exclusions précises disparaissent quand leur signal est réuni');
+  assert.equal(v.store.verify().ok, true);
+});
+
+test('scission : panne au second événement de journal, rollback complet puis reprise avec chaîne intacte', t => {
+  const v = vigieOf(t);
+  for (const sub of ['a', 'b']) {
+    v.add('session_use_after_expire', { sub, session: `session-${sub}`, detail: { meme_reseau_et_navigateur: false } });
+    v.clock.t += MIN;
+  }
+  const [a, b] = v.dossiers();
+  v.D.fusionner(a.id, b.id, { par: 'essai' });
+  const signaux = v.fiche(a.id).signaux.filter(s => s.sub === 'b').map(s => s.id);
+  const choix = { entites: ['compte:b', 'session:session-b'], signaux, motif: 'Deux acteurs', par: 'essai' };
+  const tables = ['dossiers', 'dossier_entites', 'dossier_signaux', 'alerts', 'dossier_separations', 'dossier_signaux_ecartes', 'events', 'daily'];
+  const etat = () => tables.map(table => v.db.prepare(`SELECT * FROM ${table}`).all());
+  const avant = etat(), prochain = v.db.prepare('SELECT MAX(id) + 1 FROM dossiers').pluck().get();
+  // Le premier événement « scinde » est déjà écrit quand le second échoue.
+  v.db.exec(`CREATE TRIGGER panne_second_journal BEFORE INSERT ON events
+    WHEN NEW.type = 'vigie_dossier' AND json_extract(NEW.detail, '$.action') = 'scinde'
+      AND json_extract(NEW.detail, '$.id') = ${prochain}
+    BEGIN SELECT RAISE(ABORT, 'panne du second journal'); END`);
+  assert.throws(() => v.D.scinder(a.id, choix), /panne du second journal/);
+  assert.deepEqual(etat(), avant);
+  assert.equal(v.store.verify().ok, true);
+  v.db.exec('DROP TRIGGER panne_second_journal');
+  assert.equal(v.D.scinder(a.id, choix), prochain);
+  assert.equal(v.store.verify().ok, true);
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_dossier' AND json_extract(detail, '$.action') = 'scinde'").pluck().get(), 2);
+});

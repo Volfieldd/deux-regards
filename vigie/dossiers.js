@@ -107,7 +107,10 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     nbSignaux: db.prepare('SELECT COUNT(*) FROM dossier_signaux WHERE dossier_id = ?').pluck(),
     ajouterSignal: db.prepare(`INSERT INTO dossier_signaux (dossier_id, seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, objet, alerte_id, cle)
       SELECT @dossier_id, @seq, @regle, @survenu_a, @nature, @phase, @marqueurs, @points, @source, @gravite, @entite_kind, @entite_key, @sub, @session, @ip, @objet, @alerte_id, @cle
-      WHERE NOT EXISTS (SELECT 1 FROM dossier_signaux_ecartes WHERE dossier_id = @dossier_id AND seq = COALESCE(@seq, 0) AND regle = @regle)
+      WHERE NOT EXISTS (SELECT 1 FROM dossier_signaux_ecartes WHERE dossier_id = @dossier_id AND seq = COALESCE(@seq, 0) AND regle = @regle
+        AND survenu_a = CASE WHEN @seq IS NULL THEN @survenu_a ELSE 0 END
+        AND entite_kind = CASE WHEN @seq IS NULL THEN COALESCE(@entite_kind, '') ELSE '' END
+        AND entite_key = CASE WHEN @seq IS NULL THEN COALESCE(@entite_key, '') ELSE '' END)
       ON CONFLICT (dossier_id, seq, regle) DO UPDATE SET alerte_id = COALESCE(excluded.alerte_id, dossier_signaux.alerte_id)`),
     promouvoir: db.prepare("UPDATE dossier_signaux SET promu = 1, nature = 'jalon' WHERE id = ? AND nature = 'fait'"),
     alertesDe: db.prepare('SELECT id, regle, gravite FROM alerts WHERE dossier_id = ?'),
@@ -329,13 +332,16 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
         if (voisin !== garde) db.prepare('INSERT OR IGNORE INTO dossier_separations (gauche, droite) VALUES (?, ?)').run(Math.min(garde, voisin), Math.max(garde, voisin));
       }
       db.prepare('DELETE FROM dossier_separations WHERE gauche = ? OR droite = ?').run(autre, autre);
-      db.prepare(`INSERT OR IGNORE INTO dossier_signaux_ecartes (dossier_id, seq, regle)
-        SELECT ?, seq, regle FROM dossier_signaux_ecartes WHERE dossier_id = ?`).run(garde, autre);
+      db.prepare(`INSERT OR IGNORE INTO dossier_signaux_ecartes (dossier_id, seq, regle, survenu_a, entite_kind, entite_key)
+        SELECT ?, seq, regle, survenu_a, entite_kind, entite_key FROM dossier_signaux_ecartes WHERE dossier_id = ?`).run(garde, autre);
       // Les signaux réunis appartiennent de nouveau au dossier : leur éventuel complément d'alerte ne doit plus
       // être bloqué par l'exclusion créée lors de la scission.
       db.prepare(`DELETE FROM dossier_signaux_ecartes WHERE dossier_id = ? AND EXISTS
         (SELECT 1 FROM dossier_signaux s WHERE s.dossier_id = dossier_signaux_ecartes.dossier_id
-          AND COALESCE(s.seq, 0) = dossier_signaux_ecartes.seq AND s.regle = dossier_signaux_ecartes.regle)`).run(garde);
+          AND COALESCE(s.seq, 0) = dossier_signaux_ecartes.seq AND s.regle = dossier_signaux_ecartes.regle
+          AND (s.seq IS NOT NULL OR (s.survenu_a = dossier_signaux_ecartes.survenu_a
+            AND COALESCE(s.entite_kind, '') = dossier_signaux_ecartes.entite_kind
+            AND COALESCE(s.entite_key, '') = dossier_signaux_ecartes.entite_key)))`).run(garde);
       noter('fusionne', { action: 'fusionne', id: garde, absorbe: autre, par });
     }
     return garde;
@@ -724,18 +730,23 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
       db.prepare(`INSERT INTO dossier_entites (dossier_id, kind, key, role, force, via, ajoute_a, detache_a)
         SELECT ?, kind, key, role, force, via, ajoute_a, detache_a FROM dossier_entites
         WHERE dossier_id = ? AND detache_a IS NOT NULL ON CONFLICT DO NOTHING`).run(nouveau, id);
-      db.prepare(`INSERT INTO dossier_signaux_ecartes (dossier_id, seq, regle)
-        SELECT ?, seq, regle FROM dossier_signaux_ecartes WHERE dossier_id = ?`).run(nouveau, id);
+      db.prepare(`INSERT INTO dossier_signaux_ecartes (dossier_id, seq, regle, survenu_a, entite_kind, entite_key)
+        SELECT ?, seq, regle, survenu_a, entite_kind, entite_key FROM dossier_signaux_ecartes WHERE dossier_id = ?`).run(nouveau, id);
       for (const s of db.prepare('SELECT gauche, droite FROM dossier_separations WHERE gauche = ? OR droite = ?').all(id, id)) {
         const voisin = s.gauche === id ? s.droite : s.gauche;
         db.prepare('INSERT INTO dossier_separations (gauche, droite) VALUES (?, ?)').run(Math.min(nouveau, voisin), Math.max(nouveau, voisin));
       }
-      const ecarter = db.prepare('INSERT OR IGNORE INTO dossier_signaux_ecartes (dossier_id, seq, regle) VALUES (?, ?, ?)');
+      const exclusion = db.prepare(`INSERT OR IGNORE INTO dossier_signaux_ecartes
+        (dossier_id, seq, regle, survenu_a, entite_kind, entite_key) VALUES (?, ?, ?, ?, ?, ?)`);
+      // Les détecteurs périodiques n'ont pas d'événement source. Leur règle ne suffit pas à les identifier :
+      // l'heure et l'entité distinguent l'occurrence déplacée des futurs signaux et des autres réseaux.
+      const ecarter = (dossier, s) => exclusion.run(dossier, s.seq ?? 0, s.regle,
+        s.seq == null ? s.survenu_a : 0, s.seq == null ? s.entite_kind ?? '' : '', s.seq == null ? s.entite_key ?? '' : '');
       for (const s of p.signaux) {
-        ecarter.run(id, s.seq ?? 0, s.regle);
+        ecarter(id, s);
         db.prepare('UPDATE dossier_signaux SET dossier_id = ? WHERE id = ?').run(nouveau, s.id);
       }
-      for (const s of p.restants) ecarter.run(nouveau, s.seq ?? 0, s.regle);
+      for (const s of p.restants) ecarter(nouveau, s);
       for (const a of p.alertes) db.prepare('UPDATE alerts SET dossier_id = ? WHERE id = ?').run(nouveau, a);
       const reste = p.restantes.find(e => e.force === 'graine') || p.restantes.find(e => e.role === 'acteur') || p.restantes[0];
       db.prepare('UPDATE dossiers SET graine_kind = ?, graine_key = ? WHERE id = ?').run(reste.kind, reste.key, id);

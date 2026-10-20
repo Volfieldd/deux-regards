@@ -119,8 +119,18 @@ export function register(app, ctx) {
           apercu: { entites: p.entites.length, signaux: p.signaux.length, alertes: p.alertes,
             restantes: p.restantes.length, restants: p.restants.length } }) };
       }
+      const autre = geste === 'fusionner' ? numero(body.autre) : null;
+      if (geste === 'fusionner') {
+        if (!autre || autre === id) throw new ActionError('choisissez un autre dossier', 'autre');
+        const cible = D.fiche(autre);
+        if (!cible || cible.fusionne_dans) throw new ActionError('l’autre dossier est inconnu ou fusionné : choisissez à nouveau', 'autre');
+        if (body.confirme !== 'oui') return { confirmation: confirmation({ db: ctx.db, engine, role: req.moi.role, id, geste, valeurs: body, autre }) };
+      }
       let destination = id;
       ctx.db.transaction(() => {
+        // Le verrou d'écriture couvre la dernière lecture des deux empreintes et le geste (CLI concurrente comprise).
+        if (body.revision !== revision(ctx.db, id)) throw new ActionError('le dossier a changé : relisez la confirmation avant de recommencer');
+        if (geste === 'fusionner' && body.revisionAutre !== revision(ctx.db, autre)) throw new ActionError('l’autre dossier a changé : relisez la confirmation de fusion');
         if (geste === 'prendre') D.prendre(id, auteur);
         if (geste === 'classer') {
           if (body.classement === 'legitime' && indicesAppris(ctx.db, id, req.moi.role).apprentissageTronque) throw new ActionError('plus de 200 indices à apprendre : examinez ce dossier en ligne de commande avant de le classer légitime');
@@ -138,12 +148,10 @@ export function register(app, ctx) {
           D.rattacher(id, body.type, body.cle.trim(), { par: auteur });
         }
         if (geste === 'fusionner') {
-          const autre = numero(body.autre);
-          if (!autre || autre === id) throw new ActionError('choisissez un autre dossier', 'autre');
           destination = D.fusionner(id, autre, { par: auteur });
         }
         if (geste === 'scinder') destination = D.scinder(id, { entites: selections('entites'), signaux: selections('signaux'), motif: texte(body.motif), par: auteur });
-      })();
+      }).immediate();
       const messages = { prendre: 'pris en charge', classer: 'classé et clos', detacher: 'entité détachée', rattacher: 'entité rattachée', fusionner: 'fusion effectuée', scinder: `scission effectuée, nouveau dossier #${destination}` };
       return { texte: `Dossier #${id} : ${messages[geste]}.`, retour: `/dossiers/${destination}` };
     });

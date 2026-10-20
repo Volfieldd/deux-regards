@@ -135,7 +135,7 @@ export function fiche({ db, engine, role = 'viewer', id, query = {} }) {
     ${avant ? 'AND (s.survenu_a < ? OR (s.survenu_a = ? AND s.id < ?))' : ''} ORDER BY s.survenu_a DESC, s.id DESC LIMIT ${SIGNAUX + 1}`)
     .all(id, ...(avant ? [Number(avant[1]), Number(avant[1]), Number(avant[2])] : []));
   const derniers = rows.slice(0, SIGNAUX), dernier = derniers.at(-1);
-  const ents = q.entites.all(id), histoires = q.histoire.all(id);
+  const ents = q.entites.all(id), histoires = q.histoire.all(id), alertes = q.alertes.all(id);
   const journal = histoires.slice(0, 50).map(h => {
     const a = lire(h.detail) || {};
     const mots = { ouvert: 'Ouvert', fusionne: 'Fusion', aggrave: 'Aggravation', sommeil: 'Mise en sommeil', clos: 'Clôture', classe: 'Classement', detache: 'Entité détachée', rattache: 'Entité rattachée', scinde: 'Scission', 'prise en charge': 'Prise en charge' };
@@ -151,7 +151,7 @@ export function fiche({ db, engine, role = 'viewer', id, query = {} }) {
     signaux: derniers.map(s => signal(s, role, regles)), avantInvalide: query.avant != null && !avant,
     suivante: rows.length > SIGNAUX ? `/dossiers/${id}?avant=${dernier.survenu_a}-${dernier.id}#signaux` : null,
     debut: avant ? `/dossiers/${id}#signaux` : null,
-    alertesVue: q.alertes.all(id).slice(0, 200).map(a => ({ id: a.id, titre: texte(titreDe(a.regle, regles), role), grav: gravite(a.gravite), mode: MODES[a.mode] || '', statut: a.statut === 'close' ? 'Close' : a.statut === 'en_cours' ? 'Prise en charge' : 'Ouverte' })),
+    alertesVue: alertes.slice(0, 200).map(a => ({ id: a.id, titre: texte(titreDe(a.regle, regles), role), grav: gravite(a.gravite), mode: MODES[a.mode] || '', statut: a.statut === 'close' ? 'Close' : a.statut === 'en_cours' ? 'Prise en charge' : 'Ouverte' })), alertesCoupees: alertes.length > 200,
     reponses: reponses.slice(0, 50).map(r => ({ id: r.id, type: DECISIONS[r.kind] || r.kind, cible: texte(r.cible, role, 200), motif: texte(r.motif, role),
       alerte: r.alerte_id, date: quand(r.cree_a), fin: r.leve_a ? `levée le ${quand(r.leve_a)}` : `jusqu’au ${quand(r.fin)}` })), reponsesCoupees: reponses.length > 50,
     journal, journalCoupe: histoires.length > 50 };
@@ -183,15 +183,21 @@ export function indicesAppris(db, id, role) {
   }
   return { appris: [...valeurs].map(c => texte(c, role, 400)), apprentissageTronque: false };
 }
-export function confirmation({ db, engine, role, id, geste, valeurs = {}, erreur = null, apercu = null }) {
+export function confirmation({ db, engine, role, id, geste, valeurs = {}, erreur = null, apercu = null, autre = null }) {
   const q = requetesDossiers(db), d = q.dossier.get(id);
   if (!d || d.fusionne_dans) return null;
   const regles = new Map(engine.rules().map(r => [r.id, r]));
   const sig = q.sql('SELECT * FROM dossier_signaux WHERE dossier_id = ? ORDER BY survenu_a, id LIMIT 2001').all(id);
   const entites = q.entites.all(id).filter(e => e.detache_a == null).map(e => entite(e, role));
   const apprentissage = indicesAppris(db, id, role);
+  const cible = autre && q.dossier.get(autre);
+  // Après le choix du second dossier seulement : ses conséquences et son empreinte sont montrées ensemble.
+  const fusion = cible && !cible.fusionne_dans ? { id: cible.id, titre: ligne(cible, q, role).titre, revision: revision(db, autre),
+    conserve: Math.min(id, autre), entites: q.sql('SELECT COUNT(*) FROM dossier_entites WHERE dossier_id = ? AND detache_a IS NULL').pluck().get(autre),
+    signaux: q.sql('SELECT COUNT(*) FROM dossier_signaux WHERE dossier_id = ?').pluck().get(autre),
+    alertes: q.sql('SELECT COUNT(*) FROM alerts WHERE dossier_id = ?').pluck().get(autre) } : null;
   return { id, geste, titre: `${GESTES[geste]} · dossier #${id}`, retour: `/dossiers/${id}`, revision: revision(db, id),
-    valeurs, erreur, apercu, entites, signaux: sig.slice(0, 2000).map(s => signal(s, role, regles)), trop: sig.length > 2000,
+    valeurs, erreur, apercu, fusion, entites, signaux: sig.slice(0, 2000).map(s => signal(s, role, regles)), trop: sig.length > 2000,
     classements: CLASSEMENTS, types: TYPES, ...apprentissage,
     autres: geste === 'fusionner' ? q.sql('SELECT * FROM dossiers WHERE id != ? AND fusionne_dans IS NULL ORDER BY derniere DESC LIMIT 100').all(id).map(a => ({ id: a.id, titre: texte((lire(a.explication) || {}).titre, role) })) : [] };
 }
