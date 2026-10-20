@@ -49,6 +49,9 @@ test('preuve d’antériorité : horodatage affiché et vérifié', async ({ pag
     await page.reload();
     return proof.getByText(/^Horodatée le \d{4}-\d{2}-\d{2} à /).count();
   }, { timeout: 60_000, intervals: [2000] }).toBe(1);
+  // La rubrique est un <details> replié par défaut (fiche en rubriques) : l'ouvrir avant d'y agir. Échouait aussi sur
+  // main avec une session neuve (aucune rubrique retenue ouverte).
+  if (!(await proof.evaluate(d => d.open))) await proof.locator('summary').click();
   await expect(proof.locator('code')).toHaveText(/^[0-9a-f]{64}$/);
   await proof.getByRole('button', { name: 'Vérifier la preuve' }).click();
   await expect(page.getByRole('status').first()).toContainText('Preuve valide : original intact');
