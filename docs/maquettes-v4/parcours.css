@@ -1,0 +1,142 @@
+/* Documentary prototypes only. Each direction extends its gallery grammar to the inner pages. */
+.page-lead{max-width:46ch;margin-top:25px;color:var(--muted);font-size:18px}
+.header nav{gap:25px}footer div{flex-wrap:wrap}
+.map-explorer{display:grid;grid-template-columns:2.15fr 1fr;gap:40px;margin:0 var(--gutter);align-items:start}
+.map-canvas{position:relative;border:1px solid #3a464c;overflow:hidden}
+.map-canvas svg{display:block;width:100%;height:auto}
+.map-marker{position:absolute;transform:translate(-25%,-50%);font-size:12px;padding:7px 12px 7px 8px;border:1px solid #536261;background:#101819;color:#edeae4;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.map-marker span{display:grid;place-items:center;width:25px;height:25px;border:1px solid #a58f72;border-radius:50%;font:10px Mono}
+.map-marker[aria-pressed=true]{background:#e0bd91;color:#111619;border-color:#e0bd91;z-index:1}
+.map-marker[aria-pressed=true] span{border-color:#68503c}
+.map-marker:focus-visible{outline-offset:-3px}
+.map-disclaimer{font:11px Jost;color:var(--muted);margin-top:12px}
+#map-selection>.eyebrow{margin-bottom:20px}
+#map-selection img{height:270px;object-fit:contain;background:#0d1012}
+#map-selection .shot-label{font:28px Editorial;line-height:1.1;margin-top:10px}
+#map-selection .shot-label .mono{font-size:14px}
+.map-thought{margin:22px 0 10px;color:var(--muted)}
+#map-selection>.muted{font-size:11px;margin-top:20px}
+.map-collection{margin:85px var(--gutter) 0;border-top:1px solid var(--line);padding-top:35px}
+.map-collection h2{margin:20px 0 32px}
+.map-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:25px}
+.map-list img{height:220px;object-fit:contain;background:#0d1012}
+.author-pair{margin:0 var(--gutter);display:grid;grid-template-columns:1fr 1fr;gap:8vw}
+.author-pair img{height:480px;object-fit:contain;width:100%;background:#0c0e10}
+.author-pair .eyebrow{margin:30px 0 18px}
+.author-pair h2{font-size:52px;margin-bottom:20px}
+.author-pair article>p:not(.eyebrow){max-width:40ch;color:var(--muted)}
+.author-pair .text-link{margin-top:20px}
+.author-note{margin:100px var(--gutter) 0;border-top:1px solid var(--line);padding-top:35px;display:grid;grid-template-columns:1fr 1fr;gap:30px 8vw}
+.author-note p{color:var(--muted);max-width:45ch}
+.author-note>a{grid-column:2;justify-self:start}
+.contact-layout{margin:0 var(--gutter);display:grid;grid-template-columns:1.1fr 1fr;gap:10vw;max-width:1200px}
+#contact-demo{display:grid;gap:23px;align-content:start}
+#contact-demo button{justify-self:start;border-color:var(--accent)}
+#contact-demo .muted{font-size:12px}
+#contact-result{color:var(--accent);font-size:14px}
+.contact-layout figure{max-width:400px;justify-self:end}
+.contact-layout figure img{height:510px;width:100%;object-fit:contain}
+.contact-layout figcaption{font:27px Editorial;line-height:1.2;margin-top:25px}
+.contact-layout figcaption span{display:block;font:11px Jost;color:var(--muted);margin-top:15px}
+/* Obscura: quieter inner pages, one axis, generous space around whole prints. */
+.interior[data-piste=obscura] .page-intro{text-align:center;padding:25px 0}
+.interior[data-piste=obscura] .page-lead{margin-left:auto;margin-right:auto}
+.interior[data-piste=obscura] .gallery-grid{grid-template-columns:1fr 1fr;max-width:1120px;margin-left:auto;margin-right:auto;gap:65px 55px;padding:0 var(--gutter)}
+.interior[data-piste=obscura] .gallery-grid .shot img{height:380px;background:none}
+.interior[data-piste=obscura] .trip-cover{max-width:1100px;margin-left:auto;margin-right:auto;padding:0 var(--gutter)}
+.interior[data-piste=obscura] .trip-cover img{object-fit:contain;background:none}
+.interior[data-piste=obscura] .viewer-caption{max-width:940px}
+.interior[data-piste=obscura] .travel-title{text-align:center}
+.interior[data-piste=obscura] .chapter-nav{justify-content:center}
+.interior[data-piste=obscura] .map-explorer{max-width:1250px;margin-left:auto;margin-right:auto;padding:0 var(--gutter)}
+/* Panoramique: expansive framing and clear horizontal sequences. */
+.interior[data-piste=panoramique]{--accent:#bcd4de}
+.interior[data-piste=panoramique] .page-intro h1{font-size:clamp(54px,7.5vw,112px)}
+.interior[data-piste=panoramique] .gallery-grid{grid-template-columns:1fr 1fr;gap:60px 28px}
+.interior[data-piste=panoramique] .gallery-grid .shot:first-child{grid-column:1/-1}
+.interior[data-piste=panoramique] .gallery-grid .shot img{height:390px;object-fit:cover}
+.interior[data-piste=panoramique] .gallery-grid .shot:first-child img{height:57vh;min-height:390px}
+.interior[data-piste=panoramique] .viewer-image img{height:75vh}
+.interior[data-piste=panoramique] .trip-cover img{height:65vh}
+.interior[data-piste=panoramique] .travel-chapter{grid-template-columns:1fr;gap:32px}
+.interior[data-piste=panoramique] .travel-chapter>div{display:grid;grid-template-columns:80px 1fr 1fr;gap:25px;align-items:center}
+.interior[data-piste=panoramique] .travel-chapter>div p{margin:0}
+.interior[data-piste=panoramique] .travel-chapter>div .eyebrow{grid-column:2}
+.interior[data-piste=panoramique] .travel-chapter .shot img{max-height:670px;height:auto}
+.interior[data-piste=panoramique] .map-explorer{grid-template-columns:1fr}
+.interior[data-piste=panoramique] #map-selection{display:grid;grid-template-columns:1.5fr 1fr;gap:15px 45px;align-items:center}
+.interior[data-piste=panoramique] #map-selection .shot{grid-column:1;grid-row:1/5}
+.interior[data-piste=panoramique] #map-selection>.eyebrow{grid-column:2}
+.interior[data-piste=panoramique] #map-selection>.muted{margin:0}
+.interior[data-piste=panoramique] .notebooks{grid-template-columns:1fr}
+.interior[data-piste=panoramique] .notebook{grid-template-columns:1.5fr 1fr;gap:50px}
+/* Contact: an archive / photographic laboratory, tight numbering and frames. */
+.interior[data-piste=contact]{--accent:#e2bd80}
+.interior[data-piste=contact] .page-intro{border-top:1px solid var(--line);padding-top:30px}
+.interior[data-piste=contact] .page-intro h1{font-size:clamp(45px,5vw,70px)}
+.interior[data-piste=contact] .gallery-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:30px 20px;counter-reset:print}
+.interior[data-piste=contact] .gallery-grid .shot{counter-increment:print;border-top:1px solid #645342;padding-top:15px}
+.interior[data-piste=contact] .gallery-grid .shot::before{content:'VUE 0' counter(print);display:block;font:11px Mono;color:var(--accent);margin-bottom:15px}
+.interior[data-piste=contact] .gallery-grid .shot img{height:280px;object-fit:contain;padding:10px}
+.interior[data-piste=contact] .shot-label{font-family:Mono;font-size:12px}
+.interior[data-piste=contact] .viewer-image{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:25px 0}
+.interior[data-piste=contact] .viewer-caption{max-width:none}
+.interior[data-piste=contact] .notebook{border-top:1px solid var(--line);padding-top:25px}
+.interior[data-piste=contact] .chapter-nav{font-family:Mono}
+.interior[data-piste=contact] .travel-chapter{gap:35px;border-bottom:1px solid var(--line);padding-bottom:45px}
+.interior[data-piste=contact] .map-canvas{border:10px solid #1a1d1f;outline:1px solid #78634e}
+.interior[data-piste=contact] .map-list .shot{border-top:1px solid var(--line);padding-top:18px}
+/* Résonances: pairs, centred typography and balanced reading columns. */
+.interior[data-piste=resonances]{--accent:#d9b6a7}
+.interior[data-piste=resonances] .page-intro{text-align:center}
+.interior[data-piste=resonances] .page-lead{margin-left:auto;margin-right:auto}
+.interior[data-piste=resonances] .gallery-grid{grid-template-columns:1fr 1fr;gap:70px 20px}
+.interior[data-piste=resonances] .gallery-grid .shot img{height:470px;object-fit:contain;background:none}
+.interior[data-piste=resonances] .gallery-grid .shot-label{padding-top:22px;border-top:1px solid var(--line);margin-top:20px}
+.interior[data-piste=resonances] .viewer-caption{text-align:center;display:block}
+.interior[data-piste=resonances] .viewer-caption .generated-label{margin-top:22px}
+.interior[data-piste=resonances] .photo-more{grid-template-columns:1fr 1fr}
+.interior[data-piste=resonances] .related{grid-template-columns:1fr 1fr}
+.interior[data-piste=resonances] .related .shot:last-child{grid-column:1/-1}
+.interior[data-piste=resonances] .notebook{display:block}
+.interior[data-piste=resonances] .notebook img{height:400px;object-fit:contain}
+.interior[data-piste=resonances] .notebook>div{margin-top:25px}
+.interior[data-piste=resonances] .map-explorer{grid-template-columns:1.6fr 1fr}
+.interior[data-piste=resonances] .author-pair{gap:35px}
+/* Itinérance: chapter markers and editorial notes beside the image. */
+.interior[data-piste=itinerance]{--accent:#c8c9a3}
+.interior[data-piste=itinerance] .page-intro{padding-left:35px;border-left:1px solid var(--accent)}
+.interior[data-piste=itinerance] .gallery-grid{grid-template-columns:1fr;gap:65px;counter-reset:chapter}
+.interior[data-piste=itinerance] .gallery-grid .shot{display:grid;grid-template-columns:2fr 1fr;gap:55px;align-items:center;counter-increment:chapter}
+.interior[data-piste=itinerance] .gallery-grid .shot img{height:430px;object-fit:contain;background:none}
+.interior[data-piste=itinerance] .gallery-grid .shot-label{display:block;font:38px Editorial;border-left:1px solid var(--line);padding:15px 0 15px 30px}
+.interior[data-piste=itinerance] .gallery-grid .shot-label::before{content:'ÉTAPE 0' counter(chapter);display:block;font:11px Mono;color:var(--accent);margin-bottom:25px}
+.interior[data-piste=itinerance] .gallery-grid .shot-label .mono{display:block;margin-top:20px}
+.interior[data-piste=itinerance] .travel-chapter>div{padding-left:30px;border-left:1px solid #666950}
+.interior[data-piste=itinerance] .notebooks{grid-template-columns:1fr;max-width:1150px}
+.interior[data-piste=itinerance] .notebook{grid-template-columns:1fr 1.2fr;gap:55px}
+.interior[data-piste=itinerance] .map-explorer{grid-template-columns:1fr 2fr}
+.interior[data-piste=itinerance] .map-explorer>div:first-child{grid-column:2}
+.interior[data-piste=itinerance] #map-selection{grid-row:1;grid-column:1}
+.interior[data-piste=itinerance] .essay-layout aside{border-left:1px solid var(--accent);padding-left:20px}
+/* Hors cadre: varied scale, asymmetry and generous intervals. */
+.interior[data-piste=hors-cadre]{--accent:#d6a78b}
+.interior[data-piste=hors-cadre] .page-intro{max-width:750px;margin-top:65px;margin-bottom:70px}
+.interior[data-piste=hors-cadre] .gallery-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:65px 30px}
+.interior[data-piste=hors-cadre] .gallery-grid .shot:nth-child(1){grid-column:5/13}
+.interior[data-piste=hors-cadre] .gallery-grid .shot:nth-child(2){grid-column:1/7;grid-row:2}
+.interior[data-piste=hors-cadre] .gallery-grid .shot:nth-child(3){grid-column:9/13;grid-row:2;margin-top:100px}
+.interior[data-piste=hors-cadre] .gallery-grid .shot:nth-child(4){grid-column:3/11;grid-row:3}
+.interior[data-piste=hors-cadre] .gallery-grid .shot img{height:auto;max-height:520px;background:none;object-fit:contain}
+.interior[data-piste=hors-cadre] .notebooks{gap:8vw;align-items:start}
+.interior[data-piste=hors-cadre] .notebook{display:block}
+.interior[data-piste=hors-cadre] .notebook:nth-child(2){margin-top:170px}
+.interior[data-piste=hors-cadre] .notebook>div{margin-top:25px}
+.interior[data-piste=hors-cadre] .travel-chapter:nth-of-type(odd){grid-template-columns:1.2fr 2fr}
+.interior[data-piste=hors-cadre] .travel-chapter:nth-of-type(even)>.shot{grid-column:1;grid-row:1}
+.interior[data-piste=hors-cadre] .travel-chapter:nth-of-type(even)>div{grid-column:2;grid-row:1;max-width:360px;justify-self:end}
+.interior[data-piste=hors-cadre] .map-explorer{grid-template-columns:2.3fr 1fr;gap:55px}
+.interior[data-piste=hors-cadre] #map-selection{margin-top:110px}
+.interior[data-piste=hors-cadre] .author-pair article:nth-child(2){margin-top:150px}
+@media(max-width:1000px){.header nav{gap:16px}.map-explorer{gap:25px}.map-marker{font-size:10px;padding:5px;gap:5px;min-height:36px}.map-marker span{width:20px;height:20px;font-size:9px}#map-selection img{height:210px}.author-pair img{height:350px}.contact-layout{gap:6vw}.interior[data-piste=contact] .gallery-grid{grid-template-columns:1fr 1fr}.interior[data-piste=itinerance] .gallery-grid .shot{gap:25px}.interior[data-piste=hors-cadre] .map-explorer{gap:25px}.interior[data-piste=resonances] .gallery-grid .shot img{height:350px}}
+@media(max-width:700px){.header nav{gap:3px}.page-lead{font-size:16px}.map-explorer{display:block;margin:0 var(--gutter)}.map-canvas svg{height:auto;min-height:0}.map-marker{font-size:0;width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;border-radius:50%;transform:translate(-50%,-50%)}.map-marker span{width:28px;height:28px;font-size:11px}.map-disclaimer{font-size:10px;line-height:1.6}#map-selection{margin-top:35px}#map-selection img{height:240px}.map-collection{margin-top:55px}.map-collection h2{font-size:35px}.map-list{grid-template-columns:1fr 1fr;gap:30px 16px}.map-list img{height:165px}.map-list .shot-label .mono{display:none}.author-pair{display:block}.author-pair article+article{margin-top:65px}.author-pair img{height:320px}.author-pair h2{font-size:45px}.author-note{display:block;margin-top:60px}.author-note p{margin:25px 0}.contact-layout{display:flex;flex-direction:column;gap:55px}.contact-layout figure{max-width:none;width:100%}.contact-layout figure img{height:340px}.contact-layout figcaption{font-size:29px}.interior[data-piste] .page-intro h1{font-size:50px}.interior[data-piste=obscura] .page-intro{text-align:left;padding:0}.interior[data-piste=obscura] .gallery-grid{grid-template-columns:1fr;gap:40px}.interior[data-piste=obscura] .gallery-grid .shot img{height:auto;max-height:460px}.interior[data-piste=obscura] .trip-cover{padding:0 var(--gutter)}.interior[data-piste=obscura] .trip-cover img{height:auto;min-height:0}.interior[data-piste=obscura] .travel-title{text-align:left}.interior[data-piste=obscura] .map-explorer{padding:0 var(--gutter);margin:0}.interior[data-piste=panoramique] .gallery-grid{grid-template-columns:1fr;gap:40px}.interior[data-piste=panoramique] .gallery-grid .shot:first-child{grid-column:auto}.interior[data-piste=panoramique] .gallery-grid .shot img,.interior[data-piste=panoramique] .gallery-grid .shot:first-child img{height:280px;min-height:0}.interior[data-piste=panoramique] .viewer-image img{height:auto;max-height:62vh}.interior[data-piste=panoramique] .trip-cover img{height:42vh}.interior[data-piste=panoramique] .travel-chapter>div{display:block}.interior[data-piste=panoramique] .travel-chapter>div p{margin:18px 0}.interior[data-piste=panoramique] #map-selection{display:block}.interior[data-piste=panoramique] #map-selection>.muted{margin-top:20px}.interior[data-piste=panoramique] .notebook{display:block}.interior[data-piste=panoramique] .notebook>div{margin-top:25px}.interior[data-piste=contact] .gallery-grid{gap:35px 14px}.interior[data-piste=contact] .gallery-grid .shot img{height:180px;padding:0}.interior[data-piste=contact] .shot-label{font-size:11px}.interior[data-piste=contact] .map-canvas{border-width:4px}.interior[data-piste=resonances] .page-intro{text-align:left}.interior[data-piste=resonances] .gallery-grid{gap:40px 15px}.interior[data-piste=resonances] .gallery-grid .shot img{height:205px}.interior[data-piste=resonances] .gallery-grid .shot-label{margin-top:15px;padding-top:15px}.interior[data-piste=resonances] .viewer-caption{text-align:left}.interior[data-piste=resonances] .photo-more{grid-template-columns:1fr}.interior[data-piste=resonances] .related{grid-template-columns:repeat(3,minmax(0,1fr))}.interior[data-piste=resonances] .related .shot:last-child{grid-column:auto}.interior[data-piste=resonances] .notebook img{height:320px}.interior[data-piste=itinerance] .page-intro{padding-left:18px}.interior[data-piste=itinerance] .gallery-grid .shot{display:block}.interior[data-piste=itinerance] .gallery-grid .shot img{height:auto;max-height:430px}.interior[data-piste=itinerance] .gallery-grid .shot-label{font-size:28px;padding:18px 0 0;border-left:0}.interior[data-piste=itinerance] .gallery-grid .shot-label::before{margin-bottom:13px}.interior[data-piste=itinerance] .gallery-grid .shot-label .mono{display:none}.interior[data-piste=itinerance] .travel-chapter>div{padding-left:18px}.interior[data-piste=itinerance] .notebook{display:block}.interior[data-piste=itinerance] .notebook>div{margin-top:25px}.interior[data-piste=itinerance] .map-explorer{display:flex;flex-direction:column}.interior[data-piste=itinerance] .map-explorer>div:first-child{width:100%}.interior[data-piste=itinerance] #map-selection{margin-top:20px;width:100%}.interior[data-piste=hors-cadre] .page-intro{margin-top:35px;margin-bottom:45px}.interior[data-piste=hors-cadre] .gallery-grid{grid-template-columns:1fr 1fr;gap:40px 15px}.interior[data-piste=hors-cadre] .gallery-grid .shot:nth-child(1){grid-column:1/-1}.interior[data-piste=hors-cadre] .gallery-grid .shot:nth-child(2){grid-column:1;grid-row:2}.interior[data-piste=hors-cadre] .gallery-grid .shot:nth-child(3){grid-column:2;grid-row:2;margin-top:45px}.interior[data-piste=hors-cadre] .gallery-grid .shot:nth-child(4){grid-column:1/-1;grid-row:3}.interior[data-piste=hors-cadre] .notebook:nth-child(2){margin-top:0}.interior[data-piste=hors-cadre] #map-selection{margin-top:35px}.interior[data-piste=hors-cadre] .author-pair article:nth-child(2){margin-top:65px}}

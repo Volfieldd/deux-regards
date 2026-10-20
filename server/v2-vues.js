@@ -268,13 +268,23 @@ export const pct = (v, from, size) => Number((((v - from) / size) * 100).toFixed
 // vignette d'une ville, 16 px de rayon et son nombre, tient entière dans le cadre de 150 px de haut d'un écran de 320 px),
 // au format du fond (1000 × 520), dans ses limites ; une seule ville reste située (60 unités, environ 22° de longitude).
 // Calculé par le serveur : la carte s'ouvre cadrée avec ou sans script ; « Monde » (avec script) montre le monde entier.
-export function cadrage(places, { W = 1000, H = 520, min = 60 } = {}) {
-  if (!places.length) return { x: 0, y: 0, w: W, h: H };
+// Mini-carte de la visionneuse (server/photo-map.js) : centrée sur la ville (centre), au format de son cadre (ratio,
+// hauteur / largeur), la même marge d'un sixième autour de la voisine la plus écartée.
+export function cadrage(places, { W = 1000, H = 520, min = 60, centre = null, ratio = H / W } = {}) {
+  if (!places.length && !centre) return { x: 0, y: 0, w: W, h: H };
   const xs = places.map(p => p.x), ys = places.map(p => p.y);
-  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-  let w = Math.max(min, (Math.max(...xs) - Math.min(...xs)) * 1.5, ((Math.max(...ys) - Math.min(...ys)) * 1.5 * W) / H);
-  w = Math.min(W, w);
-  const h = (w * H) / W;
+  let cx, cy, sx, sy;
+  if (centre) {
+    ({ x: cx, y: cy } = centre);
+    sx = 2 * Math.max(0, ...xs.map(x => Math.abs(x - cx)));
+    sy = 2 * Math.max(0, ...ys.map(y => Math.abs(y - cy)));
+  } else {
+    cx = (Math.min(...xs) + Math.max(...xs)) / 2; cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    sx = Math.max(...xs) - Math.min(...xs); sy = Math.max(...ys) - Math.min(...ys);
+  }
+  let w = Math.max(min, sx * 1.5, (sy * 1.5) / ratio);
+  w = Math.min(W, H / ratio, w);
+  const h = w * ratio;
   const r = n => Number(n.toFixed(2));
   return { x: r(Math.min(W - w, Math.max(0, cx - w / 2))), y: r(Math.min(H - h, Math.max(0, cy - h / 2))), w: r(w), h: r(h) };
 }

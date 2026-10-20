@@ -595,9 +595,6 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .vis-pres h2 { margin: 0 0 var(--esp-3); }
 .vis-carte { max-width: 400px; margin: 0; }
 .vis-carte svg { display: block; width: 100%; height: auto; }
-/* Passe 5 : la mini-carte est dessinée dans un viewBox de 400 de large ; sous 448 px d'écran, elle rétrécit (364 px sur un
-   téléphone de 412 px, 288 px à 320 px) : ses textes passent de 13 à 18,1 unités, soit 13 px rendus au moins (18,1 × 288 / 400). */
-@media (max-width: 447px) { .vis-carte svg text { font-size: 18.1px; } }
 .vis-carte figcaption { margin-top: var(--esp-1); color: var(--mute); font-size: var(--t-meta); }
 .vis-carte figcaption a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--field); }
 
@@ -775,10 +772,14 @@ kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; border: 1px sol
 .vis-carte-o:hover text, .vis-carte-o:focus-visible text { fill: var(--ink); text-decoration: underline; }
 .vis-carte-o:focus-visible { outline: none; }
 .vis-carte-o:focus-visible circle { stroke: var(--ink); stroke-width: 3px; }
+/* Cible du doigt (12 px de rayon) autour de la pastille : invisible, même au focus. */
+.vis-carte-o .vis-carte-cible, .vis-carte-o:focus-visible .vis-carte-cible { fill: transparent; stroke: none; }
 .vis-carte-ici circle { fill: none; stroke: var(--safelight); stroke-width: 2px; }
 .vis-carte-ici text { fill: var(--ink); }
+/* Barre d'échelle (PLAN point 8, MQ-04) : un trait et deux talons, la longueur en 13 px, sur le même liseré sombre que les
+   noms ; sa longueur est donnée par le serveur en pourcentage du cadre (views/v2/photo.eta). */
+.vis-carte-echelle line { stroke: var(--prose); stroke-width: 1.5px; }
 .vis-carte figcaption { margin-top: var(--esp-1); color: var(--mute); font-size: var(--t-meta); }
-@media (max-width: 447px) { .vis-carte-reperes text { font-size: var(--t-meta); } }
 
 /* Mots-clés (réglage « Afficher les mots-clés ») : dans les données, chacun mène à la recherche. */
 .vis-mots { display: flex; flex-wrap: wrap; gap: 0 var(--esp-2); margin: 0; padding: 0; list-style: none; }

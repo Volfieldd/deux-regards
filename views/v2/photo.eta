@@ -103,9 +103,15 @@
           </svg>
           <svg class="vis-carte-reperes" role="group" aria-label="<%= v.typo(n.map(pl.me.city)) %>">
             <defs><clipPath id="vis-carte-rond" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath></defs>
-<% /* Le nom d'une autre ville se pose du côté opposé à la photo (jamais sur la vignette d'ici), et dans le cadre. */
-   pl.others.forEach(o => { const ox = Number(px(o.x)), end = ox > 85 || (ox >= 15 && ox < mx); %>            <a class="vis-carte-o" href="<%= it.photoUrl(o.href) %>" aria-label="<%= v.typo(`${n.others(o.city, o.photos.length)} · ${n.km(o.km)}`) %>"><svg x="<%= ox %>%" y="<%= py(o.y) %>%" overflow="visible"><circle r="12" fill="transparent" stroke="none"/><circle r="5"/><text x="<%= end ? -10 : 10 %>" y="4"<%~ end ? ' text-anchor="end"' : '' %>><%= o.city %></text></svg></a>
-<% }) %>            <svg class="vis-carte-ici" x="<%= mx %>%" y="<%= py(pl.me.y) %>%" overflow="visible"><circle r="17"/><image href="/media/<%= it.thumb %>" x="-15" y="-15" width="30" height="30" preserveAspectRatio="xMidYMid slice" clip-path="url(#vis-carte-rond)"/><text x="0" y="34" text-anchor="<%= mx < 18 ? 'start' : mx > 82 ? 'end' : 'middle' %>"><%= pl.me.city %></text></svg>
+<% /* Noms placés par le serveur (server/photo-map.js, placer) : sans chevauchement de 288 à 400 px de large ; une voisine
+      sans place garde sa pastille, son nom est lu. La ville vient après les pastilles : son nom reste lisible. */
+   const NOM = { start: 'x="10" y="4"', end: 'x="-10" y="4" text-anchor="end"', top: 'y="-10" text-anchor="middle"', bottom: 'y="18" text-anchor="middle"' };
+   const me = pl.me.label;
+   pl.others.forEach(o => { %>            <a class="vis-carte-o" href="<%= it.photoUrl(o.href) %>" aria-label="<%= v.typo(`${n.others(o.city, o.photos.length)} · ${n.km(o.km)}`) %>"><svg x="<%= px(o.x) %>%" y="<%= py(o.y) %>%" overflow="visible"><circle class="vis-carte-cible" r="12"/><circle r="5"/><% if (o.label) { %><text <%~ NOM[o.label] %>><%= o.city %></text><% } %></svg></a>
+<% }) %>            <svg class="vis-carte-ici" x="<%= mx %>%" y="<%= py(pl.me.y) %>%" overflow="visible"><circle r="17"/><image href="/media/<%= it.thumb %>" x="-15" y="-15" width="30" height="30" preserveAspectRatio="xMidYMid slice" clip-path="url(#vis-carte-rond)"/><text x="0" y="<%= me.pos === 'top' ? -27 : 34 %>" text-anchor="<%= me.anchor %>"><%= pl.me.city %></text></svg>
+<% /* Barre d'échelle (server/photo-map.js, echelle) : sa longueur en pourcentage du cadre, juste à toutes les largeurs et
+      sans script ; à 12 px du bord, dans le coin du bas le moins chargé. */
+   const sc = pl.scale, sp = sc.part * 100; %>            <g class="vis-carte-echelle" role="img" aria-label="<%= v.typo(n.scale(sc.label)) %>" transform="translate(<%= sc.end ? -12 : 12 %> -14)"><svg x="<%= (sc.end ? 100 - sp : 0).toFixed(2) %>%" y="100%" width="<%= sp.toFixed(2) %>%" overflow="visible"><line x1="0" x2="100%"/><line y1="-5" y2="5"/><line x1="100%" x2="100%" y1="-5" y2="5"/><text x="<%= sc.end ? 0 : '100%' %>" dx="<%= sc.end ? -8 : 8 %>" y="4.5"<%~ sc.end ? ' text-anchor="end"' : '' %>><%= sc.label %></text></svg></g>
           </svg>
         </div>
         <figcaption><%= n.here(pl.me.city) %><%= pl.count ? ` · ${n.more(pl.count)}` : '' %><% if (it.mapPage) { %>&nbsp;· <a class="lien" href="<%= it.u('/carte') %>#lieu-<%= p.city_id %>"><%= n.world %></a><% } %></figcaption>

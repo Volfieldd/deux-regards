@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-20",
+  "method": "Comparaison SHA-256 avec un réencodage WebP des quatre PNG générés ; aucun média du site copié dans le serveur isolé.",
+  "images": [
+    {
+      "file": "maree.webp",
+      "sha256": "cda08d0361934e9c51ea8f3f6795714d16a1014c404ca3a4c46edeccdfa303bc",
+      "generated_png_sha256": "71951848fa039e998203bb5338bb78d5e4f351907a4f03c3c0baedd2dc117352",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "file": "dune.webp",
+      "sha256": "270cf15f08445cc0cd848a6633652a27d0fada0c8620ff65d96a30ec2289c618",
+      "generated_png_sha256": "f72bcef41b78f509ebe1dc5b3a1cf88af0395c68e908b82fe9f822994ae0bff2",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "file": "foret.webp",
+      "sha256": "8e49a5642312415a4ef5602ffc206f0cb9440ed2ca4aba261f5c6b7e3f06dbe0",
+      "generated_png_sha256": "fab73fbd81e46783b1ce48adb4849ac7c91f2aa201f321bfec98d2f9c53f7aad",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "file": "cimes.webp",
+      "sha256": "e0b74eb5b08b95701dfcaa8b0d4dde22ae85e96a4cc284930a590104ac4dd80f",
+      "generated_png_sha256": "2356317d6ef49066c1c48cd30b16fa4f8c5a15706cab66e1845bb1c56b4b5838",
+      "width": 1536,
+      "height": 1024
+    }
+  ]
+}

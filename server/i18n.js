@@ -271,7 +271,7 @@ export const UI = {
     },
     near: {
       title: 'À proximité', map: city => `Carte : la photo a été prise à ${city}`, here: city => `Prise à ${city}`, same: 'même ville',
-      km: n => `${n} km`, more: n => `${n} photo${n > 1 ? 's' : ''} à proximité`, others: (city, n) => `${city} : ${n} photo${n > 1 ? 's' : ''}`, world: 'Voir la carte du monde',
+      km: n => `${n} km`, scale: d => `Échelle : ${d}`, more: n => `${n} photo${n > 1 ? 's' : ''} à proximité`, others: (city, n) => `${city} : ${n} photo${n > 1 ? 's' : ''}`, world: 'Voir la carte du monde',
     },
     // Site public v2 (views/v2/) : mots du lexique de l'audit d'ergonomie (docs/audit-ergonomie-2026-10-16/maquettes/LEXIQUE-ET-DONNEES.md).
     v2: {
@@ -530,7 +530,7 @@ export const UI = {
     },
     near: {
       title: 'Nearby', map: city => `Map: the photo was taken in ${city}`, here: city => `Taken in ${city}`, same: 'same town',
-      km: n => `${n} km`, more: n => `${n} photo${n === 1 ? '' : 's'} nearby`, others: (city, n) => `${city}: ${n} photo${n === 1 ? '' : 's'}`, world: 'See the world map',
+      km: n => `${n} km`, scale: d => `Scale: ${d}`, more: n => `${n} photo${n === 1 ? '' : 's'} nearby`, others: (city, n) => `${city}: ${n} photo${n === 1 ? '' : 's'}`, world: 'See the world map',
     },
     v2: {
       skip: 'Skip to content', menu: 'Menu', home: 'Home', homeOf: site => `${site}, home`, back: 'Back: ',
@@ -785,7 +785,7 @@ export const UI = {
     },
     near: {
       title: 'In der Nähe', map: city => `Karte: Das Foto wurde in ${city} aufgenommen`, here: city => `Aufgenommen in ${city}`, same: 'selber Ort',
-      km: n => `${n} km`, more: n => `${n} ${n === 1 ? 'Foto' : 'Fotos'} in der Nähe`, others: (city, n) => `${city}: ${n} ${n === 1 ? 'Foto' : 'Fotos'}`, world: 'Weltkarte ansehen',
+      km: n => `${n} km`, scale: d => `Maßstab: ${d}`, more: n => `${n} ${n === 1 ? 'Foto' : 'Fotos'} in der Nähe`, others: (city, n) => `${city}: ${n} ${n === 1 ? 'Foto' : 'Fotos'}`, world: 'Weltkarte ansehen',
     },
     v2: {
       skip: 'Zum Inhalt springen', menu: 'Menü', home: 'Startseite', homeOf: site => `${site}, Startseite`, back: 'Zurück: ',
