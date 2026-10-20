@@ -1,0 +1,188 @@
+/* Six compositions, un socle fonctionnel. Chargé seulement pour les pages concernées.
+   Les images restent entières, sauf l'ouverture cinématographique ; leur lien ouvre la visionneuse entière. */
+:root.theme-chambre {
+  color-scheme: dark;
+  --paper: #08090a; --ink: #eeede8; --mute: #aaaeb1; --prose: #d0d0cb;
+  --rule: #34383c; --field: #777d82; --frame: #101214; --safelight: #deb68d; --on-accent: #08090a;
+  --dark: #08090a; --dark-ink: #eeede8; --dark-mute: #aaaeb1;
+  --serif: 'Cormorant Garamond', Georgia, serif; --display-style: normal;
+  --t-titre-1: clamp(40px, 5.8vw, 86px); --t-titre-2: clamp(28px, 3.2vw, 46px);
+  --t-affiche: clamp(46px, 6.4vw, 96px);
+}
+.theme-chambre body { background: var(--paper); }
+.theme-chambre .sh { border-bottom-color: var(--rule); }
+.theme-chambre .sh-marque { font: 400 clamp(24px, 2.6vw, 38px)/1.1 var(--serif); letter-spacing: -.035em; text-transform: none; }
+.theme-chambre :is(.titre-page, .titre-2, .billet-e-titre, .voyage-e-titre) { font-family: var(--serif); font-weight: 400; font-style: normal; letter-spacing: -.02em; }
+.theme-chambre :is(.titre-page, .room-heading h1) { text-wrap: balance; }
+.theme-chambre :is(.cartel-m,.etiquette,.voyage-meta,.billet-meta) { font-family: var(--mono); font-size: 13px; }
+.theme-chambre .tete-page { padding-block: clamp(40px, 6vw, 88px); }
+.theme-chambre .partie { margin-top: clamp(64px, 8vw, 120px); }
+.theme-chambre :is(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #f5c58f; outline-offset: 5px; }
+.theme-chambre :is(.vignette, .room-print > a) { display: block; }
+.theme-chambre .cartel { padding-top: 18px; }
+.theme-chambre .cartel-t { font-size: 18px; }
+.theme-chambre .cartel-m { display: block; margin-top: 7px; }
+.theme-chambre .rangees { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 64px 32px; }
+.theme-chambre .rangees > li { width: auto; max-width: none; min-width: 0; margin: 0; flex: none; }
+.theme-chambre .rangees picture { width: 100%; }
+.theme-chambre .rangees img { width: 100%; height: 390px; max-height: none; object-fit: contain; background: none; }
+.theme-chambre .vis-scene img { object-fit: contain; }
+.theme-chambre .vis-pres .rangees { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+.theme-chambre .vis-pres .rangees img { height: 220px; }
+.theme-chambre .billet { font-size: 19px; line-height: 1.85; }
+.theme-chambre .billet > p { max-width: 65ch; }
+.theme-chambre .voyage-jour { margin-top: 72px; }
+.theme-chambre .voyage-jour-t { margin-bottom: 32px; }
+.theme-chambre .voyage-e-img img { object-fit: contain; }
+.theme-chambre .room-opening { padding-top: 32px; }
+.room-heading { max-width: 880px; margin-bottom: 38px; }
+.room-heading h1 { font: 400 var(--t-affiche)/1.06 var(--serif); margin: 12px 0 22px; }
+.room-heading > p:last-child { color: var(--mute); max-width: 55ch; }
+.room-prints { display: grid; gap: 24px; min-width: 0; }
+.room-print { margin: 0; min-width: 0; }
+.room-print img { width: 100%; height: min(58vw, 62vh); object-fit: contain; background: none; }
+.room-print .cartel { display: flex; align-items: baseline; gap: 24px; }
+.room-number { color: var(--safelight); }
+.room-print .cartel-t { font: 400 clamp(24px, 2.5vw, 34px)/1.15 var(--serif); }
+.room-controls { display: flex; gap: 16px; align-items: center; margin-top: 28px; flex-wrap: wrap; }
+.room-controls [data-room-count] { flex: 1; text-align: center; color: var(--mute); }
+.room-controls[hidden], .room-bottom [hidden], .room-preferences [hidden] { display: none; }
+.room-strip { display: flex; width: 100%; max-width: 680px; gap: 16px; overflow-x: auto; padding-bottom: 12px; }
+.room-strip button { flex: 0 0 100px; padding: 8px 0; border-bottom: 2px solid transparent; }
+.room-strip button[aria-pressed=true] { border-color: var(--safelight); }
+.room-strip img { width: 100px; height: 64px; object-fit: cover; }
+.room-strip span { display: block; margin-top: 8px; }
+.room-bottom { display: flex; justify-content: space-between; margin-top: 36px; }
+.room-preferences { padding-block: 20px 36px; }
+/* Obscura : un tirage central, avec des marges généreuses. */
+.chambre-obscura .room-opening { max-width: 1120px; margin-inline: auto; }
+.chambre-obscura .room-heading { text-align: center; margin-inline: auto; }
+.chambre-obscura .room-heading > p { margin-inline: auto; }
+.chambre-obscura .room-heading h1 { font-size: clamp(34px, 4vw, 58px); }
+.chambre-obscura .tete-page { text-align: center; }
+.chambre-obscura .tete-page .chapo { margin-inline: auto; }
+.chambre-obscura .rangees { gap: 88px 60px; }
+.chambre-obscura .billet-ouv { padding-block: 48px; }
+.chambre-obscura .voyage-ouv { max-width: 1280px; margin-inline: auto; }
+/* Panoramique : grandes séquences, titre discret, couverture en projection. */
+:root.chambre-panoramique { --serif: Jost, Arial, sans-serif; }
+.chambre-panoramique .room-heading h1 { font: 300 clamp(28px,3.2vw,48px)/1.15 var(--sans); }
+.chambre-panoramique .room-print img { height: 59vh; min-height: 320px; object-fit: cover; }
+.chambre-panoramique .rangees > li:first-child { grid-column: 1/-1; }
+.chambre-panoramique .rangees > li:first-child img { height: min(66vh,680px); }
+.chambre-panoramique .rangees { gap: 64px 24px; }
+.chambre-panoramique .voyage-ouv { display: flex; flex-direction: column; gap: 40px; }
+.chambre-panoramique .voyage-ouv-photo { width: 100%; }
+.chambre-panoramique .voyage-ouv-photo img { width: 100%; height: 65vh; object-fit: contain; }
+.chambre-panoramique .billet-ouv { display: flex; flex-direction: column; align-items: stretch; }
+.chambre-panoramique .billet-ouv-photo img { width: 100%; max-height: 65vh; object-fit: contain; }
+.chambre-panoramique .billet-ouv-suite { max-width: 800px; }
+.chambre-panoramique .carte-cadre { aspect-ratio: 2.2; }
+/* Contact : une planche numérotée, dans l'ordre de lecture et du clavier. */
+:root.chambre-contact { --safelight: #d8bd86; }
+.chambre-contact .room-prints { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 24px; }
+.chambre-contact .room-print img { height: 300px; }
+.chambre-contact .room-print .cartel { border-top: 1px solid var(--rule); margin-top: 16px; flex-direction: column; gap: 10px; }
+.chambre-contact .room-print .cartel-t { font-size: 24px; }
+.chambre-contact .rangees { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 48px 24px; counter-reset: prints; }
+.chambre-contact .rangees > li { counter-increment: prints; border-top: 1px solid var(--rule); padding-top: 18px; }
+.chambre-contact .rangees > li::before { content: counter(prints, decimal-leading-zero); color: var(--safelight); display: block; font: 13px var(--mono); margin-bottom: 16px; }
+.chambre-contact .rangees img { height: 260px; }
+.chambre-contact :is(.billet-e, .voyage-e) { border-top: 1px solid var(--rule); padding-top: 24px; }
+.chambre-contact .carte-cadre { border: 8px solid var(--rule); }
+/* Résonances : deux images côte à côte, un même poids visuel. */
+:root.chambre-resonances { --safelight: #d9b6a7; }
+.chambre-resonances .room-heading { text-align: center; margin-inline: auto; }
+.chambre-resonances .room-heading > p { margin-inline: auto; }
+.chambre-resonances .room-prints { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+.chambre-resonances .room-print img { height: 48vh; }
+.chambre-resonances .rangees { gap: 72px 24px; }
+.chambre-resonances .rangees .cartel { border-top: 1px solid var(--rule); margin-top: 20px; }
+.chambre-resonances .tete-page { text-align: center; }
+.chambre-resonances .tete-page .chapo { margin-inline: auto; }
+.chambre-resonances .billet-e { display: flex; flex-direction: column; }
+.chambre-resonances .billet-e-img img { width: 100%; height: 350px; object-fit: contain; }
+/* Itinérance : notes à côté des images, jalons et récit. */
+:root.chambre-itinerance { --safelight: #c8c9a3; }
+.chambre-itinerance .room-opening { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 48px; align-items: center; padding-block: 64px; }
+.chambre-itinerance .room-bottom { grid-column: 1/-1; }
+.chambre-itinerance .room-heading h1 { font-size: clamp(38px, 4.5vw, 68px); }
+.chambre-itinerance .rangees { grid-template-columns: minmax(0,1fr); gap: 64px; }
+.chambre-itinerance .rangees .vignette { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr); gap: 40px; align-items: center; }
+.chambre-itinerance .rangees .cartel { border-left: 1px solid var(--safelight); padding: 20px 0 20px 24px; }
+.chambre-itinerance .rangees .cartel-t { font: 400 32px/1.2 var(--serif); }
+.chambre-itinerance .voyage-jour { border-left: 1px solid var(--safelight); padding-left: 32px; }
+.chambre-itinerance .billets { grid-template-columns: minmax(0,1fr); }
+.chambre-itinerance .billet-e { grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.chambre-itinerance .billet-e-img { grid-row: 1; }
+/* Hors cadre : asymétrie sans modifier l'ordre des contenus. */
+:root.chambre-hors-cadre { --safelight: #d6a78b; }
+.chambre-hors-cadre .room-prints { grid-template-columns: 1.4fr 1fr 1.6fr; gap: 32px; align-items: center; }
+.chambre-hors-cadre .room-print:nth-child(2) { margin-top: 140px; }
+.chambre-hors-cadre .room-print:nth-child(3) { margin-top: -60px; }
+.chambre-hors-cadre .room-print img { height: auto; max-height: 52vh; }
+.chambre-hors-cadre .rangees { grid-template-columns: repeat(12,minmax(0,1fr)); gap: 96px 32px; }
+.chambre-hors-cadre .rangees > li { grid-column: span 6; }
+.chambre-hors-cadre .rangees > li:nth-child(4n+1) { grid-column: 4/13; }
+.chambre-hors-cadre .rangees > li:nth-child(4n+2) { grid-column: 1/8; }
+.chambre-hors-cadre .rangees > li:nth-child(4n+3) { grid-column: 9/13; margin-top: 100px; }
+.chambre-hors-cadre .rangees > li:nth-child(4n) { grid-column: 3/11; }
+.chambre-hors-cadre .rangees img { height: auto; max-height: 540px; }
+.chambre-hors-cadre .billets > li:nth-child(even) { margin-top: 140px; }
+.chambre-hors-cadre .voyage-jour:nth-child(even) { margin-left: 8%; }
+/* La proximité reste compacte dans toutes les visionneuses. */
+.theme-chambre .vis-pres .rangees > li { grid-column: auto; margin-top: 0; }
+.theme-chambre .vis-pres .rangees .vignette { display: block; }
+.theme-chambre .vis-pres .rangees .cartel { border: 0; padding: 16px 0 0; }
+.theme-chambre .vis-pres .rangees .cartel-t { font: 400 18px/1.3 var(--sans); }
+@media (max-width: 900px) {
+  .chambre-contact .room-prints { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .chambre-hors-cadre .room-prints { gap: 20px; }
+  .chambre-itinerance .room-opening { gap: 24px; }
+}
+@media (max-width: 700px) {
+  .theme-chambre { --t-titre-1: clamp(36px,10vw,52px); }
+  .theme-chambre .room-opening { padding-top: 24px; }
+  .room-heading h1 { font-size: 46px; }
+  .room-print img { height: auto; max-height: 62vh; }
+  .room-print .cartel { gap: 12px; }
+  .room-print .cartel-t { font-size: 26px; }
+  .theme-chambre .rangees { grid-template-columns: minmax(0,1fr); gap: 44px; }
+  .theme-chambre .rangees > li:nth-child(n) { grid-column: auto; margin-top: 0; }
+  .theme-chambre .rangees img { height: auto; max-height: 62vh; }
+  .theme-chambre .rangees .vignette { display: block; }
+  .theme-chambre .vis-pres .rangees { grid-template-columns: minmax(0,1fr); }
+  .theme-chambre .vis-pres .rangees img { max-height: 240px; }
+  .chambre-panoramique .room-print img { height: 42vh; min-height: 220px; }
+  .chambre-panoramique .rangees > li:first-child img { height: auto; }
+  .chambre-panoramique .carte-cadre { aspect-ratio: 1.25; }
+  .chambre-contact .room-print img { height: 180px; }
+  .chambre-contact .room-print .cartel-t { font-size: 22px; }
+  .chambre-contact .room-print .cartel-m { font: 13px/1.5 var(--sans); }
+  .chambre-resonances .room-prints { grid-template-columns: minmax(0,1fr); gap: 48px; }
+  .chambre-resonances .room-print img { height: auto; max-height: 55vh; }
+  .chambre-itinerance .room-opening { display: block; padding-block: 24px; }
+  .chambre-itinerance .rangees .cartel { border: 0; padding: 18px 0 0; }
+  .chambre-itinerance .voyage-jour { padding-left: 18px; }
+  .chambre-itinerance .billet-e { display: flex; flex-direction: column; align-items: stretch; }
+  .chambre-hors-cadre .room-prints { grid-template-columns: minmax(0,1fr); gap: 48px; }
+  .chambre-hors-cadre .room-print:nth-child(n) { margin-top: 0; }
+  .chambre-hors-cadre .room-print:nth-child(2) { width: 75%; }
+  .chambre-hors-cadre .room-print:nth-child(3) { width: 85%; margin-left: auto; }
+  .chambre-hors-cadre .billets > li:nth-child(even), .chambre-hors-cadre .voyage-jour:nth-child(even) { margin: 0; }
+  .theme-chambre .billet { font-size: 18px; }
+}
+/* Mouvement court, uniquement à l'arrivée et à l'interaction. Aucun défilement forcé ni effet continu. */
+@media (prefers-reduced-motion: no-preference) {
+  .theme-chambre:not(.room-calm) .room-print { animation: room-enter .5s ease-out both; }
+  .theme-chambre:not(.room-calm) :is(.vignette img, .room-print img) { transition: opacity .25s ease, transform .35s ease; }
+  .theme-chambre:not(.room-calm) .vignette:hover img { transform: translateY(-4px); }
+}
+@keyframes room-enter { from { opacity: .3; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media print {
+  .theme-chambre { --paper: white; --ink: black; --mute: #444; --prose: #222; }
+  .room-controls, .room-preferences { display: none; }
+}
+.room-preferences button { color: var(--mute); background: transparent; border: 1px solid var(--field); padding: 10px 16px; min-height: 44px; font: inherit; }
+.room-preferences button[aria-pressed=true] { background: transparent; color: var(--safelight); border-color: var(--safelight); }
+.room-preferences button:disabled { cursor: default; }

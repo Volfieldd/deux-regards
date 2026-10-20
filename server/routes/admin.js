@@ -21,6 +21,7 @@ import { pad } from '../format.js';
 import sharp from 'sharp';
 import { normalizeWatermark, normalizeExif, EXIF_MODES, MIN_WIDTHS } from '../variants.js';
 import { FONTS, POSITIONS, KINDS, TONE_LABELS } from '../watermark.js';
+import { DESIGNS, SECTIONS, validDesignSettings } from '../designs.js';
 import { THEMES, BRAND_MODES, BRAND_SLOTS } from '../themes.js';
 import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
 import { loadHelp } from '../help.js';
@@ -425,7 +426,7 @@ export default async function adminRoutes(app) {
       visitorsToday: request.scope('statistiques.voir')?.all ? app.stats.today() : null,
       // Photo du moment : parmi celles dont le compte voit les chiffres (statistiques.voir), pas toutes celles qu'il voit.
       monthTop: (() => { const seen = request.mine('statistiques.voir', photos); if (!seen.length) return null; const { from, to } = app.stats.range(30); const t = app.stats.topPhotos(from, to, 100).find(r => seen.some(x => x.id === r.id)); const p = t && seen.find(x => x.id === t.id); return p ? { ...withReady(p), views: t.views } : null; })(),
-      themeLabel: (THEMES[app.appearance.themeId()] || {}).label,
+      themeLabel: DESIGNS[app.publicVersion.designSettings()?.default]?.label || (THEMES[app.appearance.themeId()] || {}).label,
       publicUrl: app.config.publicUrl,
       counts: { published: photos.filter(p => p.status === 'published').length, draft: photos.filter(p => p.status === 'draft').length },
       categories: repo.categories().length, authors: repo.authors(), me: repo.authorBySub(request.session.sub),
@@ -2238,8 +2239,32 @@ export default async function adminRoutes(app) {
 
   app.get('/admin/apparence', P('site.apparence'), async (request, reply) => render(request, reply, 'appearance', {
     title: request.t('Apparence'), THEMES, BRAND_MODES, BRAND_SLOTS, themeId: app.appearance.themeId(), brand: app.appearance.brand(),
-    publicVersion: app.publicVersion.setting(), vueSession: app.publicVersion.viewOf(request),
+    DESIGNS, SECTIONS, designSettings: app.publicVersion.designSettings(), publicVersion: app.publicVersion.setting(), vueSession: app.publicVersion.viewOf(request),
   }));
+
+  app.post('/admin/apparence/compositions', W('site.apparence'), async (request, reply) => {
+    const b = request.body || {};
+    let value = null;
+    if (b.reset !== '1') {
+      const fields = Object.keys(b);
+      if (fields.some(k => !['_csrf', 'default', 'reset', ...Object.keys(SECTIONS).map(s => `section_${s}`)].includes(k)))
+        return reply.code(400).send({ error: request.t('Réglage de thème inconnu.') });
+      const sections = {};
+      for (const section of Object.keys(SECTIONS)) {
+        const id = b[`section_${section}`];
+        if (id !== undefined && id !== 'inherit') sections[section] = id;
+      }
+      value = { default: b.default, sections };
+      if (!validDesignSettings(value)) return reply.code(400).send({ error: request.t('Thème inconnu. Aucun changement enregistré.') });
+    }
+    const before = app.publicVersion.designSettings();
+    app.publicVersion.saveDesign(value);
+    request.audited = true;
+    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/compositions', target: 'site public', status: 303,
+      detail: `compositions : ${JSON.stringify(before)} → ${JSON.stringify(value)}` });
+    if (asJson(request)) return { ok: true, design: app.publicVersion.designSettings() };
+    return done(reply, '/admin/apparence#compositions', request.t('Thèmes enregistrés.'));
+  });
 
   app.post('/admin/apparence', W('site.apparence'), async (request, reply) => {
     const body = request.body || {};

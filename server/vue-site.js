@@ -1,3 +1,4 @@
+import { DESIGNS } from './designs.js';
 import { PREFIX } from './i18n.js';
 import { VERSIONS } from './version-publique.js';
 
@@ -43,8 +44,15 @@ export function vueSite({ pv, lang, url, csrf, rendu, sansV1 }) {
     // l'accueil en v1 et le dit.
     const accueil = cible === 'v1' && sansV1;
     // Revenir à la version des visiteurs, c'est oublier la vue (« suivre » le réglage), pas la forcer.
-    return { vue: cible === pv.applied ? 'suivre' : cible, vers: accueil ? PREFIX[lang] || '/' : url, bouton: accueil ? t.accueil(cible) : t.voir(cible) };
+    return { vue: cible === (pv.appliedDesign || pv.applied) ? 'suivre' : cible, vers: accueil ? PREFIX[lang] || '/' : url, bouton: accueil ? t.accueil(cible) : t.voir(cible) };
   });
+  if (pv.darkroom || pv.configured || (pv.view && !VERSIONS.includes(pv.view))) {
+    const labels = { fr: ['Présentation', 'Visiteurs', 'Revenir au thème des visiteurs'], en: ['Design', 'Visitors', 'Return to the visitors’ design'], de: ['Gestaltung', 'Besucher', 'Zur Besucheransicht zurückkehren'] }[lang] || ['Présentation', 'Visiteurs', 'Revenir au thème des visiteurs'];
+    const current = DESIGNS[pv.design]?.label || pv.version;
+    const applied = DESIGNS[pv.appliedDesign]?.label || pv.applied;
+    return { csrf, label: labels[0], forced: pv.forced, boutons: [...boutons, { vue: 'suivre', vers: url, bouton: labels[2] }],
+      ...boutons[0], etat: `${labels[0]} : ${current} · ${labels[1]} : ${applied}`, note: '' };
+  }
   return {
     csrf, label: t.label, forced: pv.forced, boutons,
     // Champs du premier bouton, gardés à plat pour les gabarits et les tests qui n'en lisent qu'un.

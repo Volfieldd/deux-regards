@@ -4,6 +4,26 @@ L'apparence du **site public** : version (v1, v2 ou v3), thème, logo et icône.
 
 En **admin v2**, cette page est l'onglet **Identité et apparence** des Réglages : mêmes champs, mais le sous-titre, la marque et le thème s'enregistrent au geste (avec **Défaire**), et un logo dès le fichier choisi ; remplacer ou retirer un logo passe par un dialogue (voir [L'admin v2](premiers-pas#ladmin-v2)).
 
+## Thèmes et rubriques
+
+En haut de **Réglages → Identité et apparence** (ou **Apparence** dans l’admin historique), choisissez un **Thème général**, puis ouvrez **Personnaliser par rubrique** pour les exceptions.
+
+Les choix sont V1 — Originale, V2 — Essentielle, V3 — Plein cadre, et les six chambres noires **Obscura, Panoramique, Contact, Résonances, Itinérance, Hors cadre**. Les chambres noires comprennent leur composition et leur palette ; les trois présentations historiques conservent la palette réglée plus bas.
+
+Exemple : **Obscura** pour le thème général, **V1 — Originale** pour l’accueil, **Résonances** pour les Carnets. Cliquez sur **Appliquer les thèmes au site**. Les autres rubriques suivent Obscura. Une rubrique réglée sur **Suivre le thème général** suivra vos prochains changements ; une exception reste en place jusqu’à son retrait.
+
+Les rubriques sont l’accueil, les galeries/séries/recherche, la visionneuse, la carte, les voyages, les Carnets, la présentation des regards, le contact et les informations. Ce sont des pages et leurs pages de détail, pas les blocs d’une même page : les aperçus de galerie présents dans l’accueil gardent le thème de l’accueil. Le menu Galerie ouvre une page distincte avec son propre choix.
+
+**Découvrir les thèmes sans les appliquer** ouvre un aperçu pour votre session seulement. Les visiteurs gardent leurs thèmes ; **Revenir au thème des visiteurs** met fin à l’aperçu. Un changement de thème ne publie pas de photo ou de billet et n’active pas une carte désactivée. Les galeries privées conservent leur présentation dédiée.
+
+Les Carnets restent disponibles dans le nouveau système, même si le thème général est V1 : cette rubrique utilise alors le socle V2. La photo, ses connexes, sa carte lorsqu’un lieu est publié, les voyages et les billets utilisent les fonctions existantes. Les six chambres noires partagent ces fonctions.
+
+**Mode calme**, au pied des pages sombres, coupe les mouvements facultatifs. La préférence de réduction des animations de l’appareil est toujours respectée. Aucun diaporama ne démarre automatiquement.
+
+**Revenir aux réglages historiques** retire le thème général et les exceptions, puis rétablit les anciens choix de version et de palette, qui ont été conservés. Installer le code ne change pas l’apparence déjà publiée : seul l’enregistrement explicite active le nouveau système.
+
+Les sections suivantes décrivent les réglages historiques, disponibles tant que les thèmes par rubrique ne sont pas activés.
+
 ## Site public : v1 ou v2
 
 En tête de la page. La **v2** est la nouvelle présentation du site public, issue de l'audit d'ergonomie d'octobre 2026. Elle couvre toutes les pages publiques (voir [Le site vu par les visiteurs](site-public)), sauf les pages d'erreur et de connexion, qui gardent la présentation v1. L'administration ne change pas.

@@ -1,20 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { DESIGNS, knownDesign, validDesignSettings, sectionOf } from './designs.js';
 
-// Site public en trois versions, côte à côte : v1 (les gabarits de views/), v2 (ceux de views/v2/, la refonte issue de
-// l'audit d'ergonomie du 16 oct. 2026) et v3 (les gabarits v2, redessinés : css/v3/v3.css, accueil en plein cadre,
-// views/v3/ ; maquettes de docs/maquettes-v3/). Le réglage « Site public » (Réglages → Apparence) choisit la version de
-// tous les visiteurs ; v1 par défaut. Une page qui n'a pas encore de gabarit v2 s'affiche en v1 (repli automatique), en
-// v2 comme en v3 : la v3 n'a pas de page à elle, seulement un autre dessin des pages v2.
-//
-// Vue de la session : un administrateur (permission site.apparence) peut voir le site public dans une autre version que
-// celle des visiteurs, d'un clic sur un bouton « Voir en v1 / v2 / v3 » des pages publiques (server/vue-site.js) : aucune
-// vue (il suit le réglage, comme les visiteurs), ou « v1 », « v2 », « v3 » (forcée pour lui). La vue est gardée ici, en
-// mémoire, pour sa session (l'empreinte de son jeton) : ni cookie, ni paramètre d'adresse, rien que le navigateur puisse
-// fabriquer. Elle tombe avec la session (déconnexion, expiration, droit retiré) et au redémarrage du serveur. C'est une
-// préférence d'affichage de la session, pas un réglage du site : les visiteurs voient toujours le réglage.
-// Toute réponse publique faite à une session (bouton, jeton CSRF, vue forcée) est « private, no-store » (voir app.js) :
-// rien de ce que voit un administrateur ne peut entrer dans un cache partagé (Cloudflare) et être servi à un visiteur.
+// Présentations historiques et compositions par rubrique. Sans public_design, le comportement
+// public_version reste identique. Une configuration explicite choisit un défaut et des exceptions.
+// Les six chambres noires partagent les pages V2 et leurs fonctions ; les Carnets utilisent aussi
+// ce socle quand une rubrique du nouveau système choisit V1. Les galeries privées restent dédiées.
+// Un aperçu est conservé côté serveur, par session autorisée : jamais depuis un paramètre public.
+// Il expire avec la session, le retrait du droit ou le redémarrage. Les réponses de session sont
+// private, no-store (app.js), y compris les flux et les pages qui utilisent un repli de gabarit.
 export const VERSIONS = ['v1', 'v2', 'v3'];
 // La v2 et la v3 servent les mêmes pages (gabarits de views/v2/) : Carnets, menu, repli sur la v1, tout ce qui dépend de
 // « la refonte » vaut pour les deux.
@@ -23,14 +17,14 @@ const KEY = 'public_version';
 const PERM = 'site.apparence';
 const MAX_VIEWS = 64;                      // borne de la mémoire : au-delà, les plus anciennes vues sont oubliées
 // Pages qui n'existent qu'en v2 (galeries privées, MQ-16 et MQ-17) : de nouvelles pages, hors menu, sans gabarit v1 ;
-// servies en v2 quel que soit le réglage (un invité s'en sert même si le site est en v1). La v1 reste figée : aucun de
-// ses gabarits n'est touché, et une page v1 n'est jamais servie en v2 par ce biais (préfixe « prive- » seulement).
+// servies en v2 quel que soit le réglage (un invité s'en sert même si le site est en v1).
+// Le préfixe « prive- » ne choisit jamais une composition publique.
 export const ONLY_V2 = /^prive-[a-z]+$/;
 
 export function createPublicVersion({ db, viewsDir, cache = false }) {
   const read = db.prepare('SELECT value FROM settings WHERE key = ?').pluck();
   const write = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
-  const views = new Map();                   // empreinte du jeton de session → { vue: 'v1' | 'v2' | 'v3', expires }
+  const views = new Map();                   // empreinte du jeton de session → { vue: identifiant de composition, expires }
   const known = new Map();                   // gabarit → existe-t-il en v2 ? (gardé en production seulement)
   const knownV1 = new Map();                 // gabarit → existe-t-il en v1 ?
 
@@ -39,6 +33,13 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
     try { v = JSON.parse(read.get(KEY) ?? 'null'); } catch { v = null; }
     return VERSIONS.includes(v) ? v : 'v1';
   };
+
+  const designSettings = () => {
+    try { const v = JSON.parse(read.get('public_design') ?? 'null'); return validDesignSettings(v) ? v : null; }
+    catch { return null; }
+  };
+  const designFor = section => { const d = designSettings(); return d?.sections[section] || d?.default || setting(); };
+  const versionFor = (design, section) => section === 'carnets' && design === 'v1' && designSettings() ? 'v2' : DESIGNS[design].version;
 
   // Cette requête peut-elle changer de vue ? Session valide et droit d'apparence, relu à chaque requête.
   const canSwitch = request => Boolean(request.session?.id && request.can?.(PERM));
@@ -54,15 +55,23 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
 
   return {
     setting,
+    designSettings,
+    designFor,
+    versionForSection: section => versionFor(designFor(section), section),
+    saveDesign(value) {
+      if (value !== null && !validDesignSettings(value)) return false;
+      write.run('public_design', JSON.stringify(value));
+      return true;
+    },
     save(v) { if (!VERSIONS.includes(v)) return false; write.run(KEY, JSON.stringify(v)); return true; },
     canSwitch,
     viewOf,
     // La session voit-elle une autre version que les visiteurs ?
-    forcedOn: request => { const v = viewOf(request); return Boolean(v) && v !== setting(); },
-    // vue : « v1 », « v2 », « v3 », ou « suivre » (oublier la vue : suivre le réglage). Seulement pour une session qui a le droit.
+    forcedOn: request => { const v = viewOf(request); return Boolean(v) && v !== designFor(sectionOf(request)); },
+    // vue : composition connue, ou « suivre » pour revenir aux réglages de chaque rubrique. Permission obligatoire.
     setView(request, vue) {
       const s = request.session;
-      if (!canSwitch(request) || !(VERSIONS.includes(vue) || vue === 'suivre')) return false;
+      if (!canSwitch(request) || !(knownDesign(vue) || vue === 'suivre')) return false;
       views.delete(s.id);
       if (vue === 'suivre') return true;
       views.set(s.id, { vue, expires: s.expires_at });
@@ -71,11 +80,14 @@ export function createPublicVersion({ db, viewsDir, cache = false }) {
     },
     // Version servie à cette requête : la vue de la session si elle en a une, sinon le réglage.
     // applied : ce que voient les visiteurs ; forced : la session voit autre chose ; switcher : elle a le bouton.
-    forRequest(request) {
-      const applied = setting();
+    forRequest(request, section = sectionOf(request)) {
+      const appliedDesign = designFor(section);
       const view = viewOf(request);
-      const version = view || applied;
-      return { version, applied, view, forced: version !== applied, switcher: canSwitch(request) };
+      const design = view || appliedDesign;
+      const version = versionFor(design, section);
+      const applied = versionFor(appliedDesign, section);
+      return { version, applied, design, appliedDesign, section, view, forced: design !== appliedDesign,
+        darkroom: Boolean(DESIGNS[design].darkroom), configured: Boolean(designSettings()), switcher: canSwitch(request) };
     },
     // Page sans version v1 : toujours en v2.
     onlyV2: template => ONLY_V2.test(template),

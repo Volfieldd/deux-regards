@@ -1,0 +1,937 @@
+{
+  "date": "2026-10-20",
+  "fixture": "Stockage et base jetables ; quatre images générées vérifiées par empreinte ; aucun média ni compte de production.",
+  "generatedImages": [
+    {
+      "file": "maree.webp",
+      "sha256": "cda08d0361934e9c51ea8f3f6795714d16a1014c404ca3a4c46edeccdfa303bc",
+      "generated_png_sha256": "71951848fa039e998203bb5338bb78d5e4f351907a4f03c3c0baedd2dc117352",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "file": "dune.webp",
+      "sha256": "270cf15f08445cc0cd848a6633652a27d0fada0c8620ff65d96a30ec2289c618",
+      "generated_png_sha256": "f72bcef41b78f509ebe1dc5b3a1cf88af0395c68e908b82fe9f822994ae0bff2",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "file": "foret.webp",
+      "sha256": "8e49a5642312415a4ef5602ffc206f0cb9440ed2ca4aba261f5c6b7e3f06dbe0",
+      "generated_png_sha256": "fab73fbd81e46783b1ce48adb4849ac7c91f2aa201f321bfec98d2f9c53f7aad",
+      "width": 1024,
+      "height": 1536
+    },
+    {
+      "file": "cimes.webp",
+      "sha256": "e0b74eb5b08b95701dfcaa8b0d4dde22ae85e96a4cc284930a590104ac4dd80f",
+      "generated_png_sha256": "2356317d6ef49066c1c48cd30b16fa4f8c5a15706cab66e1845bb1c56b4b5838",
+      "width": 1536,
+      "height": 1024
+    }
+  ],
+  "serverTests": {
+    "distinctCases": 84,
+    "result": "passed",
+    "files": [
+      "themes-sections",
+      "apparence",
+      "version-publique",
+      "vue-site",
+      "v2-galerie",
+      "site-v3",
+      "admin-v2-reglages",
+      "carnet-public",
+      "v2-pages",
+      "langues-admin"
+    ]
+  },
+  "uiCases": [
+    {
+      "name": "save-persist-mixed-navigation",
+      "passed": true
+    },
+    {
+      "name": "obscura-bureau-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-bureau-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "obscura-mobile-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-bureau-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "panoramique-mobile-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-bureau-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "contact-mobile-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-bureau-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "resonances-mobile-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-bureau-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "itinerance-mobile-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-bureau-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-accueil",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-galerie",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-photo",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-portrait",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-carte",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-voyages",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-voyage",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-carnets",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-carnet",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-regards",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "hors-cadre-mobile-contact",
+      "overflow": false,
+      "broken": [],
+      "h1": 1
+    },
+    {
+      "name": "slideshow-and-system-reduced-motion",
+      "passed": true
+    },
+    {
+      "name": "admin-preview-isolation-and-exit",
+      "passed": true
+    }
+  ],
+  "interactions": [
+    "obscura home 320px",
+    "panoramique home 320px",
+    "contact home 320px",
+    "resonances home 320px",
+    "itinerance home 320px",
+    "hors-cadre home 320px",
+    "keyboard skip link",
+    "skip reaches content",
+    "calm on",
+    "calm persists across pages",
+    "photo mini map visible",
+    "related photos visible",
+    "fullscreen opens",
+    "fullscreen closes and restores focus",
+    "map zoom changes bounds",
+    "map point opens its place or expands its cluster",
+    "admin theme form 320px",
+    "without JS: opening print visible",
+    "without JS: gallery navigation"
+  ],
+  "blockedRequests": [],
+  "javascriptErrors": [],
+  "axe": [
+    {
+      "name": "home",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "photo",
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "map",
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "journal",
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    }
+  ],
+  "proofs": [
+    {
+      "file": "captures/00-six-accueils.webp",
+      "width": 1800,
+      "height": 1100,
+      "bytes": 180792,
+      "sha256": "961570bc8c3ed8a60c3ba599e349d58283fd54d81f7badce6e70cb7c42177c65"
+    },
+    {
+      "file": "captures/01-reglages.webp",
+      "width": 1440,
+      "height": 2955,
+      "bytes": 157172,
+      "sha256": "2db40c4c52b4f723e0abb8414bf62e6eee5f95d8887611c2d089d69de5879e47"
+    },
+    {
+      "file": "captures/02-photo-carte-connexes.webp",
+      "width": 1440,
+      "height": 2850,
+      "bytes": 298342,
+      "sha256": "2d12ea38d0064b2b236d010ce42a1a4963b0c15c28adbedb269604aa466bc7c3"
+    },
+    {
+      "file": "captures/03-carnet-mobile.webp",
+      "width": 390,
+      "height": 4595,
+      "bytes": 213132,
+      "sha256": "5e1de4d58f1b22737a8c1b797199ea43c2721a55c5d3db0bec0a05d6492c260f"
+    }
+  ]
+}

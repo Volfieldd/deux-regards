@@ -1,0 +1,186 @@
+{
+  "Thèmes et rubriques": {
+    "en": "Themes and sections",
+    "de": "Themen und Bereiche"
+  },
+  "Choisissez une présentation pour tout le site, puis des exceptions si vous le souhaitez. Les pages d’une même rubrique partagent le même thème. L’administration garde son apparence.": {
+    "en": "Choose a design for the whole site, then optional exceptions. Pages in the same section share a theme. The administration keeps its own appearance.",
+    "de": "Wählen Sie eine Gestaltung für die gesamte Website und bei Bedarf Ausnahmen. Die Seiten eines Bereichs teilen sich ein Thema. Die Verwaltung behält ihr eigenes Erscheinungsbild."
+  },
+  "Les thèmes par rubrique sont actifs.": {
+    "en": "Section themes are active.",
+    "de": "Die Themen nach Bereichen sind aktiv."
+  },
+  "Le site utilise encore les réglages historiques. Rien ne change avant votre enregistrement.": {
+    "en": "The site still uses the legacy settings. Nothing changes until you save.",
+    "de": "Die Website verwendet noch die bisherigen Einstellungen. Erst beim Speichern ändert sich etwas."
+  },
+  "Votre aperçu personnel": {
+    "en": "Your personal preview",
+    "de": "Ihre persönliche Vorschau"
+  },
+  "Revenir au thème des visiteurs": {
+    "en": "Return to the visitors’ theme",
+    "de": "Zum Thema der Besucher zurückkehren"
+  },
+  "Thème général": {
+    "en": "Default theme",
+    "de": "Allgemeines Thema"
+  },
+  "Personnaliser par rubrique": {
+    "en": "Customise by section",
+    "de": "Nach Bereich anpassen"
+  },
+  "« Suivre le thème général » suivra aussi vos prochains changements. Une exception reste en place jusqu’à son retrait.": {
+    "en": "“Use the default theme” also follows future changes. An exception stays in place until you remove it.",
+    "de": "„Allgemeinem Thema folgen“ berücksichtigt auch spätere Änderungen. Eine Ausnahme bleibt bestehen, bis Sie sie entfernen."
+  },
+  "Suivre le thème général": {
+    "en": "Use the default theme",
+    "de": "Allgemeinem Thema folgen"
+  },
+  "Les chambres noires incluent leur palette. V1, V2 et V3 utilisent la palette historique ci-dessous. Avec ce système, les Carnets restent disponibles : si vous choisissez V1, cette rubrique utilise la présentation V2.": {
+    "en": "The darkroom designs include their own palette. V1, V2 and V3 use the legacy palette below. Journals remain available: when you choose V1, this section uses the V2 layout.",
+    "de": "Die Dunkelkammer-Themen haben ihre eigene Farbpalette. V1, V2 und V3 verwenden die bisherige Palette unten. Die Journale bleiben verfügbar: Wenn Sie V1 wählen, verwendet dieser Bereich die V2-Darstellung."
+  },
+  "Appliquer les thèmes au site": {
+    "en": "Apply themes to the site",
+    "de": "Themen auf die Website anwenden"
+  },
+  "Découvrir les thèmes sans les appliquer": {
+    "en": "Preview themes without applying them",
+    "de": "Themen ansehen, ohne sie anzuwenden"
+  },
+  "Chaque aperçu ne concerne que votre session. Il suit votre navigation ; les visiteurs gardent leurs thèmes. « Revenir au thème des visiteurs » quitte cet aperçu.": {
+    "en": "Each preview applies only to your session and follows your navigation. Visitors keep their themes. “Return to the visitors’ theme” exits the preview.",
+    "de": "Jede Vorschau gilt nur für Ihre Sitzung und folgt Ihrer Navigation. Besucher behalten ihre Themen. „Zum Thema der Besucher zurückkehren“ beendet die Vorschau."
+  },
+  "Revenir aux réglages historiques retire les exceptions. Vos anciens choix de version et de palette ont été conservés.": {
+    "en": "Returning to the legacy settings removes the exceptions. Your previous version and palette choices have been preserved.",
+    "de": "Die Rückkehr zu den bisherigen Einstellungen entfernt die Ausnahmen. Ihre frühere Version und Farbpalette wurden beibehalten."
+  },
+  "Revenir aux réglages historiques": {
+    "en": "Return to legacy settings",
+    "de": "Zu bisherigen Einstellungen zurückkehren"
+  },
+  "V1 — Originale": {
+    "en": "V1 — Original",
+    "de": "V1 — Original"
+  },
+  "La présentation historique et la palette existante.": {
+    "en": "The original layout and existing palette.",
+    "de": "Die ursprüngliche Gestaltung und bisherige Farbpalette."
+  },
+  "V2 — Essentielle": {
+    "en": "V2 — Essential",
+    "de": "V2 — Wesentlich"
+  },
+  "La présentation fonctionnelle et la palette existante.": {
+    "en": "The functional layout and existing palette.",
+    "de": "Die funktionale Gestaltung und bisherige Farbpalette."
+  },
+  "V3 — Plein cadre": {
+    "en": "V3 — Full frame",
+    "de": "V3 — Vollformat"
+  },
+  "La photo en ouverture et la palette existante.": {
+    "en": "An opening photograph and the existing palette.",
+    "de": "Ein Foto zum Einstieg und die bisherige Farbpalette."
+  },
+  "Un tirage entier, de l’espace, le temps de regarder.": {
+    "en": "A complete print, open space and time to look.",
+    "de": "Ein vollständiger Abzug, Raum und Zeit zum Betrachten."
+  },
+  "Une projection large et des séquences photographiques.": {
+    "en": "A wide projection and photographic sequences.",
+    "de": "Eine breite Projektion und fotografische Sequenzen."
+  },
+  "Une planche de photos, précise et compacte.": {
+    "en": "A precise, compact contact sheet.",
+    "de": "Ein präziser, kompakter Kontaktbogen."
+  },
+  "Des images par paires et des regards qui se répondent.": {
+    "en": "Paired images and viewpoints in dialogue.",
+    "de": "Bildpaare und Perspektiven im Dialog."
+  },
+  "Des images et des récits à parcourir par étapes.": {
+    "en": "Images and stories to explore in stages.",
+    "de": "Bilder und Erzählungen zum schrittweisen Erkunden."
+  },
+  "Un accrochage asymétrique, des respirations et des surprises.": {
+    "en": "An asymmetric hanging, space and surprises.",
+    "de": "Eine asymmetrische Hängung, Freiräume und Überraschungen."
+  },
+  "Galeries, séries et recherche": {
+    "en": "Galleries, series and search",
+    "de": "Galerien, Serien und Suche"
+  },
+  "Visionneuse des photos": {
+    "en": "Photo viewer",
+    "de": "Fotoansicht"
+  },
+  "Voyages et leurs étapes": {
+    "en": "Journeys and their stages",
+    "de": "Reisen und ihre Etappen"
+  },
+  "Carnets et billets": {
+    "en": "Journals and articles",
+    "de": "Journale und Beiträge"
+  },
+  "À propos des regards": {
+    "en": "About the photographers",
+    "de": "Über die Fotografen"
+  },
+  "Droits et autres informations": {
+    "en": "Rights and other information",
+    "de": "Rechte und weitere Informationen"
+  },
+  "Réglage de thème inconnu.": {
+    "en": "Unknown theme setting.",
+    "de": "Unbekannte Themeneinstellung."
+  },
+  "Thème inconnu. Aucun changement enregistré.": {
+    "en": "Unknown theme. No changes saved.",
+    "de": "Unbekanntes Thema. Keine Änderungen gespeichert."
+  },
+  "Thèmes enregistrés.": {
+    "en": "Themes saved.",
+    "de": "Themen gespeichert."
+  },
+  "Thèmes par rubrique enregistrés": {
+    "en": "Section themes saved",
+    "de": "Themen nach Bereichen gespeichert"
+  },
+  "Le choix de version est remplacé par « Thèmes et rubriques ». Les réglages historiques sont conservés pour le retour arrière.": {
+    "en": "“Themes and sections” replaces the version choice. Legacy settings are preserved for rollback.",
+    "de": "„Themen und Bereiche“ ersetzt die Versionsauswahl. Die bisherigen Einstellungen bleiben für eine Rückkehr erhalten."
+  },
+  "Obscura": {
+    "en": "Obscura",
+    "de": "Obscura"
+  },
+  "Panoramique": {
+    "en": "Panoramique",
+    "de": "Panoramique"
+  },
+  "Résonances": {
+    "en": "Résonances",
+    "de": "Résonances"
+  },
+  "Itinérance": {
+    "en": "Itinérance",
+    "de": "Itinérance"
+  },
+  "Hors cadre": {
+    "en": "Hors cadre",
+    "de": "Hors cadre"
+  },
+  "Palette des présentations V1, V2 et V3": {
+    "en": "Palette for V1, V2 and V3 layouts",
+    "de": "Farbpalette für V1, V2 und V3"
+  },
+  "Cette palette ne concerne que les rubriques en V1, V2 ou V3. Les chambres noires ont leur propre palette.": {
+    "en": "This palette only affects sections using V1, V2 or V3. The darkroom designs have their own palette.",
+    "de": "Diese Palette gilt nur für Bereiche mit V1, V2 oder V3. Die Dunkelkammer-Themen haben ihre eigene Farbpalette."
+  }
+}
