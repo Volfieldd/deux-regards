@@ -25,7 +25,7 @@ async function ctxOf(t) {
 
 test('Instagram suppose le site : refusé sans le site partout, ancien accord lu sans Instagram', async t => {
   const { app, db, enc, julien } = await ctxOf(t);
-  const hello = await app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0201', decision: 'accord', scope_instagram: 'on', email: 'a@exemple.fr', name: 'Ana' } });
+  const hello = await app.inject({ method: 'POST', url: '/bonjour', payload: { ref: 'J-0201', decision: 'accord', adult: 'oui', scope_instagram: 'on', email: 'a@exemple.fr', name: 'Ana' } });
   assert.match(hello.body, /Instagram suppose le site/);
   assert.equal(db.prepare("SELECT COUNT(*) FROM encounters WHERE ref = 'J-0201'").pluck().get(), 0);
   assert.throws(() => enc.saveCard(null, { ref: 'J-0202', signed: 'on', scope_instagram: 'on', author_id: julien }), e => e instanceof EncounterError && /Instagram suppose le site/.test(e.errors.scopes));

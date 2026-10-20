@@ -50,14 +50,14 @@ Pour un tee-shirt ou un sac : **Sur le terrain → QR des vêtements**. L'écran
 
 ## La page /bonjour
 
-C'est la page du QR (en français, anglais et allemand, sans lien dans le menu, jamais indexée). La personne y indique sa référence, ou à défaut la date, le lieu et un détail, puis ce qu'elle souhaite :
+C'est la page du QR (en français, anglais et allemand, sans lien dans le menu, jamais indexée). La personne y indique sa référence, ou à défaut la date (en toutes lettres ou en chiffres : « 14/10/2026 », « 12 mars », « hier soir » ; relue par le site en toutes lettres après l'envoi), le lieu et un détail, puis ce qu'elle souhaite :
 
-- **recevoir la photo** par e-mail ;
-- **accepter** la publication (site, Instagram, expositions et tirages, avec son prénom), avec son nom et son e-mail ;
+- **recevoir la photo** par e-mail (l'âge est alors demandé aussi : **avant 15 ans**, elle donne l'adresse d'un **parent** à la place de la sienne, qui n'est pas gardée ; la fiche dit « E-mail du parent », et la photo offerte part à cette adresse) ;
+- **accepter** la publication (site, Instagram, expositions et tirages, avec son prénom), avec son nom, son e-mail et son **âge** (18 ans ou plus, ou moins, comme dans l'app) ; avant 18 ans, un parent remplit le formulaire avec elle et donne son **nom** (la publication se fait avec l'accord des deux parents, ou du parent qui exerce seul l'autorité parentale ; un seul nom suffit) : sans lui, l'accord n'est pas enregistré. Une personne notée mineure (app, carte, page) ne passe jamais à « 18 ans ou plus » par la page, même avec le code ; sans le code, un âge ou un parent qui contredit la fiche, ou un accord plus large pour une personne mineure, n'est pas appliqué : la rencontre repasse en « nouvelle », l'historique le signale, à vous de décider (un refus, lui, est appliqué). La fiche de la rencontre montre l'âge et le parent comme pour une rencontre saisie sur le téléphone (« mineure · parent : … ») ; l'accord en ligne reste moins sûr qu'une carte signée ;
 - **refuser** la publication (possible sans donner d'adresse) ;
 - **écrire un message**.
 
-Elle peut revenir à tout moment et changer d'avis : le dernier choix l'emporte, l'historique garde les précédents. Contre les abus : 8 demandes par heure et par connexion, et un piège pour les robots.
+Elle peut revenir à tout moment et changer d'avis : le dernier choix l'emporte, l'historique garde les précédents. Après l'envoi, la page de remerciement lui montre une seule fois **ce qu'elle a envoyé** (référence ou date et lieu, souhaits, tranche d'âge ; jamais son nom ni son adresse) ; aucun accusé de réception ne part par e-mail. Contre les abus : 8 demandes par heure et par connexion, et un piège pour les robots.
 
 ## Sur le téléphone : l'accueil Terrain et l'app Rencontre
 

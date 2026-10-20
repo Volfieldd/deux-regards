@@ -31,15 +31,25 @@
 <% if (it.card && it.card.author) { %>      <p class="hello-card mono"><%= it.card.ref %> · <%= it.card.code ? h.cardOk(it.card.author.name) : h.cardUnverified %></p>
 <% } %>      <label><%= h.refLabel %> <span class="hint"><%= h.refHint %></span>
         <input name="ref" value="<%= v.ref || '' %>" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"<%~ bad('ref') %>></label>
-      <details class="hello-nocard"<%~ (it.who || (!v.ref && (v.met_on || v.place || e.where))) ? ' open' : '' %>>
+      <details class="hello-nocard"<%~ (it.who || e.met_on || (!v.ref && (v.met_on || v.place || e.where))) ? ' open' : '' %>>
         <summary><%= h.noCard %></summary>
         <div class="hello-row">
-          <label><%= h.metOn %> <input type="date" name="met_on" value="<%= v.met_on || '' %>"<%~ bad('where') %>></label>
+          <label><%= h.metOn %> <span class="hint"><%= h.metOnHint %></span> <input name="met_on" value="<%= v.met_on || '' %>" maxlength="40" autocomplete="off"<%~ bad('met_on', 'where') %>></label>
           <label><%= h.metTime %> <input name="met_time" value="<%= v.met_time || '' %>" maxlength="20" placeholder="16 h"></label>
         </div>
         <label><%= h.place %> <input name="place" value="<%= v.place || '' %>" maxlength="120" placeholder="<%= h.placeHint %>"<%~ bad('where') %>></label>
         <label><%= h.details %> <input name="details" value="<%= v.details || '' %>" maxlength="500" placeholder="<%= h.detailsHint %>"></label>
       </details>
+    </fieldset>
+    <% /* Âge, comme l'app de terrain (server/encounters.js) : demandé avec un accord ; avant 18 ans, le nom du parent. */ %>
+    <fieldset<%~ bad('adult', 'guardian', 'guardian_email') %>>
+      <legend><%= h.age %></legend>
+      <p class="hint"><%= h.ageHint %></p>
+      <label class="check"><input type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %>> <%= h.adult %></label>
+      <label class="check"><input type="radio" name="adult" value="non"<%~ v.adult === 'non' ? ' checked' : '' %>> <%= h.minor %></label>
+      <label class="check"><input type="radio" name="adult" value="moins15"<%~ v.adult === 'moins15' ? ' checked' : '' %>> <%= h.under15 %></label>
+      <label><%= h.guardian %> <span class="hint"><%= h.guardianHint %></span> <input name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"></label>
+      <label><%= h.guardianEmail %> <span class="hint"><%= h.guardianEmailHint %></span> <input type="email" name="guardian_email" value="<%= v.guardian_email || '' %>" maxlength="200" autocomplete="off"<%~ bad('guardian_email') %>></label>
     </fieldset>
     <fieldset<%~ bad('what') %>>
       <legend><%= h.wish %></legend>

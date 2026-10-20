@@ -41,7 +41,7 @@ test('A019 : des espaces autour de la référence ne contournent pas le compteur
   const pad = ' '.repeat(35);
   let ip = 10;
   const post = ref => app.inject({ method: 'POST', url: '/bonjour', remoteAddress: `203.0.113.${ip++}`,
-    payload: { ref, decision: 'accord', scope_site: 'on', scope_instagram: 'on', email: 'attaquant@evil.example', name: 'Attaquant' } });
+    payload: { ref, decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', email: 'attaquant@evil.example', name: 'Attaquant' } });
   const failures = () => db.prepare("SELECT COUNT(*) FROM card_code_failures WHERE ref = 'J-0007'").pluck().get();
   assert.equal((await post(`${pad}J-0007-${wrong[0]}`)).statusCode, 422);
   assert.equal(failures(), 1);                                                         // compté, espaces ou pas
@@ -66,7 +66,7 @@ test('A036 : une référence tapée sans code près de la série décale la num�
   const ctx = await setup(t, { seeded: true });
   const { app, db } = ctx;
   const enc = app.encounters;
-  const hello = (ref, ip) => app.inject({ method: 'POST', url: '/bonjour', remoteAddress: ip, payload: { ref, email: 'tiers@example.org', message: 'Bonjour', wants_photo: 'on' } });
+  const hello = (ref, ip) => app.inject({ method: 'POST', url: '/bonjour', remoteAddress: ip, payload: { ref, email: 'tiers@example.org', message: 'Bonjour', wants_photo: 'on', adult: 'oui' } });
   enc.reserve('J', 10);
   assert.equal((await hello('J-0013', '198.51.100.1')).statusCode, 303);
   assert.equal(enc.nextNumber('J'), 14);                                                // pas 11 : J-0013 serait réimprimée

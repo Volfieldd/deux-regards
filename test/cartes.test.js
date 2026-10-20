@@ -50,7 +50,7 @@ test('planches de cartes : paires numérotées (QR, code de contrôle), numéros
 
 test('photo offerte : lien privé dans la langue de la personne, JPEG jamais l’original, compteurs, expiration, retrait', async t => {
   const c = await ctxOf(t);
-  await c.app.inject({ method: 'POST', url: '/de/bonjour', payload: { ref: 'J-0142', wants_photo: 'on', email: 'anna@beispiel.de', name: 'Anna' } });
+  await c.app.inject({ method: 'POST', url: '/de/bonjour', payload: { ref: 'J-0142', wants_photo: 'on', adult: 'oui', email: 'anna@beispiel.de', name: 'Anna' } });
   const id = c.db.prepare("SELECT id FROM encounters WHERE ref = 'J-0142'").pluck().get();
   const photo = c.db.prepare("SELECT * FROM photos WHERE slug = 'brume-sur-la-loire'").get();
   // Photo non liée : refusée.
@@ -103,12 +103,12 @@ test('QR générique d’un photographe : /bonjour/J, demande attribuée sans ca
   assert.match(page, /Vous avez croisé Julien et il vous a peut-être pris en photo/);
   assert.match(page, /<input type="hidden" name="photographer" value="J">/);
   assert.match((await c.app.inject('/en/bonjour/s')).body, /You met Sébastien/);
-  const r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', met_on: '2026-10-14', place: 'Angers', wants_photo: 'on', email: 'eve@exemple.fr' } });
+  const r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', met_on: '2026-10-14', place: 'Angers', wants_photo: 'on', adult: 'oui', email: 'eve@exemple.fr' } });
   assert.equal(r.headers.location, '/bonjour/merci');
   const e = c.db.prepare('SELECT ref, author_id FROM encounters').get();
   assert.deepEqual([e.ref, e.author_id], [null, c.author('julien')]);
   // Sans date ni lieu, la lettre ne suffit pas : il faut retrouver la photo.
-  assert.equal((await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', wants_photo: 'on', email: 'eve@exemple.fr' } })).statusCode, 422);
+  assert.equal((await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', wants_photo: 'on', adult: 'oui', email: 'eve@exemple.fr' } })).statusCode, 422);
   // Fichiers à imprimer, depuis la fiche de l'auteur.
   const authors = (await c.as({ url: '/admin/terrain' })).body;
   assert.match(authors, new RegExp(`/admin/auteurs/${c.author('julien')}/qr/vertical-blanc\\.svg`));

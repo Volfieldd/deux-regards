@@ -242,7 +242,7 @@ test('liens mailto : l’adresse d’un visiteur est encodée, elle ne peut pas 
   assert.equal(new URL(href).searchParams.get('body'), null);
   assert.equal(decodeURIComponent(href.slice('mailto:'.length)), evil);         // l'adresse reste celle saisie
   // Rencontre envoyée depuis /bonjour : « Écrire » garde son sujet, sans copie cachée.
-  const { id } = c.app.encounters.submit({ met_on: '2026-10-10', place: 'Angers', wants_photo: 'on', email: evil });
+  const { id } = c.app.encounters.submit({ met_on: '2026-10-10', place: 'Angers', wants_photo: 'on', adult: 'oui', email: evil });
   const page = (await admin.get(`/admin/rencontres/${id}`)).body;
   const write = new URL(/href="(mailto:[^"]+)">Écrire</.exec(page)[1].replace(/&amp;/g, '&'));
   assert.equal(write.searchParams.get('bcc'), null);

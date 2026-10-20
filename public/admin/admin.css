@@ -1422,3 +1422,7 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .msg-suppr form { margin-top: 8px; }
 .msg-suppr summary { display: inline-flex; align-items: center; }
 @media (pointer: coarse), (max-width: 720px) { .msg-suppr summary { min-height: 44px; } }
+
+/* Thèmes et rubriques (Apparence, #188) : les deux « details » de la section ont un résumé d’au moins 24 px de haut
+   (WCAG 2.5.8, relevé par axe-core en mode sombre). */
+#compositions details > summary { display: list-item; min-height: 24px; padding-block: 4px; cursor: pointer; }

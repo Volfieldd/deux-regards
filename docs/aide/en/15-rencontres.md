@@ -50,14 +50,14 @@ For a T-shirt or a bag: **In the field → QR code for clothing**. The screen sh
 
 ## The /bonjour page
 
-This is the QR code’s page (in French, English and German, with no link in the menu, never indexed). The person enters their reference, or failing that the date, the place and a detail, then what they would like:
+This is the QR code’s page (in French, English and German, with no link in the menu, never indexed). The person enters their reference, or failing that the date (in words or figures: “14/10/2026”, “12 March”, “yesterday evening”; read back in full by the site after sending), the place and a detail, then what they would like:
 
-- **receive the photo** by email;
-- **accept** publication (site, Instagram, exhibitions and prints, with their first name), with their name and email;
+- **receive the photo** by email (the age is then asked too: **under 15**, they give a **parent’s** address instead of their own, which is not kept; the record says “Parent’s email”, and the gift photo goes to that address);
+- **accept** publication (site, Instagram, exhibitions and prints, with their first name), with their name, email and **age** (18 or older, or under, as in the app); under 18, a parent fills in the form with them and gives their **name** (publication is made with the consent of both parents, or of the parent who alone exercises parental authority; one name is enough): without it, the consent is not recorded. A person recorded as a minor (app, card, page) never becomes “18 or older” through the page, even with the code; without the code, an age or parent contradicting the record, or a wider consent for a minor, is not applied: the encounter goes back to “new”, the history says so, and you decide (a refusal is applied). The encounter’s record shows the age and the parent as for an encounter entered on the phone (“minor · parent: …”); an online consent remains less certain than a signed card;
 - **refuse** publication (possible without giving an address);
 - **write a message**.
 
-They can come back at any time and change their mind: the latest choice wins, the history keeps the earlier ones. Against abuse: 8 requests per hour per connection, and a trap for robots.
+They can come back at any time and change their mind: the latest choice wins, the history keeps the earlier ones. After sending, the thank-you page shows them once **what they sent** (reference or date and place, wishes, age bracket; never their name or address); no acknowledgement is sent by email. Against abuse: 8 requests per hour per connection, and a trap for robots.
 
 ## On the phone: the Field home screen and the Encounter app
 

@@ -2,10 +2,12 @@
       pas une erreur de saisie (la saisie est gardée) ; sinon, dès deux points à corriger, le résumé : une <section> titrée,
       un lien par point vers son champ, focus posé dessus au chargement (autofocus sur tabindex="-1", sans script). Un seul
       point : pas de résumé, le focus va au champ (posé par la page). it.errs : [{ target, text }] dans l'ordre de la page ;
-      it.limit : le texte de la limite, ou rien. */ %>
+      it.limit : le texte de la limite, ou rien ; it.formErr : un envoi mal formé (pas de champ à désigner), ou rien. */ %>
 <% const t = it.t, F = t.v2form, ic = it.v2.ic; %>
 <% if (it.limit) { %>
     <div class="msg" id="limite" role="status" tabindex="-1" autofocus><%~ ic('horloge', { size: 18 }) %><p><b><%= F.limitTitle %>.</b> <%= it.limit %> <%= F.limitKept %></p></div>
+<% } else if (it.formErr) { %>
+    <div class="msg" id="resume" role="alert" tabindex="-1" autofocus><%~ ic('alerte', { size: 18 }) %><p><b><%= F.error %></b> <%= it.formErr %></p></div>
 <% } else if (it.errs.length > 1) { %>
     <section class="resume" id="resume" tabindex="-1" autofocus aria-labelledby="resume-t"><h2 class="resume-t" id="resume-t"><%~ ic('alerte', { size: 22 }) %><%= F.points(it.errs.length) %></h2>
       <ul><% it.errs.forEach(x => { %><li><a href="#<%= x.target %>"><%= x.text %></a></li><% }) %></ul></section>

@@ -54,6 +54,7 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-28 Formulaire de contact ou de licence forgé | DS12 | ✓ site | `feat/page-contact` (#183) ; règle `valeurs_impossibles_repetees` telle quelle | fait |
 | BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; ✓ Vigie | site : `feat/page-contact` (#183), plafond global de 50 messages acceptés par jour (503) et plafond des annonces (30 e-mails, compté dans la base), tous deux `limite: messages_global` (distingués par `detail.plafond`) ; Vigie : #184, règle `messages_satures` (`30-exploration.yml`, DS21, entité site « messages ») | fait |
 | BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; ✓ Vigie | site : `feat/page-contact` (#183), `sensitive_read` et `sensitive_delete` (`objet: message`, `id` numérique, la suppression seulement si elle a lieu), `authz_fail` hors portée, journal ; Vigie : #184 et #185, type `sensitive_delete`, corrélation `messages_effaces_en_masse` (10 messages distincts par compte en 1 h, DS18), `lectures_massives` par objet + id, `role_incoherent` qui exige `messages.traiter` pour supprimer, objets `personne` et `rencontre` sur les `sensitive_read` des fiches | fait |
+| BV-31 Formulaire /bonjour forgé : âge hors liste, date ou nom du parent au-delà de la page | DS12 | ✓ site | `feat/bonjour-mineurs` (#187) : `input_validation_fail` (émetteur `server/routes/public.js · bonjour`), **sans valeur** (longueur seule) pour `adult`, `met_on` et `guardian` ; noms propres ordinaires et dates courantes sans `malicious_input` (testé) ; règle `valeurs_impossibles_repetees` telle quelle | fait |
 
 ---
 
@@ -938,6 +939,73 @@ valides : la boîte de l'admin s'emplit, les notifications épuisent le quota de
   « merci » dans les trois langues, v1 et v2 : zéro 404.
 - **Registre RGPD et page Confidentialité** : ce qui est gardé, pourquoi, 12 mois, chiffré, qui le lit ; à relire par
   le propriétaire.
+
+
+## Bonjour : mineurs et date libre
+
+Évaluation du 20 octobre 2026, avant le code (PLAN.md, point 8 : « données et champs à créer pour `/bonjour` : âge et
+nom du parent, date saisie en texte libre, […] récapitulatif des choix après l'envoi » ; maquette
+[MQ-05](../audit-ergonomie-2026-10-16/maquettes/MQ-05-bonjour-formulaire.html), cadres 5, 11 et 13). Aucune route
+nouvelle : `POST /bonjour` (trois langues) reçoit trois champs de plus, `GET /bonjour/merci` montre un récapitulatif.
+Les accroches restent **exactement** celles de #127 : `trapped(request, 'bonjour')`, `sameSite`, `gate(request,
+helloLimit, 'bonjour')`, `token_guess` sur un code de carte faux, dans le même ordre et avant toute lecture des
+nouveaux champs.
+
+### Surfaces
+
+- **Champs nouveaux** (noms exacts lus par le serveur, `server/encounters.js`, ceux de l'app de terrain) :
+  - `body.adult` : boutons radio, liste fermée `oui` (« J'ai 18 ans ou plus ») ou `non` (« J'ai moins de 18 ans : un
+    parent remplit ce formulaire avec moi ») ; vide permis, exigé seulement avec un accord, comme dans l'app ;
+  - `body.guardian` : texte libre, nom du parent, 80 signes (`maxlength` de la page), exigé pour l'accord d'une personne
+    mineure ;
+  - `body.met_on` : la date de la rencontre, désormais **en texte libre** (« 14/10/2026 », « 12 mars », « hier soir »,
+    « 12. März », « March 12 »), 40 signes ; jusqu'ici `type="date"` et `AAAA-MM-JJ` seul (toujours accepté).
+- **Stockage** : colonnes existantes `encounters.adult` et `encounters.guardian` (migration 017, aucune migration) ;
+  `guardian` chiffré par `DATA_KEY` comme le nom ; `adult` chiffré lui aussi (comme la position), pour l'app comme
+  pour la page ; la date est enregistrée lue (`AAAA-MM-JJ`), jamais telle qu'elle a été tapée.
+- **Récapitulatif** (`/bonjour/merci`) : rien de plus dans l'adresse (`?ref=` seul, comme avant) ; un cookie
+  `bonjour_recap` (`httpOnly`, `SameSite=Lax`, 15 minutes, lu une seule fois) porte un numéro tiré au hasard, qui désigne en mémoire du
+  serveur les choix de l'envoi (date lue, lieu, souhaits, tranche d'âge) ; ni nom, ni nom du parent, ni adresse ; rien
+  sur le disque.
+
+### Abus possibles et ce que la Vigie voit déjà
+
+| Surface | Abus possible | Déjà vu par la Vigie | Besoin |
+|---|---|---|---|
+| `body.adult` | valeur hors liste (formulaire forgé, sondage) | rien : une valeur inconnue serait ignorée sans rien dire | **BV-31** (DS12), **sans la valeur** : une tranche d'âge tapée à la main est une donnée personnelle |
+| `body.met_on`, `body.guardian` | texte au-delà du `maxlength` de la page (remplissage, sondage) | rien : coupé sans rien dire | **BV-31** (DS12, longueur seule) |
+| `body.met_on` | injection (SQL, gabarit, XSS) par la date libre | crochet commun : `malicious_input`, champ `body.met_on`, longueur seule (DS11) ; la date n'est jamais enregistrée ni montrée telle quelle (seulement à son auteur, dans la réponse 422) ; requêtes préparées | aucun |
+| `body.met_on` | déni de service par l'analyse (expression régulière à retour arrière) | — | aucun : longueur vérifiée **avant** toute lecture (40 signes), découpage par une seule classe de caractères, aucune expression à quantificateurs imbriqués ; temps borné et testé (100 000 saisies hostiles) |
+| `body.guardian` | injection dans le nom du parent | crochet commun (DS11), `body.guardian`, longueur seule ; un nom ordinaire (« Marie-Hélène d'Aubigné ») n'émet rien (testé) | aucun |
+| Accord d'un mineur | accord donné seul par un mineur, ou par un tiers qui se dit parent | — (question de droit, pas de sécurité) | aucun : refusé sans nom du parent (comme l'app) ; l'accord en ligne reste marqué « moins sûr qu'une carte signée » dans la fiche |
+| Cookie `bonjour_recap` | numéro forgé ou rejoué | — | aucun : 128 bits tirés au hasard, inconnu ou expiré : la page « merci » ordinaire ; jamais émis au piège ni à l'autre site ; mémoire bornée (500 récapitulatifs au plus) |
+| Événements | une donnée personnelle (âge, parent, date, lieu) dans un événement | — | aucun : aucun événement ne porte ces valeurs (testé) |
+
+### BV-31 — Formulaire `/bonjour` forgé (BV-28 étendu)
+
+- **Événement** : `input_validation_fail` (E13), existant ; émetteur `server/routes/public.js · bonjour`.
+- **Quand** : `adult` présent et ni `oui` ni `non` (y compris répété : `adult=oui&adult=non`) : `raison: 'valeur hors
+  liste'`, `formulaire: 'bonjour'`, `champ: 'adult'`, `longueur` (**jamais la valeur**) ; `met_on` au-delà de 40 signes
+  ou `guardian` au-delà de 80 : `raison: 'saisie hors formulaire'`, `champ`, `longueur`. Pas d'émission si le crochet
+  commun a déjà signalé la valeur (DS11), ni au piège, ni à l'autre site, ni à la limite (rien n'est lu).
+- **Réponse** : âge hors liste : lu comme « non renseigné » (un accord est alors refusé, 422) ; date trop longue : 422,
+  « date illisible » ; nom du parent trop long : coupé, comme le nom.
+- **Adresse du parent** (décision du 20 octobre 2026, moins de 15 ans qui reçoit la photo) : champ libre `body.guardian_email`
+  (200 signes) ; au-delà : `raison: 'saisie hors formulaire'`, `champ: 'guardian_email'`, `longueur` ; `adult` accepte
+  aussi `moins15`. Jamais l'adresse dans un événement (testé).
+- **Type inattendu** (revue de sécurité de la PR #187) : un champ qui n'est pas un texte (objet ou tableau d'un envoi
+  JSON, champ répété) : `raison: 'type inattendu'`, `champ` (le premier), `type` (`object`, `tableau`…), `nombre` ;
+  réponse 422, rien n'est lu ni enregistré.
+- **Règle** : `valeurs_impossibles_repetees` (DS12, 2 en 10 minutes par adresse), telle quelle.
+- **Qui** : le site.
+
+### Prérequis côté site (Bonjour)
+
+- Les tests de `test/v2-formulaires.test.js` restent verts (accroches en v1 et en v2) ; v1 et v2 envoient toujours les
+  mêmes champs (les trois nouveaux compris).
+- Aucune donnée personnelle dans un événement (âge, parent, date, lieu) : testé sur un envoi complet.
+- Registre RGPD et page Confidentialité : tranche d'âge, nom du parent, cookie du récapitulatif ; à relire par le
+  propriétaire.
 
 ---
 

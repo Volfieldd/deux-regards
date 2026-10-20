@@ -75,21 +75,21 @@ test('A034 : sans code, une rencontre saisie sur le téléphone (refus, « plus 
   const author = c.db.prepare('SELECT * FROM authors WHERE id = ?').get(c.jul);
   const refus = await c.enc.saveApp({ decision: 'refus', lang: 'fr' }, { author });
   const later = await c.enc.saveApp({ decision: '', email: 'vraie@exemple.fr', name: 'Vraie', wants_photo: 'on', lang: 'fr' }, { author });
-  await c.hello({ ref: refus.ref, decision: 'accord', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'attaquant@exemple.fr' });
+  await c.hello({ ref: refus.ref, decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'attaquant@exemple.fr' });
   let e = c.enc.get(refus.id);
   assert.deepEqual([e.refused, e.consent, e.email, e.name, e.status], [1, null, '', '', 'nouvelle']);
   assert.equal(c.enc.events(refus.id).at(-1).detail.non_verifiee, true);
-  await c.hello({ ref: later.ref, decision: 'accord', scope_site: 'on', name: 'Autre', email: 'attaquant@exemple.fr' });
+  await c.hello({ ref: later.ref, decision: 'accord', adult: 'oui', scope_site: 'on', name: 'Autre', email: 'attaquant@exemple.fr' });
   e = c.enc.get(later.id);
   assert.deepEqual([e.email, e.name, e.consent], ['vraie@exemple.fr', 'Vraie', null]);
   // Avec le code du QR montré par l'app : la personne elle-même, son choix est appliqué.
-  await c.hello({ ref: `${refus.ref}-${refus.code}`, decision: 'accord', scope_site: 'on', name: 'Zoé', email: 'zoe@exemple.fr' });
+  await c.hello({ ref: `${refus.ref}-${refus.code}`, decision: 'accord', adult: 'oui', scope_site: 'on', name: 'Zoé', email: 'zoe@exemple.fr' });
   e = c.enc.get(refus.id);
   assert.deepEqual([e.refused, e.consent_source, e.email], [0, 'en_ligne', 'zoe@exemple.fr']);
   // Carte au tampon (référence sans code) : la première demande est notée ; ensuite, sans code, ni l'adresse ni le
   // nom ne sont remplacés, et un accord ne lève pas le refus.
   await c.hello({ ref: 'J-0500', decision: 'refus', email: 'premiere@exemple.fr', name: 'Première' });
-  await c.hello({ ref: 'J-0500', decision: 'accord', scope_site: 'on', email: 'seconde@exemple.fr', name: 'Seconde' });
+  await c.hello({ ref: 'J-0500', decision: 'accord', adult: 'oui', scope_site: 'on', email: 'seconde@exemple.fr', name: 'Seconde' });
   e = c.row('J-0500');
   assert.deepEqual([e.refused, e.consent, e.email, e.name], [1, null, 'premiere@exemple.fr', 'Première']);
 });
@@ -280,7 +280,7 @@ test('A138 : SMTP chiffré exigé hors relais local (délais vraiment appliqués
 
 test('A140 : date impossible refusée sur /bonjour et dans la fiche ; anciennes dates impossibles vidées par la migration', async t => {
   const c = await world(t);
-  const r = await c.hello({ photographer: 'J', met_on: '2025-02-30', place: 'Angers', wants_photo: 'on', email: 'a@exemple.fr' });
+  const r = await c.hello({ photographer: 'J', met_on: '2025-02-30', place: 'Angers', wants_photo: 'on', adult: 'oui', email: 'a@exemple.fr' });
   assert.equal(r.statusCode, 422);
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), 0);
   const id = c.enc.saveCard(null, { ref: 'J-0010', author_id: c.jul, met_on: '2026-00-10', session_day: '2025-02-29' });
@@ -297,7 +297,7 @@ test('A140 : date impossible refusée sur /bonjour et dans la fiche ; anciennes 
 
 test('A141, A155 : carte saisie sur une demande reçue : on complète ; case décochée : accord retiré ; refus jamais levé par la fiche', async t => {
   const c = await world(t);
-  await c.hello({ ref: 'J-0005', wants_photo: 'on', email: 'alice@exemple.fr', name: 'Alice', place: 'Angers', met_on: '2026-10-11' });
+  await c.hello({ ref: 'J-0005', wants_photo: 'on', adult: 'oui', email: 'alice@exemple.fr', name: 'Alice', place: 'Angers', met_on: '2026-10-11' });
   const id = c.enc.saveCard(null, { ref: 'J-0005', signed: 'on', scope_site: 'on' });
   let e = c.enc.get(id);
   assert.deepEqual([e.email, e.name, e.place, e.met_on, e.consent_source], ['alice@exemple.fr', 'Alice', 'Angers', '2026-10-11', 'carte']);
@@ -390,7 +390,7 @@ test('A150, A151, A152 : historique lisible ; liens des photos nommés ; langues
   c.db.prepare("UPDATE encounters SET lang = 'de' WHERE id = ?").run(id);
   c.enc.exclude(id, photo, true);
   c.enc.exclude(id, photo, false);
-  await c.hello({ ref: 'J-0600', decision: 'accord', scope_site: 'on', name: 'X', email: 'x@exemple.fr' });
+  await c.hello({ ref: 'J-0600', decision: 'accord', adult: 'oui', scope_site: 'on', name: 'X', email: 'x@exemple.fr' });
   c.db.prepare("INSERT INTO encounter_events (encounter_id, at, kind, verified, detail) VALUES (?, ?, 'refus_personne', 0, '{}')").run(id, Date.now());
   const root = c.as('root', ['admin']);
   const page = (await root.get(`/admin/rencontres/${id}`)).body;
@@ -416,7 +416,7 @@ test('A154, A156, A038 : cartes au nom de ce site ; export sans données de tier
   assert.deepEqual(TEXTS.scopes('test.example')[0], 'site test.example');
   // Export : la demande d'un tiers (référence tapée sans code) n'y apporte ni son adresse, ni son nom, ni son message.
   const id = c.enc.saveCard(null, { ref: 'J-0142', signed: 'on', scope_site: 'on', author_id: c.jul, email: 'alice@exemple.fr', name: 'Alice' });
-  await c.hello({ ref: 'J-0142', wants_photo: 'on', email: 'autre@exemple.org', name: 'Paul', message: 'Message de Paul' });
+  await c.hello({ ref: 'J-0142', wants_photo: 'on', adult: 'oui', email: 'autre@exemple.org', name: 'Paul', message: 'Message de Paul' });
   const data = JSON.stringify(c.enc.exportData(id).data);
   assert.match(data, /alice@exemple\.fr/);
   assert.doesNotMatch(data, /autre@exemple\.org|Paul/);
