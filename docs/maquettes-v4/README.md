@@ -2,7 +2,9 @@
 
 20 octobre 2026 · deuxième round de maquettes · **aucun code applicatif modifié**.
 
-**[Comparer les six compositions](six-chambres-noires.jpg)** · **[Ouvrir les maquettes](index.html)**
+**[Parcourir les 217 WebP](webp/index.html)** · **[Comparer les six accueils en WebP](webp/00-comparatif-six-pistes.webp)** · **[Ouvrir les maquettes HTML](index.html)**
+
+Le dossier WebP couvre les principaux parcours dans les six directions, sur ordinateur et téléphone : 202 captures et 15 planches. [Guide des exports et vérification des images](webp/README.md).
 
 ## Les images
 
@@ -39,8 +41,10 @@ La typographie ne recouvre pas les photographies. Le noir est un espace de respi
 
 ## Les parcours communs
 
-Les six accueils ont des compositions distinctes. Les pages suivantes partagent volontairement le même socle : cette étape permet de comparer les directions sans dupliquer six applications.
+Les six accueils ont des compositions distinctes. Les pages intérieures reprennent désormais la grammaire de chaque direction : espacement des tirages, séquences larges, planche-contact, diptyques, chapitres ou asymétrie. Les fonctions restent communes ; l’administration garde une présentation conventionnelle partagée.
 
+- **[Carte](carte.html)** : quatre points sur un territoire fictif, sélection d’une image, liste équivalente et retour depuis la photo.
+- **[Regards](regards.html)** et **[contact](nous-ecrire.html)** : présentation éditoriale fictive, formulaire sans transmission de données.
 - **[Collection](galerie.html)** : recherche, univers, état sans résultat et récupération ; le filtre est conservé au retour d’une photo.
 - **[Photo](photo.html)** : image entière, précédente/suivante, agrandissement au clavier, petite carte schématique, trois images connexes, retour au contexte de provenance.
 - **[Voyages](voyages.html)** et **[voyage](voyage.html)** : couverture, trois étapes, images et textes courts. Une photo revient à son étape ; les connexes du même voyage conservent ce contexte.

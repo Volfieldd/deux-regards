@@ -1,0 +1,4442 @@
+{
+  "date": "2026-10-20",
+  "format": "WebP",
+  "captureCount": 202,
+  "boardCount": 15,
+  "generatedImagesOnly": true,
+  "capturePolicy": "Copie isolée sans médias du site ; liste blanche de fichiers et de quatre images ; aucune requête externe ; PNG intermédiaires puis encodage WebP qualité 90.",
+  "checks": {
+    "horizontalOverflow": false,
+    "decodedImages": true,
+    "mapReturn": true,
+    "contactNoTransmission": true,
+    "generatedSourcesOnly": true
+  },
+  "blockedRequests": [],
+  "javascriptErrors": [],
+  "observedImagePaths": [
+    "/docs/maquettes-v4/assets/maree.webp",
+    "/docs/maquettes-v4/assets/cimes.webp",
+    "/docs/maquettes-v4/assets/foret.webp",
+    "/docs/maquettes-v4/assets/dune.webp"
+  ],
+  "captures": [
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "obscura/bureau/01-accueil.webp",
+      "fullPage": true,
+      "url": "obscura.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1785,
+      "bytes": 208254,
+      "sha256": "4d48363ecb1c24d488ae4572f39d76a768a07127462a57f067ec8b96fa41e34d"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "obscura/bureau/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1740,
+      "bytes": 153448,
+      "sha256": "c6a753db55a58bc042507c8a7a8f6660868120661c2f965d4c188d46e4ea3717"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "obscura/bureau/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1774,
+      "bytes": 222928,
+      "sha256": "67d687e734794bc6878f118e37c0dba6196cea601d7f46eacf3747bcd9b1c163"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "obscura/bureau/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1774,
+      "bytes": 149134,
+      "sha256": "94bb2f54566775178f422dc17cfc436bc2e34052931222ea232dad58f0d0e9f3"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "obscura/bureau/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 158708,
+      "sha256": "f43c064fcdc902653c1e49d29bdc456fcb6f66301b376c991d81b9098ebe1cb0"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "obscura/bureau/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1790,
+      "bytes": 136110,
+      "sha256": "ddb8500f49157b3fd57075a6353db6caddc6eaa19596530d72064e56bcba6b46"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "obscura/bureau/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 1440,
+      "height": 1515,
+      "bytes": 170870,
+      "sha256": "666f4161a5a1b15370fda2a634c10be04d923e365dc6dc341a4fe14041bf3127"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "obscura/bureau/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 3216,
+      "bytes": 347660,
+      "sha256": "6122f46f62231834a61621fe0189a20ff5e9b2c586254d3d0f9d143643f7e217"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "obscura/bureau/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1052,
+      "bytes": 87708,
+      "sha256": "f55f763e6650e230b87144b83b3ef8f547f31a8ddfcc2fe704460da7c1d87685"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "obscura/bureau/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 2260,
+      "bytes": 158906,
+      "sha256": "2ba907683773b02354543f9e21d06f29006d15d1873dc8a0b4c0a78aab179cbd"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "obscura/bureau/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 2177,
+      "bytes": 130560,
+      "sha256": "53c62c9c8fb244be51734bd211716abd088e15a99e09c5f1a74c7eb45a0e581f"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "obscura/bureau/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1897,
+      "bytes": 189752,
+      "sha256": "7fc2cfa9b9b03a10cbe8cc72d2ea04f40832df905d03701601a4123ac6d7ee09"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "obscura/bureau/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1388,
+      "bytes": 101528,
+      "sha256": "5aa2ee0932374b91ffd57044656033134861c13b62346973a2850d86d7fa758e"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "obscura/bureau/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1260,
+      "bytes": 48830,
+      "sha256": "d044ad2174816a5c5c4ef4f523340b601ba5cd784a00ee886f3aff7c3f62e762"
+    },
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "obscura/bureau/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=obscura",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1159,
+      "bytes": 39966,
+      "sha256": "46c642ac96e164bec1b0e16d4c93adb098c93b3e6bcf32462799bd3ed9e567ec"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "obscura/mobile/01-accueil.webp",
+      "fullPage": true,
+      "url": "obscura.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 1994,
+      "bytes": 87782,
+      "sha256": "953b92e160f75d8ec584fa8b91c300755282bf50a18bc034c9b96a91aa3abca2"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "obscura/mobile/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2207,
+      "bytes": 117256,
+      "sha256": "2796a503eb0a40d32643a921c79a1be65d10fe16a681bfd55ee42506952e9501"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "obscura/mobile/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1771,
+      "bytes": 70018,
+      "sha256": "c9d4565c364992f4d73778e42ab0dc6eea72a5e7959889d2c46bb9bb2da22b17"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "obscura/mobile/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2059,
+      "bytes": 103462,
+      "sha256": "1d9ad581925b012d4d168498684335bc3fb763f42e317ef542803fb73d88132a"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "obscura/mobile/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 20552,
+      "sha256": "ebb2e8cead82413cc04ebc9659d48df1ee4ce903c6c78f3339a845995fe9a390"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "obscura/mobile/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2101,
+      "bytes": 83478,
+      "sha256": "e14a501b6ebc5779cd8c1475348b729a61d7cbaa5af490c0fec023e36d3dc71e"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "obscura/mobile/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 390,
+      "height": 1198,
+      "bytes": 53608,
+      "sha256": "355d30232f5345bdefe7902317b401d5829d535fbdb40b65b703b5821030c98a"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "obscura/mobile/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2901,
+      "bytes": 132788,
+      "sha256": "fab99780a5c1ea21856a6dca1d918e6acb8e915c5899af7097e911072dfed2c1"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "obscura/mobile/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1757,
+      "bytes": 76008,
+      "sha256": "43b91ccff577c50ae53bd8df6d8befc83ee1dd22a03a05b22b7acda9c808fb21"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "obscura/mobile/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2479,
+      "bytes": 116142,
+      "sha256": "171e9a41d66e0e40ed8a00107f5d70a8f0286bfe40e5c9792931075faad148d4"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "obscura/mobile/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 2362,
+      "bytes": 91644,
+      "sha256": "31a2d6cd6414313158adcab853007111baf2848db76c21a7e3a74790e0b469b3"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "obscura/mobile/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2443,
+      "bytes": 103660,
+      "sha256": "d4f2fcc337b439a14cbf2b1a4825c8704e17c13516b753d8ce86b639c015134b"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "obscura/mobile/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 1859,
+      "bytes": 57718,
+      "sha256": "ddec6c72b67e97024fd676289dea545bb35095a3a7c7c7fb039b7b4f2e62d2e1"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "obscura/mobile/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1076,
+      "bytes": 29192,
+      "sha256": "171d0cca90f225252d36b3fb4b1bd36b5536eae3c47c7896feb8dfcaba828e57"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "obscura/mobile/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1135,
+      "bytes": 27448,
+      "sha256": "92ae238a1b883bed775defc39a1447a6b89db7a95617ca0a2f0c2104799e59a6"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "id": "16-menu",
+      "label": "Navigation mobile",
+      "file": "obscura/mobile/16-menu.webp",
+      "fullPage": false,
+      "url": "obscura.html?piste=obscura",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 20052,
+      "sha256": "aa4ec1056b6fc2554cf1b49efe132a61a6b9fbcb85e845640b1dcb51ec74bcf1"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "panoramique/bureau/01-accueil.webp",
+      "fullPage": true,
+      "url": "panoramique.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1821,
+      "bytes": 200260,
+      "sha256": "ef37b1058fff8e57fad273bd9eca1416fdd312e9f64b3d3fbbb68d87d208017a"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "panoramique/bureau/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 2414,
+      "bytes": 346922,
+      "sha256": "bfdc6f1f0a1ea68cd2aae0ad0fe84c79be4b741954fc56e884f7c6529832d73b"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "panoramique/bureau/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1874,
+      "bytes": 261328,
+      "sha256": "1480ecc6cc145c2e428340c17dda6cf55d841d01c4860305bf6d35991643cfa7"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "panoramique/bureau/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1874,
+      "bytes": 163670,
+      "sha256": "7ffc0592b207f8798353a1e4cca9a70d8eb22788f44df70669a183a1285d38c8"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "panoramique/bureau/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 158708,
+      "sha256": "f43c064fcdc902653c1e49d29bdc456fcb6f66301b376c991d81b9098ebe1cb0"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "panoramique/bureau/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 2502,
+      "bytes": 166258,
+      "sha256": "a7cd31023a910cee5320517233b0618d51af0c08323e53348b5f573d19ce5bd2"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "panoramique/bureau/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 1440,
+      "height": 1599,
+      "bytes": 248636,
+      "sha256": "bda5b3dae0feb244bd0d5130e6257010be7a735028f20172024ced3cf1313b78"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "panoramique/bureau/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 4065,
+      "bytes": 423726,
+      "sha256": "007d9651f842c4e7c753d48a9768fefaca57c4d37359bf99c9247160ded95ddf"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "panoramique/bureau/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1452,
+      "bytes": 132190,
+      "sha256": "808b522a099f6ecb02820cd6770c2e2d2f480cc840c7e62f7b8fa59988c21e0d"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "panoramique/bureau/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 2260,
+      "bytes": 159020,
+      "sha256": "15ab889ab99ab37e3c5ecc15e648db60ec0add6588866231c7088c42cfee83d2"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "panoramique/bureau/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 2177,
+      "bytes": 130672,
+      "sha256": "2044a3843b652ba56a87dab0779c0b9c633e0263840cc69f2443a920c7a4ee5e"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "panoramique/bureau/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1892,
+      "bytes": 193268,
+      "sha256": "6acd1d0afbfd512eea96859f8fd5b9bfeb51a1f4ff7a3ac4e5943e994b2f49d1"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "panoramique/bureau/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1382,
+      "bytes": 104120,
+      "sha256": "ad23ba4372720c3239edb1b54373ff4cf90f21aa92ee59ca1e82f07907caf3f2"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "panoramique/bureau/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1444,
+      "bytes": 100992,
+      "sha256": "5669575f3d3ee14899b42f312433347dab25649c5b5ef6a270017026075d9ee5"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "panoramique/bureau/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=panoramique",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1154,
+      "bytes": 44218,
+      "sha256": "def6a899477642c051bfd19c5f57609910eff9cb31b79bd9698b6a645834985f"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "panoramique/mobile/01-accueil.webp",
+      "fullPage": true,
+      "url": "panoramique.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2171,
+      "bytes": 100908,
+      "sha256": "a52e8d7c411615734e0d97fa6cf972fc61caaf1cceb7a2e20732192861cb8783"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "panoramique/mobile/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2175,
+      "bytes": 118056,
+      "sha256": "2aae588d9c61825e6535734d32668336bbad6367618c83f68ba5116f446c14d8"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "panoramique/mobile/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1771,
+      "bytes": 70072,
+      "sha256": "439f7cc6fa81d2bba03d9d863b3080d5712215c257eae42b2325d8e537c32148"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "panoramique/mobile/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2059,
+      "bytes": 103664,
+      "sha256": "33c57fde26ef5b14ec723b9141a880a9a5785ee909e90688fd4df85e7c806e41"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "panoramique/mobile/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 20552,
+      "sha256": "ebb2e8cead82413cc04ebc9659d48df1ee4ce903c6c78f3339a845995fe9a390"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "panoramique/mobile/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2101,
+      "bytes": 83552,
+      "sha256": "eece01c25353f0f0a544e7e07bd99af55590234690a7db4f7524eb1defec577f"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "panoramique/mobile/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 390,
+      "height": 1321,
+      "bytes": 68622,
+      "sha256": "356ae60dfe9d3933533efef42361ca9552e14562a72fd77bd28ba2127873d228"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "panoramique/mobile/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2980,
+      "bytes": 144626,
+      "sha256": "ca3824665b2961e007a647a677e07009dbcb15505f83336ad15eb67f5859d747"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "panoramique/mobile/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1767,
+      "bytes": 76450,
+      "sha256": "cca680738ef5d1044984d4840a2394a05a6a63dac375b2274bc68112a728f816"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "panoramique/mobile/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2479,
+      "bytes": 116266,
+      "sha256": "21997abc83a4ed8ba12f8c3d64634bd9c5e3a015911e3212644c9f86723c4376"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "panoramique/mobile/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 2362,
+      "bytes": 92000,
+      "sha256": "25529b898bfbdf1ca370589ddb829a696d41dbb256274e1d20fdf49e1aea5283"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "panoramique/mobile/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2443,
+      "bytes": 103826,
+      "sha256": "ad89aa52e78c81246bd9ce5fcbb289e3fcbd0f5ce90182b17fd25988b0776584"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "panoramique/mobile/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 1859,
+      "bytes": 57934,
+      "sha256": "5675b39c6a883ceb0b89af0e42ee9d8a55dc5887819c8f60f75da3d8c6d2dc48"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "panoramique/mobile/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1125,
+      "bytes": 32160,
+      "sha256": "77012e943f9ae846eda229616eec85d783349265acfc09764cbd720f9ea17258"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "panoramique/mobile/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1135,
+      "bytes": 27562,
+      "sha256": "1faf84f444fec4848e466ef4f85b22b0ff9daf6440e2b52a515b8fa4172366fd"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "id": "16-menu",
+      "label": "Navigation mobile",
+      "file": "panoramique/mobile/16-menu.webp",
+      "fullPage": false,
+      "url": "panoramique.html?piste=panoramique",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 32398,
+      "sha256": "260832bcb40ce1015a25b20f94b1bfe0b394916eb86de1ce1f6147b114586472"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "contact/bureau/01-accueil.webp",
+      "fullPage": true,
+      "url": "contact.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1645,
+      "bytes": 138766,
+      "sha256": "01ce88f0369b421180b3f51b9bc1abace853e3b68308c4785102d8eb9a656184"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "contact/bureau/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1149,
+      "bytes": 87442,
+      "sha256": "2da8b7c8fc5942590b5c39a180219f5461dfdec390f198fa97e9f4f419910d7e"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "contact/bureau/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1826,
+      "bytes": 224996,
+      "sha256": "31b1236b9ffed62ed8fd765f1221c647c9d9720f6468c1b4dceb4fe48d61109c"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "contact/bureau/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1826,
+      "bytes": 150880,
+      "sha256": "96a5f9627bc560853f75623ce84bb5d141166e3b703c57355c19ac2bd800807a"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "contact/bureau/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 158708,
+      "sha256": "f43c064fcdc902653c1e49d29bdc456fcb6f66301b376c991d81b9098ebe1cb0"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "contact/bureau/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1830,
+      "bytes": 150880,
+      "sha256": "d403efd52ee8cdebed450ebb0d88f8a35c9eca381f2a1f85890a2d8d357177f7"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "contact/bureau/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 1440,
+      "height": 1462,
+      "bytes": 221554,
+      "sha256": "bcfbcb3d9cd3283f3d474ec22c0d46085f05f18d21e62651023470ca968cbb81"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "contact/bureau/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 3400,
+      "bytes": 365228,
+      "sha256": "4630e23657edaf1efa333d687ed0725d9dd1a7e4473db6356329a4d56d83ccf9"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "contact/bureau/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1026,
+      "bytes": 85598,
+      "sha256": "f552236252171de3f1c574798411ed333aebc3380c088bcbb0db8b4d86d880bd"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "contact/bureau/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 2256,
+      "bytes": 157174,
+      "sha256": "cd4c098864cebbb0121a0a1ef5d0fdd998e77fbc6c676a20916c62ace50254d3"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "contact/bureau/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 2173,
+      "bytes": 131966,
+      "sha256": "d976dd2bee5cfa653f6de0f80dfa2f5c7f57bcd5dbb5b84d499bd1067b831f8f"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "contact/bureau/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1844,
+      "bytes": 185722,
+      "sha256": "f00537f5e64b7162cf9955754d4f6b73f1c111ec0269d65d18045e1889154ac0"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "contact/bureau/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1335,
+      "bytes": 98804,
+      "sha256": "9a3931d6936d08d6b7cd36f4df31014517df7a034a70289863b9b64d64fba406"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "contact/bureau/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1149,
+      "bytes": 36310,
+      "sha256": "6dd67fd707633c0d8be92ee1a040184e8e18f2e54002bafad0818a7abb3471a9"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "contact/bureau/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=contact",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1106,
+      "bytes": 37688,
+      "sha256": "9d601312b739cfb0075775706316abb7f9d1b129f2cd07957d856c5bcb584f8c"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "contact/mobile/01-accueil.webp",
+      "fullPage": true,
+      "url": "contact.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2383,
+      "bytes": 93094,
+      "sha256": "6ad905bf440f71f699c97cd53323fb692a3989962c3b7957c910908ff1158c0d"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "contact/mobile/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1397,
+      "bytes": 46090,
+      "sha256": "4901d36f4608e8cc1676015b7ae9a44ae9c38eccec83149a80cb1669aea49589"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "contact/mobile/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1819,
+      "bytes": 70600,
+      "sha256": "a22126f03406c2d8a495d0d31bbae0ee7b81e46270a0f307540c4a9d1fae8839"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "contact/mobile/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2107,
+      "bytes": 104442,
+      "sha256": "bf3466ef40d5c37ac01692f90943e8210d79eb4e05014eea11f8ad8615b61e41"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "contact/mobile/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 20552,
+      "sha256": "ebb2e8cead82413cc04ebc9659d48df1ee4ce903c6c78f3339a845995fe9a390"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "contact/mobile/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2178,
+      "bytes": 85410,
+      "sha256": "db145349e83e85948bed96f8cb55c0a9cd65f62a9d7ca9a233eee399b5010c70"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "contact/mobile/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 390,
+      "height": 1336,
+      "bytes": 68232,
+      "sha256": "27874b639a782972954884de7fe1ecc6e36065c46944b58939071ea40eedb5bc"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "contact/mobile/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 3033,
+      "bytes": 133732,
+      "sha256": "c109985cc1947341dc72b8e5b350d6e623d5f6df5b7e32e372bef70e4b15269c"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "contact/mobile/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1840,
+      "bytes": 76272,
+      "sha256": "3b455aad3ccf50f5361f63fbe9876607f3a68f09bc93dd783b0b3b74798a07a7"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "contact/mobile/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2477,
+      "bytes": 115832,
+      "sha256": "4d423ee93e0e3657dade9c7e5e955d9f01f7082115facfdf92bd94e6e1177b91"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "contact/mobile/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 2360,
+      "bytes": 91622,
+      "sha256": "65cfe70cd173250b356d394de7866386ef681d2a7d9b35f9a28244f7dcfa9199"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "contact/mobile/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2474,
+      "bytes": 103248,
+      "sha256": "aaf01d06aba1a47015ff9038822ed48be447af532c9fb7b2800dc19e3767a6dd"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "contact/mobile/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 1890,
+      "bytes": 58834,
+      "sha256": "74fd07929236deda1d47821620f131b1563e9ccaefd4a0781d21aeb6a75010fe"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "contact/mobile/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1097,
+      "bytes": 23434,
+      "sha256": "a086d5edfef87bcb4dcac82e5a27a22a5787e48ce1cd7936368f251d7f03f699"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "contact/mobile/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1166,
+      "bytes": 26670,
+      "sha256": "9bc3202af4adf7bda13ac7c2eb35d95b8181f90340feba1cbbf419e5580fd033"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "id": "16-menu",
+      "label": "Navigation mobile",
+      "file": "contact/mobile/16-menu.webp",
+      "fullPage": false,
+      "url": "contact.html?piste=contact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 20984,
+      "sha256": "3bdc17cb946a77c8e4606f48b85b6a05390c199fbd76784a9619779d80802c89"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "resonances/bureau/01-accueil.webp",
+      "fullPage": true,
+      "url": "resonances.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1736,
+      "bytes": 175636,
+      "sha256": "4a3eec9f23ff680415477d922cdfd047710dbb253b4116f7aefe8c39be675b6d"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "resonances/bureau/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1931,
+      "bytes": 223656,
+      "sha256": "50abd8b994ae28289fbe640c432cbb487299807fb71e752b34516deeb10743ee"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "resonances/bureau/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1927,
+      "bytes": 226844,
+      "sha256": "16fd9de9d1be3c568894741870d8bb6e5c951ce10e01d08bca5f77e7367e047e"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "resonances/bureau/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1927,
+      "bytes": 152580,
+      "sha256": "eb135f538141899a5febd04c96265da94d9961e72ef85d642e3bbe75382e6f1a"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "resonances/bureau/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 158708,
+      "sha256": "f43c064fcdc902653c1e49d29bdc456fcb6f66301b376c991d81b9098ebe1cb0"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "resonances/bureau/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1757,
+      "bytes": 152956,
+      "sha256": "fa957ce1a9690d824ca9a0df8fecb11ca2e71ec7f91addeba5d9f6dad0797582"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "resonances/bureau/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 1440,
+      "height": 1465,
+      "bytes": 224976,
+      "sha256": "ea8cc80b36fe2f76097a98901a643dde58d51a1e5a34621f764e4b1e16fe8a10"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "resonances/bureau/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 3216,
+      "bytes": 347808,
+      "sha256": "0bf362eb483bb076ebad2dc27a7453e322193c320cc08f35c7bf365602035a12"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "resonances/bureau/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1290,
+      "bytes": 109052,
+      "sha256": "364e7dbc6b525a5f1bfd1ea0b1e8706407621e48c3091a842ed7242f78599636"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "resonances/bureau/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 2260,
+      "bytes": 158966,
+      "sha256": "f99e6dc40153e9588f50e76e808a2d2cc6ef6a0d740d9cb224a5ce559388dcd7"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "resonances/bureau/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 2177,
+      "bytes": 130544,
+      "sha256": "d1f0b0b54ff30b349f698884039924fae303bff4f9d63721a7ffd4cfc37ad834"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "resonances/bureau/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1847,
+      "bytes": 193034,
+      "sha256": "7fe6a85ee7485fe7b6e92d25fb12fa175739c4b31e1a69beece6042a89370d35"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "resonances/bureau/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1338,
+      "bytes": 99768,
+      "sha256": "63645e8bb46b2e94fd54696dfd06ecffd0785d70cd1a237c837feb463ff1f536"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "resonances/bureau/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1328,
+      "bytes": 58744,
+      "sha256": "67f9d772ebc7016463324ffd62c500f53b6a3fc04ca834c8817046675fdf0b05"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "resonances/bureau/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=resonances",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1109,
+      "bytes": 40986,
+      "sha256": "b2e961a04427a30910776814f0d0bb4b6d92c514627bdedc2b3854969478d585"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "resonances/mobile/01-accueil.webp",
+      "fullPage": true,
+      "url": "resonances.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2147,
+      "bytes": 85046,
+      "sha256": "6bf338668234b6f8f4591965b3233b40437c78e92cbf1c642383c0a285893249"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "resonances/mobile/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1363,
+      "bytes": 47800,
+      "sha256": "8b1724eb6748ea7628efda891d13ad7ed15c9e3b51571c932a3646e3900606d0"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "resonances/mobile/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1771,
+      "bytes": 70022,
+      "sha256": "40cf650b8a022feeba72aaf699981c46c8997d34dff323e1707ec152321e4e89"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "resonances/mobile/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2059,
+      "bytes": 103534,
+      "sha256": "3488c349289d9ffd3a2e37bf9c38fd6d89c66e54c0d606545480ade962802408"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "resonances/mobile/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 20552,
+      "sha256": "ebb2e8cead82413cc04ebc9659d48df1ee4ce903c6c78f3339a845995fe9a390"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "resonances/mobile/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2101,
+      "bytes": 83532,
+      "sha256": "4aba3d27c26e63d922727315684221fac746ea4d94cb28bb9e5f60e378df2caf"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "resonances/mobile/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 390,
+      "height": 1305,
+      "bytes": 67842,
+      "sha256": "567e789d19ce46b247f2ed781ec21cd6c4d9e1658c5f79136994943c8b8a5621"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "resonances/mobile/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2901,
+      "bytes": 132958,
+      "sha256": "19038d784bb12341021c4c5061aab365879ae994f34fd2362e9201f073a2c1fb"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "resonances/mobile/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1807,
+      "bytes": 64306,
+      "sha256": "4e16f79aa459654171f268d185336ac8ef5fc4450936d33e36df9348ea613765"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "resonances/mobile/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2479,
+      "bytes": 116300,
+      "sha256": "f77bcc338b183d459077dbb7c691bdf39524cb6ba566b6d27fe660c876f8a18e"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "resonances/mobile/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 2362,
+      "bytes": 91988,
+      "sha256": "5d389beecf211cdfdd7cb4317b5a89de16ccb5a1517a2e8b3e66ba03e25b6b35"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "resonances/mobile/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2443,
+      "bytes": 103736,
+      "sha256": "b03abf53f2b84454744f87e01f0e97904f3633b8a34b648281c0f0b4b67d758b"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "resonances/mobile/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 1859,
+      "bytes": 57870,
+      "sha256": "8bbe659698c6ab134e95c0a62c251d885ba813e48c2b277ef38a734553b30636"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "resonances/mobile/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1069,
+      "bytes": 23244,
+      "sha256": "27b6da411d2a229cbcb5980c4b1fe7bc9b4e920bdebb25253e9d2401922661d2"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "resonances/mobile/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1135,
+      "bytes": 27502,
+      "sha256": "bc801cbbf49f3fb26d9732422d017d4aeeb39edc10b6e5ee3e603e9fd988e8b3"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "id": "16-menu",
+      "label": "Navigation mobile",
+      "file": "resonances/mobile/16-menu.webp",
+      "fullPage": false,
+      "url": "resonances.html?piste=resonances",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 19976,
+      "sha256": "2f5c641a66b787f519e55d47dc323f2d66edd03f84a84a650b11fa0ba6a2f382"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "itinerance/bureau/01-accueil.webp",
+      "fullPage": true,
+      "url": "itinerance.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1725,
+      "bytes": 221578,
+      "sha256": "74a5d38bd02f27ca138879c8a3c7d7828b3c64c08a0a3b8e00d649f3c9576d5c"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "itinerance/bureau/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 2710,
+      "bytes": 234734,
+      "sha256": "35d3e7dba43306d01524c962f6b33b33e56c9f934baad11c34bc6db38e80c23b"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "itinerance/bureau/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1774,
+      "bytes": 222840,
+      "sha256": "2e42fa4a2dbf5143d7b1ccbec11dce72346d3f789f4ef3db0701cc49f0c8cd57"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "itinerance/bureau/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1774,
+      "bytes": 149058,
+      "sha256": "31065c642117153f39eb627081f53867ead1c60b7b87bd0af8727d1c20cb7896"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "itinerance/bureau/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 158708,
+      "sha256": "f43c064fcdc902653c1e49d29bdc456fcb6f66301b376c991d81b9098ebe1cb0"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "itinerance/bureau/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1798,
+      "bytes": 154030,
+      "sha256": "31b18b44daea37ae7b6a61168aa4c4d0330c6cf30e8ea42fb7fecd705c47f3c4"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "itinerance/bureau/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 1440,
+      "height": 1465,
+      "bytes": 225160,
+      "sha256": "8a25a8c62fad643a2a8bf0f77ef059100358da2300c156245aba2de0adbcdcb4"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "itinerance/bureau/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 3216,
+      "bytes": 347326,
+      "sha256": "29b3468f58fd43d0f44ba4f5030809526330ef9a2a7a5c983c967bd59f3bf240"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "itinerance/bureau/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1407,
+      "bytes": 100352,
+      "sha256": "c65513de11f80baafc6400caf5dd1f2633d6e47d9fcd46da59b00a4186e5cc86"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "itinerance/bureau/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 2260,
+      "bytes": 158986,
+      "sha256": "29e884188519674e509d1b58a914cbf3ca4c674eaeedf9851794bd229c238b3f"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "itinerance/bureau/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 2177,
+      "bytes": 130560,
+      "sha256": "65db6fcf8c617a08d2fdee7619ca66dc5cb8ba9d6d51328e0fd95828fd2ba6b4"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "itinerance/bureau/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1847,
+      "bytes": 187590,
+      "sha256": "ae0d876dfe5712ecbaeaf25a19eeae1ee5aa8dd3ebded2d5cda769a32876f5f7"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "itinerance/bureau/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1338,
+      "bytes": 100032,
+      "sha256": "cb5d124b85f8bdfffb81c20e5b4a5fc6f53ed2a24d4c265d83b6dcbdb89d8777"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "itinerance/bureau/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1225,
+      "bytes": 61592,
+      "sha256": "031547396fad7cb74220d30ce15a29a8623beb6c21dd12c7327819520af81f18"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "itinerance/bureau/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=itinerance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1109,
+      "bytes": 41086,
+      "sha256": "8d095551df967723f9575cee389630dc3d013dabbafdd284f1f47c24b2cafc6e"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "itinerance/mobile/01-accueil.webp",
+      "fullPage": true,
+      "url": "itinerance.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2251,
+      "bytes": 108350,
+      "sha256": "11346ffbf29b8fc7499ee2c5d6dc9ffba95e6d40c613abb7f0eebffcff9bc582"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "itinerance/mobile/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2499,
+      "bytes": 120982,
+      "sha256": "610c3a61c199f3e506bde51be37db4b81ecc2b809f3d1e7c01c6d3b35fae3f88"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "itinerance/mobile/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1771,
+      "bytes": 69976,
+      "sha256": "49456925f5ca5d5cf0087087bfc6144818831a8d42b77a63e816fbd41e63e725"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "itinerance/mobile/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2059,
+      "bytes": 103484,
+      "sha256": "acc0a847b5c80a9fed140dab3de6008f75925adbc02dd0e640853ec4911370d1"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "itinerance/mobile/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 20552,
+      "sha256": "ebb2e8cead82413cc04ebc9659d48df1ee4ce903c6c78f3339a845995fe9a390"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "itinerance/mobile/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2111,
+      "bytes": 84518,
+      "sha256": "3be600f27f792b03ccefcc918e3d71fe3e6b2fa74860892f6e90c8758ce12c3d"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "itinerance/mobile/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 390,
+      "height": 1356,
+      "bytes": 67692,
+      "sha256": "ecb97b4b8f9b31d79f952904d3d43b23622e0edcab826b60e14d0bdef2cff7de"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "itinerance/mobile/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2901,
+      "bytes": 132726,
+      "sha256": "62e211e1c5436c83e07225d614a873a9bc55208d1ea3e061d7421d3f3e755090"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "itinerance/mobile/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1767,
+      "bytes": 76216,
+      "sha256": "981d1b86b748725bf076c9eb6b5d3cdfb995000fb21bad402fba7b11ddc36454"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "itinerance/mobile/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2479,
+      "bytes": 116196,
+      "sha256": "0c23b4ac8ff7e7886cf61070877025edd41af0f46f260d26db6e982cef59de35"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "itinerance/mobile/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 2362,
+      "bytes": 91920,
+      "sha256": "453af7d1f9c52707b6a9fa6e87b567ee4bbcd57a79ceb113ad84ed8bee5f9c9c"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "itinerance/mobile/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2443,
+      "bytes": 103306,
+      "sha256": "4e1d6f0abe61fdd2a91ab8004a24dda9bfe12ee3a2bdcc136846a2896e564818"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "itinerance/mobile/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 1859,
+      "bytes": 57866,
+      "sha256": "bf05b03d899d7d2d701ff70f27d56624f289564d64ec68b19f9ed3b5b920c339"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "itinerance/mobile/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1176,
+      "bytes": 30002,
+      "sha256": "e3afd028586fc8e9cc95e5debace54a5a2dd3d8d438039144723f5f15603a9ec"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "itinerance/mobile/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1186,
+      "bytes": 26840,
+      "sha256": "e34b05a414ab969f000c3aac2f06515881ac23442b7366b9ef57ce2ace790b03"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "id": "16-menu",
+      "label": "Navigation mobile",
+      "file": "itinerance/mobile/16-menu.webp",
+      "fullPage": false,
+      "url": "itinerance.html?piste=itinerance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 42924,
+      "sha256": "616ee60e8e551a458edfe4ec2830e1f1cb7dc81adf49c7fe374551f92219b6e5"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "hors-cadre/bureau/01-accueil.webp",
+      "fullPage": true,
+      "url": "hors-cadre.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 2578,
+      "bytes": 256600,
+      "sha256": "e524b26d431d23b08c445dd7113e677205037f512492ec7229a3f6639bd0cf78"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "hors-cadre/bureau/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 2728,
+      "bytes": 306418,
+      "sha256": "bce038d9fd532899c6cbcb1a7632596f60e86453afef3d384aba555cbd3c54f9"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "hors-cadre/bureau/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1774,
+      "bytes": 223006,
+      "sha256": "9989b194cea43325d126fca0a1b573bc5d693cd1f82c0b3c1b4bebba04af697e"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "hors-cadre/bureau/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1774,
+      "bytes": 149164,
+      "sha256": "19dd6f5a79da6a5f42b6ac502df42a1cecc63a80f059f943caa3d194076c5146"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "hors-cadre/bureau/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 158708,
+      "sha256": "f43c064fcdc902653c1e49d29bdc456fcb6f66301b376c991d81b9098ebe1cb0"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "hors-cadre/bureau/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1888,
+      "bytes": 141468,
+      "sha256": "981256b68a82d21c79a707ed0eecaa145a95222d7455ac5b313150847f0a5720"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "hors-cadre/bureau/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 1440,
+      "height": 1503,
+      "bytes": 225408,
+      "sha256": "655a3ac691b4c4773862c77fcf0b0fc7ee338194e7e75f88391b40553016bea0"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "hors-cadre/bureau/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 2679,
+      "bytes": 206402,
+      "sha256": "ac70e708593ced2968e84ac88571f74d05fee83b1d43530001b4b23af199c3c7"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "hors-cadre/bureau/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1448,
+      "bytes": 120610,
+      "sha256": "8e5abff202bdd51a4899ea6c6749cb0cf885573a9fad3cb0b1573eef4e242e1d"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "hors-cadre/bureau/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 2260,
+      "bytes": 158982,
+      "sha256": "d9a783ad3fea21b8c6189d06171373b0343e3958e9c2c79694123827e606d371"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "hors-cadre/bureau/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 2177,
+      "bytes": 130604,
+      "sha256": "892ca6864633e8a184d5c348b7acc78eced902c90712b372efa53ec693595bb4"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "hors-cadre/bureau/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 2035,
+      "bytes": 189126,
+      "sha256": "f9a41e11e4f22cf5fc961e0f864e575c2bc4355ebe158d542940a3f09dcf5a47"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "hors-cadre/bureau/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 1440,
+      "height": 1376,
+      "bytes": 101312,
+      "sha256": "4e08f07b82a5ffd5da1e92861024d11cc4407376498d6d55c797abe48b7e315a"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "hors-cadre/bureau/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 1440,
+      "height": 1388,
+      "bytes": 79348,
+      "sha256": "c8c9d4e5a027c69e5e25f5e7da086b0623da92699399e59cec1c4b0dbebf4f57"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "hors-cadre/bureau/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=hors-cadre",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1147,
+      "bytes": 40702,
+      "sha256": "51330cae1b49c10fe6f51888693fe417ce7d17b39a8482d0e7a9db4cea6545e6"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "01-accueil",
+      "label": "Accueil",
+      "file": "hors-cadre/mobile/01-accueil.webp",
+      "fullPage": true,
+      "url": "hors-cadre.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2663,
+      "bytes": 118672,
+      "sha256": "26918a61c011953a65a6fc5cc619e4db8983e220cf561ba9d2cf92d17007a524"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "02-galerie",
+      "label": "Galerie",
+      "file": "hors-cadre/mobile/02-galerie.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1760,
+      "bytes": 76304,
+      "sha256": "e80e9f540675e90256708dd85a1863cb8a00e4df51e7a906711b75e3098dd49a"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "03-photo-paysage",
+      "label": "Photo, carte et connexes",
+      "file": "hors-cadre/mobile/03-photo-paysage.webp",
+      "fullPage": true,
+      "url": "photo.html?id=maree&piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1771,
+      "bytes": 69926,
+      "sha256": "f11e31391c2a09830380a1a46f5b66dd253e94fdcf1dcd564314f19d7dc66714"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "04-photo-portrait",
+      "label": "Photo verticale",
+      "file": "hors-cadre/mobile/04-photo-portrait.webp",
+      "fullPage": true,
+      "url": "photo.html?id=foret&piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2059,
+      "bytes": 103608,
+      "sha256": "727d43baac1bed199c9264e8cca6f755a8f041644ae4f58ff3e10a1bb5053a87"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "05-photo-agrandie",
+      "label": "Agrandissement",
+      "file": "hors-cadre/mobile/05-photo-agrandie.webp",
+      "fullPage": false,
+      "url": "photo.html?id=cimes&piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/cimes.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 20552,
+      "sha256": "ebb2e8cead82413cc04ebc9659d48df1ee4ce903c6c78f3339a845995fe9a390"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "06-carte",
+      "label": "Carte des images",
+      "file": "hors-cadre/mobile/06-carte.webp",
+      "fullPage": true,
+      "url": "carte.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2121,
+      "bytes": 84148,
+      "sha256": "f5951f9faecb3ea160ff5418ec13f20e84f3099c696c48962dcbaa6ffbd8a11e"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "07-voyages",
+      "label": "Les voyages",
+      "file": "hors-cadre/mobile/07-voyages.webp",
+      "fullPage": true,
+      "url": "voyages.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp"
+      ],
+      "width": 390,
+      "height": 1325,
+      "bytes": 67442,
+      "sha256": "358137da8c41c69699b7234d7c68687ae626a08921993529775965d95eb55eca"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "08-voyage",
+      "label": "Un voyage, trois étapes",
+      "file": "hors-cadre/mobile/08-voyage.webp",
+      "fullPage": true,
+      "url": "voyage.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 2901,
+      "bytes": 132900,
+      "sha256": "63849612b568d162e5d6204737a7bbe0d96088a73425e3b7dbac8badaad6735c"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "09-carnets",
+      "label": "Les Carnets",
+      "file": "hors-cadre/mobile/09-carnets.webp",
+      "fullPage": true,
+      "url": "carnets.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1768,
+      "bytes": 76696,
+      "sha256": "7316dd9e7927be425a568c8719492005bf5bc15f9514df05dc74e16f7834ec26"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "10-carnet-ralentir",
+      "label": "Carnet : ralentir",
+      "file": "hors-cadre/mobile/10-carnet-ralentir.webp",
+      "fullPage": true,
+      "url": "carnet.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2479,
+      "bytes": 116210,
+      "sha256": "0b2b7a21d44afe28489c6f9b5c4ec0ad397eb6e12b2a5cdbe6a210a7eff68dd6"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "11-carnet-ombre",
+      "label": "Carnet : l’ombre",
+      "file": "hors-cadre/mobile/11-carnet-ombre.webp",
+      "fullPage": true,
+      "url": "carnet.html?billet=ombre&piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 2362,
+      "bytes": 91940,
+      "sha256": "fffe90f83ce24d92b7bae22cad72cef4981bc0a2ee3d2696cf2ffb267a1e9f72"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "12-regards",
+      "label": "Les deux regards",
+      "file": "hors-cadre/mobile/12-regards.webp",
+      "fullPage": true,
+      "url": "regards.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 2463,
+      "bytes": 105230,
+      "sha256": "0c6fe2892e95cf2ab03005c20f666584dfb7649d4d5af4594ae9c0550fc278ec"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "13-contact",
+      "label": "Nous écrire",
+      "file": "hors-cadre/mobile/13-contact.webp",
+      "fullPage": true,
+      "url": "nous-ecrire.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/foret.webp"
+      ],
+      "width": 390,
+      "height": 1879,
+      "bytes": 57954,
+      "sha256": "0ae30f6ccec6d08fecbbd4a259e482c66657de192ab9101c646dfdf3e89a0db1"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "14-recherche-filtree",
+      "label": "Recherche filtrée",
+      "file": "hors-cadre/mobile/14-recherche-filtree.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp"
+      ],
+      "width": 390,
+      "height": 1096,
+      "bytes": 28344,
+      "sha256": "e3e03d92ad3bf73da49390d556d9c3fa66a219c6451278a0b563e4ceacf590a5"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "15-recherche-vide",
+      "label": "Recherche sans résultat",
+      "file": "hors-cadre/mobile/15-recherche-vide.webp",
+      "fullPage": true,
+      "url": "galerie.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1155,
+      "bytes": 27358,
+      "sha256": "f6cd54f9ae616c6d5264606aa4535eff4d7cd118f6874191d572adcc5215586b"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "id": "16-menu",
+      "label": "Navigation mobile",
+      "file": "hors-cadre/mobile/16-menu.webp",
+      "fullPage": false,
+      "url": "hors-cadre.html?piste=hors-cadre",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 29406,
+      "sha256": "51b29f6b816640e49efd6f39556047b79181e7fe6ebf3fef27c9ce7624cad253"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "id": "01-photos",
+      "label": "Photothèque",
+      "file": "admin-commune/bureau/01-photos.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=01-photos#photos",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 55778,
+      "sha256": "bdba238ab916cbfafb45b2d040ee8265bc6d67e28f3fa871ab8d9c477f326801"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "id": "02-fiche-photo",
+      "label": "Fiche photo",
+      "file": "admin-commune/bureau/02-fiche-photo.webp",
+      "fullPage": false,
+      "url": "admin.html?capture=02-fiche-photo#photos",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 23222,
+      "sha256": "29c8b34382e97a0fdf4eaecd15714e162abefef68de93522fbd2c46f215766e6"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "id": "03-voyages",
+      "label": "Voyages et sorties",
+      "file": "admin-commune/bureau/03-voyages.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=03-voyages#voyages",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 46766,
+      "sha256": "bd1f73e7ec061590b39984521c90ee7fdf8d812f1088c7e559e1f6f8b8d0f1d7"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "id": "04-sortie-ajoutee",
+      "label": "Nouvelle sortie",
+      "file": "admin-commune/bureau/04-sortie-ajoutee.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=04-sortie-ajoutee#voyages",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1072,
+      "bytes": 50988,
+      "sha256": "d33bccfc464d17699cdd8ec5ae5c4e943cc3d6ee2728dcbb7502a90ecf77e763"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "id": "05-carnet",
+      "label": "Édition du Carnet",
+      "file": "admin-commune/bureau/05-carnet.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=05-carnet#carnets",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1058,
+      "bytes": 48200,
+      "sha256": "97df766fffd447ba8e543d27cb82a98e9ec7da03bd2e5c96115d27aef53fed8a"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "id": "06-confirmation",
+      "label": "Confirmation de publication",
+      "file": "admin-commune/bureau/06-confirmation.webp",
+      "fullPage": false,
+      "url": "admin.html?capture=06-confirmation#carnets",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 19686,
+      "sha256": "679836ab50b92b30cefbf267b821b9890c92992e546857f2a849fef61a34aefe"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "id": "07-verifier",
+      "label": "À vérifier",
+      "file": "admin-commune/bureau/07-verifier.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=07-verifier#publication",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1000,
+      "bytes": 40714,
+      "sha256": "f8374f8be09ef34b1a4d1ceb0c67dc3843d85cbb24ea4b9492831f7cd30bc738"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "id": "08-reglages",
+      "label": "Réglages regroupés",
+      "file": "admin-commune/bureau/08-reglages.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=08-reglages#reglages",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageSources": [],
+      "width": 1440,
+      "height": 1044,
+      "bytes": 65608,
+      "sha256": "a77692becc4fd771c6e78d0f57ecd0c416ab3043db60ef24efb9b942edae42b1"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "id": "01-photos",
+      "label": "Photothèque",
+      "file": "admin-commune/mobile/01-photos.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=01-photos#photos",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 1497,
+      "bytes": 46354,
+      "sha256": "030470fea2cdae52d5d905abaf02712e7a84d6a19969910c4b443ba706633aa6"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "id": "02-fiche-photo",
+      "label": "Fiche photo",
+      "file": "admin-commune/mobile/02-fiche-photo.webp",
+      "fullPage": false,
+      "url": "admin.html?capture=02-fiche-photo#photos",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [
+        "/docs/maquettes-v4/assets/maree.webp",
+        "/docs/maquettes-v4/assets/dune.webp",
+        "/docs/maquettes-v4/assets/foret.webp",
+        "/docs/maquettes-v4/assets/cimes.webp"
+      ],
+      "width": 390,
+      "height": 844,
+      "bytes": 14734,
+      "sha256": "c1de54099f3c3ddf30c757ba23f09c6973066034751b5293ba5a65c17399c36d"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "id": "03-voyages",
+      "label": "Voyages et sorties",
+      "file": "admin-commune/mobile/03-voyages.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=03-voyages#voyages",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1360,
+      "bytes": 39998,
+      "sha256": "62cd656ce3799a23dd381c46c735b8a6d3b105ebca613e2317baafbdb1312bad"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "id": "04-sortie-ajoutee",
+      "label": "Nouvelle sortie",
+      "file": "admin-commune/mobile/04-sortie-ajoutee.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=04-sortie-ajoutee#voyages",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1479,
+      "bytes": 44040,
+      "sha256": "6f192e134735ae9e79f328ee7d8b66399af5bd0d55f3ba37784c7c388bb0afb6"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "id": "05-carnet",
+      "label": "Édition du Carnet",
+      "file": "admin-commune/mobile/05-carnet.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=05-carnet#carnets",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1392,
+      "bytes": 40106,
+      "sha256": "0d542259a61a043b293f14a7be9d1b0fedbc19ea18ded9109ca688bd9791d3d2"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "id": "06-confirmation",
+      "label": "Confirmation de publication",
+      "file": "admin-commune/mobile/06-confirmation.webp",
+      "fullPage": false,
+      "url": "admin.html?capture=06-confirmation#carnets",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 844,
+      "bytes": 14108,
+      "sha256": "5ecadddecbb547abe1ce629882f40cc56935fdce46abc4897628be15d88caaf8"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "id": "07-verifier",
+      "label": "À vérifier",
+      "file": "admin-commune/mobile/07-verifier.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=07-verifier#publication",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1066,
+      "bytes": 33008,
+      "sha256": "68a48b39627b685f63df0ae8a00158af2108ecb206cb3e6b699cdaec70f85154"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "id": "08-reglages",
+      "label": "Réglages regroupés",
+      "file": "admin-commune/mobile/08-reglages.webp",
+      "fullPage": true,
+      "url": "admin.html?capture=08-reglages#reglages",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSources": [],
+      "width": 390,
+      "height": 1999,
+      "bytes": 61774,
+      "sha256": "a52c161555b41b96de166e292ef4ceefa8f3c2e12b07958983e6f5473e1bdb0b"
+    }
+  ],
+  "boards": [
+    {
+      "group": "obscura",
+      "device": "bureau",
+      "file": "obscura/00-parcours-bureau.webp",
+      "width": 1824,
+      "height": 2493,
+      "bytes": 363420,
+      "sha256": "f3b9a71faa1c80bfd8d99610314cd42590d5e7970dbb232a56162cfc742d5898"
+    },
+    {
+      "group": "obscura",
+      "device": "mobile",
+      "file": "obscura/00-parcours-mobile.webp",
+      "width": 1464,
+      "height": 3318,
+      "bytes": 452528,
+      "sha256": "49f3ca782df82266defb4622a49f8810cbab26e66c47d56b85800e89baac354b"
+    },
+    {
+      "group": "panoramique",
+      "device": "bureau",
+      "file": "panoramique/00-parcours-bureau.webp",
+      "width": 1824,
+      "height": 2493,
+      "bytes": 414544,
+      "sha256": "5f5b4ea57cf1664e8df4c2621f054730448be41bd1faaf46b73350c893052a22"
+    },
+    {
+      "group": "panoramique",
+      "device": "mobile",
+      "file": "panoramique/00-parcours-mobile.webp",
+      "width": 1464,
+      "height": 3318,
+      "bytes": 486032,
+      "sha256": "7de205b9b4cb1f3cd94c493f27509a7e9e426211545caead2da3a66266c756fe"
+    },
+    {
+      "group": "contact",
+      "device": "bureau",
+      "file": "contact/00-parcours-bureau.webp",
+      "width": 1824,
+      "height": 2493,
+      "bytes": 371968,
+      "sha256": "95b671b83a0125a42ef0960052283a78dcc3d8c879b34f448540ed499d26cae7"
+    },
+    {
+      "group": "contact",
+      "device": "mobile",
+      "file": "contact/00-parcours-mobile.webp",
+      "width": 1464,
+      "height": 3318,
+      "bytes": 432894,
+      "sha256": "e59f5df1c4a5c1c8cdaf3982f3efc70c3c977779f4942197aa0a530b32ed82ba"
+    },
+    {
+      "group": "resonances",
+      "device": "bureau",
+      "file": "resonances/00-parcours-bureau.webp",
+      "width": 1824,
+      "height": 2493,
+      "bytes": 393392,
+      "sha256": "dc1e73cf8a896e59b17aab122b9fe13d37617758d9243d55cb71d9bc67d98fe4"
+    },
+    {
+      "group": "resonances",
+      "device": "mobile",
+      "file": "resonances/00-parcours-mobile.webp",
+      "width": 1464,
+      "height": 3318,
+      "bytes": 433846,
+      "sha256": "de1cca08310eba52fda95ec980b941670f0f22bc1fcf781260afd1216da5e1fd"
+    },
+    {
+      "group": "itinerance",
+      "device": "bureau",
+      "file": "itinerance/00-parcours-bureau.webp",
+      "width": 1824,
+      "height": 2493,
+      "bytes": 393588,
+      "sha256": "6c3787ee7333326f409b6565355211b4a89d276a29db33bb9352fd94860e0e7a"
+    },
+    {
+      "group": "itinerance",
+      "device": "mobile",
+      "file": "itinerance/00-parcours-mobile.webp",
+      "width": 1464,
+      "height": 3318,
+      "bytes": 476540,
+      "sha256": "9d31e2cbd51648f011277c17390fabeff4065c16a8ee7cc43d6812e4401f0721"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "bureau",
+      "file": "hors-cadre/00-parcours-bureau.webp",
+      "width": 1824,
+      "height": 2493,
+      "bytes": 373402,
+      "sha256": "81be26d1245ddc6709b241a9a164817ddde38755c741cac9e2f4f9788f512e97"
+    },
+    {
+      "group": "hors-cadre",
+      "device": "mobile",
+      "file": "hors-cadre/00-parcours-mobile.webp",
+      "width": 1464,
+      "height": 3318,
+      "bytes": 467178,
+      "sha256": "af04a228459dc0e2850fce9539fd767d3a46a2b7369c4230b547fb301217df2c"
+    },
+    {
+      "group": "admin-commune",
+      "device": "bureau",
+      "file": "admin-commune/00-parcours-bureau.webp",
+      "width": 1824,
+      "height": 1575,
+      "bytes": 113662,
+      "sha256": "fdbc1a41cc2a61c9c64c1d8caa790bd50bea025d9b20f9950940a59a72ec7d26"
+    },
+    {
+      "group": "admin-commune",
+      "device": "mobile",
+      "file": "admin-commune/00-parcours-mobile.webp",
+      "width": 1464,
+      "height": 1758,
+      "bytes": 184326,
+      "sha256": "b0f1cc21c304d9fcf69b56860331f9d122ae3797312f5a975f7665c27b7721a0"
+    },
+    {
+      "group": "comparatif",
+      "device": "bureau",
+      "file": "00-comparatif-six-pistes.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 211096,
+      "sha256": "2f6cbc16a2d6fd246a2ccc132860cf648cee3dff63fa816007b572744f5634f3"
+    }
+  ]
+}

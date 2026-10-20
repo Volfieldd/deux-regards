@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>La carte des regards — Nicephos · Maquette</title>
+<link rel="stylesheet" href="chambre.css">
+<link rel="stylesheet" href="parcours.css">
+<script defer src="data.js">
+</script>
+<script defer src="chambre.js">
+</script>
+</head>
+<body class="map-page" data-piste="obscura">
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="prototype">
+<a href="index.html">Études V4 · chambre noire</a>
+<span>Images générées · lieux et récits fictifs</span>
+</div>
+<header class="header">
+<a class="brand" href="index.html" aria-label="Nicephos, les six propositions">nicephos<span class="brand-dot">.</span>
+</a>
+<button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu</button>
+<nav id="navigation" aria-label="Navigation principale">
+<a href="galerie.html">Photographies</a>
+<a href="carte.html">Carte</a>
+<a href="voyages.html">Voyages</a>
+<a href="carnets.html">Carnets</a>
+<a href="regards.html">Regards</a>
+<button id="calm" aria-pressed="false">Mode calme</button>
+</nav>
+</header>
+<main id="main">
+<section class="page-intro">
+<p class="eyebrow">EXPLORER PAR LE LIEU · TERRITOIRE IMAGINAIRE</p>
+<h1>Une image.<br>
+<em>Un endroit où revenir.</em>
+</h1>
+<p class="page-lead">Du rivage aux cimes, quatre points de départ pour laisser le regard voyager.</p>
+</section>
+<section class="map-explorer" aria-label="Carte des images fictives">
+<div>
+<div class="map-canvas">
+<svg viewBox="0 0 900 570" role="img" aria-labelledby="atlas-title">
+<title id="atlas-title">Territoire imaginaire : rivage à l’ouest, dunes au sud, forêt au centre et sommets au nord-est. Carte fictive sans coordonnées réelles.</title>
+<defs>
+<pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+<path d="M60 0H0V60" fill="none" stroke="#29363b" stroke-width=".7"/>
+</pattern>
+</defs>
+<rect width="900" height="570" fill="#111a20"/>
+<rect width="900" height="570" fill="url(#grid)"/>
+<path d="M900 0H430Q475 70 385 110T340 220Q400 300 300 330T220 450Q250 510 300 570H900Z" fill="#1a2526"/>
+<g fill="none" stroke="#34413d" stroke-width="1.5">
+<path d="M450 40Q730 20 780 100T650 225T480 350T600 530"/>
+<path d="M475 70Q680 50 750 120T620 210T450 350T580 550"/>
+<path d="M500 100Q650 80 720 140T590 210T425 350T550 565"/>
+<path d="M525 130Q620 110 690 160T560 210T405 350"/>
+<path d="M435 390Q550 310 670 380T865 400"/>
+<path d="M415 420Q540 340 670 410T880 430"/>
+</g>
+<path d="M330 285Q410 250 530 275T700 135M530 275Q500 385 390 445" fill="none" stroke="#a58f72" stroke-width="2" stroke-dasharray="5 9"/>
+<g fill="#9caeae" font-family="Jost, sans-serif" font-size="16" letter-spacing="4">
+<text x="70" y="190">LE LARGE</text>
+<text x="585" y="480">LES TERRES</text>
+</g>
+<text x="835" y="60" fill="#d8c7b4" font-family="Jost" font-size="15">N ↑</text>
+</svg>
+<button class="map-marker" style="left:36.7%;top:50%" data-place="maree" aria-pressed="true">
+<span>01</span> Le rivage</button>
+<button class="map-marker" style="left:43.3%;top:78.1%" data-place="dune" aria-pressed="false">
+<span>02</span> Les dunes</button>
+<button class="map-marker" style="left:58.9%;top:48.2%" data-place="foret" aria-pressed="false">
+<span>03</span> La forêt</button>
+<button class="map-marker" style="left:77.8%;top:23.7%" data-place="cimes" aria-pressed="false">
+<span>04</span> Les cimes</button>
+</div>
+<p class="map-disclaimer">Géographie entièrement fictive · aucun emplacement réel des auteurs.</p>
+</div>
+<aside id="map-selection" aria-live="polite">
+</aside>
+</section>
+<section class="map-collection">
+<p class="eyebrow">LES MÊMES IMAGES, SANS PASSER PAR LA CARTE</p>
+<h2>Choisir <em>son horizon.</em>
+</h2>
+<div class="map-list" id="map-list">
+</div>
+</section>
+</main>
+<footer>
+<a class="brand small" href="index.html">nicephos.</a>
+<span>Étude de direction artistique · images de substitution générées</span>
+<div>
+<a href="index.html">Les six pistes</a>
+<a href="nous-ecrire.html">Nous écrire</a>
+<a href="admin.html">L’atelier</a>
+</div>
+</footer>
+<dialog id="lightbox" aria-label="Image agrandie">
+<button class="close-lightbox" autofocus>Fermer ×</button>
+<img alt="">
+<p>
+</p>
+</dialog>
+<p class="sr-only" id="announcement" role="status">
+</p>
+</body>
+</html>

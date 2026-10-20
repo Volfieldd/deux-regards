@@ -17,7 +17,7 @@ Quatre images générées par l’outil intégré `imagegen`, sans photographie 
 
 Les titres, légendes, récits et lieux sont fictifs, sans attribution aux auteurs réels. Les captures de ce dossier montrent exclusivement ces nouveaux éléments. Aucun ancien PPTX, JPG, PNG ou WebP n’a été réutilisé.
 
-## Vérifications exécutées
+## Vérifications du deuxième round, avant les exports WebP
 
 Résultats détaillés : [verification.json](preuves/verification.json). **18 cas réussis**, dont un contrôle de **42 états dimensionnels** : 14 pages à 1440, 390 et 320 px.
 
@@ -55,3 +55,7 @@ Non exécutés : lecteur d’écran réel, zoom navigateur 200 %, appareils phys
 - **Amélioration visuelle** : la visionneuse mobile utilise toute la largeur pour la photo ; ses flèches sont placées dessous. Les états à 390 et 320 px et le scan Photo ont été rejoués.
 
 Les scripts ponctuels de cette séance ne sont pas ajoutés comme nouvelle infrastructure de test. Aucun script de fumée ou pipeline CI du produit n’a été modifié. Les vérifications déjà réussies n’ont pas été répétées sans changement pertinent.
+
+## Complément : dossier WebP du site
+
+Les maquettes ont ensuite été complétées par une carte dédiée, Regards et Contact, puis par les déclinaisons intérieures des six pistes. Les 202 captures WebP et 15 planches sont décrites dans [le guide des exports](webp/README.md). Le [manifeste](webp/manifest.json) et la [provenance vérifiée](webp/provenance-images.json) consignent les dimensions, empreintes et seules images admises. Les contrôles de cette extension sont distincts des 18 cas du round précédent ; aucune nouvelle conformité exhaustive n’est revendiquée.

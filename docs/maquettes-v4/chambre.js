@@ -9,6 +9,15 @@
   const requested = params.get('piste') || document.body.dataset.piste;
   const piste = validPistes.includes(requested) ? requested : 'obscura';
   const page = location.pathname.split('/').pop() || 'index.html';
+  document.body.dataset.piste = piste;
+  if (!validPistes.includes(page.replace('.html','')) && !['index.html','admin.html'].includes(page)) document.body.classList.add('interior');
+  if (page !== 'index.html') {
+    $('.prototype > a').textContent = page === 'admin.html' ? 'Études V4 · administration commune' : `Études V4 · ${concepts.find(c=>c[0]===piste)[1]}`;
+    if (page !== 'admin.html') {
+      $('.header .brand').href = piste+'.html';
+      $('.header .brand').setAttribute('aria-label', `Nicephos, accueil ${concepts.find(c=>c[0]===piste)[1]}`);
+    }
+  }
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const announce = text => { $('#announcement').textContent = text; };
   const url = (file, values = {}) => {
@@ -89,6 +98,20 @@
   });
   const normalize=s=>s.toLocaleLowerCase('fr').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const filtered=(query,theme)=>photos.filter(p=>(!theme || p.theme===theme)&&normalize(`${p.title} ${p.theme} ${p.note}`).includes(normalize(query.trim())));
+  if ($('#map-selection')) {
+    function selectPlace(id) {
+      const p=photos.find(photo=>photo.id===id) || photos[0];
+      $('#map-selection').innerHTML=`<p class="eyebrow">POINT DE DÉPART ${String(photos.indexOf(p)+1).padStart(2,'0')} · ${esc(p.theme)}</p>${shot(p,{from:'carte'})}<p class="map-thought">${esc(p.note)}</p><a class="text-link" href="${esc(url('voyage.html'))}">Suivre le récit imaginaire ↗</a><p class="muted">Image générée · lieu fictif</p>`;
+      $$('[data-place]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.place===p.id)));
+    }
+    $('#map-list').innerHTML=photos.map(p=>shot(p,{from:'carte'})).join('');
+    $$('[data-place]').forEach(b=>b.addEventListener('click',()=>selectPlace(b.dataset.place)));
+    selectPlace(params.get('lieu'));
+  }
+  $('#contact-demo')?.addEventListener('submit',e=>{
+    e.preventDefault();
+    $('#contact-result').textContent='Essai terminé : aucune donnée transmise. Ce formulaire est une maquette.';
+  });
   if ($('#filters')) {
     $('#query').value=params.get('q') || '';
     $('#theme').value=params.get('theme') || '';
@@ -119,6 +142,7 @@
     const back=$('#back');
     if (from==='voyage') {back.href=url('voyage.html')+`#etape-${Math.max(1,[0,2,3].indexOf(photos.indexOf(p))+1)}`;back.textContent='← Revenir à cette étape';}
     else if(from==='carnet') {back.href=url('carnet.html',params.get('billet')==='ombre'?{billet:'ombre'}:{})+'#attendre';back.textContent='← Revenir au Carnet';}
+    else if(from==='carte') {back.href=url('carte.html',{lieu:p.id});back.textContent='← Revenir à la carte';}
     else if(validPistes.includes(from)) {back.href=url(from+'.html',{image:p.id});back.textContent='← Revenir à '+concepts.find(c=>c[0]===from)[1];}
     else {back.href=url('galerie.html',{q,theme});back.textContent='← Revenir à la collection';}
     function move(delta) {
