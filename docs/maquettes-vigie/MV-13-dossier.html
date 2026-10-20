@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Maquette MV-13 : fiche d’un dossier de la console de la Vigie (explication, frise par phases, matrice ATT&CK, graphe des entités, signaux, réponses, journal ; gestes de l’analyste).">
+<title>Dossier #23 · Vigie · Nicephos (maquette MV-13)</title>
+<link rel="stylesheet" href="../audit-ergonomie-2026-10-16/maquettes/_commun/admin.css">
+<link rel="stylesheet" href="../audit-ergonomie-2026-10-16/maquettes/_commun/tokens.css">
+<link rel="stylesheet" href="../audit-ergonomie-2026-10-16/maquettes/_commun/admin-plus.css">
+<link rel="stylesheet" href="_vigie/vigie.css">
+<link rel="stylesheet" href="../audit-ergonomie-2026-10-16/maquettes/_commun/annotations.css">
+</head>
+<body class="admin vigie">
+<i id="sans-annotations" hidden></i>
+<div class="mq-fold" aria-hidden="true"></div>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="shell">
+<aside class="side" id="admin-nav" aria-label="Menu de la console">
+  <div class="side-haut"><a class="word" href="/"><span class="marque mq-a">Vigie</span><span class="mention">Sécurité de Nicephos</span></a><a class="side-fermer" href="#contenu"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>Fermer<span class="sr-only"> le menu</span></a></div>
+  <nav class="nav" aria-label="Vue d’ensemble">
+    <a href="/"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Vue d’ensemble</a>
+  </nav>
+  <p class="grp" id="nav-surveiller">Surveiller</p>
+  <nav class="nav" aria-labelledby="nav-surveiller">
+    <a href="/dossiers" aria-current="page"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.5 7v10.5a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H12l-2-2.5H5.5a2 2 0 0 0-2 2z"/><path d="M8 13h8M8 16h5"/></svg>Dossiers<span class="nav-badge"><span aria-hidden="true">5</span><span class="sr-only">, 5 ouverts</span></span></a>
+    <a href="/alertes"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Alertes<span class="nav-badge"><span aria-hidden="true">6</span><span class="sr-only">, 6 ouvertes</span></span></a>
+    <a href="/flux"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h4c6 0 6 12 12 12h2"/><path d="M3 12h5c4 0 5 3 8 3h5"/><path d="M3 18h4c5 0 6-12 12-12h2"/></svg>Flux</a>
+    <a href="/attack"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="4" width="4.5" height="16" rx="1"/><rect x="9.75" y="4" width="4.5" height="11" rx="1"/><rect x="16" y="4" width="4.5" height="13.5" rx="1"/></svg>ATT&amp;CK</a>
+    <a href="/evenements"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>Événements</a>
+    <a href="/entites"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 1.5v3.5M12 19v3.5M1.5 12H5M19 12h3.5"/></svg>Entités</a>
+    <a href="/sante"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg>Santé<span class="nav-badge attention"><span aria-hidden="true">▲ 1</span><span class="sr-only">, 1 écart</span></span></a>
+  </nav>
+  <p class="grp" id="nav-agir">Agir</p>
+  <nav class="nav" aria-labelledby="nav-agir">
+    <a href="/decisions"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.1-7.5 9.5-4.3-1.4-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.6"/></svg>Décisions<span class="nav-badge neutre"><span aria-hidden="true">4</span><span class="sr-only">, 4 en cours</span></span></a>
+  </nav>
+  <p class="grp" id="nav-regler">Régler</p>
+  <nav class="nav" aria-labelledby="nav-regler">
+    <a href="/reglages"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>Règles et réglages</a>
+    <a href="/droits"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/></svg>Droits</a>
+  </nav>
+  <div class="foot">
+    <div class="me">
+      <span class="av" aria-hidden="true">S</span><span class="who"><span class="me-nom">Sébastien</span><small>Administrateur</small></span>
+      <form method="post" action="/theme"><input type="hidden" name="_csrf" value="v9a2…"><input type="hidden" name="back" value="/dossiers/23"><button class="iconbtn btn-theme" type="submit" name="theme" value="light" title="Mode clair / sombre"><span class="when-dark"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span class="sr-only">Passer en mode clair</span></span><span class="when-light"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="sr-only">Passer en mode sombre</span></span></button></form>
+      <form method="post" action="/deconnexion"><input type="hidden" name="_csrf" value="v9a2…"><button class="iconbtn" type="submit" aria-label="Se déconnecter" title="Se déconnecter"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></svg></button></form>
+    </div>
+  </div>
+</aside>
+<main class="main" id="contenu" tabindex="-1">
+<div class="vg-bandeau" role="alert"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2z"/><path d="M12 7.5v5.5M12 16.5h.01"/></svg><p><span class="t">2 alertes critiques sans intervenant : #413 depuis 14 h 05, #412 depuis 14 h 02.</span><span class="sec">Un administrateur apparu hors de l’application, vu par le site puis par le contrôle des rôles : le même compte.</span></p><a class="btn ghost" href="/alertes/413">Ouvrir l’alerte #413</a></div>
+<header class="ep mq-a"><span class="mq-pin d" aria-hidden="true">1</span>
+  <a class="ep-retour" href="/dossiers"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Dossiers</a>
+  <div class="ep-titre"><h1>Un compte inconnu, devenu Administrateur hors de l’application : accès puis ancrage</h1><span class="ep-pastilles"><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouvert</span></span></div>
+  <p class="ep-meta"><span>Dossier #23 · piste identité</span><span>compte&nbsp;<span class="sub">zitadel-329906113</span></span><span class="tel-non">ouvert à 14 h 02 par l’alerte #412 · dernier signe à 14 h 10</span><span class="tel-non"><span class="vg-identite"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg>Identité confirmée à 14 h 17, valable jusqu’à 14 h 22</span></span></p>
+  <div class="ep-actions"><a class="btn ghost ep-secondaire" href="#classer">Classer…</a><details class="menu ep-plus"><summary class="btn ghost" aria-label="Plus de gestes sur le dossier"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></summary><div class="menu-pop"><a href="#rattacher">Rattacher une entité…</a><a href="#fusionner">Fusionner avec un autre dossier…</a><a href="#classer">Classer…</a></div></details><form method="post" action="/dossiers/23/prendre"><input type="hidden" name="_csrf" value="v9a2…"><button class="btn" type="submit">Prendre en charge</button></form></div>
+</header>
+<div class="mq-a"><span class="mq-pin d" aria-hidden="true">2</span>
+<div class="ds-expl"><p class="l1">Critique · Ancrage atteinte, 2 phases dans l’ordre (accès → ancrage) ; non observé : repérage, tentative, exploration</p><p class="l2"><span class="k">Confiance forte :</span> preuve : rôle donné hors de l’application (14 h 02, alerte #412)</p><p class="l3"><span class="k">Enjeu critique :</span> droits d’administrateur en jeu, rôle donné hors de l’application</p><ul class="ds-modifs" aria-label="Modificateurs de la gravité"><li>enjeu critique (+1)</li><li>dissimulation pendant le dossier (+1) : surveillance réduite, alerte #414 à 14 h 10</li><li>plancher : alerte #412 critique</li></ul><p class="ds-ou"><span class="mq-pin" aria-hidden="true">3</span><b>Où chercher :</b> le rôle a été écrit dans la base, hors de l’application ; ni adresse ni session ne l’accompagnent. Repérage, tentative et exploration ne sont pas observés par la Vigie : voyez les journaux de l’hôte et la sauvegarde de 14 h 04.</p></div>
+</div>
+<div class="mq-a"><span class="mq-pin d" aria-hidden="true">4</span><ul class="ds-nav" aria-label="Parties du dossier"><li><a href="#frise">Frise</a></li><li><a href="#attack">Matrice ATT&amp;CK</a></li><li><a href="#entites">Graphe des entités</a></li><li><a href="#signaux">Signaux et faits</a></li><li><a href="#reponses">Réponses</a></li><li><a href="#journal">Journal du dossier</a></li></ul></div>
+<section class="panel ds-section mq-a" id="frise" aria-labelledby="t-frise"><span class="mq-pin d" aria-hidden="true">5</span><h2 class="panel-t" id="t-frise">Frise</h2>
+<div class="ds-frise"><figure class="ds-dessin"><div class="ds-std"><svg class="ds-svg" viewBox="0 0 760 424" role="img" aria-labelledby="fr23s-t fr23s-d"><title id="fr23s-t">Frise du dossier #23, de 13 h 55 à 14 h 20</title><desc id="fr23s-d">Accès à 14 h 02 min 11 ; ancrage à 14 h 02 min 11 (preuve, alerte #412) et 14 h 05 (alerte #413) ; dissimulation à 14 h 10 (alerte #414) ; repérage, tentative, exploration non observés. Le même contenu est dans le tableau « Signaux et faits ».</desc>
+<rect class="ds-c-fond" x="0" y="10" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="32.0">1 Repérage</text>
+<text class="ds-non-t" x="152" y="32.0">non observé</text>
+<rect class="ds-c-fond alt" x="0" y="44" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="66.0">2 Tentative</text>
+<text class="ds-non-t" x="152" y="66.0">non observé</text>
+<rect class="ds-c-fond" x="0" y="78" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="100.0">3 Accès</text>
+<rect class="ds-c-fond alt" x="0" y="112" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="134.0">4 Exploration</text>
+<text class="ds-non-t" x="152" y="134.0">non observé</text>
+<rect class="ds-c-fond" x="0" y="146" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="168.0">5 Ancrage</text>
+<rect class="ds-c-fond alt" x="0" y="180" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="202.0">6 Collecte</text>
+<rect class="ds-c-fond" x="0" y="214" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="236.0">7 Exfiltration</text>
+<rect class="ds-c-fond alt" x="0" y="248" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="270.0">8 Impact</text>
+<rect class="ds-c-fond" x="0" y="282" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="304.0">Indices</text>
+<rect class="ds-c-fond alt" x="0" y="316" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="338.0">Dissimulation</text>
+<rect class="ds-c-fond" x="0" y="350" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="372.0">Faits</text>
+<line class="ds-axe" x1="146" y1="384" x2="736" y2="384"></line>
+<line class="ds-axe" x1="146.0" y1="10" x2="146.0" y2="390"></line><text class="ds-graduation" x="146.0" y="410" text-anchor="middle">13 h 55</text>
+<line class="ds-axe" x1="264.0" y1="10" x2="264.0" y2="390"></line><text class="ds-graduation" x="264.0" y="410" text-anchor="middle">14 h 00</text>
+<line class="ds-axe" x1="382.0" y1="10" x2="382.0" y2="390"></line><text class="ds-graduation" x="382.0" y="410" text-anchor="middle">14 h 05</text>
+<line class="ds-axe" x1="500.0" y1="10" x2="500.0" y2="390"></line><text class="ds-graduation" x="500.0" y="410" text-anchor="middle">14 h 10</text>
+<line class="ds-axe" x1="618.0" y1="10" x2="618.0" y2="390"></line><text class="ds-graduation" x="618.0" y="410" text-anchor="middle">14 h 15</text>
+<line class="ds-axe" x1="736.0" y1="10" x2="736.0" y2="390"></line><text class="ds-graduation" x="736.0" y="410" text-anchor="middle">14 h 20</text>
+<polyline class="ds-chaine" points="315.5,95.0 315.5,163.0"></polyline>
+<g><title>Accès compté : confiance forte dès la preuve</title><rect class="ds-m-jalon" x="309.5" y="89.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Rôle donné hors de l’application (#412)</title><path class="ds-m-preuve" d="M315.5 155.0l8 8-8 8-8-8z"></path></g>
+<g><title>Sauvegarde du site différente de ce qu’il déclare (#413, venue avec #24)</title><rect class="ds-m-jalon" x="376.0" y="157.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Surveillance réduite : blocages automatiques arrêtés (#414)</title><path class="ds-m-marqueur" d="M500.0 325.0l8 14h-16z"></path></g>
+</svg></div><div class="ds-large"><svg class="ds-svg ds-l" viewBox="0 0 1120 424" role="img" aria-labelledby="fr23l-t fr23l-d"><title id="fr23l-t">Frise du dossier #23, de 13 h 55 à 14 h 20</title><desc id="fr23l-d">Accès à 14 h 02 min 11 ; ancrage à 14 h 02 min 11 (preuve, alerte #412) et 14 h 05 (alerte #413) ; dissimulation à 14 h 10 (alerte #414) ; repérage, tentative, exploration non observés. Le même contenu est dans le tableau « Signaux et faits ».</desc>
+<rect class="ds-c-fond" x="0" y="10" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="32.0">1 Repérage</text>
+<text class="ds-non-t" x="174" y="32.0">non observé</text>
+<rect class="ds-c-fond alt" x="0" y="44" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="66.0">2 Tentative</text>
+<text class="ds-non-t" x="174" y="66.0">non observé</text>
+<rect class="ds-c-fond" x="0" y="78" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="100.0">3 Accès</text>
+<rect class="ds-c-fond alt" x="0" y="112" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="134.0">4 Exploration</text>
+<text class="ds-non-t" x="174" y="134.0">non observé</text>
+<rect class="ds-c-fond" x="0" y="146" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="168.0">5 Ancrage</text>
+<rect class="ds-c-fond alt" x="0" y="180" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="202.0">6 Collecte</text>
+<rect class="ds-c-fond" x="0" y="214" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="236.0">7 Exfiltration</text>
+<rect class="ds-c-fond alt" x="0" y="248" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="270.0">8 Impact</text>
+<rect class="ds-c-fond" x="0" y="282" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="304.0">Indices</text>
+<rect class="ds-c-fond alt" x="0" y="316" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="338.0">Dissimulation</text>
+<rect class="ds-c-fond" x="0" y="350" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="372.0">Faits</text>
+<line class="ds-axe" x1="168" y1="384" x2="1096" y2="384"></line>
+<line class="ds-axe" x1="168.0" y1="10" x2="168.0" y2="390"></line><text class="ds-graduation" x="168.0" y="410" text-anchor="middle">13 h 55</text>
+<line class="ds-axe" x1="353.6" y1="10" x2="353.6" y2="390"></line><text class="ds-graduation" x="353.6" y="410" text-anchor="middle">14 h 00</text>
+<line class="ds-axe" x1="539.2" y1="10" x2="539.2" y2="390"></line><text class="ds-graduation" x="539.2" y="410" text-anchor="middle">14 h 05</text>
+<line class="ds-axe" x1="724.8" y1="10" x2="724.8" y2="390"></line><text class="ds-graduation" x="724.8" y="410" text-anchor="middle">14 h 10</text>
+<line class="ds-axe" x1="910.4" y1="10" x2="910.4" y2="390"></line><text class="ds-graduation" x="910.4" y="410" text-anchor="middle">14 h 15</text>
+<line class="ds-axe" x1="1096.0" y1="10" x2="1096.0" y2="390"></line><text class="ds-graduation" x="1096.0" y="410" text-anchor="middle">14 h 20</text>
+<polyline class="ds-chaine" points="434.6,95.0 434.6,163.0"></polyline>
+<g><title>Accès compté : confiance forte dès la preuve</title><rect class="ds-m-jalon" x="428.6" y="89.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Rôle donné hors de l’application (#412)</title><path class="ds-m-preuve" d="M434.6 155.0l8 8-8 8-8-8z"></path></g>
+<g><title>Sauvegarde du site différente de ce qu’il déclare (#413, venue avec #24)</title><rect class="ds-m-jalon" x="533.2" y="157.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Surveillance réduite : blocages automatiques arrêtés (#414)</title><path class="ds-m-marqueur" d="M724.8 325.0l8 14h-16z"></path></g>
+</svg></div><figcaption><ul class="ds-leg" aria-label="Lire la frise"><li><span class="ds-sym jalon" aria-hidden="true"></span>jalon : une phase a eu lieu</li><li><span class="ds-sym preuve" aria-hidden="true"></span>preuve : l’accès est hostile</li><li><span class="ds-sym indice" aria-hidden="true"></span>indice : l’accès est douteux</li><li><span class="ds-sym fait" aria-hidden="true"></span>fait ordinaire</li><li><span class="ds-sym marqueur" aria-hidden="true"></span>marqueur (dissimulation)</li><li><span class="ds-sym chaine" aria-hidden="true"></span>la suite dans l’ordre</li></ul></figcaption></figure><div class="ds-tel"><section class="ds-ph non"><h3>Repérage<span class="sec">non observé</span></h3></section>
+<section class="ds-ph non"><h3>Tentative<span class="sec">non observée</span></h3></section>
+<section class="ds-ph"><h3>Accès<span class="sec">1 jalon</span></h3><ol><li><span class="ds-sym jalon" aria-hidden="true"></span><span><b>14 h 02</b> · accès compté : confiance forte dès la preuve</span></li></ol></section>
+<section class="ds-ph non"><h3>Exploration<span class="sec">non observée</span></h3></section>
+<section class="ds-ph"><h3>Ancrage<span class="sec">2 signaux</span></h3><ol><li><span class="ds-sym preuve" aria-hidden="true"></span><span><b>14 h 02</b> · rôle donné hors de l’application, alerte #412</span></li><li><span class="ds-sym jalon" aria-hidden="true"></span><span><b>14 h 05</b> · sauvegarde différente de ce qu’il déclare, alerte #413</span></li></ol></section>
+<section class="ds-ph"><h3>Dissimulation<span class="sec">1 marqueur</span></h3><ol><li><span class="ds-sym marqueur" aria-hidden="true"></span><span><b>14 h 10</b> · surveillance réduite, alerte #414</span></li></ol></section></div></div>
+<p class="panel-pied"><span class="ds-zoom">Zoom : <a class="vg-lien" href="/dossiers/23?frise=1h">1 heure</a> · <a class="vg-lien" href="/dossiers/23?frise=24h">24 heures</a> · <a class="vg-lien" href="/dossiers/23?frise=7j">7 jours</a></span><span>Faits ordinaires : aucun</span></p>
+</section>
+<section class="panel ds-section mq-a" id="attack" aria-labelledby="t-attack"><span class="mq-pin d" aria-hidden="true">6</span><h2 class="panel-t" id="t-attack">MITRE ATT&amp;CK</h2>
+<p class="vg-lede">Les 15 tactiques d’ATT&amp;CK 20.0, dans l’ordre de MITRE ; les techniques vues dans le dossier, numérotées dans l’ordre de leur première apparition, avec la phase qu’elles donnent au dossier.</p>
+<ul class="ak-matrice"><li class="ak-tac ak-vide"><h3>Reconnaissance<span class="sec">TA0043 · Reconnaissance</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-hors"><h3>Développement de ressources<span class="sec">TA0042 · Resource Development</span></h3><p class="ak-rien">Non observable ici : la préparation de l’attaquant se fait hors du site.</p></li><li class="ak-tac ak-vide"><h3>Accès initial<span class="sec">TA0001 · Initial Access</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-vide"><h3>Exécution<span class="sec">TA0002 · Execution</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac"><h3>Persistance<span class="sec">TA0003 · Persistence</span></h3><ul class="ak-tq"><li><span><span class="ak-ordre" aria-hidden="true">1</span><span class="sr-only">1re technique vue : </span><span class="ak-id">T1098</span></span><span class="ak-n">2<span class="sr-only"> signalaux</span></span><span class="ak-nm">Manipulation de compte</span><span class="ak-ph">phase du dossier : ancrage</span></li></ul></li><li class="ak-tac"><h3>Élévation de privilèges<span class="sec">TA0004 · Privilege Escalation</span></h3><ul class="ak-tq"><li><span><span class="ak-ordre" aria-hidden="true">1</span><span class="sr-only">1re technique vue : </span><span class="ak-id">T1098</span></span><span class="ak-n">2<span class="sr-only"> signalaux</span></span><span class="ak-nm">Manipulation de compte</span><span class="ak-ph">phase du dossier : ancrage</span></li></ul></li><li class="ak-tac ak-vide"><h3>Furtivité<span class="sec">TA0005 · Stealth</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac"><h3>Neutralisation des défenses<span class="sec">TA0112 · Defense Impairment</span></h3><ul class="ak-tq"><li><span><span class="ak-ordre" aria-hidden="true">2</span><span class="sr-only">2e technique vue : </span><span class="ak-id">T1685</span></span><span class="ak-n">1<span class="sr-only"> signal</span></span><span class="ak-nm">Désactivation ou modification des outils</span><span class="ak-ph">phase du dossier : marqueur dissimulation</span></li><li><span class="ak-nm">et le contrôle des rôles (#413), sans technique de cette tactique</span></li></ul></li><li class="ak-tac ak-vide"><h3>Accès aux identifiants<span class="sec">TA0006 · Credential Access</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-vide"><h3>Découverte<span class="sec">TA0007 · Discovery</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-vide"><h3>Mouvement latéral<span class="sec">TA0008 · Lateral Movement</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-vide"><h3>Collecte<span class="sec">TA0009 · Collection</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-vide"><h3>Commande et contrôle<span class="sec">TA0011 · Command and Control</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-vide"><h3>Exfiltration<span class="sec">TA0010 · Exfiltration</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-vide"><h3>Impact<span class="sec">TA0040 · Impact</span></h3><p class="ak-rien">Aucun signal.</p></li><li class="ak-tac ak-vides-tel"><details class="ak-sans"><summary>11 tactiques sans signal</summary><ul><li>Reconnaissance</li><li>Accès initial</li><li>Exécution</li><li>Furtivité</li><li>Accès aux identifiants</li><li>Découverte</li><li>Mouvement latéral</li><li>Collecte</li><li>Commande et contrôle</li><li>Exfiltration</li><li>Impact</li></ul></details></li></ul>
+<p class="panel-pied"><a class="vg-lien" href="/attack?dossier=23">Ces techniques dans la vue ATT&amp;CK de la détection</a><a class="vg-lien" href="/attack/navigator.json?dossier=23">Calque ATT&amp;CK Navigator du dossier (JSON)</a></p>
+</section>
+<section class="panel ds-section mq-a" id="entites" aria-labelledby="t-ent"><span class="mq-pin d" aria-hidden="true">7</span><h2 class="panel-t" id="t-ent">Entités</h2>
+<div class="ds-graphe"><figure class="ds-dessin"><div class="ds-std"><svg class="ds-svg" viewBox="0 0 760 118" role="img" aria-labelledby="gr23s-t gr23s-d"><title id="gr23s-t">Entités du dossier #23</title><desc id="gr23s-d">Au centre, le compte zitadel-329906113 (graine) ; à droite, la cible « site, comptes », rattachée à la main par la fusion du dossier #24. Aucun acteur réseau. Le même contenu est dans le tableau qui suit.</desc>
+<text class="ds-col" x="20" y="20">ACTEURS</text><text class="ds-col" x="270.0" y="20">COMPTE ET SESSION</text><text class="ds-col" x="520" y="20">CIBLES</text>
+<path class="ds-e manuel" d="M490.0 69.0C505.0 69.0 505.0 69.0 520.0 69.0"></path>
+<rect class="ds-n graine" x="270.0" y="44.0" width="220" height="50" rx="8"></rect><text class="ds-n-k" x="282.0" y="63.0">compte · graine</text><text class="ds-n-mono" x="282.0" y="83.0">zitadel-329906113</text>
+<rect class="ds-n cible" x="520.0" y="44.0" width="220" height="50" rx="8"></rect><text class="ds-n-k" x="532.0" y="63.0">cible · site</text><text class="ds-n-mono" x="532.0" y="83.0">comptes</text>
+</svg></div><div class="ds-large"><svg class="ds-svg ds-l" viewBox="0 0 1120 118" role="img" aria-labelledby="gr23l-t gr23l-d"><title id="gr23l-t">Entités du dossier #23</title><desc id="gr23l-d">Au centre, le compte zitadel-329906113 (graine) ; à droite, la cible « site, comptes », rattachée à la main par la fusion du dossier #24. Aucun acteur réseau. Le même contenu est dans le tableau qui suit.</desc>
+<text class="ds-col" x="20" y="20">ACTEURS</text><text class="ds-col" x="410.0" y="20">COMPTE ET SESSION</text><text class="ds-col" x="800" y="20">CIBLES</text>
+<path class="ds-e manuel" d="M710.0 69.0C755.0 69.0 755.0 69.0 800.0 69.0"></path>
+<rect class="ds-n graine" x="410.0" y="44.0" width="300" height="50" rx="8"></rect><text class="ds-n-k" x="422.0" y="63.0">compte · graine</text><text class="ds-n-mono" x="422.0" y="83.0">zitadel-329906113</text>
+<rect class="ds-n cible" x="800.0" y="44.0" width="300" height="50" rx="8"></rect><text class="ds-n-k" x="812.0" y="63.0">cible · site</text><text class="ds-n-mono" x="812.0" y="83.0">comptes</text>
+</svg></div><figcaption><ul class="ds-leg" aria-label="Lire le graphe"><li><span class="ds-sym e-fort" aria-hidden="true"></span>lien fort (session, compte)</li><li><span class="ds-sym e-moyen" aria-hidden="true"></span>moyen (adresse de la session)</li><li><span class="ds-sym e-faible" aria-hidden="true"></span>faible (autre adresse du compte, 72 h)</li><li><span class="ds-sym e-manuel" aria-hidden="true"></span>rattaché à la main</li></ul></figcaption></figure></div>
+<p class="vg-lede">Aucun acteur réseau : ni adresse ni session ne sont venues avec le rôle, écrit dans la base hors de l’application.</p>
+<div class="mq-a"><span class="mq-pin" aria-hidden="true">8</span>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-ds-t">
+<caption><div class="vg-cap-t">2 entités : le compte d’où vient le dossier, la cible venue avec la fusion du dossier #24</div></caption>
+<thead><tr><th scope="col">Rôle</th><th scope="col">Entité</th><th scope="col">Lien</th><th scope="col">Entrée par</th><th scope="col">Depuis</th><th scope="col">Geste</th></tr></thead>
+<tbody>
+<tr><td data-label="Rôle">acteur</td><th scope="row"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-329906113</span></span></th><td data-label="Lien">graine</td><td data-label="Entrée par">l’alerte #412</td><td data-label="Depuis">14 h 02</td><td data-label="Geste"><a class="vg-lien" href="/entites/compte/zitadel-329906113">Fiche du compte</a></td></tr>
+<tr><td data-label="Rôle">cible</td><th scope="row"><span class="ent"><span class="k">site</span><span class="sub">comptes</span></span></th><td data-label="Lien">rattachée à la main</td><td data-label="Entrée par">la fusion du dossier #24, par Sébastien</td><td data-label="Depuis">14 h 18</td><td data-label="Geste"><a class="vg-lien" href="#detacher">Détacher…<span class="sr-only"> la cible site, comptes</span></a></td></tr>
+</tbody></table></div>
+</div>
+<p class="panel-pied"><span>Dossiers voisins : aucun.</span><a class="vg-lien" href="#rattacher">Rattacher une entité…</a></p>
+</section>
+<section class="panel ds-section mq-a" id="signaux" aria-labelledby="t-sig"><span class="mq-pin d" aria-hidden="true">9</span><h2 class="panel-t" id="t-sig">Signaux et faits</h2>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-ds-t">
+<caption><div class="vg-cap-t">3 signaux, du plus ancien au plus récent : l’équivalent de la frise et de la matrice</div></caption>
+<thead><tr><th scope="col">Heure à la source</th><th scope="col">Phase</th><th scope="col">Nature</th><th scope="col">Signal</th><th scope="col">Entité</th><th scope="col">Alerte</th></tr></thead>
+<tbody>
+<tr><td class="c-h" data-label="Heure à la source">14 h 02 min 11</td><td data-label="Phase">Ancrage</td><td class="c-nat" data-label="Nature"><span class="ds-sym preuve" aria-hidden="true"></span>preuve</td><th scope="row">Rôle donné, retiré ou compte changé hors de l’application<span class="sec"><code>role_hors_application · DS8</code> · T1098 Manipulation de compte</span></th><td data-label="Entité"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-329906113</span></span></td><td data-label="Alerte"><a class="vg-lien" href="/alertes/412">#412</a></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">14 h 05</td><td data-label="Phase">Ancrage</td><td class="c-nat" data-label="Nature"><span class="ds-sym jalon" aria-hidden="true"></span>jalon</td><th scope="row">Sauvegarde du site différente de ce qu’il déclare<span class="sec"><code>controle_roles · DS8</code> · T1098 Manipulation de compte</span></th><td data-label="Entité"><span class="ent"><span class="k">site</span><span class="sub">comptes</span></span></td><td data-label="Alerte"><a class="vg-lien" href="/alertes/413">#413</a></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">14 h 10</td><td data-label="Phase">Dissimulation</td><td class="c-nat" data-label="Nature"><span class="ds-sym marqueur" aria-hidden="true"></span>marqueur</td><th scope="row">Surveillance réduite<span class="sec"><code>surveillance_reduite · DS24</code> · T1685 Désactivation ou modification des outils</span></th><td data-label="Entité"><span class="ent"><span class="k">la Vigie</span><span class="sub">blocages automatiques</span></span></td><td data-label="Alerte"><a class="vg-lien" href="/alertes/414">#414</a></td></tr>
+</tbody></table></div>
+<p class="panel-pied"><span>L’accès (phase 3) n’a pas de signal à lui : il compte dès que la confiance est moyenne ou forte, à l’heure de la première preuve.</span></p>
+</section>
+<div class="vg-trois">
+<section class="panel ds-section mq-a" id="reponses" aria-labelledby="t-rep"><span class="mq-pin d" aria-hidden="true">10</span><h2 class="panel-t" id="t-rep">Réponses</h2>
+<ul class="vg-lignes">
+<li><span class="t">Geler un compte · <span class="sub">zitadel-329906113</span></span><span class="n">#87</span><span class="sec">par la Vigie à 14 h 02 (alerte #412, mode Bloquer), jusqu’au dim. 18 oct., 14 h 02</span><a class="vg-lien" href="/decisions/87/lever">Lever le gel…<span class="sr-only"> (décision #87)</span></a></li>
+<li><span class="t">Fermer les sessions d’un compte · <span class="sub">zitadel-329906113</span></span><span class="n">#88</span><span class="sec">par la Vigie à 14 h 02, jusqu’au lun. 19 oct., 14 h 02</span><a class="vg-lien" href="/decisions/88/lever">Lever la fermeture des sessions…<span class="sr-only"> (décision #88)</span></a></li>
+</ul>
+<p class="panel-pied"><span>Aucune réponse au niveau du dossier pendant le mois d’observation (D37).</span><a class="vg-lien" href="/entites/compte/zitadel-329906113#agir">Actions forcées sur le compte</a></p>
+</section>
+<section class="panel ds-section mq-a" id="journal" aria-labelledby="t-jou"><span class="mq-pin d" aria-hidden="true">11</span><h2 class="panel-t" id="t-jou">Journal du dossier</h2>
+<ul class="vg-lignes">
+<li><span class="t">Fusion du dossier #24</span><span class="n">14 h 18</span><span class="sec">par Sébastien : « le même compte que #412 » ; l’alerte #413 et la cible « site, comptes » viennent avec lui</span></li>
+<li><span class="t">Ouvert par l’alerte #412</span><span class="n">14 h 02</span><span class="sec">par la Vigie, graine : le compte ; critique dès l’ouverture</span></li>
+</ul>
+<p class="panel-pied"><span>Chaque geste est chaîné (<code>vigie_dossier</code>) ; la marque de dissimulation de 14 h 10 est dans les signaux, pas au journal.</span></p>
+</section>
+</div>
+<div class="mq-etats">
+<section class="mq-ecran" inert aria-labelledby="etat-a"><p class="mq-etat" id="etat-a"><span class="mq-pin" aria-hidden="true">12</span>État · Hypothèse du mar. 20 oct. (scénario 7.1 de l’étude) : la session de Sébastien volée, 34 fiches lues puis exportées, 5 phases dans l’ordre</p>
+<div class="ecran-a vg-page">
+<header class="ep">
+  <a class="ep-retour" href="/dossiers"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Dossiers</a>
+  <div class="ep-titre"><h2 class="h1">Le compte de Sébastien, connecté depuis un appareil et un pays inédits : 34 fiches lues puis exportées</h2><span class="ep-pastilles"><span class="grav grav--critique"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Critique</span><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouvert</span></span></div>
+  <p class="ep-meta"><span>Dossier #27 · piste identité</span><span>compte&nbsp;<span class="sub">zitadel-318204411</span></span><span>Sébastien</span><span class="tel-non">mar. 20 oct., ouvert à 09 h 55 · dernier signe à 10 h 47</span></p>
+  
+</header>
+<div class="ds-expl"><p class="l1">Critique · Exfiltration atteinte, 5 phases dans l’ordre (repérage → tentative → accès → collecte → exfiltration) ; non observé : exploration, ancrage</p><p class="l2"><span class="k">Confiance forte :</span> échecs puis connexion, pays inédit (NL), appareil inédit (6 points, 2 sources)</p><p class="l3"><span class="k">Enjeu critique :</span> 34 objets personnels lus ou exportés, export de données personnelles, données personnelles sorties sous un accès douteux</p><ul class="ds-modifs" aria-label="Modificateurs de la gravité"><li>enjeu critique (+1)</li><li>chaîne d’attaque ouverte : alerte #418 (DS23, mode Observer)</li></ul><p class="ds-ou"><b>À savoir :</b> l’adresse 198.51.100.61 s’est connectée avec un compte d’administrateur : elle est désormais « vue avec un administrateur », jamais bloquée automatiquement. Le blocage se décide ici, à la main.</p></div>
+<ul class="ds-nav" aria-label="Parties du dossier"><li><a href="#frise-a">Frise</a></li><li><a href="#entites-a">Graphe des entités</a></li><li><a href="#signaux-a">Signaux et faits</a></li></ul>
+<div class="panel ds-section" id="frise-a"><h3 class="panel-t" id="t-frise-a">Frise</h3>
+<div class="ds-frise"><figure class="ds-dessin"><div class="ds-std"><svg class="ds-svg" viewBox="0 0 760 424" role="img" aria-labelledby="fr27s-t fr27s-d"><title id="fr27s-t">Frise du dossier #27, de 09 h 30 à 11 h 00 (et la veille, 22 h 10)</title><desc id="fr27s-d">Repérage la veille à 22 h 10 ; 3 échecs à 09 h 52 ; accès à 09 h 55 avec trois indices ; 34 fiches lues de 10 h 03 à 10 h 36 ; un export à 10 h 47.</desc>
+<rect class="ds-c-fond" x="0" y="10" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="32.0">1 Repérage</text>
+<rect class="ds-c-fond alt" x="0" y="44" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="66.0">2 Tentative</text>
+<rect class="ds-c-fond" x="0" y="78" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="100.0">3 Accès</text>
+<rect class="ds-c-fond alt" x="0" y="112" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="134.0">4 Exploration</text>
+<text class="ds-non-t" x="152" y="134.0">non observé</text>
+<rect class="ds-c-fond" x="0" y="146" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="168.0">5 Ancrage</text>
+<text class="ds-non-t" x="152" y="168.0">non observé</text>
+<rect class="ds-c-fond alt" x="0" y="180" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="202.0">6 Collecte</text>
+<rect class="ds-c-fond" x="0" y="214" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="236.0">7 Exfiltration</text>
+<rect class="ds-c-fond alt" x="0" y="248" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="270.0">8 Impact</text>
+<rect class="ds-c-fond" x="0" y="282" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="304.0">Indices</text>
+<rect class="ds-c-fond alt" x="0" y="316" width="760" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="338.0">Dissimulation</text>
+<rect class="ds-c-fond" x="0" y="350" width="760" height="34"></rect>
+<text class="ds-c-t" x="10" y="372.0">Faits</text>
+<line class="ds-axe" x1="146" y1="384" x2="736" y2="384"></line>
+<line class="ds-axe" x1="146.0" y1="10" x2="146.0" y2="390"></line><text class="ds-graduation" x="146.0" y="410" text-anchor="middle">09 h 30</text>
+<line class="ds-axe" x1="244.3" y1="10" x2="244.3" y2="390"></line><text class="ds-graduation" x="244.3" y="410" text-anchor="middle">09 h 45</text>
+<line class="ds-axe" x1="342.7" y1="10" x2="342.7" y2="390"></line><text class="ds-graduation" x="342.7" y="410" text-anchor="middle">10 h 00</text>
+<line class="ds-axe" x1="441.0" y1="10" x2="441.0" y2="390"></line><text class="ds-graduation" x="441.0" y="410" text-anchor="middle">10 h 15</text>
+<line class="ds-axe" x1="539.3" y1="10" x2="539.3" y2="390"></line><text class="ds-graduation" x="539.3" y="410" text-anchor="middle">10 h 30</text>
+<line class="ds-axe" x1="637.7" y1="10" x2="637.7" y2="390"></line><text class="ds-graduation" x="637.7" y="410" text-anchor="middle">10 h 45</text>
+<line class="ds-axe" x1="736.0" y1="10" x2="736.0" y2="390"></line><text class="ds-graduation" x="736.0" y="410" text-anchor="middle">11 h 00</text>
+<polyline class="ds-chaine" points="152.6,27.0 290.8,61.0 309.9,95.0 362.3,197.0 650.8,231.0"></polyline>
+<g><title>Saisies malveillantes en série, la veille à 22 h 10 (scanner)</title><rect class="ds-m-jalon" x="146.6" y="21.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Échec de connexion, avant l’accès</title><rect class="ds-m-promu" x="286.8" y="56.0" width="16.0" height="10" rx="5"></rect><text class="ds-m-nb" x="305.1" y="66.0">3</text></g>
+<g><title>Accès compté : confiance forte</title><rect class="ds-m-jalon" x="303.9" y="89.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Fiche de personne lue</title><rect class="ds-m-promu" x="358.3" y="192.0" width="224.3" height="10" rx="5"></rect><text class="ds-m-nb" x="588.7" y="202.0">34</text></g>
+<g><title>Export de la fiche d’une personne</title><rect class="ds-m-jalon" x="644.8" y="225.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Échecs puis connexion ; pays inédit (NL) ; appareil inédit</title><circle class="ds-m-indice" cx="309.9" cy="299.0" r="6"></circle></g>
+<g><title>Connexion réussie</title><circle class="ds-m-fait" cx="309.9" cy="367.0" r="4"></circle></g>
+</svg></div><div class="ds-large"><svg class="ds-svg ds-l" viewBox="0 0 1120 424" role="img" aria-labelledby="fr27l-t fr27l-d"><title id="fr27l-t">Frise du dossier #27, de 09 h 30 à 11 h 00 (et la veille, 22 h 10)</title><desc id="fr27l-d">Repérage la veille à 22 h 10 ; 3 échecs à 09 h 52 ; accès à 09 h 55 avec trois indices ; 34 fiches lues de 10 h 03 à 10 h 36 ; un export à 10 h 47.</desc>
+<rect class="ds-c-fond" x="0" y="10" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="32.0">1 Repérage</text>
+<rect class="ds-c-fond alt" x="0" y="44" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="66.0">2 Tentative</text>
+<rect class="ds-c-fond" x="0" y="78" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="100.0">3 Accès</text>
+<rect class="ds-c-fond alt" x="0" y="112" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="134.0">4 Exploration</text>
+<text class="ds-non-t" x="174" y="134.0">non observé</text>
+<rect class="ds-c-fond" x="0" y="146" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="168.0">5 Ancrage</text>
+<text class="ds-non-t" x="174" y="168.0">non observé</text>
+<rect class="ds-c-fond alt" x="0" y="180" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="202.0">6 Collecte</text>
+<rect class="ds-c-fond" x="0" y="214" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="236.0">7 Exfiltration</text>
+<rect class="ds-c-fond alt" x="0" y="248" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="270.0">8 Impact</text>
+<rect class="ds-c-fond" x="0" y="282" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="304.0">Indices</text>
+<rect class="ds-c-fond alt" x="0" y="316" width="1120" height="34"></rect>
+<text class="ds-c-t vide" x="10" y="338.0">Dissimulation</text>
+<rect class="ds-c-fond" x="0" y="350" width="1120" height="34"></rect>
+<text class="ds-c-t" x="10" y="372.0">Faits</text>
+<line class="ds-axe" x1="168" y1="384" x2="1096" y2="384"></line>
+<line class="ds-axe" x1="168.0" y1="10" x2="168.0" y2="390"></line><text class="ds-graduation" x="168.0" y="410" text-anchor="middle">09 h 30</text>
+<line class="ds-axe" x1="322.7" y1="10" x2="322.7" y2="390"></line><text class="ds-graduation" x="322.7" y="410" text-anchor="middle">09 h 45</text>
+<line class="ds-axe" x1="477.3" y1="10" x2="477.3" y2="390"></line><text class="ds-graduation" x="477.3" y="410" text-anchor="middle">10 h 00</text>
+<line class="ds-axe" x1="632.0" y1="10" x2="632.0" y2="390"></line><text class="ds-graduation" x="632.0" y="410" text-anchor="middle">10 h 15</text>
+<line class="ds-axe" x1="786.7" y1="10" x2="786.7" y2="390"></line><text class="ds-graduation" x="786.7" y="410" text-anchor="middle">10 h 30</text>
+<line class="ds-axe" x1="941.3" y1="10" x2="941.3" y2="390"></line><text class="ds-graduation" x="941.3" y="410" text-anchor="middle">10 h 45</text>
+<line class="ds-axe" x1="1096.0" y1="10" x2="1096.0" y2="390"></line><text class="ds-graduation" x="1096.0" y="410" text-anchor="middle">11 h 00</text>
+<polyline class="ds-chaine" points="178.3,27.0 395.7,61.0 425.8,95.0 508.3,197.0 962.0,231.0"></polyline>
+<g><title>Saisies malveillantes en série, la veille à 22 h 10 (scanner)</title><rect class="ds-m-jalon" x="172.3" y="21.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Échec de connexion, avant l’accès</title><rect class="ds-m-promu" x="391.7" y="56.0" width="16.0" height="10" rx="5"></rect><text class="ds-m-nb" x="412.6" y="66.0">3</text></g>
+<g><title>Accès compté : confiance forte</title><rect class="ds-m-jalon" x="419.8" y="89.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Fiche de personne lue</title><rect class="ds-m-promu" x="504.3" y="192.0" width="348.3" height="10" rx="5"></rect><text class="ds-m-nb" x="858.5" y="202.0">34</text></g>
+<g><title>Export de la fiche d’une personne</title><rect class="ds-m-jalon" x="956.0" y="225.0" width="12" height="12" rx="1"></rect></g>
+<g><title>Échecs puis connexion ; pays inédit (NL) ; appareil inédit</title><circle class="ds-m-indice" cx="425.8" cy="299.0" r="6"></circle></g>
+<g><title>Connexion réussie</title><circle class="ds-m-fait" cx="425.8" cy="367.0" r="4"></circle></g>
+</svg></div><figcaption><ul class="ds-leg" aria-label="Lire la frise"><li><span class="ds-sym jalon" aria-hidden="true"></span>jalon : une phase a eu lieu</li><li><span class="ds-sym preuve" aria-hidden="true"></span>preuve : l’accès est hostile</li><li><span class="ds-sym indice" aria-hidden="true"></span>indice : l’accès est douteux</li><li><span class="ds-sym fait" aria-hidden="true"></span>fait ordinaire</li><li><span class="ds-sym marqueur" aria-hidden="true"></span>marqueur (dissimulation)</li><li><span class="ds-sym chaine" aria-hidden="true"></span>la suite dans l’ordre</li></ul></figcaption></figure><div class="ds-tel"><section class="ds-ph"><h4>Repérage<span class="sec">1 jalon</span></h4><ol><li><span class="ds-sym jalon" aria-hidden="true"></span><span><b>lun. 22 h 10</b> · saisies malveillantes en série depuis 198.51.100.61</span></li></ol></section>
+<section class="ds-ph"><h4>Tentative<span class="sec">3 échecs</span></h4><ol><li><span class="ds-sym jalon" aria-hidden="true"></span><span><b>09 h 52</b> · 3 échecs de connexion, devenus jalons : ils précèdent l’accès douteux</span></li></ol></section>
+<section class="ds-ph"><h4>Accès<span class="sec">confiance forte</span></h4><ol><li><span class="ds-sym indice" aria-hidden="true"></span><span><b>09 h 55</b> · échecs puis connexion, pays inédit (NL), appareil inédit</span></li></ol></section>
+<section class="ds-ph non"><h4>Exploration<span class="sec">non observée</span></h4></section>
+<section class="ds-ph non"><h4>Ancrage<span class="sec">non observé</span></h4></section>
+<section class="ds-ph"><h4>Collecte<span class="sec">34 fiches</span></h4><ol><li><span class="ds-sym jalon" aria-hidden="true"></span><span><b>10 h 03 → 10 h 36</b> · 34 fiches de personnes lues, devenues jalons</span></li></ol></section>
+<section class="ds-ph"><h4>Exfiltration<span class="sec">1 export</span></h4><ol><li><span class="ds-sym jalon" aria-hidden="true"></span><span><b>10 h 47</b> · export de la fiche d’une personne</span></li></ol></section></div></div>
+<p class="panel-pied"><span>Repérage : la veille, lun. 19 oct., 22 h 10, dessiné au bord gauche.</span><span>Faits ordinaires : 1 connexion ; les 37 autres sont devenus des jalons</span></p>
+</div>
+<div class="panel ds-section" id="entites-a"><h3 class="panel-t" id="t-ent-a">Entités</h3>
+<div class="ds-graphe"><figure class="ds-dessin"><div class="ds-std"><svg class="ds-svg" viewBox="0 0 760 246" role="img" aria-labelledby="gr27s-t gr27s-d"><title id="gr27s-t">Entités du dossier #27</title><desc id="gr27s-d">Acteurs : l’adresse 198.51.100.61 (lien moyen). Centre : le compte zitadel-318204411 (graine) et sa session c41e07b29d55 (lien fort). Cibles : 34 fiches de personnes et un export. Voisin : le dossier #22, même réseau.</desc>
+<text class="ds-col" x="20" y="20">ACTEURS</text><text class="ds-col" x="270.0" y="20">COMPTE ET SESSION</text><text class="ds-col" x="520" y="20">CIBLES</text>
+<path class="ds-e moyen" d="M240.0 133.0C255.0 133.0 255.0 165.0 270.0 165.0"></path>
+<path class="ds-e moyen" d="M240.0 133.0C255.0 133.0 255.0 101.0 270.0 101.0"></path>
+<path class="ds-e fort" d="M380.0 126.0V140.0"></path>
+<path class="ds-e moyen" d="M490.0 165.0C505.0 165.0 505.0 69.0 520.0 69.0"></path>
+<path class="ds-e moyen" d="M490.0 165.0C505.0 165.0 505.0 133.0 520.0 133.0"></path>
+<rect class="ds-n" x="20.0" y="108.0" width="220" height="50" rx="8"></rect><text class="ds-n-k" x="32.0" y="127.0">adresse</text><text class="ds-n-mono" x="32.0" y="147.0">198.51.100.61</text>
+<rect class="ds-n graine" x="270.0" y="76.0" width="220" height="50" rx="8"></rect><text class="ds-n-k" x="282.0" y="95.0">compte · graine</text><text class="ds-n-mono" x="282.0" y="115.0">zitadel-318204411</text>
+<rect class="ds-n" x="270.0" y="140.0" width="220" height="50" rx="8"></rect><text class="ds-n-k" x="282.0" y="159.0">session</text><text class="ds-n-mono" x="282.0" y="179.0">c41e07b29d55</text>
+<rect class="ds-n cible" x="520.0" y="44.0" width="220" height="50" rx="8"></rect><text class="ds-n-k" x="532.0" y="63.0">objets · personne</text><text class="ds-n-mono" x="532.0" y="83.0">34 fiches lues</text>
+<rect class="ds-n cible" x="520.0" y="108.0" width="220" height="50" rx="8"></rect><text class="ds-n-k" x="532.0" y="127.0">export · personne</text><text class="ds-n-mono" x="532.0" y="147.0">1 export</text>
+<rect class="ds-n voisin" x="520.0" y="172.0" width="220" height="50" rx="8"></rect><text class="ds-n-t" x="532.0" y="203.0">voisin : dossier #22, même réseau</text>
+</svg></div><div class="ds-large"><svg class="ds-svg ds-l" viewBox="0 0 1120 246" role="img" aria-labelledby="gr27l-t gr27l-d"><title id="gr27l-t">Entités du dossier #27</title><desc id="gr27l-d">Acteurs : l’adresse 198.51.100.61 (lien moyen). Centre : le compte zitadel-318204411 (graine) et sa session c41e07b29d55 (lien fort). Cibles : 34 fiches de personnes et un export. Voisin : le dossier #22, même réseau.</desc>
+<text class="ds-col" x="20" y="20">ACTEURS</text><text class="ds-col" x="410.0" y="20">COMPTE ET SESSION</text><text class="ds-col" x="800" y="20">CIBLES</text>
+<path class="ds-e moyen" d="M320.0 133.0C365.0 133.0 365.0 165.0 410.0 165.0"></path>
+<path class="ds-e moyen" d="M320.0 133.0C365.0 133.0 365.0 101.0 410.0 101.0"></path>
+<path class="ds-e fort" d="M560.0 126.0V140.0"></path>
+<path class="ds-e moyen" d="M710.0 165.0C755.0 165.0 755.0 69.0 800.0 69.0"></path>
+<path class="ds-e moyen" d="M710.0 165.0C755.0 165.0 755.0 133.0 800.0 133.0"></path>
+<rect class="ds-n" x="20.0" y="108.0" width="300" height="50" rx="8"></rect><text class="ds-n-k" x="32.0" y="127.0">adresse</text><text class="ds-n-mono" x="32.0" y="147.0">198.51.100.61</text>
+<rect class="ds-n graine" x="410.0" y="76.0" width="300" height="50" rx="8"></rect><text class="ds-n-k" x="422.0" y="95.0">compte · graine</text><text class="ds-n-mono" x="422.0" y="115.0">zitadel-318204411</text>
+<rect class="ds-n" x="410.0" y="140.0" width="300" height="50" rx="8"></rect><text class="ds-n-k" x="422.0" y="159.0">session</text><text class="ds-n-mono" x="422.0" y="179.0">c41e07b29d55</text>
+<rect class="ds-n cible" x="800.0" y="44.0" width="300" height="50" rx="8"></rect><text class="ds-n-k" x="812.0" y="63.0">objets · personne</text><text class="ds-n-mono" x="812.0" y="83.0">34 fiches lues</text>
+<rect class="ds-n cible" x="800.0" y="108.0" width="300" height="50" rx="8"></rect><text class="ds-n-k" x="812.0" y="127.0">export · personne</text><text class="ds-n-mono" x="812.0" y="147.0">1 export</text>
+<rect class="ds-n voisin" x="800.0" y="172.0" width="300" height="50" rx="8"></rect><text class="ds-n-t" x="812.0" y="203.0">voisin : dossier #22, même réseau</text>
+</svg></div><figcaption><ul class="ds-leg" aria-label="Lire le graphe"><li><span class="ds-sym e-fort" aria-hidden="true"></span>lien fort (session, compte)</li><li><span class="ds-sym e-moyen" aria-hidden="true"></span>moyen (adresse de la session)</li><li><span class="ds-sym e-faible" aria-hidden="true"></span>faible (autre adresse du compte, 72 h)</li><li><span class="ds-sym e-manuel" aria-hidden="true"></span>rattaché à la main</li></ul></figcaption></figure></div>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-ds-t">
+<caption><div class="vg-cap-t">4 entités et un voisin ; les objets lus restent dans les signaux</div></caption>
+<thead><tr><th scope="col">Rôle</th><th scope="col">Entité</th><th scope="col">Lien</th><th scope="col">Entrée par</th><th scope="col">Depuis</th><th scope="col">Geste</th></tr></thead>
+<tbody>
+<tr><td data-label="Rôle">acteur</td><th scope="row"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-318204411</span><span class="nom">(Sébastien)</span></span></th><td data-label="Lien">graine</td><td data-label="Entrée par">« échecs puis connexion »</td><td data-label="Depuis">09 h 55</td><td data-label="Geste"><a class="vg-lien" href="/entites/compte/zitadel-318204411">Fiche du compte</a></td></tr>
+<tr><td data-label="Rôle">acteur</td><th scope="row"><span class="ent"><span class="k">session</span><span class="sub">c41e07b29d55</span></span></th><td data-label="Lien">fort</td><td data-label="Entrée par">la connexion de 09 h 55</td><td data-label="Depuis">09 h 55</td><td data-label="Geste"><a class="vg-lien" href="#detacher">Détacher…<span class="sr-only"> la session c41e07b29d55</span></a></td></tr>
+<tr><td data-label="Rôle">acteur</td><th scope="row"><span class="ent"><span class="k">adresse</span><span class="ip">198.51.100.61</span></span></th><td data-label="Lien">moyen</td><td data-label="Entrée par">la session</td><td data-label="Depuis">09 h 55</td><td data-label="Geste"><a class="vg-lien" href="/entites/ip/198.51.100.61#agir">Bloquer…<span class="sr-only"> l’adresse 198.51.100.61</span></a></td></tr>
+<tr><td data-label="Rôle">acteur</td><th scope="row"><span class="ent"><span class="k">adresse</span><span class="ip">2001:db8:4:1c::5e</span></span></th><td data-label="Lien">écartée</td><td data-label="Entrée par">adresse du compte (72 h), vue avec un administrateur : jamais en lien faible</td><td data-label="Depuis">—</td><td data-label="Geste"><span class="vg-sans-val">—<span class="sr-only"> (aucun)</span></span></td></tr>
+</tbody></table></div>
+</div>
+<div class="panel ds-section" id="signaux-a"><h3 class="panel-t" id="t-sig-a">Signaux et faits</h3>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-ds-t">
+<caption><div class="vg-cap-t">Les 8 premières lignes de 42, du plus ancien au plus récent</div></caption>
+<thead><tr><th scope="col">Heure à la source</th><th scope="col">Phase</th><th scope="col">Nature</th><th scope="col">Signal</th><th scope="col">Entité</th><th scope="col">Alerte</th></tr></thead>
+<tbody>
+<tr><td class="c-h" data-label="Heure à la source">lun. 22 h 10</td><td data-label="Phase">Repérage</td><td class="c-nat" data-label="Nature"><span class="ds-sym jalon" aria-hidden="true"></span>jalon</td><th scope="row">Saisies malveillantes en série depuis une adresse<span class="sec"><code>scanner · DS11</code> · T1595.002 Balayage actif : Recherche de vulnérabilités</span></th><td data-label="Entité"><span class="ent"><span class="k">adresse</span><span class="ip">198.51.100.61</span></span></td><td data-label="Alerte"><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">09 h 52 min 05</td><td data-label="Phase">Tentative</td><td class="c-nat" data-label="Nature"><span class="ds-sym jalon" aria-hidden="true"></span>fait devenu jalon</td><th scope="row">Échec de connexion<span class="sec"><code>authn_login_fail</code></span></th><td data-label="Entité"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-318204411</span></span></td><td data-label="Alerte"><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">09 h 55</td><td data-label="Phase">Accès</td><td class="c-nat" data-label="Nature"><span class="ds-sym indice" aria-hidden="true"></span>indice</td><th scope="row">Échecs puis connexion<span class="sec"><code>pivot_identifiants · DS25</code> · T1110 Force brute</span></th><td data-label="Entité"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-318204411</span></span></td><td data-label="Alerte"><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">09 h 55</td><td data-label="Phase">Accès</td><td class="c-nat" data-label="Nature"><span class="ds-sym indice" aria-hidden="true"></span>indice</td><th scope="row">Première apparition : pays (NL), appareil<span class="sec"><code>premiere_apparition · DS4</code> · T1078 Comptes valides</span></th><td data-label="Entité"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-318204411</span></span></td><td data-label="Alerte"><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">09 h 55</td><td data-label="Phase">Accès</td><td class="c-nat" data-label="Nature"><span class="ds-sym fait" aria-hidden="true"></span>fait</td><th scope="row">Connexion réussie<span class="sec"><code>authn_login_success</code></span></th><td data-label="Entité"><span class="ent"><span class="k">session</span><span class="sub">c41e07b29d55</span></span></td><td data-label="Alerte"><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">10 h 03</td><td data-label="Phase">Collecte</td><td class="c-nat" data-label="Nature"><span class="ds-sym jalon" aria-hidden="true"></span>fait devenu jalon</td><th scope="row">Fiche d’une personne lue (personne 112)<span class="sec"><code>sensitive_read</code></span></th><td data-label="Entité"><span class="ent"><span class="k">session</span><span class="sub">c41e07b29d55</span></span></td><td data-label="Alerte"><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">10 h 33</td><td data-label="Phase">Collecte</td><td class="c-nat" data-label="Nature"><span class="ds-sym jalon" aria-hidden="true"></span>jalon</td><th scope="row">30 fiches lues en une heure<span class="sec"><code>lectures_massives · DS18</code> · T1213 Données des dépôts d’information</span></th><td data-label="Entité"><span class="ent"><span class="k">compte</span><span class="sub">zitadel-318204411</span></span></td><td data-label="Alerte"><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span></td></tr>
+<tr><td class="c-h" data-label="Heure à la source">10 h 47</td><td data-label="Phase">Exfiltration</td><td class="c-nat" data-label="Nature"><span class="ds-sym jalon" aria-hidden="true"></span>fait devenu jalon</td><th scope="row">Export de la fiche d’une personne (personne 5)<span class="sec"><code>sensitive_export</code></span></th><td data-label="Entité"><span class="ent"><span class="k">session</span><span class="sub">c41e07b29d55</span></span></td><td data-label="Alerte"><span class="vg-sans-val">—<span class="sr-only"> (aucune)</span></span></td></tr>
+</tbody></table></div>
+<p class="panel-pied"><a class="vg-lien" href="/dossiers/27/signaux?page=2">Les 34 suivantes</a></p>
+</div>
+</div>
+</section>
+<section class="mq-ecran" inert aria-labelledby="etat-b" id="classer"><p class="mq-etat" id="etat-b"><span class="mq-pin" aria-hidden="true">13</span>État · « Classer… » sur le dossier #21 : « Légitime » choisi sans motif ; ce que la Vigie oubliera (rien : une preuve ne s’apprend pas)</p>
+<div class="ecran-a vg-page">
+<header class="ep">
+  
+  <div class="ep-titre"><h2 class="h1">Classer le dossier #21</h2><span class="ep-pastilles"><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span><span class="etat etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Pris en charge</span></span></div>
+  <p class="ep-meta"><span>Compte zitadel-318204977 (Julien) : accès</span><span class="tel-non">pris en charge par Sébastien à 11 h 41</span></p>
+  
+</header>
+<p class="err" id="e-motif"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/></svg><span><b>Erreur :</b> un classement « Légitime » demande un motif : il dit aux autres pourquoi la Vigie oubliera des indices.</span></p>
+<form class="panel form" method="post" action="/dossiers/21/classer"><input type="hidden" name="_csrf" value="v9a2…">
+<fieldset class="choix-a"><legend>Classement</legend>
+<label><input type="radio" name="classement" value="incident"><span>Incident confirmé</span><span class="sec">une attaque ou une erreur réelle</span></label>
+<label><input type="radio" name="classement" value="faux_positif"><span>Faux positif</span><span class="sec">rien d’anormal : dites pourquoi dans le motif</span></label>
+<label><input type="radio" name="classement" value="test"><span>Test</span><span class="sec">un essai de votre part</span></label>
+<label><input type="radio" name="classement" value="legitime" checked><span>Légitime</span><span class="sec">c’était bien la personne : ses indices identiques ne compteront plus 90 jours</span></label>
+</fieldset>
+<div class="champ-a"><label for="c-motif">Motif <span class="facultatif">(obligatoire pour « Légitime »)</span></label><textarea id="c-motif" name="note" rows="3" aria-describedby="e-motif c-aide" aria-invalid="true"></textarea>
+<p class="aide" id="c-aide">Ce que la Vigie oubliera pendant 90 jours pour ce compte : aucun indice. Ce dossier ne tient qu’à une preuve (cookie d’une session fermée rejoué depuis un autre appareil, alerte #407), et une preuve ne s’apprend jamais.</p></div>
+<div class="btns-ligne"><button class="btn" type="submit">Classer et clore le dossier</button><a class="btn ghost" href="/dossiers/21">Revenir au dossier</a></div>
+</form>
+</div>
+</section>
+<section class="mq-ecran" inert aria-labelledby="etat-c" id="detacher"><p class="mq-etat" id="etat-c"><span class="mq-pin" aria-hidden="true">14</span>État · « Détacher… » l’adresse 192.0.2.214 du dossier #21 : motif obligatoire, ce qui change</p>
+<div class="ecran-a vg-page">
+<header class="ep">
+  
+  <div class="ep-titre"><h2 class="h1">Détacher l’adresse 192.0.2.214 du dossier #21 ?</h2><span class="ep-pastilles"><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span><span class="etat etat--encours"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Pris en charge</span></span></div>
+  <p class="ep-meta"><span>Compte zitadel-318204977 (Julien) : accès</span></p>
+  
+</header>
+<form class="panel form" method="post" action="/dossiers/21/detacher"><input type="hidden" name="_csrf" value="v9a2…"><input type="hidden" name="entite" value="ip:192.0.2.214">
+<p class="vg-lede">Elle ne reviendra pas dans ce dossier par ce lien ; les signaux déjà rattachés restent, et le dossier est recalculé. Si l’adresse revient avec le compte, elle rentre comme une nouvelle entité.</p>
+<div class="champ-a"><label for="d-motif">Motif</label><textarea id="d-motif" name="motif" rows="2" required></textarea></div>
+<div class="btns-ligne"><button class="btn" type="submit">Détacher l’adresse</button><a class="btn ghost" href="/dossiers/21#entites">Revenir au dossier</a></div>
+</form>
+</div>
+</section>
+<section class="mq-ecran" inert aria-labelledby="etat-d"><p class="mq-etat" id="etat-d"><span class="mq-pin" aria-hidden="true">15</span>État · Camille, Lectrice, ouvre le dossier #22 : adresse tronquée partout, aucun geste</p>
+<div class="ecran-a vg-page">
+<header class="ep">
+  <a class="ep-retour" href="/dossiers"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Dossiers</a>
+  <div class="ep-titre"><h2 class="h1">Une adresse explore le site : repérage puis collecte de pages publiques</h2><span class="ep-pastilles"><span class="grav grav--haute"><span class="barres" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Haute</span><span class="etat etat--afaire"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>Ouvert</span></span></div>
+  <p class="ep-meta"><span>Dossier #22 · piste externe</span><span>adresse&nbsp;<span class="ip">198.51.100.0/24</span> (tronquée)</span><span>Camille, Lectrice</span></p>
+  
+</header>
+<div class="ds-expl"><p class="l1">Haute · Collecte atteinte, 2 phases dans l’ordre (repérage → collecte) ; non observé : tentative, accès, exploration, ancrage</p><p class="l2"><span class="k">Confiance faible :</span> aucun compte, aucune preuve</p><p class="l3"><span class="k">Enjeu ordinaire :</span> pages publiques</p><ul class="ds-modifs" aria-label="Modificateurs de la gravité"><li>enjeu ordinaire (−1)</li><li>plancher : alerte #409 haute</li></ul></div>
+<p class="note-a"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5h.01"/></svg><span><b>Lectrice : vous lisez le dossier, vous n’y agissez pas.</b> Adresses tronquées (/24, /48) dans le titre, le graphe et les tableaux ; ni « Prendre en charge », ni « Classer », ni « Détacher ».</span></p>
+</div>
+</section>
+<section class="mq-ecran" inert aria-labelledby="etat-e"><p class="mq-etat" id="etat-e"><span class="mq-pin" aria-hidden="true">16</span>État · « Rattacher une entité… » et « Fusionner avec un autre dossier… » sur le dossier #23</p>
+<div class="ecran-a vg-page">
+<div class="vg-trois">
+<form class="panel form" id="rattacher" method="post" action="/dossiers/23/rattacher"><input type="hidden" name="_csrf" value="v9a2…"><h3 class="panel-t" id="t-rat-e">Rattacher une entité</h3>
+<div class="champ-a"><label for="r-type">Type</label><select id="r-type" name="type"><option value="ip">adresse</option><option value="reseau">réseau</option><option value="compte" selected>compte</option><option value="session">session</option><option value="acces">accès de galerie</option></select></div>
+<div class="champ-a"><label for="r-cle">Clé</label><p class="aide" id="r-aide">L’entité entre en lien « rattaché à la main » ; ses signaux des 24 dernières heures (7 jours pour un repérage) viennent avec elle.</p><input class="vg-mono" id="r-cle" name="cle" spellcheck="false" autocomplete="off" aria-describedby="r-aide"></div>
+<div class="btns-ligne"><button class="btn" type="submit">Rattacher au dossier #23</button></div>
+</form>
+<form class="panel form" id="fusionner" method="post" action="/dossiers/23/fusionner"><input type="hidden" name="_csrf" value="v9a2…"><h3 class="panel-t" id="t-fus-e">Fusionner avec un autre dossier</h3>
+<div class="champ-a"><label for="f-autre">Dossier à absorber</label><p class="aide" id="f-aide">Le plus ancien garde son numéro ; l’autre renvoie à lui. Une fusion n’abaisse jamais une gravité.</p><select id="f-autre" name="autre" aria-describedby="f-aide"><option value="">Choisir…</option><option value="25">#25 · La Vigie, blocages automatiques : surveillance réduite</option><option value="22">#22 · Adresse 198.51.100.23 : repérage → collecte</option></select></div>
+<div class="btns-ligne"><button class="btn ghost" type="submit">Fusionner dans le dossier #23</button></div>
+</form>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<nav class="tabbar" aria-label="Navigation rapide">
+  <a href="/"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Vue d’ensemble</a>
+  <a href="/alertes"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Alertes</a>
+  <a href="/decisions"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.1-7.5 9.5-4.3-1.4-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.6"/></svg>Décisions</a>
+  <a href="#admin-nav"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</a>
+</nav>
+<aside class="mq-notes" aria-labelledby="mq-t">
+  <p class="mq-id">MV-13 · console de la Vigie · fiche d’un dossier (<code>/dossiers/23</code>) · Sébastien, Administrateur · samedi 17 octobre 2026, 14 h 20 (lexique de la console, § 3.20) · « Chambre noire » au bureau, clair au téléphone · v1 du 20 oct. 2026 (étude <code>docs/etudes/vigie-dossiers.md</code>, section 8.2 ; moteur : PR #191)</p>
+  <h2 id="mq-t">Ce que montre l’écran</h2>
+  <p class="mq-lead">Sébastien ouvre le dossier critique #23 : un compte inconnu devenu Administrateur hors de l’application à 14 h 02. En tête, l’explication du moteur en trois lignes (progression, confiance, enjeu), ses modificateurs et où chercher ; puis la frise par phases, la matrice ATT&amp;CK complète, le graphe des entités, les signaux, les réponses et le journal. Le même gabarit montre un dossier riche (état 12, hypothèse du scénario 7.1 de l’étude).</p>
+  <ol class="mq-reperes">
+    <li><span class="mq-num" aria-hidden="true">1</span><b>Un titre factuel, la graine, un geste plein</b><p>Le titre dit ce qui s’est passé, le numéro et la piste en sous-titre (le titre de la page ne porte ni compte ni adresse). « Prendre en charge » est le seul bouton plein ; « Classer… », « Rattacher une entité… », « Fusionner avec un autre dossier… » mènent à une page de confirmation.</p><span class="mq-ref">étude 5.6 · <code>dossier &lt;id&gt; prendre</code></span></li>
+    <li><span class="mq-num" aria-hidden="true">2</span><b>L’explication du moteur, mot pour mot</b><p>Trois lignes : la gravité et la progression (phase la plus avancée, phases dans l’ordre, non observées) ; la confiance et ce qui la fonde ; l’enjeu. Les mêmes phrases que la ligne de commande.</p><span class="mq-ref">étude 6.3 · vigie/dossiers.js (<code>expliquer</code>)</span></li>
+    <li><span class="mq-num" aria-hidden="true">3</span><b>Modificateurs et où chercher</b><p>Ce qui a monté ou fixé la gravité (enjeu, dissimulation, plancher à l’alerte la plus grave) ; puis où chercher les phases non observées : ici, hors de la Vigie.</p><span class="mq-ref">étude 6.2 et 4.8</span></li>
+    <li><span class="mq-num" aria-hidden="true">4</span><b>Les parties du dossier</b><p>Des ancres, sans script : frise, ATT&amp;CK, entités, signaux, réponses, journal.</p><span class="mq-ref">étude 8.2</span></li>
+    <li><span class="mq-num" aria-hidden="true">5</span><b>La frise en couloirs</b><p>Huit phases, puis Indices, Dissimulation, Faits ; l’heure à la source en abscisse. La forme dit la nature (carré : jalon ; losange : preuve ; rond cerné : indice ; petit rond : fait ; triangle : marqueur), le trait relie le premier signal des phases qui se suivent. Une phase non observée sous la plus avancée le dit dans son couloir. Deux boîtes de dessin (760 et 1 120 unités) gardent le texte à 13 px au moins ; sous 706 px de conteneur, une liste par phase (téléphone).</p><span class="mq-ref">étude 4.8 et 8.2 · vigie.css § 25</span></li>
+    <li><span class="mq-num" aria-hidden="true">6</span><b>La matrice ATT&amp;CK complète</b><p>Les 15 tactiques d’ATT&amp;CK 20.0 dans l’ordre de MITRE, même vides (Développement de ressources : « non observable ici ») ; les techniques vues, numérotées dans l’ordre de leur première apparition, avec la phase qu’elles donnent au dossier. Au téléphone, les tactiques sans signal se replient. Le calque Navigator se télécharge.</p><span class="mq-ref">étude 3.1 · décision D31 · vigie/attack.js</span></li>
+    <li><span class="mq-num" aria-hidden="true">7</span><b>Le graphe des entités</b><p>Acteurs à gauche, compte et session au centre, cibles à droite ; la force du lien par le trait. Ici, aucun acteur réseau : c’est en soi un renseignement.</p><span class="mq-ref">étude 5.2 · vigie.css § 25</span></li>
+    <li><span class="mq-num" aria-hidden="true">8</span><b>Les entités, en tableau</b><p>L’équivalent du graphe : rôle, entité, lien, par où elle est entrée, depuis quand, et le geste (fiche, détacher, bloquer).</p><span class="mq-ref"><code>dossier &lt;id&gt; detacher</code></span></li>
+    <li><span class="mq-num" aria-hidden="true">9</span><b>Signaux et faits</b><p>L’équivalent de la frise et de la matrice : heure à la source, phase, nature, signal (titre, code, cas, technique), entité, alerte.</p><span class="mq-ref"><code>dossier &lt;id&gt;</code> (40 derniers)</span></li>
+    <li><span class="mq-num" aria-hidden="true">10</span><b>Réponses déjà faites</b><p>Les décisions des alertes du dossier, levées nommées par leur objet. Aucune réponse au niveau du dossier pendant le mois d’observation.</p><span class="mq-ref">décision D37 · lexique § 3.4</span></li>
+    <li><span class="mq-num" aria-hidden="true">11</span><b>Le journal du dossier</b><p>Ouverture, fusions, aggravations, gestes : chaînés (<code>vigie_dossier</code>).</p><span class="mq-ref">étude 5.6</span></li>
+    <li><span class="mq-num" aria-hidden="true">12</span><b>Un dossier riche (hypothèse)</b><p>Le scénario 7.1 : repérage la veille (au bord gauche de la frise), échecs devenus jalons, accès sous trois indices, 34 fiches regroupées en une barre, l’export ; le graphe avec la session, l’adresse, les objets regroupés, l’adresse de Sébastien écartée et un dossier voisin. Et la conséquence à connaître : l’adresse de l’attaquant devient « vue avec un administrateur ».</p><span class="mq-ref">étude 7.1 · test/vigie-dossiers.test.js</span></li>
+    <li><span class="mq-num" aria-hidden="true">13</span><b>Classer, et ce que la Vigie oubliera</b><p>Quatre classements ; « Légitime » exige un motif et dit, avant d’enregistrer, quels indices ne compteront plus 90 jours (aucun ici : une preuve ne s’apprend pas).</p><span class="mq-ref">décision D39 · vigie/dossiers.js (<code>classer</code>)</span></li>
+    <li><span class="mq-num" aria-hidden="true">14</span><b>Détacher, avec un motif</b><p>Ce qui change dit avant : l’entité ne revient pas par ce lien, les signaux restent, le dossier est recalculé.</p><span class="mq-ref">vigie/dossiers.js (<code>detacher</code>)</span></li>
+    <li><span class="mq-num" aria-hidden="true">15</span><b>Une Lectrice lit, n’agit pas</b><p>Adresses tronquées dans le titre, le graphe et les tableaux ; aucun geste.</p><span class="mq-ref">lexique § 3.14, point 11</span></li>
+    <li><span class="mq-num" aria-hidden="true">16</span><b>Rattacher, fusionner</b><p>Rattacher une entité (lien « à la main », ses signaux récents viennent avec elle) ; fusionner un autre dossier dans celui-ci (le plus ancien garde son numéro ; une fusion n’abaisse jamais une gravité).</p><span class="mq-ref"><code>dossier &lt;id&gt; rattacher</code>, <code>fusionner</code> · étude 5.4</span></li>
+  </ol>
+  <h3>À créer</h3>
+  <p>La route <code>/dossiers/:id</code> et les pages de confirmation des gestes (prendre, classer, détacher, rattacher, fusionner : le moteur les a, PR #191) ; la frise, le graphe et la matrice rendus par le serveur (référence : <code>commun_d.py</code>, comme <code>flux.py</code> pour MV-11) ; le zoom de la frise ; le calque Navigator d’un dossier ; la page des signaux au-delà des 40 derniers ; la scission d’un dossier (étude 5.6, absente du moteur). Écarts relevés en dessinant : le moteur ne relie pas l’alerte #413 au dossier de #412 (le contrôle des rôles ne porte pas le compte dans son événement) : ici, Sébastien les a fusionnés à la main ; à reprendre en PR D, en donnant le compte au signal du contrôle.</p>
+  <p><b>Styles à embarquer (D3).</b> La console dépend des classes de l’admin refondue (<code>liste-a</code>, <code>champ-a</code>, <code>note-a</code>, <code>kv-a</code>, <code>plier</code>), qui n’existent pas encore dans <code>public/admin/admin.css</code> : elle embarquera ces styles avec <code>vigie.css</code> (lexique § 3.14, point 18).</p>
+  <p class="mq-bascule"><a href="#sans-annotations">Voir cette page sans annotations</a><a href="#contenu">Revenir avec les annotations</a></p>
+  <p class="mq-mesures"><b>Mesures</b> · <b>v1 du 20 oct. 2026, dossiers et vue ATT&amp;CK (lexique § 3.20)</b> (Chromium de Playwright 1.64 en conteneur, texte sans lissage sous-pixel ; outils de dr-work/outils copiés et adaptés à la console dans dr-tmp/vigie-mq, repassés tous ensemble par ctrl-vigie.sh et build-vigie.sh : consol-vigie.mjs (console, 13 px) ou consol-admin-c.mjs (admin, 12 px, barre allemande), debord-hauteurs-vigie.mjs ou -c.mjs, controle-annotations-vigie.mjs, formulaires-vigie.mjs, coherence-vigie.py ; tels quels : focus-colle.mjs, p2adm-focus.mjs --sans-inert, radios-cadres.py, insecables.py, html-validate 11) · axe-core (WCAG 2.2 A et AA, bonnes pratiques) : 0 violation au bureau (1 440 × 900, Chambre noire) et sur Pixel 7 (clair), cadres d’état inertes, puis 0 encore les 5 inert retirés · débordement : aucun à 320, 360, 412, 600, 721, 820, 1 024, 1 100, 1 180, 1 280 et 1 440 px, ni à 320 et 412 px tous les &lt;details&gt; ouverts, ni de 320 à 1 440 px au pas de 16 px à 900, 1 024 et 1 100 px de haut (270 mesures) ; aucune ellipse ; toute ligne qui défile montre sa suite · barre latérale (la même sur les douze écrans en session, « Dossiers » et « ATT&amp;CK » compris) : rien n’en sort à aucune largeur ; le bas du compte à 900 px dans une fenêtre de 900 ; sans script, « Menu » l’ouvre au téléphone · focus visible sur les 63 éléments focalisables, cadres d’état compris (inert retiré), en sombre et en clair · focus jamais caché par une barre fixe (WCAG 2.4.11), au bureau, sur Pixel 7 et à 320 px, menu ouvert compris · cibles : 0 sous 24 px au bureau, 0 sous 44 px au toucher · textes : rien sous 13 px (règle de la console), SVG compris · formulaires : champs nommés, aucun bouton d’envoi hors formulaire, un jeton _csrf dans chaque formulaire POST, cadres d’état compris · html-validate : 0 erreur · annotations : rien à redire à 1 440, 412 et 320 px · insécables : 0 à poser · 1 groupes de radios, aucun partagé entre cadres · cohérence des données avec les neuf autres maquettes et le lexique (numéros, heures, adresses, comptes, liens) : 0 contradiction · essais des jurés (essais-vigie.mjs) : espacement du texte (WCAG 1.4.12) à 320, 412 et 1 440 px, puis à 320 et 412 px tous les &lt;details&gt; ouverts, sans rien de coupé ni débordant, contraste forcé (bordure de chaque bouton, sélection en Highlight), aucun identifiant coupé en fin de ligne à 320, 412 et 1 440 px, &lt;details&gt; ouverts compris, et une commande en bloc coupée seulement à une espace, jamais dans un mot (espacement WCAG compris), aucun lien de même nom vers deux cibles, ni dans l’écran ni dans un cadre d’état (inert retiré), aucune transition en mouvement réduit · poids : 363 ko au bureau comme au téléphone, polices et CSS compris ; aucun script, aucune ressource tierce.</p>
+</aside>
+
+</body>
+</html>

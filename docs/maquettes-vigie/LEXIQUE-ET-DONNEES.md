@@ -579,6 +579,44 @@ Notes après la refonte : MV-11 à 8 (jury 1) et 9 (jury 2) ; MV-01 à 8 pour le
 5. **Légende** : « sans alerte » se lit à son nœud ; ses bandes sont à peine tracées, et la légende le dit.
 6. **Téléphone** : dans la table des alertes, Origine → Sources → Chemin sur une ligne par alerte (carte plus courte).
 
+### 3.20 Dossiers et vue ATT&CK : MV-12, MV-13, MV-14 (20 oct. 2026)
+
+Étude : [`docs/etudes/vigie-dossiers.md`](../etudes/vigie-dossiers.md) (décisions D31 à D39). Moteur : PR #191 (`vigie/dossiers.js`) ; référentiel ATT&CK 20.0 : PR #190. Les dossiers ne changent ni les alertes, ni leurs modes, ni leurs notifications (D36, D37).
+
+**Mots.**
+
+| On écrit | Ce que cela désigne | On n'écrit pas |
+|---|---|---|
+| **dossier** | Ce qui touche une même attaque probable, d'une entité à l'autre ; il regroupe des alertes, des signaux et des faits. | « case », « incident » (réservé au classement) |
+| **piste** | **identité** (un compte), **invité** (une galerie privée), **serveur**, **externe** (une adresse, un réseau), **surveillance** (la Vigie). | « type d'attaque » |
+| **phase** | **Repérage**, **Tentative**, **Accès**, **Exploration**, **Ancrage**, **Collecte**, **Exfiltration**, **Impact** ; une projection des étiquettes ATT&CK, dans les dossiers seulement. | « tactique » pour une phase |
+| **marqueur** | **Dissimulation** (aveugler la Vigie), **Disponibilité** (déni de service) : hors de la suite des phases. | — |
+| **jalon** · **indice** · **preuve** · **fait** | Prouve une phase · rend un accès douteux · rend un accès hostile à lui seul · événement ordinaire (qui devient jalon sous un accès douteux : « fait devenu jalon »). | « IOC », « evidence » |
+| **confiance** | **aucune**, **faible**, **moyenne**, **forte** : la part d'hostile dans les accès. | « score de risque » |
+| **enjeu** | **ordinaire**, **personnel**, **sensible**, **critique** : ce qui a été touché. | « impact » (c'est une phase) |
+| **dans l'ordre** | Les phases qui se suivent dans l'ordre du temps (la cohérence). | « kill chain » |
+| **non observé** | Une phase sous la plus avancée sans signal : « où chercher ». | « manquant » |
+| **Prendre en charge** · **Classer…** · **Détacher…** · **Rattacher une entité…** · **Fusionner avec un autre dossier…** | Gestes de l'analyste ; classement **Incident confirmé**, **Faux positif**, **Test**, **Légitime** (motif obligatoire, indices identiques oubliés 90 jours). | « fermer » un dossier |
+| **tactique**, **technique** | Les mots de MITRE ATT&CK, avec leurs identifiants (TA0001, T1078) ; noms en français dans la console, nom anglais à côté. | « TTP » |
+
+**Dossiers du sam. 17 oct. à 14 h 20** (ordre de la liste : gravité, puis phase la plus avancée, confiance, dernier jalon) :
+
+| # | Gravité | Titre | Piste | Graine | Alertes | Progression | Confiance · enjeu | Ouvert · dernier signe | Statut |
+|---|---|---|---|---|---|---|---|---|---|
+| 23 | Critique | Compte zitadel-329906113 : accès → ancrage | identité | compte `zitadel-329906113` | #412, #413 (par fusion de #24) ; marqueur #414 | Ancrage, 2 dans l'ordre (accès → ancrage) ; non observé : repérage, tentative, exploration | forte (preuve : rôle donné hors de l'application) · critique | 14 h 02 · 14 h 10 | Ouvert ; réponses #87, #88 |
+| 22 | Haute | Adresse 198.51.100.23 : repérage → collecte | externe | adresse `198.51.100.23` | #409 | Collecte, 2 dans l'ordre | faible · ordinaire (−1) ; plancher #409 | 13 h 41 · 14 h 12 | Ouvert |
+| 21 | Haute | Compte zitadel-318204977 : accès | identité | compte de Julien | #407 | Accès | forte (preuve : cookie rejoué) · ordinaire (−1) ; plancher #407 | 11 h 26 · 11 h 26 | Pris en charge par Sébastien à 11 h 41 ; entités : le compte, la session `7be21d90c4a8`, l'adresse `192.0.2.214` |
+| 20 | Moyenne | Réseau 203.0.113.0/24 : repérage | externe | réseau `203.0.113.0/24` | #405 | Repérage | faible · ordinaire ; plancher #405 | 09 h 10 · 13 h 58 | Ouvert ; décision #86 |
+| 25 | Moyenne | La Vigie, blocages automatiques : surveillance réduite | surveillance | cible « la Vigie · blocages automatiques » | #414 | sans phase (marqueur seul) | aucune · ordinaire ; plancher #414 | 14 h 10 · 14 h 10 | Ouvert |
+
+Fusionné : **#24** (Critique, piste serveur, cible « site, comptes », alerte #413, ouvert à 14 h 05), fusionné dans #23 par Sébastien à 14 h 18 (« le même compte que #412 ») : le moteur ne relie pas deux dossiers par une cible. Clos la veille : **#18** (Moyenne, externe, adresse `192.0.2.77`, alerte #398, tentative ; ven. 16 oct., 19 h 12 · 19 h 31 ; Faux positif par Julien à 20 h 05, « box redémarrée »). Compteur de la barre : **5** dossiers ouverts.
+
+**Hypothèse de MV-13 (état 12), mar. 20 oct.** (scénario 7.1 de l'étude) : dossier **#27**, Critique, piste identité, graine le compte de Sébastien `zitadel-318204411`. Lun. 19 oct., 22 h 10 : saisies malveillantes en série depuis `198.51.100.61` (scanner, repérage). Mar. 20 oct. : 3 échecs à 09 h 52, connexion à 09 h 55 (session `c41e07b29d55`, pays NL, appareil inédit ; indices : échecs puis connexion 3, pays 1,5, appareil 1,5 : 6 points, 2 sources) ; 34 fiches de personnes lues de 10 h 03 à 10 h 36 (« 30 fiches lues en une heure » à 10 h 33) ; export de la fiche de la personne 5 à 10 h 47. Exfiltration, 5 phases dans l'ordre ; confiance forte ; enjeu critique ; alerte de chaîne d'attaque **#418** (Critique, mode Observer, ouverte à 09 h 55). L'adresse de Sébastien `2001:db8:4:1c::5e` est écartée (vue avec un administrateur) ; voisin : #22 (même réseau 198.51.100.0/24). L'adresse `198.51.100.61` devient « vue avec un administrateur » : jamais bloquée automatiquement.
+
+États de MV-13 : « Classer… » le dossier #21 avec « Légitime » sans motif (erreur ; aucun indice à oublier : une preuve ne s'apprend pas) ; « Détacher… » l'adresse `192.0.2.214` du dossier #21 ; Camille, Lectrice, sur #22 (adresse tronquée).
+
+**Vue ATT&CK (MV-14)** : référentiel ATT&CK 20.0 (publiée par MITRE le 13 oct. 2026), 15 tactiques ; 88 règles et 7 détecteurs étiquetés ; **39 techniques couvertes dans 14 tactiques** (Développement de ressources : non observable ici ; Découverte 2 sur 34, Furtivité 2 sur 31). Signaux des 7 derniers jours (dim. 11 au sam. 17 oct.) par technique : T1595 118 (#405, #409), T1213 21 (#409), T1078 14 (9 premières apparitions, 4 heures inhabituelles, 1 nouvel opérateur), T1595.003 9, T1595.002 6, T1110 4 (#398), T1098 3 (#412, #413), T1190 2, T1539 1 et T1550.004 1 (#407), T1685 1 (#414) : 11 techniques. Journée calme (jeu. 15 oct.) : aucun signal.
+
 ## 4. Les maquettes et ce qu'elles montrent
 
 Chaque maquette : bureau (1 440 × 900, thème Chambre noire) et téléphone (Pixel 7, clair), écran principal vivant, autres états dans `.mq-etats`, encart « Ce qui change » en dernier. Rôle montré : **Administrateur** (Sébastien) sauf indication ; l'état « Lecteur » (Camille) là où il change l'écran.
@@ -596,6 +634,9 @@ Chaque maquette : bureau (1 440 × 900, thème Chambre noire) et téléphone (Pi
 | **MV-09** Accès | pages hors session : « Connexion refusée : aucun rôle dans la console », « Second facteur exigé », « Confirmez votre identité » (ré-authentification), « Session expirée » | les quatre, plus le jeton Access absent (403 sobre) |
 | **MV-10** Dans l'admin du site | `/admin` (« Aujourd'hui ») : badge sur l'entrée « Sécurité » du menu, ligne « 2 alertes critiques et 1 haute ouvertes dans la Vigie » (urgent) **(consol. : « 1 alerte critique à traiter » ; § 3.12, § 3.13)**, bandeau rouge en haut de page pour une critique non prise en charge, lien qui ouvre la console dans un nouvel onglet ; **messages** Signal et e-mail (texte exact de `vigie/notifications.js`) | Vigie injoignable (bandeau daté « au dernier résumé, 14 h 10 », « Résumé de la Vigie indisponible depuis 14 h 11 » **(consol. : « indisponible depuis 14 h 10 », sans bandeau ; § 3.13, point 6)**) ; aucune alerte ; compte sans `securite.voir` (rien) |
 | **MV-11** Flux et provenance des alertes **(MV-11 : § 3.17)** | `/flux` (`?periode=7j`, `30j`, `?alerte=412`) : la phrase du jour, « Les 6 alertes » (une bande égale par alerte) puis « Les 319 événements » **(refonte : § 3.18)**, leurs tables, ce que les alertes ont déclenché, les provenances sans les administrateurs ; barre de provenance par origine dans MV-01 **(§ 3.19)**, entrée « Flux » après « Alertes », « Voir son flux » dans MV-02 | 7 jours ; #412 mise en avant ; vue Lectrice ; journée calme ; téléphone (barre et tables, sans Sankey) ; paramètres refusés |
+| **MV-12** Dossiers **(§ 3.20)** | `/dossiers` (`?statut=`, `piste=`, `gravite=`, `phase=`) : l'état en une phrase, les filtres, la liste (gravité, titre, numéro, piste, progression en huit cases, confiance, enjeu, entités, dernier signe, statut) ; entrées « Dossiers » et « ATT&CK » dans la barre de toutes les pages | filtre « Tous » (fusionné #24, clos #18) ; liste vide ; vue Lectrice |
+| **MV-13** Un dossier **(§ 3.20)** | `/dossiers/23` : titre factuel, explication en trois lignes, modificateurs, où chercher ; frise en couloirs (liste par phase au téléphone) ; matrice ATT&CK complète ; graphe des entités et leur tableau ; signaux et faits ; réponses ; journal ; gestes (Prendre en charge, Classer…, Détacher…, Rattacher, Fusionner) | hypothèse #27 (5 phases, frise et graphe riches) ; « Classer… » avec erreur ; « Détacher… » ; vue Lectrice |
+| **MV-14** ATT&CK **(§ 3.20)** | `/attack` (`?periode=24h`, `7j`, `30j`), `/attack/T1078` : les 15 tactiques d'ATT&CK 20.0, couverture par technique (règles et détecteurs), signaux, techniques sans règle, calques ATT&CK Navigator | une technique (T1078) ; journée calme |
 
 ## 5. Ce qui existe dans le code et ce qui est à créer
 

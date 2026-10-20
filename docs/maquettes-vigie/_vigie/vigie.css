@@ -182,7 +182,7 @@ a.vg-lien { display: inline-flex; align-items: center; min-height: 24px; }
 }
 @media (max-width: 1100px) and (min-width: 721px) { .vigie :is(.vg-alertes, .vg-regles, .vg-droits) tbody { grid-template-columns: minmax(0, 1fr); } }
 /* Légende au téléphone : la place de la pastille d'annotation n'empiète pas sur le texte (géométrie identique sans). */
-@media (max-width: 767px) { :is(.vg-decisions, .vg-regles, .vg-droits) caption { padding-right: 24px; } }
+@media (max-width: 767px) { :is(.vg-decisions, .vg-regles, .vg-droits, .vg-dossiers) caption { padding-right: 24px; } }
 
 /* 7.1 Alertes (MV-01) : gravité d'abord, puis l'alerte (titre, numéro, cas), l'entité, les sources, les occurrences, le mode, le
    statut. Triée par gravité puis par date de la dernière occurrence (vigie/cli.js, « alertes »). En carte : gravité et mode en
@@ -849,3 +849,183 @@ meter.vg-m.total::-moz-meter-bar { background: var(--danger); }
 figure.fx-dessin { margin: 0; }
 .fx-plaque { fill: var(--bg); stroke: none; }   /* sous un libellé du milieu : la bande s'interrompt, le texte reste net */
 .mq-ecran .fx-plaque { fill: var(--s1); }
+
+/* ---------- 25. Dossiers (MV-12, MV-13 ; étude docs/etudes/vigie-dossiers.md, section 8 ; lexique § 3.20) ----------
+   Un dossier : ce qui touche une même attaque probable, d'une entité à l'autre. La progression en huit cases (.ds-phases : une
+   case par phase, pleine pour une phase observée, cernée d'un trait plein pour celles qui se suivent dans l'ordre, en tirets
+   pour une phase non observée sous la plus avancée), la confiance et l'enjeu en trois barres (.ds-niv), l'explication en trois
+   lignes (.ds-expl). La frise (.ds-frise) et le graphe (.ds-graphe) sont des SVG rendus par le serveur, sans script, chacun
+   avec son équivalent en tableau ; la frise s'affiche quand son conteneur a 706 px au moins, sinon une liste par phase. */
+.ds-phases { display: inline-flex; align-items: center; gap: 3px; margin: 0; padding: 0; list-style: none; vertical-align: middle; }
+.ds-phases li { display: block; width: 14px; height: 14px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--line2); }
+.ds-phases li.vu { background: var(--ink3); box-shadow: none; }
+.ds-phases li.suite { background: var(--ink); box-shadow: none; }
+.ds-phases li.non { box-shadow: none; outline: 1px dashed var(--ink3); outline-offset: -1px; }
+.ds-prog { display: grid; gap: 4px; justify-items: start; }
+.ds-prog .mot { color: var(--ink); font-size: 13px; font-weight: 500; }
+.ds-prog .sec { color: var(--ink3); font-size: 13px; }
+.ds-niv { display: inline-flex; align-items: center; gap: 7px; color: var(--ink); font-size: 13px; white-space: nowrap; }
+.ds-niv .barres { display: inline-grid; grid-auto-flow: column; align-items: end; gap: 2px; height: 12px; flex: none; }
+.ds-niv .barres i { display: block; width: 3px; border-radius: 1px; background: currentColor; opacity: .3; }
+.ds-niv .barres i:nth-child(1) { height: 5px; } .ds-niv .barres i:nth-child(2) { height: 8px; } .ds-niv .barres i:nth-child(3) { height: 12px; }
+.ds-niv.n1 .barres i:nth-child(1), .ds-niv.n2 .barres i:nth-child(-n+2), .ds-niv.n3 .barres i { opacity: 1; }
+.ds-niv .k { color: var(--ink3); }
+/* Liste des dossiers (MV-12) : la gravité, le dossier (titre, numéro, piste), la progression, la confiance, l'enjeu, les
+   entités, le dernier signe, le statut. En carte sous 1 100 px. */
+.vg-dossiers td, .vg-dossiers th { vertical-align: top; }
+.vg-dossiers .c-grav { width: 1%; white-space: nowrap; }
+.vg-dossiers th[scope="row"] { width: 30%; }
+.vg-dossiers .c-niv .ds-niv { display: flex; } .vg-dossiers .c-niv .ds-niv + .ds-niv { margin-top: 6px; }
+.vg-dossiers tr.vg-crit > td:first-child { box-shadow: inset 4px 0 0 var(--danger); }
+@media (max-width: 1100px) {
+  .vg-dossiers [data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: 13px; }
+  .vg-dossiers tr { grid-template-columns: minmax(0, 1fr) auto; }
+  .vg-dossiers .c-grav { grid-column: 1; grid-row: 1; width: auto; }
+  .vg-dossiers .c-etat { grid-column: 2; grid-row: 1; text-align: right; }
+  .vg-dossiers th[scope="row"] { grid-column: 1 / -1; grid-row: 2; width: auto; }
+  .vg-dossiers .c-prog { grid-column: 1 / -1; grid-row: 3; }
+  .vg-dossiers .c-niv { grid-column: 1; grid-row: 4; }
+  .vg-dossiers .c-ent { grid-column: 2; grid-row: 4; text-align: right; }
+  .vg-dossiers .c-der { grid-column: 1 / -1; grid-row: 5; }
+  .vg-dossiers .c-grav[data-label]::before, .vg-dossiers .c-etat[data-label]::before { content: none; }
+  .vg-dossiers tr.vg-crit { box-shadow: inset 0 0 0 1px var(--line), inset 4px 0 0 var(--danger); }
+  .vg-dossiers tr.vg-crit > td:first-child { box-shadow: none; }
+  .vg-dossiers .c-niv .ds-niv { display: inline-flex; margin: 0 12px 0 0; } .vg-dossiers .c-niv .ds-niv + .ds-niv { margin-top: 0; }
+}
+@media (max-width: 1100px) and (min-width: 721px) { .vigie .vg-dossiers tbody { grid-template-columns: minmax(0, 1fr); } }
+.ds-leg { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--ink2); font-size: 13px; }
+.ds-leg li { display: inline-flex; align-items: center; gap: 8px; }
+.ds-leg .ds-phases li { width: 12px; height: 12px; }
+/* Fiche d'un dossier (MV-13) : l'explication en trois lignes, puis les modificateurs ; la navigation de la fiche (des ancres). */
+.ds-expl { display: grid; gap: 6px; margin: 0 0 20px; padding: 18px 22px; border-radius: var(--r-admin-panneau); background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.ds-expl .l1 { margin: 0; color: var(--ink); font-size: 22px; font-weight: 300; line-height: 1.3; }
+.ds-expl .l2, .ds-expl .l3 { margin: 0; color: var(--ink); }
+.ds-expl .k { color: var(--ink3); }
+.ds-modifs { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 4px 0 0; padding: 8px 0 0; border-top: 1px solid var(--line); list-style: none; color: var(--ink2); font-size: 13px; }
+.ds-modifs li::before { content: "· "; color: var(--ink3); }
+.ds-modifs li:first-child::before { content: none; }
+.ds-ou { margin: 2px 0 0; color: var(--ink2); font-size: 13px; }
+@media (max-width: 720px) { .ds-expl { padding: 14px 16px; } .ds-expl .l1 { font-size: 19px; } }
+.ds-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; padding: 0; list-style: none; }
+.ds-nav a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 999px; color: var(--ink2);
+  box-shadow: inset 0 0 0 1px var(--line2); font-size: 13px; text-decoration: none; }
+.ds-nav a:hover { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink3); }
+@media (pointer: coarse) { .ds-nav a { min-height: 44px; } }
+.ds-section { min-width: 0; scroll-margin-top: 16px; }   /* dans un cadre en grille, un tableau large défile au lieu d'élargir la page */
+.ds-zoom a { white-space: nowrap; }
+@media (pointer: coarse), (max-width: 720px) { :is(.vg-ds-t, .ds-zoom, .vg-dossiers .sec) a.vg-lien { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; } }
+/* La frise en couloirs : huit phases, puis Indices, Dissimulation, Faits ; l'heure en abscisse. La forme dit la nature (jalon
+   carré plein, preuve losange plein, indice rond cerné, fait petit rond, marqueur triangle), le trait relie le premier jalon
+   des phases qui se suivent dans l'ordre ; une phase non observée sous la plus avancée est hachurée et le dit. */
+.ds-frise { container: dsf / inline-size; margin: 0 0 12px; }
+.ds-frise .ds-dessin { display: none; margin: 0; }
+@container dsf (min-width: 706px) { .ds-frise .ds-dessin { display: block; } .ds-frise .ds-tel { display: none; } }
+.ds-frise .ds-large, .ds-graphe .ds-large { display: none; }
+@container dsf (min-width: 971px) { .ds-frise .ds-std { display: none; } .ds-frise .ds-large { display: block; } }
+.ds-svg { display: block; width: 100%; height: auto; overflow: hidden; }
+.ds-svg text { font-family: var(--sans); font-size: 14px; fill: var(--ink2); }
+.ds-svg.ds-l text { font-size: 15px; }   /* la grande boîte (1 120 unités) dès 971 px : 15 unités, 13 px au moins à l'écran */
+.ds-svg .ds-c-t { fill: var(--ink); }
+.ds-svg .ds-c-t.vide { fill: var(--ink3); }
+.ds-svg .ds-c-fond { fill: var(--s2); }
+.ds-svg .ds-c-fond.alt { fill: transparent; }
+.ds-svg .ds-non-t { fill: var(--ink3); font-style: italic; }
+.ds-svg .ds-axe { stroke: var(--line2); stroke-width: 1px; }
+.ds-svg .ds-graduation { fill: var(--ink3); font-variant-numeric: tabular-nums; }
+.ds-svg .ds-chaine { fill: none; stroke: var(--ink); stroke-width: 1.5px; }
+.ds-svg .ds-m-jalon { fill: var(--ink); }
+.ds-svg .ds-m-preuve { fill: var(--danger); stroke: var(--ink); stroke-width: 1px; }
+.ds-svg .ds-m-indice { fill: var(--bg); stroke: var(--ink); stroke-width: 2px; }
+.ds-svg .ds-m-fait { fill: var(--ink3); }
+.ds-svg .ds-m-promu { fill: var(--ink); stroke: var(--bg); stroke-width: 1px; }
+.ds-svg .ds-m-marqueur { fill: var(--warn); stroke: var(--ink); stroke-width: 1px; }
+.ds-svg .ds-m-nb { fill: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+.mq-ecran .ds-svg .ds-m-indice { fill: var(--s1); }
+.ds-sym { display: inline-block; flex: none; width: 12px; height: 12px; }
+.ds-sym.jalon { background: var(--ink); border-radius: 1px; }
+.ds-sym.preuve { width: 10px; height: 10px; margin: 0 1px; background: var(--danger); transform: rotate(45deg); box-shadow: 0 0 0 1px var(--ink); }
+.ds-sym.indice { border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink); }
+.ds-sym.fait { width: 8px; height: 8px; margin: 0 2px; border-radius: 50%; background: var(--ink3); }
+.ds-sym.marqueur { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 12px solid var(--warn); }
+.ds-sym.chaine { height: 2px; width: 22px; background: var(--ink); }
+/* Au téléphone : une phase par bloc, ses signaux dessous (la frise devient verticale). */
+.ds-tel { display: grid; gap: 10px; }
+.ds-tel .ds-ph { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.ds-tel .ds-ph h4 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 6px; font-size: 15px; font-weight: 500; }
+.ds-tel .ds-ph h4 .sec { color: var(--ink3); font-size: 13px; font-weight: 400; }
+.ds-tel .ds-ph.non { background: transparent; box-shadow: inset 0 0 0 1px var(--line2); }
+.ds-tel .ds-ph.non h4 { margin: 0; color: var(--ink3); }
+.ds-tel ol { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ds-tel li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: baseline; font-size: 13px; color: var(--ink2); }
+.ds-tel li .ds-sym { align-self: center; }
+.ds-tel li b { color: var(--ink); font-weight: 500; }
+/* Le graphe des entités : acteurs à gauche, compte et session au centre, cibles à droite ; la force du lien par le trait
+   (plein épais : fort, plein : moyen, tirets : faible, pointillés : rattaché à la main) ; les dossiers voisins en satellites. */
+.ds-graphe { container: dsg / inline-size; margin: 0 0 12px; }
+.ds-graphe .ds-dessin { display: none; margin: 0; }
+@container dsg (min-width: 706px) { .ds-graphe .ds-dessin { display: block; } }
+@container dsg (min-width: 971px) { .ds-graphe .ds-std { display: none; } .ds-graphe .ds-large { display: block; } }
+.ds-svg .ds-col { fill: var(--ink3); letter-spacing: .06em; }
+.ds-svg .ds-n { fill: var(--s2); stroke: var(--line2); stroke-width: 1px; }
+.ds-svg .ds-n.graine { stroke: var(--ink); stroke-width: 2px; }
+.ds-svg .ds-n.cible { fill: transparent; stroke: var(--ink3); stroke-dasharray: 4 3; }
+.ds-svg .ds-n.voisin { fill: transparent; stroke: var(--ink3); }
+.ds-svg .ds-n-t { fill: var(--ink); }
+.ds-svg .ds-n-k { fill: var(--ink3); }
+.ds-svg .ds-n-mono { font-family: var(--mono); fill: var(--ink); }
+.ds-svg .ds-e { fill: none; stroke: var(--ink3); }
+.ds-svg .ds-e.fort { stroke: var(--ink); stroke-width: 2.5px; }
+.ds-svg .ds-e.moyen { stroke: var(--ink2); stroke-width: 1.5px; }
+.ds-svg .ds-e.faible { stroke-width: 1.5px; stroke-dasharray: 6 4; }
+.ds-svg .ds-e.manuel { stroke: var(--ink2); stroke-width: 1.5px; stroke-dasharray: 2 3; }
+.ds-svg .ds-e.voisin { stroke-width: 1px; stroke-dasharray: 2 4; }
+.ds-sym.e-fort { height: 3px; width: 22px; background: var(--ink); }
+.ds-sym.e-moyen { height: 2px; width: 22px; background: var(--ink2); }
+.ds-sym.e-faible { height: 2px; width: 22px; background: repeating-linear-gradient(90deg, var(--ink3) 0 6px, transparent 6px 10px); }
+.ds-sym.e-manuel { height: 2px; width: 22px; background: repeating-linear-gradient(90deg, var(--ink2) 0 2px, transparent 2px 5px); }
+/* La matrice ATT&CK d'un dossier (MV-13) et de la détection (MV-14) : une carte par tactique, dans l'ordre de MITRE (15
+   tactiques depuis ATT&CK 20.0), qui passent à la ligne ; une tactique que la Vigie n'observe pas est dite, pas cachée. */
+.ak-matrice { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 10px; margin: 0 0 14px; padding: 0; list-style: none; }
+.ak-tac { display: grid; align-content: start; gap: 8px; padding: 12px; border-radius: 10px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.ak-tac.ak-vide { background: transparent; box-shadow: inset 0 0 0 1px var(--line2); }
+.ak-tac.ak-hors { background: transparent; box-shadow: none; outline: 1px dashed var(--line2); outline-offset: -1px; }
+.ak-tac h3, .ak-tac h4 { display: grid; gap: 2px; margin: 0; font-size: 15px; font-weight: 500; line-height: 1.3; }
+.ak-tac h3 .sec, .ak-tac h4 .sec { color: var(--ink3); font-size: 13px; font-weight: 400; }
+.ak-tac .ak-cpt { margin: 0; color: var(--ink2); font-size: 13px; }
+.ak-tac .ak-cpt b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.ak-tac > p.ak-rien { margin: 0; color: var(--ink3); font-size: 13px; }
+.ak-tq { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ak-tq li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: baseline; padding-top: 6px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink2); }
+.ak-tq li:first-child { padding-top: 0; border-top: 0; }
+.ak-tq .ak-id { font-family: var(--mono); color: var(--ink); white-space: nowrap; }
+.ak-tq .ak-nm { grid-column: 1 / -1; color: var(--ink); }
+.ak-tq .ak-n { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.ak-tq .ak-ordre { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; margin-right: 6px; border-radius: 999px;
+  background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ak-tq .ak-ph { grid-column: 1 / -1; color: var(--ink3); }
+.ak-tq a.vg-lien { grid-column: 1 / -1; justify-self: start; }
+.ak-tq .ak-barre { grid-column: 1 / -1; display: block; width: 100%; height: 6px; }
+.ak-barre rect { fill: var(--ink3); } .ak-barre .fond { fill: var(--line2); }
+.ak-sans { margin: 0; font-size: 13px; color: var(--ink2); }
+.ak-sans summary { display: inline-flex; align-items: center; min-height: 32px; cursor: pointer; }
+.ak-sans ul { display: grid; gap: 2px; margin: 6px 0 0; padding: 0; list-style: none; }
+.ak-sans li .ak-id { font-family: var(--mono); color: var(--ink2); margin-right: 6px; white-space: nowrap; }
+@media (pointer: coarse) { .ak-sans summary { min-height: 44px; } .ak-tq a.vg-lien { display: inline-flex; align-items: center; min-height: 44px; } }
+.ak-vides-tel { display: none; }
+@media (max-width: 720px) { .ak-tac.ak-vide { display: none; } .ak-vides-tel { display: grid; } }
+/* Signaux et faits d'un dossier (équivalent de la frise et de la matrice) ; entités (équivalent du graphe) : tableaux en cartes. */
+.vg-ds-t td, .vg-ds-t th { vertical-align: top; }
+.vg-ds-t .c-h { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.vg-ds-t .c-nat { white-space: nowrap; }
+.vg-ds-t .c-nat .ds-sym { margin-right: 6px; vertical-align: -1px; }
+@media (max-width: 1100px) { .vg-ds-t [data-label]::before { content: attr(data-label); display: block; color: var(--ink3); font-size: 13px; } }
+.ak-export .btn { white-space: normal; }
+@media (max-width: 720px) { .ep .ak-export.tel-non { display: none; } }   /* au téléphone, les calques restent en bas de page, pas dans la barre fixe */
+.ak-export { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+@media (forced-colors: active) {
+  .ds-phases li, .ds-phases li.vu, .ds-phases li.suite { border: 1px solid CanvasText; } .ds-phases li.suite { background: CanvasText; }
+  .ds-svg text { fill: CanvasText; } .ds-svg :is(.ds-m-jalon, .ds-m-promu, .ds-m-preuve, .ds-m-marqueur, .ds-m-fait) { fill: CanvasText; }
+  .ds-svg .ds-m-indice, .ds-svg .ds-n { stroke: CanvasText; } .ds-svg .ds-chaine, .ds-svg .ds-e { stroke: CanvasText; }
+  .ds-sym { border: 1px solid CanvasText; } .ds-nav a { border: 1px solid ButtonText; }
+  .ak-tq .ak-ordre { border: 1px solid CanvasText; }
+}

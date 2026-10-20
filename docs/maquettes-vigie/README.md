@@ -1,6 +1,6 @@
 # Maquettes de la console de la Vigie (phase D2)
 
-Onze maquettes en HTML et CSS, sans dépendance ni script obligatoire : dix écrans de la console de la Vigie (`https://vigie.nicephos.art`, annexe architecture, section 5) et son affichage dans l'administration du site (MV-10). Elles reposent sur le commun des maquettes de l'administration ([`../audit-ergonomie-2026-10-16/maquettes/_commun/`](../audit-ergonomie-2026-10-16/maquettes/_commun/)), sur **une seule feuille propre à la console**, [`_vigie/vigie.css`](_vigie/vigie.css), sur [`_vigie/admin-site.css`](_vigie/admin-site.css) pour ce qui ne sert qu'à l'admin du site, et sur le référentiel de mots et de données fictives [LEXIQUE-ET-DONNEES.md](LEXIQUE-ET-DONNEES.md). Grille du jury : celle de l'administration ([`GRILLE.md`](../audit-ergonomie-2026-10-16/maquettes/GRILLE.md)), avec ses contrôles outillés.
+Quatorze maquettes en HTML et CSS, sans dépendance ni script obligatoire : treize écrans de la console de la Vigie (`https://vigie.nicephos.art`, annexe architecture, section 5) et son affichage dans l'administration du site (MV-10). MV-12 à MV-14 (20 oct. 2026) dessinent les dossiers et la vue ATT&CK (étude [`vigie-dossiers.md`](../etudes/vigie-dossiers.md), section 8 ; lexique § 3.20). Elles reposent sur le commun des maquettes de l'administration ([`../audit-ergonomie-2026-10-16/maquettes/_commun/`](../audit-ergonomie-2026-10-16/maquettes/_commun/)), sur **une seule feuille propre à la console**, [`_vigie/vigie.css`](_vigie/vigie.css), sur [`_vigie/admin-site.css`](_vigie/admin-site.css) pour ce qui ne sert qu'à l'admin du site, et sur le référentiel de mots et de données fictives [LEXIQUE-ET-DONNEES.md](LEXIQUE-ET-DONNEES.md). Grille du jury : celle de l'administration ([`GRILLE.md`](../audit-ergonomie-2026-10-16/maquettes/GRILLE.md)), avec ses contrôles outillés.
 
 Dessinées par quatre personnes en parallèle (MV-01 et MV-02 ; MV-03 et MV-04 ; MV-05, MV-06 et MV-08 ; MV-07, MV-09 et MV-10), elles ont été consolidées le 18 oct. 2026 : une feuille au lieu de quatre, mêmes barre latérale, barre d'onglets, mots, données et composants d'un écran à l'autre, liens entre écrans vers les adresses que les autres montrent, arbitrages du § 3.13 du lexique repris partout. Après le jury v1 (deux jurés indépendants), la passe 2 du même jour applique les dix-huit arbitrages du § 3.14 ; après le jury v2, la passe 3 applique les treize du § 3.15 et montre comme faits les comportements de la PR #121 de la Vigie ; après le jury v3, les finitions appliquent les sept points du § 3.16 (textes de la PR #124). Après validation de MV-01 à MV-10 (PR #125), les photographes ont demandé MV-11, « Flux et provenance des alertes » (§ 3.17), refondue après son jury (§ 3.18), et sa barre de provenance dans MV-01.
 
@@ -19,6 +19,9 @@ Dessinées par quatre personnes en parallèle (MV-01 et MV-02 ; MV-03 et MV-04 ;
 | [MV-09](MV-09-acces.html) | Accès, pages hors session : connexion refusée, second facteur, ré-authentification, session expirée, 403 | `/connexion`, `/reauth` | [bureau](MV-09-acces-bureau.webp) · [téléphone](MV-09-acces-mobile.webp) |
 | [MV-10](MV-10-admin-site.html) | Dans l'admin du site : entrée « Sécurité », bandeau, ligne d'« Aujourd'hui » ; messages Signal et e-mail | `/admin` | [bureau](MV-10-admin-site-bureau.webp) · [téléphone](MV-10-admin-site-mobile.webp) |
 | [MV-11](MV-11-flux.html) | Flux et provenance des alertes : « Les 6 alertes » (une bande égale par alerte), puis « Les 319 événements », leurs tables, provenances ; barre de provenance dans MV-01 | `/flux` | [bureau](MV-11-flux-bureau.webp) · [téléphone](MV-11-flux-mobile.webp) |
+| [MV-12](MV-12-dossiers.html) | Dossiers : l'état en une phrase, les filtres, la liste (gravité, progression en huit cases, confiance, enjeu) ; entrées « Dossiers » et « ATT&CK » dans la barre de toutes les pages | `/dossiers` | [bureau](MV-12-dossiers-bureau.webp) · [téléphone](MV-12-dossiers-mobile.webp) |
+| [MV-13](MV-13-dossier.html) | Un dossier : explication en trois lignes, frise en couloirs, matrice ATT&CK complète, graphe des entités, signaux, réponses, journal ; gestes de l'analyste ; hypothèse d'un vol de session sur cinq phases | `/dossiers/23` | [bureau](MV-13-dossier-bureau.webp) · [téléphone](MV-13-dossier-mobile.webp) |
+| [MV-14](MV-14-attack.html) | ATT&CK : les 15 tactiques d'ATT&CK 20.0, couverture par technique (règles et détecteurs du code), signaux, techniques sans règle, calques ATT&CK Navigator | `/attack` | [bureau](MV-14-attack-bureau.webp) · [téléphone](MV-14-attack-mobile.webp) |
 
 Le contenu attendu de chaque écran et ses états sont au § 4 du lexique ; les données, au § 3 (tableaux de référence à l'état final, § 3.1 à 3.6).
 
@@ -83,36 +86,36 @@ Elles s'ajoutent à celles de l'administration (planche MQ-00, `GRILLE.md`). `_v
 
 **Encart** : « Ce que montre l'écran », la commande de `vigie/cli.js` équivalente, ce qui est « à créer », les écarts avec le lexique et le code, et les **styles à embarquer** (la console dépend de `liste-a`, `champ-a`, `note-a`, `kv-a`, `plier`, absents de `public/admin/admin.css` : D3) ; un seul bloc « Mesures », écrit par `mesures-vigie.py`.
 
-## Contrôles passés (18 oct. 2026, MV-11 ajoutée)
+## Contrôles passés (20 oct. 2026, MV-12 à MV-14 ajoutées)
 
-Tous repassés sur les onze pages (MV-11 comprise), une colonne par maquette ; tout est à 0 défaut. Console (MV-01 à MV-09, MV-11) : textes à 13 px au moins, français seul ; admin du site (MV-10) : 12 px au moins, en français et avec la barre latérale allemande (« Sicherheit »), pied de la barre au toucher de 721 à 1 440 px (102 mesures, thème et « Se déconnecter » à 44 px). Les essais des deux jurés tournent à chaque passe ; depuis la passe 3, avec tous les `<details>` ouverts à 320 et 412 px, l'espacement du texte à 412 px et les noms en double cherchés dans chaque cadre d'état. Le poids d'une page de la console va de 290 à 501 ko : la feuille unique porte les composants des neuf écrans et se met en cache d'une page à l'autre.
+Tous repassés sur les quatorze pages (MV-01 à MV-11 régénérées avec la barre « Dossiers », « ATT&CK »), une colonne par maquette ; tout est à 0 défaut. Console (MV-01 à MV-09, MV-11 à MV-14) : textes à 13 px au moins, SVG compris, français seul ; admin du site (MV-10) : 12 px au moins, en français et avec la barre latérale allemande (« Sicherheit »). Les essais des jurés tournent à chaque passe (espacement du texte, contraste forcé, identifiants coupés, noms en double, mouvement réduit, `<details>` ouverts). L'essai de lisibilité des diagrammes (`flux-lisible.mjs`) ne vise que MV-11 : la frise et le graphe de MV-13 sont contrôlés pour la taille de leur texte, pas pour les chevauchements (vus à l'œil).
 
-| Contrôle | MV-01 | MV-02 | MV-03 | MV-04 | MV-05 | MV-06 | MV-07 | MV-08 | MV-09 | MV-10 | MV-11 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| axe-core, bureau sombre et Pixel 7 clair (violations) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
-| axe-core sans `inert` (violations ; inert retirés) | 0 / 0 (4) | 0 / 0 (6) | 0 / 0 (3) | 0 / 0 (3) | 0 / 0 (7) | 0 / 0 (5) | 0 / 0 (5) | 0 / 0 (5) | 0 / 0 (6) | 0 / 0 (7) | 0 / 0 (6) |
-| débordement, 11 largeurs, et à 320 et 412 px `<details>` ouverts | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun |
-| débordement de 320 à 1 440 px au pas de 16, à 900, 1 024, 1 100 px de haut (mesures) | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 540 | 270 |
-| ellipses | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune |
-| lignes qui défilent sans suite visible | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| barre latérale : rien n’en sort ; bas du compte (bureau) | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | sans barre | oui ; 900 px ; fr et de | oui ; 900 px |
-| cibles sous 24 px (bureau) / 44 px (toucher) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
-| textes sous 13 px (console) ou 12 px (admin), bureau / téléphone | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
-| focus visible, sombre et clair, inert retirés (éléments, 0 invisible) | 55, 0 | 50, 0 | 73, 0 | 48, 0 | 77, 0 | 124, 0 | 35, 0 | 20, 0 | 11, 0 | 109, 0 | 59, 0 |
-| focus caché par une barre fixe, menu ouvert compris | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| html-validate (erreurs) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| formulaires (noms, boutons, `_csrf` sur tout POST) | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire |
-| annotations à 1 440, 412, 320 px | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire |
-| insécables à poser | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| groupes de radios (aucun partagé entre cadres) | 0 | 2 | 0 | 2 | 3 | 0 | 0 | 0 | 0 | 0 | 0 |
-| cohérence des données (contradictions) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| espacement du texte (WCAG 1.4.12) à 320, 412, 1 440 px, et `<details>` ouverts à 320 et 412 px (défauts) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| contraste forcé : bouton sans bordure, sélection invisible | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| identifiants (.ip, .sub, code) coupés en fin de ligne, 320, 412, 1 440 px, `<details>` ouverts compris ; commandes coupées dans un mot | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| liens ou boutons de même nom vers des cibles différentes, écran et cadres d’état | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| transitions ou animations en mouvement réduit | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| diagrammes SVG : libellés qui se chevauchent, hors cadre, sous 13 px ou sur une bande ; contours sous 3:1 ; paires de teintes sous 1,5 (320 à 1 440 px) | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | 0 (10 SVG, 126 libellés) |
-| poids, polices et CSS compris (ko) | 331 | 318 | 346 | 324 | 326 | 412 | 324 | 310 | 290 | 296 | 501 |
+| Contrôle | MV-01 | MV-02 | MV-03 | MV-04 | MV-05 | MV-06 | MV-07 | MV-08 | MV-09 | MV-10 | MV-11 | MV-12 | MV-13 | MV-14 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| axe-core, bureau sombre et Pixel 7 clair (violations) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| axe-core sans `inert` (violations ; inert retirés) | 0 / 0 (4) | 0 / 0 (6) | 0 / 0 (3) | 0 / 0 (3) | 0 / 0 (7) | 0 / 0 (5) | 0 / 0 (5) | 0 / 0 (5) | 0 / 0 (6) | 0 / 0 (7) | 0 / 0 (6) | 0 / 0 (3) | 0 / 0 (5) | 0 / 0 (2) |
+| débordement, 11 largeurs, et à 320 et 412 px `<details>` ouverts | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun | aucun |
+| débordement de 320 à 1 440 px au pas de 16, à 900, 1 024, 1 100 px de haut (mesures) | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 270 | 540 | 270 | 270 | 270 | 270 |
+| ellipses | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune | aucune |
+| lignes qui défilent sans suite visible | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| barre latérale : rien n’en sort ; bas du compte (bureau) | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px | sans barre | oui ; 900 px ; fr et de | oui ; 900 px | oui ; 900 px | oui ; 900 px | oui ; 900 px |
+| cibles sous 24 px (bureau) / 44 px (toucher) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| textes sous 13 px (console) ou 12 px (admin), bureau / téléphone | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| focus visible, sombre et clair, inert retirés (éléments, 0 invisible) | 57, 0 | 52, 0 | 75, 0 | 50, 0 | 79, 0 | 126, 0 | 37, 0 | 22, 0 | 11, 0 | 109, 0 | 61, 0 | 44, 0 | 63, 0 | 100, 0 |
+| focus caché par une barre fixe, menu ouvert compris | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| html-validate (erreurs) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| formulaires (noms, boutons, `_csrf` sur tout POST) | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire |
+| annotations à 1 440, 412, 320 px | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire | rien à redire |
+| insécables à poser | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| groupes de radios (aucun partagé entre cadres) | 0 | 2 | 0 | 2 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| cohérence des données (contradictions) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| espacement du texte (WCAG 1.4.12) à 320, 412, 1 440 px, et `<details>` ouverts à 320 et 412 px (défauts) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| contraste forcé : bouton sans bordure, sélection invisible | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| identifiants (.ip, .sub, code) coupés en fin de ligne, 320, 412, 1 440 px, `<details>` ouverts compris ; commandes coupées dans un mot | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| liens ou boutons de même nom vers des cibles différentes, écran et cadres d’état | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| transitions ou animations en mouvement réduit | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| diagrammes SVG : libellés qui se chevauchent, hors cadre, sous 13 px ou sur une bande ; contours sous 3:1 ; paires de teintes sous 1,5 (320 à 1 440 px) | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | sans diagramme | 0 (10 SVG, 126 libellés) | sans diagramme | frise et graphe : rien sous 13 px (15 unités dans la grande boîte) ; chevauchements vus à l’œil, sans essai outillé | sans diagramme |
+| poids, polices et CSS compris (ko) | 347 | 334 | 362 | 340 | 342 | 428 | 340 | 326 | 305 | 296 | 518 | 329 | 363 | 345 |
 
 
 Les outils de `dr-work/outils/` filtrent sur `MQ-` ou visent le dossier des maquettes de l'administration : ils ont été **copiés et adaptés** dans `dr-work/dr-tmp/vigie-mq/` (sans les modifier), avec les générateurs. Depuis la consolidation, deux commandes suffisent :
@@ -176,3 +179,15 @@ Demandée par les photographes en validant MV-01 à MV-10 (§ 3.17 du lexique), 
 - **Données** (`flux_donnees.py`, partagé avec la barre de MV-01) : les 319 événements du journal de MV-03 et les 6 alertes de MV-01, vérifiés par des assertions et par `coherence-vigie.py` (règles F1 à F3, et O1, O2 pour les opérateurs).
 - **Téléphone** : pas de Sankey ; la phrase, la barre « 6 alertes par origine », les tableaux avec leurs intitulés ; « Voir le diagramme » l'ouvre à sa taille, dans un cadre qui défile.
 - **Essai** `flux-lisible.mjs` : de 320 à 1 440 px, aucun libellé qui en chevauche un autre, hors cadre, sous 13 px ou posé sur une bande ou un nœud ; au moins un libellé par diagramme ; le diagramme des alertes affiché dès 1 024 px ; contours des bandes d'alerte à 3:1 au moins et toutes les paires de teintes à 1,5 au moins, en sombre et en clair ; la cohérence compare les barres de MV-01 et de MV-11. Il relève bien les copies sabotées des jurés et les nôtres.
+
+## MV-12 à MV-14, dossiers et vue ATT&CK (20 oct. 2026)
+
+Après la fusion du moteur des dossiers (PR #191) et du référentiel ATT&CK 20.0 (PR #190), selon la section 8 de l'étude [`vigie-dossiers.md`](../etudes/vigie-dossiers.md) et ses décisions D31 à D39 ; données au § 3.20 du lexique. Une seule passe de contrôle, sans jury (règle des maquettes depuis la v3).
+
+- **Une barre plus longue pour toutes les pages** : « Dossiers » en tête de « Surveiller », avec le nombre de dossiers ouverts (5), « ATT&CK » après « Flux ». MV-01 à MV-11 sont régénérées avec elle, sans autre changement ; MV-06 garde l'instantané du registre des règles avec lequel elle a été validée (54 règles).
+- **Les dossiers du jour** reprennent les six alertes du lexique, comme le moteur les regrouperait : #23 (critique : #412, #413 par la fusion manuelle de #24, et #414 en dissimulation), #22 (#409), #21 (#407, pris en charge), #20 (#405), #25 (#414) ; #18 clos la veille. Le moteur ne relie pas #413 à #412 (le contrôle des rôles ne porte pas le compte) : Sébastien les fusionne à 14 h 18, et l'encart de MV-13 le note pour la PR D.
+- **La progression en huit cases** (`.ds-phases`) : sombre pour les phases dans l'ordre, grise pour une phase hors de la suite, en tirets pour une phase non observée sous la plus avancée ; confiance et enjeu en trois barres (`.ds-niv`).
+- **La frise et le graphe** sont des SVG rendus par le serveur (`commun_d.py`, référence du rendu de la PR D), sans script, en deux boîtes de dessin (760 et 1 120 unités) comme MV-11 : le texte reste à 13 px au moins ; sous 706 px de conteneur, la frise devient une liste par phase et le graphe laisse son tableau. Chacun a son équivalent en tableau.
+- **La matrice ATT&CK** (`.ak-`) : les 15 tactiques dans l'ordre de MITRE, même vides ; Développement de ressources « non observable ici » ; au téléphone, les tactiques sans signal se replient. MV-14 lit sa couverture dans le code (`attack-donnees.mjs` : `vigie/attack.js`, `vigie/regles/`, `DETECTEURS`, `vigie/phases.js`) : 39 techniques couvertes dans 14 tactiques, 88 règles et 7 détecteurs.
+- **Contrôles** : les mêmes que pour MV-01 à MV-11, sur les quatorze pages (tableau ci-dessus) ; `coherence-vigie.py` connaît les adresses `/dossiers`, `/dossiers/<n°>`, `/attack`, `/attack/<technique>`, l'alerte hypothétique #418 et le filtre « technique » à créer.
+
