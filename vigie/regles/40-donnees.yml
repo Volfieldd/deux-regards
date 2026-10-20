@@ -45,12 +45,16 @@ name: lectures_massives
 id: 7f9d31f9-4bc6-5d15-8cd4-d5b0ac985036
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
+description: >-
+  30 lectures sensibles distinctes en 1 h par un compte (DS18). Une lecture distincte est le couple objet et numéro
+  (registre BV-30) : le message 12 (objet « message ») et la fiche 12 sont deux lectures. Les lectures sans objet (fiches
+  des personnes et des rencontres, telles que le site les émet) se comptent entre elles par leur numéro, comme avant.
 tags: [attack.collection, attack.t1213]
 correlation:
   type: value_count
   rules: [lecture_fiche]
   group-by: [sub]
   timespan: 1h
-  condition: { gte: 30, field: detail.id }
+  condition: { gte: 30, field: [detail.objet, detail.id] }
 level: medium
 vigie: { cas: DS18, points: 3 }

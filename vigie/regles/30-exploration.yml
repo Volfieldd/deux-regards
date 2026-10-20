@@ -138,3 +138,25 @@ correlation:
   condition: { gte: 10 }
 level: medium
 vigie: { cas: DS16, entite: { kind: ip, champ: ip }, points: 3 }
+---
+# Contact et demande de licence (registre des briques, BV-29) : chaque adresse reste sous sa limite (8 envois par heure),
+# mais un réseau de machines peut déposer des centaines de messages valides. Le site plafonne les notifications à 30 par
+# jour et le dit une fois par jour, à la 31e retenue (server/messages.js · notifications, sans adresse ni compte) : le
+# fait est global, l'alerte vise l'entité « site » de clé « messages », comme les calculs de mot de passe des galeries.
+title: Boîtes de messages bombardées (plafond des notifications du jour atteint)
+name: messages_satures
+id: 2243feab-b47a-42a8-9dbc-70618fe9a37c
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  Plus de 30 messages acceptés en un jour par les pages Contact et demande de licence (registre BV-29, DS21) : les
+  messages restent dans la boîte de l'admin, plus aucun e-mail ce jour-là. À rapprocher des pièges (aspiration_distribuee,
+  DS15) et des limites par adresse de la même heure.
+tags: [attack.impact, attack.t1499]
+detection:
+  selection:
+    type: excess_rate_limit_exceeded
+    detail.limite: messages_global
+  condition: selection
+level: medium
+vigie: { cas: DS21, entite: { kind: site, valeur: messages }, source_unique: true, mode: alerter }

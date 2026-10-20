@@ -30,7 +30,25 @@ export const BY_TYPE = {
 };
 // Propres au canal : l'échec d'un mot de passe de galerie privée (composant public) n'est pas une force brute sur la
 // connexion de l'admin ; ses propres règles (BV-16 : échecs par adresse, essais répartis, suspension) le comptent.
-const detailObjet = row => { try { return (typeof row.detail === 'string' ? JSON.parse(row.detail) : row.detail)?.objet; } catch { return null; } };
+const detailOf = row => { try { return (typeof row.detail === 'string' ? JSON.parse(row.detail) : row.detail) || {}; } catch { return {}; } };
+const detailObjet = row => detailOf(row).objet;
+// Champs libres des formulaires Contact et demande de licence (registre des briques, BV-27) : un message cite souvent du
+// code (« <script> », « union select »), un visiteur qui écrit n'est pas un scanner. Envois de ces deux formulaires
+// seulement (route du site, trois langues ; jamais la page en GET, dont les paramètres restent notés comme ailleurs).
+const FORMULAIRES_LIBRES = /^(?:\/(?:en|de))?\/(?:contact|droits\/demande)$/;
+const CHAMPS_LIBRES = new Set(['body.message', 'body.diffusion']);
+// Saisie dont tous les constats sont dans le message ou la diffusion d'un de ces formulaires, sans outil d'attaque reconnu
+// au navigateur ; un constat ailleurs (nom, e-mail, adresse, navigateur) garde tout son poids.
+export function saisieLibre(row) {
+  if (row.type !== 'malicious_input' || row.composant !== 'site · public' || (row.method && row.method !== 'POST') || !FORMULAIRES_LIBRES.test(String(row.route || ''))) return false;
+  const d = detailOf(row);
+  const constats = Array.isArray(d.constats) ? d.constats : [];
+  return constats.length > 0 && constats.every(c => CHAMPS_LIBRES.has(c?.champ)) && !(Array.isArray(d.familles) && d.familles.includes('outil'));
+}
+// Poids d'une saisie libre par gravité : « bas » (envoyée depuis une session de l'admin) gardée pour l'enquête, sans
+// point ; « moyen » (un visiteur) un quart du poids ordinaire ; « haut » ou plus : le poids ordinaire. La série reste
+// comptée par la règle scanner (5 saisies en 1 h depuis une adresse, DS11), qui ne lit pas ce barème.
+const SAISIE_LIBRE = { bas: 0, moyen: 0.5 };
 const BY_CANAL = {
   'authn_login_fail|site · public': 0,
   'authn_login_disabled|site · public': 0,      // forme provisoire du palier des galeries (type_attendu authn_login_lock)
@@ -43,6 +61,7 @@ export const pointsOf = row => {
   // Billet des Carnets : un constat « bas » (HTML inoffensif, image externe) est gardé pour l'enquête, sans point ; une
   // construction active (moyen ou plus) garde ses points (BV-12).
   if (row.type === 'malicious_input' && row.severity === 'bas' && detailObjet(row) === 'billet') return 0;
+  if (Object.hasOwn(SAISIE_LIBRE, row.severity) && saisieLibre(row)) return SAISIE_LIBRE[row.severity];
   return Object.hasOwn(BY_TYPE, row.type) ? BY_TYPE[row.type] : BY_SEVERITY[row.severity] ?? 0;
 };
 

@@ -9,7 +9,8 @@ import { parseAllDocuments } from 'yaml';
 // status, ua_family, detail.<chemin>).
 //   - détection : sélections (carte = ET, liste de valeurs = OU), modificateurs contains, startswith, endswith, re, gte,
 //     gt, lte, lt, exists, all ; condition : and, or, not, parenthèses, « 1 of x* », « all of x* », « 1 of them » ;
-//   - corrélations (méta-règles Sigma) : event_count, value_count, temporal, sur une fenêtre glissante, par groupe ;
+//   - corrélations (méta-règles Sigma) : event_count, value_count (un champ, ou une liste de champs comptés ensemble),
+//     temporal, sur une fenêtre glissante, par groupe ;
 //   - bloc « vigie » propre au site : cas (DS…), entité visée, source unique (alerte immédiate) ou points (déposés sur
 //     l'entité, quorum), réponse automatique, mode par défaut.
 // Une règle mal écrite est refusée au chargement (le service ne démarre pas sur une règle fausse).
@@ -179,6 +180,9 @@ export function loadRules(dir) {
         const cond = c.condition || {};
         if (c.type !== 'temporal' && !['gte', 'gt'].some(k => k in cond)) throw new RuleError(`${file} : condition de corrélation attendue (gte ou gt ; lte et eq ne sont pas pris en charge)`);
         if (c.type === 'value_count' && !cond.field) throw new RuleError(`${file} : value_count demande condition.field`);
+        // Extension au format Sigma : condition.field peut être une liste de champs, comptés ensemble (valeur distincte = le
+        // couple, par exemple detail.objet et detail.id : le message 12 et la fiche 12 sont deux lectures).
+        if (Array.isArray(cond.field) && (!cond.field.length || !cond.field.every(f => typeof f === 'string' && f))) throw new RuleError(`${file} : condition.field attend un champ ou une liste de champs`);
         correlations.push({ ...base, type: c.type, rules: [].concat(c.rules || []), groupBy: [].concat(c['group-by'] || []), span: timespan(c.timespan), cond, ...vigieBlock(doc, file) });
         continue;
       }
@@ -206,6 +210,13 @@ export function createCorrelator(correlations, { now = Date.now, maxGroups = 10_
   let total = 0;
   const groupKey = (c, row) => c.groupBy.map(f => String(fieldOf(row, f) ?? '')).join('|');
   const short = v => (v == null ? null : crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex').slice(0, 16));
+  // Valeur comptée par value_count : un champ, ou plusieurs ensemble (null si tous manquent : comme un champ absent).
+  // Un champ seul garde exactement son empreinte d'avant (les fenêtres en cours ne changent pas de valeurs).
+  const valueOf = (field, row) => {
+    if (!Array.isArray(field)) return short(fieldOf(row, field));
+    const vals = field.map(f => fieldOf(row, f));
+    return vals.every(v => v == null) ? null : short(vals);
+  };
   const weight = row => { const n = Number(fieldOf(row, 'detail.nombre')); return Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n) + 1, 1000) : 1; };
   const trim = (g, t, span) => { const before = g.hits.length; g.hits = g.hits.filter(h => t - h.t <= span); total -= before - g.hits.length; };
   function feed(row, matched, { t = now(), source = null } = {}) {
@@ -228,7 +239,7 @@ export function createCorrelator(correlations, { now = Date.now, maxGroups = 10_
       trim(g, t, c.span);
       // temporal : un point par règle satisfaite ; sinon un point par événement, même s'il satisfait plusieurs règles.
       for (const r of c.type === 'temporal' ? which : [which[0]]) {
-        g.hits.push({ t, seq: row.seq, rule: r, source, v: c.cond.field ? short(fieldOf(row, c.cond.field)) : null, w: weight(row) });
+        g.hits.push({ t, seq: row.seq, rule: r, source, v: c.cond.field ? valueOf(c.cond.field, row) : null, w: weight(row) });
         total += 1;
       }
       if (g.hits.length > 1000) { total -= g.hits.length - 1000; g.hits = g.hits.slice(-1000); }
