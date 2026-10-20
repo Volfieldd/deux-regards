@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-20",
+  "cases": [
+    {
+      "name": "14 pages × 3 largeurs : images et absence de débordement",
+      "result": "pass"
+    },
+    {
+      "name": "Comparateur : chaque piste conserve sa propre direction",
+      "result": "pass"
+    },
+    {
+      "name": "Obscura : image suivante et retour à la sélection",
+      "result": "pass"
+    },
+    {
+      "name": "Panoramique : choix de vue et ouverture entière",
+      "result": "pass"
+    },
+    {
+      "name": "Résonances : changement effectif du diptyque",
+      "result": "pass"
+    },
+    {
+      "name": "Galerie : filtre, zéro résultat et réinitialisation",
+      "result": "pass"
+    },
+    {
+      "name": "Galerie : retour avec filtre et sous-ensemble conservés",
+      "result": "pass"
+    },
+    {
+      "name": "Photo : agrandissement au clavier, Échap et restitution du focus",
+      "result": "pass"
+    },
+    {
+      "name": "Voyage : retour à l’étape et connexes du même voyage",
+      "result": "pass"
+    },
+    {
+      "name": "Carnets : deux articles distincts et retour au bon billet",
+      "result": "pass"
+    },
+    {
+      "name": "Admin : modification de fiche en mémoire et remise à zéro au rechargement",
+      "result": "pass"
+    },
+    {
+      "name": "Admin : ajout de sortie visible",
+      "result": "pass"
+    },
+    {
+      "name": "Admin : titre blanc bloqué, brouillon et confirmation de publication",
+      "result": "pass"
+    },
+    {
+      "name": "Menu mobile : ouverture, Échap et retour du focus",
+      "result": "pass"
+    },
+    {
+      "name": "Mode calme : préférence persistée et réduction système",
+      "result": "pass"
+    },
+    {
+      "name": "Reflow avec espacements de texte majorés à 390 px",
+      "result": "pass"
+    },
+    {
+      "name": "Aucun appel externe ni erreur JavaScript",
+      "result": "pass",
+      "errors": [],
+      "external": []
+    },
+    {
+      "name": "Galerie : retour — photo mobile élargie et commandes accessibles",
+      "result": "pass"
+    }
+  ],
+  "dimensionalStates": 42,
+  "axe": [
+    {
+      "page": "obscura",
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "page": "panoramique",
+      "violations": [],
+      "incomplete": [
+        "aria-prohibited-attr"
+      ]
+    },
+    {
+      "page": "contact",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "resonances",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "itinerance",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "hors-cadre",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "admin",
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "page": "photo",
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    }
+  ],
+  "targetedRecheck": "Recherche après correction du double rafraîchissement ; préférence système attendue sur son événement ; photo mobile élargie à 390/320 px."
+}

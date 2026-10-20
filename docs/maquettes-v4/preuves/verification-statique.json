@@ -1,0 +1,44 @@
+{
+  "htmlPages": 14,
+  "missingLocalTargets": [],
+  "oldMediaReferences": [],
+  "replacementFiles": [
+    "foret.webp",
+    "maree.webp",
+    "cimes.webp",
+    "dune.webp"
+  ],
+  "replacementBytes": 865062,
+  "mainContrastPairs": [
+    {
+      "label": "Texte principal",
+      "foreground": "#eeede8",
+      "background": "#08090a",
+      "ratio": 17.0
+    },
+    {
+      "label": "Texte secondaire",
+      "foreground": "#aaaeb1",
+      "background": "#08090a",
+      "ratio": 8.92
+    },
+    {
+      "label": "Accent et focus",
+      "foreground": "#deb68d",
+      "background": "#08090a",
+      "ratio": 10.61
+    },
+    {
+      "label": "Titres italiques",
+      "foreground": "#d7c4af",
+      "background": "#08090a",
+      "ratio": 11.77
+    },
+    {
+      "label": "Texte secondaire sur panneau",
+      "foreground": "#aaaeb1",
+      "background": "#15181b",
+      "ratio": 7.98
+    }
+  ]
+}

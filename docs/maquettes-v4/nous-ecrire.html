@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Nous écrire — Nicephos · Maquette</title>
+<link rel="stylesheet" href="chambre.css">
+<link rel="stylesheet" href="parcours.css">
+<script defer src="data.js">
+</script>
+<script defer src="chambre.js">
+</script>
+</head>
+<body class="contact-page" data-piste="obscura">
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="prototype">
+<a href="index.html">Études V4 · chambre noire</a>
+<span>Images générées · lieux et récits fictifs</span>
+</div>
+<header class="header">
+<a class="brand" href="index.html" aria-label="Nicephos, les six propositions">nicephos<span class="brand-dot">.</span>
+</a>
+<button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu</button>
+<nav id="navigation" aria-label="Navigation principale">
+<a href="galerie.html">Photographies</a>
+<a href="carte.html">Carte</a>
+<a href="voyages.html">Voyages</a>
+<a href="carnets.html">Carnets</a>
+<a href="regards.html">Regards</a>
+<button id="calm" aria-pressed="false">Mode calme</button>
+</nav>
+</header>
+<main id="main">
+<section class="page-intro">
+<p class="eyebrow">PRENDRE CONTACT</p>
+<h1>La conversation<br>
+<em>continue ici.</em>
+</h1>
+<p class="page-lead">Une question, une impression, une envie de parler photographie.</p>
+</section>
+<div class="contact-layout">
+<form id="contact-demo">
+<label for="contact-name">Votre prénom<input id="contact-name" autocomplete="given-name" required>
+</label>
+<label for="contact-email">Votre adresse e-mail<input id="contact-email" type="email" autocomplete="email" required>
+</label>
+<label for="contact-subject">Votre sujet<select id="contact-subject">
+<option>À propos d’une photographie</option>
+<option>À propos d’un voyage</option>
+<option>Juste pour échanger</option>
+</select>
+</label>
+<label for="contact-message">Votre message<textarea id="contact-message" rows="7" required>
+</textarea>
+</label>
+<p class="muted">Maquette de formulaire : aucune donnée n’est envoyée ni enregistrée.</p>
+<button type="submit">Essayer le formulaire ↗</button>
+<p id="contact-result" role="status">
+</p>
+</form>
+<figure>
+<img src="assets/foret.webp" alt="Des arbres dans la brume, paysage généré pour la maquette." width="1024" height="1536">
+<figcaption>Les meilleures images sont parfois le début d’une conversation.<br>
+<span>Texte et paysage de démonstration.</span>
+</figcaption>
+</figure>
+</div>
+</main>
+<footer>
+<a class="brand small" href="index.html">nicephos.</a>
+<span>Étude de direction artistique · images de substitution générées</span>
+<div>
+<a href="index.html">Les six pistes</a>
+<a href="nous-ecrire.html">Nous écrire</a>
+<a href="admin.html">L’atelier</a>
+</div>
+</footer>
+<dialog id="lightbox" aria-label="Image agrandie">
+<button class="close-lightbox" autofocus>Fermer ×</button>
+<img alt="">
+<p>
+</p>
+</dialog>
+<p class="sr-only" id="announcement" role="status">
+</p>
+</body>
+</html>
