@@ -38,6 +38,10 @@
         <g class="vmap-me"><circle class="vmap-halo" cx="<%= pl.me.x.toFixed(2) %>" cy="<%= pl.me.y.toFixed(2) %>" r="<%= (pl.r * 1.18).toFixed(2) %>" vector-effect="non-scaling-stroke"/>
           <image href="<%= `/media/${it.thumb}` %>" x="<%= (pl.me.x - pl.r).toFixed(2) %>" y="<%= (pl.me.y - pl.r).toFixed(2) %>" width="<%= (pl.r * 2).toFixed(2) %>" height="<%= (pl.r * 2).toFixed(2) %>" preserveAspectRatio="xMidYMid slice" clip-path="url(#vmap-rond)"/>
           <text class="vmap-me-t" x="<%= pl.me.x.toFixed(2) %>" y="<%= (pl.me.y + pl.r * 1.18 + pl.fs * 1.1).toFixed(2) %>" font-size="<%= pl.fs.toFixed(2) %>"><%= pl.me.city %></text></g>
+<% /* Barre d'échelle (server/photo-map.js, echelle), en unités du fond comme le reste de la carte ; sa longueur écrite en
+      4,6 unités pour 100 de large, 13 px rendus au moins (cadre de 288 px à 320 px d'écran). */
+   const sc = pl.scale, len = sc.part * v.w, bx = sc.end ? v.x + v.w - 4 * pl.u - len : v.x + 4 * pl.u, by = v.y + v.h - 5 * pl.u, t = 0.8 * pl.u; %>
+        <g class="vmap-echelle" role="img" aria-label="<%= n.scale(sc.label) %>"><path d="M<%= bx.toFixed(3) %> <%= by.toFixed(3) %>h<%= len.toFixed(3) %>M<%= bx.toFixed(3) %> <%= (by - t).toFixed(3) %>v<%= (2 * t).toFixed(3) %>M<%= (bx + len).toFixed(3) %> <%= (by - t).toFixed(3) %>v<%= (2 * t).toFixed(3) %>" vector-effect="non-scaling-stroke"/><text x="<%= (sc.end ? bx - 1.6 * pl.u : bx + len + 1.6 * pl.u).toFixed(3) %>" y="<%= by.toFixed(3) %>" font-size="<%= (4.6 * pl.u).toFixed(3) %>"<%~ sc.end ? ' text-anchor="end"' : '' %>><%= sc.label %></text></g>
       </svg>
       <figcaption class="mono"><%= n.here(pl.me.city) %><%= pl.count ? ` · ${n.more(pl.count)}` : '' %><% if (it.mapPage) { %> · <a href="<%= it.u('/carte') %>#lieu-<%= p.city_id %>"><%= n.world %></a><% } %></figcaption>
     </figure>
