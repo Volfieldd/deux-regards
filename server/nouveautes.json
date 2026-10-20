@@ -1,5 +1,34 @@
 [
   {
+    "version": "1.183.0",
+    "date": "2026-10-20",
+    "pr": 183,
+    "title": {
+      "fr": "Une page Contact et la demande de licence",
+      "en": "A Contact page and licence requests",
+      "de": "Eine Kontaktseite und Lizenzanfragen"
+    },
+    "items": [
+      {
+        "fr": "Le site a une page Contact (/contact, lien en pied de page et dans À propos) : un visiteur écrit à Sébastien, à Julien ou aux deux. Sous chaque photo (site v2 et v3) et sur la page Droits, « Demander une licence » ouvre une demande déjà remplie avec la photo : usage prévu, diffusion, message.",
+        "en": "The site has a Contact page (/contact, linked in the footer and on About): a visitor writes to Sébastien, to Julien or to both. Under each photo (site v2 and v3) and on the Rights page, “Request a licence” opens a request already filled in with the photo: intended use, circulation, message.",
+        "de": "Die Website hat eine Kontaktseite (/contact, verlinkt in der Fußzeile und unter Über uns): Ein Besucher schreibt an Sébastien, an Julien oder an beide. Unter jedem Foto (Website v2 und v3) und auf der Seite Rechte öffnet „Lizenz anfragen“ eine bereits mit dem Foto ausgefüllte Anfrage: geplante Nutzung, Verbreitung, Nachricht."
+      },
+      {
+        "fr": "Les messages arrivent dans « Messages et demandes » (groupe Personnes) et dans « Aujourd’hui » ; chacun voit les siens et ceux adressés aux deux. Le nom, l’adresse et le texte ne s’affichent qu’en ouvrant le message (lecture notée au journal) ; répondez par « Répondre par e-mail ». Ils sont chiffrés et effacés au bout de 12 mois ; le site n’envoie rien au visiteur.",
+        "en": "Messages arrive in “Messages and requests” (People group) and in “Today”; each of you sees your own and those addressed to both. The name, address and text are only shown when you open the message (the reading is logged); answer with “Reply by email”. They are encrypted and erased after 12 months; the site sends nothing to the visitor.",
+        "de": "Die Nachrichten kommen in „Nachrichten und Anfragen“ (Gruppe Personen) und in „Heute“ an; jeder sieht seine eigenen und die an beide. Name, Adresse und Text erscheinen erst, wenn Sie die Nachricht öffnen (das Lesen wird protokolliert); antworten Sie mit „Per E-Mail antworten“. Sie werden verschlüsselt und nach 12 Monaten gelöscht; die Website sendet dem Besucher nichts.",
+        "perm": "messages.traiter"
+      },
+      {
+        "fr": "Si la messagerie du site est réglée, vous recevez « Un nouveau message vous attend » avec le lien vers l’admin, sans rien du message.",
+        "en": "If the site’s mail server is set up, you receive “A new message is waiting for you” with the link to the admin, with nothing from the message.",
+        "de": "Ist der E-Mail-Server der Website eingerichtet, erhalten Sie „Eine neue Nachricht wartet auf Sie“ mit dem Link zur Verwaltung, ohne etwas aus der Nachricht.",
+        "perm": "messages.traiter"
+      }
+    ]
+  },
+  {
     "version": "1.181.0",
     "date": "2026-10-19",
     "pr": 181,
