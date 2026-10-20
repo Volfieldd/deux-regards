@@ -68,6 +68,9 @@ const titreAlertes = { ip: 'Alertes de l’adresse', reseau: 'Alertes du réseau
 </section>
 </div>
 <div class="cote">
+<section class="panel" aria-labelledby="t-dossiers"><h2 class="panel-t" id="t-dossiers">Dossiers</h2>
+<% if (it.dossiers?.length) { %><ul class="ds-liste"><% for (const d of it.dossiers.slice(0, 20)) { %><li><a class="vg-lien" href="/dossiers/<%= d.id %>">Dossier #<%= d.id %> · <%= d.titre %></a></li><% } %></ul><% if (it.dossiers.length > 20) { %><p>Les 20 dossiers les plus récents sont affichés.</p><% } %><% } else { %><p>Aucun dossier directement rattaché à cette entité.</p><% } %>
+</section>
 <section class="panel" aria-labelledby="t-alertes"><h2 class="panel-t" id="t-alertes"><%= titreAlertes %></h2>
 <% if (f.alertes.length) { %>
 <ul class="vg-lignes">

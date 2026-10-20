@@ -384,3 +384,85 @@ test('ligne de commande : dossiers, fiche, gestes (motif exigé), erreurs dites'
   assert.match(cli(['dossiers', '--tous'], { config, user: 'root' }), /#1 .*clos/);
   assert.equal(cli(['dossier', '99'], { config, user: 'root' }), 'Dossier inconnu.');
 });
+
+test('scission : partition explicite, alertes indivisibles, séparation persistante et rattachement rétroactif sans reprise', t => {
+  const v = vigieOf(t);
+  v.add('session_use_after_expire', { sub: 'compte-e', ip: '203.0.113.50', session: 's-e', detail: { meme_reseau_et_navigateur: false } });
+  v.clock.t += MIN;
+  v.add('session_use_after_expire', { sub: 'compte-f', ip: '203.0.113.60', session: 's-f', detail: { meme_reseau_et_navigateur: false } });
+  const [e, f] = v.dossiers(); v.D.fusionner(e.id, f.id, { par: 'test' });
+  const d = v.fiche(e.id), signaux = d.signaux.filter(s => s.sub === 'compte-f').map(s => s.id);
+  const entites = ['compte:compte-f', 'session:s-f', 'ip:203.0.113.60'];
+  assert.throws(() => v.D.scinder(e.id, { entites, signaux, par: 'test' }), /motif obligatoire/);
+  const nouveau = v.D.scinder(e.id, { entites, signaux, par: 'test', motif: 'Deux attaques distinctes' });
+  assert.equal(v.dossiers().length, 2);
+  assert.ok(v.fiche(nouveau).alertes.length);
+  assert.ok(v.fiche(nouveau).alertes.every(a => !v.fiche(e.id).alertes.some(b => b.id === a.id)));
+  assert.ok(v.fiche(e.id).entites.find(x => x.kind === 'compte' && x.key === 'compte-f').detache_a);
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM dossier_separations').pluck().get(), 1);
+  v.D.rattacher(e.id, 'compte', 'compte-e', { par: 'test' });
+  assert.ok(v.fiche(e.id).signaux.every(s => !signaux.includes(s.id)), 'le rattachement rétroactif ne reprend pas les signaux déplacés');
+  // Nouvelle instance du moteur, sur le même stockage : la séparation ne dépend pas d'un cache en mémoire.
+  const now = () => v.clock.t, store = createStore({ db: v.db, logKey: LOG_KEY, now });
+  const decisions = createDecisions({ store, privateKey: VIGIE_KEYS.privateKey, now });
+  const moteur = createEngine({ store, decisions, switches: createSwitches({ store, now }), now });
+  store.onAdded(rows => moteur.process(rows));
+  v.clock.t += MIN;
+  store.add([{ id: crypto.randomUUID(), type: 'sensitive_read', severity: 'info', composant: 'site · admin', canal: 'ingestion signée', confiance: 'rapporté',
+    recu_a: now(), survenu_a: now(), sub: 'compte-f', session: 's-f', ip: '203.0.113.50', detail: JSON.stringify({ objet: 'personne', id: 44 }) }]);
+  assert.equal(v.dossiers().length, 2, 'le compte F et l’ancienne adresse de E ne refusionnent pas les dossiers');
+  assert.ok(v.fiche(nouveau).signaux.some(s => s.objet === 'personne:44'));
+  assert.ok(!v.fiche(e.id).signaux.some(s => s.objet === 'personne:44'));
+  // La fenêtre temporelle serveur ne doit pas réunir une paire séparée quand le compte désigne l'autre branche.
+  v.db.prepare("UPDATE dossiers SET piste = 'serveur' WHERE id = ?").run(e.id);
+  moteur.dossiers.surSignal({ regle: 'essai.sortie', entite: { kind: 'site', key: 'sortie' }, gravite: 'haut',
+    projection: { nature: 'jalon', n: 7, marqueurs: [] } }, { seq: 999999, survenu_a: now(), sub: 'compte-f' });
+  assert.equal(v.dossiers().length, 2);
+  assert.ok(v.fiche(nouveau).signaux.some(s => s.regle === 'essai.sortie'));
+  assert.equal(store.verify().ok, true);
+  const garde = moteur.dossiers.fusionner(nouveau, e.id, { par: 'test' });
+  assert.equal(garde, e.id); assert.equal(v.dossiers().length, 1);
+  assert.ok(v.fiche(garde).entites.some(x => x.key === 'compte-f' && !x.detache_a));
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM dossier_signaux_ecartes WHERE dossier_id = ?').pluck().get(garde), 0, 'les signaux réunis ne restent plus exclus de leur propre dossier');
+});
+
+test('scission : une sélection fausse et une panne pendant le transfert ne laissent aucune écriture partielle', t => {
+  const v = vigieOf(t);
+  v.add('session_use_after_expire', { sub: 'a', ip: '203.0.113.1', detail: { meme_reseau_et_navigateur: false } });
+  v.add('session_use_after_expire', { sub: 'b', ip: '203.0.113.2', detail: { meme_reseau_et_navigateur: false } });
+  const [a,b] = v.dossiers(); v.D.fusionner(a.id, b.id, { par: 'test' });
+  const avant = v.fiche(a.id), chaine = v.store.head();
+  assert.throws(() => v.D.scinder(a.id, { entites: ['compte:absent'], signaux: [avant.signaux[0].id], motif: 'essai', par: 'test' }), /entités actives/);
+  v.db.exec("CREATE TRIGGER panne_scission BEFORE INSERT ON dossier_separations BEGIN SELECT RAISE(ABORT, 'panne simulée'); END");
+  assert.throws(() => v.D.scinder(a.id, { entites: ['compte:b','ip:203.0.113.2'], signaux: avant.signaux.filter(s => s.sub === 'b').map(s => s.id), motif: 'essai', par: 'test' }), /panne simulée/);
+  assert.deepEqual(v.fiche(a.id), avant); assert.deepEqual(v.store.head(), chaine); assert.equal(v.dossiers().length, 1);
+  assert.equal(v.store.verify().ok, true);
+});
+
+test('scissions successives : les séparations suivent une nouvelle branche puis une fusion avec un tiers', t => {
+  const v = vigieOf(t);
+  for (const [sub, ip] of [['a','203.0.113.1'],['b','203.0.113.2'],['c','203.0.113.3']]) {
+    v.add('session_use_after_expire', { sub, ip, detail: { meme_reseau_et_navigateur: false } });
+    v.clock.t += MIN;
+  }
+  const [a,b,c] = v.dossiers();
+  v.D.fusionner(a.id, b.id, { par: 'test' }); v.D.fusionner(a.id, c.id, { par: 'test' });
+  const separer = (sub, ip) => v.D.scinder(a.id, { entites: [`compte:${sub}`, `ip:${ip}`],
+    signaux: v.fiche(a.id).signaux.filter(s => s.sub === sub).map(s => s.id), motif: 'Acteurs distincts', par: 'test' });
+  const nc = separer('c', '203.0.113.3'), nb = separer('b', '203.0.113.2');
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM dossier_separations').pluck().get(), 3);
+  assert.ok(v.fiche(nb).entites.some(e => e.key === 'c' && e.detache_a), 'détachement antérieur transmis');
+  v.D.rattacher(nb, 'compte', 'b', { par: 'test' });
+  assert.ok(v.fiche(nb).signaux.every(s => s.sub !== 'c'), 'pas de reprise des signaux de la première scission');
+  v.add('sensitive_read', { sub: 'b', ip: '203.0.113.3', detail: { objet: 'personne', id: 51 } });
+  assert.equal(v.dossiers().length, 3);
+  assert.ok(v.fiche(nb).signaux.some(s => s.objet === 'personne:51'));
+  v.add('session_use_after_expire', { sub: 'd', ip: '203.0.113.4', detail: { meme_reseau_et_navigateur: false } });
+  const nd = v.dossiers().find(d => d.graine_key === 'd').id;
+  v.D.fusionner(nd, nb, { par: 'test' });
+  assert.ok(v.db.prepare('SELECT 1 FROM dossier_separations WHERE gauche = ? AND droite = ?').get(nc, nb));
+  v.add('sensitive_read', { sub: 'd', ip: '203.0.113.3', detail: { objet: 'personne', id: 52 } });
+  assert.equal(v.dossiers().length, 3);
+  assert.ok(v.fiche(nb).signaux.some(s => s.objet === 'personne:52'));
+  assert.equal(v.store.verify().ok, true);
+});

@@ -42,7 +42,13 @@ const hash = s => crypto.createHash('sha256').update(s || '').digest('hex').slic
 
 export function checkRoles({ store, siteBackupDir, now = Date.now }) {
   const t = now();
-  const report = (severity, detail) => { store.own('vigie_controle_roles', { severity, emetteur: 'vigie/controle-roles.js', detail }); };
+  const report = (severity, detail) => {
+    // Le contrôle vise parfois plusieurs comptes. Garder un seul rapport et tous ses acteurs : choisir seulement
+    // le premier ferait disparaître les autres dossiers ; un écart de déclencheur n'a aucun compte à lui prêter.
+    const comptes = [...new Set([...(detail.administrateurs_non_declares || []), ...(detail.administrateurs_sans_changement || [])])];
+    store.own('vigie_controle_roles', { severity, emetteur: 'vigie/controle-roles.js',
+      sub: comptes.length === 1 ? comptes[0] : undefined, detail: { ...detail, ...(comptes.length ? { comptes } : {}) } });
+  };
   const snapInfo = latestSnapshot(siteBackupDir, t);
   if (!snapInfo) {
     // Signalé une fois par jour au plus (le contrôle tourne chaque heure).

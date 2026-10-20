@@ -18,6 +18,7 @@ export const ACTIONS = {
   voir: 'viewer',
   adresses_completes: 'handler',
   alertes_traiter: 'handler',
+  dossiers_traiter: 'handler',
   actions_forcees: 'handler',
   exporter: 'analyst',
   reglages: 'analyst',

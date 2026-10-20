@@ -8,6 +8,7 @@ import { setTrust, runRolesCheck } from '../reglages.js';
 import { RightsError, ROLES, LABELS } from './droits.js';
 import { FINE } from './format.js';
 import { sansContacts } from '../util.js';
+import { GESTES, TYPES, confirmation, indicesAppris, numero, revision } from './ecrans/dossiers.js';
 
 // Actions de la console (phase D3c, annexe architecture § 5.4 et § 6). Une route par geste, en POST, toujours :
 //   1. les trois verrous et le jeton CSRF (crochets du serveur) ;
@@ -79,21 +80,73 @@ export function register(app, ctx) {
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       const libelleVu = typeof libelle === 'function' ? libelle(req) : libelle;
       if (!(await ctx.guard(req, reply, droit, { reauth, libelle: libelleVu }))) return reply;
-      const retour = body.retour ? ctx.safeRetour(body.retour) : typeof retourDefaut === 'function' ? retourDefaut(req) : retourDefaut;
+      let retour = body.retour ? ctx.safeRetour(body.retour) : typeof retourDefaut === 'function' ? retourDefaut(req) : retourDefaut;
       let message;
       try {
         const fait = await geste(req, body);
-        message = { k: 'ok', texte: fait, action: url.split('/')[1] };
+        if (fait?.confirmation) return ctx.view(reply, req, 'dossiers-confirmer', { page: 'dossiers', titre: fait.confirmation.titre, vue: fait.confirmation, message: null });
+        if (fait?.retour) retour = ctx.safeRetour(fait.retour);
+        message = { k: 'ok', texte: fait?.texte || fait, action: url.split('/')[1] };
       } catch (err) {
         if (!userError(err)) ctx.log.error({ err: err.message, route: req.routeOptions?.url }, 'Vigie : console : action en échec');
         // Valeurs saisies renvoyées au formulaire (sans le jeton), pour corriger sans tout retaper.
         const valeurs = Object.fromEntries(Object.entries(body).filter(([k, v]) => k !== '_csrf' && typeof v === 'string').map(([k, v]) => [k, v.slice(0, 300)]).slice(0, 20));
+        // Une sélection de scission doit pouvoir être corrigée après un refus, sans perdre les cases déjà cochées.
+        for (const k of ['entites', 'signaux']) if (Array.isArray(body[k])) valeurs[k] = body[k].slice(0, 2000).filter(v => typeof v === 'string').map(v => v.slice(0, 220));
         message = { k: 'erreur', texte: userError(err) ? err.message : 'L’action n’a pas pu être faite (erreur de la Vigie, notée dans son journal).', champ: err.champ || champDe(err, body), valeurs };
       }
       sessions.setMessage(req.moi.sid, message);
       return reply.redirect(retour, 303);
     });
   }
+
+  // ---------- Dossiers (Intervenant) ----------
+  // L'empreinte vient de la page de confirmation ; les droits et l'état sont relus avant chaque écriture.
+  for (const geste of Object.keys(GESTES)) action(`/dossiers/:id/${geste}`, 'dossiers_traiter',
+    { retour: req => `/dossiers/${numero(req.params.id) || ''}/${geste}` }, (req, body) => {
+      const id = numero(req.params.id), D = engine.dossiers;
+      const d = id && D.fiche(id);
+      if (!d) throw new ActionError('dossier inconnu');
+      if (d.fusionne_dans) throw new ActionError(`dossier fusionné dans #${d.fusionne_dans} : ouvrez sa nouvelle fiche`);
+      if (['prendre', 'classer', 'scinder'].includes(geste) && d.statut === 'clos') throw new ActionError('ce dossier est clos');
+      if (body.revision !== revision(ctx.db, id)) throw new ActionError('le dossier a changé : relisez la confirmation avant de recommencer');
+      const auteur = par(req);
+      const selections = k => (Array.isArray(body[k]) ? body[k] : typeof body[k] === 'string' ? [body[k]] : []);
+      if (geste === 'scinder' && body.confirme !== 'oui') {
+        const p = D.preparerScission(id, { entites: selections('entites'), signaux: selections('signaux') });
+        if (!texte(body.motif)) throw new ActionError('motif obligatoire', 'motif');
+        return { confirmation: confirmation({ db: ctx.db, engine, role: req.moi.role, id, geste, valeurs: body,
+          apercu: { entites: p.entites.length, signaux: p.signaux.length, alertes: p.alertes,
+            restantes: p.restantes.length, restants: p.restants.length } }) };
+      }
+      let destination = id;
+      ctx.db.transaction(() => {
+        if (geste === 'prendre') D.prendre(id, auteur);
+        if (geste === 'classer') {
+          if (body.classement === 'legitime' && indicesAppris(ctx.db, id, req.moi.role).apprentissageTronque) throw new ActionError('plus de 200 indices à apprendre : examinez ce dossier en ligne de commande avant de le classer légitime');
+          D.classer(id, { classement: texte(body.classement, 30), note: texte(body.note, 500), par: auteur });
+        }
+        if (geste === 'detacher') {
+          const e = /^([a-z]+):(.{1,200})$/u.exec(typeof body.entite === 'string' ? body.entite : '');
+          if (!e || !Object.hasOwn(TYPES, e[1])) throw new ActionError('entité à choisir dans le dossier', 'entite');
+          if (!d.entites.some(x => x.kind === e[1] && x.key === e[2] && x.detache_a == null)) throw new ActionError('choisissez une entité active de ce dossier', 'entite');
+          D.detacher(id, e[1], e[2], { motif: texte(body.motif), par: auteur });
+        }
+        if (geste === 'rattacher') {
+          if (!Object.hasOwn(TYPES, body.type || '') || typeof body.cle !== 'string' || !body.cle.trim() || body.cle.length > 200 || /[\u0000-\u001f\u007f-\u009f]/.test(body.cle))
+            throw new ActionError('type et clé d’entité attendus (200 signes au plus)', 'cle');
+          D.rattacher(id, body.type, body.cle.trim(), { par: auteur });
+        }
+        if (geste === 'fusionner') {
+          const autre = numero(body.autre);
+          if (!autre || autre === id) throw new ActionError('choisissez un autre dossier', 'autre');
+          destination = D.fusionner(id, autre, { par: auteur });
+        }
+        if (geste === 'scinder') destination = D.scinder(id, { entites: selections('entites'), signaux: selections('signaux'), motif: texte(body.motif), par: auteur });
+      })();
+      const messages = { prendre: 'pris en charge', classer: 'classé et clos', detacher: 'entité détachée', rattacher: 'entité rattachée', fusionner: 'fusion effectuée', scinder: `scission effectuée, nouveau dossier #${destination}` };
+      return { texte: `Dossier #${id} : ${messages[geste]}.`, retour: `/dossiers/${destination}` };
+    });
 
   // ---------- Alertes (Intervenant) ----------
   const alerte = req => {

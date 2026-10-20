@@ -22,6 +22,7 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
   <div class="ep-actions"><% if (ac.classer) { %><a class="btn ghost ep-secondaire" href="#classer">Classer…</a><% } %><% if (ac.forcees) { %><a class="btn ghost ep-secondaire" href="#agir">Actions forcées…</a><% } %><% if (ac.classer || ac.forcees) { %><details class="menu ep-plus"><summary class="btn ghost" aria-label="Plus d’actions"><%~ include('./_dec-ic', { icone: 'points', taille: 18 }) %></summary><div class="menu-pop"><% if (ac.classer) { %><a href="#classer">Classer…</a><% } %><% if (ac.forcees) { %><a href="#agir">Actions forcées</a><% } %></div></details><% } %><% if (ac.prendre) { %><button class="btn" type="submit" form="f-prendre">Prendre en charge</button><% } %></div>
 <% } %>
 </header>
+<% if (vue.dossier) { %><p class="note-a">Cette alerte appartient au <a class="vg-lien" href="/dossiers/<%= vue.dossier %>">dossier #<%= vue.dossier %></a>.</p><% } %>
 <% if (ac && ac.prendre) { %><form class="form-cache" id="f-prendre" method="post" action="<%= ac.prendre %>"><input type="hidden" name="_csrf" value="<%= ac.csrf %>"><input type="hidden" name="formulaire" value="prendre"></form>
 <% } %>
 <% if (vue.lecteur) { %>

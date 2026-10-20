@@ -26,6 +26,7 @@ const pl = (n, un, plusieurs) => (n > 1 ? plusieurs : un);
 <% } %>
 <div class="vg-etat">
   <h2 class="phrase" id="t-etat"><%= vue.phrase %></h2>
+<% if (vue.dossiers) { %><p><a class="vg-lien" href="/dossiers"><%= vue.dossiers.total %> <%= pl(vue.dossiers.total, 'dossier non clos', 'dossiers non clos') %></a> · <a class="vg-lien" href="/alertes"><%= al.total %> <%= pl(al.total, 'alerte non close', 'alertes non closes') %></a><% if (vue.dossiers.gravites.length) { %><span class="sec">Dossiers par gravité : <%= vue.dossiers.gravites.map(g => g.n + ' ' + g.mot.toLowerCase()).join(', ') %>.</span><% } %></p><% } %>
 <% if (faits.length) { %>
   <ul class="faits">
 <% for (const f of faits) { %>
