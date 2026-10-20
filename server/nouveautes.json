@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.191.0",
+    "date": "2026-10-20",
+    "pr": 191,
+    "title": {
+      "fr": "Vigie : les dossiers",
+      "en": "Vigie: cases",
+      "de": "Vigie: Fälle"
+    },
+    "items": [
+      {
+        "fr": "La Vigie regroupe en dossiers ce qui touche une même attaque probable, d’une adresse à un compte ou à une session : alertes, signaux faibles et lectures faites sous un accès douteux. Chaque dossier dit la phase atteinte (de repérage à exfiltration), la confiance, l’enjeu et sa gravité en trois lignes. Lisibles en ligne de commande (dossiers, dossier <n°>) ; la console suivra. Alertes et notifications inchangées.",
+        "en": "The Vigie groups into cases whatever concerns one likely attack, from an address to an account or a session: alerts, weak signals and data read under a doubtful access. Each case states the phase reached (from reconnaissance to exfiltration), the confidence, what is at stake and its severity in three lines. Readable from the command line (dossiers, dossier <no.>); the console will follow. Alerts and notifications are unchanged.",
+        "de": "Die Vigie fasst in Fällen zusammen, was zu einem wahrscheinlichen Angriff gehört, von einer Adresse bis zu einem Konto oder einer Sitzung: Warnungen, schwache Signale und Lesezugriffe unter zweifelhaftem Zugang. Jeder Fall nennt die erreichte Phase (von Aufklärung bis Exfiltration), das Vertrauen, die Tragweite und seinen Schweregrad in drei Zeilen. Über die Befehlszeile lesbar (dossiers, dossier <Nr.>); die Konsole folgt. Warnungen und Benachrichtigungen bleiben unverändert.",
+        "perm": "securite.voir"
+      }
+    ]
+  },
+  {
     "version": "1.190.0",
     "date": "2026-10-20",
     "pr": 190,
