@@ -37,6 +37,11 @@ export const PERMISSIONS = {
   'instagram.publier': {},             // publier maintenant (droit à part)
   'instagram.compte': {},
   'signalements.traiter': {},
+  // Messages des visiteurs (page Contact, demande de licence ; server/messages.js) : lire (le nom, l'adresse et le message
+  // déchiffrés), marquer traité, supprimer. Portée « les miennes » : les messages adressés à son photographe (la photo
+  // d'une demande de licence est la sienne) et ceux adressés aux deux. Ni le Modérateur ni le Relecteur : ils ne voient
+  // pas les adresses des personnes (comme l'adresse laissée avec un signalement).
+  'messages.traiter': { scoped: true },
   'statistiques.voir': { scoped: true },
   // Galeries privées (étude G55, registre de la Vigie BV-14 et BV-23) : voir (liste, fiche, suivi des accès, vue équipe de
   // /prive/…), gérer (galerie, photos, ouverture, fermeture, sélections), partager (créer, prolonger, débloquer, révoquer,
@@ -78,7 +83,7 @@ export const ROLES = {
       'photos.proposer': OWN, 'photos.publiees.modifier': OWN, 'instagram.proposer': OWN,
       'sorties.voir': OWN, 'sorties.gerer': OWN,
       'personnes.voir': OWN, 'personnes.gerer': OWN, 'personnes.refus': OWN, 'personnes.demandes': OWN, 'personnes.offrir': OWN,
-      'statistiques.voir': OWN,
+      'statistiques.voir': OWN, 'messages.traiter': OWN,
       'galeries.voir': OWN, 'galeries.gerer': OWN, 'galeries.partager': OWN,
       'carnet.voir': OWN, 'carnet.ecrire': OWN, 'carnet.publies.modifier': OWN,
     },

@@ -65,6 +65,7 @@
         <div>
           <p><a class="lien" href="<%= it.u('/droits') %>"><%= t.v2.rights %></a></p>
           <p><%= t.v2.rightsText %></p>
+          <p><a class="lien" href="<%= it.u('/droits/demande') %>?photo=<%= encodeURIComponent(p.slug) %>"><%= t.v2.licence %></a></p>
         </div>
         <div>
           <p><%= t.v2.me %></p>

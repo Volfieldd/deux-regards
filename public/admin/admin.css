@@ -1409,3 +1409,14 @@ img.enc-face.big { width: 64px; height: 64px; margin-right: 12px; }
 .ver-choix button { display: inline-flex; align-items: center; min-height: 32px; padding: 0 8px; margin-left: -8px; border: 0; border-radius: 8px; background: none; color: var(--ink2); font: inherit; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .ver-choix button:hover { background: var(--s2); color: var(--ink); }
 @media (max-width: 720px), (pointer: coarse) { .ver-choix button { min-height: 44px; } }
+/* Messages et demandes (views/admin/messages.eta, message.eta) : la fiche d'un message, sa suppression confirmée. */
+.msg-fiche { display: grid; gap: 12px; }
+.msg-fiche > * { margin: 0; }
+.msg-def { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 0; }
+.msg-def dt { color: var(--ink2); }
+.msg-def dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 540px) { .msg-def { grid-template-columns: minmax(0, 1fr); } .msg-def dd { margin-bottom: 6px; } }
+.msg-fiche .rp-msg { overflow-wrap: anywhere; max-width: 72ch; }
+.msg-fiche .rp-acts { flex-wrap: wrap; }
+.msg-suppr summary { cursor: pointer; min-height: 24px; text-decoration: underline; }
+.msg-suppr form { margin-top: 8px; }

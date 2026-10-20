@@ -24,6 +24,7 @@ import { shareLinks, shareQr } from '../share.js';
 import { EncounterError } from '../encounters.js';
 import { safeNext } from '../auth.js';
 import { registerCarnetPages, registerCarnetFeeds, carnetContext, carnetSitemap } from './carnet-public.js';
+import { registerContactPages } from './contact-public.js';
 
 const HERO_COUNT = 5;
 const YEAR = 365 * 24 * 3600;
@@ -39,6 +40,9 @@ export default async function publicRoutes(app) {
   const likeLimit = createRateLimiter({ limit: 120, windowMs: 3600 * 1000 });
   const reportLimit = createRateLimiter({ limit: 5, windowMs: 3600 * 1000 });
   const shareLimit = createRateLimiter({ limit: 60, windowMs: 3600 * 1000 });
+  // Page Contact et demande de licence : 8 envois par heure et par adresse au plus, communs aux deux formulaires et aux
+  // trois langues (comme /bonjour ; comptés après le champ piège et la provenance).
+  const messageLimit = createRateLimiter({ limit: 8, windowMs: 3600 * 1000 });
   // Recherche : 60 recherches en 10 minutes par adresse au plus (partagé entre les trois langues ; registre de la Vigie, BV-9).
   const searchLimit = createRateLimiter({ limit: 60, windowMs: 10 * 60 * 1000 });
   // Codes de contrôle des cartes (3 caractères) : au plus 5 codes faux par référence en 24 h, d'où que viennent les
@@ -56,7 +60,7 @@ export default async function publicRoutes(app) {
     fail: ref => { cq.forget.run(Date.now() - CODE_WINDOW); cq.add.run(ref, Date.now()); return cq.count.get(ref, Date.now() - CODE_WINDOW) === CODE_TRIES; },
   };
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
-  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, codeGuard });
+  for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, messageLimit, codeGuard });
 
   // Flux des Carnets (/carnet/flux.xml, /en/…, /de/…), hors des pages : jamais redirigés d'une langue à l'autre (B58).
   registerCarnetFeeds(app);
@@ -198,7 +202,7 @@ function helpers(lang) {
     v2: { ...v2, date: takenOn => shortDate(takenOn, lang), typo: s => v2.typo(s, lang) } };
 }
 
-async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, codeGuard }) {
+async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, messageLimit, codeGuard }) {
   const finder = createSearch({ db: app.db });
   const t = UI[lang];
   const base = helpers(lang);
@@ -592,6 +596,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
 
   // ---------- Carnets (v2 seulement, server/routes/carnet-public.js) ----------
   registerCarnetPages(app, { lang, repo, base, ignored, gate, shareLimit });
+
+  // ---------- Contact et demande de licence (server/routes/contact-public.js) ----------
+  registerContactPages(app, { lang, repo, base, gate, trapped, sameSite, limit: messageLimit });
 
   // « Je vous ai photographié » : page du QR des cartes « pour eux » (référence dans l'adresse) ou tapée à la main.
   // Jamais indexée ; aucune photo ni donnée d'une autre personne n'y est montrée.

@@ -50,10 +50,10 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-24 Données des invités lues ou exportées dans l'admin | DS18 | ✓ site ; `SENSITIVE` : Vigie | `feat/galeries-privees` : `sensitive_read` émis par la route (fiche d'un accès, activité, sélections ; `detail.id` : l'accès), lecture notée au journal ; export CSV en `config.audit` ; Vigie : `SENSITIVE` laissé tel quel (la route émet déjà `sensitive_read` : l'étendre compterait chaque lecture deux fois) | fait |
 | BV-25 Gestes d'invité impossibles pour l'interface | DS12, DS14 | ✓ site ; corrélation : Vigie ; ✓ Vigie | `feat/galeries-privees` : `input_validation_fail` (provenance, photo hors galerie, taille hors liste ou non permise, vue ou langue inconnue), `authz_csrf_fail` (`site · public`) ; Vigie (phase E1) : corrélation `csrf_repetes_invite` (par session visiteur) ; DS12 telle quelle | fait |
 | BV-26 Réponse privée servie par le cache de Cloudflare | DS18 | ✓ Vigie | bordure (phase C3), avant l'ouverture de la phase 37a ; Vigie (phase E1) : point `cache_prive` du Worker, événement `bordure_cache_prive`, règle (`70-bordure.yml`, haute) | fait |
-| BV-27 Saisie malveillante dans un message libre (Contact, demande de licence) | DS11 | ✓ site (aucune émission de plus) ; poids du canal : Vigie |  | proposé |
-| BV-28 Formulaire de contact ou de licence forgé | DS12 | ✓ site |  | proposé |
-| BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; règle : Vigie |  | proposé |
-| BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; regroupement par objet : Vigie |  | proposé |
+| BV-27 Saisie malveillante dans un message libre (Contact, demande de licence) | DS11 | ✓ site (aucune émission de plus) ; poids du canal : Vigie | `feat/page-contact` | fait côté site |
+| BV-28 Formulaire de contact ou de licence forgé | DS12 | ✓ site | `feat/page-contact` | fait côté site |
+| BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; règle : Vigie | `feat/page-contact` | fait côté site |
+| BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; regroupement par objet : Vigie | `feat/page-contact` | fait côté site |
 
 ---
 
@@ -839,7 +839,7 @@ et qu'une adresse de contact publiée attire le pourriel sans que la Vigie en vo
 | idem | rafale répartie sur de nombreuses adresses (boîtes des photographes inondées, quota de la messagerie) | rien : chaque adresse reste sous sa limite | **BV-29** |
 | `message`, `diffusion`, `name`, `company` | injection (SQL, XSS, gabarit) ; contenu malveillant | crochet commun (`server/securite/site.js:250-282`) : `malicious_input`, une seule fois par requête, `detail.constats[].champ` = `body.message`…, **longueur seule** (jamais l'extrait) ; `scanner` (DS11, 5 en 1 h) ; requêtes préparées, gabarits échappés, CSP | **BV-27** (poids du canal) |
 | `pour`, `usage`, `photo`, longueurs | formulaire forgé : valeur hors liste, texte au-delà du `maxlength` de la page (sondage, remplissage de la base) | rien : une valeur inconnue serait refusée sans rien dire | **BV-28** |
-| `?photo=` et `?pour=` (GET) | valeurs forgées dans l'adresse | crochet commun pour les motifs ; `ignored()` (BV-3, `public.js:224-240`) | BV-28 (même fonction) |
+| `?photo=` et `?pour=` (GET) | valeurs forgées dans l'adresse | crochet commun pour les motifs ; une valeur inconnue serait ignorée sans rien dire | BV-28 (même logique que `ignored()`, BV-3) |
 | `email` | hameçonnage par l'adresse de réponse : un faux éditeur, une adresse qui imite un média, un lien piégé dans le message | rien côté site ; le message est montré en texte (aucun lien cliquable, échappé), « Répondre » est un `mailto:` vers l'adresse saisie, aucune notification ne la contient | aucun (durcissement de l'affichage, prérequis plus bas) |
 | Accusé de réception (maquette, cadre 9) | relais de pourriel : le site écrirait à toute adresse saisie (bombardement, réputation du relais), comme la lettre (BV-15) | — | aucun : **pas d'accusé de réception** (écart volontaire avec la maquette) |
 | Données personnelles | collecte excessive, lecture par qui n'en a pas besoin, conservation sans fin | chiffrement au repos ; `crypto_decrypt_fail` (E20) au déchiffrement d'une valeur altérée (`server/vault.js`) ; 12 mois | **BV-30** |
@@ -876,10 +876,12 @@ Un message libre contient souvent un lien, un « < » (« 3 < 5 »), du SQL ou d
   `· licence`.
 - **Quand** : `pour` ou `usage` hors de la liste fermée (`raison: 'valeur hors liste'`, `formulaire`, `champ`, `valeur`
   à 60 signes) ; texte plus long que le `maxlength` de la page (`raison: 'saisie hors formulaire'`, `formulaire`,
-  `champ`, `longueur` ; retours à la ligne comptés pour un signe, comme le navigateur) ; `?photo=` ou `photo` d'une photo
-  inconnue, par `ignored()` (photo dépubliée depuis moins de 30 jours : rien). Pas d'émission si le crochet commun a
-  déjà signalé la valeur (DS11).
-- **Réponse** : 422, la saisie gardée ; rien n'est stocké.
+  `champ`, `longueur` ; retours à la ligne comptés pour un signe, comme le navigateur) ; `?pour=` d'un destinataire
+  inconnu (GET) ; `?photo=` ou `photo` d'une photo inconnue de la base (`raison: 'valeur hors liste'`, `champ: 'photo'` ;
+  une photo connue mais dépubliée depuis, vieux lien : rien). Pas d'émission si le crochet commun a déjà signalé la
+  valeur (DS11).
+- **Réponse** : destinataire, usage ou longueur : 422, la saisie gardée, rien n'est stocké ; photo inconnue : la page
+  s'ouvre sans photo, et une demande envoyée arrive sans photo.
 - **Règle** : `valeurs_impossibles_repetees` (DS12, 2 en 10 minutes par adresse), telle quelle.
 - **Qui** : le site.
 

@@ -1,0 +1,58 @@
+<% const t = it.t, E = __eta.e; %>
+<% /* Messages et demandes (admin v2, sur le modèle des Signalements de la vague 4). Mêmes messages, même droit
+      (messages.traiter, avec portée), mêmes routes que la v1 (views/admin/messages.eta ; GET /admin/messages,
+      /admin/messages/:id). La liste ne déchiffre rien : nature en pastille, date, destinataire, photo, usage, langue,
+      état ; « Lire » ouvre le message (lecture notée au journal). Filtres Nouveaux, Traités, Contact et Licence à
+      l'affichage (?etat=, ?nature=). */ %>
+<% layout('./layout', { pageTitle: `${t('Messages et demandes')} · ${t('Administration')} · ${it.siteName}` }) %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', encours: '<path d="M12 2.7a9.3 9.3 0 0 1 0 18.6z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const KIND = { contact: ['afaire', t('Message (page Contact)')], licence: ['encours', t('Demande de licence')] };
+   const USAGE = { presse: t('livre ou presse imprimée'), web: t('site web ou réseaux sociaux'), publicite: t('publicité, affiche'), autre: t('autre usage') };
+   const LANGUE = { fr: t('en français'), en: t('en anglais'), de: t('en allemand') };
+   const when = ms => { const d = new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Paris' }).format(ms); const h = new Intl.DateTimeFormat(it.locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Paris' }).format(ms); return t('{date} à {heure}', { date: d, heure: it.lang === 'fr' ? h.replace(/^0?(\d+):(\d\d)$/, '$1 h $2') : h }); };
+   const L = it.list;
+   const nNew = L.filter(m => m.status === 'nouveau').length, nDone = L.length - nNew;
+   const list = L.filter(m => (!it.etat || m.status === it.etat) && (!it.nature || m.kind === it.nature));
+   const q = (k, v) => { const p = new URLSearchParams(); const cur = { etat: it.etat, nature: it.nature, [k]: v }; for (const [a, b] of Object.entries(cur)) if (b) p.set(a, b); const s = p.toString(); return '/admin/messages' + (s ? '?' + s : ''); };
+   const curr = c => (c ? ' aria-current="page"' : ''); %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/suivi-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#site-public-messages-et-demandes"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-suivi">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Messages et demandes') %></h1></div>
+  <p class="ep-meta"><span><%= nNew > 1 ? t('{n} nouveaux', { n: nNew }) : nNew === 1 ? t('1 nouveau') : t('aucun nouveau') %></span><span><%= nDone > 1 ? t('{n} traités', { n: nDone }) : nDone === 1 ? t('1 traité') : t('aucun traité') %></span></p>
+</header>
+<p class="rub-intro"><%= t('Envoyés depuis la page Contact et les demandes de licence du site. Nom, adresse et message chiffrés, effacés au bout de 12 mois ; ils ne s’affichent qu’en ouvrant le message (lecture notée au journal). Aucun accusé de réception n’est envoyé : répondez depuis le message.') %><% if (it.ownScope) { %> <%= t('Vous voyez les messages qui vous sont adressés et ceux adressés aux deux photographes.') %><% } %></p>
+<nav class="chips filtres-l" aria-label="<%= t('Filtrer les messages par état') %>">
+  <a class="chip" href="<%= q('etat', '') %>"<%~ curr(!it.etat) %>><%= t('Tous') %> <span class="chip-n"><%= L.length %></span></a>
+  <a class="chip" href="<%= q('etat', 'nouveau') %>"<%~ curr(it.etat === 'nouveau') %>><span class="chip-st chip-st--attention"><%~ ic('attention') %></span><%= t('Nouveaux') %> <span class="chip-n"><%= nNew %></span></a>
+  <a class="chip" href="<%= q('etat', 'traite') %>"<%~ curr(it.etat === 'traite') %>><span class="chip-st chip-st--abouti"><%~ ic('abouti') %></span><%= t('Traités') %> <span class="chip-n"><%= nDone %></span></a>
+</nav>
+<nav class="chips filtres-l" aria-label="<%= t('Filtrer les messages par nature') %>">
+  <a class="chip" href="<%= q('nature', '') %>"<%~ curr(!it.nature) %>><%= t('Toutes les natures') %></a>
+  <a class="chip" href="<%= q('nature', 'contact') %>"<%~ curr(it.nature === 'contact') %>><%= t('Page Contact') %> <span class="chip-n"><%= L.filter(m => m.kind === 'contact').length %></span></a>
+  <a class="chip" href="<%= q('nature', 'licence') %>"<%~ curr(it.nature === 'licence') %>><%= t('Demandes de licence') %> <span class="chip-n"><%= L.filter(m => m.kind === 'licence').length %></span></a>
+</nav>
+<% if (!list.length) { %>
+<p class="panel hint"><%= !L.length ? t('Aucun message.') : it.etat === 'nouveau' ? t('Aucun nouveau message : tout est traité.') : t('Aucun message pour ce filtre.') %></p>
+<% } else { %>
+<ul class="sg-liste" aria-label="<%= list.length > 1 ? t('{n} messages', { n: list.length }) : t('{n} message', { n: list.length }) %>">
+<% list.forEach(m => { const k = KIND[m.kind]; %>
+  <li class="panel sg<%= m.status === 'nouveau' ? ' sg--nouveau' : '' %>" id="msg-<%= m.id %>">
+    <div class="sg-photo"><% if (m.photo && m.photo.ready) { %><%~ it.picture(m.photo, { sizes: '96px', alt: '' }) %><% } else { %><span class="sg-vide" aria-hidden="true"></span><% } %></div>
+    <div class="sg-corps">
+      <h2 class="sg-titre"><a class="ligne-lien" href="/admin/messages/<%= m.id %>"><%= m.kind === 'licence' ? t('Demande de licence n° {id}', { id: m.id }) : t('Message n° {id}', { id: m.id }) %></a></h2>
+      <p class="sg-etats"><%~ etat(k[0], k[1]) %><%~ m.status === 'nouveau' ? etat('attention', t('Nouveau')) : etat('abouti', t('Traité')) %></p>
+      <p class="sg-quand"><%= when(m.created_at) %> · <%= LANGUE[m.lang] || m.lang %></p>
+      <p><%= m.author_name ? t('Pour {name}', { name: m.author_name }) : t('Pour les deux photographes') %><% if (m.kind === 'licence') { %> · <%= m.photo_title ? t('photo « {title} »', { title: m.photo_title }) : t('aucune photo choisie') %> · <%= USAGE[m.usage] || m.usage %><% } %></p>
+    </div>
+  </li>
+<% }) %>
+</ul>
+<% } %>
+</div>

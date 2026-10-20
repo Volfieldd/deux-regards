@@ -101,6 +101,8 @@ export const LIBELLES = {
   'POST /admin/rencontres/:id/session/:pid': 'Photo exclue de la rencontre',
   'POST /admin/rencontres/:id/statut': 'Suivi d’une rencontre changé',
   'POST /admin/rencontres/:id/supprimer': 'Rencontre supprimée',
+  'POST /admin/messages/:id/supprimer': 'Message supprimé',
+  'POST /admin/messages/:id/traite': 'Message traité',
   'POST /admin/series': 'Série créée',
   'POST /admin/series/descriptions': 'Assistant « Décrire les photos » réglé',
   'POST /admin/series/:id': 'Série modifiée',
@@ -145,6 +147,7 @@ export const LIBELLES = {
   'compte supprimé': 'Compte supprimé',
   'compte rétabli par ADMIN_SUBS': 'Compte rétabli par l’administrateur du serveur',
   'circuit réglé': 'Circuit réglé',
+  'message lu': 'Message lu',
   'compte Instagram connecté': 'Compte Instagram connecté',
 };
 
@@ -155,8 +158,8 @@ export const FAMILLE_NOMS = { publication: 'Photos et publication', personnes: '
 export function famille(action) {
   const a = String(action || '');
   if (/^(connexion|identité confirmée|vérification d’identité)/.test(a)) return 'connexions';
-  if (a.startsWith('GET ')) return 'lectures';
-  if (a.startsWith('galerie privée') || /^POST \/admin\/(rencontres?|personnes|signalements|galeries)\b/.test(a)) return 'personnes';
+  if (a.startsWith('GET ') || a === 'message lu') return 'lectures';
+  if (a.startsWith('galerie privée') || /^POST \/admin\/(rencontres?|personnes|signalements|messages|galeries)\b/.test(a)) return 'personnes';
   if (/^(compte (modifié|supprimé|rétabli)|circuit réglé)/.test(a) || /^POST \/admin\/(comptes|circuit|auteurs|compte\/)/.test(a)) return 'equipe';
   if (/^POST \/admin\/(apparence|reglages|images|traduction|langue|theme|version|carnet\/reglages|instagram\/reglages|series\/(propositions|descriptions))\b/.test(a)) return 'reglages';
   return 'publication';
@@ -181,6 +184,7 @@ const OBJETS = [
   [/^POST \/admin\/carnet\/:id\b/, 'Billet n° {id}', id => `/admin/carnet/${id}`],
   [/^(POST|GET) \/admin\/galeries\/:id\b/, 'Galerie n° {id}', id => `/admin/galeries/${id}`],
   [/^POST \/admin\/signalements\/:id\b/, 'Signalement n° {id}', () => '/admin/signalements'],
+  [/^(?:POST \/admin\/messages\/:id\b|message lu$)/, 'Message n° {id}', id => `/admin/messages/${id}`],
   [/^POST \/admin\/comptes\/:id\b/, 'Compte n° {id}', () => '/admin/comptes'],
   [/^POST \/admin\/circuit\/:id\b/, 'Compte n° {id}', () => '/admin/circuit'],
   [/^POST \/admin\/auteurs\/:id\b/, 'Photographe n° {id}', () => '/admin/auteurs'],

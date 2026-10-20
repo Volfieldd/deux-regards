@@ -1,0 +1,100 @@
+<% /* Demande de licence en v2 et v3 (maquette MQ-06, cadres 1 à 9, sans la vente de tirages : ni « tirage hors catalogue »,
+      ni prix, ni stock) : /droits/demande?photo=<slug>, ouverte par « Demander une licence » dans la visionneuse et sur la
+      page Droits. En tête, le retour à la photo et la photo dont on parle (vignette et cartel, une fois) ; l'usage prévu en
+      quatre choix, la diffusion et la durée en une ligne ; le message ; vous joindre ; « Droits et licences, en bref » à
+      côté (bureau) ou après (téléphone). Erreurs de la planche MQ-00 § 8 (comme /bonjour). Mêmes champs que la v1
+      (views/licence.eta : photo caché, usage, diffusion, message, name, company, email, et le champ piège website). Pas
+      d'accusé de réception (le site n'écrit jamais à une adresse saisie) : la page « merci » le dit sans rien redire de la
+      saisie. */ %>
+<% const t = it.t, l = it.l, c = it.c, F = t.v2form, ic = it.v2.ic, ty = it.v2.typo, p = it.photo;
+   const v = it.values || {}, e = it.errors || {};
+   const ORDER = ['usage', 'diffusion', 'message', 'name', 'company', 'email'];
+   const TARGET = { usage: `dl-usage-${it.usages[0]}`, diffusion: 'dl-diffusion', message: 'dl-message', name: 'dl-nom', company: 'dl-societe', email: 'dl-email' };
+   const text = k => ty(c.errors[e[k]] || String(e[k]));
+   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && !ORDER.includes(k))];
+   const errs = keys.map(k => ({ key: k, target: TARGET[k] || TARGET.message, text: text(k) }));
+   const limit = e.limit ? ty(c.errors.limit) : '';
+   const focusOn = !limit && errs.length === 1 ? errs[0].target : null;
+   const af = id => (focusOn === id ? ' autofocus' : '');
+   const desc = (...ids) => { const x = ids.filter(Boolean); return x.length ? ` aria-describedby="${x.join(' ')}"` : ''; };
+   const bad = k => (e[k] ? ' aria-invalid="true"' : '');
+   const after = s => (it.lang === 'fr' && !/^\p{Lu}{2}/u.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+   const err = k => (e[k] ? `<p class="champ-err" id="err-${k}">${ic('alerte', { size: 16 })}<span><b>${F.error}</b> ${it.v2.esc(after(text(k)))}</span></p>` : '');
+   const ek = k => (e[k] ? `err-${k}` : null);
+   const opt = `<span class="facultatif">${F.optional}</span>`;
+   const pageTitle = it.sent ? it.pageTitle
+     : limit ? `${F.limitTitle} · ${it.pageTitle}`
+     : errs.length > 1 ? `${F.titleError(F.points(errs.length))} · ${it.pageTitle}`
+     : errs.length ? `${F.titleError(c.fields[errs[0].key] || c.fields.message)} · ${it.pageTitle}` : it.pageTitle;
+   const meta = p ? ty([p.author, p.place, (it.v2.date(p.taken_on) || '').replace(/ /g, ' ')].filter(Boolean).join(' · ')) : '';
+   const who = it.author ? it.author.name : ''; %>
+<% layout('./layout', { pageTitle: ty(pageTitle), description: ty(it.description), formulaires: true }) %>
+<% if (p) { %><%~ include('./_contexte', { ...it, retour: { href: it.photoUrl(p.slug), label: p.title } }) %><% } else { %><%~ include('./_entete', it) %><% } %>
+<main id="contenu" class="wrap">
+<% if (it.sent) { %>
+<div class="pf pf--seul">
+  <div class="pf-intro">
+    <p class="etiquette"><%= l.label %></p>
+    <h1 class="titre-page" id="merci-t" tabindex="-1" autofocus><%= ty(c.thanks) %></h1>
+    <div class="msg msg--ok" role="status"><%~ ic('coche', { size: 18 }) %><p><b><%= F.sent %></b> <%= ty(l.thanksText(who)) %></p></div>
+<% if (p) { %>    <div class="photo-ref">
+      <%~ it.picture(p, { sizes: '(max-width: 420px) 120px, 160px', alt: '' }) %>
+      <div><p class="cartel"><span class="cartel-t"><%= p.title %></span><span class="cartel-m"><%= meta %></span></p></div>
+    </div>
+    <p class="pf-suite"><a class="lien" href="<%= it.photoUrl(p.slug) %>"><%= l.backPhoto %></a><a class="lien" href="<%= it.u('/droits') %>"><%= t.v2.rights %></a></p>
+<% } else { %>    <p class="pf-suite"><a class="lien" href="<%= it.u('/') %>"><%= c.back %></a></p>
+<% } %>  </div>
+</div>
+<% } else { %>
+<div class="dl">
+  <div class="dl-tete">
+    <p class="etiquette"><a class="lien" href="<%= it.u('/droits') %>"><%= l.label %></a></p>
+    <h1 class="titre-page"><%= l.title %></h1>
+    <p class="chapo"><%= ty(l.lead) %></p>
+  </div>
+  <form class="form" method="post" action="<%= it.u('/droits/demande') %>" novalidate>
+<%~ include('./_erreurs', { ...it, errs, limit }) %>
+    <p class="form-oblig"><%= F.required %></p>
+    <fieldset class="bloc"><legend><%= l.photo %></legend>
+<% if (p) { %>      <input type="hidden" name="photo" value="<%= p.slug %>">
+      <div class="photo-ref">
+        <%~ it.picture(p, { sizes: '(max-width: 420px) 120px, 160px', alt: '' }) %>
+        <div><p class="cartel"><span class="cartel-t"><%= p.title %></span><span class="cartel-m"><%= meta %></span></p>
+          <p><a class="lien" href="<%= it.u('/') %>#galerie"><%= l.other %></a></p></div>
+      </div>
+<% } else { %>      <p class="champ-aide"><%= ty(l.noPhoto) %></p>
+      <p><a class="lien" href="<%= it.u('/') %>#galerie"><%= l.choose %></a></p>
+<% } %>    </fieldset>
+    <fieldset class="bloc groupe<%= e.usage ? ' groupe--erreur' : '' %>"<%~ desc(ek('usage')) %>><legend><%= l.usage %></legend>
+<%~ err('usage') %>
+<% it.usages.forEach(k => { %>      <label class="choix"><input id="dl-usage-<%= k %>" type="radio" name="usage" value="<%= k %>"<%~ v.usage === k ? ' checked' : '' %><%~ bad('usage') %><%~ af(`dl-usage-${k}`) %>><span><%= l.usages[k] %></span></label>
+<% }) %>      <div class="champ"><label for="dl-diffusion"><%= l.diffusion %> <%~ opt %></label><p class="champ-aide" id="dl-diffusion-aide"><%= ty(l.diffusionHint) %></p>
+        <input id="dl-diffusion" name="diffusion" value="<%= v.diffusion || '' %>" maxlength="300"<%~ desc(ek('diffusion'), 'dl-diffusion-aide') %><%~ bad('diffusion') %><%~ af('dl-diffusion') %>><%~ err('diffusion') %></div>
+    </fieldset>
+    <fieldset class="bloc"><legend><%= c.messageLegend %></legend>
+      <div class="champ"><label for="dl-message"><%= c.message %></label><p class="champ-aide" id="dl-message-aide"><%= ty(c.messageHint) %></p>
+        <textarea id="dl-message" name="message" rows="6" maxlength="2000"<%~ desc(ek('message'), 'dl-message-aide') %><%~ bad('message') %><%~ af('dl-message') %>><%= v.message || '' %></textarea><%~ err('message') %></div>
+    </fieldset>
+    <fieldset class="bloc"><legend><%= c.contact %></legend>
+      <div class="duo">
+        <div class="champ"><label for="dl-nom"><%= c.name %></label>
+          <input id="dl-nom" name="name" value="<%= v.name || '' %>" maxlength="100" autocomplete="name"<%~ desc(ek('name')) %><%~ bad('name') %><%~ af('dl-nom') %>><%~ err('name') %></div>
+        <div class="champ"><label for="dl-societe"><%= l.company %> <%~ opt %></label>
+          <input id="dl-societe" name="company" value="<%= v.company || '' %>" maxlength="120" autocomplete="organization"<%~ desc(ek('company')) %><%~ bad('company') %><%~ af('dl-societe') %>><%~ err('company') %></div>
+      </div>
+      <div class="champ"><label for="dl-email"><%= c.email %></label><p class="champ-aide" id="dl-email-aide"><%= ty(c.emailHint) %></p>
+        <input id="dl-email" type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ desc(ek('email'), 'dl-email-aide') %><%~ bad('email') %><%~ af('dl-email') %>><%~ err('email') %></div>
+      <p class="note-donnees"><%= ty(l.privacy) %> <a href="<%= it.u('/confidentialite') %>"><%= t.footer.privacy %></a></p>
+    </fieldset>
+    <div class="piege" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="envoi"><button class="btn" type="submit"><%= l.send %></button><p><%= ty(l.sendNote(who)) %></p></div>
+  </form>
+  <aside class="dl-bref" aria-labelledby="dl-bref-t">
+    <h2 id="dl-bref-t"><%= l.brief %></h2>
+    <dl><% l.briefItems.forEach(([dt, dd]) => { %><div><dt><%= ty(dt) %></dt><dd><%= ty(dd) %></dd></div><% }) %></dl>
+    <p><a class="lien" href="<%= it.u('/droits') %>"><%= l.detail %></a></p>
+  </aside>
+</div>
+<% } %>
+</main>
+<%~ include('./_pied', it) %>

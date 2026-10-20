@@ -9,6 +9,11 @@ import { grantsOf, SCOPES } from './permissions.js';
 //   l'adresse de la personne dans l'e-mail : sa référence seulement, le détail est dans l'admin.
 // - Récapitulatif de ce qui attend chaque compte (« Aujourd'hui ») : réglé par chacun, jamais, chaque jour ou chaque
 //   semaine (le lundi), vers 8 h (heure de Paris), jamais plus d'un par jour, et seulement s'il y a quelque chose.
+// - Messages des visiteurs (Contact, demande de licence ; server/messages.js) : à l'arrivée, un e-mail « Un nouveau
+//   message vous attend » aux comptes du photographe concerné (aux deux pour un message adressé aux deux ; à
+//   l'administrateur quand aucun ne peut le lire), avec le lien vers l'admin et rien d'autre : ni nom, ni adresse, ni
+//   message, ni photo (registre de la Vigie, BV-29 et BV-30). 30 par jour au plus : au-delà, les messages attendent dans
+//   l'admin (« Aujourd'hui »), et la Vigie est prévenue une fois (boîtes bombardées).
 // - Tester l'envoi (Comptes et rôles) : un e-mail à l'adresse choisie, l'erreur du serveur de messagerie sinon.
 export const DIGESTS = ['off', 'daily', 'weekly'];
 const DIGEST_HOUR = 8;
@@ -16,6 +21,7 @@ const DIGEST_HOUR = 8;
 // jour au plus, tous comptes confondus. Au-delà (afflux de fausses demandes), elles attendent le lendemain : elles
 // restent signalées dans « Aujourd'hui » et sur leur fiche, et le quota de la messagerie reste aux personnes.
 const UNVERIFIED_PER_DAY = 30;
+const MESSAGES_PER_DAY = 30;
 
 // Échéance légale d'une demande (RGPD, art. 12-3 : « un mois », compté de date à date, heure de Paris) : le même
 // quantième le mois suivant, à la même heure, ou le dernier jour de ce mois s'il est plus court (31 janvier → 28 ou
@@ -32,7 +38,7 @@ export function rightsDue(at) {
   return wall - offset(first);
 }
 
-export function createReminders({ db, accounts, todo, mailer, siteName = () => '', publicUrl = '', log, now = Date.now }) {
+export function createReminders({ db, accounts, todo, mailer, messages = null, onMessagesCap = () => {}, siteName = () => '', publicUrl = '', log, now = Date.now }) {
   const langOf = authorId => (authorId ? db.prepare('SELECT admin_lang FROM authors WHERE id = ?').pluck().get(authorId) : null) || 'fr';
   const addr = a => a.notify_to || a.email || '';
   const active = () => accounts.list().filter(a => a.status === 'actif' && addr(a));
@@ -123,6 +129,53 @@ export function createReminders({ db, accounts, todo, mailer, siteName = () => '
   };
   const LEVELS = { urgent: '[!]', bientot: '[•]', 'plus-tard': '[ ]' };
 
+  // Messages des visiteurs : un e-mail par compte et par passage, quel que soit le nombre de messages arrivés.
+  const messagesSent = { day: '', n: 0, capped: false };
+  async function notifyMessages() {
+    if (!messages || !mailer?.enabled) return 0;
+    const fresh = messages.toNotify();
+    if (!fresh.length) return 0;
+    const today = paris(now(), { dateStyle: 'short' });
+    if (messagesSent.day !== today) Object.assign(messagesSent, { day: today, n: 0, capped: false });
+    const readers = active().map(a => ({ a, sc: scopeOf(a)('messages.traiter') })).filter(x => x.sc);
+    // Destinataires d'un message : les comptes de son photographe (de tous les photographes, s'il est adressé aux deux) ;
+    // sinon, qui voit tous les messages.
+    const recipientsOf = m => {
+      const own = readers.filter(x => !x.sc.all && x.a.author_id != null && (m.author_id == null || x.a.author_id === m.author_id));
+      const linked = readers.filter(x => x.sc.all && x.a.author_id != null && (m.author_id == null || x.a.author_id === m.author_id));
+      const list = [...own, ...linked];
+      return list.length ? list : readers.filter(x => x.sc.all);
+    };
+    const byAccount = new Map();
+    for (const m of fresh) for (const x of recipientsOf(m)) { const e = byAccount.get(x.a.id) || { a: x.a, n: 0 }; e.n++; byAccount.set(x.a.id, e); }
+    // Plafond du jour : un passage entier ou rien (un compte ne reçoit jamais deux fois l'annonce des mêmes messages) ;
+    // au-delà, les messages restent à annoncer (le lendemain), et la Vigie est prévenue une fois (BV-29).
+    if (messagesSent.n + byAccount.size > MESSAGES_PER_DAY) {
+      if (!messagesSent.capped) { messagesSent.capped = true; try { onMessagesCap({ envoyes: messagesSent.n, en_attente: fresh.length }); } catch { /* jamais d'erreur ici */ } }
+      return 0;
+    }
+    let sent = 0;
+    for (const { a, n } of byAccount.values()) {
+      const t = translator(langOf(a.author_id));
+      const ok = await send({ to: [addr(a)], subject: n > 1 ? t('{n} nouveaux messages vous attendent', { n }) : t('Un nouveau message vous attend'),
+        text: [n > 1 ? t('{n} nouveaux messages vous attendent dans l’admin (page Contact ou demande de licence).', { n }) : t('Un nouveau message vous attend dans l’admin (page Contact ou demande de licence).'),
+          t('Pour le lire, connectez-vous :'), link('/admin/messages')].join('\n') });
+      messagesSent.n++;
+      if (ok) sent++;
+    }
+    // Annoncés (ou tentés : une panne de la messagerie ne fait pas renvoyer l'annonce aux autres comptes) ; le message
+    // reste signalé dans « Aujourd'hui ».
+    for (const m of fresh) messages.notified(m.id);
+    return sent;
+  }
+  let messagesRun = null, messagesAgain = false;
+  function messagesOnce() {
+    if (messagesRun) { messagesAgain = true; return messagesRun; }
+    messagesRun = (async () => { let n = 0; do { messagesAgain = false; n += await notifyMessages(); } while (messagesAgain); return n; })()
+      .finally(() => { messagesRun = null; });
+    return messagesRun;
+  }
+
   async function digests() {
     const t0 = now();
     const today = paris(t0, { dateStyle: 'short' });
@@ -154,9 +207,10 @@ export function createReminders({ db, accounts, todo, mailer, siteName = () => '
     stageOf,
     // Toutes les heures (et juste après une demande reçue).
     async run() {
-      try { return { rights: await rightsOnce(), digests: await digests() }; } catch (err) { log?.error({ err }, 'relances'); return null; }
+      try { return { rights: await rightsOnce(), messages: await messagesOnce(), digests: await digests() }; } catch (err) { log?.error({ err }, 'relances'); return null; }
     },
     rights: rightsOnce,
+    messages: messagesOnce,
     digests,
     // E-mail de test : lève l'erreur du serveur de messagerie (MailError) pour l'afficher.
     async test(to, t) {

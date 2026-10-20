@@ -39,6 +39,7 @@ import { createOutings } from './outings.js';
 import { createShotBackfill } from './prise-de-vue.js';
 import { createPeople } from './people.js';
 import { createFeedback } from './feedback.js';
+import { createMessages } from './messages.js';
 import { createReadiness } from './readiness.js';
 import { createFaceDetector, createFaceService } from './faces.js';
 import { createImageModel, createSeriesSuggest } from './series-suggest.js';
@@ -207,6 +208,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('people', createPeople({ db, encounters: app.encounters }));
   // J'aime et signalements des visiteurs (voir server/feedback.js).
   app.decorate('feedback', createFeedback({ db, vault: createVault(config.dataKey) }));
+  // Messages des visiteurs : page Contact et demande de licence (voir server/messages.js), chiffrés comme les signalements.
+  app.decorate('messages', createMessages({ db, vault: createVault(config.dataKey) }));
   // Comptes de l'admin et journal (server/accounts.js), utilisés aussi par la connexion (server/auth.js).
   app.decorate('accounts', createAccounts({ db, adminSubs: config.adminSubs || [], ticketKey: Buffer.from(crypto.hkdfSync('sha256', config.cookieSecret, 'deux-regards', 'tickets-comptes-v1', 32)) }));
   app.decorate('audit', createAudit({ db }));
@@ -221,11 +224,13 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     if (sealed) app.log.info({ sealed }, 'rencontres : données en clair chiffrées');
     app.encounters.reindexEmails();
     app.feedback.sealExisting();
+    app.messages.sealExisting();
     app.encounters.purge();
     app.feedback.purge();
+    app.messages.purge();
     app.people.sync();
     app.audit.purge(); app.accounts.purgePending(); app.accounts.purgeChanges();
-    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.feedback.purge(); app.audit.purge(); app.accounts.purgePending(); app.accounts.purgeChanges(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
+    purgeTimer = setInterval(() => { try { app.encounters.purge(); app.feedback.purge(); app.messages.purge(); app.audit.purge(); app.accounts.purgePending(); app.accounts.purgeChanges(); app.people.sync(); } catch (err) { app.log.error({ err }, 'rencontres : purge'); } }, 24 * 3600 * 1000);
     purgeTimer.unref();
   });
   app.addHook('onClose', async () => clearInterval(purgeTimer));
@@ -313,10 +318,12 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Au démarrage, les photos en échec sont reprises une fois (réseau rétabli, modèle réparé…).
   if (!describeOptions.manual) app.addHook('onReady', async () => { app.describer.retryFailed(); describeTimer = setInterval(() => app.describer.run(), 10 * 60 * 1000); describeTimer.unref(); });
   app.addHook('onClose', async () => { clearInterval(describeTimer); await app.describer.close(); });
-  app.decorate('todo', createTodo({ db, spaces: app.spaces, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
+  app.decorate('todo', createTodo({ db, spaces: app.spaces, encounters: app.encounters, instagram: app.instagram, proofs: app.proofs, readiness: app.readiness, feedback: app.feedback, messages: app.messages, seriesSuggest: app.seriesSuggest, accounts: app.accounts, notes: app.notes, review: app.review }));
   app.addHook('onClose', async () => { await app.proofs.stop(); });
   // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.
-  app.decorate('reminders', createReminders({ db, accounts: app.accounts, todo: app.todo, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
+  app.decorate('reminders', createReminders({ db, accounts: app.accounts, todo: app.todo, mailer: app.mailer, messages: app.messages, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log,
+    // Plafond des notifications de messages atteint pour la journée (boîtes bombardées : registre de la Vigie, BV-29).
+    onMessagesCap: detail => app.securite?.emit('excess_rate_limit_exceeded', { request: null, severity: 'moyen', emetteur: 'server/messages.js · notifications', detail: { limite: 'messages_global', ...detail } }) }));
   let remindTimer = null;
   app.addHook('onReady', async () => { remindTimer = setInterval(() => app.reminders.run(), 3600 * 1000); remindTimer.unref(); setTimeout(() => app.reminders.run(), 60 * 1000).unref(); });
   app.addHook('onClose', async () => clearInterval(remindTimer));

@@ -129,3 +129,54 @@
 .offerte > * { margin: 0; }
 .offerte-fig { display: grid; gap: var(--esp-1); margin: var(--esp-2) 0 0; max-width: 100%; }
 .offerte-fig img { width: auto; max-width: 100%; max-height: calc(100vh - 320px); max-height: calc(100dvh - 320px); min-height: 0; background: var(--frame); }
+
+/* =====================================================================================================
+   41. Contact et demande de licence (MQ-06, sans la vente de tirages ; views/v2/contact.eta, views/v2/licence.eta)
+   ===================================================================================================== */
+
+/* Contact (/contact) : l'intro, les photographes en colonnes (.ecrire, planche § 24 : une colonne par personne, photo à
+   la même hauteur, nom, phrase, lien), le formulaire, puis les éditeurs du site. */
+.ct { display: grid; gap: var(--esp-6); padding-block: var(--esp-6) 0; }
+.ct > * { min-width: 0; }
+.ct-form { scroll-margin-top: var(--esp-4); }
+.ecrire { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--esp-5) var(--esp-3); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) { .ecrire { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ecrire > .les-deux { grid-column: 1 / -1; } }
+@media (min-width: 1024px) { .ecrire { grid-template-columns: repeat(4, minmax(0, 1fr)); } .ecrire > .les-deux { grid-column: span 2; } }
+.ecrire li { display: grid; gap: var(--esp-1); align-content: start; min-width: 0; }
+.ecrire figure { margin: 0; display: grid; gap: var(--esp-1); align-content: start; min-width: 0; }
+.ecrire picture { display: block; }
+.ecrire img { display: block; width: 100%; height: auto; aspect-ratio: 1.5; object-fit: cover; background: var(--frame); }
+.ecrire figcaption { overflow-wrap: anywhere; }
+.ecrire h3 { margin: var(--esp-1) 0 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.ecrire p { margin: 0; color: var(--prose); }
+.ecrire .deux-photos { display: grid; grid-template-columns: 1fr 1fr; gap: var(--esp-3); align-content: start; }
+.ct-bref { display: grid; gap: var(--esp-2); }
+.ct-bref h2 { margin: 0; font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.ct-bref > p { margin: 0; }
+.suivre { display: flex; flex-wrap: wrap; gap: 0 var(--esp-4); }
+.suivre .lien { display: inline-flex; align-items: center; min-height: var(--cible); }
+.editeurs { margin: 0; padding-top: var(--esp-3); border-top: 1px solid var(--rule); color: var(--mute); font-size: var(--t-petit); line-height: 1.6; overflow-wrap: anywhere; }
+.editeurs a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+@media (min-width: 1024px) {
+  .ct { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); grid-template-areas: "tete tete" "gens gens" "bref form"; column-gap: var(--esp-8); align-items: start; }
+  .ct-tete { grid-area: tete; } .ct-gens { grid-area: gens; } .ct-form { grid-area: form; } .ct-bref { grid-area: bref; }
+}
+
+/* Demande de licence (/droits/demande) : l'en-tête, le formulaire, « Droits et licences, en bref » à droite dès
+   1 024 px (après le formulaire au téléphone). */
+.dl { display: grid; gap: var(--esp-6); padding-block: var(--esp-5) 0; }
+.dl > * { min-width: 0; }
+.dl-tete { display: grid; gap: var(--esp-2); }
+.dl-tete > * { margin: 0; }
+.dl-tete .etiquette a { color: inherit; }
+@media (min-width: 1024px) {
+  .dl { grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); grid-template-rows: auto 1fr; grid-template-areas: "tete aside" "form aside"; column-gap: var(--esp-10); align-items: start; }
+  .dl-tete { grid-area: tete; } .dl > .form { grid-area: form; } .dl-bref { grid-area: aside; }
+}
+.dl-bref { padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.dl-bref h2 { margin: 0 0 var(--esp-2); font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.dl-bref dl { margin: 0; display: grid; gap: var(--esp-2); }
+.dl-bref dt { font-weight: 500; }
+.dl-bref dd { margin: 2px 0 0; color: var(--prose); line-height: 1.55; }
+.dl-bref p { margin: var(--esp-3) 0 0; }
+.photo-ref p { margin: 0; }

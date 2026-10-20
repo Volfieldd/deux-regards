@@ -24,5 +24,13 @@
     </section>
 <% }) %>
   </div>
+  <section class="prose" id="contact" aria-labelledby="contact-t">
+    <h2 id="contact-t"><%= it.t.contact.aboutTitle %></h2>
+    <p><%= it.t.contact.aboutLead %></p>
+    <ul>
+<% it.authors.forEach(a => { %>      <li><a class="more" href="<%= it.u('/contact') %>?pour=<%= encodeURIComponent(a.slug) %>"><%= it.t.contact.write(a.name) %></a></li>
+<% }) %><% if (it.authors.length > 1) { %>      <li><a class="more" href="<%= it.u('/contact') %>?pour=tous"><%= it.t.contact.writeBoth(it.authors.length) %></a></li>
+<% } %>    </ul>
+  </section>
 </main>
 <%~ include('./footer', it) %>

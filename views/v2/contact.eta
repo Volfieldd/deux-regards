@@ -1,0 +1,100 @@
+<% /* Page Contact en v2 et v3 (maquette MQ-06, cadre 10 : « Écrire à Sébastien, à Julien, ou aux deux », sans la vente de
+      tirages). Les photographes en colonnes (une photo de chacun, à la même hauteur ; « Les deux » avec une photo de chacun),
+      chacun menant au formulaire, destinataire choisi (?pour=) ; puis le formulaire (règles et erreurs de la planche MQ-00
+      § 8, comme /bonjour : sous le champ, sous la légende d'un groupe ; dès deux points, le résumé en tête prend le focus ;
+      un seul, le champ le prend) ; puis « Nous suivre » et les éditeurs du site (cadres 11 et 12). Mêmes champs que la v1
+      (views/contact.eta : pour, message, name, email, et le champ piège website). Après l'envoi (/contact/merci), le titre
+      prend le focus ; rien de ce qui a été saisi n'est redit. */ %>
+<% const t = it.t, c = it.c, F = t.v2form, ic = it.v2.ic, ty = it.v2.typo;
+   const v = it.values || {}, e = it.errors || {}, A = it.authors, n = A.length;
+   const ORDER = ['pour', 'message', 'name', 'email'];
+   const TARGET = { pour: A.length ? `ct-pour-${A[0].slug}` : 'ct-pour-tous', message: 'ct-message', name: 'ct-nom', email: 'ct-email' };
+   const text = k => ty(c.errors[e[k]] || String(e[k]));
+   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && !ORDER.includes(k))];
+   const errs = keys.map(k => ({ key: k, target: TARGET[k] || TARGET.message, text: text(k) }));
+   const limit = e.limit ? ty(c.errors.limit) : '';
+   const focusOn = !limit && errs.length === 1 ? errs[0].target : null;
+   const af = id => (focusOn === id ? ' autofocus' : '');
+   const desc = (...ids) => { const l = ids.filter(Boolean); return l.length ? ` aria-describedby="${l.join(' ')}"` : ''; };
+   const bad = k => (e[k] ? ' aria-invalid="true"' : '');
+   const after = s => (it.lang === 'fr' && !/^\p{Lu}{2}/u.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+   const err = k => (e[k] ? `<p class="champ-err" id="err-${k}">${ic('alerte', { size: 16 })}<span><b>${F.error}</b> ${it.v2.esc(after(text(k)))}</span></p>` : '');
+   const ek = k => (e[k] ? `err-${k}` : null);
+   const pageTitle = it.sent ? it.pageTitle
+     : limit ? `${F.limitTitle} · ${it.pageTitle}`
+     : errs.length > 1 ? `${F.titleError(F.points(errs.length))} · ${it.pageTitle}`
+     : errs.length ? `${F.titleError(c.fields[errs[0].key] || c.fields.message)} · ${it.pageTitle}` : it.pageTitle;
+   const SIZES = '(min-width: 1440px) 294px, (min-width: 1024px) calc(25vw - 66px), (min-width: 768px) calc(50vw - 76px), calc(100vw - 48px)';
+   const SIZES2 = '(min-width: 1440px) 294px, (min-width: 1024px) calc(25vw - 66px), (min-width: 768px) calc(50vw - 76px), calc(50vw - 36px)';
+   const cap = p => ty([p.title, (it.v2.date(p.taken_on) || '').replace(/ /g, ' ')].filter(Boolean).join(' · '));
+   const href = slug => `${it.u('/contact')}?pour=${encodeURIComponent(slug)}#ct-form`; %>
+<% layout('./layout', { pageTitle: ty(pageTitle), description: ty(it.description), formulaires: true }) %>
+<%~ include('./_entete', { ...it, courant: 'contact' }) %>
+<main id="contenu" class="wrap">
+<% if (it.sent) { %>
+<div class="pf pf--seul">
+  <div class="pf-intro">
+    <p class="etiquette"><%= c.label %></p>
+    <h1 class="titre-page" id="merci-t" tabindex="-1" autofocus><%= ty(c.thanks) %></h1>
+    <div class="msg msg--ok" role="status"><%~ ic('coche', { size: 18 }) %><p><b><%= F.sent %></b> <%= ty(c.thanksText) %></p></div>
+    <p class="pf-suite"><a class="lien" href="<%= it.u('/') %>"><%= c.back %></a></p>
+  </div>
+</div>
+<% } else { %>
+<div class="ct">
+  <div class="pf-intro ct-tete">
+    <p class="etiquette"><%= c.label %></p>
+    <h1 class="titre-page"><%= ty(c.heading(A.map(a => a.name))) %></h1>
+    <p class="chapo"><%= ty(c.lead) %></p>
+    <p class="chapo chapo--texte"><%= ty(c.licenceLead) %> <a href="<%= it.u('/droits/demande') %>"><%= c.licenceLink %></a></p>
+  </div>
+<% if (n) { %>  <section class="ct-gens" aria-labelledby="ct-gens-t">
+    <h2 class="sr-only" id="ct-gens-t"><%= c.people %></h2>
+    <ul class="ecrire">
+<% A.forEach(a => { %>      <li>
+<% if (a.photo) { %>        <figure><%~ it.picture(a.photo, { sizes: SIZES, alt: '' }) %><figcaption class="cartel-m"><%= cap(a.photo) %></figcaption></figure>
+<% } %>        <h3><%= a.name %></h3>
+<% if (a.short_bio) { %>        <p><%= ty(a.short_bio) %></p>
+<% } %>        <p><a class="lien" href="<%= href(a.slug) %>"><%= c.write(a.name) %></a></p>
+      </li>
+<% }) %><% if (n > 1) { %>      <li class="les-deux">
+<% if (A.every(a => a.photo2)) { %>        <figure><div class="deux-photos"><% A.slice(0, 2).forEach(a => { %><%~ it.picture(a.photo2, { sizes: SIZES2, alt: '' }) %><% }) %></div><figcaption class="cartel-m"><%= ty(A.slice(0, 2).map(a => a.photo2.title).join(' · ')) %></figcaption></figure>
+<% } %>        <h3><%= c.both(n) %></h3>
+        <p><%= ty(c.bothText(n)) %></p>
+        <p><a class="lien" href="<%= href(it.ALL) %>"><%= c.writeBoth(n) %></a></p>
+      </li>
+<% } %>    </ul>
+  </section>
+<% } %>
+  <form class="form ct-form" id="ct-form" method="post" action="<%= it.u('/contact') %>" novalidate>
+<%~ include('./_erreurs', { ...it, errs, limit }) %>
+    <p class="form-oblig"><%= F.required %></p>
+    <fieldset class="bloc groupe<%= e.pour ? ' groupe--erreur' : '' %>"<%~ desc(ek('pour')) %>><legend><%= c.pour %></legend>
+<%~ err('pour') %>
+<% A.forEach(a => { %>      <label class="choix"><input id="ct-pour-<%= a.slug %>" type="radio" name="pour" value="<%= a.slug %>"<%~ v.pour === a.slug ? ' checked' : '' %><%~ bad('pour') %><%~ af(`ct-pour-${a.slug}`) %>><span><%= a.name %></span></label>
+<% }) %>      <label class="choix"><input id="ct-pour-tous" type="radio" name="pour" value="<%= it.ALL %>"<%~ v.pour === it.ALL ? ' checked' : '' %><%~ bad('pour') %><%~ af('ct-pour-tous') %>><span><%= c.pourAll(n) %></span></label>
+    </fieldset>
+    <fieldset class="bloc"><legend><%= c.messageLegend %></legend>
+      <div class="champ"><label for="ct-message"><%= c.message %></label><p class="champ-aide" id="ct-message-aide"><%= ty(c.messageHint) %></p>
+        <textarea id="ct-message" name="message" rows="6" maxlength="2000"<%~ desc(ek('message'), 'ct-message-aide') %><%~ bad('message') %><%~ af('ct-message') %>><%= v.message || '' %></textarea><%~ err('message') %></div>
+    </fieldset>
+    <fieldset class="bloc"><legend><%= c.contact %></legend>
+      <div class="champ"><label for="ct-nom"><%= c.name %></label>
+        <input id="ct-nom" name="name" value="<%= v.name || '' %>" maxlength="100" autocomplete="name"<%~ desc(ek('name')) %><%~ bad('name') %><%~ af('ct-nom') %>><%~ err('name') %></div>
+      <div class="champ"><label for="ct-email"><%= c.email %></label><p class="champ-aide" id="ct-email-aide"><%= ty(c.emailHint) %></p>
+        <input id="ct-email" type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ desc(ek('email'), 'ct-email-aide') %><%~ bad('email') %><%~ af('ct-email') %>><%~ err('email') %></div>
+      <p class="note-donnees"><%= ty(c.privacy) %> <a href="<%= it.u('/confidentialite') %>"><%= t.footer.privacy %></a></p>
+    </fieldset>
+    <div class="piege" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="envoi"><button class="btn" type="submit"><%= c.send %></button><p><%= ty(c.sendNote) %></p></div>
+  </form>
+  <aside class="ct-bref" aria-label="<%= c.editors %>">
+<% if (it.carnetPage) { %>    <h2><%= c.follow %></h2>
+    <p class="suivre"><a class="lien" href="<%= it.u('/carnet/flux.xml') %>" type="application/atom+xml"><%= t.carnet.feed %></a></p>
+<% } %><% if (it.legal.names) { %>    <p class="editeurs"><%= c.editors %><%= t.v2.colon %> <%= it.legal.names %><% if (it.legal.director) { %> · <%= c.director %><%= t.v2.colon %> <%= it.legal.director %><% } %> · <a href="<%= it.u('/mentions-legales') %>"><%= t.footer.legal %></a></p>
+<% } else { %>    <p class="editeurs"><a href="<%= it.u('/mentions-legales') %>"><%= t.footer.legal %></a></p>
+<% } %>  </aside>
+</div>
+<% } %>
+</main>
+<%~ include('./_pied', it) %>

@@ -3,7 +3,7 @@
 // le code fait réellement : toute évolution d'un traitement ou d'une durée se reporte ici dans la même modification.
 // Responsables conjoints : les auteurs du site ; contact réglable dans l'admin (privacy_contact).
 
-export const UPDATED = '2026-10-19';
+export const UPDATED = '2026-10-20';
 // Date du paragraphe « Journal de sécurité », affiché seulement avec la Vigie (facultative).
 export const UPDATED_SECURITY_LOG = '2026-10-17';
 
@@ -38,6 +38,12 @@ export const PRIVACY = {
         'Le bouton « Partager » ouvre le menu de partage de votre téléphone, ou de simples liens vers WhatsApp, Facebook, Bluesky, X, Pinterest ou votre messagerie : aucun script de ces services n’est chargé sur notre site, et rien n’est transmis avant que vous ne choisissiez. Nous comptons seulement le nombre de partages par photo et par moyen, chaque jour, sans rien garder sur vous.',
         'Le lien « Signaler » nous envoie votre message et, si vous le souhaitez, votre adresse e-mail pour vous répondre : ils ne servent qu’à traiter le signalement et sont effacés au bout de 12 mois.',
       ]],
+      ['Contact et demandes de licence', [
+        `Par la page ${host}/contact, ou par « Demander une licence » sous une photo (${host}/droits/demande), vous nous envoyez votre nom, votre adresse e-mail et votre message ; pour une licence, aussi la photo concernée, l’usage prévu, la diffusion et, si vous le souhaitez, votre société ou votre média.`,
+        'Ils servent seulement à vous répondre et, pour une licence, à vous proposer des conditions. Base légale : votre demande, à laquelle nous répondons (mesures précontractuelles pour une licence) et notre intérêt légitime à répondre à qui nous écrit (RGPD, articles 6-1-b et 6-1-f).',
+        'Seul le photographe à qui vous écrivez (celui de la photo, pour une licence ; les deux si vous écrivez aux deux) et l’administrateur du site les lisent ; chaque lecture est notée. Nous ne vous envoyons aucun e-mail automatique : seulement notre réponse. Le photographe est prévenu par un e-mail qui ne contient rien de votre message.',
+        `Votre message, votre nom et votre adresse sont ${fields ? 'chiffrés dans notre base et ' : ''}effacés 12 mois après l’envoi ; vous pouvez nous demander de les effacer plus tôt.`,
+      ]],
       ['Galeries privées', [
         'Nous pouvons montrer des photos à des personnes choisies, dans une galerie privée : chacune reçoit de nous un lien personnel et, par un autre moyen, un mot de passe. Pour cela, nous gardons le nom de la personne invitée (chiffré, visible de nous seuls), la langue et la durée de son accès, et une empreinte du lien et du mot de passe (jamais le lien ni le mot de passe eux-mêmes).',
         'Quand vous ouvrez une galerie privée, nous notons la date de vos visites, les mots de passe refusés, vos favoris, la sélection que vous nous envoyez et vos téléchargements, avec le réseau d’où vous venez (votre adresse IP tronquée) et le pays estimé par Cloudflare ; jamais votre navigateur. Cela nous dit si les photos vous sont parvenues, et protège la galerie contre un lien qui aurait été transmis à d’autres.',
@@ -47,13 +53,14 @@ export const PRIVACY = {
       ]],
       ['Combien de temps', [
         'Demande sans accord ni refus : effacée après 12 mois sans nouvelle.',
+        'Message envoyé par la page Contact ou demande de licence : effacé 12 mois après l’envoi.',
         'Photo de vous jointe à votre accord : conservée avec l’accord ; sans accord, effacée après 6 mois (si vous refusez après avoir accepté : 6 mois après votre refus).',
         'Accord ou refus (avec la signature) : conservé tant qu’une photo qui vous concerne existe chez nous, puis 5 ans après la suppression de la dernière, le temps pendant lequel une action en justice reste possible.',
         'Lien privé pour télécharger votre photo : valable 30 jours, effacé un mois après.',
         'Sauvegardes : la base de données est sauvegardée chaque jour et chaque sauvegarde est effacée au bout de 14 jours ; une photo que nous supprimons disparaît de nos sauvegardes au bout de 90 jours.',
       ]],
       ['Qui reçoit vos données', [
-        'Nous deux, et les personnes à qui nous confions la modération ou la relecture des photos (chacune avec son compte) : elles voient les photos, jamais vos coordonnées, votre signature ni votre accord. Nous ne vendons ni ne cédons aucune donnée.',
+        'Nous deux, et les personnes à qui nous confions la modération ou la relecture des photos (chacune avec son compte) : elles voient les photos, jamais vos coordonnées, votre signature, votre accord ni les messages que vous nous envoyez. Nous ne vendons ni ne cédons aucune donnée.',
         'Cloudflare achemine les connexions vers notre serveur (il assure le chiffrement HTTPS) ; il agit pour notre compte, sous ses conditions de protection des données, avec des transferts encadrés hors de l’Union européenne (Data Privacy Framework et clauses contractuelles types).',
         'Instagram (Meta) reçoit une photo seulement si vous avez accepté cet usage, qui suppose aussi le site. Si vous refusez Instagram, aucune photo de ce jour-là où vous pourriez figurer n’y est envoyée.',
         'Si nous vous écrivons par e-mail, le message passe par notre fournisseur de messagerie.',
@@ -101,6 +108,12 @@ export const PRIVACY = {
         'The “Share” button opens your phone’s share menu, or plain links to WhatsApp, Facebook, Bluesky, X, Pinterest or your email: no script from these services is loaded on our site, and nothing is sent before you choose. We only count the number of shares per photo and per channel, each day, keeping nothing about you.',
         'The “Report” link sends us your message and, if you wish, your email address so that we can reply: they are only used to deal with the report and are deleted after 12 months.',
       ]],
+      ['Contact and licence requests', [
+        `Through the page ${host}/contact, or through “Request a licence” under a photograph (${host}/droits/demande), you send us your name, your email address and your message; for a licence, also the photograph concerned, the intended use, the circulation and, if you wish, your company or media outlet.`,
+        'They are only used to answer you and, for a licence, to offer you terms. Legal basis: your request, which we answer (pre-contractual steps for a licence), and our legitimate interest in answering those who write to us (GDPR, Articles 6(1)(b) and 6(1)(f)).',
+        'Only the photographer you write to (the photographer of the photograph, for a licence; both of us if you write to both) and the site administrator read them; each reading is logged. We send you no automatic email: only our reply. The photographer is notified by an email that contains nothing of your message.',
+        `Your message, your name and your address are ${fields ? 'encrypted in our database and ' : ''}deleted 12 months after sending; you can ask us to delete them earlier.`,
+      ]],
       ['Private galleries', [
         'We may show photographs to chosen people, in a private gallery: each receives from us a personal link and, by another channel, a password. For this, we keep the name of the invited person (encrypted, visible to us only), the language and the duration of their access, and a fingerprint of the link and of the password (never the link or the password themselves).',
         'When you open a private gallery, we record the dates of your visits, refused passwords, your favourites, the selection you send us and your downloads, with the network you come from (your truncated IP address) and the country estimated by Cloudflare; never your browser. This tells us whether the photographs reached you, and protects the gallery against a link passed on to others.',
@@ -110,13 +123,14 @@ export const PRIVACY = {
       ]],
       ['For how long', [
         'Request without consent or refusal: deleted after 12 months without news.',
+        'Message sent through the Contact page or licence request: deleted 12 months after sending.',
         'Photo of you attached to your consent: kept with the consent; without consent, deleted after 6 months (if you refuse after agreeing: 6 months after your refusal).',
         'Consent or refusal (with the signature): kept as long as a photo concerning you exists with us, then 5 years after the last one is deleted, the period during which legal action remains possible.',
         'Private link to download your photo: valid for 30 days, deleted one month later.',
         'Backups: the database is backed up every day and each backup is deleted after 14 days; a photo we delete disappears from our backups after 90 days.',
       ]],
       ['Who receives your data', [
-        'The two of us, and the people we entrust with moderating or proofreading the photos (each with their own account): they see the photos, never your contact details, your signature or your consent. We never sell or pass on any data.',
+        'The two of us, and the people we entrust with moderating or proofreading the photos (each with their own account): they see the photos, never your contact details, your signature, your consent or the messages you send us. We never sell or pass on any data.',
         'Cloudflare routes connections to our server (it provides HTTPS encryption); it acts on our behalf, under its data protection terms, with safeguarded transfers outside the European Union (Data Privacy Framework and standard contractual clauses).',
         'Instagram (Meta) only receives a photo if you agreed to that use, which also requires the website. If you refuse Instagram, no photo from that day in which you might appear is sent there.',
         'If we email you, the message goes through our email provider.',
@@ -164,6 +178,12 @@ export const PRIVACY = {
         'Die Schaltfläche „Teilen“ öffnet das Teilen-Menü Ihres Telefons oder einfache Links zu WhatsApp, Facebook, Bluesky, X, Pinterest oder Ihrem E-Mail-Programm: kein Skript dieser Dienste wird auf unserer Website geladen, und nichts wird übertragen, bevor Sie wählen. Wir zählen nur die Anzahl der Teilungen pro Foto und Kanal und Tag, ohne etwas über Sie zu speichern.',
         'Der Link „Melden“ schickt uns Ihre Nachricht und, wenn Sie möchten, Ihre E-Mail-Adresse für eine Antwort: Sie dienen nur der Bearbeitung der Meldung und werden nach 12 Monaten gelöscht.',
       ]],
+      ['Kontakt und Lizenzanfragen', [
+        `Über die Seite ${host}/contact oder über „Lizenz anfragen“ unter einem Foto (${host}/droits/demande) senden Sie uns Ihren Namen, Ihre E-Mail-Adresse und Ihre Nachricht; für eine Lizenz außerdem das betreffende Foto, die geplante Nutzung, die Verbreitung und, wenn Sie möchten, Ihre Firma oder Ihr Medium.`,
+        'Sie dienen nur dazu, Ihnen zu antworten und Ihnen für eine Lizenz Bedingungen anzubieten. Rechtsgrundlage: Ihre Anfrage, die wir beantworten (vorvertragliche Maßnahmen für eine Lizenz), und unser berechtigtes Interesse, denen zu antworten, die uns schreiben (DSGVO, Art. 6 Abs. 1 lit. b und f).',
+        'Nur der Fotograf, an den Sie schreiben (der Fotograf des Fotos bei einer Lizenz; wir beide, wenn Sie an beide schreiben), und der Administrator der Website lesen sie; jedes Lesen wird protokolliert. Wir senden Ihnen keine automatische E-Mail: nur unsere Antwort. Der Fotograf wird per E-Mail benachrichtigt, die nichts aus Ihrer Nachricht enthält.',
+        `Ihre Nachricht, Ihr Name und Ihre Adresse werden ${fields ? 'in unserer Datenbank verschlüsselt und ' : ''}12 Monate nach dem Senden gelöscht; Sie können uns bitten, sie früher zu löschen.`,
+      ]],
       ['Private Galerien', [
         'Wir können ausgewählten Personen Fotos in einer privaten Galerie zeigen: Jede erhält von uns einen persönlichen Link und auf anderem Weg ein Passwort. Dazu speichern wir den Namen der eingeladenen Person (verschlüsselt, nur für uns sichtbar), die Sprache und die Dauer ihres Zugangs sowie einen Fingerabdruck des Links und des Passworts (nie den Link oder das Passwort selbst).',
         'Wenn Sie eine private Galerie öffnen, speichern wir die Daten Ihrer Besuche, abgelehnte Passwörter, Ihre Favoriten, die Auswahl, die Sie uns senden, und Ihre Downloads, mit dem Netz, aus dem Sie kommen (Ihre gekürzte IP-Adresse), und dem von Cloudflare geschätzten Land; nie Ihren Browser. So wissen wir, ob die Fotos angekommen sind, und schützen die Galerie vor einem an andere weitergegebenen Link.',
@@ -173,13 +193,14 @@ export const PRIVACY = {
       ]],
       ['Wie lange', [
         'Anfrage ohne Einwilligung oder Ablehnung: nach 12 Monaten ohne Nachricht gelöscht.',
+        'Über die Kontaktseite gesendete Nachricht oder Lizenzanfrage: 12 Monate nach dem Senden gelöscht.',
         'Foto von Ihnen zu Ihrer Einwilligung: zusammen mit der Einwilligung aufbewahrt; ohne Einwilligung nach 6 Monaten gelöscht (wenn Sie nach einer Einwilligung ablehnen: 6 Monate nach Ihrer Ablehnung).',
         'Einwilligung oder Ablehnung (mit der Unterschrift): so lange aufbewahrt, wie ein Foto von Ihnen bei uns existiert, danach 5 Jahre ab dem Löschen des letzten, solange rechtliche Schritte möglich sind.',
         'Privater Link zum Herunterladen Ihres Fotos: 30 Tage gültig, einen Monat danach gelöscht.',
         'Sicherungen: Die Datenbank wird täglich gesichert, jede Sicherung wird nach 14 Tagen gelöscht; ein von uns gelöschtes Foto verschwindet nach 90 Tagen aus unseren Sicherungen.',
       ]],
       ['Wer Ihre Daten erhält', [
-        'Wir beide und die Personen, die wir mit der Moderation oder dem Korrekturlesen der Fotos betrauen (jede mit eigenem Konto): Sie sehen die Fotos, nie Ihre Kontaktdaten, Ihre Unterschrift oder Ihre Einwilligung. Wir verkaufen oder übermitteln keine Daten.',
+        'Wir beide und die Personen, die wir mit der Moderation oder dem Korrekturlesen der Fotos betrauen (jede mit eigenem Konto): Sie sehen die Fotos, nie Ihre Kontaktdaten, Ihre Unterschrift, Ihre Einwilligung oder die Nachrichten, die Sie uns senden. Wir verkaufen oder übermitteln keine Daten.',
         'Cloudflare leitet die Verbindungen zu unserem Server (und sorgt für die HTTPS-Verschlüsselung); es handelt in unserem Auftrag, nach seinen Datenschutzbedingungen, mit abgesicherten Übermittlungen außerhalb der Europäischen Union (Data Privacy Framework und Standardvertragsklauseln).',
         'Instagram (Meta) erhält ein Foto nur, wenn Sie dieser Nutzung zugestimmt haben, die auch die Website voraussetzt. Wenn Sie Instagram ablehnen, wird kein Foto dieses Tages, auf dem Sie zu sehen sein könnten, dorthin gesendet.',
         'Wenn wir Ihnen eine E-Mail schreiben, läuft sie über unseren E-Mail-Anbieter.',

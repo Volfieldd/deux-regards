@@ -1,0 +1,39 @@
+<% layout('./layout') %>
+<% /* Page Contact en v1 (sobre) : mêmes champs, même route, même champ piège que la v2 (views/v2/contact.eta) ; erreurs
+      en tête, reliées aux champs, focus posé sur la liste au retour (comme Signaler et /bonjour en v1). */ %>
+<% const c = it.c, v = it.values || {}, e = it.errors || {}; %>
+<% const bad = (...keys) => { const ids = keys.filter(k => e[k]).map(k => `err-${k}`); return ids.length ? ` aria-invalid="true" aria-describedby="${ids.join(' ')}"` : ''; }; %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <%~ include('./nav', it) %>
+</header>
+<main class="about wrap hello report-page">
+<% if (it.sent) { %>
+  <h1 id="merci-t" tabindex="-1" autofocus><%= c.thanks %></h1>
+  <p class="prose"><%= c.thanksText %></p>
+  <p><a class="more" href="<%= it.u('/') %>"><%= c.back %></a></p>
+<% } else { %>
+  <h1><%= c.heading(it.authors.map(a => a.name)) %></h1>
+  <p class="prose"><%= c.lead %></p>
+  <p class="prose"><%= c.licenceLead %> <a class="more" href="<%= it.u('/droits/demande') %>"><%= c.licenceLink %></a></p>
+<% if (Object.keys(e).length) { %>  <div class="hello-errors" id="erreurs" role="alert" tabindex="-1" autofocus><ul><% Object.entries(e).forEach(([k, code]) => { %><li id="err-<%= k %>"><%= c.errors[code] || code %></li><% }) %></ul></div>
+<% } %>
+  <form class="hello-form" method="post" action="<%= it.u('/contact') %>" novalidate>
+    <fieldset<%~ bad('pour') %>>
+      <legend><%= c.pour %></legend>
+<% it.authors.forEach(a => { %>      <label class="check"><input type="radio" name="pour" value="<%= a.slug %>"<%~ v.pour === a.slug ? ' checked' : '' %>> <%= a.name %></label>
+<% }) %>      <label class="check"><input type="radio" name="pour" value="<%= it.ALL %>"<%~ v.pour === it.ALL ? ' checked' : '' %>> <%= c.pourAll(it.authors.length) %></label>
+    </fieldset>
+    <label><%= c.message %> <span class="hint"><%= c.messageHint %></span><textarea name="message" rows="6" maxlength="2000"<%~ bad('message') %>><%= v.message || '' %></textarea></label>
+    <fieldset>
+      <legend><%= c.contact %></legend>
+      <label><%= c.name %><input name="name" value="<%= v.name || '' %>" maxlength="100" autocomplete="name"<%~ bad('name') %>></label>
+      <label><%= c.email %> <span class="hint"><%= c.emailHint %></span><input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ bad('email') %>></label>
+    </fieldset>
+    <div class="hello-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <p class="report-actions"><button class="hello-send eyebrow" type="submit"><%= c.send %></button></p>
+    <p class="hint"><%= c.privacy %> <a href="<%= it.u('/confidentialite') %>"><%= it.t.footer.privacy %></a></p>
+  </form>
+<% } %>
+</main>
+<%~ include('./footer', it) %>

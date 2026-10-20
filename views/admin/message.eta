@@ -1,0 +1,36 @@
+<% layout('./layout') %>
+<% /* Un message (admin v1) : déchiffré pour ce compte, lecture notée au journal et signalée à la Vigie (server/routes/
+      messages.js). Le message est montré en texte (échappé, retours à la ligne gardés ; aucun lien cliquable : un lien
+      d'hameçonnage reste un texte). « Répondre » ouvre la messagerie vers l'adresse saisie par le visiteur. Supprimer :
+      confirmé dans un dépliant, sans script. */ %>
+<% const t = it.t, m = it.m; const KIND = { contact: t('Message (page Contact)'), licence: t('Demande de licence') };
+   const USAGE = { presse: t('livre ou presse imprimée'), web: t('site web ou réseaux sociaux'), publicite: t('publicité, affiche'), autre: t('autre usage') };
+   const when = ms => new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(ms);
+   const mail = encodeURIComponent(m.email).replace(/%40/g, '@'); %>
+<p><a class="more" href="/admin/messages"><%= t('Messages et demandes') %></a></p>
+<h1><%= it.title %></h1>
+<div class="panel msg-fiche">
+  <p><span class="enc-tag<%= m.kind === 'licence' ? ' warn' : '' %>"><%= KIND[m.kind] %></span> <span class="mono"><%= when(m.created_at) %> · <%= m.lang.toUpperCase() %><%= m.status === 'traite' ? ` · ${t('traité')}` : '' %></span></p>
+  <dl class="msg-def">
+    <dt><%= t('Pour') %></dt><dd><%= m.author_name || t('les deux photographes') %></dd>
+<% if (m.kind === 'licence') { %>    <dt><%= t('Photo') %></dt><dd><% if (m.photo) { %><a class="more" href="/admin/photos/<%= m.photo_id %>"><%= m.photo_title %></a><% } else { %><%= t('aucune photo choisie') %><% } %></dd>
+    <dt><%= t('Usage prévu') %></dt><dd><%= USAGE[m.usage] || m.usage %></dd>
+<% if (m.diffusion) { %>    <dt><%= t('Diffusion et durée') %></dt><dd><%= m.diffusion %></dd>
+<% } %><% } %>    <dt><%= t('Nom') %></dt><dd><%= m.name %></dd>
+<% if (m.company) { %>    <dt><%= t('Société ou média') %></dt><dd><%= m.company %></dd>
+<% } %>    <dt><%= t('E-mail') %></dt><dd class="mono"><%= m.email %></dd>
+  </dl>
+  <p class="rp-msg" lang="<%= m.lang %>"><%= m.message %></p>
+  <div class="rp-acts">
+    <a class="btn" href="mailto:<%= mail %>"><%= t('Répondre par e-mail') %></a>
+<% if (m.status === 'nouveau') { %>    <form method="post" action="/admin/messages/<%= m.id %>/traite"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><button class="btn ghost" type="submit"><%= t('Marquer comme traité') %></button></form>
+<% } %>  </div>
+  <details class="msg-suppr">
+    <summary><%= t('Supprimer…') %></summary>
+    <form method="post" action="/admin/messages/<%= m.id %>/supprimer">
+      <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+      <p><%= t('Le message, le nom et l’adresse sont effacés. Cette action est définitive.') %></p>
+      <p class="actions"><button class="btn danger" type="submit"><%= t('Supprimer le message') %></button></p>
+    </form>
+  </details>
+</div>

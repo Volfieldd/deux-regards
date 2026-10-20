@@ -1,0 +1,47 @@
+<% layout('./layout') %>
+<% /* Demande de licence en v1 (sobre) : mêmes champs, même route, même champ piège que la v2 (views/v2/licence.eta). La
+      photo dont on parle vient de ?photo= (visionneuse, page Droits), gardée dans un champ caché. */ %>
+<% const l = it.l, c = it.c, v = it.values || {}, e = it.errors || {}, p = it.photo; %>
+<% const bad = (...keys) => { const ids = keys.filter(k => e[k]).map(k => `err-${k}`); return ids.length ? ` aria-invalid="true" aria-describedby="${ids.join(' ')}"` : ''; }; %>
+<header class="top wrap">
+  <%~ include('./brand', it) %>
+  <%~ include('./nav', it) %>
+</header>
+<main class="about wrap hello report-page">
+<% if (it.sent) { %>
+  <h1 id="merci-t" tabindex="-1" autofocus><%= c.thanks %></h1>
+  <p class="prose"><%= l.thanksText(it.author && it.author.name) %></p>
+  <p><% if (p) { %><a class="more" href="<%= it.photoUrl(p.slug) %>"><%= l.backPhoto %><%= it.t.colon %> <%= p.title %></a><% } else { %><a class="more" href="<%= it.u('/') %>"><%= c.back %></a><% } %></p>
+<% } else { %>
+  <h1><%= l.title %></h1>
+  <p class="prose"><%= l.lead %></p>
+<% if (Object.keys(e).length) { %>  <div class="hello-errors" id="erreurs" role="alert" tabindex="-1" autofocus><ul><% Object.entries(e).forEach(([k, code]) => { %><li id="err-<%= k %>"><%= c.errors[code] || code %></li><% }) %></ul></div>
+<% } %>
+  <form class="hello-form" method="post" action="<%= it.u('/droits/demande') %>" novalidate>
+    <fieldset>
+      <legend><%= l.photo %></legend>
+<% if (p) { %>      <input type="hidden" name="photo" value="<%= p.slug %>">
+      <p class="prose"><a class="more" href="<%= it.photoUrl(p.slug) %>"><%= p.title %></a><%= p.author ? ` · ${p.author}` : '' %></p>
+      <p><a class="more" href="<%= it.u('/') %>#galerie"><%= l.other %></a></p>
+<% } else { %>      <p class="prose"><%= l.noPhoto %></p>
+      <p><a class="more" href="<%= it.u('/') %>#galerie"><%= l.choose %></a></p>
+<% } %>    </fieldset>
+    <fieldset<%~ bad('usage') %>>
+      <legend><%= l.usage %></legend>
+<% it.usages.forEach(k => { %>      <label class="check"><input type="radio" name="usage" value="<%= k %>"<%~ v.usage === k ? ' checked' : '' %>> <%= l.usages[k] %></label>
+<% }) %>      <label><%= l.diffusion %> <span class="hint"><%= it.t.v2form.optional %> <%= l.diffusionHint %></span><input name="diffusion" value="<%= v.diffusion || '' %>" maxlength="300"<%~ bad('diffusion') %>></label>
+    </fieldset>
+    <label><%= c.message %> <span class="hint"><%= c.messageHint %></span><textarea name="message" rows="6" maxlength="2000"<%~ bad('message') %>><%= v.message || '' %></textarea></label>
+    <fieldset>
+      <legend><%= c.contact %></legend>
+      <label><%= c.name %><input name="name" value="<%= v.name || '' %>" maxlength="100" autocomplete="name"<%~ bad('name') %>></label>
+      <label><%= l.company %> <span class="hint"><%= it.t.v2form.optional %></span><input name="company" value="<%= v.company || '' %>" maxlength="120" autocomplete="organization"<%~ bad('company') %>></label>
+      <label><%= c.email %> <span class="hint"><%= c.emailHint %></span><input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="email"<%~ bad('email') %>></label>
+    </fieldset>
+    <div class="hello-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <p class="report-actions"><button class="hello-send eyebrow" type="submit"><%= l.send %></button> <a class="more" href="<%= it.u('/droits') %>"><%= l.detail %></a></p>
+    <p class="hint"><%= l.privacy %> <a href="<%= it.u('/confidentialite') %>"><%= it.t.footer.privacy %></a></p>
+  </form>
+<% } %>
+</main>
+<%~ include('./footer', it) %>

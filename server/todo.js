@@ -15,7 +15,7 @@ export const LEVELS = ['urgent', 'bientot', 'plus-tard'];
 const FR = translator('fr');
 const dayOf = t => ms => new Intl.DateTimeFormat(t.locale || 'fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' }).format(ms);
 
-export function createTodo({ db, spaces = null, encounters, instagram, proofs, readiness, feedback, seriesSuggest, accounts, notes, review, now = () => Date.now() }) {
+export function createTodo({ db, spaces = null, encounters, instagram, proofs, readiness, feedback, messages = null, seriesSuggest, accounts, notes, review, now = () => Date.now() }) {
   const q = {
     rights: db.prepare(`SELECT id FROM encounters WHERE rights_request IS NOT NULL AND rights_done_at IS NULL ORDER BY rights_requested_at`).pluck(),
     // Refus dont des photos liées sont encore publiées.
@@ -124,6 +124,12 @@ export function createTodo({ db, spaces = null, encounters, instagram, proofs, r
     const reports = feedback && a.all('signalements.traiter') ? feedback.pending() : 0;
     if (reports) items.push({ level: 'bientot', title: reports > 1 ? t('{n} signalements de visiteurs', { n: reports }) : t('{n} signalement de visiteur', { n: reports }),
       detail: t('photo à retirer, suggestion pour le texte ou autre'), href: '/admin/signalements', action: t('Voir') });
+    // Messages des visiteurs (page Contact, demande de licence) : ceux du photographe du compte et ceux adressés aux deux,
+    // ou tous ; jamais le nom de la personne (le récapitulatif par e-mail reprend cette ligne telle quelle).
+    const msgScope = messages ? a.author('messages.traiter') : undefined;
+    const msgs = msgScope === undefined ? 0 : messages.pending(msgScope === null ? { all: true } : { all: false, authorId: msgScope });
+    if (msgs) items.push({ level: 'bientot', title: msgs > 1 ? t('{n} messages ou demandes de licence à lire', { n: msgs }) : t('{n} message ou demande de licence à lire', { n: msgs }),
+      detail: t('envoyés depuis la page Contact ou une demande de licence'), href: '/admin/messages', action: t('Lire') });
     const fa = a.author('personnes.voir');
     const fresh = fa === undefined ? 0 : q.fresh.get({ author: fa });
     if (fresh) items.push({ level: 'bientot', title: fresh > 1 ? t('{n} nouvelles personnes photographiées', { n: fresh }) : t('{n} nouvelle personne photographiée', { n: fresh }),
