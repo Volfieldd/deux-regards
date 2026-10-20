@@ -53,7 +53,7 @@ test('A019 : 5 codes faux par référence en 24 h, d’où qu’ils viennent ; a
   const wrong = [...'ABCDEFGHJK'].map(c => `${c}${c}${c}`).filter(c => c !== good);
   let ip = 10;
   const post = (code, extra = {}) => app.inject({ method: 'POST', url: '/bonjour', remoteAddress: `203.0.113.${ip++}`,
-    payload: { ref: `J-0007-${code}`, decision: 'accord', scope_site: 'on', scope_instagram: 'on', email: 'attaquant@evil.example', name: 'Attaquant', rights: 'acces', ...extra } });
+    payload: { ref: `J-0007-${code}`, decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', email: 'attaquant@evil.example', name: 'Attaquant', rights: 'acces', ...extra } });
   for (let i = 0; i < 5; i++) {
     const r = await post(wrong[i]);
     assert.equal(r.statusCode, 422);

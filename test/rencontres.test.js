@@ -76,7 +76,7 @@ test('demandes : validations expliquées, piège à robots, carte vérifiée, ch
   assert.match(r.body, /Dites-nous ce que vous souhaitez/);
   r = await c.hello({ ref: 'J-0142', wants_photo: 'on' });
   assert.match(r.body, /Indiquez votre e-mail/);
-  r = await c.hello({ ref: 'J-0142', decision: 'accord', email: 'a@exemple.fr', name: 'Alice' });
+  r = await c.hello({ ref: 'J-0142', decision: 'accord', adult: 'oui', email: 'a@exemple.fr', name: 'Alice' });
   assert.match(r.body, /Cochez au moins un usage/);
   const good = c.app.encounters.codeOf('J-0142');
   const wrong = (good[0] === 'A' ? 'B' : 'A') + good.slice(1);
@@ -87,7 +87,7 @@ test('demandes : validations expliquées, piège à robots, carte vérifiée, ch
   assert.equal(count(), 0);                                                              // rien d'enregistré jusqu'ici
   // Carte en main (code bon) : veut la photo et accepte site + Instagram.
   const code = c.app.encounters.codeOf('J-0142');
-  r = await c.hello({ ref: `j-0142-${code.toLowerCase()}`, wants_photo: 'on', decision: 'accord', scope_site: 'on', scope_instagram: 'on', email: 'alice@exemple.fr', name: 'Alice' });
+  r = await c.hello({ ref: `j-0142-${code.toLowerCase()}`, wants_photo: 'on', decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', email: 'alice@exemple.fr', name: 'Alice' });
   assert.deepEqual([r.statusCode, r.headers.location], [303, '/bonjour/merci?ref=J-0142']);
   assert.match((await c.app.inject(r.headers.location)).body, /Votre référence : J-0142\./);
   let e = c.db.prepare("SELECT * FROM encounters WHERE ref = 'J-0142'").get();
@@ -101,7 +101,7 @@ test('demandes : validations expliquées, piège à robots, carte vérifiée, ch
   assert.deepEqual([e.refused, e.lang, e.status], [1, 'fr', 'nouvelle']);
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounter_events WHERE encounter_id = ?').pluck().get(e.id), 2);
   // Quelqu'un d'autre, avec la seule référence (elle se devine) : ni accord, ni adresse, ni nom ne remplacent le refus.
-  await c.hello({ ref: 'J-0142', decision: 'accord', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'attaquant@exemple.fr', rights: 'acces' }, '203.0.113.10');
+  await c.hello({ ref: 'J-0142', decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'attaquant@exemple.fr', rights: 'acces' }, '203.0.113.10');
   e = c.db.prepare("SELECT * FROM encounters WHERE ref = 'J-0142'").get();
   assert.deepEqual([e.refused, e.email, e.rights_request], [1, 'alice@exemple.fr', 'acces']);   // demande de droits signalée, identité à vérifier
   assert.match(c.app.encounters.events(e.id).at(-1).detail.non_verifiee ? 'ok' : '', /ok/);

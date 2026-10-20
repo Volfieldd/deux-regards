@@ -50,14 +50,14 @@ Für ein T-Shirt oder eine Tasche: **Unterwegs → QR-Code für Kleidung**. Der 
 
 ## Die Seite /bonjour
 
-Das ist die Seite des QR-Codes (auf Französisch, Englisch und Deutsch, ohne Link im Menü, nie indexiert). Die Person gibt dort ihre Referenz an, ersatzweise Datum, Ort und ein Detail, und dann, was sie möchte:
+Das ist die Seite des QR-Codes (auf Französisch, Englisch und Deutsch, ohne Link im Menü, nie indexiert). Die Person gibt dort ihre Referenz an, ersatzweise das Datum (in Worten oder Ziffern: „14.10.2026“, „12. März“, „gestern Abend“; nach dem Senden von der Website ausgeschrieben wiederholt), Ort und ein Detail, und dann, was sie möchte:
 
 - **das Foto erhalten** per E-Mail;
-- der Veröffentlichung **zustimmen** (Website, Instagram, Ausstellungen und Abzüge, mit ihrem Vornamen), mit Namen und E-Mail-Adresse;
+- der Veröffentlichung **zustimmen** (Website, Instagram, Ausstellungen und Abzüge, mit ihrem Vornamen), mit Namen, E-Mail-Adresse und **Alter** (18 Jahre oder älter, oder jünger, wie in der App); unter 18 füllt ein Elternteil das Formular mit ihr aus und gibt seinen **Namen** an: ohne ihn wird die Einwilligung nicht gespeichert. Die Seite der Begegnung zeigt Alter und Elternteil wie bei einer auf dem Handy erfassten Begegnung („minderjährig · Elternteil: …“); eine Online-Einwilligung bleibt weniger sicher als eine unterschriebene Karte;
 - die Veröffentlichung **ablehnen** (auch ohne Angabe einer Adresse möglich);
 - **eine Nachricht schreiben**.
 
-Sie kann jederzeit zurückkommen und ihre Meinung ändern: Die letzte Wahl zählt, der Verlauf bewahrt die früheren. Gegen Missbrauch: 8 Anfragen pro Stunde und Verbindung sowie eine Falle für Bots.
+Sie kann jederzeit zurückkommen und ihre Meinung ändern: Die letzte Wahl zählt, der Verlauf bewahrt die früheren. Nach dem Senden zeigt ihr die Dankesseite 15 Minuten lang, **was sie geschickt hat** (Referenz oder Datum und Ort, Wünsche, Altersgruppe; nie ihren Namen oder ihre Adresse); es wird keine Eingangsbestätigung per E-Mail verschickt. Gegen Missbrauch: 8 Anfragen pro Stunde und Verbindung sowie eine Falle für Bots.
 
 ## Auf dem Smartphone: der Startbildschirm Unterwegs und die App Begegnung
 

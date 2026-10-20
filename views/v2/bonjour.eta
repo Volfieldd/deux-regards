@@ -1,14 +1,16 @@
 <% /* « Je vous ai photographié » en v2 (maquette MQ-05 de l'audit d'ergonomie du 16 oct. 2026) : /bonjour, /bonjour/<lettre>,
       /bonjour/<référence>, et /bonjour/merci après l'envoi. Même route, même méthode, mêmes champs que la v1
-      (views/bonjour.eta : ref, met_on, met_time, place, details, wants_photo, decision, scope_*, rights, message, email,
-      name, photographer caché, et le champ piège website) ; rien de nouveau n'est envoyé au serveur (ni « adult » ni
-      « guardian » de la maquette : le formulaire public ne les a jamais envoyés). Erreurs (MQ-00 § 8) : sous le champ,
-      sous la légende d'un groupe ; dès deux points, le résumé en tête prend le focus ; un seul, le champ le prend. */ %>
+      (views/bonjour.eta : ref, met_on, met_time, place, details, adult, guardian, wants_photo, decision, scope_*, rights,
+      message, email, name, photographer caché, et le champ piège website). L'âge et le nom du parent sont ceux de l'app
+      de terrain (cadres 5 et 11 : le nom du parent n'apparaît, sans script, que si « moins de 18 ans » est coché) ; la
+      date est en texte libre, lue par le serveur (server/date-libre.js). Erreurs (MQ-00 § 8) : sous le champ, sous la
+      légende d'un groupe ; dès deux points, le résumé en tête prend le focus ; un seul, le champ le prend. Après l'envoi,
+      le récapitulatif (cadre 13) : ce qui a été choisi, ni nom ni adresse. */ %>
 <% const t = it.t, h = it.h, F = t.v2form, B = F.hello, ic = it.v2.ic, ty = it.v2.typo;
    const v = it.values || {}, e = it.errors || {}; const on = k => v[k] === 'on' || v[k] === true;
    // Les points à corriger, dans l'ordre de la page ; chacun mène au premier champ qui le concerne.
-   const ORDER = ['ref', 'where', 'what', 'scopes', 'email', 'name'];
-   const TARGET = { ref: 'bj-ref', where: !v.met_on ? 'bj-date' : 'bj-lieu', what: 'bj-photo', scopes: 'bj-scope-site', email: 'bj-email', name: 'bj-nom' };
+   const ORDER = ['ref', 'met_on', 'where', 'adult', 'guardian', 'what', 'scopes', 'email', 'name'];
+   const TARGET = { ref: 'bj-ref', met_on: 'bj-date', where: !v.met_on || e.met_on ? 'bj-date' : 'bj-lieu', adult: 'bj-age-oui', guardian: 'bj-parent', what: 'bj-photo', scopes: 'bj-scope-site', email: 'bj-email', name: 'bj-nom' };
    const text = k => ty(F.errors[e[k]] || h.errors[e[k]] || String(e[k]));
    const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && !ORDER.includes(k))];
    const errs = keys.map(k => ({ key: k, target: TARGET[k] || 'bj-ref', text: text(k) }));
@@ -37,8 +39,27 @@
     <p class="etiquette"><%= B.label %></p>
     <h1 class="titre-page" id="merci-t" tabindex="-1" autofocus><%= ty(h.thanks) %></h1>
     <div class="msg msg--ok" role="status"><%~ ic('coche', { size: 18 }) %><p><b><%= F.sent %></b> <%= ty(h.thanksText) %></p></div>
-<% if (it.sentRef) { %>    <dl class="def"><dt><%= B.sentRef %></dt><dd class="donnee"><%= it.sentRef %></dd></dl>
-<% } %>    <p class="pf-suite"><a class="lien" href="<%= it.u('/') %>"><%= h.back %></a></p>
+<% const r = it.recap; if (r) {
+     // Récapitulatif de l'envoi (cadre 13) : la date relue en toutes lettres, les souhaits, la tranche d'âge.
+     const met = [r.met_on && B.recapDay(r.met_on), r.met_time && B.recapTime(r.met_time), r.place].filter(Boolean).join(', ');
+     const and = l => (l.length > 1 ? `${l.slice(0, -1).join(', ')}${B.and}${l.at(-1)}` : l[0] || '');
+     const wishes = [r.wants_photo && B.recapPhoto,
+       r.decision === 'accord' ? B.recapAgree(and(['site', 'instagram', 'print'].filter(s => r.scopes?.[s]).map(s => B.recapScopes[s])) + (r.scopes?.name ? `, ${B.recapScopes.name}` : ''))
+         : r.decision === 'refus' ? B.recapRefuse : B.recapUndecided,
+       r.rights === 'acces' && B.recapAccess, r.rights === 'effacement' && B.recapErase, r.message && B.recapMessage].filter(Boolean); %>
+    <section class="pf-recap" aria-labelledby="recap-t">
+      <h2 id="recap-t"><%= B.recapTitle %></h2>
+      <dl class="def">
+<% if (it.sentRef) { %>        <dt><%= B.sentRef %></dt><dd class="donnee"><%= it.sentRef %></dd>
+<% } %><% if (met) { %>        <dt><%= B.recapMet %></dt><dd><%= ty(met) %></dd>
+<% } %>        <dt><%= B.recapWish %></dt><dd><%= ty(wishes.join(' ; ')) %></dd>
+<% if (r.adult === 1 || r.adult === 0) { %>        <dt><%= B.recapAge %></dt><dd><%= r.adult === 1 ? B.recapAdult : r.decision === 'accord' ? B.recapMinorAgree : B.recapMinor %></dd>
+<% } %>      </dl>
+      <p class="champ-aide"><%= ty(B.recapNote) %></p>
+    </section>
+<% } else if (it.sentRef) { %>    <dl class="def"><dt><%= B.sentRef %></dt><dd class="donnee"><%= it.sentRef %></dd></dl>
+<% } %>    <p><%= ty(B.noReceipt) %></p>
+    <p class="pf-suite"><a class="lien" href="<%= it.u('/') %>"><%= h.back %></a></p>
   </div>
 </div>
 <% } else { %>
@@ -58,17 +79,25 @@
 <% if (it.card && it.card.author) { %>      <p class="pf-carte"><span class="donnee"><%= it.card.ref %></span>&nbsp;· <%= ty(it.card.code ? h.cardOk(it.card.author.name) : h.cardUnverified) %></p>
 <% } %>      <div class="champ champ--court"><label for="bj-ref"><%= h.refLabel %></label><p class="champ-aide" id="bj-ref-aide"><%= B.refHint %></p>
         <input id="bj-ref" name="ref" value="<%= v.ref || '' %>" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"<%~ desc(ek('ref'), 'bj-ref-aide') %><%~ bad('ref') %><%~ af('bj-ref') %>><%~ err('ref') %></div>
-      <details class="depliant"<%~ (it.who || (!v.ref && (v.met_on || v.place || e.where))) ? ' open' : '' %>><summary><%~ ic('bas', { size: 18 }) %><%= ty(h.noCard) %></summary>
+      <details class="depliant"<%~ (it.who || e.met_on || (!v.ref && (v.met_on || v.place || e.where))) ? ' open' : '' %>><summary><%~ ic('bas', { size: 18 }) %><%= ty(h.noCard) %></summary>
         <div>
 <%~ err('where') %>
           <div class="duo">
-            <div class="champ"><label for="bj-date"><%= h.metOn %></label><input id="bj-date" type="date" name="met_on" value="<%= v.met_on || '' %>"<%~ desc(ek('where')) %><%~ bad('where') %><%~ af('bj-date') %>></div>
+            <div class="champ"><label for="bj-date"><%= h.metOn %></label><p class="champ-aide" id="bj-date-aide"><%= ty(h.metOnHint) %></p><input id="bj-date" name="met_on" value="<%= v.met_on || '' %>" maxlength="40" autocomplete="off"<%~ desc(ek('met_on'), ek('where'), 'bj-date-aide') %><%~ e.met_on || e.where ? ' aria-invalid="true"' : '' %><%~ af('bj-date') %>><%~ err('met_on') %></div>
             <div class="champ"><label for="bj-heure"><%= h.metTime %> <%~ opt %></label><p class="champ-aide" id="bj-heure-aide"><%= B.metTimeHint %></p><input id="bj-heure" name="met_time" value="<%= v.met_time || '' %>" maxlength="20" aria-describedby="bj-heure-aide"></div>
           </div>
           <div class="champ"><label for="bj-lieu"><%= h.place %></label><p class="champ-aide" id="bj-lieu-aide"><%= B.placeHint %></p><input id="bj-lieu" name="place" value="<%= v.place || '' %>" maxlength="120"<%~ desc(ek('where'), 'bj-lieu-aide') %><%~ bad('where') %><%~ af('bj-lieu') %>></div>
           <div class="champ"><label for="bj-detail"><%= h.details %> <%~ opt %></label><p class="champ-aide" id="bj-detail-aide"><%= h.detailsHint %></p><input id="bj-detail" name="details" value="<%= v.details || '' %>" maxlength="500" aria-describedby="bj-detail-aide"></div>
         </div>
       </details>
+    </fieldset>
+    <fieldset class="bloc groupe revele-si<%= e.adult ? ' groupe--erreur' : '' %>"<%~ desc('bj-age-aide', ek('adult')) %>><legend><%= h.age %></legend>
+      <p class="champ-aide" id="bj-age-aide"><%= ty(h.ageHint) %></p>
+<%~ err('adult') %>
+      <label class="choix"><input id="bj-age-oui" type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %><%~ bad('adult') %><%~ af('bj-age-oui') %>><span><%= h.adult %></span></label>
+      <label class="choix"><input id="bj-age-non" type="radio" name="adult" value="non" data-revele<%~ v.adult === 'non' ? ' checked' : '' %><%~ bad('adult') %>><span><%= ty(h.minor) %></span></label>
+      <div class="champ revele"><label for="bj-parent"><%= h.guardian %></label><p class="champ-aide" id="bj-parent-aide"><%= h.guardianHint %></p>
+        <input id="bj-parent" name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"<%~ desc(ek('guardian'), 'bj-parent-aide') %><%~ bad('guardian') %><%~ af('bj-parent') %>><%~ err('guardian') %></div>
     </fieldset>
     <fieldset class="bloc"<%~ desc('bj-souhait-aide', ek('what')) %>><legend><%= h.wish %></legend>
       <p class="champ-aide" id="bj-souhait-aide"><%= B.wishHelp %></p>

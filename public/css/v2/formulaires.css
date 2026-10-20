@@ -72,6 +72,10 @@
 .depliant[open] > summary .ic { transform: rotate(180deg); }
 .depliant > div { display: grid; gap: var(--esp-3); margin-top: var(--esp-2); padding-left: var(--esp-2); border-left: 1px solid var(--field); }
 .sous-choix { display: grid; margin: 0 0 0 34px; padding: 0; list-style: none; }
+/* .revele : un champ révélé par un choix (le nom du parent sous « moins de 18 ans », MQ-05 cadre 11), sans script, par
+   :has ; toujours visible sur un navigateur qui ne le prend pas en charge. */
+.revele { margin: var(--esp-1) 0 0 34px; }
+@supports selector(:has(*)) { .revele-si:not(:has(input[data-revele]:checked)) .revele { display: none; } }
 .duo { display: grid; gap: var(--esp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
 .envoi { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2) var(--esp-3); }
 .envoi p { margin: 0; color: var(--mute); font-size: var(--t-petit); }
@@ -110,6 +114,11 @@
 .pf-carte { margin: 0; color: var(--prose); }
 .pf-droits { margin: 0; }
 .pf-suite { display: flex; flex-wrap: wrap; gap: 0 var(--esp-3); }
+/* Récapitulatif après l'envoi (MQ-05, cadre 13) : ce qui a été choisi, en relevé de données (.def). */
+.pf-recap { display: grid; gap: var(--esp-2); padding-top: var(--esp-3); border-top: 1px solid var(--rule); }
+.pf-recap > * { margin: 0; }
+.pf-recap h2 { font: 400 var(--t-titre-3)/1.3 var(--sans); }
+.pf-recap dd { overflow-wrap: anywhere; }
 /* Retour de l'en-tête Contexte (Signaler, Partager) : il nomme la photo, dont le titre peut être long ; comme celui d'une
    galerie privée (public.css, .sh--prive), il passe à la ligne au lieu de se couper d'une ellipse. */
 .sh--contexte .sh-retour-t { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; overflow-wrap: anywhere; }

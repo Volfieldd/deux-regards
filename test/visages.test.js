@@ -136,7 +136,7 @@ test('sortie : « Publier les photos prêtes » ne publie que les prêtes', asyn
 test('revue de sécurité : accord en ligne sans code, annulation, modèle indisponible', async t => {
   const c = await ctxOf(t);
   // Un « accord » anonyme par le QR des vêtements (lettre J, date de la sortie) ne rend pas une photo prête.
-  const r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', met_on: DAY, place: 'x', decision: 'accord', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'x@exemple.fr' }, remoteAddress: '203.0.113.50' });
+  const r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: { photographer: 'J', met_on: DAY, place: 'x', decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'x@exemple.fr' }, remoteAddress: '203.0.113.50' });
   assert.equal(r.statusCode, 303);
   const s = c.state(c.portrait);
   assert.equal(s.site.level, 'warn');

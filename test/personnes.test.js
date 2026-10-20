@@ -60,7 +60,7 @@ test('un refus vaut pour toutes les rencontres de la personne ; un accord plus r
   assert.equal(c.enc.get(b).refused, 1);                                                   // étendu à l'autre sortie
   assert.ok(c.enc.events(b).some(ev => ev.kind === 'refus_personne'));
   // Plus tard, accord vérifié pour J-0710 : il vaut pour sa sortie, le refus de J-0700 reste.
-  await c.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: `J-0710-${c.enc.codeOf('J-0710')}`, decision: 'accord', scope_site: 'on', name: 'L', email: 'l@exemple.fr' }, remoteAddress: '203.0.113.61' });
+  await c.app.inject({ method: 'POST', url: '/bonjour', payload: { ref: `J-0710-${c.enc.codeOf('J-0710')}`, decision: 'accord', adult: 'oui', scope_site: 'on', name: 'L', email: 'l@exemple.fr' }, remoteAddress: '203.0.113.61' });
   assert.deepEqual([c.enc.get(a).refused, c.enc.get(b).refused], [1, 0]);
   assert.equal(c.people.get(c.personOf(a)).refused, true);
 });

@@ -41,7 +41,7 @@ test('A019 : des espaces autour de la référence ne contournent pas le compteur
   const pad = ' '.repeat(35);
   let ip = 10;
   const post = ref => app.inject({ method: 'POST', url: '/bonjour', remoteAddress: `203.0.113.${ip++}`,
-    payload: { ref, decision: 'accord', scope_site: 'on', scope_instagram: 'on', email: 'attaquant@evil.example', name: 'Attaquant' } });
+    payload: { ref, decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', email: 'attaquant@evil.example', name: 'Attaquant' } });
   const failures = () => db.prepare("SELECT COUNT(*) FROM card_code_failures WHERE ref = 'J-0007'").pluck().get();
   assert.equal((await post(`${pad}J-0007-${wrong[0]}`)).statusCode, 422);
   assert.equal(failures(), 1);                                                         // compté, espaces ou pas

@@ -75,21 +75,21 @@ test('A034 : sans code, une rencontre saisie sur le téléphone (refus, « plus 
   const author = c.db.prepare('SELECT * FROM authors WHERE id = ?').get(c.jul);
   const refus = await c.enc.saveApp({ decision: 'refus', lang: 'fr' }, { author });
   const later = await c.enc.saveApp({ decision: '', email: 'vraie@exemple.fr', name: 'Vraie', wants_photo: 'on', lang: 'fr' }, { author });
-  await c.hello({ ref: refus.ref, decision: 'accord', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'attaquant@exemple.fr' });
+  await c.hello({ ref: refus.ref, decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'attaquant@exemple.fr' });
   let e = c.enc.get(refus.id);
   assert.deepEqual([e.refused, e.consent, e.email, e.name, e.status], [1, null, '', '', 'nouvelle']);
   assert.equal(c.enc.events(refus.id).at(-1).detail.non_verifiee, true);
-  await c.hello({ ref: later.ref, decision: 'accord', scope_site: 'on', name: 'Autre', email: 'attaquant@exemple.fr' });
+  await c.hello({ ref: later.ref, decision: 'accord', adult: 'oui', scope_site: 'on', name: 'Autre', email: 'attaquant@exemple.fr' });
   e = c.enc.get(later.id);
   assert.deepEqual([e.email, e.name, e.consent], ['vraie@exemple.fr', 'Vraie', null]);
   // Avec le code du QR montré par l'app : la personne elle-même, son choix est appliqué.
-  await c.hello({ ref: `${refus.ref}-${refus.code}`, decision: 'accord', scope_site: 'on', name: 'Zoé', email: 'zoe@exemple.fr' });
+  await c.hello({ ref: `${refus.ref}-${refus.code}`, decision: 'accord', adult: 'oui', scope_site: 'on', name: 'Zoé', email: 'zoe@exemple.fr' });
   e = c.enc.get(refus.id);
   assert.deepEqual([e.refused, e.consent_source, e.email], [0, 'en_ligne', 'zoe@exemple.fr']);
   // Carte au tampon (référence sans code) : la première demande est notée ; ensuite, sans code, ni l'adresse ni le
   // nom ne sont remplacés, et un accord ne lève pas le refus.
   await c.hello({ ref: 'J-0500', decision: 'refus', email: 'premiere@exemple.fr', name: 'Première' });
-  await c.hello({ ref: 'J-0500', decision: 'accord', scope_site: 'on', email: 'seconde@exemple.fr', name: 'Seconde' });
+  await c.hello({ ref: 'J-0500', decision: 'accord', adult: 'oui', scope_site: 'on', email: 'seconde@exemple.fr', name: 'Seconde' });
   e = c.row('J-0500');
   assert.deepEqual([e.refused, e.consent, e.email, e.name], [1, null, 'premiere@exemple.fr', 'Première']);
 });
@@ -390,7 +390,7 @@ test('A150, A151, A152 : historique lisible ; liens des photos nommés ; langues
   c.db.prepare("UPDATE encounters SET lang = 'de' WHERE id = ?").run(id);
   c.enc.exclude(id, photo, true);
   c.enc.exclude(id, photo, false);
-  await c.hello({ ref: 'J-0600', decision: 'accord', scope_site: 'on', name: 'X', email: 'x@exemple.fr' });
+  await c.hello({ ref: 'J-0600', decision: 'accord', adult: 'oui', scope_site: 'on', name: 'X', email: 'x@exemple.fr' });
   c.db.prepare("INSERT INTO encounter_events (encounter_id, at, kind, verified, detail) VALUES (?, ?, 'refus_personne', 0, '{}')").run(id, Date.now());
   const root = c.as('root', ['admin']);
   const page = (await root.get(`/admin/rencontres/${id}`)).body;
