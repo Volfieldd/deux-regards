@@ -17,7 +17,7 @@ name: rafale_erreurs
 id: 87f76d9b-ff26-5927-90b7-3eca6116fbc7
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.t1190]
+tags: [attack.initial_access, attack.t1190]
 correlation:
   type: event_count
   rules: [erreur]
@@ -32,20 +32,20 @@ name: moteur_sature
 id: 50985a19-d707-4ce0-ae4e-29f4f5b20809
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1499]
+tags: [attack.defense_impairment, attack.impact, attack.t1499]
 detection:
   selection:
     type: vigie_moteur_sature
   condition: selection
 level: high
-vigie: { cas: MV11, entite: { kind: vigie, valeur: moteur }, source_unique: true }
+vigie: { cas: MV11, entite: { kind: vigie, valeur: moteur }, source_unique: true, phase_dossier: dissimulation }
 ---
 title: Contrôle des rôles impossible ou incomplet (sauvegarde absente, ancienne ou illisible)
 name: controle_roles_degrade
 id: 616bd319-1bbc-4e4f-9bd5-daf89d634157
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion]
+tags: [attack.defense_impairment]
 detection:
   selection:
     type: vigie_controle_roles
@@ -59,20 +59,20 @@ name: regle_lente
 id: 039c2284-5967-40ea-b6a4-0481f98ae034
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1499]
+tags: [attack.defense_impairment, attack.impact, attack.t1499]
 detection:
   selection:
     type: vigie_regle_lente
   condition: selection
 level: medium
-vigie: { cas: MV11, entite: { kind: vigie, valeur: regles }, source_unique: true }
+vigie: { cas: MV11, entite: { kind: vigie, valeur: regles }, source_unique: true, phase_dossier: dissimulation }
 ---
 title: Canal de notification en échec (Signal ou e-mail)
 name: canal_echec
 id: 1beba84f-4c91-4c59-9f6e-bb52e6811b39
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1562]
+tags: [attack.defense_impairment, attack.t1685]
 detection:
   selection:
     type: vigie_canal_echec
@@ -85,7 +85,7 @@ name: surveillance_reduite
 id: b661c60f-647b-4256-90ad-a3cb40f09ae9
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1562]
+tags: [attack.defense_impairment, attack.t1685]
 detection:
   selection:
     type: vigie_surveillance_reduite

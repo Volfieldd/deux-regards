@@ -54,7 +54,7 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <section class="panel" aria-labelledby="t-signal"><h2 class="panel-t" id="t-signal">D’où vient le signal</h2>
 <div class="vg-regle"><p class="r">Règle «&#8239;<%= rg.titre %>&#8239;» · mode <%= vue.mode.mot %> <span class="vg-code"><%= rg.id %><% if (rg.cas) { %> · <%= rg.cas %><% } %></span></p>
 <% if (rg.nature) { %><p><%= rg.nature %></p><% } %>
-<% if (rg.mitre) { %><p>MITRE ATT&amp;CK : <%= rg.mitre.tactiques.length ? rg.mitre.tactiques.join(', ') : (rg.mitre.techniques.length > 1 ? 'techniques' : 'technique') %><% if (rg.mitre.techniques.length) { %> <span class="vg-code"><%= rg.mitre.techniques.join(' · ') %></span><% } %></p><% } %>
+<% if (rg.mitre) { %><p>MITRE ATT&amp;CK : <%= rg.mitre.tactiques.join(', ') %><% rg.mitre.techniques.forEach((id, i) => { %><%= i || rg.mitre.tactiques.length ? ' · ' : '' %><span class="vg-code"><%= id %></span><% if (rg.mitre.noms[i]) { %> <%= rg.mitre.noms[i] %><% } %><% }) %></p><% } %>
 </div>
 <p class="vg-verdict<%= vue.verdict.seul ? ' vg-verdict--seul' : '' %>"><%~ include('./_ic', { icone: vue.verdict.seul ? 'info' : 'coche', taille: 16 }) %><span><%= vue.verdict.texte %></span></p>
 <% if (ev.lignes.length) { %>

@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { parseAllDocuments } from 'yaml';
+import { estPhaseOuMarqueur, NATURES } from './phases.js';
 
 // Règles au format Sigma (décision D20, recadrage du 17 octobre 2026) : sous-ensemble évalué sur les événements de la
 // Vigie (champs : type, severity, composant, emetteur, confiance, sub, session, ip, ip_net, country, route, method,
@@ -153,12 +154,17 @@ function vigieBlock(doc, file) {
     expireAt = /^\d{4}-\d{2}-\d{2}$/.test(s) ? Date.parse(`${s}T23:59:59.999Z`) : Date.parse(s);
     if (!Number.isFinite(expireAt)) throw new RuleError(`${file} : expire attend une date (AAAA-MM-JJ) : ${s}`);
   }
+  // Projection propre aux dossiers (étude docs/etudes/vigie-dossiers.md, 4.5 ; D32) : phase ou marqueur quand la technique
+  // trompe, nature (indice, preuve) ; sans effet sur la détection ni sur les étiquettes ATT&CK.
+  if (v.phase_dossier != null && !estPhaseOuMarqueur(v.phase_dossier)) throw new RuleError(`${file} : phase_dossier inconnue ${v.phase_dossier}`);
+  if (v.nature_dossier != null && !NATURES.includes(v.nature_dossier)) throw new RuleError(`${file} : nature_dossier attendue (${NATURES.join(', ')})`);
   const reDelay = v.delai_re_ms == null ? null : Number(v.delai_re_ms);
   if (reDelay != null && !(Number.isInteger(reDelay) && reDelay >= 1 && reDelay <= 1000)) throw new RuleError(`${file} : delai_re_ms de 1 à 1000`);
   // contexte: true (arbitrage NC3-1) : les points de la règle comptent dans le score, jamais comme une source du quorum
   // (le même fait déjà vu par une autre source, comme les erreurs 404 vues à la fois par le site et la bordure).
   return { contexte: v.contexte === true, cas: v.cas || null, entite, sourceUnique: v.source_unique === true, points: v.points ?? POINTS[gravite], reponse: v.reponse || null,
-    mode: v.mode || 'observer', gravite, graviteEvenement: v.gravite === 'evenement', signal: v.signal !== false, expireAt, reDelay };
+    mode: v.mode || 'observer', gravite, graviteEvenement: v.gravite === 'evenement', signal: v.signal !== false, expireAt, reDelay,
+    phase_dossier: v.phase_dossier ?? null, nature_dossier: v.nature_dossier ?? null };
 }
 
 // Charge toutes les règles d'un dossier (un fichier peut contenir plusieurs documents YAML).

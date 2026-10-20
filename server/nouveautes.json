@@ -12,7 +12,8 @@
       {
         "fr": "Quand la passerelle Signal refuse un message (« réponse 400 »), la Vigie dit pourquoi et, pour les cas courants, quoi corriger : identifiant du groupe, numéro non enregistré, numéro de sécurité changé. Numéros et groupes restent masqués. Le guide Signal explique comment rejouer l’envoi.",
         "en": "When the Signal gateway refuses a message (“response 400”), the Vigie says why and, for common cases, what to fix: group identifier, unregistered number, changed safety number. Numbers and groups stay masked. The Signal guide explains how to replay the sending.",
-        "de": "Lehnt das Signal-Gateway eine Nachricht ab („Antwort 400“), nennt die Vigie den Grund und für häufige Fälle die Abhilfe: Gruppenkennung, nicht registrierte Nummer, geänderte Sicherheitsnummer. Nummern und Gruppen bleiben verdeckt. Die Signal-Anleitung erklärt, wie man den Versand wiederholt."
+        "de": "Lehnt das Signal-Gateway eine Nachricht ab („Antwort 400“), nennt die Vigie den Grund und für häufige Fälle die Abhilfe: Gruppenkennung, nicht registrierte Nummer, geänderte Sicherheitsnummer. Nummern und Gruppen bleiben verdeckt. Die Signal-Anleitung erklärt, wie man den Versand wiederholt.",
+        "perm": "securite.voir"
       }
     ]
   },

@@ -87,7 +87,7 @@ description: >-
   notifications par jour (BV-29) et quelques messages par semaine en temps ordinaire, triés un par un : 10 en une heure
   n'arrive guère qu'après une vague de pourriels, d'où le mode Alerter, sans réponse automatique. Propre aux messages :
   un autre objet effacé aurait son volume, donc son seuil, et sa corrélation.
-tags: [attack.impact, attack.t1485, attack.defense_evasion, attack.t1070]
+tags: [attack.impact, attack.t1485, attack.stealth, attack.t1070]
 correlation:
   type: value_count
   rules: [message_supprime]

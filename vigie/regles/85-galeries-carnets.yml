@@ -213,7 +213,7 @@ correlation:
   timespan: 24h
   condition: { gte: 3, field: detail.pays }
 level: high
-vigie: { cas: DS3, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter, reponse: suspendre_acces }
+vigie: { cas: DS3, entite: { kind: site, champ: detail.acces, prefixe: 'acces:' }, source_unique: true, mode: alerter, reponse: suspendre_acces, nature_dossier: preuve }
 ---
 title: Lien de groupe ouvert depuis 5 pays en 24 heures
 name: acces_groupe_pays_multiples
@@ -279,7 +279,7 @@ description: >-
   entrée) : le site dit le nouvel appareil, et le premier appareil d'un accès n'en est pas un (c'est l'invitée qui
   arrive). Une archive seule n'y entre pas : ouvrir sur le téléphone puis télécharger l'archive sur l'ordinateur est le
   parcours ordinaire ; seule une limite atteinte compte.
-tags: [attack.collection, attack.exfiltration, attack.t1530, attack.t1078]
+tags: [attack.initial_access, attack.collection, attack.exfiltration, attack.t1530, attack.t1078]
 correlation:
   type: temporal
   rules: [galerie_nouvel_appareil, telechargements_en_masse]
@@ -299,7 +299,7 @@ description: >-
   Le site refuse déjà ; l'alerte dit que l'accès retiré est encore tenté, souvent signe d'une fuite à instruire
   (procédure de violation, docs/wiki/RGPD.md § 4). Gravité de l'événement : « haut » quand réseau et navigateur
   diffèrent de l'entrée d'origine. cookie_rejoue (10-preuves.yml) exige un sub : il ne la double pas.
-tags: [attack.credential_access, attack.t1539, attack.t1550.004]
+tags: [attack.credential_access, attack.t1539, attack.lateral_movement, attack.t1550.004]
 detection:
   selection:
     type: session_use_after_expire
@@ -307,7 +307,7 @@ detection:
     detail.portail: galerie_privee
   condition: selection
 level: medium
-vigie: { cas: DS1, entite: { kind: site, champ: detail.acces, prefixe: 'acces:', sinon: galerie_privee }, source_unique: true, gravite: evenement, mode: alerter }
+vigie: { cas: DS1, entite: { kind: site, champ: detail.acces, prefixe: 'acces:', sinon: galerie_privee }, source_unique: true, gravite: evenement, mode: alerter, phase_dossier: tentative }
 ---
 # ---------------------------------------------------------------------------------------------------------------------
 # BV-25 — CSRF d'un invité : corrélation sœur de csrf_repetes (20-connexion.yml), groupée par la session visiteur
@@ -332,7 +332,7 @@ id: 9e94a6ef-2dff-43ce-88f9-cb03f0029697
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
 description: Même seuil que pour un compte (3 en 1 h) ; points sur la session visiteur, comme csrf_repetes.
-tags: [attack.t1185]
+tags: [attack.collection, attack.t1185]
 correlation:
   type: event_count
   rules: [csrf_invite]
@@ -375,7 +375,7 @@ correlation:
   timespan: 1h
   condition: { gte: 5 }
 level: medium
-vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter, phase_dossier: exfiltration }
 ---
 title: Accès débloqué
 name: acces_debloque
@@ -407,7 +407,7 @@ correlation:
   group-by: [detail.acces]
   timespan: 24h
 level: medium
-vigie: { cas: DS16, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+vigie: { cas: DS16, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter, phase_dossier: ancrage }
 ---
 title: Accès créé, élargi, prolongé ou lien renouvelé
 name: acces_prive_elargi
@@ -436,7 +436,7 @@ correlation:
   group-by: [sub]
   timespan: 1h
 level: high
-vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter, phase_dossier: ancrage }
 ---
 title: Accès donné ou prolongé pour plus de 90 jours
 name: acces_longue_echeance
@@ -474,7 +474,7 @@ detection:
     detail.ecriture: true
   condition: selection
 level: medium
-vigie: { cas: DS10, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+vigie: { cas: DS10, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter, phase_dossier: exploration }
 ---
 # ---------------------------------------------------------------------------------------------------------------------
 # BV-12 — Construction active neutralisée par le rendu d'un billet (« moyen » ; « bas » pour du HTML inoffensif ou une
@@ -512,7 +512,7 @@ correlation:
 level: high
 # Une écriture a suivi la reprise : la même réponse douce que session_autre_appareil (verifier_identite), qui arrête
 # les écritures suivantes ; rien de plus si l'identité a été confirmée après la reprise (vigie/moteur.js).
-vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: bloquer, reponse: verifier_identite }
+vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: bloquer, reponse: verifier_identite, phase_dossier: ancrage }
 ---
 # ---------------------------------------------------------------------------------------------------------------------
 # BV-21 appliqué aux billets (Tranché 10 : une corrélation à part, 3 billets en 1 h, plutôt que 20 en 10 minutes)

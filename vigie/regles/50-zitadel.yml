@@ -60,7 +60,7 @@ name: zitadel_politique
 id: 90fb066a-6b33-5d97-856a-f723be098a04
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1556]
+tags: [attack.defense_impairment, attack.t1556]
 detection:
   selection:
     type: zitadel_politique

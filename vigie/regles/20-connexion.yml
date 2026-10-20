@@ -61,7 +61,7 @@ name: csrf_repetes
 id: 1ebe78af-ee1d-5c01-926d-997cfb252063
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.t1185]
+tags: [attack.collection, attack.t1185]
 correlation:
   type: event_count
   rules: [csrf]

@@ -14,7 +14,7 @@ detection:
     detail.hors_application: true
   condition: selection
 level: critical
-vigie: { cas: DS8, entite: { kind: compte, champ: detail.compte }, source_unique: true, mode: bloquer, reponse: geler_et_revoquer }
+vigie: { cas: DS8, entite: { kind: compte, champ: detail.compte }, source_unique: true, mode: bloquer, reponse: geler_et_revoquer, nature_dossier: preuve }
 ---
 title: Rôle administrateur donné par l'application
 name: administrateur_donne
@@ -37,7 +37,7 @@ name: integrite_comptes
 id: 403bd873-8509-5678-ac81-becf1bba66c1
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1562]
+tags: [attack.defense_impairment, attack.t1685]
 detection:
   selection:
     type: sys_state
@@ -51,7 +51,7 @@ name: chaine_rompue
 id: a82a9fdc-1338-5e92-aaae-8e74aa60a2a6
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1070]
+tags: [attack.defense_impairment, attack.t1685]
 detection:
   selection:
     type: log_integrity_fail
@@ -72,14 +72,14 @@ detection:
     sub|exists: true
   condition: selection
 level: high
-vigie: { cas: DS1, source_unique: true, mode: bloquer, reponse: revoquer_compte }
+vigie: { cas: DS1, source_unique: true, mode: bloquer, reponse: revoquer_compte, nature_dossier: preuve }
 ---
 title: Session reprise depuis un autre appareil
 name: session_autre_appareil
 id: c4924851-c225-59bc-ab60-b42cf8274031
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.t1550.004]
+tags: [attack.lateral_movement, attack.t1550.004]
 detection:
   selection:
     type: session_context_change
@@ -90,7 +90,7 @@ level: high
 # Réponse douce (décision du propriétaire du 19 octobre 2026) : le site redemande l'identité du compte avant toute
 # écriture dans l'admin (verifier_identite, 24 h) ; la personne légitime confirme en quelques secondes, un voleur de
 # cookie de session, non. D'où le mode « bloquer » d'emblée (l'ancienne réponse, fermer les sessions, restait en Observer).
-vigie: { cas: DS2, source_unique: true, gravite: evenement, mode: bloquer, reponse: verifier_identite }
+vigie: { cas: DS2, source_unique: true, gravite: evenement, mode: bloquer, reponse: verifier_identite, nature_dossier: preuve }
 ---
 title: Saisie malveillante depuis un compte de l'admin
 name: saisie_compte_admin
@@ -126,7 +126,7 @@ name: configuration
 id: 086a7bea-3f59-50ff-bc96-2a3943be6291
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1562]
+tags: [attack.defense_impairment, attack.t1685]
 detection:
   selection:
     type: sys_config_changed
@@ -139,7 +139,7 @@ name: restauration
 id: 4a4be720-c295-5c9d-a99b-2eb0d4058008
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.t1485]
+tags: [attack.impact, attack.t1485]
 detection:
   selection:
     type: sys_restore
@@ -158,14 +158,14 @@ detection:
     type: crypto_decrypt_fail
   condition: selection
 level: high
-vigie: { cas: DS18, entite: { kind: site, valeur: donnees }, source_unique: true }
+vigie: { cas: DS18, entite: { kind: site, valeur: donnees }, source_unique: true, phase_dossier: dissimulation }
 ---
 title: Lot refusé par la Vigie (signature fausse, lot rejoué)
 name: ingestion_refusee
 id: 57c041ec-cfce-576c-9298-7abf2e8f420c
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion]
+tags: [attack.defense_impairment]
 detection:
   selection:
     type: vigie_ingestion_refusee
@@ -179,7 +179,7 @@ name: trou_zitadel
 id: c44994ff-9179-52b9-9366-db46d1d72322
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion]
+tags: [attack.defense_impairment]
 detection:
   selection:
     type: vigie_zitadel_trou
@@ -225,14 +225,14 @@ correlation:
   timespan: 24h
   condition: { gte: 4, field: sub }
 level: medium
-vigie: { cas: DS7, entite: { kind: site, valeur: connexion }, source_unique: true }
+vigie: { cas: DS7, entite: { kind: site, valeur: connexion }, source_unique: true, phase_dossier: tentative }
 ---
 title: Sauvegarde du site différente de ce qu'il déclare (administrateur non déclaré, déclencheur absent)
 name: controle_roles
 id: 06e2b6dc-d385-53de-87ce-49243dfcc993
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.privilege_escalation, attack.defense_evasion, attack.t1098]
+tags: [attack.privilege_escalation, attack.defense_impairment, attack.t1098]
 detection:
   selection:
     type: vigie_controle_roles

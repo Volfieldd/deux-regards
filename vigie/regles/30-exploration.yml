@@ -45,7 +45,7 @@ name: valeurs_impossibles_repetees
 id: e3062d3f-8c70-5834-b2b7-c95f2631bb60
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.t1190]
+tags: [attack.initial_access, attack.t1190]
 correlation:
   type: event_count
   rules: [valeur_impossible]

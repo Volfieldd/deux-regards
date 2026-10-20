@@ -19,7 +19,7 @@ id: a92b4442-c98a-4d88-8926-e60e0ff2feae
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
 description: Une adresse de contact remplacée sert à hameçonner les personnes photographiées qui exercent leurs droits.
-tags: [attack.impact, attack.t1491, attack.t1566]
+tags: [attack.impact, attack.t1491, attack.initial_access, attack.t1566]
 detection:
   selection:
     type: config_public_changed
@@ -40,7 +40,7 @@ detection:
     detail.exif_complet: true
   condition: selection
 level: medium
-vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter, phase_dossier: exfiltration }
 ---
 title: Heure d'une photo rendue visible
 name: heure_rendue_visible
@@ -69,7 +69,7 @@ correlation:
   timespan: 10m
   condition: { gte: 20 }
 level: medium
-vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter, phase_dossier: exfiltration }
 ---
 title: Réglage public changé dans l'heure qui suit une session reprise depuis un autre appareil
 name: reglage_apres_session_reprise
@@ -85,7 +85,7 @@ correlation:
 level: high
 # Une écriture a suivi la reprise : la même réponse douce que session_autre_appareil (verifier_identite), qui arrête
 # les écritures suivantes ; rien de plus si l'identité a été confirmée après la reprise (vigie/moteur.js).
-vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: bloquer, reponse: verifier_identite }
+vigie: { cas: DS23, entite: { kind: compte, champ: sub }, source_unique: true, mode: bloquer, reponse: verifier_identite, phase_dossier: ancrage }
 ---
 # Textes publiés (BV-20, BV-21) : émis par server/securite/textes-publics.js après chaque écriture de l'admin et chaque
 # publication programmée (sub nul : entité « site »).
@@ -175,7 +175,7 @@ description: >-
   sans la confirmer : la personne légitime confirme après une ou deux (l'enregistrement automatique d'un billet reste une
   seule route) ; un voleur de cookie de session ne le peut pas et essaie ailleurs. Alerte haute : geler le compte se décide
   à la main.
-tags: [attack.credential_access, attack.t1539, attack.defense_evasion, attack.t1550.004]
+tags: [attack.credential_access, attack.t1539, attack.lateral_movement, attack.t1550.004]
 correlation:
   type: value_count
   rules: [ecriture_sans_identite]
@@ -183,4 +183,4 @@ correlation:
   timespan: 15m
   condition: { gte: 5, field: route }
 level: high
-vigie: { cas: DS2, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }
+vigie: { cas: DS2, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter, nature_dossier: preuve }
