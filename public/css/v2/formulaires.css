@@ -15,6 +15,9 @@
    Résumé en tête au-delà d'un point, focus posé dessus (autofocus) ; un seul point : le focus va au champ. */
 .form { display: grid; gap: var(--esp-4); max-width: 640px; min-width: 0; }
 .form-oblig { margin: 0; color: var(--mute); font-size: var(--t-petit); }
+/* Champ atteint par un lien du résumé (#bj-date…) : posé sous le bord de l'écran, son libellé au-dessus encore visible
+   (sinon arrondi à une fraction de pixel au-dessus du bord). */
+.form :is(input, textarea, select) { scroll-margin-top: var(--esp-8); }
 .champ { display: grid; gap: var(--esp-1); min-width: 0; }
 .champ > label, .groupe > legend { font-weight: 500; font-size: var(--t-texte); color: var(--ink); }
 .facultatif { font-weight: 400; color: var(--mute); }
