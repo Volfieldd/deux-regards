@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Note de conception. Décisions D31 à D39 prises le 20 octobre 2026 (section 13). PR A faite (#190, ATT&CK 20.0 et projection), PR B faite (moteur des dossiers, section 14), avec une précision du propriétaire : la vue ATT&CK complète est conservée ; les huit phases servent aux dossiers, pas à la détection (section 3.1). |
+| Statut | Note de conception. Décisions D31 à D39 prises le 20 octobre 2026 (section 13). PR A faite (#190, ATT&CK 20.0 et projection), PR B faite (moteur des dossiers, section 14), PR C faite (maquettes MV-12 à MV-14), avec une précision du propriétaire : la vue ATT&CK complète est conservée ; les huit phases servent aux dossiers, pas à la détection (section 3.1). |
 | Date | 20 octobre 2026, d'après le code de `main` à ea0528b (Vigie après #186). |
 | Demande | « Est-ce que ce ne serait pas plus pertinent de travailler tout ça avec la vue « case » qui prendrait un artefact en origine (asset : ip, hostname source, dest, session utilisateur ou nom d'utilisateur) qui viendrait regrouper tous les événements suspects connexes en se servant d'une mécanique de pondération interne pour donner une idée du niveau de l'alerte ? Une corrélation automatique inter entités, avec une représentation de la timeline et une possibilité d'explorer (drill down) de la même façon les liens entre case et autres assets. » Puis : « je veux particulièrement bien détailler le côté « phase d'attaque » ». Point de départ : détecter l'accès aux données personnelles et leur sortie, en corrélant les lectures avec les authentifications et les signaux faibles (adresses multiples, adresse ou heure inhabituelle, empreinte différente). |
 | Base | [`recadrage-vigie-edge-wake.md`](recadrage-vigie-edge-wake.md) (entités, score, quorum), [`journalisation-securite.md`](journalisation-securite.md) (cas DS1 à DS32), [`vigie-besoins-des-briques.md`](vigie-besoins-des-briques.md) (BV-1 à BV-30), `vigie/moteur.js`, `vigie/detecteurs.js`, `vigie/regles/*.yml`. |
@@ -491,7 +491,7 @@ La piste serveur se relie **par le temps** : la tentative depuis une adresse et 
 
 ## 8. Représentation dans la console
 
-Maquettes à faire, en une seule passe de contrôle : MV-12 « Dossiers » et MV-13 « Un dossier ».
+Maquettes faites (PR C, 20 octobre 2026), en une seule passe de contrôle : [MV-12 « Dossiers »](../maquettes-vigie/MV-12-dossiers.html), [MV-13 « Un dossier »](../maquettes-vigie/MV-13-dossier.html) et [MV-14 « ATT&CK »](../maquettes-vigie/MV-14-attack.html) ; données au § 3.20 du lexique de la console.
 
 ### 8.1 Liste des dossiers
 
