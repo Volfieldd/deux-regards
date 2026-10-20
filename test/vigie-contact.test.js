@@ -12,6 +12,10 @@ import { createEngine } from '../vigie/moteur.js';
 import { loadRules, createCorrelator } from '../vigie/sigma.js';
 import { pointsOf, saisieLibre, BY_TYPE } from '../vigie/poids.js';
 import { droitsSurveilles } from '../vigie/detecteurs.js';
+import { createIngest } from '../vigie/ingest.js';
+import { EVENTS } from '../server/securite/vocabulaire.js';
+import { isType as isVigieType, isSiteType } from '../vigie/vocabulaire.js';
+import { LIBELLES } from '../vigie/console/ecrans/evenements.js';
 
 // La Vigie face à la page Contact et à la demande de licence (PR #183) : registre des briques,
 // docs/etudes/vigie-besoins-des-briques.md, « Contact et demande de licence » (BV-27 à BV-30). Événements synthétiques de
@@ -186,4 +190,67 @@ test('rôle incohérent (DS10) : message ouvert par un compte sans messages.trai
   assert.deepEqual(incoherents(), ['zitadel-modo', 'zitadel-relecteur']);
   const sig = v.signals('detecteur.role_incoherent').find(s => s.entite.key === 'zitadel-modo');
   assert.deepEqual([sig.objet, sig.permissions_manquantes, sig.gravite], ['message', ['messages.traiter'], 'critique']);
+});
+
+// BV-30, suppressions : sensitive_delete tel que POST /admin/messages/:id/supprimer l'émettra (PR #183), détail { objet, id }.
+const INGEST_KEY = 'cle-de-signature-vigie-0123456789abcdef';
+const efface = (v, id, { sub = 'zitadel-julien', objet = 'message' } = {}) => v.add('sensitive_delete', 'bas', { composant: 'site · admin', sub, ip: '203.0.113.5',
+  emetteur: 'server/routes/messages.js · suppression', route: '/admin/messages/:id/supprimer', method: 'POST', detail: { objet, id } });
+
+test('BV-30 : sensitive_delete au vocabulaire (bas, site · admin), au lexique de la console et au barème ; reçu par l’ingestion signée, un composant hors du site refusé', async t => {
+  assert.deepEqual(EVENTS.sensitive_delete, { severity: 'bas', composant: 'site · admin' });
+  assert.ok(isSiteType('sensitive_delete') && isVigieType('sensitive_delete'));
+  assert.equal(LIBELLES.sensitive_delete, 'Suppression de données sensibles');
+  assert.equal(pointsOf(row({ type: 'sensitive_delete', severity: 'bas', composant: 'site · admin', detail: { objet: 'message', id: 12 } })), 0.2);
+  const v = vigieOf(t, { start: Date.now() });
+  const decisions = createDecisions({ store: v.store, privateKey: VIGIE_KEYS.privateKey, now: v.now });
+  const ingest = createIngest({ store: v.store, decisions, ingestKey: INGEST_KEY, now: v.now });
+  t.after(() => ingest.close());
+  const envoyer = async lot => {
+    const body = JSON.stringify({ emetteur: 'site', envoye_a: v.now(), lot });
+    const ts = String(v.now()), nonce = crypto.randomBytes(16).toString('hex');
+    return ingest.inject({ method: 'POST', url: '/v1/events', payload: body, headers: { 'x-vigie-ts': ts, 'x-vigie-nonce': nonce, 'x-vigie-sig': crypto.createHmac('sha256', INGEST_KEY).update(`${ts}.${nonce}.${body}`).digest('hex') } });
+  };
+  const ev = (composant = 'site · admin') => ({ v: 1, id: crypto.randomUUID(), type: 'sensitive_delete', severity: 'bas', survenu_a: v.now(), origine: { composant, emetteur: 'server/routes/messages.js · suppression' },
+    sub: 'zitadel-julien', ip: '203.0.113.5', ip_net: '203.0.113.0', method: 'POST', route: '/admin/messages/:id/supprimer', status: 303, detail: { objet: 'message', id: 12 } });
+  assert.equal((await envoyer([ev(), ev('vigie · console')])).statusCode, 200);
+  const recus = v.db.prepare("SELECT composant, sub, detail FROM events WHERE type = 'sensitive_delete'").all();
+  assert.deepEqual(recus, [{ composant: 'site · admin', sub: 'zitadel-julien', detail: '{"objet":"message","id":12}' }], 'le second (composant de la Vigie) écarté');
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_ingestion_refusee'").pluck().get(), 1);
+});
+
+test('BV-30 : messages_effaces_en_masse, 10 messages distincts supprimés en 1 h par un compte → alerte (DS18, alerter) ; 9, un message compté une fois, autre objet, autre compte, hors fenêtre : rien', async t => {
+  const { rules, correlations } = loadRules(new URL('../vigie/regles/', import.meta.url).pathname);
+  const c = correlations.find(x => x.name === 'messages_effaces_en_masse');
+  assert.deepEqual([c.file, c.gravite, c.mode, c.cas, c.sourceUnique, c.entite, c.type, c.span, c.cond], ['40-donnees.yml', 'moyen', 'alerter', 'DS18', true, { kind: 'compte', champ: 'sub' }, 'value_count', 3600e3, { gte: 10, field: ['detail.objet', 'detail.id'] }]);
+  assert.equal(rules.find(x => x.name === 'message_supprime').signal, false);
+  const massives = v => v.alerts('sigma.messages_effaces_en_masse').map(a => [a.entite_kind, a.entite_key, a.gravite, a.cas, a.mode]);
+  {
+    const v = vigieOf(t);
+    for (let id = 1; id <= 9; id++) efface(v, id);
+    efface(v, 9); efface(v, 3);                                             // le même message, envoyé deux fois
+    for (let id = 1; id <= 5; id++) efface(v, id, { objet: 'galerie' });     // un autre objet : pas un message
+    for (let id = 10; id <= 20; id++) efface(v, id, { sub: 'zitadel-seb' });  // un autre compte
+    assert.deepEqual(massives(v), [['compte', 'zitadel-seb', 'moyen', 'DS18', 'alerter']]);
+    efface(v, 10);
+    assert.deepEqual(massives(v).map(a => a[1]).sort(), ['zitadel-julien', 'zitadel-seb']);
+  }
+  // Étalé sur plus d'une heure : 5 puis 5, rien.
+  {
+    const v = vigieOf(t);
+    for (let id = 1; id <= 5; id++) efface(v, id);
+    v.clock.t += 3601e3;
+    for (let id = 6; id <= 10; id++) efface(v, id);
+    assert.deepEqual(massives(v), []);
+  }
+});
+
+test('BV-30 : rôle incohérent (DS10) sur une suppression de message par un compte sans messages.traiter ; le photographe : rien', async t => {
+  const v = vigieOf(t);
+  v.store.setting.set('controle_roles_comptes', { instantane_a: v.now() - 3600e3, comptes: {
+    'zitadel-julien': { roles: ['photographe'], adjust: {}, auteur: 1 },
+    'zitadel-modo': { roles: ['moderateur'], adjust: {}, auteur: null },
+  } });
+  efface(v, 12); efface(v, 13, { sub: 'zitadel-modo' });
+  assert.deepEqual(v.alerts('detecteur.role_incoherent').map(a => [a.entite_key, a.gravite]), [['zitadel-modo', 'critique']]);
 });

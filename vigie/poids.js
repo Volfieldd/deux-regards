@@ -17,6 +17,9 @@ export const BY_TYPE = {
   reseau_sortie_refusee: 0, reseau_sortie_directe: 0, reseau_flux_hors_liste: 0, vigie_reseau_silence: 0,
   // Lectures : peu, beaucoup s'additionnent.
   sensitive_read: 0.2, sensitive_export: 1,
+  // Suppression (BV-30) : trier sa boîte est un geste ordinaire, noté comme une lecture plutôt qu'au poids de sa gravité
+  // (« bas », 0,5) ; la série est jugée par sa corrélation (messages_effaces_en_masse, 40-donnees.yml).
+  sensitive_delete: 0.2,
   // Signaux d'exploration ou d'attaque.
   // Types qu'une règle Sigma à un seul événement note déjà (piège, connexion de test, Zitadel « haut ») : pas de points de
   // base en plus (jamais compté deux fois).

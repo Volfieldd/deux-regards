@@ -306,6 +306,25 @@ test('budget : par réseau et par type, jamais pour un compte connecté ni une c
   assert.equal(c.app.securite.emit('type_inconnu', {}), null);
 });
 
+test('fiches lues ou exportées : objet « personne » ou « rencontre » (BV-30), la personne n et la rencontre n restent deux fiches ; rien d’autre ne change', async t => {
+  const c = await withVigie(t);
+  const cookies = await c.login();
+  const jul = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const per = c.db.prepare('INSERT INTO people (created_at, updated_at) VALUES (?, ?)').run(Date.now(), Date.now()).lastInsertRowid;
+  const enc = c.db.prepare("INSERT INTO encounters (ref, author_id, person_id, met_on, created_at, updated_at) VALUES ('J-0043', ?, ?, '2026-10-01', ?, ?)").run(jul, per, Date.now(), Date.now()).lastInsertRowid;
+  c.app.people.sync();
+  for (const url of [`/admin/personnes/${per}`, `/admin/rencontres/${enc}`, `/admin/personnes/${per}/export.zip`, `/admin/rencontres/${enc}/export.zip`]) {
+    assert.equal((await c.app.inject({ url, cookies })).statusCode, 200, url);
+  }
+  const v = await c.flush();
+  const vu = type => v.of(type).map(e => [e.detail.cible, e.detail.objet, e.detail.id, Object.keys(e.detail).join()]);
+  assert.deepEqual(vu('sensitive_read'), [['/admin/personnes/:id', 'personne', String(per), 'cible,objet,id'], ['/admin/rencontres/:id', 'rencontre', String(enc), 'cible,objet,id']]);
+  assert.deepEqual(vu('sensitive_export'), [['/admin/personnes/:id/export.zip', 'personne', String(per), 'cible,objet,id'], ['/admin/rencontres/:id/export.zip', 'rencontre', String(enc), 'cible,objet,id']]);
+  // Une page de l'admin qui n'est pas une fiche : rien d'émis, comme avant.
+  assert.equal((await c.app.inject({ url: '/admin/personnes', cookies })).statusCode, 200);
+  assert.equal((await c.flush()).of('sensitive_read').length, 2);
+});
+
 test('déchiffrement impossible d’une donnée personnelle : signalé, regroupé par minute', async t => {
   const c = await withVigie(t);
   const sealed = createVault('a'.repeat(32)).seal('Camille');

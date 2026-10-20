@@ -85,6 +85,7 @@ Vocabulaire repris d'OWASP [1], adapté au site. Les colonnes « Où » désigne
 | E10 | `user_created` (`admin` par amorce), `user_deleted`, `user_rescued` | amorce par le rôle Zitadel, `ADMIN_SUBS` | `server/auth.js:205` | haut |
 | E11 | `sensitive_read` | lecture d'une fiche personne, d'une rencontre, d'une signature, d'une photo de carte, d'un original, d'un export | routes concernées (`config.sensitive`) | info |
 | E12 | `sensitive_export` | export ZIP RGPD, téléchargement d'original | déjà dans `audit_log`, recopié ici | bas |
+| E12b | `sensitive_delete` | donnée sensible effacée depuis l'admin : un message de la boîte Contact (BV-30) ; détail `{ objet, id }` seulement, jamais le contenu | `POST /admin/messages/:id/supprimer` (PR #183) | bas |
 | E13 | `input_validation_fail` | valeur impossible pour l'interface : clé hors table, `__proto__`, énumération inconnue, identifiant non numérique, champ multipart au nom refusé, méthode HTTP inattendue | validations existantes (elles refusent déjà, elles ne disent rien) | moyen |
 | E14 | `malicious_input` | motif d'injection reconnu dans une saisie (`DS11`) | crochet `preValidation` commun au public et à l'admin | moyen |
 | E15 | `upload_rejected` | fichier refusé au décodage (polyglotte, bombe de décompression, EXIF piégé, SVG déguisé) | `server/imports.js`, `server/brand.js`, `server/watermark.js` | moyen (haut si répété) |

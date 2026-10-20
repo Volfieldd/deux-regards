@@ -66,6 +66,7 @@ export const LIBELLES = {
   user_rescued: 'Administrateur rétabli (ADMIN_SUBS)',
   sensitive_read: 'Lecture de données sensibles',
   sensitive_export: 'Export de données sensibles',
+  sensitive_delete: 'Suppression de données sensibles',
   input_validation_fail: 'Saisie refusée',
   malicious_input: 'Saisie malveillante',
   upload_rejected: 'Fichier refusé',
