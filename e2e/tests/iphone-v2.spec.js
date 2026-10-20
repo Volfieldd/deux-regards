@@ -121,3 +121,69 @@ test('Mon QR et Merci au toucher : titres, évitement, QR nommé, la suite du ph
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
   } finally { await effacerRencontre(page, id); }
 });
+
+// Mineurs (suite de la PR #187) : dans WebKit, au toucher, « moins de 15 ans » dans l'app : l'e-mail d'un parent apparaît
+// avec cette réponse (sans script, :has), l'âge est demandé pour la photo, et la rencontre part avec l'adresse du parent.
+const finDe = url => Number(/\/admin\/rencontre\/(\d+)\/merci/.exec(url)?.[1]);
+test('app : « moins de 15 ans » au toucher : âge demandé pour la photo, e-mail d’un parent révélé et exigé', async ({ page }) => {
+  await page.goto('/admin/rencontre');
+  await page.getByRole('link', { name: 'Tendre le téléphone à la personne' }).tap();
+  const parent = page.locator('#parent-email');
+  await expect(parent).toBeHidden();
+  await expect(page.locator('#email-aide')).toBeHidden();
+  // La photo sans âge : arrêtée avant l'envoi, la question de l'âge pour la photo.
+  await page.locator('input[name="decision"][value=""]').check();
+  await page.locator('input[name="wants_photo"]').check();
+  await page.locator('#email').fill('enfant@example.org');
+  await page.locator('[data-save]').tap();
+  await expect(page.locator('.resume')).toBeFocused();
+  await expect(page.locator('.resume')).toContainText('Âge : dites quel âge vous avez (avant 15 ans, la photo est envoyée à un parent).');
+  // Moins de 15 ans : l'e-mail d'un parent apparaît, la phrase sous « E-mail » aussi ; sans lui, arrêté.
+  await page.locator('input[name="adult"][value="moins15"]').check();
+  await expect(parent).toBeVisible();
+  await expect(page.locator('#email-aide')).toBeVisible();
+  await expect(page.locator('#parent-aide [data-l="fr"]')).toContainText('avec l’accord des deux parents (ou du parent qui exerce seul l’autorité parentale)');
+  await page.locator('[data-save]').tap();
+  await expect(page.locator('.resume')).toContainText('E-mail d’un parent : nécessaire avant 15 ans, la photo lui est envoyée.');
+  // Rien ne déborde.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+  test.skip(!process.env.E2E_ALLOW_WRITES, 'la suite écrit une rencontre : E2E_ALLOW_WRITES=1');
+  await parent.fill('parent@example.org');
+  await Promise.all([page.waitForURL(/\/admin\/rencontre\/\d+\/merci/), page.locator('[data-save]').tap()]);
+  const id = finDe(page.url());
+  try {
+    await page.goto(`/admin/rencontres/${id}`);
+    await expect(page.locator('main')).toContainText('E-mail du parent');
+    await expect(page.locator('main')).toContainText('parent@example.org');
+    await expect(page.locator('main')).not.toContainText('enfant@example.org');
+  } finally { await effacerRencontre(page, id); }
+});
+
+test.describe('app sans JavaScript (WebKit)', () => {
+  test.use({ javaScriptEnabled: false });
+  test('« moins de 15 ans » : l’e-mail d’un parent révélé sans script, exigé par le serveur, puis la rencontre enregistrée', async ({ page }) => {
+    await page.goto('/admin/rencontre');
+    const parent = page.locator('#parent-email');
+    await expect(parent).toBeHidden();
+    await page.locator('input[name="adult"][value="moins15"]').check();
+    await expect(parent).toBeVisible();
+    await page.locator('input[name="wants_photo"]').check();
+    await page.locator('#email').fill('enfant@example.org');
+    const [res] = await Promise.all([page.waitForResponse(r => r.request().method() === 'POST'), page.locator('[data-save]').tap()]);
+    expect(res.status()).toBe(422);
+    // La réponse reste cochée, le champ visible et marqué, la phrase sous le champ dans la langue de la personne.
+    await expect(page.locator('input[name="adult"][value="moins15"]')).toBeChecked();
+    await expect(parent).toBeVisible();
+    await expect(parent).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#parent-email-e [data-l="fr"]')).toContainText('Moins de 15 ans : l’e-mail d’un parent est nécessaire');
+    test.skip(!process.env.E2E_ALLOW_WRITES, 'la suite écrit une rencontre : E2E_ALLOW_WRITES=1');
+    await parent.fill('parent@example.org');
+    await Promise.all([page.waitForURL(/\/admin\/rencontre\/\d+\/merci/), page.locator('[data-save]').tap()]);
+    const id = finDe(page.url());
+    try {
+      await page.goto(`/admin/rencontres/${id}`);
+      await expect(page.locator('main')).toContainText('E-mail du parent');
+      await expect(page.locator('main')).not.toContainText('enfant@example.org');
+    } finally { await effacerRencontre(page, id); }
+  });
+});

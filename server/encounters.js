@@ -194,7 +194,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     else if (decision === 'accord' && adult === 0 && !guardian) errors.guardian = 'guardian';
     // L'adresse qui sert à répondre : celle de la personne, ou avant 15 ans celle du parent.
     const parentEmail = under15 ? text(body.guardian_email, 200) : '';
-    const email = under15 ? parentEmail : text(body.email, 200);
+    let email = under15 ? parentEmail : text(body.email, 200);
     const emailKey = under15 ? 'guardian_email' : 'email';
     const name = text(body.name, 80);
     const message = text(body.message, 2000);
@@ -222,6 +222,11 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     };
     return db.transaction(() => {
       let e = c ? q.byRef.get(c.ref) : null;
+      // Fiche dont l'adresse est celle d'un parent (moins de 15 ans) : une demande qui ne dit pas l'âge (refus, message,
+      // droits), même avec le code, ne remplace jamais cette adresse par celle qu'elle porte (peut-être celle de l'enfant),
+      // qui n'est gardée ni dans la fiche ni dans l'historique. Une tranche d'âge donnée (moins de 15 ans : un parent ;
+      // 15 à 17 ans : sa propre adresse) suit les règles ordinaires.
+      if (e?.email_parent && email && adult === null) { email = ''; delete detail.email; }
       // Demande sans code de contrôle sur une rencontre qui existe déjà : la référence seule se devine (numéros qui se
       // suivent), la demande peut venir de n'importe qui.
       const unverified = Boolean(e) && !c.verified;
@@ -266,7 +271,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       // notés ne sont pas remplacés, et un refus n'est pas levé par un accord. La demande reste dans l'historique,
       // marquée non vérifiée si quelque chose n'a pas été repris (elle peut venir d'un tiers).
       const before = unverified ? openRow({ adult: e.adult, guardian: e.guardian }) : {};
-      const kept = unverified && ((email && e.email && emailHash(email) !== e.email_hash) || (name && e.name && O(e.name) !== name)
+      const kept = unverified && ((email && e.email && (e.email_parent ? O(e.email) !== email : emailHash(email) !== e.email_hash)) || (name && e.name && O(e.name) !== name)
         || (adult !== null && before.adult != null && before.adult !== adult) || (guardian && before.guardian && before.guardian !== guardian)
         || (decision === 'accord' && e.refused) || (rights && e.rights_request && !e.rights_done_at));
       const set = { status: 'nouvelle', updated_at: t, verified: e.verified || (c?.verified ? 1 : 0), ...rightsSet(e, Boolean(c?.verified)) };
@@ -358,7 +363,9 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       const keep = v => v === LOCKED || (merge && !v);
       const set = { ref: c?.ref ?? target.ref ?? null, author_id: authorId ?? target.author_id ?? null, updated_at: t };
       for (const [k, v] of Object.entries({ name: text(body.name, 80), email, place: text(body.place, 120), details: text(body.details, 500) })) if (!keep(v)) set[k] = S(v);
-      if ('email' in set) set.email_hash = emailHash(email);
+      // Adresse d'un parent (moins de 15 ans, email_parent) : jamais d'empreinte (elle ne rapproche pas deux enfants d'une
+      // même famille).
+      if ('email' in set) set.email_hash = target.email_parent ? null : emailHash(email);
       if (!(merge && !metOn)) set.met_on = metOn;
       if (!(merge && !sessionDay)) set.session_day = sessionDay;
       // Carte signée : l'accord de la carte. Déjà enregistrée (on corrige la fiche) : les usages suivent la carte, mais
@@ -491,10 +498,21 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     const decision = ['accord', 'refus'].includes(body.decision) ? body.decision : '';
     const scopes = scopesOf(body);
     const name = text(body.name, 80);
-    const email = text(body.email, 200);
-    if (email && !EMAIL.test(email)) errors.email = 'Adresse e-mail invalide.';
+    // Âge, comme sur la page /bonjour (décisions du propriétaire du 20 octobre 2026) : demandé avec un accord, et aussi
+    // dès que la photo ou le récapitulatif partent à une adresse (« Recevoir la photo », ou un e-mail noté). Avant 15 ans
+    // (« moins15 »), l'adresse d'un parent (guardian_email) remplace celle de la personne, qui n'est jamais gardée (ni
+    // fiche, ni historique, ni export) : la photo et le récapitulatif partent au parent (email_parent, migration 062, sans
+    // empreinte email_hash). Avant 18 ans, l'accord se signe avec un parent (son nom, et sa signature).
+    const wantsPhoto = body.wants_photo === 'on';
     const adult = adultOf(body.adult);
+    const under15 = adult === 0 && body.adult === 'moins15';
+    const ownEmail = text(body.email, 200), parentEmail = text(body.guardian_email, 200);
+    const email = under15 ? parentEmail : ownEmail;
+    const needAge = decision === 'accord' || wantsPhoto || Boolean(ownEmail || parentEmail);
+    if (email && !EMAIL.test(email)) errors[under15 ? 'guardian_email' : 'email'] = 'Adresse e-mail invalide.';
+    else if (under15 && !email && (wantsPhoto || ownEmail)) errors.guardian_email = 'Moins de 15 ans : l’e-mail d’un parent est nécessaire, la photo lui est envoyée.';
     const guardian = text(body.guardian, 80);
+    if (needAge && adult === null && decision !== 'accord') errors.adult = 'Indiquez l’âge de la personne : avant 15 ans, la photo est envoyée à un parent.';
     let signature = null;
     if (decision === 'accord') {
       if (!SCOPES.slice(0, 3).some(s => scopes[s])) errors.scopes = 'Cochez au moins un usage accepté.';
@@ -513,7 +531,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
         } catch { errors.signature = 'Signature illisible : recommencez.'; }
       }
     }
-    if (!decision && !email && !body.wants_photo) errors.what = 'Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.';
+    if (!decision && !email && !wantsPhoto && !errors.guardian_email) errors.what = 'Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.';
     const lat = Number(body.lat), lon = Number(body.lon);
     const hasPos = Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && body.lat !== '' && body.lon !== '';
     if (Object.keys(errors).length) throw new EncounterError(errors);
@@ -531,15 +549,16 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       if (number > 9999) throw new EncounterError({ author: 'Plus aucun numéro libre pour cette lettre (9999 au plus) : changez la lettre des cartes dans Photographes.' });
       const ref = refOf(prefix, number);
       reserveApp(prefix, number);
-      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email: S(email), email_hash: emailHash(email), name: S(name), lang,
-        person_id: personId, wants_photo: body.wants_photo === 'on' ? 1 : 0,
+      const row = { ref, author_id: author.id, status: 'en_cours', verified: decision === 'accord' ? 1 : 0, email: S(email), email_hash: under15 ? null : emailHash(email),
+        email_parent: under15 && email ? 1 : 0, name: S(name), lang, person_id: personId, wants_photo: wantsPhoto ? 1 : 0,
         consent: decision === 'accord' ? JSON.stringify(scopes) : null, consent_source: decision === 'accord' ? 'signature' : null, consent_at: decision === 'accord' ? t : null,
         refused: decision === 'refus' ? 1 : 0, refused_at: decision === 'refus' ? t : null, met_on: parisDay, met_time: new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }).format(t),
         place: S(text(body.place, 120) || (city ? city.label : '')), details: S(text(body.details, 500)), portrait_jpeg: vault.sealBuf(portraitJpeg), signature_png: vault.sealBuf(signature),
         lat: sealPos(pos?.lat ?? null), lon: sealPos(pos?.lon ?? null), adult: sealAdult(adult), guardian: S(adult === 0 ? guardian : ''), created_at: t, updated_at: t };
       const cols = Object.keys(row);
       const id = Number(db.prepare(`INSERT INTO encounters (${cols.join(', ')}) VALUES (${cols.map(c => `@${c}`).join(', ')})`).run(row).lastInsertRowid);
-      log(id, 'app', { decision, scopes: decision === 'accord' ? scopes : undefined, adult, guardian: guardian || undefined, portrait: Boolean(portraitJpeg), position: Boolean(pos) }, decision === 'accord');
+      log(id, 'app', { decision, scopes: decision === 'accord' ? scopes : undefined, adult, guardian: adult === 0 ? guardian || undefined : undefined,
+        email_parent: (under15 && Boolean(email)) || undefined, portrait: Boolean(portraitJpeg), position: Boolean(pos) }, decision === 'accord');
       return { id, ref, code: codeOf(ref) };
     })();
   }
@@ -612,10 +631,11 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
   // Lien valide (non expiré) : la rencontre, la photo et l'auteur ; sinon null.
   function share(token) {
     if (!/^[\w-]{32}$/.test(String(token || ''))) return null;
-    const s = db.prepare(`SELECT s.*, e.lang, e.name, e.ref, p.file, p.title, p.width, p.height, a.name AS author FROM encounter_shares s
+    const s = db.prepare(`SELECT s.*, e.lang, e.name, e.ref, e.email_parent, p.file, p.title, p.width, p.height, a.name AS author FROM encounter_shares s
       JOIN encounters e ON e.id = s.encounter_id JOIN photos p ON p.id = s.photo_id JOIN authors a ON a.id = p.author_id WHERE s.token = ?`).get(token);
     if (!s) return null;
-    return { ...s, name: O(s.name), expired: s.expires_at <= now() };
+    // email_parent : le lien a été envoyé à un parent (moins de 15 ans) ; la page s'adresse à lui, sans le nom de l'enfant.
+    return { ...s, name: O(s.name), parent: Boolean(s.email_parent), expired: s.expires_at <= now() };
   }
   const countShare = (token, kind) => db.prepare(`UPDATE encounter_shares SET ${kind === 'download' ? 'downloads' : 'views'} = ${kind === 'download' ? 'downloads' : 'views'} + 1, last_at = ? WHERE token = ?`).run(now(), token);
   const revokeShare = (id, token) => db.prepare('DELETE FROM encounter_shares WHERE encounter_id = ? AND token = ?').run(id, token).changes > 0;
@@ -690,9 +710,10 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     reindexEmails() {
       let n = 0;
       db.transaction(() => {
-        for (const e of db.prepare("SELECT id, email, email_hash FROM encounters WHERE email IS NOT NULL AND email <> ''").all()) {
+        for (const e of db.prepare("SELECT id, email, email_hash, email_parent FROM encounters WHERE email IS NOT NULL AND email <> ''").all()) {
           const plain = O(e.email);
-          const h = plain === LOCKED ? null : emailHash(plain);
+          // Adresse d'un parent (moins de 15 ans) : toujours sans empreinte.
+          const h = plain === LOCKED || e.email_parent ? null : emailHash(plain);
           if (h !== e.email_hash) { db.prepare('UPDATE encounters SET email_hash = ? WHERE id = ?').run(h, e.id); n++; }
         }
       })();

@@ -14,8 +14,9 @@
    const every = fn => L.map(l => `<span data-l="${l}" lang="${l}">${fn(l)}</span>`).join('');
    const E = __eta.e;
    // Les erreurs dans la langue de la personne (traducteurs de l'admin) ; « décision » et « âge » : les phrases de /bonjour.
-   const ERR = { what: ['decision', l => it.UI[l].app.errDecision], adult: ['age', l => it.UI[l].app.errAdult], scopes: ['usages', l => TL[l].msg(e.scopes)], name: ['nom', l => TL[l].msg(e.name)],
-     guardian: ['parent', l => TL[l].msg(e.guardian)], email: ['email', l => TL[l].msg(e.email)], signature: ['signature', l => TL[l].msg(e.signature)] };
+   // L'âge : la question d'un accord (18 ans ?) ou celle de la photo et du récapitulatif (quel âge ? avant 15 ans, un parent).
+   const ERR = { what: ['decision', l => it.UI[l].app.errDecision], adult: ['age', l => (v.decision === 'accord' ? it.UI[l].app.errAdult : it.UI[l].app.errAdultPhoto)], scopes: ['usages', l => TL[l].msg(e.scopes)], name: ['nom', l => TL[l].msg(e.name)],
+     guardian: ['parent', l => TL[l].msg(e.guardian)], guardian_email: ['parent-email', l => TL[l].msg(e.guardian_email)], email: ['email', l => TL[l].msg(e.email)], signature: ['signature', l => TL[l].msg(e.signature)] };
    const personErrors = Object.keys(ERR).filter(k => e[k]);
    const otherErrors = Object.entries(e).filter(([k]) => !ERR[k]);
    const exp = it.session && it.session.expires_at ? new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(it.session.expires_at).reduce((o, p) => ({ ...o, [p.type]: p.value }), {}) : null;
@@ -107,16 +108,28 @@
       </fieldset>
       <label class="champ-l" for="nom"><%~ every(l => E(TL[l]('Prénom et nom'))) %></label>
       <%~ errFor('name') %><input id="nom" name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="off"<%~ e.name ? ' aria-invalid="true" aria-describedby="nom-e"' : '' %>>
-      <label class="champ-l" for="email"><%~ L.map(l => `<span data-l="${l}" lang="${l}">${E(TL[l]('E-mail'))} <span class="facultatif">${E(TL[l]('(facultatif)'))}</span></span>`).join('') %></label>
-      <%~ errFor('email') %><input type="email" id="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="off" inputmode="email"<%~ e.email ? ' aria-invalid="true" aria-describedby="email-e"' : '' %>>
-      <label class="check"><input type="checkbox" name="wants_photo"<%~ on('wants_photo') ? ' checked' : '' %>> <%~ every(l => E(it.UI[l].hello.wantsPhoto)) %></label>
+<% /* Âge avant l'adresse (décisions du propriétaire du 20 octobre 2026, comme /bonjour) : demandé avec un accord, et dès
+      que la photo ou le récapitulatif partent à une adresse. Avant 15 ans, l'e-mail d'un parent (révélé sans script par
+      :has, toujours visible sur un vieux navigateur) remplace celui de la personne, qui n'est jamais gardé. Sous le nom du
+      parent, la phrase des deux parents de /bonjour. */ %>
       <fieldset class="age<%= e.adult ? ' groupe-err' : '' %>" id="age" data-group="adult"<%~ e.adult ? ' aria-describedby="age-e"' : '' %>><legend><%~ every(l => E(TL[l]('Âge'))) %></legend>
         <%~ errFor('adult') %>
         <label class="check"><input type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %><%~ bad('adult') %>> <%~ every(l => E(it.UI[l].app.adult)) %></label>
         <label class="check"><input type="radio" name="adult" value="non"<%~ v.adult === 'non' ? ' checked' : '' %><%~ bad('adult') %>> <%~ every(l => E(it.UI[l].app.minor)) %></label>
+        <label class="check"><input type="radio" name="adult" value="moins15" data-moins15<%~ v.adult === 'moins15' ? ' checked' : '' %><%~ bad('adult') %>> <%~ every(l => E(it.UI[l].app.under15)) %></label>
       </fieldset>
       <label class="champ-l" for="parent"><%~ L.map(l => `<span data-l="${l}" lang="${l}">${E(TL[l]('Nom du parent'))} <span class="facultatif">${E(TL[l]('(si vous avez moins de 18 ans)'))}</span></span>`).join('') %></label>
-      <%~ errFor('guardian') %><input id="parent" name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"<%~ e.guardian ? ' aria-invalid="true" aria-describedby="parent-e"' : '' %>>
+      <p class="hint" id="parent-aide"><%~ every(l => E(it.UI[l].hello.guardianHint)) %></p>
+      <%~ errFor('guardian') %><input id="parent" name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off" aria-describedby="<%= e.guardian ? 'parent-e ' : '' %>parent-aide"<%~ e.guardian ? ' aria-invalid="true"' : '' %>>
+      <div class="revele-15">
+        <label class="champ-l" for="parent-email"><%~ every(l => E(it.UI[l].app.guardianEmail)) %></label>
+        <p class="hint" id="parent-email-aide"><%~ every(l => E(it.UI[l].app.guardianEmailHint)) %></p>
+        <%~ errFor('guardian_email') %><input type="email" id="parent-email" name="guardian_email" value="<%= v.guardian_email || '' %>" maxlength="200" autocomplete="off" inputmode="email" aria-describedby="<%= e.guardian_email ? 'parent-email-e ' : '' %>parent-email-aide"<%~ e.guardian_email ? ' aria-invalid="true"' : '' %>>
+      </div>
+      <label class="champ-l" for="email"><%~ L.map(l => `<span data-l="${l}" lang="${l}">${E(TL[l]('E-mail'))} <span class="facultatif">${E(TL[l]('(facultatif)'))}</span></span>`).join('') %></label>
+      <p class="hint si-15" id="email-aide"><%~ every(l => E(it.UI[l].app.emailUnder15)) %></p>
+      <%~ errFor('email') %><input type="email" id="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="off" inputmode="email"<%~ e.email ? ' aria-invalid="true" aria-describedby="email-e"' : '' %>>
+      <label class="check"><input type="checkbox" name="wants_photo"<%~ on('wants_photo') ? ' checked' : '' %>> <%~ every(l => E(it.UI[l].hello.wantsPhoto)) %></label>
       <p class="hint app-privacy"><%~ every(l => E(it.UI[l].app.privacy(it.host))) %></p>
       <div class="sig js-seul<%= redo.signature && !it.signatureKept ? ' redo' : '' %>" id="signature" data-sig>
         <p id="sig-l"><%~ every(l => E(it.UI[l].app.sign)) %></p>

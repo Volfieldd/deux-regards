@@ -93,7 +93,7 @@ test('§ 13 : « Lieu » et « Ville » ne portent plus le même nom en allemand
 test('§ 5 et § 10 : app de terrain, question sans réponse marquée dans la langue de la personne ; langue sans script', async t => {
   const c = await admin(t);
   const blank = (await c.get('/admin/rencontre')).body;
-  assert.match(blank, /<p class="app-err" id="err-adult" data-err-for="adult" hidden>/);
+  assert.match(blank, /<p class="app-err" id="err-adult" data-err-for="adult" data-quand="accord" hidden>/);
   assert.doesNotMatch(blank, /aria-invalid/);
   // Accord donné, âge sans réponse : refusé par le serveur.
   const author = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
@@ -101,8 +101,8 @@ test('§ 5 et § 10 : app de terrain, question sans réponse marquée dans la la
   const res = await c.app.inject({ method: 'POST', url: '/admin/rencontre', cookies: c.cookies, ...m });
   assert.equal(res.statusCode, 422);
   assert.match(res.body, /<fieldset class="app-age" data-group="adult" aria-describedby="err-adult">/);
-  assert.match(res.body, /<p class="app-err" id="err-adult" data-err-for="adult"><span data-l="fr" lang="fr">[^<]+<\/span><span data-l="en" lang="en">[^<]+<\/span><span data-l="de" lang="de">Bitte beantworten Sie diese Frage: Sind Sie 18 Jahre oder älter\?<\/span><\/p>/);
-  assert.equal([...res.body.matchAll(/name="adult" value="(oui|non)"[^>]* aria-invalid="true">/g)].length, 2);
+  assert.match(res.body, /<p class="app-err" id="err-adult" data-err-for="adult" data-quand="accord"><span data-l="fr" lang="fr">[^<]+<\/span><span data-l="en" lang="en">[^<]+<\/span><span data-l="de" lang="de">Bitte beantworten Sie diese Frage: Sind Sie 18 Jahre oder älter\?<\/span><\/p>/);
+  assert.equal([...res.body.matchAll(/name="adult" value="(oui|non|moins15)"[^>]* aria-invalid="true">/g)].length, 3);
   assert.match(res.body, /data-lang="de"/);
   assert.doesNotMatch(res.body, /name="decision" value="accord"[^>]*aria-invalid/);
   // Rien à enregistrer : c'est la décision qui est marquée.

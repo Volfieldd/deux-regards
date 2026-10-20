@@ -1007,6 +1007,25 @@ nouveaux champs.
 - Registre RGPD et page Confidentialité : tranche d'âge, nom du parent, cookie du récapitulatif ; à relire par le
   propriétaire.
 
+### Suite : l'app de terrain et « moins de 15 ans » (PR `feat/app-mineurs`)
+
+Évaluation du 20 octobre 2026, avant le code. Aucune route, aucune permission, aucune migration, aucun événement
+nouveaux ; rien dans `vigie/`, `server/securite/`, `server/vigie-admin.js`, `server/auth.js`.
+
+- **App de terrain** (`POST /admin/rencontre`, session de l'admin, `terrain.app`, jeton CSRF, inchangés) : un champ de
+  plus, `guardian_email` (texte libre, 200 signes, l'e-mail d'un parent avant 15 ans), et la réponse `adult=moins15`
+  (liste fermée, déjà connue de `/bonjour`). L'envoi est en `multipart/form-data`, lu dans la route : le crochet commun
+  des saisies (DS11) ne le voit pas, **comme tous les champs de l'app depuis sa création** (nom, e-mail, parent, lieu,
+  notes). Rien de nouveau à ce manque, déjà rattaché à DS11 ; pas de BV nouveau (à décider avec la Vigie si l'app doit
+  un jour passer par le crochet : il faudrait lire les champs avant la route, ou appeler `scanObject` après la lecture).
+- **`/bonjour`** : mêmes champs (`adult`, `guardian`, `guardian_email`), mêmes accroches dans le même ordre, BV-31 tel
+  quel ; seule la règle d'affichage de « moins de 15 ans » change (aussi avec « J'accepte »).
+- **Photo offerte** (`/pour-vous/:jeton`) : seuls les textes changent pour un parent ; `token_guess` sur un jeton faux,
+  tel quel ; la page ne montre jamais le nom de l'enfant.
+- **Ce que la Vigie peut consommer** : les événements existants seulement (`sensitive_read` objet `rencontre`, les mêmes
+  en v1 et en v2 ; `token_guess` ; BV-31) ; **jamais** un âge, un nom ni une adresse dans un événement (testé :
+  `test/app-mineurs.test.js`).
+
 ---
 
 ## Mini-carte de la visionneuse : cadrage et barre d'échelle

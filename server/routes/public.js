@@ -139,8 +139,12 @@ export default async function publicRoutes(app) {
     const date = new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(s.expires_at);
     giftHeaders(reply);
     if (s.expired) reply.code(410);
-    return reply.render('gift', { ...helpers(lang), siteName, s, g: UI[lang].gift, date, base: `/pour-vous/${s.token}`,
-      pageTitle: `${UI[lang].gift.title} · ${siteName}`, description: '' });
+    // Lien envoyé à un parent (moins de 15 ans) : la page s'adresse à lui (« La photo de votre enfant »), sans nommer
+    // l'enfant.
+    const G = UI[lang].gift;
+    const g = s.parent ? { ...G, title: G.parentTitle, text: G.parentText } : G;
+    return reply.render('gift', { ...helpers(lang), siteName, s, g, date, base: `/pour-vous/${s.token}`,
+      pageTitle: `${g.title} · ${siteName}`, description: '' });
   });
   for (const [name, width, kind] of [['apercu.jpg', 1200, 'view'], ['photo.jpg', 2048, 'download']]) {
     app.get(`/pour-vous/:token/${name}`, async (request, reply) => {
