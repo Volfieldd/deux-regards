@@ -77,7 +77,9 @@ test('sans JavaScript : envoi refusé, résumé focalisé et visible, lien vers 
   await expect(page.getByLabel('Votre e-mail')).toHaveValue('claire@example,org');
   await expect(page.getByLabel('Ce que vous avez en tête')).toHaveValue('Une question sur une exposition.');
   // Le premier lien du résumé mène au premier champ en erreur (le destinataire) : focus visible.
-  await page.locator('#resume a').first().click();
+  // Au clavier (Entrée sur le lien) : le premier choix prend le focus, visible.
+  await page.locator('#resume a').first().focus();
+  await page.keyboard.press('Enter');
   await expect.poll(() => focused(page)).toEqual({ id: 'ct-pour-sebastien', visible: true });
   await expect(page.locator('#err-pour')).toBeVisible();
   // Un seul point (l'e-mail) : pas de résumé, le champ prend le focus, le titre le nomme.
@@ -133,7 +135,10 @@ test('avec le script : rien ne change (même formulaire, envoi classique, aucune
   for (const url of ['/contact', `/droits/demande?photo=${PHOTO}`, '/de/contact']) {
     await page.goto(url);
     await expect(page.locator('form[method="post"][novalidate]')).toHaveCount(1);
-    await expect(page.locator('input[name="website"]')).toBeHidden();
+    // Champ piège hors de l'écran (comme /bonjour) : jamais atteint au clavier.
+    const trap = await page.locator('input[name="website"]').boundingBox();
+    expect(trap.x + trap.width).toBeLessThanOrEqual(0);
+    await expect(page.locator('input[name="website"]')).toHaveAttribute('tabindex', '-1');
   }
   await ctx.close();
 });
