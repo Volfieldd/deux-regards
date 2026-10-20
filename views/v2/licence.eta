@@ -11,9 +11,9 @@
    const ORDER = ['usage', 'diffusion', 'message', 'name', 'company', 'email'];
    const TARGET = { usage: `dl-usage-${it.usages[0]}`, diffusion: 'dl-diffusion', message: 'dl-message', name: 'dl-nom', company: 'dl-societe', email: 'dl-email' };
    const text = k => ty(c.errors[e[k]] || String(e[k]));
-   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && !ORDER.includes(k))];
+   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && k !== 'global' && !ORDER.includes(k))];
    const errs = keys.map(k => ({ key: k, target: TARGET[k] || TARGET.message, text: text(k) }));
-   const limit = e.limit ? ty(c.errors.limit) : '';
+   const limit = e.limit ? ty(c.errors.limit) : e.global ? ty(c.errors.global) : '';
    const focusOn = !limit && errs.length === 1 ? errs[0].target : null;
    const af = id => (focusOn === id ? ' autofocus' : '');
    const desc = (...ids) => { const x = ids.filter(Boolean); return x.length ? ` aria-describedby="${x.join(' ')}"` : ''; };

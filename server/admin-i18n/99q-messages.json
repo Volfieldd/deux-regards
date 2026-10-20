@@ -206,5 +206,33 @@
  "Message lu": {
   "en": "Message read",
   "de": "Nachricht gelesen"
+ },
+ "{name} a encore {n} message(s) de visiteurs : traitez-les puis supprimez-les (page Messages et demandes).": {
+  "en": "{name} still has {n} visitor message(s): handle them, then delete them (Messages and requests page).",
+  "de": "{name} hat noch {n} Besuchernachricht(en): Bearbeiten und löschen Sie sie (Seite Nachrichten und Anfragen)."
+ },
+ "Photographe supprimé depuis": {
+  "en": "Photographer since deleted",
+  "de": "Fotograf inzwischen gelöscht"
+ },
+ "Pages des messages": {
+  "en": "Message pages",
+  "de": "Seiten der Nachrichten"
+ },
+ "Page précédente": {
+  "en": "Previous page",
+  "de": "Vorherige Seite"
+ },
+ "Page suivante": {
+  "en": "Next page",
+  "de": "Nächste Seite"
+ },
+ "Page {p} sur {n}": {
+  "en": "Page {p} of {n}",
+  "de": "Seite {p} von {n}"
+ },
+ "Tous": {
+  "en": "All",
+  "de": "Alle"
  }
 }

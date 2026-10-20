@@ -12,7 +12,7 @@
 <div class="panel msg-fiche">
   <p><span class="enc-tag<%= m.kind === 'licence' ? ' warn' : '' %>"><%= KIND[m.kind] %></span> <span class="mono"><%= when(m.created_at) %> · <%= m.lang.toUpperCase() %><%= m.status === 'traite' ? ` · ${t('traité')}` : '' %></span></p>
   <dl class="msg-def">
-    <dt><%= t('Pour') %></dt><dd><%= m.author_name || t('les deux photographes') %></dd>
+    <dt><%= t('Pour') %></dt><dd><%= m.author_name || (m.to_all ? t('les deux photographes') : t('Photographe supprimé depuis')) %></dd>
 <% if (m.kind === 'licence') { %>    <dt><%= t('Photo') %></dt><dd><% if (m.photo) { %><a class="more" href="/admin/photos/<%= m.photo_id %>"><%= m.photo_title %></a><% } else { %><%= t('aucune photo choisie') %><% } %></dd>
     <dt><%= t('Usage prévu') %></dt><dd><%= USAGE[m.usage] || m.usage %></dd>
 <% if (m.diffusion) { %>    <dt><%= t('Diffusion et durée') %></dt><dd><%= m.diffusion %></dd>

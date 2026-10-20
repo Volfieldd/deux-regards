@@ -30,7 +30,7 @@
 <section class="panel sg msg-v2" id="msg-<%= m.id %>" aria-labelledby="msg-t">
   <div class="sg-photo"><% if (m.photo && m.photo.ready) { %><%~ it.picture(m.photo, { sizes: '96px', alt: '' }) %><% } else { %><span class="sg-vide" aria-hidden="true"></span><% } %></div>
   <div class="sg-corps">
-    <h2 class="sg-titre" id="msg-t"><%= m.author_name ? t('Pour {name}', { name: m.author_name }) : t('Pour les deux photographes') %></h2>
+    <h2 class="sg-titre" id="msg-t"><%= m.author_name ? t('Pour {name}', { name: m.author_name }) : m.to_all ? t('Pour les deux photographes') : t('Photographe supprimé depuis') %></h2>
     <p class="sg-etats"><%~ etat(k[0], k[1]) %><%~ m.status === 'nouveau' ? etat('attention', t('Nouveau')) : etat('abouti', t('Traité')) %></p>
     <dl class="msg-def">
 <% if (m.kind === 'licence') { %>      <dt><%= t('Photo') %></dt><dd><% if (m.photo) { %><a class="lien-a" href="/admin/photos/<%= m.photo_id %>"><%= m.photo_title %></a><% } else { %><%= t('aucune photo choisie') %><% } %></dd>

@@ -12,8 +12,8 @@ import { grantsOf, SCOPES } from './permissions.js';
 // - Messages des visiteurs (Contact, demande de licence ; server/messages.js) : à l'arrivée, un e-mail « Un nouveau
 //   message vous attend » aux comptes du photographe concerné (aux deux pour un message adressé aux deux ; à
 //   l'administrateur quand aucun ne peut le lire), avec le lien vers l'admin et rien d'autre : ni nom, ni adresse, ni
-//   message, ni photo (registre de la Vigie, BV-29 et BV-30). 30 par jour au plus : au-delà, les messages attendent dans
-//   l'admin (« Aujourd'hui »), et la Vigie est prévenue une fois (boîtes bombardées).
+//   message, ni photo (registre de la Vigie, BV-29 et BV-30). 30 par jour au plus (compte gardé dans la base) : au-delà, les messages
+//   attendent dans l'admin (« Aujourd'hui »), et la Vigie est prévenue une fois (boîtes bombardées).
 // - Tester l'envoi (Comptes et rôles) : un e-mail à l'adresse choisie, l'erreur du serveur de messagerie sinon.
 export const DIGESTS = ['off', 'daily', 'weekly'];
 const DIGEST_HOUR = 8;
@@ -129,20 +129,25 @@ export function createReminders({ db, accounts, todo, mailer, messages = null, o
   };
   const LEVELS = { urgent: '[!]', bientot: '[•]', 'plus-tard': '[ ]' };
 
-  // Messages des visiteurs : un e-mail par compte et par passage, quel que soit le nombre de messages arrivés.
-  const messagesSent = { day: '', n: 0, capped: false };
+  // Messages des visiteurs : un e-mail par compte et par passage, quel que soit le nombre de messages arrivés. Le compte du
+  // jour (heure de Paris) est gardé dans la base (réglage messages_annonces) : un redémarrage ne le remet pas à zéro.
+  const COUNTER = 'messages_annonces';
+  const readCounter = () => { try { return JSON.parse(db.prepare('SELECT value FROM settings WHERE key = ?').pluck().get(COUNTER) || 'null') || {}; } catch { return {}; } };
+  const saveCounter = c => db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(COUNTER, JSON.stringify(c));
   async function notifyMessages() {
     if (!messages || !mailer?.enabled) return 0;
     const fresh = messages.toNotify();
     if (!fresh.length) return 0;
     const today = paris(now(), { dateStyle: 'short' });
-    if (messagesSent.day !== today) Object.assign(messagesSent, { day: today, n: 0, capped: false });
+    const stored = readCounter();
+    const messagesSent = stored.day === today ? { day: today, n: Number(stored.n) || 0, capped: Boolean(stored.capped) } : { day: today, n: 0, capped: false };
     const readers = active().map(a => ({ a, sc: scopeOf(a)('messages.traiter') })).filter(x => x.sc);
     // Destinataires d'un message : les comptes de son photographe (de tous les photographes, s'il est adressé aux deux) ;
-    // sinon, qui voit tous les messages.
+    // sinon (photographe supprimé depuis, aucun compte lié), qui voit tous les messages.
     const recipientsOf = m => {
-      const own = readers.filter(x => !x.sc.all && x.a.author_id != null && (m.author_id == null || x.a.author_id === m.author_id));
-      const linked = readers.filter(x => x.sc.all && x.a.author_id != null && (m.author_id == null || x.a.author_id === m.author_id));
+      const mine = x => x.a.author_id != null && x.a.author_id > 0 && (m.to_all === 1 || (m.author_id != null && x.a.author_id === m.author_id));
+      const own = readers.filter(x => !x.sc.all && mine(x));
+      const linked = readers.filter(x => x.sc.all && mine(x));
       const list = [...own, ...linked];
       return list.length ? list : readers.filter(x => x.sc.all);
     };
@@ -151,7 +156,7 @@ export function createReminders({ db, accounts, todo, mailer, messages = null, o
     // Plafond du jour : un passage entier ou rien (un compte ne reçoit jamais deux fois l'annonce des mêmes messages) ;
     // au-delà, les messages restent à annoncer (le lendemain), et la Vigie est prévenue une fois (BV-29).
     if (messagesSent.n + byAccount.size > MESSAGES_PER_DAY) {
-      if (!messagesSent.capped) { messagesSent.capped = true; try { onMessagesCap({ envoyes: messagesSent.n, en_attente: fresh.length }); } catch { /* jamais d'erreur ici */ } }
+      if (!messagesSent.capped) { messagesSent.capped = true; saveCounter(messagesSent); try { onMessagesCap({ envoyes: messagesSent.n, en_attente: fresh.length }); } catch { /* jamais d'erreur ici */ } }
       return 0;
     }
     let sent = 0;
@@ -161,6 +166,7 @@ export function createReminders({ db, accounts, todo, mailer, messages = null, o
         text: [n > 1 ? t('{n} nouveaux messages vous attendent dans l’admin (page Contact ou demande de licence).', { n }) : t('Un nouveau message vous attend dans l’admin (page Contact ou demande de licence).'),
           t('Pour le lire, connectez-vous :'), link('/admin/messages')].join('\n') });
       messagesSent.n++;
+      saveCounter(messagesSent);
       if (ok) sent++;
     }
     // Annoncés (ou tentés : une panne de la messagerie ne fait pas renvoyer l'annonce aux autres comptes) ; le message

@@ -10,9 +10,9 @@
    const ORDER = ['pour', 'message', 'name', 'email'];
    const TARGET = { pour: A.length ? `ct-pour-${A[0].slug}` : 'ct-pour-tous', message: 'ct-message', name: 'ct-nom', email: 'ct-email' };
    const text = k => ty(c.errors[e[k]] || String(e[k]));
-   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && !ORDER.includes(k))];
+   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && k !== 'global' && !ORDER.includes(k))];
    const errs = keys.map(k => ({ key: k, target: TARGET[k] || TARGET.message, text: text(k) }));
-   const limit = e.limit ? ty(c.errors.limit) : '';
+   const limit = e.limit ? ty(c.errors.limit) : e.global ? ty(c.errors.global) : '';
    const focusOn = !limit && errs.length === 1 ? errs[0].target : null;
    const af = id => (focusOn === id ? ' autofocus' : '');
    const desc = (...ids) => { const l = ids.filter(Boolean); return l.length ? ` aria-describedby="${l.join(' ')}"` : ''; };

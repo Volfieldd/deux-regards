@@ -2,7 +2,10 @@
 -- Sébastien, à Julien, ou aux deux ») et la demande de licence d'une photo (/droits/demande?photo=<slug>). Lus dans
 -- l'admin, boîte « Messages et demandes » (server/messages.js, server/routes/messages.js).
 --   kind      : 'contact' ou 'licence' ;
---   author_id : le photographe à qui le message est adressé (celui de la photo pour une licence) ; NULL : aux deux ;
+--   author_id : le photographe à qui le message est adressé (celui de la photo pour une licence) ; NULL : aux deux
+--               (to_all = 1), ou photographe supprimé depuis (to_all = 0 : le message n'est plus lisible que de qui voit
+--               tous les messages, jamais de l'autre photographe) ;
+--   to_all    : 1 pour un message adressé aux deux (Contact « aux deux », demande de licence sans photo) ;
 --   photo_id  : la photo d'une demande de licence (NULL : aucune, ou supprimée depuis) ;
 --   usage     : usage prévu d'une licence (presse, web, publicite, autre), liste fermée ;
 --   name, email, company, diffusion, message : données personnelles, chiffrées par DATA_KEY (server/vault.js) quand elle
@@ -12,6 +15,7 @@ CREATE TABLE messages (
   id          INTEGER PRIMARY KEY,
   kind        TEXT NOT NULL CHECK (kind IN ('contact', 'licence')),
   author_id   INTEGER REFERENCES authors(id) ON DELETE SET NULL,
+  to_all      INTEGER NOT NULL DEFAULT 0 CHECK (to_all IN (0, 1)),
   photo_id    INTEGER REFERENCES photos(id) ON DELETE SET NULL,
   usage       TEXT NOT NULL DEFAULT '' CHECK (usage IN ('', 'presse', 'web', 'publicite', 'autre')),
   name        TEXT NOT NULL DEFAULT '',

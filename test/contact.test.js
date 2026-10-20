@@ -475,7 +475,7 @@ test('e-mail aux photographes : sans donnée personnelle ni message, aux bons co
   assert.ok(c.db.prepare('SELECT COUNT(*) FROM messages WHERE notified_at IS NULL').pluck().get() >= 1, 'des messages attendent le lendemain');
   await c.app.reminders.messages();
   const v = await c.flush();
-  const cap = v.of('excess_rate_limit_exceeded').filter(e => e.detail.limite === 'messages_global');
+  const cap = v.of('excess_rate_limit_exceeded').filter(e => e.detail.limite === 'messages_annonces');
   assert.equal(cap.length, 1);
   assert.deepEqual([cap[0].severity, cap[0].origine.emetteur], ['moyen', 'server/messages.js · notifications']);
 });
@@ -486,4 +486,123 @@ test('sans messagerie : rien n’est envoyé, les messages attendent dans l’ad
   assert.equal((await post(c.app, '/contact', payloadOf(form, CONTACT_OK))).statusCode, 303);
   assert.equal(await c.app.reminders.messages(), 0);
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM messages WHERE notified_at IS NULL').pluck().get(), 1);
+});
+
+// ---------- revue de sécurité de la PR #183 (un test par constat) ----------
+test('revue 1 : un compte Photographe sans photographe lié ne voit ni ne supprime rien, pas même les messages aux deux', async t => {
+  const c = await site(t, 'v2', { vigie: true });
+  const form = formOf((await c.app.inject('/contact')).body, '/contact');
+  const lic = formOf((await c.app.inject('/droits/demande')).body, '/droits/demande');
+  await post(c.app, '/contact', payloadOf(form, { ...CONTACT_OK, pour: 'tous' }), { ip: '198.51.100.50' });
+  await post(c.app, '/droits/demande', payloadOf(lic, LICENCE_OK), { ip: '198.51.100.51' });             // sans photo : aux deux
+  const [toAll, noPhoto] = c.db.prepare('SELECT id FROM messages ORDER BY id').pluck().all();
+  assert.deepEqual(c.db.prepare('SELECT to_all FROM messages ORDER BY id').pluck().all(), [1, 1]);
+  const lone = await c.account('lone', { roles: ['photographe'] });
+  const list = (await lone.get('/admin/messages')).body;
+  assert.doesNotMatch(list, /href="\/admin\/messages\/\d+"/);
+  for (const id of [toAll, noPhoto]) {
+    assert.equal((await lone.get(`/admin/messages/${id}`)).statusCode, 404);
+    assert.equal((await lone.post(`/admin/messages/${id}/supprimer`)).statusCode, 404);
+  }
+  assert.equal(count(c), 2);
+  assert.doesNotMatch((await lone.get('/admin')).body, /demandes? de licence à lire/);
+  // Lié à un photographe : il les voit.
+  const seb = await c.account('seb', { roles: ['photographe'], author: c.authorId('sebastien') });
+  assert.equal((await seb.get(`/admin/messages/${toAll}`)).statusCode, 200);
+  const v = await c.flush();
+  assert.equal(v.of('authz_fail').filter(e => e.detail.objet === 'message').length, 4);
+});
+
+test('revue 2 : un photographe supprimé ne rend pas ses messages lisibles par l’autre ; sa suppression est retenue par ses messages', async t => {
+  const c = await site(t, 'v2');
+  const jul = c.authorId('julien'), seb = c.authorId('sebastien');
+  const form = formOf((await c.app.inject('/contact')).body, '/contact');
+  await post(c.app, '/contact', payloadOf(form, { ...CONTACT_OK, pour: 'julien' }), { ip: '198.51.100.52' });
+  const id = c.db.prepare('SELECT MAX(id) FROM messages').pluck().get();
+  // La suppression de Julien est retenue par son message (comme par ses photos et ses rencontres).
+  c.db.prepare('UPDATE photos SET author_id = ? WHERE author_id = ?').run(seb, jul);
+  c.db.prepare('UPDATE accounts SET author_id = NULL WHERE author_id = ?').run(jul);
+  const root = await c.account('root', { roles: ['admin'] });
+  const page = (await root.get('/admin/auteurs')).body;
+  assert.match(page, /Julien a encore 1 message\(s\) de visiteurs/);
+  // Supprimé quand même (base modifiée à la main, ou ancienne base) : le message devient orphelin, jamais « aux deux ».
+  c.db.prepare('DELETE FROM authors WHERE id = ?').run(jul);
+  assert.deepEqual(c.db.prepare('SELECT author_id, to_all FROM messages WHERE id = ?').get(id), { author_id: null, to_all: 0 });
+  const ph = await c.account('ph-seb', { roles: ['photographe'], author: seb });
+  assert.equal((await ph.get(`/admin/messages/${id}`)).statusCode, 404);
+  assert.doesNotMatch((await ph.get('/admin/messages')).body, new RegExp(`href="/admin/messages/${id}"`));
+  const r = await root.get(`/admin/messages/${id}`);
+  assert.equal(r.statusCode, 200);
+  assert.match(r.body, /Photographe supprimé depuis/);
+});
+
+test('revue 3 : boîte paginée (50 par page, filtre Nouveaux sans troncature) ; plafond global de 50 messages acceptés par jour (503, saisie gardée, Vigie)', async t => {
+  const c = await site(t, 'v2', { vigie: true });
+  const authors = c.db.prepare('SELECT id, slug FROM authors').all();
+  for (let i = 0; i < 49; i++) c.app.messages.submit('contact', { ...CONTACT_OK, pour: 'julien' }, { authors });
+  const form = formOf((await c.app.inject('/contact')).body, '/contact');
+  assert.equal((await post(c.app, '/contact', payloadOf(form, CONTACT_OK), { ip: '198.51.100.60' })).statusCode, 303);   // le 50e
+  const r = await post(c.app, '/contact', payloadOf(form, { ...CONTACT_OK, message: 'Gardé au plafond' }), { ip: '198.51.100.61' });
+  assert.equal(r.statusCode, 503);
+  assert.match(r.body, /Gardé au plafond<\/textarea>/);
+  assert.match(r.body, /<div class="msg" id="limite" role="status" tabindex="-1" autofocus>/);
+  assert.match(nb(r.body), /Beaucoup de messages nous sont arrivés aujourd’hui/);
+  const lic = formOf((await c.app.inject('/droits/demande')).body, '/droits/demande');
+  assert.equal((await post(c.app, '/droits/demande', payloadOf(lic, LICENCE_OK), { ip: '198.51.100.62' })).statusCode, 503);
+  assert.equal(count(c), 50);
+  const v = await c.flush();
+  assert.deepEqual(v.of('excess_rate_limit_exceeded').filter(e => e.detail.limite === 'messages_global').map(e => [e.detail.formulaire, e.severity]), [['contact', 'moyen'], ['licence', 'moyen']]);
+  // Le lendemain (heure de Paris), le compteur repart.
+  c.db.prepare('UPDATE messages SET created_at = created_at - 2 * 86400000').run();
+  assert.equal(c.app.messages.acceptedToday(), 0);
+  // Boîte : 51 messages au plus vus, en deux pages ; « Nouveaux » compte et pagine tout.
+  c.app.messages.submit('contact', { ...CONTACT_OK, pour: 'julien' }, { authors });
+  c.db.prepare('UPDATE messages SET status = \'traite\' WHERE id <= 3').run();
+  const root = await c.account('root', { roles: ['admin'], version: 'v2' });
+  const p1 = (await root.get('/admin/messages')).body;
+  assert.equal(p1.match(/<li class="panel sg/g).length, 50);
+  assert.match(p1, /Page 1 sur 2/);
+  const p2 = (await root.get('/admin/messages?page=2')).body;
+  assert.equal(p2.match(/<li class="panel sg/g).length, 1);
+  const fresh = (await root.get('/admin/messages?etat=nouveau&page=2')).body;
+  assert.equal(fresh.match(/<li class="panel sg/g).length, 48);                 // une seule page de nouveaux : la page 2 ramène à la 1
+  assert.match((await root.get('/admin/messages?etat=nouveau')).body, /Nouveaux <span class="chip-n">48<\/span>/);
+  const v1 = await c.account('root1', { roles: ['admin'], version: 'v1' });
+  assert.match((await v1.get('/admin/messages?page=2')).body, /Page 2 sur 2/);
+});
+
+test('revue 4 : le plafond des annonces par e-mail survit à un redémarrage (compté dans la base, jour de Paris)', async t => {
+  const c = await site(t, 'v2', { mail: true });
+  c.app.accounts.ensure({ sub: 'jul', name: 'jul', email: 'jul@example.org', roles: ['photographe'] });
+  c.app.accounts.update(c.app.accounts.bySub('jul').id, { authorId: c.authorId('julien') }, 'test');
+  const authors = c.db.prepare('SELECT id, slug FROM authors').all();
+  c.app.messages.submit('contact', { ...CONTACT_OK, pour: 'julien' }, { authors });
+  await c.app.reminders.messages();
+  const stored = JSON.parse(c.db.prepare("SELECT value FROM settings WHERE key = 'messages_annonces'").pluck().get());
+  assert.equal(stored.n, 1);
+  // Un « redémarrage » : un nouveau module de relances relit le compte du jour, déjà au plafond.
+  c.db.prepare("UPDATE settings SET value = ? WHERE key = 'messages_annonces'").run(JSON.stringify({ ...stored, n: 30 }));
+  const { createReminders } = await import('../server/reminders.js');
+  const again = createReminders({ db: c.db, accounts: c.app.accounts, todo: c.app.todo, mailer: c.app.mailer, messages: c.app.messages, siteName: () => 'Test', publicUrl: '' });
+  c.app.messages.submit('contact', { ...CONTACT_OK, pour: 'julien' }, { authors });
+  const before = c.sent.length;
+  assert.equal(await again.messages(), 0);
+  assert.equal(c.sent.length, before);
+  // Un autre jour : le compte repart.
+  c.db.prepare("UPDATE settings SET value = ? WHERE key = 'messages_annonces'").run(JSON.stringify({ day: '01/01/2020', n: 30 }));
+  assert.equal(await again.messages(), 1);
+});
+
+test('revue 5 : caractères invisibles et de direction retirés des champs d’une ligne', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'messages-'));
+  const db = openDb(path.join(dir, 't.db'));
+  migrate(db);
+  db.prepare("INSERT INTO authors (slug, name) VALUES ('julien', 'Julien')").run();
+  const m = createMessages({ db });
+  const id = m.submit('licence', { ...LICENCE_OK, name: 'Lu‮cie​ Ex­em⁦ple﻿', company: '‏Éditions⁠ du Fleuve', diffusion: '3‍000 ex.', email: 'lucie​@example.org', message: 'Texte​ gardé' }, { authors: [] });
+  const r = m.get(id);
+  assert.deepEqual([r.name, r.company, r.diffusion, r.email], ['Lucie Exemple', 'Éditions du Fleuve', '3000 ex.', 'lucie@example.org']);
+  assert.equal(r.message, 'Texte​ gardé');                      // le message, texte libre, n'est pas une ligne
+  db.close();
+  fs.rmSync(dir, { recursive: true, force: true });
 });

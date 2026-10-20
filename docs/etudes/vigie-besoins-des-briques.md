@@ -52,7 +52,7 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-26 Réponse privée servie par le cache de Cloudflare | DS18 | ✓ Vigie | bordure (phase C3), avant l'ouverture de la phase 37a ; Vigie (phase E1) : point `cache_prive` du Worker, événement `bordure_cache_prive`, règle (`70-bordure.yml`, haute) | fait |
 | BV-27 Saisie malveillante dans un message libre (Contact, demande de licence) | DS11 | ✓ site (aucune émission de plus) ; poids du canal : Vigie | `feat/page-contact` | fait côté site |
 | BV-28 Formulaire de contact ou de licence forgé | DS12 | ✓ site | `feat/page-contact` | fait côté site |
-| BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; règle : Vigie | `feat/page-contact` | fait côté site |
+| BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; règle : Vigie | `feat/page-contact` : plafond global de 50 messages acceptés par jour (`limite: messages_global`, 503) et plafond des annonces (30 e-mails, `limite: messages_annonces`, compté dans la base) | fait côté site |
 | BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; regroupement par objet : Vigie | `feat/page-contact` | fait côté site |
 
 ---
@@ -812,7 +812,8 @@ et qu'une adresse de contact publiée attire le pourriel sans que la Vigie en vo
     `publicite`, `autre`), `diffusion` (300, facultatif), `message` (2 000), `name` (100), `company` (120,
     facultatif), `email` (200), `website`.
 - **Limites** : 8 envois par heure et par adresse, communs aux deux formulaires (comme `/bonjour`), comptés après le
-  piège et la provenance ; e-mails de notification : 30 par jour au plus, tous messages confondus (comme les demandes
+  piège et la provenance ; 50 messages acceptés par jour au plus, tous formulaires confondus (503 au-delà) ; e-mails de
+  notification : 30 par jour au plus, tous messages confondus, compte gardé dans la base (comme les demandes
   RGPD non vérifiées, `server/reminders.js:18`).
 - **Stockage** : table `messages` (migration 061) : `kind` (`contact` ou `licence`), photographe destinataire
   (`author_id`, nul pour « les deux »), photo (`photo_id`, nulle si la photo est supprimée), `usage`, langue, état
@@ -836,7 +837,7 @@ et qu'une adresse de contact publiée attire le pourriel sans que la Vigie en vo
 | `POST /contact`, `POST /droits/demande` | robot (pourriel) qui remplit tous les champs | `trapped()` : `malicious_honeypot`, `detail.formulaire` = **`contact`** ou **`licence`** (même clé que `bonjour` et `signalement`), règle `piege` (DS15, 2 points sur l'adresse), `aspiration_distribuee` ; rien n'est stocké, réponse « merci » | aucun |
 | idem | envoi depuis un autre site (formulaire caché sur une page tierce, CSRF de visiteur) | `gate()` : `input_validation_fail` (`raison: formulaire envoyé depuis un autre site`, `formulaire`, `origine`), `valeurs_impossibles_repetees` (DS12) ; rien n'est stocké | aucun |
 | idem | rafale depuis une adresse | `gate()` : `excess_rate_limit_exceeded` (`detail.limite` = `contact` ou `licence`), 429, saisie gardée ; poids 1 (`vigie/poids.js`) | aucun |
-| idem | rafale répartie sur de nombreuses adresses (boîtes des photographes inondées, quota de la messagerie) | rien : chaque adresse reste sous sa limite | **BV-29** |
+| idem | rafale répartie sur de nombreuses adresses (boîtes des photographes inondées, quota de la messagerie) | rien : chaque adresse reste sous sa limite | **BV-29** (plafond global de 50 par jour et plafond des annonces, signalés) |
 | `message`, `diffusion`, `name`, `company` | injection (SQL, XSS, gabarit) ; contenu malveillant | crochet commun (`server/securite/site.js:250-282`) : `malicious_input`, une seule fois par requête, `detail.constats[].champ` = `body.message`…, **longueur seule** (jamais l'extrait) ; `scanner` (DS11, 5 en 1 h) ; requêtes préparées, gabarits échappés, CSP | **BV-27** (poids du canal) |
 | `pour`, `usage`, `photo`, longueurs | formulaire forgé : valeur hors liste, texte au-delà du `maxlength` de la page (sondage, remplissage de la base) | rien : une valeur inconnue serait refusée sans rien dire | **BV-28** |
 | `?photo=` et `?pour=` (GET) | valeurs forgées dans l'adresse | crochet commun pour les motifs ; une valeur inconnue serait ignorée sans rien dire | BV-28 (même logique que `ignored()`, BV-3) |
@@ -890,11 +891,17 @@ Un message libre contient souvent un lien, un « < » (« 3 < 5 »), du SQL ou d
 Chaque adresse reste sous sa limite (8 par heure), mais un réseau de machines peut déposer des centaines de messages
 valides : la boîte de l'admin s'emplit, les notifications épuisent le quota de la messagerie.
 
-- **Événement** : `excess_rate_limit_exceeded` (E15), existant, `detail.limite: 'messages_global'`, gravité `moyen`,
-  émetteur `server/messages.js · notifications`, **une fois par jour**, quand la 31e notification du jour est
-  retenue (les messages restent dans la boîte et dans « Aujourd'hui » ; plus aucun e-mail ce jour-là).
-- **Règle** (Vigie) : `messages_satures`, sur le modèle de `lettre_confirmations_saturees` (BV-15) : source unique sur
-  l'entité `site` `messages`, `medium`, DS21 ; corrélation possible avec `aspiration_distribuee` (DS15) dans l'heure.
+- **Plafond global des messages** (revue de sécurité de la PR #183) : 50 messages acceptés par jour (heure de Paris),
+  tous formulaires et toutes adresses confondus ; au-delà, réponse 503 (saisie gardée) et `excess_rate_limit_exceeded`
+  (E15), `detail: { limite: 'messages_global', formulaire, par_jour: 50 }`, gravité `moyen`, émetteur
+  `server/routes/contact-public.js · contact|licence`, à chaque envoi refusé (regroupé par adresse comme les autres
+  limites). La boîte de l'admin ne peut donc plus grossir que de 50 messages par jour.
+- **Plafond des annonces par e-mail** : 30 par jour, compté dans la base (réglage `messages_annonces`, jour de Paris :
+  un redémarrage ne le remet pas à zéro) ; au-delà, `excess_rate_limit_exceeded`, `detail.limite: 'messages_annonces'`,
+  gravité `moyen`, émetteur `server/messages.js · notifications`, **une fois par jour** (les messages restent dans la
+  boîte et dans « Aujourd'hui » ; plus aucun e-mail ce jour-là).
+- **Règle** (Vigie) : `messages_satures`, sur le modèle de `lettre_confirmations_saturees` (BV-15) : `limite` dans
+  `messages_global` ou `messages_annonces`, source unique sur l'entité `site` `messages`, `medium`, DS21 ; corrélation possible avec `aspiration_distribuee` (DS15) dans l'heure.
 - **Qui** : le site (émission) ; la Vigie (règle).
 
 ### BV-30 — Messages lus ou effacés en masse dans l'admin
@@ -902,6 +909,10 @@ valides : la boîte de l'admin s'emplit, les notifications épuisent le quota de
 - **Lecture** : `GET /admin/messages/:id` émet `sensitive_read` (E11) par la route (comme les galeries privées,
   BV-24), `detail: { cible: '/admin/messages/:id', objet: 'message', id }`, et note la lecture au journal d'audit
   (« message : lecture ») ; la liste ne déchiffre rien. Aucun export.
+- **Portée** (revue de sécurité de la PR #183) : un message « aux deux » est marqué (`to_all = 1`) et n'est visible que
+  d'un compte lié à un photographe ; un message dont le photographe a été supprimé depuis n'est plus visible que de qui
+  voit tout (sa suppression est d'ailleurs retenue tant qu'il a des messages) ; un compte Photographe sans photographe
+  lié ne voit rien.
 - **Hors portée** : le message d'un autre photographe demandé par un compte de portée « les miens » : 404 et
   `authz_fail` (`raison: 'hors portée'`, `permission: 'messages.traiter'`, `objet: 'message'`, `id`, `ecriture`),
   comme BV-14 ; règles `exploration_droits` et `ecriture_hors_portee` telles quelles.

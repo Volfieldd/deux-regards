@@ -472,18 +472,23 @@ export function createAdminRepo(db) {
       db.prepare('INSERT INTO authors (name, slug, bio, bio_en, bio_de, short_bio, short_bio_en, short_bio_de, card_prefix, ig_signature) VALUES (@name, @slug, @bio, @bio_en, @bio_de, @short_bio, @short_bio_en, @short_bio_de, @card_prefix, @ig_signature)').run(values);
     },
     // Ce qui retient un photographe (phrases en français, une par cause) : ses photos, ses rencontres (données
-    // personnelles, qui ne seraient plus visibles que des administrateurs), ses voyages (devenus « communs ») et le
+    // personnelles, qui ne seraient plus visibles que des administrateurs), ses voyages (devenus « communs »), les messages
+    // des visiteurs qui lui sont adressés et le
     // compte qui lui est lié. Ses sorties et ses journées de voyage n'existent que par ses photos et ses rencontres.
     authorHolds(id) {
       const a = q.authors.all().find(r => r.id === Number(id));
       if (!a) return [];
       const encounters = db.prepare('SELECT COUNT(*) FROM encounters WHERE author_id = ?').pluck().get(a.id);
       const trips = db.prepare('SELECT COUNT(*) FROM trips WHERE author_id = ?').pluck().get(a.id);
+      // Messages des visiteurs qui lui sont adressés (pas ceux adressés aux deux) : supprimé, il les rendrait lisibles des
+      // seuls administrateurs (registre de la Vigie, BV-30) ; on prévient plutôt que de les déplacer.
+      const messages = db.prepare('SELECT COUNT(*) FROM messages WHERE author_id = ? AND to_all = 0').pluck().get(a.id);
       const accounts = db.prepare("SELECT COALESCE(NULLIF(name, ''), sub) FROM accounts WHERE author_id = ?").pluck().all(a.id);
       return [
         a.count && `${a.name} a encore ${a.count} photo(s).`,
         encounters && `${a.name} a encore ${encounters} rencontre(s) : rattachez-les à un autre photographe (fiche de chaque rencontre).`,
         trips && `${a.name} a encore ${trips} voyage(s) : rattachez-les à un autre photographe ou supprimez-les (page Voyages).`,
+        messages && `${a.name} a encore ${messages} message(s) de visiteurs : traitez-les puis supprimez-les (page Messages et demandes).`,
         ...accounts.map(account => `Le compte « ${account} » est lié à ${a.name} : changez son photographe dans Comptes et rôles.`),
       ].filter(Boolean);
     },

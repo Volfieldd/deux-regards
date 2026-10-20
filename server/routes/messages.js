@@ -30,13 +30,15 @@ export function registerMessages(app, { render, P, W, done, withReady }) {
     app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'message lu', target: String(id), status: 200 });
   };
 
+  // La boîte : 50 messages par page (?page=), filtres état (?etat=) et nature (?nature=) appliqués par la base, jamais
+  // tronqués en silence.
   app.get('/admin/messages', P(PERM), async (request, reply) => {
     const scope = request.scope(PERM);
-    const list = messages.list(scope).map(view);
+    const etat = ['nouveau', 'traite'].includes(request.query.etat) ? request.query.etat : '';
+    const nature = ['contact', 'licence'].includes(request.query.nature) ? request.query.nature : '';
+    const box = messages.list(scope, { status: etat || null, kind: nature || null, page: request.query.page });
     return render(request, reply, 'messages', {
-      title: request.t('Messages et demandes'), list, ownScope: !scope.all,
-      etat: ['nouveau', 'traite'].includes(request.query.etat) ? request.query.etat : '',
-      nature: ['contact', 'licence'].includes(request.query.nature) ? request.query.nature : '',
+      title: request.t('Messages et demandes'), list: box.items.map(view), box, ownScope: !scope.all, etat, nature,
     });
   });
 

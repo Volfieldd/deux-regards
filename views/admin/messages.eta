@@ -5,11 +5,14 @@
 <% const t = it.t; const KIND = { contact: t('Message (page Contact)'), licence: t('Demande de licence') };
    const USAGE = { presse: t('livre ou presse imprimée'), web: t('site web ou réseaux sociaux'), publicite: t('publicité, affiche'), autre: t('autre usage') };
    const when = ms => new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(ms);
-   const to = m => (m.author_name ? t('Pour {name}', { name: m.author_name }) : t('Pour les deux photographes')); %>
+   const to = m => (m.author_name ? t('Pour {name}', { name: m.author_name }) : m.to_all ? t('Pour les deux photographes') : t('Photographe supprimé depuis'));
+   const C = it.box.counts;
+   const q = (etat, page) => { const p = new URLSearchParams(); if (etat) p.set('etat', etat); if (page > 1) p.set('page', page); const s = p.toString(); return '/admin/messages' + (s ? '?' + s : ''); }; %>
 <h1><%= t('Messages et demandes') %></h1>
 <p class="prose"><%= t('Envoyés depuis la page Contact et les demandes de licence du site. Nom, adresse et message chiffrés, effacés au bout de 12 mois ; ils ne s’affichent qu’en ouvrant le message (lecture notée au journal). Aucun accusé de réception n’est envoyé : répondez depuis le message.') %><% if (it.ownScope) { %> <%= t('Vous voyez les messages qui vous sont adressés et ceux adressés aux deux photographes.') %><% } %></p>
+<p class="actions"><a class="btn ghost" href="<%= q('') %>"<%~ !it.etat ? ' aria-current="page"' : '' %>><%= t('Tous') %> (<%= C.total %>)</a> <a class="btn ghost" href="<%= q('nouveau') %>"<%~ it.etat === 'nouveau' ? ' aria-current="page"' : '' %>><%= t('Nouveaux') %> (<%= C.nouveaux %>)</a></p>
 <% if (!it.list.length) { %>
-<p class="empty"><%= t('Aucun message.') %></p>
+<p class="empty"><%= !C.total ? t('Aucun message.') : t('Aucun message pour ce filtre.') %></p>
 <% } else { %>
 <ul class="reports">
 <% it.list.forEach(m => { %>
@@ -23,4 +26,6 @@
   </li>
 <% }) %>
 </ul>
+<% } %>
+<% if (it.box.pages > 1) { %><p class="actions"><% if (it.box.page > 1) { %><a class="btn ghost" href="<%= q(it.etat, it.box.page - 1) %>"><%= t('Page précédente') %></a> <% } %><span><%= t('Page {p} sur {n}', { p: it.box.page, n: it.box.pages }) %></span><% if (it.box.page < it.box.pages) { %> <a class="btn ghost" href="<%= q(it.etat, it.box.page + 1) %>"><%= t('Page suivante') %></a><% } %></p>
 <% } %>

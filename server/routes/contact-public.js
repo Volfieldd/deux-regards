@@ -1,5 +1,5 @@
 import { UI, localize } from '../i18n.js';
-import { MessageError, USAGES, ALL } from '../messages.js';
+import { MessageError, USAGES, ALL, PER_DAY } from '../messages.js';
 import { scanValue } from '../securite/detection.js';
 
 // Page Contact et demande de licence, côté public (maquette MQ-06, sans la vente de tirages ; registre de la Vigie,
@@ -51,6 +51,13 @@ export function registerContactPages(app, { lang, repo, base, gate, trapped, sam
     const s = repo.settings();
     return { names: String(s.legal_names || '').trim(), director: String(s.legal_director || '').trim() };
   };
+  // Plafond global (50 messages acceptés par jour, tous formulaires) : au-delà, 503, saisie gardée, et la Vigie prévenue
+  // (boîtes bombardées depuis de nombreuses adresses, BV-29).
+  const full = (request, formulaire) => {
+    if (app.messages.acceptedToday() < PER_DAY) return false;
+    app.securite.emit('excess_rate_limit_exceeded', { request, severity: 'moyen', emetteur: `server/routes/contact-public.js · ${formulaire}`, detail: { limite: 'messages_global', formulaire, par_jour: PER_DAY } });
+    return true;
+  };
   const nocache = reply => reply.header('x-robots-tag', 'noindex').header('cache-control', 'no-store');
 
   // ---------- Contact ----------
@@ -84,6 +91,7 @@ export function registerContactPages(app, { lang, repo, base, gate, trapped, sam
     if (trapped(request, 'contact')) return reply.redirect(thanks, 303);                       // piège à robots
     if (!sameSite(request)) { gate(request, limit, 'contact'); return reply.redirect(thanks, 303); }
     if (!gate(request, limit, 'contact')) return contactPage(request, reply, { values: body, errors: { limit: 'limit' }, status: 429 });
+    if (full(request, 'contact')) return contactPage(request, reply, { values: body, errors: { global: 'global' }, status: 503 });
     try {
       app.messages.submit('contact', body, { lang, authors: authorsOf() });
     } catch (err) {
@@ -127,6 +135,7 @@ export function registerContactPages(app, { lang, repo, base, gate, trapped, sam
     const photo = photoOf(request, 'body');
     const values = { ...body, photo: photo?.slug || '' };
     if (!gate(request, limit, 'licence')) return licencePage(request, reply, { photo, values, errors: { limit: 'limit' }, status: 429 });
+    if (full(request, 'licence')) return licencePage(request, reply, { photo, values, errors: { global: 'global' }, status: 503 });
     try {
       app.messages.submit('licence', body, { lang, photo });
     } catch (err) {
