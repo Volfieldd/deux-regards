@@ -43,8 +43,11 @@ test('au clavier : l’âge avant les usages, le nom du parent apparaît sous «
   await page.goto('/bonjour');
   const parent = page.locator('#bj-parent');
   await expect(parent).toBeHidden();
-  // Du dernier champ de la carte, la tabulation entre dans le groupe « Votre âge » (avant « Ce que vous souhaitez »).
+  // Du dernier élément du bloc de la carte (« Pas de carte ? », replié), la tabulation entre dans le groupe « Votre âge »
+  // (avant « Ce que vous souhaitez »).
   await page.locator('#bj-ref').focus();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('.depliant > summary')).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.locator('#bj-age-oui')).toBeFocused();
   await expect.poll(() => focused(page)).toEqual({ id: 'bj-age-oui', visible: true });

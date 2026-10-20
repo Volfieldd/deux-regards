@@ -47,6 +47,28 @@
     ]
   },
   {
+    "version": "1.187.0",
+    "date": "2026-10-20",
+    "pr": 187,
+    "title": {
+      "fr": "« Je vous ai photographié » : l’âge, le parent, une date en toutes lettres",
+      "en": "“I took your photo”: age, parent, a date in plain words",
+      "de": "„Ich habe Sie fotografiert“: Alter, Elternteil, ein Datum in Worten"
+    },
+    "items": [
+      {
+        "fr": "Sur la page /bonjour, un accord demande maintenant l’âge, comme l’app de terrain : 18 ans ou plus, ou moins. Avant 18 ans, le nom du parent qui remplit le formulaire avec la personne est exigé ; sans lui, l’accord n’est pas enregistré (un refus, si). La fiche de la rencontre montre l’âge et le parent comme pour une rencontre saisie sur le téléphone.",
+        "en": "On the /bonjour page, a consent now asks for the age, as the field app does: 18 or older, or under. Under 18, the name of the parent filling in the form with the person is required; without it, the consent is not recorded (a refusal is). The encounter’s record shows the age and the parent as for an encounter entered on the phone.",
+        "de": "Auf der Seite /bonjour fragt eine Einwilligung jetzt nach dem Alter, wie die App für unterwegs: 18 Jahre oder älter, oder jünger. Unter 18 ist der Name des Elternteils nötig, der das Formular mit der Person ausfüllt; ohne ihn wird die Einwilligung nicht gespeichert (eine Ablehnung schon). Die Seite der Begegnung zeigt Alter und Elternteil wie bei einer auf dem Handy erfassten Begegnung."
+      },
+      {
+        "fr": "La date de la rencontre se tape librement (« 14/10/2026 », « 12 mars », « hier soir », en anglais et en allemand aussi) ; une date ambiguë ou impossible est signalée sous le champ. Après l’envoi, la page de remerciement (site v2 et v3) récapitule ce que la personne a choisi, sans son nom ni son adresse ; aucun accusé de réception n’est envoyé par e-mail.",
+        "en": "The date of the meeting is typed freely (“14/10/2026”, “12 March”, “yesterday evening”, in French and German too); an ambiguous or impossible date is flagged under the field. After sending, the thank-you page (site v2 and v3) sums up what the person chose, without their name or address; no acknowledgement is sent by email.",
+        "de": "Das Datum der Begegnung wird frei eingegeben („14.10.2026“, „12. März“, „gestern Abend“, auch auf Französisch und Englisch); ein mehrdeutiges oder unmögliches Datum wird unter dem Feld gemeldet. Nach dem Senden fasst die Dankesseite (Website v2 und v3) zusammen, was die Person gewählt hat, ohne Namen oder Adresse; es wird keine Eingangsbestätigung per E-Mail verschickt."
+      }
+    ]
+  },
+  {
     "version": "1.186.0",
     "date": "2026-10-20",
     "pr": 186,
