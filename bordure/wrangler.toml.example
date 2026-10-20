@@ -11,8 +11,10 @@ workers_dev = false
 
 # Routes : l'admin, la connexion et les pages ; jamais les images ni les fichiers statiques (quota). Les routes « sans
 # Worker » des chemins exclus se posent dans le tableau de bord (Workers Routes → Add route → Worker : None).
+# www seulement : c'est l'adresse du site (PUBLIC_URL) ; nicephos.art est renvoyé vers www par une règle de redirection,
+# appliquée avant les Workers ; vigie.nicephos.art (console, derrière Access) ne passe jamais par ce Worker.
 routes = [
-  { pattern = "nicephos.art/*", zone_name = "nicephos.art" },
+  { pattern = "www.nicephos.art/*", zone_name = "nicephos.art" },
 ]
 
 # Journaux du Worker coupés : ils garderaient l'adresse complète des pages (dont « /pour-vous/<jeton> »).
