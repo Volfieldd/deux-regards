@@ -50,6 +50,12 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - les brouillons ne sont pas servis publiquement (l'admin les voit via `/admin/media/`, sous session, sans cache) ;
   - aucune métadonnée par défaut.
 
+## Thèmes et aperçus publics
+
+Le choix par rubrique passe par `POST /admin/apparence/compositions`, avec permission `site.apparence` et jeton CSRF. Le catalogue des thèmes et des rubriques est fermé ; toute configuration invalide est refusée avant l’écriture atomique. Le retour historique ne se combine pas avec des sélections dans la même requête. Les aperçus reposent sur la session serveur ; les réponses de session restent `private, no-store`. Changer de thème ne publie aucun contenu et ne change pas les droits des galeries privées.
+
+La Vigie reçoit `config_public_changed` pour `public_design`, avec les identifiants autorisés avant/après, aplatis pour respecter son format. Une valeur altérée est remplacée par « invalide » ; les refus `input_validation_fail` ne recopient pas la saisie. Les protections communes (blocage, gel, verrouillage, confirmation d’identité) et la corrélation DS23 restent applicables. Un aperçu ou un enregistrement identique ne signale pas de changement public. Les contrôles locaux et leurs limites sont décrits dans la [validation de la PR 188](https://github.com/Volfieldd/deux-regards/blob/main/docs/themes-par-rubrique/validation.md).
+
 ## Preuves d'antériorité
 
 - **Ce qui sort du serveur :** seule l'empreinte SHA-256 de l'original est envoyée à l'autorité d'horodatage, jamais l'image.

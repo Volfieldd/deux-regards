@@ -1,8 +1,16 @@
 # Apparence et thèmes
 
-L'apparence du site public se règle dans **Admin → Apparence**, sans toucher au code. Un nouveau thème s'ajoute en un fichier CSS et quelques lignes. L'admin garde toujours son apparence propre.
+L'apparence du site public se règle dans **Admin → Apparence**, sans toucher au code. L'admin garde toujours son apparence propre.
 
 ## Dans l'admin
+
+### Thèmes et rubriques
+
+Le formulaire commun aux deux admins propose **V1, V2, V3, Obscura, Panoramique, Contact, Résonances, Itinérance et Hors cadre**. Choisir un thème général puis, si nécessaire, **Personnaliser par rubrique** : accueil, galeries, photos, carte, voyages, Carnets, regards, contact, informations. Les pages d’une rubrique partagent le choix ; les blocs d’une même page ne se règlent pas séparément.
+
+**Découvrir les thèmes sans les appliquer** ouvre un aperçu de session. **Appliquer les thèmes au site** publie les choix ; installer le code ne les active pas. **Revenir aux réglages historiques** retire la configuration et ses exceptions, puis retrouve l’ancienne version et sa palette. Les chambres noires ont leur propre palette ; V1, V2 et V3 utilisent les palettes ci-dessous. Les galeries privées gardent leur présentation dédiée.
+
+Voir le [mode d’emploi détaillé](https://github.com/Volfieldd/deux-regards/blob/main/docs/aide/08-apparence.md#thèmes-et-rubriques). Les sections suivantes décrivent les palettes et leur extension ; ajouter une composition demande aussi de l’inscrire dans le catalogue des thèmes et de vérifier les pages concernées.
 
 ### Choisir un thème
 

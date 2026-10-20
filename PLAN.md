@@ -291,6 +291,8 @@ storage/           données (hors Git) : base SQLite, originals/ (jamais servi),
 
 ## Feuille de route
 
+**Thèmes par rubrique — PR 188, version 1.188.0 (implémenté, en attente de fusion et de déploiement).** Neuf choix : les trois présentations historiques et six chambres noires ; thème général et exceptions par rubrique dans les deux admins, aperçu personnel, retour historique, galerie distincte, ouverture manuelle et mode calme. Aucun changement d’apparence à l’installation. Dans ce nouveau système, les Carnets restent disponibles avec un thème général V1 grâce au rendu V2 ; les restrictions V1 mentionnées plus bas décrivent le fonctionnement historique. La route `/galerie` est livrée pour ce système ; `/series` reste à traiter. [Fonctionnement](docs/themes-par-rubrique/README.md) et [validation, captures et limites](docs/themes-par-rubrique/validation.md). Ces contrôles ciblés ne constituent pas une certification RGAA/RGESN ni une validation sur Safari réel.
+
 Fait côté nom et domaine : **Nicephos**, en ligne sur `https://www.nicephos.art` (toutes les autres adresses y sont redirigées par Cloudflare, voir [Déploiement](docs/wiki/Déploiement.md)).
 
 À faire, par ordre de priorité :

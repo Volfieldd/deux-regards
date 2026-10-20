@@ -2,6 +2,14 @@
 
 Ce que vos visiteurs peuvent faire, pour savoir ce que vos réglages changent.
 
+## Thèmes par rubrique
+
+L’apparence peut varier selon la rubrique : accueil, galeries, photos, carte, voyages, Carnets, regards, contact ou informations. Les trois présentations historiques et six chambres noires sont disponibles. Le choix se règle dans [Apparence → Thèmes et rubriques](apparence#thèmes-et-rubriques) ; installer la mise à jour ne change pas le site publié.
+
+Dans une chambre noire, les images d’ouverture se choisissent manuellement, sans défilement automatique. **Mode calme**, en pied de page, réduit les mouvements facultatifs ; le réglage de réduction des animations de l’appareil est toujours respecté. La photo conserve ses connexes et sa mini-carte lorsqu’un lieu est publié. Les voyages et les Carnets gardent leurs fonctions. Les galeries privées conservent leur présentation dédiée.
+
+Quand les thèmes par rubrique sont activés, le menu Galerie ouvre `/galerie`, avec son propre thème. Les Carnets restent accessibles même avec un thème général V1 ; ils utilisent alors la présentation V2. Les descriptions des accueils ci-dessous concernent les présentations historiques V1 et V2.
+
 ## Langues
 
 Le site existe en **français** (adresses habituelles, `/photo/…`), **anglais** (`/en/…`) et **allemand** (`/de/…`).

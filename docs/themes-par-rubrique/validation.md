@@ -68,3 +68,20 @@ Corrections :
 Exécution sous Node 22 dans l’image locale `site-photo:latest`, avec `AVIF_EFFORT=0` et `TEST_AVEC_VIGIE=1` pour la campagne Vigie. `themes-vigie.test.js` raccorde les vrais modules de réception, stockage et règles par injection HTTP à deux bases temporaires. Les alertes de création du compte de test sont prises comme état initial ; les sessions du jeu de test portent le contexte du navigateur utilisé. Les verrous qui ferment une session sont vérifiés par un refus 401, les autres blocages par 403, ainsi que par l’absence d’écriture.
 
 Cette relecture ne constitue ni un audit intégral du dépôt ni un test de l’installation de production : réseau Docker, Cloudflare, Zitadel et transport HTTP externe non exercés. Aucun changement visuel supplémentaire, aucune nouvelle capture, aucune photo réelle ajoutée. Les tests navigateur précédents restent documentés séparément ci-dessus.
+
+## Notes de version et règles du dépôt — 20 octobre 2026
+
+Synchronisation avec `main` (`ea0528b`, correction des notifications Signal), puis ajout de la version **1.188.0** dans `package.json`, les deux métadonnées de `package-lock.json` et en tête de `server/nouveautes.json`. La note 1.186.0 est conservée. Le titre et les trois lignes de nouveautés sont traduits en français, anglais et allemand ; les instructions d’administration sont filtrées par `site.apparence`.
+
+Documentation complétée : aide du site public dans les trois langues, spécifications et copie wiki, visite de l’admin, apparence, sécurité, catalogue des tests et feuille de route. Les titres existants de l’aide sont conservés ; les nouvelles sections ont la même position et le même niveau dans les trois langues. Le paragraphe Sécurité est explicite dans la PR. Les sources du wiki restent dans la PR, sans publication anticipée.
+
+**16 tests ciblés passants, aucun échec**, sous Node 22 dans l’image locale `site-photo:latest`, avec stockage temporaire :
+
+```sh
+AVIF_EFFORT=0 node --test test/nouveautes.test.js test/aide.test.js test/langues-admin.test.js test/vigie-notifications.test.js
+AVIF_EFFORT=0 node --test --test-name-pattern="Nouveautés v2" test/admin-v2-suivi.test.js
+```
+
+La première commande exécute 15 tests ; la seconde, un parcours HTTP de la page et de la fenêtre Nouveautés en admin v2, avec contrôle du repli v1. Les tests couvrent aussi les versions et langues du catalogue, la fenêtre affichée une seule fois selon les droits, les liens et ancres de l’aide, et les notifications Signal reprises de `main`. `git diff --check` ne signale aucune erreur. Pas de nouvelle campagne navigateur pour ces seuls changements de documentation et de métadonnées ; la couverture précédente reste décrite ci-dessus.
+
+**Exception de nommage** : la branche dédiée existante `codex/themes-par-section` est conservée pour maintenir la PR #188 et ses preuves de revue ; elle ne suit pas le préfixe `feat/…` prévu par le guide. Aucune fusion dans `main`, aucun déploiement ni changement des réglages de production.
