@@ -23,7 +23,7 @@ const xml = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 const jsonLd = obj => JSON.stringify(obj).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 
 // Les Carnets sont-ils ouverts pour cette requête ? v2 ou v3 appliquée, ou aperçu d'un administrateur.
-export const carnetOpen = (app, request) => usesV2(app.publicVersion.forRequest(request).version);
+export const carnetOpen = (app, request) => usesV2(app.publicVersion.forRequest(request, 'carnets').version);
 
 export function registerCarnetPages(app, { lang, repo, base, ignored, gate, shareLimit }) {
   const c = app.carnet;
@@ -286,7 +286,7 @@ ${entries}
 // Plan du site (B69) : /carnet et chaque billet publié, seulement en v2 ou v3 appliquée (en v1, ces pages n'existent pas), lastmod
 // = mise à jour signalée ou publication, langues publiées seulement.
 export function carnetSitemap(app) {
-  if (!usesV2(app.publicVersion.setting())) return [];
+  if (!usesV2(app.publicVersion.versionForSection('carnets'))) return [];
   const posts = app.carnet.published();
   if (!posts.length) return [];
   const day = ms => new Date(ms).toISOString().slice(0, 10);

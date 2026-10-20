@@ -94,7 +94,7 @@ Le filigrane (texte ou logo, position, opacité, taille), le niveau de métadonn
 
 ## Apparence
 
-Thème du site public, avec aperçu réservé aux admins, emblème et sous-titre : voir [Apparence et thèmes](Apparence-et-thèmes).
+**Thèmes et rubriques** propose un thème général (V1, V2, V3 ou une des six chambres noires), puis des exceptions par rubrique. Le même formulaire existe dans les deux admins : **Réglages → Identité et apparence** en v2, **Apparence** en v1. L’aperçu est réservé à votre session ; **Appliquer les thèmes au site** active les choix pour les visiteurs. **Revenir aux réglages historiques** retire les exceptions et retrouve l’ancienne version et sa palette. L’installation seule ne change pas le site publié. Emblème, sous-titre et palettes historiques restent sur cette page : voir [Apparence et thèmes](Apparence-et-thèmes).
 
 ## Site public, droits et confidentialité
 

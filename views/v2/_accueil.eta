@@ -3,7 +3,9 @@
       #regards, #series et #galerie mènent toujours quelque part. Pas de Carnets : la rubrique n'existe pas encore. */ %>
 <% const t = it.t, v = it.v2, ic = v.ic, authors = it.regards.slice(1).filter(r => r.count);
    const series = it.seriesAll.filter(c => c.count && c.cover); %>
-<% if (it.hero.length && it.v3) { /* v3 : plein cadre, puis la promesse (views/v3/_ouverture.eta) */ %>
+<% if (it.hero.length && it.darkroom) { %>
+<%~ include('../themes/_ouverture', it) %>
+<% } else if (it.hero.length && it.v3) { /* v3 : plein cadre, puis la promesse (views/v3/_ouverture.eta) */ %>
 <%~ include('../v3/_ouverture', it) %>
 <% } else if (it.hero.length) { %>
 <%~ include('./_ouverture', it) %>

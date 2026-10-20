@@ -63,3 +63,11 @@ Each theme is shown with its three colours (background, ink, accent) and a descr
 - **Photo of a drawing:** the phone’s orientation is applied; a photographed drawing is not shown sideways.
 - **Sharing image:** re-encoded as JPEG, 1200 px at most. Transparency becomes a **white** background behind a dark drawing (cut-out black logo), **black** behind a light one.
 - **SVG:** refused on upload.
+
+## Themes by section
+
+The **Themes and sections** panel now lets you choose a default design and optional exceptions: home, galleries/search, photo viewer, map, journeys, journals, about, contact and information pages. Choose from V1/V2/V3 or Obscura, Panoramique, Contact, Résonances, Itinérance and Hors cadre. The darkroom designs include their palette; the legacy designs keep the palette setting described above.
+
+For example, choose Obscura by default, V1 for the home page and Résonances for journals. **Apply themes to the site** saves the whole selection. “Use the default theme” follows later changes; an exception remains until removed. This applies to pages in a section, not individual blocks within a page. The Gallery menu opens a separate page.
+
+Previews affect your session only. **Return to the visitors’ theme** exits preview. **Return to legacy settings** removes the exceptions and restores the previous version and palette choices. Installing the code does not activate this system automatically. Journals remain available in the new system, using V2 when V1 is selected. Private galleries keep their dedicated presentation.

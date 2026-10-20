@@ -9,6 +9,7 @@ import { clientKey } from '../ratelimit.js';
 import { TRAP_PATH } from './piege.js';
 import { settingsOf, SESSION_TRIGGER } from './retrait.js';
 import { createEdgeVerifier } from './bordure.js';
+import { validDesignSettings } from '../designs.js';
 
 // Branchement de la Vigie sur le site (seulement quand VIGIE_URL est réglé ; sans elle, retireVigie() efface ce qu'elle
 // avait laissé). Points d'émission communs à tout le site : saisies, pièges, méthodes inattendues, rafales de 404,
@@ -292,13 +293,21 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   //     privacy_exposure_changed.
   // Quelle que soit la route (aucun emit à ajouter route par route) ; ce qui change hors de l'admin (ligne de commande)
   // est vu à l'écriture suivante.
-  const WATCHED = /^(public_version|site_name|tagline(_en|_de)?|hero(_tel)?|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
+  const WATCHED = /^(public_design|public_version|site_name|tagline(_en|_de)?|hero(_tel)?|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
   const CONTACT = new Set(['rights_contact', 'privacy_contact', 'carnet_contact', 'legal_email', 'legal_phone', 'legal_address', 'legal_names', 'legal_director']);
-  const PLAIN = new Set(['public_version', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host']);
+  const PLAIN = new Set(['public_design', 'public_version', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host']);
   const settingsRows = db.prepare('SELECT key, value FROM settings');
   const shownTimes = db.prepare('SELECT COUNT(*) FROM photos WHERE show_time = 1').pluck();
   const parseJson = v => { try { return JSON.parse(v); } catch { return v; } };
   const exifMode = v => parseJson(v)?.mode ?? null;
+  // Identifiants connus uniquement : jamais de contenu arbitraire écrit directement en base.
+  // Aplatir les rubriques garde le détail dans la profondeur bornée des événements de la Vigie.
+  const publicValue = (key, raw) => {
+    if (key === 'exif') return exifMode(raw);
+    const value = parseJson(raw) ?? null;
+    if (key !== 'public_design' || value === null) return value;
+    return validDesignSettings(value) ? { default: value.default, ...value.sections } : 'invalide';
+  };
   const snapshot = () => ({ settings: Object.fromEntries(settingsRows.all().filter(r => WATCHED.test(r.key)).map(r => [r.key, r.value])), heure: shownTimes.get() });
   let lastSnapshot = null;
   // Textes publiés (BV-20, BV-21) : instantané comparé comme les réglages. Liens vers le site lui-même exclus.
@@ -342,7 +351,7 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     const keys = [...new Set([...Object.keys(now.settings), ...Object.keys(before.settings)])].filter(k => now.settings[k] !== before.settings[k]).sort();
     if (keys.length) {
       const contact = keys.some(k => CONTACT.has(k));
-      const valeurs = Object.fromEntries(keys.filter(k => PLAIN.has(k)).map(k => [k, k === 'exif' ? { avant: exifMode(before.settings[k]), apres: exifMode(now.settings[k]) } : { avant: parseJson(before.settings[k]) ?? null, apres: parseJson(now.settings[k]) ?? null }]));
+      const valeurs = Object.fromEntries(keys.filter(k => PLAIN.has(k)).map(k => [k, { avant: publicValue(k, before.settings[k]), apres: publicValue(k, now.settings[k]) }]));
       sec.emit('config_public_changed', { request, severity: contact ? 'moyen' : undefined, emetteur: 'server/securite · réglages publics', detail: { cles: keys.slice(0, 30), contact_change: contact, valeurs } });
     }
     const exifAll = exifMode(now.settings.exif) === 'all' && exifMode(before.settings.exif) !== 'all';

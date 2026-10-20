@@ -2,6 +2,14 @@
 
 What your visitors can do, so you know what your settings change.
 
+## Themes by section
+
+The appearance can vary by section: home, galleries, photos, map, trips, Journals, photographers, contact or information. The three existing layouts and six darkroom designs are available. Choose them in [Appearance → Themes and sections](apparence#thèmes-et-rubriques); installing the update does not change the published site.
+
+In a darkroom design, opening images are selected manually, without autoplay. **Calm mode**, in the footer, reduces optional motion; the device’s reduced-motion setting is always respected. Photos retain related images and a mini-map when a location is published. Trips and Journals retain their features. Private galleries keep their dedicated layout.
+
+When section themes are enabled, the Gallery menu opens `/galerie`, with its own theme. Journals remain accessible even with V1 as the general theme; they then use the V2 layout. The home page descriptions below refer to the existing V1 and V2 layouts.
+
 ## Languages
 
 The site exists in **French** (usual addresses, `/photo/…`), **English** (`/en/…`) and **German** (`/de/…`).

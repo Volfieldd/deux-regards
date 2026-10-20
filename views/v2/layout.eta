@@ -53,17 +53,21 @@
 <% if (it.formulaires || it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/formulaires.css') %>">
 <% } %><% if (it.prive) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/prive.css') %>">
 <% } %><% if (it.v3) { /* v3 : le dessin de la v3, chargé en dernier (docs/maquettes-v3, server/version-publique.js) */ %>  <link rel="stylesheet" href="<%= it.asset('css/v3/v3.css') %>">
+<% } %><% if (it.darkroom) { %>
+  <link rel="stylesheet" href="<%= it.asset('css/themes/chambre-noire.css') %>">
+  <script src="<%= it.asset('js/chambre-noire.js') %>" defer></script>
 <% } %><% if (brand.favicon64) { %>
   <link rel="icon" type="image/png" href="/brand/<%= brand.favicon64 %>">
   <link rel="apple-touch-icon" href="/brand/<%= brand.favicon180 %>">
 <% } %>
   <script src="<%= it.asset('js/v2/site.js') %>" defer></script>
 </head>
-<body class="<%= it.bodyClass || '' %>">
+<body class="<%= it.bodyClass || '' %>"<% if (it.darkroom) { %> data-composition="<%= it.darkroom %>" data-section="<%= it.designSection %>"<% } %>>
 <a class="skip" href="#contenu"><%= t.v2.skip %></a>
 <% if (it.vueSite) { %>
 <%~ include('../_vue-site', it.vueSite) %>
 <% } %>
 <%~ it.body %>
+<% if (it.darkroom) { %><div class="wrap room-preferences"><button type="button" class="bascule" data-room-calm hidden aria-pressed="false"><%= ({fr:'Mode calme',en:'Calm mode',de:'Ruhiger Modus'})[lang] || 'Mode calme' %></button></div><% } %>
 </body>
 </html>

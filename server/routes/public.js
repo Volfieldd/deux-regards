@@ -162,6 +162,7 @@ export default async function publicRoutes(app) {
     const day = d => (d ? d.slice(0, 10) : undefined);
     const pagesList = [
       { loc: '/', lastmod: day(latest) },
+      ...(app.publicVersion.designSettings() ? [{ loc: '/galerie', lastmod: day(latest) }] : []),
       ...repo.categories().filter(c => photos.some(p => p.category_slug === c.slug)).map(c => ({ loc: galleryUrl({ serie: c.slug }) })),
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
@@ -206,6 +207,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   const finder = createSearch({ db: app.db });
   const t = UI[lang];
   const base = helpers(lang);
+  const originalGalleryUrl = base.galleryUrl;
+  base.galleryUrl = filter => { const url = originalGalleryUrl(filter); return app.publicVersion.designSettings() && url === base.u('/') ? base.u('/galerie') : url; };
   const trusted = Boolean(app.config.trustProxy);
 
   // Arrivée sur une page française : la langue choisie avec le sélecteur, sinon celle du pays et du navigateur
@@ -293,7 +296,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       ...base, filter, settings, tagline, intro: pick(settings, 'intro', lang), hero, heroTel, series, regards, photos, total: all.length,
       categoriesCount: categories.length, activeAuthor, activeSerie, page, seriesAll,
       pageTitle: title ? `${title} · ${siteName}` : siteName, siteName,
-      canonical: galleryUrl({ regard: filter.regard, serie: filter.serie }),   // même contenu, quel que soit l'ordre
+      canonical: page === 'galerie' && !filter.regard && !filter.serie && app.publicVersion.designSettings() ? '/galerie' : galleryUrl({ regard: filter.regard, serie: filter.serie }),   // même contenu, quel que soit l'ordre
       description: tagline,
       ogImage: hero[0] && `/media/${variantName(hero[0].file, widthsFor(hero[0].width).at(-1), 'webp', hero[0].variant_key)}`,
     });
@@ -303,6 +306,13 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const filter = readFilter(request, repo.authors(), repo.categories());
     app.stats.hit(request, { page: filter.serie ? `serie:${filter.serie}` : filter.regard ? `auteur:${filter.regard}` : 'accueil' });
     return renderGallery(reply, filter);
+  });
+
+  app.get('/galerie', async (request, reply) => {
+    if (!app.publicVersion.designSettings() && !app.publicVersion.forRequest(request).darkroom) return reply.callNotFound();
+    const filter = readFilter(request, repo.authors(), repo.categories());
+    app.stats.hit(request, { page: 'galerie' });
+    return renderGallery(reply, filter, 'galerie');
   });
 
   app.get('/serie/:slug', async (request, reply) => {
