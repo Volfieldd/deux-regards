@@ -22,6 +22,7 @@ export const OWN = {
   vigie_purge: E('info', 'vigie · contrôle'),
   vigie_alerte: E('info', 'vigie · contrôle'),
   vigie_signal: E('info', 'vigie · contrôle'),
+  vigie_dossier: E('info', 'vigie · contrôle'),                // dossiers : ouverture, fusion, aggravation, sommeil, clôture, gestes
   vigie_controle_roles: E('info', 'vigie · contrôle'),
   vigie_moteur_sature: E('haut', 'vigie · contrôle'),
   vigie_regle_lente: E('moyen', 'vigie · contrôle'),

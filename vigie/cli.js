@@ -35,6 +35,10 @@ const HELP = `Commandes :
   alerte <id>                              détail : règle, entité, sources, événements, réponse
   prendre <id>                             alerte prise en charge
   classer <id> <incident|faux_positif|test> [--note "…"]   alerte close
+  dossiers [--tous]                        dossiers ouverts (ou tous, 50 derniers) : gravité, phase, confiance, enjeu
+  dossier <id>                             explication, entités, signaux et faits (40 derniers), alertes
+  dossier <id> prendre | classer <incident|faux_positif|test|legitime> [--note "…"]   (« legitime » : motif obligatoire)
+  dossier <id> detacher <type:clé> --motif "…" | rattacher <type:clé> | fusionner <id2>
   entites                                  entités les plus chaudes (score, sources)
   regles                                   règles et leur mode
   regle <règle> <arret|observer|alerter|bloquer> [--duree 4h] [--motif "…"]   motif obligatoire pour réduire
@@ -165,6 +169,34 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
       }
       case 'prendre': ouverte(Number(rest[0])); return engine.classify(Number(rest[0]), { classement: null, par, statut: 'en_cours' }) ? `Alerte #${rest[0]} prise en charge.` : 'Alerte inconnue.';
       case 'classer': ouverte(Number(rest[0])); return engine.classify(Number(rest[0]), { classement: rest[1], note: opt.note === true ? '' : opt.note || '', par }) ? `Alerte #${rest[0]} close (${rest[1]}).` : 'Alerte inconnue.';
+      case 'dossiers': {
+        const rows = engine.dossiers.liste({ tous: Boolean(opt.tous) });
+        return rows.map(d => `#${d.id}  ${d.gravite.padEnd(8)} ${d.statut.padEnd(8)} ${d.piste.padEnd(12)} phase ${d.phase_max ?? '—'} (${d.coherence} dans l’ordre)  confiance ${d.confiance}  enjeu ${d.enjeu}${d.dissimulation ? '  dissimulation' : ''}${d.recidive ? '  récidive' : ''}  ${d.explication.titre || ''}`).join('\n') || 'Aucun dossier.';
+      }
+      case 'dossier': {
+        const id = Number(rest[0]);
+        const D = engine.dossiers;
+        const geste = rest[1];
+        const entite = () => { const m = /^([a-z]+):(.+)$/.exec(String(rest[2] || '')); if (!m) throw new DecisionError('entité attendue : <type:clé> (ip:203.0.113.7, compte:<sub>…)'); return [m[1], m[2]]; };
+        try {
+          if (geste === 'prendre') { D.prendre(id, par); return `Dossier #${id} pris en charge.`; }
+          if (geste === 'classer') { D.classer(id, { classement: rest[2], note: opt.note === true ? '' : opt.note || '', par }); return `Dossier #${id} clos (${rest[2]}).`; }
+          if (geste === 'detacher') { const [k, v] = entite(); D.detacher(id, k, v, { motif, par }); return `Dossier #${id} : ${k} ${v} détaché.`; }
+          if (geste === 'rattacher') { const [k, v] = entite(); D.rattacher(id, k, v, { par }); return `Dossier #${id} : ${k} ${v} rattaché.`; }
+          if (geste === 'fusionner') return `Dossier #${D.fusionner(id, Number(rest[2]), { par })} : fusion faite.`;
+          if (geste) throw new DecisionError('geste : prendre, classer, detacher, rattacher ou fusionner');
+        } catch (err) { if (err instanceof DecisionError) throw err; throw new DecisionError(err.message); }
+        const d = D.fiche(id);
+        if (!d) return 'Dossier inconnu.';
+        const iso = t => new Date(t).toISOString().slice(0, 19).replace('T', ' ');
+        const x = d.explication;
+        return [`Dossier #${d.id} : ${x.titre || ''}`, `Piste ${d.piste}, ${d.statut}${d.classement ? ` (${d.classement})` : ''}${d.recidive ? ', récidive' : ''}${d.fusionne_dans ? `, fusionné dans #${d.fusionne_dans}` : ''}${d.tronque ? ', TRONQUÉ (plafond atteint)' : ''}`,
+          ...(x.lignes || []), ...(x.modificateurs?.length ? [`Modificateurs : ${x.modificateurs.join(', ')}`] : []),
+          `Ouvert ${iso(d.ouvert_a)} UTC, dernier signe ${iso(d.derniere)} UTC`,
+          'Entités :', ...d.entites.map(e => `  ${e.role.padEnd(8)} ${e.kind.padEnd(8)} ${e.key}  (${e.force}${e.via ? `, par ${e.via}` : ''})${e.detache_a ? '  DÉTACHÉE' : ''}`),
+          'Signaux et faits (heure de la source) :', ...d.signaux.slice(-40).map(s => `  ${iso(s.survenu_a)}  ${(s.phase ? `${s.phase}` : '·')} ${s.nature.padEnd(6)}${s.promu ? '*' : ' '} ${s.regle}${s.entite_key ? `  ${s.entite_kind} ${s.entite_key}` : ''}${s.objet ? `  ${s.objet}` : ''}${s.alerte_id ? `  alerte #${s.alerte_id}` : ''}`),
+          `Alertes : ${d.alertes.map(a => `#${a.id} ${a.regle} (${a.gravite}, ${a.statut})`).join(', ') || 'aucune'}`].join('\n');
+      }
       case 'entites': return engine.top(20).map(e => `${e.kind.padEnd(8)} ${e.key}  score ${e.score.toFixed(1)}  sources ${e.sources.join('+') || '—'}  ${e.signaux} signaux`).join('\n') || 'Aucune entité active.';
       case 'regles': return engine.rules().map(r => `${r.id.padEnd(40)} ${r.mode.padEnd(9)} ${(r.cas || '').padEnd(5)}${r.expire ? ` ${r.expire < now() ? 'EXPIRÉE' : 'expire'} le ${new Date(r.expire).toISOString().slice(0, 10)}` : ''}`).join('\n') + `\nSeuils : ${Object.entries(engine.thresholds()).map(([k, v]) => `${k} ${v}`).join(', ')}`;
       case 'regle':

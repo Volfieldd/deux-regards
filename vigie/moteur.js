@@ -3,7 +3,9 @@ import { fileURLToPath } from 'node:url';
 import { pointsOf, THRESHOLDS, HALF_LIFE_MIN, SOURCE_MIN, QUORUM, sourceOf, MODES } from './poids.js';
 import { rank } from './vocabulaire.js';
 import { loadRules, createCorrelator, fieldOf, RegexTimeout } from './sigma.js';
-import { createDetectors, createChains, lru, DETECTEURS } from './detecteurs.js';
+import { createDetectors, lru, DETECTEURS } from './detecteurs.js';
+import { projeter, projeterDetecteur } from './phases.js';
+import { createDossiers } from './dossiers.js';
 import { LISTS } from './menaces.js';
 import { parseDuration } from './decisions.js';
 import { cleReseau } from '../server/securite/adresses-ip.js';
@@ -22,7 +24,7 @@ import { cleReseau } from '../server/securite/adresses-ip.js';
 // réception, la mémoire ne dépend pas du retard, un redémarrage reprend l'analyse où elle s'était arrêtée.
 
 const DECAY = ms => 0.5 ** (ms / (HALF_LIFE_MIN * 60e3));
-const IGNORED = new Set(['vigie_alerte', 'vigie_decision', 'vigie_interrupteur', 'vigie_signal']);
+const IGNORED = new Set(['vigie_alerte', 'vigie_decision', 'vigie_interrupteur', 'vigie_signal', 'vigie_dossier']);
 const parse = s => { try { return s ? JSON.parse(s) : {}; } catch { return {}; } };
 const RULES_DIR = fileURLToPath(new URL('./regles/', import.meta.url));
 const QUIET = 24 * 3600e3;                       // alerte sans nouvel événement depuis 24 h : la suivante en ouvre une autre
@@ -53,7 +55,6 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   const { rules, correlations } = loadRules(rulesDir);
   const correlate = createCorrelator(correlations, { now });
   const detectors = createDetectors({ store, now });
-  const chain = createChains({ now });
   const threatSeen = lru(50_000);                 // « adresse|liste » → jour : points de liste une fois par jour
   const signalSeen = lru(20_000);                 // « règle|entité » → instant du dernier signal noté
   const responded = lru(10_000);                  // alerte → instant de la dernière réponse
@@ -65,6 +66,12 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     ...Object.fromEntries([...rules.filter(r => r.generate && r.signal), ...correlations].map(r => [`sigma.${r.name}`, { cas: r.cas, mode: r.mode, titre: r.title, sourceUnique: r.sourceUnique, expire: r.expireAt, tags: r.tags || [] }])),
     // Détecteurs : leur barème (vigie/detecteurs.js, DETECTEURS), lu aussi par l'écran des réglages.
     ...Object.fromEntries(Object.entries(DETECTEURS).map(([n, d]) => [`detecteur.${n}`, { cas: d.cas, mode: 'observer', titre: n.replaceAll('_', ' ') }])),
+  };
+  // Phase et nature de chaque règle et détecteur dans les dossiers (vigie/phases.js) : une projection des étiquettes ATT&CK,
+  // calculée une fois au chargement ; la chaîne d'attaque est calculée sur le dossier lui-même.
+  const PROJECTION = {
+    ...Object.fromEntries([...rules.filter(r => r.generate && r.signal), ...correlations].map(r => [`sigma.${r.name}`, projeter(r)])),
+    ...Object.fromEntries(Object.entries(DETECTEURS).map(([n, d]) => [`detecteur.${n}`, projeterDetecteur(n, d)])),
   };
   const q = {
     entity: db.prepare('SELECT * FROM entities WHERE kind = ? AND key = ?'),
@@ -108,6 +115,13 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     const fromSnapshot = setting.get('controle_roles_admins', null);
     return new Set(Array.isArray(fromSnapshot?.administrateurs) ? fromSnapshot.administrateurs : []);
   };
+  // Dossiers (docs/etudes/vigie-dossiers.md) : au-dessus des alertes, qui ne changent pas. Une erreur des dossiers est notée
+  // et n'annule jamais la détection d'un événement.
+  const dossiers = createDossiers({ store, now,
+    adresses: { isPrivate, trusted, admins, linkedSubs: (ip, since) => q.linkedSubs.all(ip, since) },
+    menaces: ip => (threats && modeOf('detecteur.menaces') !== 'arret' ? threats.labels(ip) : []),
+    hooks: { chaine: (entite, dossier, phases) => { if (entite) raise('detecteur.chaine_attaque', entite, DETECTEURS.chaine_attaque.gravite, null, { sources: [], dossier, phases }); } } });
+  const surDossiers = (quoi, fn) => { try { fn(); } catch (err) { log?.error({ err: err.message, quoi }, 'Vigie : dossiers'); } };
 
   function current(kind, key, t = now()) {
     const row = q.entity.get(kind, key);
@@ -160,7 +174,16 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     return e.sinon ? { kind: 'site', key: String(e.sinon) } : null;
   }
 
-  function raise(regle, entite, gravite, row, { score = null, sources = [], reponse = null } = {}) {
+  // Alerte, puis son dossier : à l'ouverture et à l'aggravation seulement (une alerte qui dure, une rafale de 5 000
+  // événements sur une adresse, ne recalcule pas son dossier à chaque événement : elle en avance la date ; ses
+  // événements restent rattachés à l'alerte).
+  function raise(regle, entite, gravite, row, opts = {}) {
+    const r = raiseAlerte(regle, entite, gravite, row, opts);
+    if (!r) return null;
+    surDossiers('alerte', () => (r.change ? dossiers.surAlerte({ id: r.id, regle, entite, gravite: r.gravite }, row) : dossiers.alerteDure(r.id, row)));
+    return r.id;
+  }
+  function raiseAlerte(regle, entite, gravite, row, { score = null, sources = [], reponse = null, dossier = null, phases = null } = {}) {
     const mode = modeOf(regle);
     if (mode === 'arret') return null;
     const t = now();
@@ -175,14 +198,14 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       if (g !== a.gravite) store.own('vigie_alerte', { emetteur: `vigie/moteur.js · ${regle}`, sub: entite.kind === 'compte' ? entite.key : undefined,
         detail: { action: 'aggravee', id: a.id, regle, entite, gravite: g, avant: a.gravite, sources: merged, score } });
       if (mode === 'bloquer' && t - (responded.get(a.id) ?? 0) >= RESPOND_EVERY) respond(a.id, regle, entite, reponse);
-      return a.id;
+      return { id: a.id, gravite: g, change: g !== a.gravite || a.dossier_id == null };
     }
     const id = Number(q.insert.run({ regle, cas: REGISTRY[regle]?.cas || null, entite_kind: entite.kind, entite_key: entite.key, gravite, mode, t, score, sources: JSON.stringify(sources) }).lastInsertRowid);
     if (row?.seq) q.addEvent.run(id, row.seq);
     store.own('vigie_alerte', { emetteur: `vigie/moteur.js · ${regle}`, sub: entite.kind === 'compte' ? entite.key : undefined,
-      detail: { action: 'ouverte', id, regle, cas: REGISTRY[regle]?.cas || null, entite, gravite, mode, sources, score } });
+      detail: { action: 'ouverte', id, regle, cas: REGISTRY[regle]?.cas || null, entite, gravite, mode, sources, score, dossier: dossier ?? undefined, phases: phases ?? undefined } });
     if (mode === 'bloquer') respond(id, regle, entite, reponse);
-    return id;
+    return { id, gravite, change: true };
   }
 
   // Réponses automatiques (mode « bloquer », interrupteur des blocages en marche), jamais en double.
@@ -242,14 +265,16 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     // Noté dans la chaîne une fois par 10 minutes pour la même règle et la même entité (les points, eux, comptent tous).
     const k = `${regle}|${entite.kind}|${entite.key}`;
     const t = now();
-    if (t - (signalSeen.get(k) ?? -Infinity) >= SIGNAL_DEDUP) {
+    const note = t - (signalSeen.get(k) ?? -Infinity) >= SIGNAL_DEDUP;
+    if (note) {
       signalSeen.set(k, t);
       store.own('vigie_signal', { emetteur: `vigie/moteur.js · ${regle}`, sub: entite.kind === 'compte' ? entite.key : undefined, reference: row?.seq ? `events#${row.seq}` : undefined,
         detail: { regle, titre, cas, entite, gravite, tags, sources, ...detail } });
     }
+    // Dossiers : le signal noté (une fois par 10 minutes) y entre avec sa phase, avant l'alerte qui s'y rattache.
+    if (note && PROJECTION[regle]) surDossiers('signal', () => dossiers.surSignal({ regle, entite, gravite, sources, detail, projection: PROJECTION[regle] }, row));
     if (sourceUnique) raise(regle, entite, gravite, row, { sources, reponse });
     else for (const s of sources.length ? sources : [null]) { score(entite, points / Math.max(sources.length, 1), s, row); }
-    if (tags.length && chain(entite, tags)) raise('detecteur.chaine_attaque', entite, DETECTEURS.chaine_attaque.gravite, row, { sources });
   }
 
   function processRow(row) {
@@ -301,6 +326,9 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     }
     // Détecteurs comportementaux.
     for (const s of detectors.onEvent(row)) signal({ regle: `detecteur.${s.nom}`, titre: s.nom.replaceAll('_', ' '), ...s, detail: s.detail }, row, sources);
+    // Faits ordinaires (connexions, lectures, exports…) : rattachés à leurs dossiers, ou ouvrent un dossier sous un accès
+    // douteux (étude 4.6).
+    surDossiers('fait', () => dossiers.surFait(row));
   }
 
   // Un lot dans une seule transaction (une seule écriture forcée sur disque : abaques, docs/etudes/vigie-capacite.md),
@@ -379,6 +407,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   let silent = false, lastClose = 0;
   function tick() {
     correlate.prune();
+    surDossiers('cycle', () => dossiers.tick());
     if (now() - lastClose >= 3600e3) { lastClose = now(); closeQuiet(); }
     if (!switches.isOn('detection')) return;
     for (const s of detectors.periodic()) signal({ regle: `detecteur.${s.nom}`, titre: s.nom.replaceAll('_', ' '), ...s }, null, ['site']);
@@ -429,6 +458,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   const DECISIONS_GARDE = 395 * 864e5;           // décisions levées ou échues : gardées 13 mois, comme les alertes closes
   function purge() {
     db.prepare('DELETE FROM entities WHERE derniere < ?').run(now() - 30 * 864e5);
+    surDossiers('purge', () => dossiers.purge());
     db.prepare('DELETE FROM entity_links WHERE derniere < ?').run(now() - 90 * 864e5);
     // Alertes closes depuis plus de 13 mois (et leurs liens vers les événements, eux-mêmes purgés à 13 mois).
     db.transaction(() => {
@@ -495,6 +525,6 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     if (value > before) store.own('vigie_surveillance_reduite', { emetteur: par, detail: { objet: `seuil:${kind}`, valeur: value, avant: before, motif: m } });
   };
 
-  return { process, enqueue, drain, lag, detectors, tick, closeQuiet, summary, current, top, purge, classify, note, setMode, setThreshold, modeOf, thresholds,
+  return { process, enqueue, drain, lag, detectors, dossiers, tick, closeQuiet, summary, current, top, purge, classify, note, setMode, setThreshold, modeOf, thresholds,
     rules: () => Object.entries(REGISTRY).map(([id, r]) => ({ id, ...r, mode: modeOf(id) })), counts: () => ({ regles: rules.length, correlations: correlations.length }) };
 }

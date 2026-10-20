@@ -1,0 +1,386 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { VIGIE_KEYS } from './helpers.js';
+import { openVigieDb, createStore } from '../vigie/store.js';
+import { createDecisions } from '../vigie/decisions.js';
+import { createSwitches } from '../vigie/interrupteurs.js';
+import { createEngine } from '../vigie/moteur.js';
+import { ALL } from '../vigie/vocabulaire.js';
+import { coherence, entiteDossier } from '../vigie/dossiers.js';
+
+// Dossiers de la Vigie (étude docs/etudes/vigie-dossiers.md) : les cinq scénarios de la section 7, de bout en bout (les
+// événements passent par le moteur, ses règles et ses détecteurs), puis le rattachement, la fusion, les exclusions
+// d'adresses, le cycle de vie, les gestes de l'analyste et la purge.
+
+const LOG_KEY = 'cle-de-chaine-vigie-dossiers-0123456789';
+const H = 3600e3, J = 864e5, MIN = 60e3;
+const tmp = t => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-dossiers-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };
+
+function vigieOf(t, { start = Date.parse('2026-10-20T08:00:00Z') } = {}) {
+  const db = openVigieDb(path.join(tmp(t), 'vigie.db'));
+  t.after(() => db.close());
+  const clock = { t: start };
+  const now = () => clock.t;
+  const store = createStore({ db, logKey: LOG_KEY, now });
+  const decisions = createDecisions({ store, privateKey: VIGIE_KEYS.privateKey, now });
+  const switches = createSwitches({ store, now });
+  const engine = createEngine({ store, decisions, switches, now, log: { warn() {}, info() {}, error: (o, m) => { throw new Error(`${m} : ${o.err} (${o.quoi})`); } } });
+  store.onAdded(rows => engine.process(rows));
+  const add = (type, extra = {}) => store.add([{ id: crypto.randomUUID(), recu_a: now(), survenu_a: now(), type, severity: extra.severity || ALL[type].severity,
+    canal: 'ingestion signée', confiance: 'rapporté', composant: ALL[type].composant, ...extra, detail: extra.detail ? JSON.stringify(extra.detail) : undefined }]);
+  const D = engine.dossiers;
+  const dossiers = () => db.prepare('SELECT * FROM dossiers WHERE fusionne_dans IS NULL ORDER BY id').all();
+  const fiche = id => D.fiche(id);
+  const alerts = () => db.prepare('SELECT * FROM alerts ORDER BY id').all();
+  return { db, store, engine, clock, add, D, dossiers, fiche, alerts };
+}
+const at = (v, iso) => { v.clock.t = Date.parse(iso); };
+// Connexion réussie au site (empreinte d'appareil, pays).
+const connexion = (v, sub, { ip, country = 'FR', appareil = 'fp-habituel', session } = {}) =>
+  v.add('authn_login_success', { sub, ip, ip_net: ip?.replace(/\.\d+$/, '.0'), country, session, detail: { methode: 'oidc', appareil } });
+const lecture = (v, sub, id, { ip, session, objet = 'personne' } = {}) =>
+  v.add('sensitive_read', { sub, ip, session, detail: { cible: `/admin/${objet === 'personne' ? 'personnes' : `${objet}s`}/:id`, objet, id } });
+// Historique ordinaire d'un compte : une connexion par jour à 9 h (UTC), depuis la France, avec son appareil.
+function historique(v, sub, jours, fin, { ip = '198.51.100.10', appareil = 'fp-habituel' } = {}) {
+  for (let i = jours; i >= 1; i--) { v.clock.t = fin - i * J; connexion(v, sub, { ip, appareil }); }
+}
+
+test('cohérence : plus longue suite de phases dans l’ordre du temps ; entités des règles', () => {
+  assert.deepEqual(coherence(new Map([[1, 10], [2, 20], [3, 30], [6, 40], [7, 50]])), [1, 2, 3, 6, 7]);
+  assert.deepEqual(coherence(new Map([[6, 5], [3, 10], [7, 20]])), [3, 7], 'une collecte avant l’accès ne compte pas dans la suite');
+  assert.deepEqual(coherence(new Map()), []);
+  assert.deepEqual(entiteDossier({ kind: 'site', key: 'acces:41' }), { kind: 'acces', key: 'acces:41' });
+  assert.deepEqual(entiteDossier({ kind: 'vigie', key: 'chaine' }), { kind: 'cible', key: 'vigie:chaine' });
+  assert.deepEqual(entiteDossier({ kind: 'compte', key: 'a' }), { kind: 'compte', key: 'a' });
+});
+
+test('scénario 7.1 : vol de session d’un photographe, lectures puis export → un dossier critique, 5 phases dans l’ordre', t => {
+  const v = vigieOf(t);
+  const X = '203.0.113.7';
+  historique(v, 'compte-a', 10, Date.parse('2026-10-20T09:00:00Z'));
+  // La veille : un scanner depuis l'adresse de l'attaquant (repérage, sans dossier).
+  at(v, '2026-10-19T22:10:00Z');
+  for (let i = 0; i < 5; i++) { v.add('malicious_input', { ip: X, detail: { champ: 'q' } }); v.clock.t += MIN; }
+  assert.equal(v.dossiers().length, 0, 'un repérage seul n’ouvre pas de dossier');
+  // 08:52 : trois échecs ; 08:55 : connexion depuis un appareil et un pays inédits.
+  at(v, '2026-10-20T08:52:00Z');
+  for (let i = 0; i < 3; i++) { v.add('authn_login_fail', { sub: 'compte-a', ip: X }); v.clock.t += 20e3; }
+  at(v, '2026-10-20T08:55:00Z');
+  connexion(v, 'compte-a', { ip: X, country: 'NL', appareil: 'fp-attaquant', session: 's-attaq' });
+  let ds = v.dossiers();
+  assert.equal(ds.length, 1, 'échecs puis connexion sous une confiance forte : ouverture');
+  assert.equal(ds[0].piste, 'identite');
+  assert.equal(ds[0].confiance, 'forte');
+  // 09:03 → 09:40 : 34 fiches ; 09:47 : un export.
+  at(v, '2026-10-20T09:03:00Z');
+  for (let i = 1; i <= 34; i++) { lecture(v, 'compte-a', i, { ip: X, session: 's-attaq' }); v.clock.t += MIN; }
+  at(v, '2026-10-20T09:47:00Z');
+  v.add('sensitive_export', { sub: 'compte-a', ip: X, session: 's-attaq', detail: { cible: '/admin/personnes/:id/export.zip', objet: 'personne', id: 5 } });
+  ds = v.dossiers();
+  assert.equal(ds.length, 1);
+  const d = v.fiche(ds[0].id);
+  assert.equal(d.phase_max, 7);
+  assert.equal(d.coherence, 5);
+  assert.deepEqual(d.explication.chaine, [1, 2, 3, 6, 7]);
+  assert.equal(d.confiance, 'forte');
+  assert.equal(d.enjeu, 'critique');
+  assert.equal(d.gravite, 'critique');
+  assert.match(d.explication.lignes[0], /^Critique · Exfiltration atteinte, 5 phases dans l’ordre \(repérage → tentative → accès → collecte → exfiltration\)/);
+  assert.match(d.explication.lignes[1], /^Confiance forte : /);
+  for (const x of ['échecs puis connexion', 'pays inédit (NL)', 'appareil inédit']) assert.ok(d.explication.lignes[1].includes(x), x);
+  assert.match(d.explication.lignes[2], /^Enjeu critique : 34 objets personnels lus ou exportés.*export de données personnelles.*données personnelles sorties sous un accès douteux/);
+  assert.ok(d.entites.some(e => e.kind === 'ip' && e.key === X));
+  assert.ok(d.entites.some(e => e.kind === 'session' && e.key === 's-attaq'));
+  assert.equal(d.signaux.filter(s => s.regle === 'fait.sensitive_read' && s.promu).length, 34, 'lectures sous un accès hostile : toutes des jalons');
+  assert.equal(d.signaux.filter(s => s.regle === 'fait.authn_login_fail' && s.promu).length, 3, 'échecs avant l’accès : tentative');
+  assert.ok(d.signaux.some(s => s.regle === 'sigma.scanner' && s.phase === 1), 'repérage de la veille rattaché par l’adresse');
+  // Chaîne d'attaque (DS23) calculée sur le dossier, d'une entité à l'autre.
+  const chaine = v.alerts().filter(a => a.regle === 'detecteur.chaine_attaque');
+  assert.equal(chaine.length, 1);
+  assert.equal(chaine[0].dossier_id, d.id);
+  assert.ok(d.alertes.some(a => a.regle === 'detecteur.chaine_attaque'));
+});
+
+test('scénario 7.2 : photographe en voyage — ordinateur habituel : aucun dossier ; téléphone neuf : haut, puis bas après l’identité confirmée, puis appris', t => {
+  // Ordinateur habituel : pays inédit 1,5 + heure inhabituelle 1 − appareil habituel 1 = 1,5 → faible.
+  {
+    const v = vigieOf(t);
+    historique(v, 'compte-b', 21, Date.parse('2026-10-20T09:00:00Z'));
+    at(v, '2026-10-21T02:14:00Z');
+    connexion(v, 'compte-b', { ip: '192.0.2.50', country: 'JP', appareil: 'fp-habituel', session: 's-b1' });
+    for (let i = 1; i <= 12; i++) { lecture(v, 'compte-b', i, { ip: '192.0.2.50', session: 's-b1' }); v.clock.t += MIN; }
+    assert.equal(v.dossiers().length, 0);
+    assert.equal(v.D.confianceCompte('compte-b', v.clock.t - 24 * H).niveau, 'faible');
+  }
+  // Téléphone neuf : pays 1,5 + appareil 1,5 + heure 1 = 4 → moyenne.
+  const v = vigieOf(t);
+  historique(v, 'compte-b', 21, Date.parse('2026-10-20T09:00:00Z'));
+  at(v, '2026-10-21T02:14:00Z');
+  connexion(v, 'compte-b', { ip: '192.0.2.50', country: 'JP', appareil: 'fp-telephone', session: 's-b2' });
+  assert.equal(v.dossiers().length, 0, 'des indices seuls n’ouvrent pas de dossier');
+  for (let i = 1; i <= 7; i++) { lecture(v, 'compte-b', i, { ip: '192.0.2.50', session: 's-b2' }); v.clock.t += MIN; }
+  assert.equal(v.dossiers().length, 0, '7 fiches sous un accès douteux : pas encore');
+  lecture(v, 'compte-b', 8, { ip: '192.0.2.50', session: 's-b2' });
+  let [d] = v.dossiers();
+  assert.ok(d, '8e fiche sous un accès douteux : ouverture');
+  assert.equal(d.confiance, 'moyenne');
+  assert.equal(d.phase_max, 6);
+  assert.equal(d.gravite, 'haut');
+  for (let i = 9; i <= 12; i++) { v.clock.t += MIN; lecture(v, 'compte-b', i, { ip: '192.0.2.50', session: 's-b2' }); }
+  [d] = v.dossiers();
+  assert.equal(d.enjeu, 'sensible');
+  assert.equal(d.gravite, 'haut', 'l’enjeu sensible ne change pas le niveau');
+  // Identité confirmée par le second facteur : contre-indice, confiance plafonnée à faible.
+  v.clock.t += 9 * MIN;
+  v.add('authn_reauth_success', { sub: 'compte-b', ip: '192.0.2.50', session: 's-b2', detail: { methode: 'oidc' } });
+  [d] = v.dossiers();
+  assert.equal(d.confiance, 'faible');
+  assert.equal(d.gravite, 'bas');
+  assert.match(JSON.parse(d.explication).lignes[1], /identité confirmée par le second facteur/);
+  // Classé « légitime » : motif obligatoire ; le Japon et ce téléphone ne comptent plus pendant 90 jours.
+  assert.throws(() => v.D.classer(d.id, { classement: 'legitime', par: 'essai' }), /motif obligatoire/);
+  v.D.classer(d.id, { classement: 'legitime', note: 'voyage au Japon, téléphone acheté sur place', par: 'essai' });
+  assert.equal(v.fiche(d.id).statut, 'clos');
+  at(v, '2026-10-22T02:30:00Z');
+  connexion(v, 'compte-b', { ip: '192.0.2.51', country: 'JP', appareil: 'fp-telephone', session: 's-b3' });
+  for (let i = 20; i <= 40; i++) { lecture(v, 'compte-b', i, { ip: '192.0.2.51', session: 's-b3' }); v.clock.t += MIN; }
+  assert.equal(v.dossiers().filter(x => x.statut !== 'clos').length, 0, 'indices appris : plus de dossier');
+});
+
+test('scénario 7.3 : bourrage d’identifiants chez Zitadel, puis ancrage et dissimulation → critique, chaîne d’attaque', t => {
+  const v = vigieOf(t);
+  at(v, '2026-10-20T14:00:00Z');
+  for (let i = 0; i < 6; i++) { v.add('zitadel_echec', { sub: 'compte-c', ip: `198.51.100.${100 + i}` }); v.clock.t += MIN; }
+  assert.equal(v.dossiers().length, 0, 'tentatives seules : pas de dossier');
+  at(v, '2026-10-20T14:35:00Z');
+  v.add('zitadel_connexion', { sub: 'compte-c', ip: '198.51.100.200', detail: { type_zitadel: 'session.added' } });
+  let [d] = v.dossiers();
+  assert.ok(d, 'échecs puis connexion : jalon d’accès, confiance moyenne');
+  assert.equal(d.piste, 'identite');
+  at(v, '2026-10-20T14:37:00Z');
+  v.add('zitadel_facteur', { sub: 'compte-c', severity: 'haut', detail: { type_zitadel: 'user.human.mfa.otp.added' } });
+  [d] = v.dossiers();
+  assert.equal(d.phase_max, 5);
+  assert.equal(d.confiance, 'forte', 'tentative → accès → ancrage : la suite monte la confiance');
+  assert.equal(d.gravite, 'critique');
+  at(v, '2026-10-20T14:39:00Z');
+  v.add('privilege_permissions_changed', { sub: 'compte-c', ip: '198.51.100.200', severity: 'haut', detail: { administrateur_donne: true, compte: 'compte-d' } });
+  at(v, '2026-10-20T14:41:00Z');
+  v.store.own('vigie_surveillance_reduite', { emetteur: 'console · X (x)', detail: { objet: 'seuil:compte', valeur: 50, avant: 7, motif: 'essai' } });
+  const ds = v.dossiers();
+  d = ds.find(x => x.piste === 'identite');
+  const f = v.fiche(d.id);
+  assert.equal(f.dissimulation, 1, 'la Vigie aveuglée pendant le dossier');
+  assert.equal(f.enjeu, 'sensible');
+  assert.ok(f.entites.some(e => e.kind === 'compte' && e.key === 'compte-d'), 'le compte qui reçoit les droits entre dans le dossier');
+  assert.ok(f.signaux.some(s => s.regle === 'sigma.cible_commune' || s.regle === 'sigma.zitadel_echecs_repetes'), 'tentatives rattachées en arrière');
+  assert.ok(ds.some(x => x.piste === 'surveillance'), 'l’alerte de surveillance réduite a son propre dossier');
+  assert.equal(v.alerts().filter(a => a.regle === 'detecteur.chaine_attaque' && a.dossier_id === d.id).length, 1);
+});
+
+test('scénario 7.4 : lien de galerie privée qui fuit → dossier invité, preuve, exfiltration, critique', t => {
+  const v = vigieOf(t);
+  const entree = (pays, ip, extra = {}) => v.add('session_created', { ip, detail: { portail: 'galerie_privee', acces: 41, groupe: false, pays, ...extra } });
+  at(v, '2026-10-22T10:00:00Z');
+  entree('FR', '192.0.2.10');
+  at(v, '2026-10-22T18:00:00Z');
+  entree('BR', '203.0.113.20', { nouvel_appareil: true, appareil_n: 2 });
+  v.clock.t += 2 * MIN;
+  entree('VN', '203.0.113.30');
+  let [d] = v.dossiers();
+  assert.ok(d, 'pays multiples sur un accès : alerte, dossier');
+  assert.equal(d.piste, 'invite');
+  assert.equal(d.confiance, 'forte');
+  v.clock.t += 16 * MIN;
+  v.add('excess_rate_limit_exceeded', { ip: '203.0.113.20', detail: { portail: 'galerie_privee', limite: 'telechargements', acces: 41 } });
+  [d] = v.dossiers();
+  assert.equal(v.dossiers().length, 1);
+  assert.equal(d.phase_max, 7);
+  assert.equal(d.gravite, 'critique');
+  const f = v.fiche(d.id);
+  assert.ok(f.alertes.some(a => a.regle === 'sigma.acces_nouvel_appareil_puis_siphonage'));
+  assert.ok(f.entites.some(e => e.kind === 'acces' && e.key === 'acces:41' && e.force === 'graine'));
+});
+
+test('scénario 7.5 : compromission du serveur, reliée par le temps et par la corrélation → critique, avec dissimulation', t => {
+  const v = vigieOf(t);
+  const Z = '198.51.100.4';
+  at(v, '2026-10-20T03:10:00Z');
+  v.add('input_validation_fail', { ip: Z }); v.clock.t += MIN; v.add('input_validation_fail', { ip: Z });
+  at(v, '2026-10-20T03:12:00Z');
+  v.add('malicious_input', { ip: Z, severity: 'moyen', detail: { champ: 'fichier' } });
+  at(v, '2026-10-20T03:20:00Z');
+  v.add('reseau_sortie_refusee', { detail: { source_nom: 'site', destination: 'evil.example', port: 443 } });
+  at(v, '2026-10-20T03:25:00Z');
+  v.add('reseau_sortie_directe', { detail: { source_nom: 'site', destination: '192.0.2.99', port: 4444 } });
+  at(v, '2026-10-20T03:30:00Z');
+  v.add('log_integrity_fail', { detail: { seq: 12 } });
+  const serveur = v.dossiers().filter(x => x.piste === 'serveur');
+  assert.equal(serveur.length, 1, 'sorties et chaîne reliées dans un seul dossier serveur');
+  const f = v.fiche(serveur[0].id);
+  assert.ok(f.entites.some(e => e.kind === 'ip' && e.key === Z), 'adresse de l’attaque, venue de la corrélation');
+  assert.ok(f.signaux.some(s => s.regle === 'sigma.valeurs_impossibles_repetees'), 'tentatives de l’adresse rattachées en arrière');
+  assert.equal(f.phase_max, 7);
+  assert.equal(f.dissimulation, 1);
+  assert.equal(f.gravite, 'critique');
+  assert.ok(f.explication.modificateurs.some(m => /plancher : alerte #\d+ critique/.test(m)));
+  assert.ok(v.dossiers().some(x => x.piste === 'surveillance'));
+});
+
+test('usage ordinaire : un administrateur sur son appareil habituel lit 50 fiches → aucun dossier', t => {
+  const v = vigieOf(t);
+  historique(v, 'admin-1', 20, Date.parse('2026-10-20T09:00:00Z'));
+  at(v, '2026-10-20T09:00:00Z');
+  connexion(v, 'admin-1', { ip: '198.51.100.10', session: 's-adm' });
+  for (let i = 1; i <= 50; i++) { lecture(v, 'admin-1', i, { ip: '198.51.100.10', session: 's-adm' }); v.clock.t += 30e3; }
+  v.add('sensitive_export', { sub: 'admin-1', ip: '198.51.100.10', session: 's-adm', detail: { cible: '/admin/personnes/:id/export.zip', objet: 'personne', id: 3 } });
+  assert.equal(v.dossiers().length, 0);
+});
+
+test('rattachement et fusion : deux dossiers reliés par une session commune fusionnent dans le plus ancien ; une cible ne relie rien', t => {
+  const v = vigieOf(t);
+  at(v, '2026-10-20T10:00:00Z');
+  v.add('session_use_after_expire', { sub: 'compte-e', ip: '203.0.113.50', session: 's-e', detail: { meme_reseau_et_navigateur: false } });
+  v.clock.t += MIN;
+  v.add('session_use_after_expire', { sub: 'compte-f', ip: '203.0.113.60', session: 's-f', detail: { meme_reseau_et_navigateur: false } });
+  assert.equal(v.dossiers().length, 2);
+  // Deux comptes lisent la même fiche : la fiche est une cible, aucun rapprochement.
+  lecture(v, 'compte-e', 7, { ip: '203.0.113.50', session: 's-e' });
+  lecture(v, 'compte-f', 7, { ip: '203.0.113.60', session: 's-f' });
+  assert.equal(v.dossiers().length, 2);
+  // Le compte F réutilise la session volée du compte E : lien fort, fusion.
+  v.clock.t += MIN;
+  lecture(v, 'compte-f', 8, { ip: '203.0.113.60', session: 's-e' });
+  const ds = v.dossiers();
+  assert.equal(ds.length, 1);
+  const f = v.fiche(ds[0].id);
+  assert.ok(f.entites.some(e => e.key === 'compte-e') && f.entites.some(e => e.key === 'compte-f'));
+  const absorbe = v.db.prepare('SELECT * FROM dossiers WHERE fusionne_dans IS NOT NULL').get();
+  assert.equal(absorbe.fusionne_dans, ds[0].id);
+  assert.ok(ds[0].id < absorbe.id, 'le plus ancien garde son numéro');
+  assert.ok(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_dossier' AND json_extract(detail, '$.action') = 'fusionne'").pluck().get() >= 1);
+});
+
+test('adresses : une adresse privée n’entre jamais ; une adresse vue avec un administrateur ne relie pas deux dossiers', t => {
+  const v = vigieOf(t);
+  v.store.setting.set('controle_roles_admins', { administrateurs: ['admin-1'] });
+  at(v, '2026-10-20T10:00:00Z');
+  connexion(v, 'admin-1', { ip: '198.51.100.77', session: 's-adm' });
+  v.add('session_use_after_expire', { sub: 'compte-g', ip: '198.51.100.77', session: 's-g', detail: { meme_reseau_et_navigateur: false } });
+  v.clock.t += MIN;
+  v.add('session_use_after_expire', { sub: 'compte-h', ip: '198.51.100.77', session: 's-h', detail: { meme_reseau_et_navigateur: false } });
+  assert.equal(v.dossiers().length, 2, 'adresse d’un administrateur : pas de rapprochement par elle');
+  v.add('session_use_after_expire', { sub: 'compte-i', ip: '10.0.0.5', session: 's-i', detail: { meme_reseau_et_navigateur: false } });
+  const d = v.dossiers().at(-1);
+  assert.ok(!v.fiche(d.id).entites.some(e => e.key === '10.0.0.5'), 'adresse privée jamais dans un dossier');
+});
+
+test('cycle de vie : sommeil après 72 h sans jalon, clôture après 14 jours, récidive dans les 30 jours (même numéro)', t => {
+  const v = vigieOf(t);
+  at(v, '2026-10-20T10:00:00Z');
+  v.add('session_use_after_expire', { sub: 'compte-j', ip: '203.0.113.70', session: 's-j', detail: { meme_reseau_et_navigateur: false } });
+  const [d] = v.dossiers();
+  v.clock.t += 73 * H;
+  v.engine.tick();
+  assert.equal(v.fiche(d.id).statut, 'sommeil');
+  v.clock.t += 14 * J;
+  v.engine.tick();
+  assert.equal(v.fiche(d.id).statut, 'clos');
+  v.clock.t += 2 * J;
+  v.add('session_use_after_expire', { sub: 'compte-j', ip: '203.0.113.70', session: 's-j2', detail: { meme_reseau_et_navigateur: false } });
+  const f = v.fiche(d.id);
+  assert.equal(f.statut, 'ouvert');
+  assert.equal(f.recidive, 1);
+  assert.equal(v.dossiers().filter(x => x.piste === 'identite').length, 1, 'le même dossier, pas un nouveau');
+});
+
+test('gestes de l’analyste : prise en charge, détacher (motif), rattacher, fusionner, classer ; tout est chaîné', t => {
+  const v = vigieOf(t);
+  at(v, '2026-10-20T10:00:00Z');
+  v.add('session_use_after_expire', { sub: 'compte-k', ip: '203.0.113.80', session: 's-k', detail: { meme_reseau_et_navigateur: false } });
+  v.add('session_use_after_expire', { sub: 'compte-l', ip: '203.0.113.81', session: 's-l', detail: { meme_reseau_et_navigateur: false } });
+  const [a, b] = v.dossiers();
+  v.D.prendre(a.id, 'console · Analyste (x)');
+  assert.equal(v.fiche(a.id).statut, 'en_cours');
+  assert.throws(() => v.D.detacher(a.id, 'ip', '203.0.113.80', { par: 'x' }), /motif obligatoire/);
+  v.D.detacher(a.id, 'ip', '203.0.113.80', { motif: 'adresse d’un relais', par: 'x' });
+  assert.ok(v.fiche(a.id).entites.find(e => e.key === '203.0.113.80').detache_a);
+  v.D.rattacher(a.id, 'ip', '192.0.2.9', { par: 'x' });
+  assert.equal(v.fiche(a.id).entites.find(e => e.key === '192.0.2.9').force, 'manuel');
+  assert.equal(v.D.fusionner(a.id, b.id, { par: 'x' }), a.id);
+  assert.equal(v.dossiers().length, 1);
+  assert.throws(() => v.D.classer(a.id, { classement: 'peut-etre', par: 'x' }), /classement/);
+  v.D.classer(a.id, { classement: 'incident', note: 'cookie volé', par: 'x' });
+  const actions = v.db.prepare("SELECT json_extract(detail, '$.action') FROM events WHERE type = 'vigie_dossier'").pluck().all();
+  for (const x of ['ouvert', 'prise en charge', 'detache', 'rattache', 'fusionne', 'classe']) assert.ok(actions.includes(x), x);
+  assert.equal(v.store.verify().ok, true, 'chaîne intacte');
+});
+
+test('purge : signaux projetés gardés 30 jours ; dossier « incident » gardé, ses adresses masquées après la conservation', t => {
+  const v = vigieOf(t);
+  at(v, '2026-01-10T10:00:00Z');
+  v.add('session_use_after_expire', { sub: 'compte-m', ip: '203.0.113.90', session: 's-m', detail: { meme_reseau_et_navigateur: false } });
+  v.add('session_use_after_expire', { sub: 'compte-o', ip: '192.0.2.91', session: 's-o', detail: { meme_reseau_et_navigateur: false } });
+  const [d, autre] = v.dossiers();
+  v.D.classer(d.id, { classement: 'incident', note: 'vol de cookie', par: 'x' });
+  v.D.classer(autre.id, { classement: 'faux_positif', note: 'essai', par: 'x' });
+  v.clock.t += 200 * J;
+  v.engine.purge();
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM signaux_projetes').pluck().get(), 0);
+  const f = v.fiche(d.id);
+  assert.ok(f, 'incident gardé');
+  assert.ok(f.entites.some(e => e.kind === 'ip' && e.key === '203.0.113.0/24'));
+  assert.ok(!f.entites.some(e => e.key === '203.0.113.90'));
+  assert.ok(!f.signaux.some(s => s.ip), 'adresses des signaux effacées');
+  const g = v.fiche(autre.id);
+  assert.ok(g && g.entites.some(e => e.key === '192.0.2.0/24'), 'tout dossier : adresses masquées après 183 jours');
+  v.clock.t += 200 * J;
+  v.engine.purge();
+  assert.ok(v.fiche(d.id), 'incident gardé au-delà de 13 mois');
+  assert.equal(v.fiche(autre.id), null, 'les autres effacés 13 mois après leur clôture');
+});
+
+test('clés propres : caractères de contrôle d’un compte ou d’un objet retirés avant la ligne de commande', t => {
+  const v = vigieOf(t);
+  at(v, '2026-10-20T10:00:00Z');
+  v.add('session_use_after_expire', { sub: 'compte\u001b[31m-p', ip: '203.0.113.96', session: 's-p', detail: { meme_reseau_et_navigateur: false } });
+  const [d] = v.dossiers();
+  const f = v.fiche(d.id);
+  assert.ok(f.entites.every(e => !/[\u0000-\u001f]/.test(e.key)));
+  assert.ok(f.entites.some(e => e.key === 'compte?[31m-p'));
+  assert.ok(!/\u001b/.test(d.explication));
+});
+
+test('ligne de commande : dossiers, fiche, gestes (motif exigé), erreurs dites', async t => {
+  const { run: cli, keys } = await import('../vigie/cli.js');
+  const { loadVigieConfig } = await import('../vigie/config.js');
+  const dir = tmp(t);
+  const k = keys();
+  const config = loadVigieConfig({ VIGIE_DATA_DIR: dir, VIGIE_SITE_BACKUP_DIR: dir, ...k.vigie });
+  {
+    const db = openVigieDb(config.databasePath);
+    const store = createStore({ db, logKey: config.logKey });
+    const engine = createEngine({ store, decisions: createDecisions({ store, privateKey: config.decisionsKey }), switches: createSwitches({ store }) });
+    store.onAdded(rows => engine.process(rows));
+    store.add([{ id: crypto.randomUUID(), recu_a: Date.now(), survenu_a: Date.now(), type: 'session_use_after_expire', severity: 'haut', canal: 'x', confiance: 'rapporté',
+      composant: 'site · connexion', sub: 'compte-n', ip: '203.0.113.95', session: 's-n', detail: JSON.stringify({ meme_reseau_et_navigateur: false }) }]);
+    db.close();
+  }
+  assert.match(cli(['dossiers'], { config, user: 'root' }), /^#1 {2}haut {5}ouvert {3}identite {5}phase 3 \(1 dans l’ordre\) {2}confiance forte {2}enjeu ordinaire {2}Compte compte-n : accès/);
+  const fiche = cli(['dossier', '1'], { config, user: 'root' });
+  assert.match(fiche, /^Dossier #1 : Compte compte-n/);
+  assert.match(fiche, /Confiance forte : preuve : cookie rejoue/);
+  assert.match(fiche, /acteur {3}ip {7}203\.0\.113\.95 {2}\(moyen\)/);
+  assert.match(fiche, /alerte #1/);
+  assert.throws(() => cli(['dossier', '1', 'detacher', 'ip:203.0.113.95'], { config, user: 'root' }), /motif obligatoire/);
+  assert.match(cli(['dossier', '1', 'detacher', 'ip:203.0.113.95', '--motif', 'relais'], { config, user: 'root' }), /détaché/);
+  assert.throws(() => cli(['dossier', '1', 'classer', 'peut-etre'], { config, user: 'root' }), /classement/);
+  assert.match(cli(['dossier', '1', 'classer', 'test', '--note', 'essai'], { config, user: 'root' }), /clos \(test\)/);
+  assert.equal(cli(['dossiers'], { config, user: 'root' }), 'Aucun dossier.');
+  assert.match(cli(['dossiers', '--tous'], { config, user: 'root' }), /#1 .*clos/);
+  assert.equal(cli(['dossier', '99'], { config, user: 'root' }), 'Dossier inconnu.');
+});

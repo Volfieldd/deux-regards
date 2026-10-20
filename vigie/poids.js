@@ -8,7 +8,7 @@ export const BY_TYPE = {
   // Faits ordinaires : aucun point (ils servent au contexte et aux liens).
   authn_login_success: 0, authn_reauth_success: 0, session_created: 0, session_destroyed: 0, session_expired: 0, sys_startup: 0, sys_heartbeat: 0,
   sys_state: 0, zitadel_connexion: 0, vigie_demarrage: 0, vigie_purge: 0, vigie_alerte: 0, vigie_decision: 0, vigie_interrupteur: 0,
-  vigie_signal: 0, vigie_controle_roles: 0, vigie_moteur_sature: 0, vigie_regle_lente: 0,
+  vigie_signal: 0, vigie_dossier: 0, vigie_controle_roles: 0, vigie_moteur_sature: 0, vigie_regle_lente: 0,
   // Bordure (phase C3) : notée par ses règles Sigma (70-bordure.yml), jamais deux fois.
   bordure_blocage: 0, bordure_erreurs: 0, bordure_rafale: 0, bordure_nouvel_operateur: 0, bordure_erreur_worker: 0, edge_signature_invalid: 0,
   vigie_bordure_erreur: 0, vigie_bordure_silence: 0, vigie_canal_echec: 0, vigie_surveillance_reduite: 0,

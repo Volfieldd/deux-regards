@@ -10,7 +10,7 @@ import { createDecisions } from '../vigie/decisions.js';
 import { createSwitches } from '../vigie/interrupteurs.js';
 import { createEngine } from '../vigie/moteur.js';
 import { loadRules, RuleError, RegexTimeout, createCorrelator } from '../vigie/sigma.js';
-import { createChains, km } from '../vigie/detecteurs.js';
+import { km } from '../vigie/detecteurs.js';
 import { createThreats, parseList } from '../vigie/menaces.js';
 import { checkRoles, snapshotName } from '../vigie/controle-roles.js';
 import { execFileSync } from 'node:child_process';
@@ -220,7 +220,7 @@ test('détecteurs : heure inhabituelle (heures UTC, en base) et vitesse de lectu
   assert.ok(s[0].aujourdhui >= 10 && s[0].moyenne <= 2);
 });
 
-test('détecteurs périodiques : exploration lente sur 12 heures, site silencieux (une seule alerte), chaîne d’attaque', async t => {
+test('détecteurs périodiques : exploration lente sur 12 heures, site silencieux (une seule alerte)', async t => {
   const v = vigieOf(t);
   for (let h = 0; h < 13; h++) { v.add('malicious_honeypot', 'moyen', { ip: `192.0.2.${10 + h}`, ip_net: '192.0.2.0' }); v.clock.t += 3600e3; }
   v.clock.t -= 60e3;
@@ -229,11 +229,7 @@ test('détecteurs périodiques : exploration lente sur 12 heures, site silencieu
   v.clock.t += 4 * 60e3;
   v.engine.tick(); v.engine.tick();
   assert.equal(v.alerts().filter(a => a.regle === 'detecteur.silence').length, 1);
-  const chain = createChains({ now: () => v.clock.t });
-  const e = { kind: 'ip', key: '1.2.3.4' };
-  assert.equal(chain(e, ['attack.reconnaissance']), false);
-  assert.equal(chain(e, ['attack.credential_access']), false);
-  assert.equal(chain(e, ['attack.privilege_escalation']), true);
+  // Chaîne d'attaque (DS23) : calculée sur les dossiers (test/vigie-dossiers.test.js).
 });
 
 test('listes de menaces : formats Spamhaus et lignes, étiquettes, points sans compter comme une source du quorum', async t => {
