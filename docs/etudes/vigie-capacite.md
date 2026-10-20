@@ -67,6 +67,17 @@ Le mélange ci-dessus n'ouvre aucune alerte : il ne mesurait pas le coût des d�
 
 Le déclencheur coûte quelques microsecondes par lien, moins de 2 % du calcul d'un événement : une adresse qui balaie le site et rattache des dizaines de milliers d'événements à son alerte ne ralentit pas le moteur (la relecture de mesure de la revue donnait +13,5 µs par lien, au plus +2 %). À un million de lignes, le temps écoulé par événement (1,5 ms) vient surtout de l'écriture sur disque, pas du calcul.
 
+### Dossiers (20 octobre 2026, PR B)
+
+Même banc, sur la même machine, avant et après le moteur des dossiers (`vigie/dossiers.js`), avec 20 000 événements d'historique :
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Analyse, mélange ordinaire (5 000 événements) | 0,58 ms par événement | 0,65 ms |
+| Rafale de 5 000 événements sur une adresse, alerte ouverte et rattachée à son dossier | 0,39 ms | 0,42 ms |
+
+Une première version recalculait le dossier à chaque événement d'une alerte qui dure : 1,56 ms par événement dans la rafale. Le dossier n'est plus recalculé qu'à l'ouverture et à l'aggravation de l'alerte. La confiance d'un compte est gardée une minute.
+
 ## 3. Abaques
 
 Durée de conservation par défaut : 183 jours (`VIGIE_RETENTION_DAYS`). Les durées de vérification sont extrapolées à environ 13,5 s par million de lignes (mesuré : 40,7 s pour 3 millions).

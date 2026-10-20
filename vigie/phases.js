@@ -73,7 +73,7 @@ export const DETECTEURS_DOSSIER = {
   premiere_apparition: { nature_dossier: 'indice' },
   heure_inhabituelle: { nature_dossier: 'indice' },
   voyage_impossible: { nature_dossier: 'indice' },
-  pivot_identifiants: { nature_dossier: 'indice' },
+  pivot_identifiants: { nature_dossier: 'indice', jalon_acces: true },        // aussi le jalon d'accès de la piste identité (étude 4.5)
   role_incoherent: { nature_dossier: 'preuve' },
   menaces: { phase_dossier: 'acces', nature_dossier: 'indice' },
   silence: { phase_dossier: 'dissimulation' },
@@ -82,5 +82,6 @@ export const DETECTEURS_DOSSIER = {
 export function projeterDetecteur(nom, bareme = {}) {
   const extra = DETECTEURS_DOSSIER[nom] ?? {};
   if (extra.hors_projection) return null;
-  return projeter({ tags: bareme.tags ?? [], ...extra });
+  const p = projeter({ tags: bareme.tags ?? [], ...extra });
+  return p && extra.jalon_acces ? { ...p, jalon_acces: true } : p;
 }

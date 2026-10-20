@@ -6,7 +6,7 @@ import path from 'node:path';
 import { VERSION, TACTIQUES, technique, remplacante, incoherences, libelleTechnique, lire } from '../vigie/attack.js';
 import { projeter, projeterDetecteur, TECHNIQUE_VERS, PHASES } from '../vigie/phases.js';
 import { loadRules, RuleError } from '../vigie/sigma.js';
-import { DETECTEURS, createChains } from '../vigie/detecteurs.js';
+import { DETECTEURS } from '../vigie/detecteurs.js';
 
 // Référentiel MITRE ATT&CK de la Vigie et projection vers les phases des dossiers (étude docs/etudes/vigie-dossiers.md,
 // sections 3.1 et 4 ; décisions D31 et D32 du 20 octobre 2026) : ATT&CK complet dans la détection, phases dans les
@@ -104,14 +104,4 @@ vigie: { cas: DS11, entite: { kind: ip, champ: ip }, source_unique: true${vigie}
   assert.throws(() => loadRules(dir), RuleError);
   ecrire(', nature_dossier: certitude');
   assert.throws(() => loadRules(dir), RuleError);
-});
-
-test('chaîne d’attaque actuelle (DS23) : Furtivité et Neutralisation des défenses comptent comme Defense Evasion avant la v20', () => {
-  for (const tag of ['attack.stealth', 'attack.defense_impairment']) {
-    const chain = createChains();
-    const e = { kind: 'compte', key: 'a' };
-    assert.equal(chain(e, ['attack.reconnaissance']), false);
-    assert.equal(chain(e, ['attack.credential_access']), false);
-    assert.equal(chain(e, [tag]), true, tag);
-  }
 });

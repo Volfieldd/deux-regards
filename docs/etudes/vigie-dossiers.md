@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Note de conception, aucune ligne de code. Décisions D31 à D39 prises le 20 octobre 2026 (section 13), avec une précision du propriétaire : la vue ATT&CK complète est conservée ; les huit phases servent aux dossiers, pas à la détection (section 3.1). |
+| Statut | Note de conception. Décisions D31 à D39 prises le 20 octobre 2026 (section 13). PR A faite (#190, ATT&CK 20.0 et projection), PR B faite (moteur des dossiers, section 14), avec une précision du propriétaire : la vue ATT&CK complète est conservée ; les huit phases servent aux dossiers, pas à la détection (section 3.1). |
 | Date | 20 octobre 2026, d'après le code de `main` à ea0528b (Vigie après #186). |
 | Demande | « Est-ce que ce ne serait pas plus pertinent de travailler tout ça avec la vue « case » qui prendrait un artefact en origine (asset : ip, hostname source, dest, session utilisateur ou nom d'utilisateur) qui viendrait regrouper tous les événements suspects connexes en se servant d'une mécanique de pondération interne pour donner une idée du niveau de l'alerte ? Une corrélation automatique inter entités, avec une représentation de la timeline et une possibilité d'explorer (drill down) de la même façon les liens entre case et autres assets. » Puis : « je veux particulièrement bien détailler le côté « phase d'attaque » ». Point de départ : détecter l'accès aux données personnelles et leur sortie, en corrélant les lectures avec les authentifications et les signaux faibles (adresses multiples, adresse ou heure inhabituelle, empreinte différente). |
 | Base | [`recadrage-vigie-edge-wake.md`](recadrage-vigie-edge-wake.md) (entités, score, quorum), [`journalisation-securite.md`](journalisation-securite.md) (cas DS1 à DS32), [`vigie-besoins-des-briques.md`](vigie-besoins-des-briques.md) (BV-1 à BV-30), `vigie/moteur.js`, `vigie/detecteurs.js`, `vigie/regles/*.yml`. |
@@ -289,7 +289,7 @@ Ce que le classement révèle :
 Aux entités du moteur (`ip`, `reseau`, `compte`, `session`, `appareil`), le dossier ajoute :
 
 - **`acces`** : l'accès d'une galerie privée. Il existe déjà dans les règles, sous la forme `site:acces:N`.
-- **`objet`** : la fiche, le message ou la galerie lus. La clé suit le format `personne:12` ou `message:40`, tirée du champ `detail.objet` et `detail.id` que le site émet déjà (BV-24, BV-30).
+- **`objet`** : la fiche, le message ou la galerie lus. Mise en œuvre : l'objet n'est pas une entité du dossier (34 fiches rempliraient son plafond de 40) ; il est gardé dans la colonne `objet` de chaque signal, d'où se tirent l'enjeu et la question « qui l'a lu ». La clé suit le format `personne:12` ou `message:40`, tirée du champ `detail.objet` et `detail.id` que le site émet déjà (BV-24, BV-30).
 - **`cible`** : ce qui est visé sans être une donnée lue, comme un réglage public, un billet, un compte dont on change les droits (`detail.compte`) ou la Vigie elle-même (entités `site:*` et `vigie:*` actuelles).
 
 L'objet est ce qui relie le dossier au RGPD. Depuis une fiche, on voit qui l'a lue, depuis quelle session et dans quel dossier. C'est ce qu'il faut pour délimiter une violation à notifier (section 10.3).
@@ -372,7 +372,7 @@ L'analyste peut **détacher** une entité, avec un motif obligatoire. Elle ne re
 | Ordinaire | Rien de personnel ni de privilégié : pages publiques, refus, réglages sans effet visible |
 | Personnel | Moins de 10 objets personnels lus ou exportés, ou un accès de galerie touché |
 | Sensible | 10 objets personnels ou plus ; ou une catégorie particulière (personne mineure et nom du parent, signature d'accord, lieu précis d'une rencontre) ; ou un export de données personnelles ; ou des droits d'administrateur en jeu |
-| Critique | Données personnelles sorties sous un accès douteux (jalon d'exfiltration sur des objets personnels, confiance moyenne ou forte) ; face publique changée (adresse de contact, textes, billets : les visiteurs sont visés) ; administrateur donné hors de l'application ; Vigie aveuglée pendant le dossier |
+| Critique | Données personnelles sorties sous un accès douteux (jalon d'exfiltration sur des objets personnels, confiance moyenne ou forte) ; face publique changée (adresse de contact, textes, billets : les visiteurs sont visés) ; administrateur donné hors de l'application. La Vigie aveuglée pendant le dossier ne compte pas ici : elle est le modificateur « dissimulation » (6.2), compté une fois |
 
 Avant la PR E, l'enjeu se lit sur `detail.objet` (personne, rencontre, message, accès), ce qui est grossier mais juste. La PR E ajoute les catégories (identité, coordonnées, image d'une personne, mineur, accord signé, localisation, message libre) et rend la grille fine.
 
@@ -461,7 +461,7 @@ Ce scénario montre l'intérêt de la confiance et des contre-indices. Sans eux,
 | 14:39 | `zitadel_droits` puis `administrateur_donne` | ancrage ; enjeu critique |
 | 14:41 | `surveillance_reduite` (seuil relevé depuis la console) | dissimulation : +1 cran |
 
-Gravité : critique dès 14:39. Le marqueur de 14:41 dit à l'analyste que l'attaquant a aussi touché la Vigie, ce qui oriente la réponse vers les droits de la console.
+Gravité : critique dès 14:37. Tentative, accès puis ancrage font trois phases dans l'ordre, ce qui monte la confiance à « forte » (4.8) ; Installation × forte = critique. Le marqueur de 14:41 dit à l'analyste que l'attaquant a aussi touché la Vigie, ce qui oriente la réponse vers les droits de la console.
 
 ### 7.4 Lien de galerie privée qui fuit (piste invité)
 
@@ -540,67 +540,22 @@ Maquette MV-14, dans la même passe que MV-12 et MV-13. Équivalent en tableau (
 
 ---
 
-## 9. Modèle de données (Vigie, migration à créer)
+## 9. Modèle de données (Vigie, migration 015)
 
-```sql
-CREATE TABLE dossiers (
-  id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  piste         TEXT NOT NULL CHECK (piste IN ('identite', 'invite', 'serveur', 'externe', 'surveillance')),
-  graine_kind   TEXT NOT NULL,
-  graine_key    TEXT NOT NULL,
-  statut        TEXT NOT NULL DEFAULT 'ouvert' CHECK (statut IN ('ouvert', 'en_cours', 'sommeil', 'clos')),
-  classement    TEXT CHECK (classement IN ('incident', 'faux_positif', 'test', 'legitime')),
-  recidive      INTEGER NOT NULL DEFAULT 0,
-  phase_max     INTEGER,                   -- 1 à 8, NULL tant qu'aucun jalon
-  coherence     INTEGER NOT NULL DEFAULT 0,
-  confiance     TEXT NOT NULL DEFAULT 'aucune' CHECK (confiance IN ('aucune', 'faible', 'moyenne', 'forte')),
-  enjeu         TEXT NOT NULL DEFAULT 'ordinaire' CHECK (enjeu IN ('ordinaire', 'personnel', 'sensible', 'critique')),
-  gravite       TEXT NOT NULL,
-  dissimulation INTEGER NOT NULL DEFAULT 0,
-  explication   TEXT NOT NULL DEFAULT '{}', -- JSON : les trois lignes et leurs éléments
-  tronque       INTEGER NOT NULL DEFAULT 0,
-  fusionne_dans INTEGER REFERENCES dossiers(id),
-  ouvert_a      INTEGER NOT NULL,
-  derniere      INTEGER NOT NULL,
-  note          TEXT
-);
-CREATE INDEX dossiers_actifs ON dossiers (statut, derniere) WHERE fusionne_dans IS NULL;
+Le schéma est dans [`vigie/migrations/015_dossiers.sql`](../../vigie/migrations/015_dossiers.sql) :
 
-CREATE TABLE dossier_entites (
-  dossier_id INTEGER NOT NULL REFERENCES dossiers(id) ON DELETE CASCADE,
-  kind       TEXT NOT NULL,                -- ip, reseau, appareil, session, compte, acces, objet, cible
-  key        TEXT NOT NULL,
-  role       TEXT NOT NULL CHECK (role IN ('acteur', 'cible', 'contexte')),
-  force      TEXT NOT NULL CHECK (force IN ('graine', 'fort', 'moyen', 'faible', 'manuel')),
-  via        TEXT,                         -- « kind:key » de l'entité par laquelle elle est entrée
-  ajoute_a   INTEGER NOT NULL,
-  detache_a  INTEGER,                      -- détachée par l'analyste (ne revient pas par ce lien)
-  PRIMARY KEY (dossier_id, kind, key)
-);
-CREATE INDEX dossier_entites_cle ON dossier_entites (kind, key) WHERE detache_a IS NULL;
+| Table | Contenu |
+|---|---|
+| `dossiers` | piste, graine, statut, classement, récidive, phase la plus avancée, cohérence, confiance, enjeu, gravité, dissimulation, explication (JSON : titre, trois lignes, modificateurs, chaîne, phases non observées), troncature, chaîne d'attaque déjà signalée, fusion, dates, prise en charge |
+| `dossier_entites` | entités d'un dossier : rôle (acteur, cible, contexte), force du lien (graine, fort, moyen, faible, manuel), entité par laquelle elle est entrée, détachement |
+| `dossier_signaux` | signaux et faits d'un dossier, **copiés** (les événements sont purgés à 6 mois) : règle, heure, nature, phase, marqueurs, points, source, entité, compte, session, adresse, objet lu, promotion d'un fait en jalon, alerte |
+| `signaux_projetes` | tous les signaux projetés des 30 derniers jours, dossier ou pas : la confiance d'un compte et le rattachement rétroactif les relisent par compte, adresse, session ou entité |
+| `alerts.dossier_id` | dossier d'une alerte |
+| index `events (session, recu_a)` | faits d'une session |
 
-CREATE TABLE dossier_signaux (
-  dossier_id  INTEGER NOT NULL REFERENCES dossiers(id) ON DELETE CASCADE,
-  seq         INTEGER NOT NULL,            -- événement (fait) ou vigie_signal (jalon, indice)
-  survenu_a   INTEGER NOT NULL,
-  nature      TEXT NOT NULL CHECK (nature IN ('jalon', 'indice', 'preuve', 'contre_indice', 'fait', 'dissimulation', 'disponibilite')),
-  phase       INTEGER,                     -- 1 à 8 pour un jalon ou un fait qualifié
-  regle       TEXT,
-  points      REAL,                        -- points de confiance d'un indice
-  entite_kind TEXT,
-  entite_key  TEXT,
-  alerte_id   INTEGER REFERENCES alerts(id),
-  PRIMARY KEY (dossier_id, seq)
-);
-CREATE INDEX dossier_signaux_temps ON dossier_signaux (dossier_id, survenu_a);
+Les gestes sur un dossier sont des événements chaînés `vigie_dossier` : ouverture, fusion, aggravation, sommeil, clôture, récidive, et les gestes de l'analyste (prise en charge, détachement, rattachement manuel, classement). Un rattachement de signal n'y est pas noté : le dossier le garde, et la chaîne a déjà l'événement d'origine.
 
-ALTER TABLE alerts ADD COLUMN dossier_id INTEGER REFERENCES dossiers(id);
-CREATE INDEX events_session ON events (session, recu_a);
-```
-
-Les gestes sur un dossier sont des événements chaînés `vigie_dossier` (ouverture, rattachement, fusion, aggravation, détachement, scission, classement). Le dossier se reconstruit à partir de la chaîne, comme les alertes.
-
-`vigie_signal` ne change pas : il garde ses étiquettes ATT&CK, et la phase n'existe que dans `dossier_signaux` (section 3.1). Le dédoublonnage des signaux (une note par règle, par entité et par 10 minutes) ne change pas. Le dossier référence la note ; les points continuent de tous compter.
+`vigie_signal` ne change pas : il garde ses étiquettes ATT&CK, et la phase n'existe que dans `signaux_projetes` et `dossier_signaux` (section 3.1). Le dédoublonnage des signaux (une note par règle, par entité et par 10 minutes) ne change pas : un signal entre dans les dossiers quand il est noté, et les points continuent de tous compter.
 
 ---
 
@@ -676,3 +631,28 @@ Toutes les propositions sont validées par le propriétaire, D31 avec une préci
 | D37 | Réponses automatiques par dossier | Aucune au départ ; à rediscuter après le mois d'observation (par exemple : vérifier l'identité dès qu'un dossier atteint la collecte avec une confiance moyenne) |
 | D38 | Conservation | 183 jours comme les événements ; dossiers « incident » gardés sans adresses complètes pour le registre des violations, durée à fixer avec le dossier légal |
 | D39 | Classement « légitime » | Apprend les indices identiques (pays, appareil) pour ce compte pendant 90 jours, avec motif obligatoire, geste chaîné |
+
+---
+
+## 14. Mise en œuvre (PR B, 20 octobre 2026)
+
+Code : [`vigie/dossiers.js`](../../vigie/dossiers.js), branché dans `vigie/moteur.js` ; tests : `test/vigie-dossiers.test.js`. Les cinq scénarios de la section 7 y passent de bout en bout : les événements traversent les règles et les détecteurs. Trois autres cas sont testés : un administrateur qui lit 50 fiches sur son appareil habituel n'ouvre aucun dossier ; les fusions et les exclusions d'adresses ; le cycle de vie, la purge et la ligne de commande.
+
+Précisions et écarts par rapport aux sections précédentes :
+
+| Point | Mise en œuvre |
+|---|---|
+| Confiance | Calculée **par compte**, sur la fenêtre du dossier (24 h avant son premier signe), et non par session : deux sessions du même compte comptent ensemble. C'est le choix prudent : la session légitime d'un compte volé est vue comme douteuse elle aussi. Une règle d'indice compte une fois, à son plus fort (une heure inhabituelle chaque heure ne s'additionne pas) ; `premiere_apparition` vaut 1,5 par attribut inédit (pays, appareil). Gardée une minute par compte, oubliée dès qu'un indice du compte arrive. |
+| Accès (phase 3) | Compté dès que la confiance est moyenne ou forte, à l'heure du premier indice ou de la première preuve. `pivot_identifiants` (échecs puis connexion) est aussi un jalon d'accès, qui ouvre un dossier si la confiance est moyenne. |
+| Faits promus | Lectures, exports, suppressions et échecs de connexion (6 h avant l'accès) deviennent des jalons dès que la confiance le permet (4.6), y compris ceux déjà rattachés. Une promotion ne se défait jamais : ce qui a eu lieu sous un accès douteux le reste, même après une identité confirmée (scénario 7.2). |
+| Cibles | Ne relient jamais deux dossiers : fiche lue, réglage, `site:*`, `vigie:*`. Le compte qui reçoit des droits (`administrateur_donne`) entre comme acteur. |
+| Piste serveur | `site:sortie`, `sortie_directe`, `chaine_sortie`, `flux`, `conteneur:*`, `donnees`, `restauration` : reliées par l'heure (une heure) ; les événements d'une corrélation (`detail.evenements`) apportent l'adresse de l'attaque. `site:battement` (site silencieux) relève de la piste surveillance. |
+| Dissimulation | Un marqueur sans acteur (chaîne rompue, surveillance réduite, bordure ou réseau muets) s'ajoute à tous les dossiers ouverts. Il compte une fois, comme modificateur (+1), et non aussi dans l'enjeu. |
+| Rattachement rétroactif | À l'ouverture, puis pour chaque acteur qui entre ensuite (adresse venue d'une corrélation, compte qui reçoit des droits). |
+| Alerte qui dure | Le dossier est recalculé quand l'alerte s'ouvre ou s'aggrave ; sinon, il avance seulement sa date, au plus une fois par minute. |
+| Chaîne d'attaque (DS23) | Ouverte une fois par dossier, sur son compte ou sa graine, quand trois phases ou plus se suivent dont l'accès (mode « observer », comme avant). L'ancienne chaîne par entité, en mémoire, est retirée. |
+| Ligne de commande | `dossiers [--tous]`, `dossier <id>`, `dossier <id> prendre`, `classer` (« légitime » : motif obligatoire), `detacher` (motif obligatoire), `rattacher`, `fusionner`. |
+| Pas encore | Scission d'un dossier (avec la console, PR D) ; catégories de données personnelles et règle « trois réseaux ou plus » (PR E) ; empreinte TLS comme indice (après sa mesure de stabilité). |
+| Inchangé | Alertes, modes, seuils, notifications, réponses automatiques (D36, D37) ; aucun événement nouveau côté site. |
+| Coût mesuré | Banc, 20 000 événements d'historique : analyse ordinaire de 0,58 à 0,65 ms par événement (dans le bruit de la mesure) ; rafale de 5 000 événements sur une adresse dont l'alerte a son dossier, de 0,39 à 0,42 ms (voir [`vigie-capacite.md`](vigie-capacite.md)). |
+

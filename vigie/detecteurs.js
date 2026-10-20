@@ -246,24 +246,3 @@ export function createDetectors({ store, now = Date.now }) {
   }
   return { onEvent, periodic, forcePeriodic: () => { lastPeriodic = 0; } };
 }
-
-// Chaîne d'attaque (DS23) : repérage, tentative puis accès sur une même entité en 24 h, d'après les tactiques MITRE des
-// signaux. Mémoire bornée, les entités les plus anciennes oubliées d'abord.
-const PHASES = {
-  reperage: ['attack.reconnaissance', 'attack.discovery'],
-  tentative: ['attack.initial_access', 'attack.credential_access', 'attack.execution'],
-  acces: ['attack.privilege_escalation', 'attack.persistence', 'attack.collection', 'attack.exfiltration', 'attack.lateral_movement', 'attack.stealth', 'attack.defense_impairment'],
-};
-export function createChains({ now = Date.now } = {}) {
-  const seen = lru(50_000);
-  return function feed(entite, tags) {
-    const t = now();
-    const k = `${entite.kind}|${entite.key}`;
-    const e = { ...(seen.get(k) || {}) };
-    for (const [phase, list] of Object.entries(PHASES)) if (tags.some(x => list.includes(x))) e[phase] = t;
-    for (const p of Object.keys(e)) if (t - e[p] > 864e5) delete e[p];
-    if (Object.keys(PHASES).every(p => e[p])) { seen.delete(k); return true; }
-    seen.set(k, e);
-    return false;
-  };
-}
