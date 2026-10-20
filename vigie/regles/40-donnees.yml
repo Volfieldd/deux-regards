@@ -47,8 +47,9 @@ author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
 description: >-
   30 lectures sensibles distinctes en 1 h par un compte (DS18). Une lecture distincte est le couple objet et numéro
-  (registre BV-30) : le message 12 (objet « message ») et la fiche 12 sont deux lectures. Les lectures sans objet (fiches
-  des personnes et des rencontres, telles que le site les émet) se comptent entre elles par leur numéro, comme avant.
+  (registre BV-30) : le message 12 (objet « message »), la personne 12 (« personne ») et la rencontre 12 (« rencontre »)
+  sont trois lectures. Les lectures sans objet (émises avant que le site nomme l'objet des fiches) se comptent entre
+  elles par leur numéro, comme avant.
 tags: [attack.collection, attack.t1213]
 correlation:
   type: value_count
@@ -58,3 +59,40 @@ correlation:
   condition: { gte: 30, field: [detail.objet, detail.id] }
 level: medium
 vigie: { cas: DS18, points: 3 }
+---
+# BV-30 — Messages de la boîte Contact effacés en masse (sensitive_delete, émis par POST /admin/messages/:id/supprimer).
+title: Message de la boîte Contact supprimé
+name: message_supprime
+id: b30b7ef5-c9c3-4914-98ce-1ab217b8f112
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: sensitive_delete
+    detail.objet: message
+  condition: selection
+level: low
+vigie: { signal: false }
+---
+title: Messages de la boîte Contact effacés en masse par un compte (10 en 1 h)
+name: messages_effaces_en_masse
+id: 44213e3f-0bd7-4dc3-8a48-5073662405c1
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+description: >-
+  10 messages distincts supprimés en 1 h par un même compte (registre BV-30, DS18) : un compte volé qui détruit des
+  messages (la trace d'un hameçonnage, des demandes de retrait). Une suppression distincte est le couple objet et
+  numéro : un message supprimé deux fois (double envoi du formulaire) compte une fois. La boîte reçoit au plus 30
+  notifications par jour (BV-29) et quelques messages par semaine en temps ordinaire, triés un par un : 10 en une heure
+  n'arrive guère qu'après une vague de pourriels, d'où le mode Alerter, sans réponse automatique. Propre aux messages :
+  un autre objet effacé aurait son volume, donc son seuil, et sa corrélation.
+tags: [attack.impact, attack.t1485, attack.defense_evasion, attack.t1070]
+correlation:
+  type: value_count
+  rules: [message_supprime]
+  group-by: [sub]
+  timespan: 1h
+  condition: { gte: 10, field: [detail.objet, detail.id] }
+level: medium
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, source_unique: true, mode: alerter }

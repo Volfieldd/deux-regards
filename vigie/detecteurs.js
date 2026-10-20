@@ -98,9 +98,10 @@ function exige(row, d) {
   if (row.type === 'sensitive_export' && (/^\/admin\/galeries\//.test(String(d.cible || '')) || (d.portail === 'galerie_privee' && d.nature === 'telechargement'))) return { toutes: ['galeries.voir'], objet: 'galerie' };
   // Message d'un visiteur ouvert dans l'admin (le nom, l'adresse et le message déchiffrés). La portée ne se juge pas ici :
   // l'événement ne dit pas à quel photographe le message est adressé, et le site refuse lui-même un message hors portée
-  // (404 et authz_fail « hors portée », règles exploration_droits et ecriture_hors_portee). Marquer traité et supprimer
-  // n'émettent rien vers la Vigie (journal d'audit seulement) : rien à juger.
+  // (404 et authz_fail « hors portée », règles exploration_droits et ecriture_hors_portee). Supprimer émet
+  // sensitive_delete (détail { objet, id }, sans cible), jugé de même ; marquer traité n'émet rien (journal d'audit).
   if (row.type === 'sensitive_read' && d.objet === 'message' && /^\/admin\/messages\//.test(String(d.cible || ''))) return { toutes: ['messages.traiter'], objet: 'message' };
+  if (row.type === 'sensitive_delete' && d.objet === 'message') return { toutes: ['messages.traiter'], objet: 'message' };
   if (row.type === 'malicious_input' && d.objet === 'billet') return { toutes: ['carnet.voir'], une_de: ['carnet.ecrire', 'carnet.textes', 'carnet.publier', 'carnet.publies.modifier'], objet: 'billet' };
   if (row.type === 'config_public_changed' && d.objet === 'textes_publics' && champs.some(c => String(c).startsWith('posts.'))) return { toutes: ['carnet.voir'], une_de: ['carnet.publier', 'carnet.publies.modifier'], objet: 'billet' };
   return null;

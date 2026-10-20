@@ -46,6 +46,10 @@ export const EVENTS = {
   // E11, E12 : données sensibles
   sensitive_read: E('info', 'site · admin'),
   sensitive_export: E('bas', 'site · admin'),
+  // Donnée sensible effacée depuis l'admin (registre des briques, BV-30 : un message de la boîte Contact) : détail
+  // { objet, id } seulement (ex. { objet: 'message', id: 12 }), jamais le contenu ni une donnée personnelle. Distinct de
+  // user_deleted (un compte de l'admin) et de sensitive_export (une sortie de données).
+  sensitive_delete: E('bas', 'site · admin'),
   // E13 à E19 : saisies, fichiers, débit, pièges, jetons
   input_validation_fail: E('moyen', 'site · public'),
   malicious_input: E('moyen', 'site · public'),

@@ -26,7 +26,11 @@ const TRAP_PREFIXES = ['/wp-admin/', '/phpmyadmin/', '/.git/'];
 const ACCOUNT_TRIGGERS = ['account_changes_insert', 'account_changes_update', 'account_changes_delete', 'account_changes_immuable',
   'account_changes_conserve', 'account_change_tickets_immuable', 'account_change_tickets_conserve'];
 const METHODS = new Set(['GET', 'HEAD', 'POST']);
-const SENSITIVE = /^\/admin\/(?:personnes|rencontres)\/:id(?:\/|$)/;
+const SENSITIVE = /^\/admin\/(personnes|rencontres)\/:id(?:\/|$)/;
+// Objet de la fiche lue ou exportée (registre des briques, BV-30) : lectures_massives compte le couple objet et numéro,
+// la personne 12 et la rencontre 12 sont deux fiches. Les autres exports (originaux, sélections des galeries) : aucun.
+const OBJETS = { personnes: 'personne', rencontres: 'rencontre' };
+const objetOf = route => OBJETS[SENSITIVE.exec(route)?.[1]];
 const NOT_FOUND_LIMIT = 20, NOT_FOUND_WINDOW = 10 * 60e3;
 
 // Chemin comme le voit le routeur : gabarit de la route trouvée, sinon chemin décodé et normalisé (« /%61dmin »,
@@ -376,8 +380,9 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     if (request.session && request.method !== 'GET' && request.method !== 'HEAD') { watchWrites(request); return; }
     if (!request.session || status >= 300 || (request.method !== 'GET' && request.method !== 'HEAD')) return;
     const route = request.routeOptions?.url || '';
-    if (request.routeOptions?.config?.audit) sec.emit('sensitive_export', { request, status, emetteur: 'server/routes · lecture sensible', detail: { cible: route, id: request.params?.id ?? null } });
-    else if (SENSITIVE.test(route)) sec.emit('sensitive_read', { request, status, emetteur: 'server/routes · lecture sensible', detail: { cible: route, id: request.params?.id ?? null } });
+    const detail = { cible: route, objet: objetOf(route), id: request.params?.id ?? null };
+    if (request.routeOptions?.config?.audit) sec.emit('sensitive_export', { request, status, emetteur: 'server/routes · lecture sensible', detail });
+    else if (SENSITIVE.test(route)) sec.emit('sensitive_read', { request, status, emetteur: 'server/routes · lecture sensible', detail });
   };
 
   return sec;
