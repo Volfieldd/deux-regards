@@ -13,6 +13,7 @@
 **Installer et configurer**
 - [Procédures](Procédures)
 - [Guide Unraid](Unraid)
+- [Installateur (Unraid, Linux)](Installateur)
 - [Installation](Installation)
 - [Déploiement](Déploiement)
 - [Configuration](Configuration)
