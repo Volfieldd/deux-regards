@@ -101,3 +101,9 @@ html.js .sans-sig { display: none; }
 .app-form, .pers-corps, .vous-corps { grid-template-columns: minmax(0, 1fr); }
 .app-privacy, .app-consent { overflow-wrap: anywhere; }
 .app-link { display: inline-flex; align-items: center; min-height: 44px; }
+/* Avant 15 ans (décisions du propriétaire du 20 octobre 2026) : l'e-mail d'un parent et la phrase sous « E-mail »
+   n'apparaissent qu'avec « moins de 15 ans », sans script ; toujours visibles sur un navigateur sans :has. */
+.revele-15 { display: grid; gap: 4px; }
+@supports selector(:has(*)) {
+  .app-form:not(:has(input[data-moins15]:checked)) :is(.revele-15, .si-15) { display: none; }
+}

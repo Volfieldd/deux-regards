@@ -114,7 +114,7 @@ test('récapitulatif envoyé par le serveur quand SMTP est configuré ; en cas d
 
   const failing = fakeTransport({ fail: true });
   const d = await ctxOf(t, { mailTransport: failing });
-  await d.send({ decision: '', email: 'x@exemple.fr', lang: 'fr' });
+  await d.send({ decision: '', email: 'x@exemple.fr', adult: 'oui', lang: 'fr' });
   const id2 = d.db.prepare('SELECT id FROM encounters').pluck().get();
   const merci = (await d.as({ url: `/admin/rencontre/${id2}/merci` })).body;
   assert.match(merci, /Envoyer le récapitulatif à x@exemple\.fr/);
@@ -135,7 +135,7 @@ test('sécurité : seules des photos sont acceptées (pas de SVG), signature exi
   assert.match(r.body, /Signature illisible/);
   assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), 0);
   // Une adresse seule ne vaut pas « veut recevoir la photo ».
-  r = await c.send({ decision: '', email: 'x@exemple.fr', __proto__x: 'y' });
+  r = await c.send({ decision: '', email: 'x@exemple.fr', adult: 'oui', __proto__x: 'y' });
   assert.equal(r.statusCode, 303);
   assert.equal(c.db.prepare('SELECT wants_photo FROM encounters').pluck().get(), 0);
   // Carte signée envoyée en SVG : refusée aussi.

@@ -80,12 +80,19 @@
     <label><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.name %></span><% }) %><input name="name" value="<%= v.name || '' %>" maxlength="80" autocomplete="off"></label>
     <label><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.email %></span><% }) %><input type="email" name="email" value="<%= v.email || '' %>" maxlength="200" autocomplete="off" inputmode="email"></label>
     <label class="check"><input type="checkbox" name="wants_photo"<%~ on('wants_photo') ? ' checked' : '' %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].hello.wantsPhoto %></span><% }) %></label>
-    <fieldset class="app-age" data-group="adult"<%~ said('adult', 'err-adult') %>>
+<% /* Âge (décisions du propriétaire du 20 octobre 2026, comme /bonjour) : demandé avec un accord, et dès que la photo ou le
+      récapitulatif partent à une adresse ; avant 15 ans, l'e-mail d'un parent remplace celui de la personne (jamais gardé).
+      Deux phrases d'erreur : avec un accord (18 ans ?) ou pour la photo (quel âge ?), app.js montre celle qui convient. */ %>
+<% const ageFor = v.decision === 'accord' ? 'accord' : 'photo'; %>
+    <fieldset class="app-age" data-group="adult"<%~ said('adult', ageFor === 'accord' ? 'err-adult' : 'err-adult-photo') %>>
       <legend class="sr-only"><%= t('Âge') %></legend>
-      <p class="app-err" id="err-adult" data-err-for="adult"<%~ e.adult ? '' : ' hidden' %>><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.errAdult %></span><% }) %></p>
+      <p class="app-err" id="err-adult" data-err-for="adult" data-quand="accord"<%~ e.adult && ageFor === 'accord' ? '' : ' hidden' %>><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.errAdult %></span><% }) %></p>
+      <p class="app-err" id="err-adult-photo" data-err-for="adult" data-quand="photo"<%~ e.adult && ageFor === 'photo' ? '' : ' hidden' %>><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.errAdultPhoto %></span><% }) %></p>
       <label class="check"><input type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %><%~ bad('adult') %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.adult %></span><% }) %></label>
       <label class="check"><input type="radio" name="adult" value="non"<%~ v.adult === 'non' ? ' checked' : '' %><%~ bad('adult') %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.minor %></span><% }) %></label>
-      <label><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.guardian %></span><% }) %><input name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"></label>
+      <label class="check"><input type="radio" name="adult" value="moins15"<%~ v.adult === 'moins15' ? ' checked' : '' %><%~ bad('adult') %>> <% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.under15 %></span><% }) %></label>
+      <label><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.guardian %> <span class="hint"><%= it.UI[l].hello.guardianHint %></span></span><% }) %><input name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"<%~ bad('guardian') %>></label>
+      <label><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.guardianEmail %> <span class="hint"><%= it.UI[l].app.guardianEmailHint %></span></span><% }) %><input type="email" name="guardian_email" value="<%= v.guardian_email || '' %>" maxlength="200" autocomplete="off" inputmode="email"<%~ bad('guardian_email') %>></label>
     </fieldset>
     <p class="hint app-privacy"><% L.forEach(l => { %><span data-l="<%= l %>" lang="<%= l %>"><%= it.UI[l].app.privacy(it.host) %></span><% }) %></p>
     <div class="app-sign<%= redo.signature ? ' redo' : '' %>">

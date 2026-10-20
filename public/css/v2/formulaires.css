@@ -79,12 +79,12 @@
    :has ; toujours visible sur un navigateur qui ne le prend pas en charge. */
 .revele { margin: var(--esp-1) 0 0 34px; }
 @supports selector(:has(*)) { .revele-si:not(:has(input[data-revele]:checked)) .revele { display: none; } }
-/* Avant 15 ans (seulement pour recevoir la photo, MQ-05 étendue par la décision du 20 octobre 2026) : le choix « moins de
-   15 ans » n'apparaît qu'avec « Recevoir la photo » (gardé s'il est déjà coché), l'adresse du parent et la phrase sous
-   « Votre e-mail » qu'avec ce choix. */
+/* Avant 15 ans (MQ-05 étendue par les décisions du 20 octobre 2026) : le choix « moins de 15 ans » n'apparaît qu'avec
+   « Recevoir la photo » ou « J'accepte » (une publication seule, sans la photo ; gardé s'il est déjà coché), l'adresse du
+   parent et la phrase sous « Votre e-mail » qu'avec ce choix. */
 .revele-15 { margin: var(--esp-1) 0 0 34px; }
 @supports selector(:has(*)) {
-  .form:not(:has(#bj-photo:checked)) .si-photo:not(:has(input:checked)) { display: none; }
+  .form:not(:has(#bj-photo:checked)):not(:has(#bj-accord:checked)) .si-usage:not(:has(input:checked)) { display: none; }
   .revele-si:not(:has(input[data-revele15]:checked)) .revele-15 { display: none; }
   .form:not(:has(input[data-revele15]:checked)) .si-15 { display: none; }
 }

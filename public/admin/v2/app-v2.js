@@ -142,21 +142,29 @@ document.documentElement.classList.add('js');
   // ----- vérification avant l'envoi : les règles du serveur (seul juge), dans la langue de la personne -----
   const EMAIL = /^[^\s@<>]{1,100}@[^\s@<>]{1,100}\.[^\s@<>]{2,30}$/;
   const ERRS = {
-    fr: { email: 'E-mail : l’adresse ne semble pas complète.', scopes: 'Usages : cochez au moins le site.', name: 'Prénom et nom : indiquez votre nom.', adult: 'Âge : dites si vous avez 18 ans ou plus.', guardian: 'Nom du parent : indiquez qui signe avec vous.', signature: 'Signature : signez avec le doigt.', what: 'Votre décision : choisissez une réponse, ou laissez votre e-mail.', titre1: '1 point à corriger', titre: '{n} points à corriger' },
-    en: { email: 'Email: the address does not look complete.', scopes: 'Uses: tick at least the website.', name: 'Full name: please give your name.', adult: 'Age: tell us whether you are 18 or older.', guardian: 'Parent’s name: tell us who is signing with you.', signature: 'Signature: please sign with your finger.', what: 'Your decision: choose an answer, or leave your email.', titre1: '1 thing to fix', titre: '{n} things to fix' },
-    de: { email: 'E-Mail: Die Adresse scheint unvollständig.', scopes: 'Nutzung: Kreuzen Sie mindestens die Website an.', name: 'Vor- und Nachname: Bitte geben Sie Ihren Namen an.', adult: 'Alter: Bitte geben Sie an, ob Sie 18 Jahre oder älter sind.', guardian: 'Name des Elternteils: Bitte angeben, wer mitunterschreibt.', signature: 'Unterschrift: Bitte mit dem Finger unterschreiben.', what: 'Ihre Entscheidung: Bitte wählen Sie eine Antwort oder geben Sie Ihre E-Mail an.', titre1: '1 Angabe fehlt', titre: '{n} Angaben fehlen' },
+    fr: { email: 'E-mail : l’adresse ne semble pas complète.', scopes: 'Usages : cochez au moins le site.', name: 'Prénom et nom : indiquez votre nom.', adult: 'Âge : dites si vous avez 18 ans ou plus.', adultPhoto: 'Âge : dites quel âge vous avez (avant 15 ans, la photo est envoyée à un parent).', parentEmail: 'E-mail d’un parent : nécessaire avant 15 ans, la photo lui est envoyée.', guardian: 'Nom du parent : indiquez qui signe avec vous.', signature: 'Signature : signez avec le doigt.', what: 'Votre décision : choisissez une réponse, ou laissez votre e-mail.', titre1: '1 point à corriger', titre: '{n} points à corriger' },
+    en: { email: 'Email: the address does not look complete.', scopes: 'Uses: tick at least the website.', name: 'Full name: please give your name.', adult: 'Age: tell us whether you are 18 or older.', adultPhoto: 'Age: tell us how old you are (under 15, the photo is sent to a parent).', parentEmail: 'A parent’s email: needed under 15, the photo is sent to them.', guardian: 'Parent’s name: tell us who is signing with you.', signature: 'Signature: please sign with your finger.', what: 'Your decision: choose an answer, or leave your email.', titre1: '1 thing to fix', titre: '{n} things to fix' },
+    de: { email: 'E-Mail: Die Adresse scheint unvollständig.', scopes: 'Nutzung: Kreuzen Sie mindestens die Website an.', name: 'Vor- und Nachname: Bitte geben Sie Ihren Namen an.', adult: 'Alter: Bitte geben Sie an, ob Sie 18 Jahre oder älter sind.', adultPhoto: 'Alter: Bitte geben Sie Ihr Alter an (unter 15 wird das Foto an ein Elternteil geschickt).', parentEmail: 'E-Mail eines Elternteils: unter 15 nötig, das Foto wird dorthin geschickt.', guardian: 'Name des Elternteils: Bitte angeben, wer mitunterschreibt.', signature: 'Unterschrift: Bitte mit dem Finger unterschreiben.', what: 'Ihre Entscheidung: Bitte wählen Sie eine Antwort oder geben Sie Ihre E-Mail an.', titre1: '1 Angabe fehlt', titre: '{n} Angaben fehlen' },
   };
   function problems() {
     const f = form.elements, out = [];
-    const email = f.email.value.trim();
-    if (email && !EMAIL.test(email)) out.push(['email', f.email]);
+    // Avant 15 ans, l'adresse d'un parent remplace celle de la personne ; l'âge est demandé aussi pour la photo ou le
+    // récapitulatif (une adresse notée), comme sur le serveur.
+    const under15 = f.adult.value === 'moins15';
+    const own = f.email.value.trim(), parent = f.guardian_email.value.trim();
+    const email = under15 ? parent : own;
+    if (email && !EMAIL.test(email)) out.push(under15 ? ['parentEmail', f.guardian_email] : ['email', f.email]);
+    else if (under15 && !email && (f.wants_photo.checked || own)) out.push(['parentEmail', f.guardian_email]);
     if (f.decision.value === 'accord') {
       if (!['scope_site', 'scope_instagram', 'scope_print'].some(n => f[n].checked)) out.push(['scopes', f.scope_site]);
       if (!f.name.value.trim()) out.push(['name', f.name]);
       if (!f.adult.value) out.push(['adult', f.adult[0]]);
-      else if (f.adult.value === 'non' && !f.guardian.value.trim()) out.push(['guardian', f.guardian]);
+      else if (f.adult.value !== 'oui' && !f.guardian.value.trim()) out.push(['guardian', f.guardian]);
       if (!drawn) out.push(['signature', canvas]);
-    } else if (!f.decision.value && !email && !f.wants_photo.checked) out.push(['what', f.decision[0]]);
+    } else {
+      if (!f.adult.value && (f.wants_photo.checked || own || parent)) out.push(['adultPhoto', f.adult[0]]);
+      if (!f.decision.value && !email && !f.wants_photo.checked && !(under15 && own)) out.push(['what', f.decision[0]]);
+    }
     return out;
   }
   function report(list) {
