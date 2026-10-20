@@ -15,7 +15,8 @@
 <link rel="stylesheet" href="<%= it.asset('admin/v2/reglages-v2.css') %>">
 <%~ include('./_reglages', { ...it, courant: 'appearance' }) %>
 <div class="rg">
-<nav class="sur-page" aria-label="<%= t('Sur cet onglet') %>"><%= t('Sur cet onglet :') %> <a href="#identite"><%= t('Identité') %></a><a href="#theme"><%= t('Thème') %></a><a href="#logos"><%= t('Logos') %></a><a href="#site-public"><%= t('Version du site public') %></a></nav>
+<nav class="sur-page" aria-label="<%= t('Sur cet onglet') %>"><%= t('Sur cet onglet :') %> <a href="#compositions"><%= t('Thèmes et rubriques') %></a><a href="#identite"><%= t('Identité') %></a><a href="#theme"><%= t('Thème') %></a><a href="#logos"><%= t('Logos') %></a><a href="#site-public"><%= t('Version du site public') %></a></nav>
+<%~ include('../_compositions', it) %>
 
 <form class="form rg-form" method="post" action="/admin/apparence" data-apparence novalidate>
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
@@ -34,15 +35,15 @@
   </section>
 
   <section class="panel" id="theme" aria-labelledby="theme-t">
-    <h2 id="theme-t"><%= t('Thème du site public') %></h2>
-    <p class="hint"><%= t('Le thème change les couleurs et la typographie du site public ; l’admin garde son apparence. « Aperçu » ouvre le site avec un thème sans l’appliquer : vous seul le voyez, pendant une heure ou jusqu’à « Quitter l’aperçu ».') %></p>
+    <h2 id="theme-t"><%= t(it.designSettings ? 'Palette des présentations V1, V2 et V3' : 'Thème du site public') %></h2>
+    <% if (it.designSettings) { %><p class="hint"><%= t('Cette palette ne concerne que les rubriques en V1, V2 ou V3. Les chambres noires ont leur propre palette.') %></p><% } else { %><p class="hint"><%= t('Le thème change les couleurs et la typographie du site public ; l’admin garde son apparence. « Aperçu » ouvre le site avec un thème sans l’appliquer : vous seul le voyez, pendant une heure ou jusqu’à « Quitter l’aperçu ».') %></p><% } %>
     <fieldset class="rg-themes" data-rg-choix data-label="<%= t('Thème') %>"><legend class="sr-only"><%= t('Thème du site public') %></legend>
 <% Object.entries(it.THEMES).forEach(([id, th]) => { %>
       <div class="rg-theme">
         <label><input type="radio" name="theme" value="<%= id %>"<%~ id === it.themeId ? ' checked' : '' %> data-mot="<%= t(th.label) %>" aria-describedby="th-<%= id %>-d"><span><b><%= t(th.label) %></b></span></label>
         <span class="swatch swatch-<%= id %>" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="sec" id="th-<%= id %>-d"><%= t(th.description) %></span>
-        <a class="rg-apercu" href="/?theme=<%= id %>" target="_blank" rel="noopener"><%= t('Aperçu') %><span class="sr-only"> <%= t('du thème {name} (nouvel onglet)', { name: t(th.label) }) %></span><%~ ext %></a>
+        <% if (!it.designSettings) { %><a class="rg-apercu" href="/?theme=<%= id %>" target="_blank" rel="noopener"><%= t('Aperçu') %><span class="sr-only"> <%= t('du thème {name} (nouvel onglet)', { name: t(th.label) }) %></span><%~ ext %></a><% } %>
       </div>
 <% }) %>
     </fieldset>
@@ -74,6 +75,7 @@
   </div>
 </section>
 
+<% if (!it.designSettings) { %>
 <section class="panel" id="site-public" aria-labelledby="site-public-t">
   <h2 id="site-public-t"><%= t('Site public : v1, v2 ou v3') %></h2>
   <p class="hint"><%= t('La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion, qui gardent la présentation v1. L’administration ne change pas.') %></p>
@@ -115,6 +117,7 @@
   </div>
 <% } %>
 </section>
+<% } else { %><p id="site-public" class="hint"><%= t('Le choix de version est remplacé par « Thèmes et rubriques ». Les réglages historiques sont conservés pour le retour arrière.') %></p><% } %>
 </div>
 
 <% /* Ce qui ne se défait pas (MQ-09) : retirer un logo efface son fichier. Avec le script, un dialogue modal (Annuler

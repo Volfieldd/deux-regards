@@ -2,6 +2,14 @@
 
 Was Ihre Besucher tun können, damit Sie wissen, was Ihre Einstellungen verändern.
 
+## Themen je Bereich
+
+Das Erscheinungsbild kann je Bereich variieren: Startseite, Galerien, Fotos, Karte, Reisen, Journale, Fotografen, Kontakt oder Informationen. Die drei bisherigen Ansichten und sechs Dunkelkammer-Designs stehen zur Wahl. Die Auswahl erfolgt unter [Erscheinungsbild → Themen und Bereiche](apparence#thèmes-et-rubriques); die Installation des Updates verändert die veröffentlichte Website nicht.
+
+In einem Dunkelkammer-Design werden die Bilder am Anfang manuell ausgewählt, ohne automatische Wiedergabe. Der **Ruhemodus** in der Fußzeile reduziert optionale Bewegungen; die Einstellung des Geräts für reduzierte Bewegung wird immer berücksichtigt. Fotos behalten verwandte Bilder und eine Minikarte, wenn ein Ort veröffentlicht ist. Reisen und Journale behalten ihre Funktionen. Private Galerien behalten ihre eigene Ansicht.
+
+Wenn Themen je Bereich aktiviert sind, öffnet das Menü Galerie `/galerie` mit einem eigenen Thema. Journale bleiben auch mit V1 als allgemeinem Thema erreichbar; sie verwenden dann die V2-Ansicht. Die folgenden Beschreibungen der Startseite beziehen sich auf die bisherigen Ansichten V1 und V2.
+
 ## Sprachen
 
 Die Website gibt es auf **Französisch** (übliche Adressen, `/photo/…`), **Englisch** (`/en/…`) und **Deutsch** (`/de/…`).

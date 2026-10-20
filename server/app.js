@@ -1,3 +1,4 @@
+import { designRowSizes } from './designs.js';
 import crypto from 'node:crypto';
 import { createReview } from './review.js';
 import { createNotes } from './notes.js';
@@ -152,11 +153,13 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorateReply('render', function (template, data) {
     const names = authorNames.all();
     const brand = app.appearance.brand();
-    const theme = app.appearance.forRequest(this.request, this);
+    let theme = app.appearance.forRequest(this.request, this);
     // Pages publiques seulement : l'admin et ses pages d'erreur restent ce qu'elles sont.
     // Pages des galeries privées : toujours en v2 (elles n'ont pas de v1), sans le bouton de la vue (pages neutres).
     const only = app.publicVersion.onlyV2(template);
-    const pv = only || /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request);
+    const pv = only || /^admin\//.test(template) || /^\/(?:admin|auth)(?:[/?#]|$)/.test(this.request.url) ? null : app.publicVersion.forRequest(this.request, template === 'home' ? (data?.page === 'accueil' ? 'accueil' : 'galerie') : undefined);
+    const darkroom = pv?.darkroom && app.publicVersion.hasV2(template) ? pv.design : null;
+    if (darkroom) theme = { ...theme, preview: false, scheme: 'dark', classes: `theme-chambre mode-nuit chambre-${darkroom}`, stylesheet: null };
     const v2 = only || (usesV2(pv?.version) && app.publicVersion.hasV2(template));
     // v3 : les gabarits v2, redessinés (css/v3/v3.css, accueil en plein cadre : views/v3/). Pas les pages des galeries
     // privées, qui gardent leur dessin quel que soit le réglage.
@@ -164,8 +167,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     // Page sans gabarit v1 (née avec la v2, comme les Carnets) servie en v1 : introuvable, jamais une erreur.
     if (pv && !v2 && !app.publicVersion.hasV1(template)) return this.callNotFound();
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
-      // Lien « Carnets » du menu et du pied de page v2 : au moins un billet publié (le menu v1 ne change pas).
-      carnetPage: usesV2(pv?.version) && app.carnet.publishedCount() > 0, v3,
+      // Disponibilité des Carnets selon leur rubrique, y compris depuis un accueil V1 dans le système de thèmes.
+      carnetPage: usesV2(app.publicVersion.forRequest(this.request, 'carnets').version) && app.carnet.publishedCount() > 0, v3, darkroom, designRowSizes, sectionThemes: Boolean(pv?.configured || pv?.darkroom), designSection: pv?.section,
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
       here: splitLang(this.request.url).path, langs: LANGS, langNames: NAMES, locales: LOCALES, localize,
       authorNames: names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0] || '',

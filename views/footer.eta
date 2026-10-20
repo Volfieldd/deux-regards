@@ -1,6 +1,6 @@
 <% const f = it.t.footer; %>
 <footer class="wrap mono">
   <span><%= it.siteName %><%= it.authorNames ? ' · ' + it.authorNames : '' %></span>
-  <span><%= f.photos %> · <%= f.noRepro %> · <a href="<%= it.u('/contact') %>"><%= f.contact %></a> · <a href="<%= it.u('/droits') %>"><%= f.rights %></a> · <a href="<%= it.u('/confidentialite') %>"><%= f.privacy %></a> · <a href="<%= it.u('/mentions-legales') %>"><%= f.legal %></a></span>
+  <span><% if (it.carnetPage) { %><a href="<%= it.u('/carnet') %>"><%= it.t.carnet.title %></a> · <% } %><%= f.photos %> · <%= f.noRepro %> · <a href="<%= it.u('/contact') %>"><%= f.contact %></a> · <a href="<%= it.u('/droits') %>"><%= f.rights %></a> · <a href="<%= it.u('/confidentialite') %>"><%= f.privacy %></a> · <a href="<%= it.u('/mentions-legales') %>"><%= f.legal %></a></span>
 <% if (it.trapLink) { %>  <a href="<%= it.trapLink %>" rel="nofollow" hidden tabindex="-1" aria-hidden="true">archives</a>
 <% } %></footer>

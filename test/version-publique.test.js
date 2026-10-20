@@ -262,13 +262,14 @@ test('aides v2 : format arrondi vers le bas, sizes, date abrégée insécable', 
   assert.equal(shortDate(''), '');
 });
 
-test('page Apparence : « Site public : v1 ou v2 » en tête, avant le thème ; un texte qui ne date pas', async t => {
+test('page Apparence : compositions en tête, version historique avant sa palette ; textes traduits', async t => {
   const c = await site(t);
   const page = (await c.as('admin').get('/admin/apparence')).body;
   const main = page.slice(page.indexOf('<h1'));
   const section = main.indexOf('id="site-public"'), theme = main.indexOf('name="theme"');
   assert.ok(section > 0 && theme > 0 && section < theme, 'la version avant le formulaire du thème');
-  assert.ok(main.indexOf('id="site-public"') < main.indexOf('<form'), 'la section est le premier bloc après le titre');
+  assert.ok(main.indexOf('id="compositions"') < main.indexOf('<form'), 'les thèmes par rubrique sont le premier bloc après le titre');
+  assert.ok(main.indexOf('id="compositions"') < section, 'les réglages historiques viennent après les compositions');
   assert.match(page, /Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion/);
   assert.doesNotMatch(page, /aujourd’hui : la page d’une photo|arrivent une à une|le site actuel/);
   // Toujours en anglais et en allemand (dictionnaire de l'admin).

@@ -7,6 +7,7 @@
 // Actions notées par leur adresse (le crochet onResponse de server/routes/admin.js : « POST /admin/… »), et lectures
 // notées (config.audit : exports, originaux).
 export const LIBELLES = {
+  'POST /admin/apparence/compositions': 'Thèmes par rubrique enregistrés',
   'POST /admin/apparence': 'Identité et apparence enregistrées',
   'POST /admin/apparence/apercu-v2': 'Vue du site public changée pour la session',
   'POST /admin/apparence/marque/:slot': 'Logo envoyé',

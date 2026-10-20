@@ -1,7 +1,9 @@
 <% layout('./layout') %>
 <% const b = it.brand; const t = it.t; %>
 <h1><%= t('Apparence') %></h1>
+<%~ include('./_compositions', it) %>
 
+<% if (!it.designSettings) { %>
 <section class="panel" id="site-public" aria-labelledby="site-public-t">
   <h2 id="site-public-t"><%= t('Site public : v1, v2 ou v3') %></h2>
   <p class="mono"><%= t('La v2 est la nouvelle présentation du site public, issue de l’audit d’ergonomie. Elle couvre toutes les pages publiques, sauf les pages d’erreur et de connexion, qui gardent la présentation v1. L’administration ne change pas.') %></p>
@@ -41,8 +43,9 @@
 <% }) %>
 <% } %>
 </section>
+<% } else { %><p id="site-public" class="hint"><%= t('Le choix de version est remplacé par « Thèmes et rubriques ». Les réglages historiques sont conservés pour le retour arrière.') %></p><% } %>
 
-<p class="prose"><%= t('Le thème change les couleurs et la typographie du site public ; l’admin garde son apparence. « Aperçu » ouvre le site avec un thème sans l’appliquer : vous seul le voyez, pendant une heure ou jusqu’à « Quitter l’aperçu ».') %></p>
+<% if (it.designSettings) { %><p class="hint"><%= t('Cette palette ne concerne que les rubriques en V1, V2 ou V3. Les chambres noires ont leur propre palette.') %></p><% } else { %><p class="prose"><%= t('Le thème change les couleurs et la typographie du site public ; l’admin garde son apparence. « Aperçu » ouvre le site avec un thème sans l’appliquer : vous seul le voyez, pendant une heure ou jusqu’à « Quitter l’aperçu ».') %></p><% } %>
 
 <form class="form" method="post" action="/admin/apparence">
   <input type="hidden" name="_csrf" value="<%= it.csrf %>">
@@ -54,7 +57,7 @@
         <label class="inline"><input type="radio" name="theme" value="<%= id %>"<%~ id === it.themeId ? ' checked' : '' %>> <strong><%= t(th.label) %></strong><%= id === it.themeId ? ` ${t('(actuel)')}` : '' %></label>
         <span class="swatch swatch-<%= id %>" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="mono"><%= t(th.description) %></span>
-        <a class="more eyebrow" href="/?theme=<%= id %>" target="_blank" rel="noopener"><%= t('Aperçu') %><span class="sr-only"> <%= t('du thème {name} (nouvel onglet)', { name: t(th.label) }) %></span></a>
+        <% if (!it.designSettings) { %><a class="more eyebrow" href="/?theme=<%= id %>" target="_blank" rel="noopener"><%= t('Aperçu') %><span class="sr-only"> <%= t('du thème {name} (nouvel onglet)', { name: t(th.label) }) %></span></a><% } %>
       </div>
 <% }) %>
     </div>

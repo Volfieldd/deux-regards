@@ -63,3 +63,11 @@ Jedes Theme wird mit seinen drei Farben (Hintergrund, Tinte, Akzent) und einer B
 - **Foto einer Zeichnung:** Die Ausrichtung des Telefons wird angewendet; eine fotografierte Zeichnung erscheint nicht verdreht.
 - **Teilen-Bild:** als JPEG neu kodiert, höchstens 1200 px. Transparenz wird hinter einer dunklen Zeichnung (freigestelltes schwarzes Logo) zu **weißem**, hinter einer hellen zu **schwarzem** Hintergrund.
 - **SVG:** beim Hochladen abgelehnt.
+
+## Themen nach Bereichen
+
+Im Bereich **Themen und Bereiche** wählen Sie eine allgemeine Gestaltung und bei Bedarf Ausnahmen: Startseite, Galerien/Suche, Fotoansicht, Karte, Reisen, Journale, Über uns, Kontakt und Informationen. Verfügbar sind V1/V2/V3 sowie Obscura, Panoramique, Contact, Résonances, Itinérance und Hors cadre. Die Dunkelkammer-Themen haben eine eigene Farbpalette; die bisherigen Gestaltungen verwenden die oben beschriebene Palette.
+
+Beispiel: Obscura allgemein, V1 für die Startseite und Résonances für die Journale. **Themen auf die Website anwenden** speichert die gesamte Auswahl. „Allgemeinem Thema folgen“ berücksichtigt spätere Änderungen; Ausnahmen bleiben bis zu ihrer Entfernung erhalten. Die Auswahl betrifft die Seiten eines Bereichs, nicht einzelne Blöcke einer Seite. Das Galeriemenü öffnet eine eigene Seite.
+
+Die Vorschau betrifft nur Ihre Sitzung. **Zum Thema der Besucher zurückkehren** beendet sie. **Zu bisherigen Einstellungen zurückkehren** entfernt die Ausnahmen und stellt die frühere Version und Farbpalette wieder her. Die Installation aktiviert das System nicht automatisch. Journale bleiben im neuen System verfügbar; bei V1 verwenden sie V2. Private Galerien behalten ihre eigene Darstellung.

@@ -1,0 +1,31 @@
+<% /* Les six compositions emploient les photos publiées de l’ouverture et les mêmes liens de visionneuse.
+   Pas de contenu de maquette ni d’image embarquée. Les vues suivantes du tirage sont chargées à la demande. */ %>
+<% const t = it.t, v = it.v2, kind = it.darkroom;
+   const slideshow = kind === 'obscura' || kind === 'panoramique';
+   const limit = kind === 'resonances' ? 2 : kind === 'hors-cadre' ? 3 : kind === 'itinerance' ? 1 : 4;
+   const images = it.hero.slice(0, slideshow ? it.hero.length : limit);
+   const sizes = kind === 'contact' ? '(max-width: 700px) 44vw, 23vw' : kind === 'resonances' ? '(max-width: 700px) 90vw, 44vw' : '(max-width: 700px) 90vw, 80vw'; %>
+<section class="room-opening wrap" aria-labelledby="room-title" data-room-opening>
+  <div class="room-heading"><p class="etiquette"><%= it.siteName %></p><h1 id="room-title"><%= it.promise %></h1><p><%= it.promiseSub %></p></div>
+  <div class="room-prints"<% if (slideshow) { %> data-room-stage<% } %>>
+<% images.forEach((p,i) => { const deferred = slideshow && i > 0; %>
+<% if (deferred) { %><template data-room-slide="<%= i %>"><% } %>
+    <figure class="room-print" data-room-index="<%= i %>">
+      <a href="<%= it.photoUrl(p.slug) %>"><%~ it.picture(p, { sizes, eager: i === 0, alt: p.alt || p.title }) %></a>
+      <figcaption class="cartel"><span class="room-number donnee"><%= String(i + 1).padStart(2,'0') %></span><a href="<%= it.photoUrl(p.slug) %>"><span class="cartel-t"><%= p.title %></span><span class="cartel-m"><%= [p.author, p.place, v.date(p.taken_on)].filter(Boolean).join(' · ') %></span></a></figcaption>
+    </figure>
+<% if (deferred) { %></template><% } %>
+<% }) %>
+  </div>
+<% if (slideshow && images.length > 1) { %>
+  <div class="room-controls" hidden data-room-controls>
+    <button type="button" class="btn btn--filet" data-room-prev aria-label="<%= t.v2.prev %>"><%~ v.ic('prec') %></button>
+    <span class="donnee" data-room-count aria-live="polite" aria-atomic="true">1 / <%= images.length %></span>
+    <button type="button" class="btn btn--filet" data-room-next aria-label="<%= t.v2.next %>"><%~ v.ic('suiv') %></button>
+<% if (kind === 'panoramique') { %><div class="room-strip">
+<% images.forEach((p,i) => { %><button type="button" data-room-select="<%= i %>" aria-pressed="<%= i === 0 %>" aria-label="<%= t.v2.slidePoint(i+1,images.length,p.title) %>"><%~ it.picture(p,{ sizes: '100px',alt:'' }) %><span class="donnee"><%= String(i+1).padStart(2,'0') %></span></button><% }) %>
+  </div><% } %>
+  </div>
+<% } %>
+  <div class="room-bottom"><a class="lien" href="<%= it.u('/galerie') %>"><%= t.nav.gallery %><%~ v.ic('fleche') %></a></div>
+</section>

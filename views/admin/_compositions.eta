@@ -1,0 +1,48 @@
+<% const t = it.t, config = it.designSettings, selected = config?.default || it.publicVersion; %>
+<section class="panel" id="compositions" aria-labelledby="compositions-t">
+  <h2 id="compositions-t"><%= t('Thèmes et rubriques') %></h2>
+  <p class="hint"><%= t('Choisissez une présentation pour tout le site, puis des exceptions si vous le souhaitez. Les pages d’une même rubrique partagent le même thème. L’administration garde son apparence.') %></p>
+  <p><%= config ? t('Les thèmes par rubrique sont actifs.') : t('Le site utilise encore les réglages historiques. Rien ne change avant votre enregistrement.') %></p>
+<% if (it.vueSession) { %>
+  <form method="post" action="/admin/apparence/apercu-v2">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="vue" value="suivre"><input type="hidden" name="vers" value="/admin/apparence#compositions">
+    <p><%= t('Votre aperçu personnel') %> : <b><%= t(it.DESIGNS[it.vueSession]?.label || it.vueSession) %></b></p>
+    <button class="btn ghost" type="submit"><%= t('Revenir au thème des visiteurs') %></button>
+  </form>
+<% } %>
+  <form class="form" method="post" action="/admin/apparence/compositions">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <div class="field champ-a"><label for="design-default"><%= t('Thème général') %></label>
+      <select id="design-default" name="default"><% Object.entries(it.DESIGNS).forEach(([id,d]) => { %><option value="<%= id %>"<%~ selected === id ? ' selected' : '' %>><%= t(d.label) %></option><% }) %></select>
+    </div>
+    <details><summary><%= t('Personnaliser par rubrique') %></summary>
+      <p class="hint"><%= t('« Suivre le thème général » suivra aussi vos prochains changements. Une exception reste en place jusqu’à son retrait.') %></p>
+<% Object.entries(it.SECTIONS).forEach(([key,section]) => { const value = config?.sections[key] || 'inherit'; %>
+      <div class="field champ-a"><label for="design-<%= key %>"><%= t(section.label) %></label>
+        <select id="design-<%= key %>" name="section_<%= key %>">
+          <option value="inherit"<%~ value === 'inherit' ? ' selected' : '' %>><%= t('Suivre le thème général') %></option>
+<% Object.entries(it.DESIGNS).forEach(([id,d]) => { %>          <option value="<%= id %>"<%~ value === id ? ' selected' : '' %>><%= t(d.label) %></option>
+<% }) %>        </select>
+      </div>
+<% }) %>    </details>
+    <p class="hint"><%= t('Les chambres noires incluent leur palette. V1, V2 et V3 utilisent la palette historique ci-dessous. Avec ce système, les Carnets restent disponibles : si vous choisissez V1, cette rubrique utilise la présentation V2.') %></p>
+    <button class="btn" type="submit"><%= t('Appliquer les thèmes au site') %></button>
+  </form>
+  <details><summary><%= t('Découvrir les thèmes sans les appliquer') %></summary>
+    <p class="hint"><%= t('Chaque aperçu ne concerne que votre session. Il suit votre navigation ; les visiteurs gardent leurs thèmes. « Revenir au thème des visiteurs » quitte cet aperçu.') %></p>
+    <div class="themes rg-themes">
+<% Object.entries(it.DESIGNS).forEach(([id,d]) => { %>      <article class="theme-card rg-theme">
+        <h3><%= t(d.label) %></h3><p><%= t(d.description) %></p>
+        <form method="post" action="/admin/apparence/apercu-v2"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="vue" value="<%= id %>"><input type="hidden" name="vers" value="/">
+          <button class="btn ghost" type="submit"><%= t('Aperçu') %> · <%= t(d.label) %></button>
+        </form>
+      </article>
+<% }) %>    </div>
+  </details>
+<% if (config) { %>  <form method="post" action="/admin/apparence/compositions">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="reset" value="1">
+    <p class="hint"><%= t('Revenir aux réglages historiques retire les exceptions. Vos anciens choix de version et de palette ont été conservés.') %></p>
+    <button class="btn ghost" type="submit"><%= t('Revenir aux réglages historiques') %></button>
+  </form>
+<% } %>
+</section>

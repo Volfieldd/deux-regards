@@ -1,5 +1,34 @@
 [
   {
+    "version": "1.188.0",
+    "date": "2026-10-20",
+    "pr": 188,
+    "title": {
+      "fr": "Six chambres noires, un thème par rubrique",
+      "en": "Six darkroom designs, a theme for each section",
+      "de": "Sechs Dunkelkammer-Designs, ein Thema je Bereich"
+    },
+    "items": [
+      {
+        "fr": "Six présentations sur fond noir mettent les photos au centre : Obscura, Panoramique, Contact, Résonances, Itinérance et Hors cadre. Elles reprennent la carte, les photos connexes, les voyages et les Carnets. L’ouverture se parcourt manuellement ; le Mode calme réduit les mouvements facultatifs.",
+        "en": "Six designs on a black background put photography centre stage: Obscura, Panoramique, Contact, Résonances, Itinérance and Hors cadre. They retain the map, related photos, trips and Journals. The opening images are selected manually; Calm mode reduces optional motion.",
+        "de": "Sechs Designs auf schwarzem Hintergrund stellen die Fotos in den Mittelpunkt: Obscura, Panoramique, Contact, Résonances, Itinérance und Hors cadre. Karte, verwandte Fotos, Reisen und Journale bleiben erhalten. Die Bilder am Anfang werden manuell ausgewählt; der Ruhemodus reduziert optionale Bewegungen."
+      },
+      {
+        "fr": "Dans Apparence → Thèmes et rubriques, choisissez un thème général puis des exceptions : par exemple V1 à l’accueil et Résonances dans les Carnets. Les trois présentations historiques restent disponibles. Le même formulaire existe dans les deux versions de l’admin.",
+        "en": "In Appearance → Themes and sections, choose a site-wide theme and then exceptions: for example V1 on the home page and Résonances in Journals. The three existing layouts remain available. Both admin versions offer the same form.",
+        "de": "Wählen Sie unter Erscheinungsbild → Themen und Bereiche ein allgemeines Thema und anschließend Ausnahmen: etwa V1 auf der Startseite und Résonances in den Journalen. Die drei bisherigen Ansichten bleiben verfügbar. Beide Verwaltungsversionen bieten dasselbe Formular.",
+        "perm": "site.apparence"
+      },
+      {
+        "fr": "La mise à jour ne change pas l’apparence publiée. Essayez les thèmes dans votre aperçu personnel, puis cliquez sur Appliquer les thèmes au site pour les activer. Revenir aux réglages historiques rétablit l’ancienne version et sa palette, en supprimant les exceptions par rubrique.",
+        "en": "The update does not change the published appearance. Try the themes in your personal preview, then click Apply themes to the site to activate them. Return to historical settings restores the previous version and palette, removing section exceptions.",
+        "de": "Das Update verändert das veröffentlichte Erscheinungsbild nicht. Probieren Sie die Themen in Ihrer persönlichen Vorschau aus und aktivieren Sie sie anschließend mit Themen auf die Website anwenden. Zu den bisherigen Einstellungen zurückkehren stellt die vorherige Version und Farbpalette wieder her und entfernt die Ausnahmen je Bereich.",
+        "perm": "site.apparence"
+      }
+    ]
+  },
+  {
     "version": "1.186.0",
     "date": "2026-10-20",
     "pr": 186,

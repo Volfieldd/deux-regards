@@ -162,7 +162,7 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
       title: t('Carnets'), list, STATE_PILL, STATE_LABEL, RUBRIQUES, RUBRIQUE_NAMES, pill: pillOf(request), carnetAssets: true,
       canCreate: Boolean(s), authors: s?.all ? repo.authors() : repo.authors().filter(a => a.id === s?.authorId),
       contact: { value: String(settings.carnet_contact || ''), fallback: legalEmail(settings) || '' }, canContact: Boolean(request.can('reglages.droits')),
-      v2: usesV2(app.publicVersion.setting()),
+      v2: usesV2(app.publicVersion.versionForSection('carnets')),
     });
   });
 
@@ -229,7 +229,7 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
       publishers: publishers(request), history: pending.slice(0, 12), revisions: c.revisions(post.id).length, lastRemark,
       weight: weightOf(post), LIMITS, ADVISE, STATE_PILL, STATE_LABEL, LANGS, translate: app.translator.enabled, pill: pillOf(request), symbol,
       langState: l => (post.langs.includes(l) ? t('publié') : String(post[col('body', l)] || post[col('title', l)] || '').trim() ? t('à relire') : t('vide')),
-      v2: usesV2(app.publicVersion.setting()), carnetAssets: true, verifyAction: verify === 'publier' ? t('publié') : t('proposé'),
+      v2: usesV2(app.publicVersion.versionForSection('carnets')), carnetAssets: true, verifyAction: verify === 'publier' ? t('publié') : t('proposé'),
     });
   }
 
