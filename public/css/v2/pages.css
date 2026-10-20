@@ -212,7 +212,7 @@
    La planche des couvertures de la liste des Carnets (MQ-11, css/v2/carnet.css § 21), pour les séries : deux colonnes dès
    768 px ; la couverture d'abord, au format de la photo, à hauteur commune (300 px, 380 au bureau), jamais recadrée ; une
    verticale se pose à côté du texte (.ser-e--cote : 2/5 de la carte ; au téléphone, 5/12, le nom à sa droite, le texte
-   d'intention et la fiche dessous). Le nom est le seul lien, étendu à toute la carte ; au toucher, 44 px de haut au moins.
+   d'intention et la fiche dessous). Le nom est le seul lien, étendu à toute la carte ; au toucher, 44 × 44 px au moins (un nom court).
    sizes : ceux des couvertures des Carnets (views/v2/series.eta). */
 .ser-index { list-style: none; margin: var(--esp-5) 0 0; padding: 0; display: grid; gap: var(--esp-8); }
 @media (min-width: 768px) { .ser-index { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -228,7 +228,7 @@
 .ser-e:hover .ser-e-titre a, .ser-e-titre a:focus-visible { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
 .ser-e-titre a:focus-visible { outline: 0; }
 .ser-e:has(.ser-e-titre a:focus-visible) { outline: var(--focus-l) solid var(--ink); outline-offset: 12px; }
-@media (max-width: 767px) { .ser-e-titre a { display: inline-flex; align-items: center; min-height: var(--cible); } }
+@media (max-width: 767px) { .ser-e-titre a { display: inline-flex; align-items: center; min-height: var(--cible); min-width: var(--cible); } }
 .ser-e-int { margin: 0; font-size: var(--t-texte); line-height: 1.6; color: var(--prose); text-wrap: pretty; }
 .ser-e-meta { margin: var(--esp-1) 0 0; font-size: var(--t-petit); color: var(--mute); }
 .ser-e-meta b { font-weight: 400; color: var(--ink); }

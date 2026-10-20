@@ -116,7 +116,9 @@ test.describe('bureau', () => {
     await expect(page).toHaveURL(new RegExp(`${href}$`));
     await page.getByRole('navigation', { name: 'Fil d’Ariane' }).getByRole('link', { name: 'Séries' }).click();
     await expect(page).toHaveURL(/\/series$/);
-    await page.locator('.ser-e-img img').nth(1).click();
+    // Un clic sur la couverture (sous le lien étendu du nom) ouvre aussi la série.
+    const img = await page.locator('.ser-e-img img').nth(1).boundingBox();
+    await page.mouse.click(img.x + img.width / 2, img.y + img.height / 2);
     await expect(page).toHaveURL(/\/serie\//);
     await ctx.close();
   });
