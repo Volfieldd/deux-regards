@@ -181,6 +181,62 @@ test('sans JavaScript : la page entière, le menu, la langue, les flèches et J�
   await ctx.close();
 });
 
+// Mini-carte (PLAN point 8, MQ-04) : cadrée sur la ville, barre d'échelle à la longueur annoncée, noms d'au moins 13 px
+// rendus (taille du SVG mesurée), dans le cadre, sans chevauchement ; le même cadre et la même barre sans script. La photo
+// doit avoir une ville et être sur la carte (sinon le test est sauté).
+const carte = page => page.evaluate(() => {
+  const fig = document.querySelector('.vis-carte');
+  if (!fig) return null;
+  const cadre = fig.querySelector('.vis-carte-cadre').getBoundingClientRect();
+  const textes = [...fig.querySelectorAll('svg text')].map(t => {
+    const r = t.getBoundingClientRect(), m = t.getScreenCTM();
+    return { t: t.textContent, px: parseFloat(getComputedStyle(t).fontSize) * Math.hypot(m.a, m.b), r: { x: r.x, y: r.y, w: r.width, h: r.height } };
+  });
+  const ici = fig.querySelector('.vis-carte-ici circle').getBoundingClientRect();
+  const g = fig.querySelector('.vis-carte-echelle');
+  const trait = g.querySelector('line').getBoundingClientRect();
+  return {
+    viewBox: fig.querySelector('[data-carte-fond]').getAttribute('viewBox'),
+    largeur: g.querySelector('svg').getAttribute('width'), lu: g.getAttribute('aria-label'),
+    cadre: { x: cadre.x, y: cadre.y, w: cadre.width, h: cadre.height }, trait: trait.width, textes,
+    ici: { x: ici.x, y: ici.y, w: ici.width, h: ici.height }, debord: document.documentElement.scrollWidth - innerWidth,
+  };
+});
+const chevauche = (a, b) => a.x < b.x + b.w - 0.5 && b.x < a.x + a.w - 0.5 && a.y < b.y + b.h - 0.5 && b.y < a.y + a.h - 0.5;
+
+test('mini-carte : cadrée, à l’échelle, noms de 13 px au moins dans le cadre, sans chevauchement ; la même sans script', async ({ browser }, info) => {
+  test.skip(info.project.name !== 'desktop', 'largeurs mesurées depuis le projet desktop');
+  const avec = await apercu(browser, info);
+  const sans = await apercu(browser, info, { javaScriptEnabled: false });
+  await avec.page.goto(PHOTO);
+  test.skip(!(await avec.page.locator('.vis-carte').count()), 'la photo n’est pas sur la carte dans ce jeu de données');
+  let ref = null;
+  for (const [width, height] of [[320, 800], [412, 915], [1032, 1250], [1376, 900], [1440, 900]]) {
+    for (const { page } of [avec, sans]) {
+      await page.setViewportSize({ width, height });
+      await page.goto(PHOTO);
+      await page.locator('.vis-carte').scrollIntoViewIfNeeded();
+      const m = await carte(page);
+      const ou = `${width} px${page === sans.page ? ', sans script' : ''}`;
+      expect(m.debord, `${ou} : débordement`).toBeLessThanOrEqual(0);
+      // Le cadre et la barre ne dépendent ni de la largeur ni du script.
+      ref ??= { viewBox: m.viewBox, largeur: m.largeur, lu: m.lu };
+      expect({ viewBox: m.viewBox, largeur: m.largeur, lu: m.lu }, ou).toEqual(ref);
+      expect(m.lu).toMatch(/^Échelle\u202f: \d[\d\u202f]*\u00a0k?m$/);
+      // Le trait mesure la part annoncée du cadre (la longueur écrite, à l'échelle du fond).
+      expect(Math.abs(m.trait - (parseFloat(m.largeur) / 100) * m.cadre.w), `${ou} : longueur du trait`).toBeLessThanOrEqual(1.5);
+      for (const t of m.textes) {
+        expect(t.px, `${ou} : « ${t.t} »`).toBeGreaterThanOrEqual(13 - 0.05);
+        expect(t.r.x >= m.cadre.x && t.r.y >= m.cadre.y && t.r.x + t.r.w <= m.cadre.x + m.cadre.w && t.r.y + t.r.h <= m.cadre.y + m.cadre.h, `${ou} : « ${t.t} » dans le cadre`).toBe(true);
+        expect(chevauche(t.r, m.ici), `${ou} : « ${t.t} » sur la vignette`).toBe(false);
+        for (const o of m.textes) if (o !== t) expect(chevauche(t.r, o.r), `${ou} : « ${t.t} » sur « ${o.t} »`).toBe(false);
+      }
+    }
+  }
+  await avec.ctx.close();
+  await sans.ctx.close();
+});
+
 test('visiteur : la v1, même pendant l’aperçu d’un administrateur', async ({ browser }, info) => {
   const { ctx } = await apercu(browser, info);
   const visitor = await browser.newContext({ ...info.project.use, storageState: { cookies: [], origins: [] } });

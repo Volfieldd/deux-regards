@@ -1009,6 +1009,26 @@ nouveaux champs.
 
 ---
 
+## Mini-carte de la visionneuse : cadrage et barre d'échelle
+
+Évaluation du 20 octobre 2026 (PLAN.md, point 8 : « cadrage de la mini-carte sur la ville et barre d'échelle » ;
+maquette [MQ-04](../audit-ergonomie-2026-10-16/maquettes/MQ-04-visionneuse-cartel.html), repère 12). **Aucune surface
+nouvelle** : ni route, ni paramètre, ni champ, ni cookie, ni permission, ni migration ; aucun fichier servi de plus (le
+fond et les tuiles restent ceux de `public/carte-terre-fine.svg` et `public/carte-tuiles/`, en statique, lus comme
+avant). Le serveur calcule autrement le cadre (`server/photo-map.js`, `v2.cadrage`) et écrit une barre et des noms
+placés dans le HTML de `/photo/:slug`.
+
+| Surface | Abus possible | Déjà vu par la Vigie | Besoin |
+|---|---|---|---|
+| Cadre et pastilles | en déduire un lieu plus précis que la ville (vie privée du photographe ou des personnes photographiées) | — (pas un événement de sécurité) | aucun : cadre et pastilles ne dépendent que du centre de la ville (0,01°), jamais moins de 60 km de large ; testé (`test/minicarte.test.js`) |
+| Page `/photo/:slug` | calcul plus long (déni de service) | limites et bordure existantes | aucun : au plus 13 villes, 3 largeurs, quelques dizaines de comparaisons de boîtes par page |
+
+**Ce que la Vigie peut consommer** : rien de nouveau (aucun événement émis, aucun changement des émissions existantes
+de la visionneuse : J'aime, partages, piège du pied de page, inchangés). **Ce qui lui manque** : rien ; aucun cas BV
+ouvert.
+
+---
+
 ## Permissions et contrôle des rôles (Carnets et galeries privées)
 
 - **Côté site** : déclarer `carnet.*`, `lettre.gerer` et `galeries.*` dans `PERMISSIONS` (`server/permissions.js:10-50`)

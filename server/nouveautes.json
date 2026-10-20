@@ -1,5 +1,22 @@
 [
   {
+    "version": "1.193.0",
+    "date": "2026-10-20",
+    "pr": 193,
+    "title": {
+      "fr": "La mini-carte d’une photo, cadrée sur sa ville et à l’échelle",
+      "en": "A photo’s mini-map, framed on its town and to scale",
+      "de": "Die Minikarte eines Fotos, auf seinen Ort zugeschnitten und maßstabsgetreu"
+    },
+    "items": [
+      {
+        "fr": "Sous une photo, la petite carte montre sa ville et ses abords (60 km de large au moins, 300 km au plus) avec les villes des photos « À proximité », et une barre d’échelle juste à sa latitude (« 20 km »). Les noms gardent 13 px et ne se chevauchent plus, au téléphone comme au bureau, avec ou sans JavaScript. La carte ne montre jamais plus précis que le centre de la ville. En v1 aussi, avec la même barre.",
+        "en": "Below a photo, the small map shows its town and surroundings (at least 60 km wide, at most 300 km) with the towns of the “Nearby” photos, and a scale bar that is correct at its latitude (“20 km”). Names stay at 13 px and no longer overlap, on phones and desktops, with or without JavaScript. The map never shows anything more precise than the town centre. In v1 too, with the same bar.",
+        "de": "Unter einem Foto zeigt die kleine Karte seinen Ort und dessen Umgebung (mindestens 60 km, höchstens 300 km breit) mit den Orten der Fotos „In der Nähe“ und einem Maßstab, der auf seiner Breite stimmt („20 km“). Die Namen bleiben 13 px groß und überlappen sich nicht mehr, auf dem Telefon wie am Rechner, mit oder ohne JavaScript. Die Karte zeigt nie mehr als die Ortsmitte. Auch in v1, mit demselben Maßstab."
+      }
+    ]
+  },
+  {
     "version": "1.191.0",
     "date": "2026-10-20",
     "pr": 191,
