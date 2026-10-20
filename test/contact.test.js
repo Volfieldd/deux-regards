@@ -475,7 +475,7 @@ test('e-mail aux photographes : sans donnée personnelle ni message, aux bons co
   assert.ok(c.db.prepare('SELECT COUNT(*) FROM messages WHERE notified_at IS NULL').pluck().get() >= 1, 'des messages attendent le lendemain');
   await c.app.reminders.messages();
   const v = await c.flush();
-  const cap = v.of('excess_rate_limit_exceeded').filter(e => e.detail.limite === 'messages_annonces');
+  const cap = v.of('excess_rate_limit_exceeded').filter(e => e.detail.limite === 'messages_global' && e.detail.plafond === 'annonces');
   assert.equal(cap.length, 1);
   assert.deepEqual([cap[0].severity, cap[0].origine.emetteur], ['moyen', 'server/messages.js · notifications']);
 });
@@ -551,7 +551,7 @@ test('revue 3 : boîte paginée (50 par page, filtre Nouveaux sans troncature) ;
   assert.equal((await post(c.app, '/droits/demande', payloadOf(lic, LICENCE_OK), { ip: '198.51.100.62' })).statusCode, 503);
   assert.equal(count(c), 50);
   const v = await c.flush();
-  assert.deepEqual(v.of('excess_rate_limit_exceeded').filter(e => e.detail.limite === 'messages_global').map(e => [e.detail.formulaire, e.severity]), [['contact', 'moyen'], ['licence', 'moyen']]);
+  assert.deepEqual(v.of('excess_rate_limit_exceeded').filter(e => e.detail.limite === 'messages_global' && e.detail.plafond === 'messages').map(e => [e.detail.formulaire, e.severity]), [['contact', 'moyen'], ['licence', 'moyen']]);
   // Le lendemain (heure de Paris), le compteur repart.
   c.db.prepare('UPDATE messages SET created_at = created_at - 2 * 86400000').run();
   assert.equal(c.app.messages.acceptedToday(), 0);

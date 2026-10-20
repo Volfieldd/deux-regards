@@ -323,7 +323,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Relances par e-mail (demandes RGPD par quarts du délai, récapitulatifs) : toutes les heures.
   app.decorate('reminders', createReminders({ db, accounts: app.accounts, todo: app.todo, mailer: app.mailer, messages: app.messages, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log,
     // Plafond des annonces de messages (30 e-mails) atteint pour la journée (boîtes bombardées : registre de la Vigie, BV-29).
-    onMessagesCap: detail => app.securite?.emit('excess_rate_limit_exceeded', { request: null, severity: 'moyen', emetteur: 'server/messages.js · notifications', detail: { limite: 'messages_annonces', ...detail } }) }));
+    onMessagesCap: detail => app.securite?.emit('excess_rate_limit_exceeded', { request: null, severity: 'moyen', emetteur: 'server/messages.js · notifications', detail: { limite: 'messages_global', plafond: 'annonces', ...detail } }) }));
   let remindTimer = null;
   app.addHook('onReady', async () => { remindTimer = setInterval(() => app.reminders.run(), 3600 * 1000); remindTimer.unref(); setTimeout(() => app.reminders.run(), 60 * 1000).unref(); });
   app.addHook('onClose', async () => clearInterval(remindTimer));

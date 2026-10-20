@@ -55,7 +55,7 @@ export function registerContactPages(app, { lang, repo, base, gate, trapped, sam
   // (boîtes bombardées depuis de nombreuses adresses, BV-29).
   const full = (request, formulaire) => {
     if (app.messages.acceptedToday() < PER_DAY) return false;
-    app.securite.emit('excess_rate_limit_exceeded', { request, severity: 'moyen', emetteur: `server/routes/contact-public.js · ${formulaire}`, detail: { limite: 'messages_global', formulaire, par_jour: PER_DAY } });
+    app.securite.emit('excess_rate_limit_exceeded', { request, severity: 'moyen', emetteur: `server/routes/contact-public.js · ${formulaire}`, detail: { limite: 'messages_global', plafond: 'messages', formulaire, par_jour: PER_DAY } });
     return true;
   };
   const nocache = reply => reply.header('x-robots-tag', 'noindex').header('cache-control', 'no-store');

@@ -50,10 +50,10 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-24 Données des invités lues ou exportées dans l'admin | DS18 | ✓ site ; `SENSITIVE` : Vigie | `feat/galeries-privees` : `sensitive_read` émis par la route (fiche d'un accès, activité, sélections ; `detail.id` : l'accès), lecture notée au journal ; export CSV en `config.audit` ; Vigie : `SENSITIVE` laissé tel quel (la route émet déjà `sensitive_read` : l'étendre compterait chaque lecture deux fois) | fait |
 | BV-25 Gestes d'invité impossibles pour l'interface | DS12, DS14 | ✓ site ; corrélation : Vigie ; ✓ Vigie | `feat/galeries-privees` : `input_validation_fail` (provenance, photo hors galerie, taille hors liste ou non permise, vue ou langue inconnue), `authz_csrf_fail` (`site · public`) ; Vigie (phase E1) : corrélation `csrf_repetes_invite` (par session visiteur) ; DS12 telle quelle | fait |
 | BV-26 Réponse privée servie par le cache de Cloudflare | DS18 | ✓ Vigie | bordure (phase C3), avant l'ouverture de la phase 37a ; Vigie (phase E1) : point `cache_prive` du Worker, événement `bordure_cache_prive`, règle (`70-bordure.yml`, haute) | fait |
-| BV-27 Saisie malveillante dans un message libre (Contact, demande de licence) | DS11 | ✓ site (aucune émission de plus) ; poids du canal : Vigie | `feat/page-contact` | fait côté site |
-| BV-28 Formulaire de contact ou de licence forgé | DS12 | ✓ site | `feat/page-contact` | fait côté site |
-| BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; règle : Vigie | `feat/page-contact` : plafond global de 50 messages acceptés par jour (`limite: messages_global`, 503) et plafond des annonces (30 e-mails, `limite: messages_annonces`, compté dans la base) | fait côté site |
-| BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; regroupement par objet : Vigie | `feat/page-contact` | fait côté site |
+| BV-27 Saisie malveillante dans un message libre (Contact, demande de licence) | DS11 | ✓ site (aucune émission de plus) ; ✓ Vigie | site : `feat/page-contact` (#183) ; Vigie : #184, `malicious_input` dont tous les constats sont dans `body.message` ou `body.diffusion` pèse 0,5 (`vigie/poids.js`), 0 depuis une session de l'admin en gravité basse ; champ piège : rien à faire côté Vigie | fait |
+| BV-28 Formulaire de contact ou de licence forgé | DS12 | ✓ site | `feat/page-contact` (#183) ; règle `valeurs_impossibles_repetees` telle quelle | fait |
+| BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; ✓ Vigie | site : `feat/page-contact` (#183), plafond global de 50 messages acceptés par jour (503) et plafond des annonces (30 e-mails, compté dans la base), tous deux `limite: messages_global` (distingués par `detail.plafond`) ; Vigie : #184, règle `messages_satures` (`30-exploration.yml`, DS21, entité site « messages ») | fait |
+| BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; Vigie en partie | site : `feat/page-contact` (#183), `sensitive_read` (`objet: message`), `authz_fail` hors portée, journal ; Vigie : #184, `lectures_massives` compte le couple objet + id, `role_incoherent` connaît `messages.traiter` ; **à faire** : `messages_effaces_en_masse`, qui demande un type d'événement pour un effacement (aucun du vocabulaire ne convient, voir BV-30) | en partie |
 
 ---
 
@@ -893,15 +893,15 @@ valides : la boîte de l'admin s'emplit, les notifications épuisent le quota de
 
 - **Plafond global des messages** (revue de sécurité de la PR #183) : 50 messages acceptés par jour (heure de Paris),
   tous formulaires et toutes adresses confondus ; au-delà, réponse 503 (saisie gardée) et `excess_rate_limit_exceeded`
-  (E15), `detail: { limite: 'messages_global', formulaire, par_jour: 50 }`, gravité `moyen`, émetteur
+  (E15), `detail: { limite: 'messages_global', plafond: 'messages', formulaire, par_jour: 50 }`, gravité `moyen`, émetteur
   `server/routes/contact-public.js · contact|licence`, à chaque envoi refusé (regroupé par adresse comme les autres
   limites). La boîte de l'admin ne peut donc plus grossir que de 50 messages par jour.
 - **Plafond des annonces par e-mail** : 30 par jour, compté dans la base (réglage `messages_annonces`, jour de Paris :
-  un redémarrage ne le remet pas à zéro) ; au-delà, `excess_rate_limit_exceeded`, `detail.limite: 'messages_annonces'`,
+  un redémarrage ne le remet pas à zéro) ; au-delà, `excess_rate_limit_exceeded`, `detail: { limite: 'messages_global', plafond: 'annonces', envoyes, en_attente }`,
   gravité `moyen`, émetteur `server/messages.js · notifications`, **une fois par jour** (les messages restent dans la
   boîte et dans « Aujourd'hui » ; plus aucun e-mail ce jour-là).
-- **Règle** (Vigie) : `messages_satures`, sur le modèle de `lettre_confirmations_saturees` (BV-15) : `limite` dans
-  `messages_global` ou `messages_annonces`, source unique sur l'entité `site` `messages`, `medium`, DS21 ; corrélation possible avec `aspiration_distribuee` (DS15) dans l'heure.
+- **Règle** (Vigie) : `messages_satures`, sur le modèle de `lettre_confirmations_saturees` (BV-15) : `detail.limite: messages_global`
+  (les deux plafonds, distingués par `detail.plafond`), source unique sur l'entité `site` `messages`, `medium`, DS21 ; corrélation possible avec `aspiration_distribuee` (DS15) dans l'heure.
 - **Qui** : le site (émission) ; la Vigie (règle).
 
 ### BV-30 — Messages lus ou effacés en masse dans l'admin
@@ -917,6 +917,11 @@ valides : la boîte de l'admin s'emplit, les notifications épuisent le quota de
   `authz_fail` (`raison: 'hors portée'`, `permission: 'messages.traiter'`, `objet: 'message'`, `id`, `ecriture`),
   comme BV-14 ; règles `exploration_droits` et `ecriture_hors_portee` telles quelles.
 - **Suppressions** : journal d'audit (`POST /admin/messages/:id/supprimer`), avec le numéro seul.
+- **Effacement** (après #184) : aucun type du vocabulaire fermé ne dit « une donnée a été effacée » (`user_deleted` vaut
+  pour un compte de l'admin, `sensitive_export` pour une sortie de données) : le site n'émet donc rien à la suppression
+  d'un message (seul le journal d'audit la note, avec le numéro). Type à ajouter par la Vigie pour
+  `messages_effaces_en_masse` : `sensitive_delete` (gravité `bas`, composant `site · admin`), détail
+  `{ objet: 'message', id }`, émis par `POST /admin/messages/:id/supprimer` ; le site l'émettra dès qu'il existera.
 - **Proposé à la Vigie** : `lectures_massives` (`40-donnees.yml`, 30 `detail.id` distincts en 1 h) compte les
   numéros sans leur objet : le message 12 et la fiche 12 comptent pour un. Grouper par `detail.objet` (absent pour les
   fiches : `personne`) ou compter le couple ; et, si elle le juge utile, une corrélation `messages_effaces_en_masse`
