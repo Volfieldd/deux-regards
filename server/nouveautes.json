@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.190.0",
+    "date": "2026-10-20",
+    "pr": 190,
+    "title": {
+      "fr": "Vigie : MITRE ATT&CK 20.0",
+      "en": "Vigie: MITRE ATT&CK 20.0",
+      "de": "Vigie: MITRE ATT&CK 20.0"
+    },
+    "items": [
+      {
+        "fr": "Les règles de la Vigie suivent ATT&CK 20.0 (13 octobre 2026) : 15 tactiques, dont Furtivité et Neutralisation des défenses qui remplacent Contournement des défenses. La fiche d’une alerte nomme chaque technique (« T1098 Manipulation de compte »). La détection, les seuils et les réponses ne changent pas.",
+        "en": "The Vigie’s rules follow ATT&CK 20.0 (13 October 2026): 15 tactics, including Stealth and Defense Impairment, which replace Defense Evasion. An alert’s page names each technique (“T1098 Account Manipulation”). Detection, thresholds and responses are unchanged.",
+        "de": "Die Regeln der Vigie folgen ATT&CK 20.0 (13. Oktober 2026): 15 Taktiken, darunter Stealth und Defense Impairment anstelle von Defense Evasion. Die Seite einer Warnung nennt jede Technik („T1098 Account Manipulation“). Erkennung, Schwellen und Reaktionen bleiben unverändert.",
+        "perm": "securite.voir"
+      }
+    ]
+  },
+  {
     "version": "1.186.0",
     "date": "2026-10-20",
     "pr": 186,
