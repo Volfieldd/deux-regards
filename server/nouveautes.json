@@ -1,5 +1,34 @@
 [
   {
+    "version": "1.194.0",
+    "date": "2026-10-20",
+    "pr": 194,
+    "title": {
+      "fr": "Mineurs : l’app de terrain et la photo offerte",
+      "en": "Minors: the field app and the gift photo",
+      "de": "Minderjährige: die Feld-App und das geschenkte Foto"
+    },
+    "items": [
+      {
+        "perm": "terrain.app",
+        "fr": "Sur le téléphone, l’âge est demandé aussi pour envoyer la photo (ou dès qu’une adresse est notée), et la réponse « moins de 15 ans » s’ajoute : l’e-mail d’un parent remplace alors celui de l’enfant, qui n’est gardé nulle part. Sous le nom du parent, la phrase des deux parents, comme sur /bonjour. En v2, l’âge vient avant l’adresse.",
+        "en": "On the phone, the age is now also asked to send the photo (or as soon as an address is noted), and the answer “under 15” is added: a parent’s email then replaces the child’s, which is kept nowhere. Under the parent’s name, the sentence about both parents, as on /bonjour. In v2, the age comes before the address.",
+        "de": "Auf dem Smartphone wird das Alter jetzt auch für das Senden des Fotos erfragt (oder sobald eine Adresse notiert wird), und die Antwort „unter 15“ kommt hinzu: Die E-Mail eines Elternteils ersetzt dann die des Kindes, die nirgends gespeichert wird. Unter dem Namen des Elternteils der Satz zu beiden Eltern, wie auf /bonjour. In v2 kommt das Alter vor der Adresse."
+      },
+      {
+        "fr": "Sur /bonjour, une personne de moins de 15 ans peut le dire aussi pour une publication seule, sans demander la photo : nous écrivons alors à son parent.",
+        "en": "On /bonjour, a person under 15 can now say so for a publication alone, without asking for the photo: we then write to their parent.",
+        "de": "Auf /bonjour kann eine Person unter 15 das jetzt auch für eine Veröffentlichung allein angeben, ohne das Foto zu erbitten: Wir schreiben dann ihrem Elternteil."
+      },
+      {
+        "perm": "personnes.offrir",
+        "fr": "Une photo offerte à l’adresse d’un parent s’adresse au parent (« Voici la photo de… »), dans la langue choisie ; la page du lien ne nomme pas l’enfant. Le récapitulatif envoyé depuis le téléphone aussi.",
+        "en": "A gift photo sent to a parent’s address is addressed to the parent (“Here is the photo of…”), in the chosen language; the link’s page does not name the child. So is the summary sent from the phone.",
+        "de": "Ein geschenktes Foto an die Adresse eines Elternteils richtet sich an das Elternteil („Hier ist das Foto von…“), in der gewählten Sprache; die Seite des Links nennt das Kind nicht. Ebenso die vom Smartphone gesendete Zusammenfassung."
+      }
+    ]
+  },
+  {
     "version": "1.193.0",
     "date": "2026-10-20",
     "pr": 193,
