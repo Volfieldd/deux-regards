@@ -964,7 +964,7 @@ nouveaux champs.
   `guardian` chiffré par `DATA_KEY` comme le nom ; `adult` chiffré lui aussi (comme la position), pour l'app comme
   pour la page ; la date est enregistrée lue (`AAAA-MM-JJ`), jamais telle qu'elle a été tapée.
 - **Récapitulatif** (`/bonjour/merci`) : rien de plus dans l'adresse (`?ref=` seul, comme avant) ; un cookie
-  `bonjour_recap` (`httpOnly`, `SameSite=Lax`, 15 minutes) porte un numéro tiré au hasard, qui désigne en mémoire du
+  `bonjour_recap` (`httpOnly`, `SameSite=Lax`, 15 minutes, lu une seule fois) porte un numéro tiré au hasard, qui désigne en mémoire du
   serveur les choix de l'envoi (date lue, lieu, souhaits, tranche d'âge) ; ni nom, ni nom du parent, ni adresse ; rien
   sur le disque.
 
@@ -990,6 +990,9 @@ nouveaux champs.
   commun a déjà signalé la valeur (DS11), ni au piège, ni à l'autre site, ni à la limite (rien n'est lu).
 - **Réponse** : âge hors liste : lu comme « non renseigné » (un accord est alors refusé, 422) ; date trop longue : 422,
   « date illisible » ; nom du parent trop long : coupé, comme le nom.
+- **Type inattendu** (revue de sécurité de la PR #187) : un champ qui n'est pas un texte (objet ou tableau d'un envoi
+  JSON, champ répété) : `raison: 'type inattendu'`, `champ` (le premier), `type` (`object`, `tableau`…), `nombre` ;
+  réponse 422, rien n'est lu ni enregistré.
 - **Règle** : `valeurs_impossibles_repetees` (DS12, 2 en 10 minutes par adresse), telle quelle.
 - **Qui** : le site.
 

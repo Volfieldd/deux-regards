@@ -62,16 +62,22 @@ export default async function publicRoutes(app) {
     // Renvoie vrai quand cet essai bloque la référence.
     fail: ref => { cq.forget.run(Date.now() - CODE_WINDOW); cq.add.run(ref, Date.now()); return cq.count.get(ref, Date.now() - CODE_WINDOW) === CODE_TRIES; },
   };
-  // Récapitulatif d'un envoi de /bonjour, pour la page « merci » (maquette MQ-05, cadre 13) : gardé en mémoire 15 minutes,
-  // jamais sur le disque ; le navigateur n'en reçoit qu'un numéro tiré au hasard (cookie bonjour_recap, httpOnly), rien
-  // dans l'adresse. Ni nom, ni adresse, ni nom du parent (server/encounters.js, submit). 500 au plus : le plus ancien
+  // Récapitulatif d'un envoi de /bonjour, pour la page « merci » (maquette MQ-05, cadre 13) : en mémoire, jamais sur le
+  // disque ; le navigateur n'en reçoit qu'un numéro tiré au hasard (cookie bonjour_recap, httpOnly), rien dans l'adresse.
+  // Ni nom, ni adresse, ni nom du parent (server/encounters.js, submit). Lu une seule fois (revue de sécurité de la
+  // PR #187 : un appareil partagé ne le remontre pas), sinon effacé au bout de 15 minutes ; 500 au plus, le plus ancien
   // part le premier (des envois répartis sur de nombreuses adresses ne font pas grossir la mémoire).
   const RECAP_TTL = 15 * 60 * 1000, RECAP_MAX = 500;
   const recaps = new Map();
   const recapStore = {
-    keep(data) {
+    // Entrées expirées retirées (dans l'ordre d'arrivée), puis les plus anciennes au-delà de 500.
+    purge() {
       const t = Date.now();
       for (const [k, v] of recaps) { if (t - v.at <= RECAP_TTL && recaps.size < RECAP_MAX) break; recaps.delete(k); }
+    },
+    keep(data) {
+      recapStore.purge();
+      const t = Date.now();
       const token = crypto.randomBytes(16).toString('base64url');
       recaps.set(token, { at: t, data });
       return token;
@@ -79,6 +85,8 @@ export default async function publicRoutes(app) {
     read(token) {
       if (typeof token !== 'string' || !/^[\w-]{22}$/.test(token)) return null;
       const r = recaps.get(token);
+      recaps.delete(token);
+      recapStore.purge();
       return r && Date.now() - r.at <= RECAP_TTL ? r.data : null;
     },
     ttl: RECAP_TTL / 1000,
@@ -552,7 +560,9 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     return true;
   };
   const trapped = (request, name) => {
-    if (!String(request.body?.website || '').trim()) return false;
+    // Un champ piège qui n'est pas un texte (envoi JSON forgé) compte pour rempli, sans String() sur un objet.
+    const w = request.body?.website;
+    if (typeof w === 'string' ? !w.trim() : w == null || w === false) return false;
     app.securite.emit('malicious_honeypot', { request, emetteur: 'server/routes/public.js · champ piège', detail: { piege: 'champ caché', formulaire: name } });
     return true;
   };
@@ -650,6 +660,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const c = app.encounters.card(request.query.ref);
     // Récapitulatif de l'envoi de ce navigateur, s'il porte sur la même référence (ou sur aucune, des deux côtés).
     const recap = recapStore.read(request.cookies?.[RECAP_COOKIE]);
+    if (request.cookies?.[RECAP_COOKIE] !== undefined) reply.clearCookie(RECAP_COOKIE, { path: localize('/bonjour', lang), sameSite: 'lax', httpOnly: true, secure: app.config.publicUrl.startsWith('https://') });
     reply.header('x-robots-tag', 'noindex').header('cache-control', 'no-store');
     return reply.render('bonjour', { ...base, siteName, h: t.hello, sent: true, sentRef: c?.ref || null, values: {}, errors: {},
       recap: recap && (recap.ref ?? null) === (c?.ref ?? null) ? recap : null,
@@ -665,7 +676,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       if (typeof raw === 'string' && scanValue('body', `body.${champ}`, raw)) return;
       app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/public.js · bonjour', detail: { raison, formulaire: 'bonjour', champ, longueur: String(raw).length } });
     };
-    if (body.adult != null && body.adult !== '' && !(typeof body.adult === 'string' && Object.hasOwn(ADULT, body.adult))) emit('valeur hors liste', 'adult', body.adult);
+    if (body.adult != null && body.adult !== '' && !Object.hasOwn(ADULT, body.adult)) emit('valeur hors liste', 'adult', body.adult);
     for (const [champ, max] of [['met_on', MAX_DATE], ['guardian', 80]]) if (body[champ] != null && String(body[champ]).length > max) emit('saisie hors formulaire', champ, body[champ]);
   };
   // Carte affichée en tête du formulaire : d'après la référence seule (lettre du photographe, publique), jamais d'après
@@ -690,11 +701,18 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     // enregistrer.
     if (trapped(request, 'bonjour')) return reply.redirect(localize('/bonjour/merci', lang), 303);
     if (!sameSite(request)) { gate(request, helloLimit, 'bonjour'); return reply.redirect(localize('/bonjour/merci', lang), 303); }
-    const card = body.ref ? shownCard(body.ref) : null;
+    const card = typeof body.ref === 'string' && body.ref ? shownCard(body.ref) : null;
     if (!gate(request, helloLimit, 'bonjour')) return hello(request, reply, { values: body, errors: { limit: 'limit' }, card, status: 429 });
     // Code de contrôle : compté et ignoré dans submit, sur la référence qu'il décode lui-même (une garde posée ici sur
     // une autre lecture de la saisie se contournait avec des espaces en tête).
     const onLock = ref => request.log.warn({ ref }, 'codes de carte faux : référence bloquée 24 h');
+    // Seulement des textes (revue de sécurité de la PR #187) : un objet ou un tableau (envoi JSON forgé, champ répété)
+    // n'est jamais envoyé par la page ; refusé (422), signalé (DS12), sans rien lire de plus.
+    const odd = body && typeof body === 'object' && !Array.isArray(body) ? Object.entries(body).filter(([, v]) => typeof v !== 'string') : [['corps', body]];
+    if (odd.length) {
+      app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/public.js · bonjour', detail: { raison: 'type inattendu', formulaire: 'bonjour', champ: String(odd[0][0]).slice(0, 40), type: Array.isArray(odd[0][1]) ? 'tableau' : typeof odd[0][1], nombre: odd.length } });
+      return hello(request, reply, { values: {}, errors: { form: 'form' }, card: null, status: 422 });
+    }
     forgedHello(request, body);
     try {
       // Code de carte faux : signalé (essais de codes), puis compté comme avant.

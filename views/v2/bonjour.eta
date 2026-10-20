@@ -12,11 +12,12 @@
    const ORDER = ['ref', 'met_on', 'where', 'adult', 'guardian', 'what', 'scopes', 'email', 'name'];
    const TARGET = { ref: 'bj-ref', met_on: 'bj-date', where: !v.met_on || e.met_on ? 'bj-date' : 'bj-lieu', adult: 'bj-age-oui', guardian: 'bj-parent', what: 'bj-photo', scopes: 'bj-scope-site', email: 'bj-email', name: 'bj-nom' };
    const text = k => ty(F.errors[e[k]] || h.errors[e[k]] || String(e[k]));
-   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => k !== 'limit' && !ORDER.includes(k))];
+   const keys = [...ORDER.filter(k => e[k]), ...Object.keys(e).filter(k => !['limit', 'form'].includes(k) && !ORDER.includes(k))];
+   const formErr = e.form ? text('form') : '';
    const errs = keys.map(k => ({ key: k, target: TARGET[k] || 'bj-ref', text: text(k) }));
    const limit = e.limit ? ty(h.errors.limit) : '';
    // Focus au chargement : la limite, sinon le résumé (deux points ou plus), sinon le seul champ en erreur.
-   const focusOn = !limit && errs.length === 1 ? errs[0].target : null;
+   const focusOn = !limit && !formErr && errs.length === 1 ? errs[0].target : null;
    const af = id => (focusOn === id ? ' autofocus' : '');
    // Champ : aide et erreur reliées (aria-describedby), aria-invalid ; message « ⚠ Erreur : … » sous le champ.
    const desc = (...ids) => { const l = ids.filter(Boolean); return l.length ? ` aria-describedby="${l.join(' ')}"` : ''; };
@@ -28,6 +29,7 @@
    const opt = `<span class="facultatif">${F.optional}</span>`;
    const pageTitle = it.sent ? it.pageTitle
      : limit ? `${F.limitTitle} · ${it.pageTitle}`
+     : formErr ? `${F.titleError(F.fields.form)} · ${it.pageTitle}`
      : errs.length > 1 ? `${F.titleError(F.points(errs.length))} · ${it.pageTitle}`
      : errs.length ? `${F.titleError(F.fields[errs[0].key] || F.fields.ref)} · ${it.pageTitle}` : it.pageTitle; %>
 <% layout('./layout', { pageTitle: ty(pageTitle), description: ty(it.description), formulaires: true }) %>
@@ -70,7 +72,7 @@
     <p class="chapo"><%= ty(it.who ? h.introWho(it.who.name) : h.intro.replace('{site}', it.siteName)) %></p>
   </div>
   <form class="form" method="post" action="<%= it.u('/bonjour') %>" novalidate>
-<%~ include('./_erreurs', { ...it, errs, limit }) %>
+<%~ include('./_erreurs', { ...it, errs, limit, formErr }) %>
     <p class="form-oblig"><%= F.required %></p>
 <% if (it.who) { %>    <input type="hidden" name="photographer" value="<%= v.photographer %>">
 <% } %>

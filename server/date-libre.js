@@ -57,9 +57,11 @@ export const parisToday = (at = Date.now()) => new Intl.DateTimeFormat('en-CA', 
 // 'date_future' } ; { error: 'date', tooLong: true } au-delà de 40 signes ; null si rien n'est saisi.
 export function readDay(input, { lang = 'fr', today = parisToday() } = {}) {
   if (input == null) return null;
-  const raw = String(input);
+  // Seulement un texte : un objet ou un tableau (envoi forgé, JSON) est illisible, sans jamais appeler String() dessus.
+  if (typeof input !== 'string') return { error: 'date' };
+  const raw = input;
   if (raw.length > MAX_DATE) return { error: 'date', tooLong: true };
-  const s = raw.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const s = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   if (!s) return null;
   const nums = [], months = [];
   let rel = null, relWords = 0, avant = false, before = false, last = false;

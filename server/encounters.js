@@ -31,7 +31,9 @@ export class EncounterError extends Error {
   constructor(errors) { super(Object.values(errors).join(' ')); this.errors = errors; }
 }
 
-const text = (v, max) => String(v ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim().slice(0, max);
+// Une valeur qui n'est ni un texte ni un nombre (objet, tableau d'un envoi JSON) compte pour vide : String() d'un objet
+// forgé peut lever une erreur.
+const text = (v, max) => (typeof v === 'string' || typeof v === 'number' ? String(v) : '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim().slice(0, max);
 
 // « j142 », « J-0142 », « J 0142 k7q » → { prefix: 'J', ref: 'J-0142', code: 'K7Q' } ; sinon null.
 // Numéro de 1 à 9999, comme les cartes imprimées. Longueur vérifiée avant l'expression (champ du formulaire public :
@@ -224,6 +226,27 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
         db.prepare(`UPDATE encounters SET ${Object.keys(held).map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...held, id: e.id });
         log(e.id, 'visiteur', { ...detail, non_verifiee: true }, false);
         return { id: e.id, ref: c.ref, author: c.author?.name ?? null, verified: false, held: true, recap };
+      }
+      // Âge ou parent qui contredisent la fiche (revue de sécurité de la PR #187) : la demande est gardée pour une décision
+      // humaine, comme ci-dessus ; ni l'accord, ni sa date, ni un refus ne bougent (un refus demandé, lui, est appliqué).
+      //   - une personne notée mineure (adult = 0, par l'app, une carte, l'admin ou la page) ne passe jamais à 18 ans ou
+      //     plus par la page, même avec le code de la carte ;
+      //   - sans le code : un âge ou un nom de parent différent de ceux de la fiche, ou un accord plus large que celui
+      //     déjà noté pour une personne mineure (Instagram, tirages, prénom que le parent n'a pas donnés).
+      if (e) {
+        const was = openRow({ adult: e.adult, guardian: e.guardian });
+        let had = null;
+        try { had = e.consent ? normalizeConsent(JSON.parse(e.consent)) : null; } catch { had = null; }
+        const minorToAdult = was.adult === 0 && adult === 1;
+        const contradicts = unverified && ((adult !== null && was.adult != null && was.adult !== adult) || Boolean(guardian && was.guardian && was.guardian !== guardian));
+        const widens = unverified && was.adult === 0 && decision === 'accord' && SCOPES.some(sc => scopes[sc] && !had?.[sc]);
+        if (minorToAdult || contradicts || widens) {
+          const held = { status: 'nouvelle', updated_at: t, ...rightsSet(e, Boolean(c?.verified)) };
+          if (decision === 'refus') Object.assign(held, { refused: 1, refused_at: t });
+          db.prepare(`UPDATE encounters SET ${Object.keys(held).map(k => `${k} = @${k}`).join(', ')} WHERE id = @id`).run({ ...held, id: e.id });
+          log(e.id, 'visiteur', { ...detail, non_verifiee: true, age_contredit: true }, false);
+          return { id: e.id, ref: c.ref, author: c.author?.name ?? null, verified: false, held: true, recap };
+        }
       }
       if (!e) {
         const id = Number(db.prepare(`INSERT INTO encounters (ref, author_id, lang, met_on, met_time, place, details, created_at, updated_at)

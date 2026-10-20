@@ -224,6 +224,9 @@ test('récapitulatif après l’envoi : rien dans l’adresse, un cookie de 15 m
   assert.match(recap, /recevoir la photo par e-mail ; sa publication sur le site, avec votre prénom ; votre message nous est transmis/);
   assert.match(recap, /<dt>Âge<\/dt><dd>moins de 18 ans, avec l’accord de votre parent<\/dd>/);
   for (const v of ['Claire', 'claire.exemple', 'Anne', 'Merci !']) assert.ok(!page.includes(v), `« ${v} » absent de la page`);
+  // Lu une seule fois (appareil partagé) : le cookie est retiré, une seconde lecture ne montre plus rien.
+  const again = await c.app.inject({ url: r.headers.location, cookies: { bonjour_recap: k.value } });
+  assert.doesNotMatch(again.body, /pf-recap/, 'récapitulatif relu');
   assert.match(page, /Nous n’envoyons pas d’accusé de réception par e-mail : le photographe vous écrit lui-même\./);
   // Sans le cookie, ou pour une autre référence : la page ordinaire, sans récapitulatif.
   const plain = nb((await c.app.inject(r.headers.location)).body);
@@ -277,7 +280,7 @@ test('Vigie : âge hors liste et saisies plus longues que la page (BV-31, DS12),
   const before = ev.length;
   let r = await c.hello({ ref: 'J-0360', decision: 'accord', scope_site: 'on', name: 'X', email: 'x@exemple.fr', adult: '16 ans' });
   assert.equal(r.statusCode, 422);
-  r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: 'ref=J-0361&wants_photo=on&email=x%40exemple.fr&adult=oui&adult=non', remoteAddress: '198.51.100.90', headers: { 'content-type': 'application/x-www-form-urlencoded' } });
+  r = await c.hello({ ref: 'J-0361', wants_photo: 'on', email: 'x@exemple.fr', adult: 'mineur' });
   assert.equal(r.statusCode, 303, 'sans accord, l’envoi suit son cours');
   // Date et nom du parent plus longs que la page ne le permet.
   r = await c.hello({ photographer: 'J', met_on: `14/10/2026${' '.repeat(60)}`, place: 'Angers', wants_photo: 'on', email: 'x@exemple.fr' });
@@ -287,7 +290,7 @@ test('Vigie : âge hors liste et saisies plus longues que la page (BV-31, DS12),
   const fails = ev.filter(e => e.type === 'input_validation_fail').map(e => ({ emetteur: e.origine.emetteur, ...e.detail }));
   assert.deepEqual(fails, [
     { emetteur: 'server/routes/public.js · bonjour', raison: 'valeur hors liste', formulaire: 'bonjour', champ: 'adult', longueur: 6 },
-    { emetteur: 'server/routes/public.js · bonjour', raison: 'valeur hors liste', formulaire: 'bonjour', champ: 'adult', longueur: 7 },
+    { emetteur: 'server/routes/public.js · bonjour', raison: 'valeur hors liste', formulaire: 'bonjour', champ: 'adult', longueur: 6 },
     { emetteur: 'server/routes/public.js · bonjour', raison: 'saisie hors formulaire', formulaire: 'bonjour', champ: 'met_on', longueur: 70 },
     { emetteur: 'server/routes/public.js · bonjour', raison: 'saisie hors formulaire', formulaire: 'bonjour', champ: 'guardian', longueur: 200 },
   ]);
@@ -395,4 +398,90 @@ test('fiche d’une rencontre (v1 et v2) : l’âge et le parent venus de la pag
     assert.deepEqual(reads(after.slice(before, mid)), reads(after.slice(mid)), `${ref} : mêmes lectures sensibles en v1 et en v2`);
     assert.deepEqual(reads(after.slice(mid)).map(d => [d.cible, d.objet]), [['/admin/rencontres/:id', 'rencontre']]);
   }
+});
+
+// ---------- revue de sécurité de la PR #187 ----------
+
+test('revue : une personne notée mineure ne passe jamais à 18 ans ou plus par la page, même avec le code (app, carte, page)', async t => {
+  const c = await site(t);
+  const author = c.db.prepare("SELECT * FROM authors WHERE slug = 'julien'").get();
+  // Saisie sur le téléphone : mineure, avec son parent, et un refus.
+  const app = await c.app.encounters.saveApp({ decision: 'refus', adult: 'non', guardian: 'Mère Dupont', lang: 'fr' }, { author });
+  const r = await c.hello({ ref: `${app.ref}-${app.code}`, decision: 'accord', adult: 'oui', scope_site: 'on', name: 'Ado', email: 'ado@exemple.fr' });
+  assert.equal(r.statusCode, 303);
+  let e = c.app.encounters.get(app.id);
+  assert.deepEqual([e.adult, e.guardian, e.refused, e.consent, e.status], [0, 'Mère Dupont', 1, null, 'nouvelle'], 'rien d’appliqué : âge, parent, refus gardés');
+  const ev = c.app.encounters.events(app.id).at(-1);
+  assert.deepEqual([ev.detail.non_verifiee, ev.detail.age_contredit, ev.verified], [true, true, 0]);
+  // Même règle pour une carte signée saisie dans l'admin, puis notée mineure par la page avec le code.
+  const code = c.app.encounters.codeOf('J-0390');
+  await c.hello({ ref: `J-0390-${code}`, decision: 'accord', adult: 'non', guardian: 'Père Martin', scope_site: 'on', name: 'Léo', email: 'leo@exemple.fr' });
+  const before = c.app.encounters.get(c.row('J-0390').id);
+  await c.hello({ ref: `J-0390-${code}`, decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', name: 'Léo', email: 'leo@exemple.fr' });
+  e = c.row('J-0390');
+  assert.deepEqual([e.adult, e.guardian, e.consent, e.consent_at], [0, 'Père Martin', before.consent, before.consent_at]);
+  // Un refus, lui, est toujours appliqué.
+  await c.hello({ ref: `J-0390-${code}`, decision: 'refus', adult: 'oui' });
+  assert.equal(c.row('J-0390').refused, 1);
+  // La fiche le dit, en v1 comme en v2 (même texte).
+  const ag = c.app.encounters.events(app.id).at(-1).detail;
+  assert.equal(ag.age_contredit, true);
+});
+
+test('revue : sans le code, âge ou parent qui contredisent la fiche, ou accord élargi d’un mineur : rien n’est appliqué', async t => {
+  const c = await site(t);
+  const ref = 'J-0451';
+  await c.hello({ ref, decision: 'accord', adult: 'non', guardian: 'Mère Dupont', scope_site: 'on', name: 'Ado', email: 'ado@exemple.fr' });
+  const id = c.row(ref).id;
+  const before = c.app.encounters.get(id);
+  // Un tiers (ou l'adolescent seul) se dit majeur et élargit l'accord à tous les usages.
+  let r = await c.hello({ ref, decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', scope_print: 'on', scope_name: 'on', name: 'Ado', email: 'ado@exemple.fr' });
+  assert.equal(r.statusCode, 303);
+  let e = c.app.encounters.get(id);
+  assert.deepEqual([e.adult, e.guardian, JSON.stringify(e.consent), e.consent_at, e.refused], [0, 'Mère Dupont', JSON.stringify(before.consent), before.consent_at, 0]);
+  assert.equal(c.app.encounters.events(id).at(-1).detail.age_contredit, true);
+  // Toujours mineur, même parent, mais un accord plus large : non plus.
+  await c.hello({ ref, decision: 'accord', adult: 'non', guardian: 'Mère Dupont', scope_site: 'on', scope_print: 'on', name: 'Ado', email: 'ado@exemple.fr' });
+  assert.deepEqual(c.app.encounters.get(id).consent, before.consent);
+  // Un autre parent : non plus.
+  await c.hello({ ref, decision: 'accord', adult: 'non', guardian: 'Quelqu’un d’autre', scope_site: 'on', name: 'Ado', email: 'ado@exemple.fr' });
+  e = c.app.encounters.get(id);
+  assert.deepEqual([e.guardian, e.consent], ['Mère Dupont', before.consent]);
+  // Le même accord (ou plus étroit) reste possible ; un refus est toujours appliqué.
+  await c.hello({ ref, decision: 'accord', adult: 'non', guardian: 'Mère Dupont', scope_site: 'on', name: 'Ado', email: 'ado@exemple.fr' });
+  assert.notEqual(c.app.encounters.events(id).at(-1).detail.age_contredit, true);
+  await c.hello({ ref, decision: 'refus' });
+  assert.equal(c.app.encounters.get(id).refused, 1);
+});
+
+test('revue : seulement des textes dans le formulaire (JSON forgé) : 422 et DS12, jamais d’erreur 500', async t => {
+  const c = await site(t, { vigie: true });
+  const bodies = [
+    { ref: 'J-0001', wants_photo: 'on', email: 'a@b.fr', adult: { toString: 'x' } },
+    { place: 'Nantes', met_on: { toString: 1 }, wants_photo: 'on', email: 'a@b.fr' },
+    { place: 'Nantes', met_on: ['14/10/2026'], wants_photo: 'on', email: 'a@b.fr' },
+    { place: 'x', met_on: '1', decision: 'accord', adult: ['oui'], name: 'n', email: 'a@b.fr', scope_site: 'on' },
+    { ref: { toString: 'x' }, wants_photo: 'on', email: 'a@b.fr' },
+    { photographer: 'J', place: 'x', met_on: 'hier', decision: 'refus', website: { toString: 'x' } },
+  ];
+  const codes = [];
+  for (const [i, body] of bodies.entries()) {
+    const r = await c.app.inject({ method: 'POST', url: '/bonjour', payload: JSON.stringify(body), remoteAddress: `198.51.100.${150 + i}`, headers: { 'content-type': 'application/json' } });
+    codes.push(r.statusCode);
+  }
+  // Le dernier remplit le champ piège avec un objet : « merci », rien d'enregistré.
+  assert.deepEqual(codes, [422, 422, 422, 422, 422, 303]);
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM encounters').pluck().get(), 0);
+  // Un champ répété (deux réponses d'âge) : de même.
+  const rep = await c.app.inject({ method: 'POST', url: '/bonjour', payload: 'ref=J-0002&wants_photo=on&email=x%40exemple.fr&adult=oui&adult=non', remoteAddress: '198.51.100.170', headers: { 'content-type': 'application/x-www-form-urlencoded' } });
+  assert.equal(rep.statusCode, 422);
+  assert.match(nb(rep.body), /<div class="msg" id="resume" role="alert" tabindex="-1" autofocus>.*<b>Erreur :<\/b> Le formulaire reçu est mal formé/);
+  assert.match(nb(rep.body), /<title>Erreur : le formulaire · /);
+  const ev = await c.flush();
+  assert.deepEqual(ev.filter(e => e.type === 'input_validation_fail').map(e => [e.detail.raison, e.detail.champ, e.detail.type]),
+    [['type inattendu', 'adult', 'object'], ['type inattendu', 'met_on', 'object'], ['type inattendu', 'met_on', 'tableau'], ['type inattendu', 'adult', 'tableau'], ['type inattendu', 'ref', 'object'], ['type inattendu', 'adult', 'tableau']]);
+  assert.deepEqual(ev.filter(e => e.type === 'malicious_honeypot').map(e => e.detail.formulaire), ['bonjour']);
+  // La date libre elle-même n'appelle jamais String() sur autre chose qu'un texte.
+  assert.deepEqual(readDay({ toString: 1 }, { today: TODAY }), { error: 'date' });
+  assert.deepEqual(readDay(['14/10/2026'], { today: TODAY }), { error: 'date' });
 });

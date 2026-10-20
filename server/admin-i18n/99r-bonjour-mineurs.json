@@ -10,5 +10,9 @@
  "moins de 18 ans, accord avec son parent": {
   "en": "under 18, consent with their parent",
   "de": "unter 18, Zustimmung mit dem Elternteil"
+ },
+ "Âge ou parent différents de ceux de la fiche : rien n’est appliqué (un refus, si), à décider par vous.": {
+  "en": "Age or parent different from the record: nothing is applied (a refusal is), for you to decide.",
+  "de": "Alter oder Elternteil weichen vom Datensatz ab: Nichts wird übernommen (eine Ablehnung schon), Sie entscheiden."
  }
 }
