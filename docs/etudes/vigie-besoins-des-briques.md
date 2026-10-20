@@ -55,6 +55,7 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; ✓ Vigie | site : `feat/page-contact` (#183), plafond global de 50 messages acceptés par jour (503) et plafond des annonces (30 e-mails, compté dans la base), tous deux `limite: messages_global` (distingués par `detail.plafond`) ; Vigie : #184, règle `messages_satures` (`30-exploration.yml`, DS21, entité site « messages ») | fait |
 | BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; ✓ Vigie | site : `feat/page-contact` (#183), `sensitive_read` et `sensitive_delete` (`objet: message`, `id` numérique, la suppression seulement si elle a lieu), `authz_fail` hors portée, journal ; Vigie : #184 et #185, type `sensitive_delete`, corrélation `messages_effaces_en_masse` (10 messages distincts par compte en 1 h, DS18), `lectures_massives` par objet + id, `role_incoherent` qui exige `messages.traiter` pour supprimer, objets `personne` et `rencontre` sur les `sensitive_read` des fiches | fait |
 | BV-31 Formulaire /bonjour forgé : âge hors liste, date ou nom du parent au-delà de la page | DS12 | ✓ site | `feat/bonjour-mineurs` (#187) : `input_validation_fail` (émetteur `server/routes/public.js · bonjour`), **sans valeur** (longueur seule) pour `adult`, `met_on` et `guardian` ; noms propres ordinaires et dates courantes sans `malicious_input` (testé) ; règle `valeurs_impossibles_repetees` telle quelle | fait |
+| BV-32 Filtres hors liste : un signalement par requête (BV-3 précisé), pages `/galerie` et `/series` | DS12 | ✓ site | `feat/galerie-series-pages` : `input_validation_fail` (émetteur `server/routes/public.js · filtres`) **une fois par requête** sur `/`, `/galerie` et la visionneuse (le premier champ et sa valeur, `champs` quand il y en a plusieurs) ; `/series` ne lit aucun filtre ; exception des 30 jours inchangée ; rien en v1 (404 avant toute lecture) ; règle `valeurs_impossibles_repetees` telle quelle | fait côté site ; rien à changer côté Vigie |
 
 ---
 
@@ -1045,6 +1046,55 @@ placés dans le HTML de `/photo/:slug`.
 **Ce que la Vigie peut consommer** : rien de nouveau (aucun événement émis, aucun changement des émissions existantes
 de la visionneuse : J'aime, partages, piège du pied de page, inchangés). **Ce qui lui manque** : rien ; aucun cas BV
 ouvert.
+
+---
+
+## /galerie et /series
+
+Évaluation du 20 octobre 2026 (PLAN.md, point 8 : « les adresses `/galerie` et `/series` (le chemin piège
+`/galerie/tout-telecharger` doit rester hors de leurs routes) » ; maquettes
+[MQ-02](../audit-ergonomie-2026-10-16/maquettes/MQ-02-galerie-rangees-filtres.html) et
+[MQ-03](../audit-ergonomie-2026-10-16/maquettes/MQ-03-page-serie.html)). Deux pages en lecture seule, sans saisie, sans
+cookie, sans permission ni migration ; en v2 et en v3 seulement (en v1, 404 et aucun lien, comme les Carnets).
+
+### Surfaces
+
+- **Routes** : `GET /galerie` et `GET /series` (et `/en/…`, `/de/…`), **deux chemins exacts** ; aucune sous-route de
+  `/galerie/` ni de `/series/` : `/galerie/`, `/galerie/<quoi que ce soit>`, `/series/<…>` sont des 404 ordinaires.
+- **Paramètres** : ceux de la galerie, inchangés (`?regard=`, `?serie=`, `?ordre=recentes`), sur `/galerie` seulement ;
+  `/series` n'en lit aucun.
+- **Disponibilité** : la rubrique Galerie servie à la requête en v2 ou en v3 (réglage, thème de la rubrique, vue de la
+  session d'un administrateur) ; sinon 404 **avant** toute lecture des paramètres et toute mesure d'audience.
+
+### Abus possibles et ce que la Vigie voit déjà
+
+| Surface | Abus possible | Déjà vu par la Vigie | Besoin |
+|---|---|---|---|
+| Chemin piège `/galerie/tout-telecharger` | une route `/galerie/*` qui le capterait (réponse 200, plus d'alerte) | `malicious_honeypot` (lien caché) dans le `onRequest` de `server/securite/site.js`, sur le chemin exact, avant le routage | aucun : aucune sous-route ; 404 testée en v1, v2 et v3, avec et sans la Vigie, avec barre finale, `?x=1`, `/en`, `/de`, HEAD et POST (`test/galerie-series.test.js`) |
+| Lien caché du pied de page | absent des nouvelles pages | `it.trapLink` du pied de page v2 | aucun : présent une fois sur `/galerie` et `/series` (testé) ; jamais au plan du site ; `robots.txt` inchangé (`Disallow` du piège avant `Allow: /`) |
+| `?regard=`, `?serie=`, `?ordre=` | valeur forgée (sondage, scanner) | `input_validation_fail` (BV-3, DS12) | **BV-32** : un seul signalement par requête (un vieux lien partagé à trois valeurs disparues ne pèse pas comme trois sondages) |
+| Sous-chemins de `/galerie/` ou `/series/` | sondage d'adresses | 404 comptées (`malicious_excess_404`, DS15) | aucun : aucun lien interne vers une 404 (BV-5, `test/liens-internes.test.js` couvre les deux pages et leurs filtres en v2 et en v3) |
+| Pages v2 en v1 | contourner le réglage (paramètre, cookie forgé) | — | aucun : seule la vue de session d'un administrateur (`site.apparence`) change la version (P23) ; réponses `private, no-store` |
+
+### BV-32 — Filtres hors liste : un signalement par requête (BV-3 précisé)
+
+- **Événement** : `input_validation_fail` (E13), existant ; émetteur `server/routes/public.js · filtres`.
+- **Quand** : au moins un des filtres `regard`, `serie`, `ordre` hors liste sur `/`, `/galerie` ou la visionneuse
+  (`/photo/<slug>?…`) ; `/serie/<slug>` et `/auteur/<slug>` ne lisent que l'ordre. **Un seul événement par requête** :
+  `raison: 'valeur de filtre hors liste'`, `champ` et `valeur` (60 signes) du premier champ, et `champs` (la liste) dès
+  qu'il y en a plusieurs. Jusqu'ici, un événement par champ (trois pour `?regard=x&serie=y&ordre=z`).
+- **Pas d'émission** : valeur vide, valeur déjà signalée par le crochet commun (DS11), série ou photographe vus par la
+  mesure d'audience dans les 30 derniers jours, page en v1 (404 avant la lecture).
+- **Règle** : `valeurs_impossibles_repetees` (DS12), telle quelle ; le seuil compte désormais des requêtes, ce qui était
+  son intention.
+- **Qui** : le site (fait). Les Carnets (BV-13, émetteur `· carnet`) gardent un événement par champ : à aligner si la
+  Vigie le souhaite.
+
+### Prérequis côté site (/galerie et /series)
+
+- `test/galerie-series.test.js`, `test/liens-internes.test.js`, `test/vigie-valeurs-impossibles.test.js` verts, avec et
+  sans la Vigie (`npm test`, `npm run test:vigie`).
+- Aucune route sous `/galerie/` : à revérifier à chaque PR qui touche la galerie.
 
 ---
 

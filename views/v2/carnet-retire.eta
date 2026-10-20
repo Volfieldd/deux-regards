@@ -11,7 +11,7 @@
   <div class="wrap introuvable">
     <ul class="liste-liens">
 <% if (it.totalAll) { %>      <li><a href="<%= it.u('/carnet') %>"><span class="liste-liens-n"><%= tc.allPosts(it.totalAll) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
-<% } %>      <li><a href="<%= it.u('/') %>#galerie"><span class="liste-liens-n"><%= t.backHome %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+<% } %>      <li><a href="<%= it.galerieHref %>"><span class="liste-liens-n"><%= t.backHome %></span><%~ ic('fleche', { size: 18 }) %></a></li>
     </ul>
   </div>
 </main>

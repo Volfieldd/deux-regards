@@ -27,7 +27,7 @@ export function sectionOf(request) {
   const url = new URL(request.url || '/', 'http://local');
   const p = url.pathname.replace(/^\/(en|de)(?=\/|$)/, '') || '/';
   if (p === '/') return ['regard', 'serie', 'ordre'].some(k => url.searchParams.get(k)) ? 'galerie' : 'accueil';
-  if (/^\/(galerie|auteur|serie|recherche)(\/|$)/.test(p)) return 'galerie';
+  if (/^\/(galerie|auteur|serie|series|recherche)(\/|$)/.test(p)) return 'galerie';
   if (/^\/photo(\/|$)/.test(p)) return 'photos';
   if (/^\/carnet(\/|$)/.test(p)) return 'carnets';
   if (/^\/voyages?(\/|$)/.test(p)) return 'voyages';

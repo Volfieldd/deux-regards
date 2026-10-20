@@ -20,3 +20,12 @@ export function photoUrl(slug, { regard, serie, ordre, carnet } = {}) {
   const s = qs.toString();
   return `/photo/${encodeURIComponent(slug)}${s ? `?${s}` : ''}`;
 }
+
+// La même vue quand la page /galerie existe (v2 et v3 ; MQ-02) : la galerie entière et les vues sans page à elles
+// (deux filtres ensemble, l'ordre seul) y passent ; un regard seul ou une série seule gardent leur page (/auteur/<slug>,
+// /serie/<slug>), leur adresse canonique. Jamais de sous-chemin de /galerie/ : le chemin piège de la Vigie
+// (server/securite/piege.js, /galerie/tout-telecharger) reste hors des routes.
+export function galerieUrl(filter = {}) {
+  const url = galleryUrl(filter);
+  return url === '/' ? '/galerie' : url.startsWith('/?') ? `/galerie${url.slice(1)}` : url;
+}

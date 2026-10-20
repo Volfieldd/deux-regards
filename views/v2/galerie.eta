@@ -1,0 +1,17 @@
+<% /* La galerie (maquette MQ-02), page /galerie de la v2 et de la v3 (/en/galerie, /de/galerie) : un seul H1, la barre de
+      filtres, les rangées dans l'ordre composé dans l'admin et la fin de liste, comme la partie #galerie de l'accueil avant
+      cette page (PR #122). Mêmes paramètres : ?regard=, ?serie=, ?ordre=recentes. Pas de gabarit v1 : en v1, la page est
+      introuvable (server/routes/public.js, server/app.js), comme les Carnets. La grille garde l'id « galerie » : la
+      visionneuse y ramène (/galerie#galerie). */ %>
+<% const t = it.t, A = it.activeAuthor, S = it.activeSerie, site = it.siteName;
+   const list = names => (names.length > 1 ? names.slice(0, -1).join(', ') + t.v2.and + names.at(-1) : names[0] || '');
+   const names = list(it.regards.slice(1).filter(r => r.count).map(r => r.name));
+   const label = A && S ? `${S.name}, ${t.by(A.name)}` : A ? t.by(A.name) : S ? S.name : '';
+   const pageTitle = label ? `${t.nav.gallery}, ${label} (${t.photos(it.photos.length)}) · ${site}` : `${t.v2.galleryTitle(names)} · ${site}`; %>
+<% layout('./layout', { pageTitle, description: it.v2.typo(t.v2.galleryDescription(it.total, names)) }) %>
+<%~ include('./_entete', { ...it, courant: 'galerie' }) %>
+<main id="contenu">
+  <div class="wrap tete-page"><h1 class="titre-page"><%= t.nav.gallery %></h1><p class="chapo"><%= t.v2.galleryLead(it.total, names) %></p></div>
+<%~ include('./_galerie', { ...it, gridId: 'galerie' }) %>
+</main>
+<%~ include('./_pied', it) %>

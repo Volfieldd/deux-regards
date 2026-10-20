@@ -22,8 +22,8 @@
   --t-affiche: clamp(40px, 4vw + 22px, 80px);
 }
 .etiquette { color: var(--safelight); }
-.cartel-m, .billet-e-meta, .vis-compte, .vis-pos { font-family: var(--mono); font-size: var(--t-meta); letter-spacing: 0; }
-.billet-e-meta b { font-family: var(--sans); }
+.cartel-m, .billet-e-meta, .ser-e-meta, .vis-compte, .vis-pos { font-family: var(--mono); font-size: var(--t-meta); letter-spacing: 0; }
+.billet-e-meta b, .ser-e-meta b { font-family: var(--sans); }
 /* Une phrase reste en Jost, même en méta : la légende d'un diptyque (« Deux regards sur Lisbonne, … »). */
 .diptyque-t .cartel-m { font-family: var(--sans); }
 .titre-page { letter-spacing: -.012em; }
@@ -78,9 +78,9 @@
 .cartel--grand .cartel-t { font: 300 clamp(26px, 1.2vw + 16px, 34px)/1.15 var(--sans); }
 .rangees { row-gap: var(--esp-4); }
 @media (min-width: 768px) { .rangees { column-gap: var(--esp-3); row-gap: var(--esp-6); } }
-.vignette img, .billet-e-img img { transition: filter .2s; }
-.vignette:hover img { filter: brightness(1.08); }
-@media (prefers-reduced-motion: reduce) { .vignette img, .billet-e-img img { transition: none; } }
+.vignette img, .billet-e-img img, .ser-e-img img { transition: filter .2s; }
+.vignette:hover img, .ser-e:hover .ser-e-img img { filter: brightness(1.08); }
+@media (prefers-reduced-motion: reduce) { .vignette img, .billet-e-img img, .ser-e-img img { transition: none; } }
 .liste-liens-n { font-weight: 300; font-size: 24px; }
 
 /* ---------- 6. Ouverture plein cadre (views/v3/_ouverture.eta) ----------

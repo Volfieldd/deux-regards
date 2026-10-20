@@ -11,6 +11,7 @@ import { billet } from './carnet-helpers.js';
 // public_version), on suit chaque lien interne des pages (href, src, srcset, action des formulaires GET, adresses
 // absolues du site : canonique, hreflang, og:image ; url() des feuilles de style), et aucune réponse n'est une 404 ni
 // une erreur. Le lien piège de la Vigie (it.trapLink, TRAP_PATH) n'est jamais suivi : il doit rester une 404.
+// Les pages /galerie et /series (v2 et v3 seulement) sont couvertes, avec leurs filtres ; en v1, aucune page n'y mène.
 // Parcours borné (profondeur, nombre d'adresses) pour rester rapide ; les pages v2 ajoutées plus tard sont couvertes
 // d'elles-mêmes (même parcours, réglage v2).
 const MAX_DEPTH = 8;
@@ -157,6 +158,15 @@ for (const version of ['v1', 'v2', 'v3']) {
       assert.ok(carnet.some(u => u.startsWith('/photo/') && u.includes('?carnet=lisbonne-et-porto')), 'visionneuse dans le contexte du billet');
       assert.ok(!carnet.some(u => /billet-retire|\/carnet\/brouillon/.test(u)), 'aucun lien vers un billet retiré ou un brouillon');
     } else assert.deepEqual(carnet, [], 'v1 : aucun lien vers les Carnets');
+    // Galerie et Séries (/galerie, /series) : parcourues en v2 et en v3 dans les trois langues, avec les filtres ; jamais
+    // en v1, où aucune page n'y mène. Plus aucun lien interne vers /#galerie ni /#series en v2 et en v3 (les ancres de
+    // l'accueil restent pour les anciens liens).
+    const galerie = [...r.seen.keys()].filter(u => /^(?:\/en|\/de)?\/(?:galerie|series)(?:[/?#]|$)/.test(u));
+    if (version !== 'v1') {
+      for (const lang of ['', '/en', '/de']) for (const u of ['/galerie', '/series', '/galerie?regard=julien&serie=rue', '/galerie?ordre=recentes'])
+        assert.ok(r.seen.has(`${lang}${u}`), `${lang}${u} parcourue (${version})`);
+      assert.ok(!galerie.some(u => /^(?:\/en|\/de)?\/(?:galerie|series)\//.test(u)), 'aucun sous-chemin de /galerie/ ni de /series/');
+    } else assert.deepEqual(galerie, [], 'v1 : aucun lien vers /galerie ni /series');
     assert.ok(r.pages > 50, `${r.pages} pages lues`);
     // Bien la version demandée (feuilles de style de la v2 en v2 et en v3, celle de la v3 en v3 seulement).
     assert.equal([...r.seen.keys()].some(u => u.startsWith('/static/css/v2/')), version !== 'v1');

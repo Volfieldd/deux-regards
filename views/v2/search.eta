@@ -35,7 +35,7 @@
   </section>
 <% } else if (it.series?.length) { %>
   <section class="wrap partie partie--pres" aria-labelledby="s-h">
-    <div class="partie-tete"><h2 class="titre-2" id="s-h"><%= t.pages.browse %></h2><a class="lien" href="<%= it.u('/') %>#galerie"><%= t.pages.allPhotos %><%~ ic('fleche', { size: 18 }) %></a></div>
+    <div class="partie-tete"><h2 class="titre-2" id="s-h"><%= t.pages.browse %></h2><a class="lien" href="<%= it.galerieHref %>"><%= t.pages.allPhotos %><%~ ic('fleche', { size: 18 }) %></a></div>
 <%~ include('./_series', { ...it, list: it.series, labelledby: 's-h' }) %>
   </section>
 <% } %>
