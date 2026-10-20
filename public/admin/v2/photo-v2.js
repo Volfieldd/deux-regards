@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Fiche d'une photo (admin v2) : ce que le script ajoute à views/admin/v2/photo.eta, après admin-v2.js (dont il reprend
 // $, T, post, toast, temoin, fieldError…). L'enregistrement au champ quitté est celui d'admin-v2.js ; ici : la ville de la
 // carte (liste proposée), les suggestions (série, mots-clés, traductions, description), qui remplissent un champ sans rien

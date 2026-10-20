@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Amélioration progressive : aucune lecture automatique, aucune bibliothèque, aucun appel réseau.
 (() => {
   const root = document.documentElement;

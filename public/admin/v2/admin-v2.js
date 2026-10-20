@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Admin v2 (maquettes MQ-07 à MQ-10 de l'audit d'ergonomie du 16 oct. 2026) : amélioration progressive. Tout marche sans
 // ce script (formulaires POST et jeton, liens, :target, :has()) ; avec lui, ce qui se défait s'enregistre au geste et le
 // message d'action propose « Défaire » (MQ-00 § 5 et 6), un champ refusé se dit sous lui et dans le témoin de l'en-tête,
