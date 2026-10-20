@@ -154,6 +154,16 @@ Au plus 20 messages par heure, puis un message de synthèse. Si l'envoi échoue 
     http://localhost:8080/v1/accounts/+33XXXXXXXXX/rate-limit-challenge
   ```
 
+- **`passerelle Signal : réponse 400`** à l'essai : la Vigie affiche la raison donnée par la passerelle et, pour les cas connus, quoi corriger. Pour voir la réponse complète, refaire le même envoi depuis la passerelle, avec les valeurs de `vigie.env` :
+
+  ```bash
+  N=$(docker exec nicephos-vigie printenv VIGIE_SIGNAL_NUMERO); G=$(docker exec nicephos-vigie printenv VIGIE_SIGNAL_GROUPE)
+  docker exec nicephos-signal curl -s -X POST -H "Content-Type: application/json" \
+    -d "{\"message\":\"Vigie : essai\",\"number\":\"$N\",\"recipients\":[\"$G\"]}" http://localhost:8080/v2/send; echo
+  docker exec nicephos-signal curl -s http://localhost:8080/v1/groups/$N; echo
+  ```
+
+  Causes habituelles : `VIGIE_SIGNAL_GROUPE` recopié depuis `internal_id` au lieu du champ `id` (`group.…`), numéro mal saisi ou pas enregistré sur la passerelle (étape 4), `vigie.env` modifié sans **Compose Up** de la Vigie (l'ancienne valeur reste dans le conteneur).
 - **Arrêter les messages** : retirer `signal` de `COMPOSE_PROFILES` puis **Compose Up** (ou `docker stop nicephos-signal`) ; la Vigie bascule sur l'e-mail.
 
 ## Sécurité

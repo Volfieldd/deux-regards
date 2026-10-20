@@ -171,3 +171,19 @@ test('surveillance réduite : un message à chaque geste (même alerte déjà ou
   v.clock.t += 2 * 3600e3;
   assert.equal(v.engine.modeOf('sigma.restauration'), 'alerter');
 });
+
+test('notification : réponse 400 de la passerelle Signal → sa raison, sans numéro ni groupe, et la piste du cas connu', async () => {
+  const { testChannel, gatewayReason } = await import('../vigie/notifications.js');
+  const config = { signal: SIGNAL };
+  const reply = body => async () => new Response(body, { status: 400 });
+  await assert.rejects(testChannel(config, 'signal', { fetchImpl: reply(JSON.stringify({ error: `Invalid group id: ${SIGNAL.group}` })) }), err => {
+    assert.match(err.message, /^passerelle Signal : réponse 400 → VIGIE_SIGNAL_GROUPE : prendre le champ « id »/);
+    assert.match(err.message, /\(passerelle : « Invalid group id: group\.••• »\)$/);
+    assert.ok(!err.message.includes(SIGNAL.group));
+    return true;
+  });
+  await assert.rejects(testChannel(config, 'signal', { fetchImpl: reply(JSON.stringify({ error: `User ${SIGNAL.number} is not registered` })) }),
+    err => /VIGIE_SIGNAL_NUMERO : numéro non enregistré/.test(err.message) && !err.message.includes(SIGNAL.number.slice(1)));
+  assert.equal(gatewayReason(''), '');
+  assert.equal(gatewayReason('{"error":"Bad\\u0000request\\u202e"}'), ' (passerelle : « Bad request »)');
+});
