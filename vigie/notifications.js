@@ -59,6 +59,23 @@ export function messageOf({ id, gravite, titre, sources = [], t, console: url, a
   return [`[${LABEL[gravite] || gravite}] ${titre}${action === 'aggravee' ? ' (aggravée)' : ''}`, `Source : ${from}`, ...(reponse ? [reponse] : []), `${hourOf(t)} · ${url}/alertes/${id}`].join('\n');
 }
 
+// Raison donnée par la passerelle (champ « error » de signal-cli-rest-api), sans numéro ni groupe, et la piste des cas
+// connus : sans elle, « réponse 400 » ne dit pas quoi corriger.
+const HINTS = [
+  [/invalid group id|group.*not found|unknown group/i, 'VIGIE_SIGNAL_GROUPE : prendre le champ « id » de /v1/groups (group.…), pas « internal_id »'],
+  [/not registered|unregistered|no such account|user .* not found/i, 'VIGIE_SIGNAL_NUMERO : numéro non enregistré sur la passerelle (signal/README.md, étape 4)'],
+  [/untrusted identity|identity.*changed/i, 'numéro de sécurité d’un destinataire changé : le faire confiance sur la passerelle'],
+];
+export function gatewayReason(body) {
+  let raw = '';
+  try { raw = JSON.parse(body)?.error ?? ''; } catch { raw = body; }
+  const text = sansContacts(String(raw).replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2066-\u2069]+/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, 120);
+  if (!text) return '';
+  const hint = HINTS.find(([re]) => re.test(text));
+  // La piste d'abord : l'événement de la console coupe à 200 caractères.
+  return `${hint ? ` → ${hint[1]}` : ''} (passerelle : « ${text} »)`;
+}
+
 export function createNotifier({ store, engine, switches, config = {}, fetchImpl = fetch, now = Date.now, log, transport = null }) {
   const { signal = null, mail = null, consoleUrl = 'https://vigie.nicephos.art' } = config;
   const mailer = mail ? (transport || nodemailer.createTransport({ url: mail.url, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 15000, requireTLS: !/^smtps:/i.test(mail.url), tls: { minVersion: 'TLSv1.2' } })) : null;
@@ -70,7 +87,7 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
     const r = await fetchImpl(`${signal.url}/v2/send`, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(15000), headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ message: text, number: signal.number, recipients: [signal.group] }) });
     const body = await readLimited(r, 64 * 1024).catch(() => '');
-    if (r.status !== 201 && r.status !== 200) throw new Error(`passerelle Signal : réponse ${r.status}${/rate.?limit/i.test(body) ? ' (limite de Signal : captcha à résoudre)' : ''}`);
+    if (r.status !== 201 && r.status !== 200) throw new Error(`passerelle Signal : réponse ${r.status}${/rate.?limit/i.test(body) ? ' (limite de Signal : captcha à résoudre)' : ''}${gatewayReason(body)}`);
   }
   async function sendMail(text) {
     await mailer.sendMail({ from: mail.from, to: mail.to, subject: text.split('\n')[0].slice(0, 120), text: `${text}\n\nVigie Nicephos — ce message ne contient aucune donnée personnelle ; le détail est dans la console.\nOuvrez la Vigie depuis votre favori ; elle ne demande jamais votre mot de passe par message.` });
