@@ -214,7 +214,7 @@ test('fiche (MV-02) : règle, cas, tactiques MITRE, entité, réponse faite, év
   assert.match(h, /<span class="vg-code">DS8<\/span>/);
   assert.match(h, /grav--critique/);
   assert.match(h, /etat--afaire[^<]*<svg[\s\S]*?<\/svg>Ouverte/);
-  assert.match(h, /MITRE ATT&amp;CK : Persistance, Élévation de privilèges <span class="vg-code">T1098<\/span>/);
+  assert.match(h, /MITRE ATT&amp;CK : Persistance, Élévation de privilèges · <span class="vg-code">T1098<\/span> Manipulation de compte<\/p>/);
   assert.match(h, /sigma\.role_hors_application · DS8/);
   assert.match(h, /Une seule observation suffit/);
   // Entité : lien vers sa fiche, clé encodée.
@@ -392,7 +392,10 @@ test('historique : index partiel sur detail.id des événements vigie_alerte ; d
 
 test('tactiques MITRE : étiquettes Sigma en français, techniques en majuscules, le reste ignoré', () => {
   assert.deepEqual(mitre(['attack.persistence', 'attack.privilege_escalation', 'attack.t1098', 'attack.t1098', 'cve.2024-1', 'attack.t1110.001']),
-    { tactiques: ['Persistance', 'Élévation de privilèges'], techniques: ['T1098', 'T1110.001'] });
+    { tactiques: ['Persistance', 'Élévation de privilèges'], techniques: ['T1098', 'T1110.001'], noms: ['Manipulation de compte', 'Force brute : Devinette de mot de passe'] });
+  // ATT&CK v20 : Furtivité et Neutralisation des défenses ; Defense Evasion, retirée, reste nommée (signaux déjà chaînés).
+  assert.deepEqual(mitre(['attack.stealth', 'attack.defense_impairment', 'attack.defense_evasion', 'attack.t1685']).tactiques,
+    ['Furtivité', 'Neutralisation des défenses', 'Contournement des défenses (avant ATT&CK v20)']);
   assert.equal(mitre([]), null);
   assert.equal(mitre([PIEGE, 'attack.inconnue']), null);
 });

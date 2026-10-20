@@ -7,6 +7,7 @@
 // les gabarits est déjà mis en forme (dates à l'heure de Paris, mots du lexique) ; un Lecteur ne voit que des adresses
 // tronquées (adresseDetail), ni le texte brut de la réponse automatique (qui peut citer une adresse).
 import { alertOrder } from '../../moteur.js';
+import { lire as lireAttack, libelleTactique, nomTechnique } from '../../attack.js';
 import { SOURCE_MIN, QUORUM, sourceOf } from '../../poids.js';
 import { can } from '../droits.js';
 import { actionsForcees, erreurDe, identite, lienLever } from './decisions.js';
@@ -29,13 +30,6 @@ const ENTITE_TITRE = { ip: 'L’adresse', reseau: 'Le réseau', compte: 'Le comp
 const FICHE_DE = { ip: 'Fiche de l’adresse', reseau: 'Fiche du réseau', compte: 'Fiche du compte', session: 'Fiche de la session', appareil: 'Fiche de l’appareil' };
 const SEUIL_DE = { ip: 'd’une adresse', reseau: 'd’un réseau', compte: 'd’un compte', session: 'd’une session', appareil: 'd’un appareil' };
 const DECISION_FAITE = { geler: 'Compte gelé', revoquer_compte: 'Sessions du compte fermées', revoquer_session: 'Session fermée', bloquer: 'Adresse bloquée', verrouiller: 'Admin verrouillée', suspendre_acces: 'Accès suspendu', verifier_identite: 'Identité redemandée' };
-// Tactiques MITRE ATT&CK (étiquettes « attack.<tactique> » des règles Sigma), en français.
-const TACTIQUES = {
-  reconnaissance: 'Reconnaissance', resource_development: 'Développement de ressources', initial_access: 'Accès initial', execution: 'Exécution',
-  persistence: 'Persistance', privilege_escalation: 'Élévation de privilèges', defense_evasion: 'Contournement des défenses',
-  credential_access: 'Accès aux identifiants', discovery: 'Découverte', lateral_movement: 'Mouvement latéral', collection: 'Collecte',
-  command_and_control: 'Commande et contrôle', exfiltration: 'Exfiltration', impact: 'Impact',
-};
 // Types d'événements les plus vus sur une fiche (mots de MV-03) ; les autres : le nom du code seul.
 const TYPES = {
   authn_login_success: 'Connexion réussie', authn_login_fail: 'Échec de connexion', session_created: 'Session ouverte', session_destroyed: 'Session fermée',
@@ -81,17 +75,13 @@ function ecart(ms) {
   else txt = `${Math.round(a / 86400)}${NBSP}jours`;
   return `reçu ${ms < 0 ? '−' : '+'} ${txt}`;
 }
-// « attack.persistence », « attack.t1098 » → { tactiques: ['Persistance'], techniques: ['T1098'] }.
+// « attack.persistence », « attack.t1098 » → { tactiques: ['Persistance'], techniques: ['T1098'], noms: ['Manipulation de
+// compte'] } (noms : null pour une technique absente du référentiel), d'après le référentiel ATT&CK de la Vigie (vigie/attack.js) : les 15 tactiques de la version en vigueur,
+// plus Defense Evasion, retirée en v20 mais portée par les signaux déjà chaînés ; une tactique inconnue est ignorée.
 export function mitre(tags) {
-  const tactiques = [], techniques = [];
-  for (const tag of tags || []) {
-    const m = /^attack\.(.+)$/i.exec(String(tag));
-    if (!m) continue;
-    const v = m[1].toLowerCase();
-    if (/^t\d{4}(\.\d{3})?$/.test(v)) { if (!techniques.includes(v.toUpperCase())) techniques.push(v.toUpperCase()); }
-    else if (Object.hasOwn(TACTIQUES, v) && !tactiques.includes(TACTIQUES[v])) tactiques.push(TACTIQUES[v]);
-  }
-  return tactiques.length || techniques.length ? { tactiques, techniques } : null;
+  const lu = lireAttack(tags);
+  const tactiques = [...new Set(lu.tactiques.map(libelleTactique).filter(Boolean))];
+  return tactiques.length || lu.techniques.length ? { tactiques, techniques: lu.techniques, noms: lu.techniques.map(nomTechnique) } : null;
 }
 
 // Registre des règles (titres, cas, mode actuel), du moteur.

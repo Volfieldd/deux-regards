@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.190.0",
+    "date": "2026-10-20",
+    "pr": 190,
+    "title": {
+      "fr": "Vigie : MITRE ATT&CK 20.0",
+      "en": "Vigie: MITRE ATT&CK 20.0",
+      "de": "Vigie: MITRE ATT&CK 20.0"
+    },
+    "items": [
+      {
+        "fr": "Les règles de la Vigie suivent ATT&CK 20.0 (13 octobre 2026) : 15 tactiques, dont Furtivité et Neutralisation des défenses qui remplacent Contournement des défenses. La fiche d’une alerte nomme chaque technique (« T1098 Manipulation de compte »). La détection, les seuils et les réponses ne changent pas.",
+        "en": "The Vigie’s rules follow ATT&CK 20.0 (13 October 2026): 15 tactics, including Stealth and Defense Impairment, which replace Defense Evasion. An alert’s page names each technique (“T1098 Account Manipulation”). Detection, thresholds and responses are unchanged.",
+        "de": "Die Regeln der Vigie folgen ATT&CK 20.0 (13. Oktober 2026): 15 Taktiken, darunter Stealth und Defense Impairment anstelle von Defense Evasion. Die Seite einer Warnung nennt jede Technik („T1098 Account Manipulation“). Erkennung, Schwellen und Reaktionen bleiben unverändert.",
+        "perm": "securite.voir"
+      }
+    ]
+  },
+  {
     "version": "1.188.0",
     "date": "2026-10-20",
     "pr": 188,
@@ -41,7 +59,8 @@
       {
         "fr": "Quand la passerelle Signal refuse un message (« réponse 400 »), la Vigie dit pourquoi et, pour les cas courants, quoi corriger : identifiant du groupe, numéro non enregistré, numéro de sécurité changé. Numéros et groupes restent masqués. Le guide Signal explique comment rejouer l’envoi.",
         "en": "When the Signal gateway refuses a message (“response 400”), the Vigie says why and, for common cases, what to fix: group identifier, unregistered number, changed safety number. Numbers and groups stay masked. The Signal guide explains how to replay the sending.",
-        "de": "Lehnt das Signal-Gateway eine Nachricht ab („Antwort 400“), nennt die Vigie den Grund und für häufige Fälle die Abhilfe: Gruppenkennung, nicht registrierte Nummer, geänderte Sicherheitsnummer. Nummern und Gruppen bleiben verdeckt. Die Signal-Anleitung erklärt, wie man den Versand wiederholt."
+        "de": "Lehnt das Signal-Gateway eine Nachricht ab („Antwort 400“), nennt die Vigie den Grund und für häufige Fälle die Abhilfe: Gruppenkennung, nicht registrierte Nummer, geänderte Sicherheitsnummer. Nummern und Gruppen bleiben verdeckt. Die Signal-Anleitung erklärt, wie man den Versand wiederholt.",
+        "perm": "securite.voir"
       }
     ]
   },

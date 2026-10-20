@@ -11,7 +11,7 @@ detection:
     type: vigie_console_refus
   condition: selection
 level: medium
-vigie: { cas: DS30, entite: { kind: vigie, valeur: console_refus }, source_unique: true, mode: alerter }
+vigie: { cas: DS30, entite: { kind: vigie, valeur: console_refus }, source_unique: true, mode: alerter, phase_dossier: tentative }
 ---
 title: Connexions à la console refusées à répétition
 name: console_refus_repetes

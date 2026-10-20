@@ -39,14 +39,14 @@ detection:
     type: bordure_nouvel_operateur
   condition: selection
 level: low
-vigie: { cas: DS4, entite: { kind: ip, champ: ip }, points: 1 }
+vigie: { cas: DS4, entite: { kind: ip, champ: ip }, points: 1, nature_dossier: indice }
 ---
 title: En-têtes de la bordure fabriqués ou rejoués
 name: bordure_entetes_faux
 id: d4b43d70-8143-48da-9eb6-2b96ceff6791
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1036]
+tags: [attack.stealth, attack.t1036]
 detection:
   selection:
     type: edge_signature_invalid
@@ -59,7 +59,7 @@ name: bordure_muette
 id: 1bababd6-3619-463d-8fba-ed1ad9018d1c
 author: Nicephos (Vigie)
 logsource: { product: nicephos, service: vigie }
-tags: [attack.defense_evasion, attack.t1562]
+tags: [attack.defense_impairment, attack.t1685]
 detection:
   selection:
     type: [vigie_bordure_erreur, vigie_bordure_silence]
