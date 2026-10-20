@@ -18,6 +18,35 @@
     ]
   },
   {
+    "version": "1.194.0",
+    "date": "2026-10-20",
+    "pr": 194,
+    "title": {
+      "fr": "Mineurs : l’app de terrain et la photo offerte",
+      "en": "Minors: the field app and the gift photo",
+      "de": "Minderjährige: die Feld-App und das geschenkte Foto"
+    },
+    "items": [
+      {
+        "perm": "terrain.app",
+        "fr": "Sur le téléphone, l’âge est demandé aussi pour envoyer la photo (ou dès qu’une adresse est notée), et la réponse « moins de 15 ans » s’ajoute : l’e-mail d’un parent remplace alors celui de l’enfant, qui n’est gardé nulle part. Sous le nom du parent, la phrase des deux parents, comme sur /bonjour. En v2, l’âge vient avant l’adresse.",
+        "en": "On the phone, the age is now also asked to send the photo (or as soon as an address is noted), and the answer “under 15” is added: a parent’s email then replaces the child’s, which is kept nowhere. Under the parent’s name, the sentence about both parents, as on /bonjour. In v2, the age comes before the address.",
+        "de": "Auf dem Smartphone wird das Alter jetzt auch für das Senden des Fotos erfragt (oder sobald eine Adresse notiert wird), und die Antwort „unter 15“ kommt hinzu: Die E-Mail eines Elternteils ersetzt dann die des Kindes, die nirgends gespeichert wird. Unter dem Namen des Elternteils der Satz zu beiden Eltern, wie auf /bonjour. In v2 kommt das Alter vor der Adresse."
+      },
+      {
+        "fr": "Sur /bonjour, une personne de moins de 15 ans peut le dire aussi pour une publication seule, sans demander la photo : nous écrivons alors à son parent.",
+        "en": "On /bonjour, a person under 15 can now say so for a publication alone, without asking for the photo: we then write to their parent.",
+        "de": "Auf /bonjour kann eine Person unter 15 das jetzt auch für eine Veröffentlichung allein angeben, ohne das Foto zu erbitten: Wir schreiben dann ihrem Elternteil."
+      },
+      {
+        "perm": "personnes.offrir",
+        "fr": "Une photo offerte à l’adresse d’un parent s’adresse au parent (« Voici la photo de… »), dans la langue choisie ; la page du lien ne nomme pas l’enfant. Le récapitulatif envoyé depuis le téléphone aussi.",
+        "en": "A gift photo sent to a parent’s address is addressed to the parent (“Here is the photo of…”), in the chosen language; the link’s page does not name the child. So is the summary sent from the phone.",
+        "de": "Ein geschenktes Foto an die Adresse eines Elternteils richtet sich an das Elternteil („Hier ist das Foto von…“), in der gewählten Sprache; die Seite des Links nennt das Kind nicht. Ebenso die vom Smartphone gesendete Zusammenfassung."
+      }
+    ]
+  },
+  {
     "version": "1.193.0",
     "date": "2026-10-20",
     "pr": 193,
@@ -31,6 +60,34 @@
         "fr": "Sous une photo, la petite carte montre sa ville et ses abords (60 km de large au moins, 300 km au plus) avec les villes des photos « À proximité », et une barre d’échelle juste à sa latitude (« 20 km »). Les noms gardent 13 px et ne se chevauchent plus, au téléphone comme au bureau, avec ou sans JavaScript. La carte ne montre jamais plus précis que le centre de la ville. En v1 aussi, avec la même barre.",
         "en": "Below a photo, the small map shows its town and surroundings (at least 60 km wide, at most 300 km) with the towns of the “Nearby” photos, and a scale bar that is correct at its latitude (“20 km”). Names stay at 13 px and no longer overlap, on phones and desktops, with or without JavaScript. The map never shows anything more precise than the town centre. In v1 too, with the same bar.",
         "de": "Unter einem Foto zeigt die kleine Karte seinen Ort und dessen Umgebung (mindestens 60 km, höchstens 300 km breit) mit den Orten der Fotos „In der Nähe“ und einem Maßstab, der auf seiner Breite stimmt („20 km“). Die Namen bleiben 13 px groß und überlappen sich nicht mehr, auf dem Telefon wie am Rechner, mit oder ohne JavaScript. Die Karte zeigt nie mehr als die Ortsmitte. Auch in v1, mit demselben Maßstab."
+      }
+    ]
+  },
+  {
+    "version": "1.192.0",
+    "date": "2026-10-20",
+    "pr": 192,
+    "title": {
+      "fr": "Une page Galerie et une page Séries",
+      "en": "A Gallery page and a Series page",
+      "de": "Eine Galerie-Seite und eine Serien-Seite"
+    },
+    "items": [
+      {
+        "fr": "Sur le site en v2 et en v3, le menu Galerie ouvre sa propre page (/galerie) : toutes les photos, avec les mêmes filtres par regard, par série et par ordre, chacun à son adresse. Le menu Séries ouvre l’index des séries (/series) : la couverture de chacune, son nombre de photos, ses photographes, ses années et le début de son texte d’intention.",
+        "en": "On the v2 and v3 site, the Gallery menu opens its own page (/galerie): every photo, with the same filters by photographer, series and order, each with its own address. The Series menu opens the series index (/series): each one’s cover, number of photos, photographers, years and the start of its statement.",
+        "de": "Auf der Website in v2 und v3 öffnet das Menü Galerie eine eigene Seite (/galerie): alle Fotos, mit denselben Filtern nach Blick, Serie und Reihenfolge, jeder mit eigener Adresse. Das Menü Serien öffnet die Übersicht der Serien (/series): Titelbild, Zahl der Fotos, Fotografen, Jahre und der Anfang des Begleittexts."
+      },
+      {
+        "fr": "L’accueil garde son ouverture et montre un aperçu de la galerie (les douze premières photos, dans votre ordre), puis « Toute la galerie » ; « Toutes les séries » mène à l’index. Le fil d’Ariane d’une série ramène à l’index. En v1, rien ne change : ces deux pages n’existent pas.",
+        "en": "The home page keeps its opening and shows a preview of the gallery (the first twelve photos, in your order), then “The whole gallery”; “All series” leads to the index. A series’ breadcrumb leads back to the index. In v1 nothing changes: these two pages do not exist.",
+        "de": "Die Startseite behält ihre Eröffnung und zeigt eine Vorschau der Galerie (die ersten zwölf Fotos, in Ihrer Reihenfolge), dann „Die ganze Galerie“; „Alle Serien“ führt zur Übersicht. Die Brotkrümelnavigation einer Serie führt zur Übersicht zurück. In v1 ändert sich nichts: Diese beiden Seiten gibt es dort nicht."
+      },
+      {
+        "fr": "Statistiques : les vues de la Galerie et des Séries ont leur ligne.",
+        "en": "Statistics: Gallery and Series page views have their own line.",
+        "de": "Statistik: Aufrufe der Galerie und der Serien haben eine eigene Zeile.",
+        "perm": "statistiques.voir"
       }
     ]
   },

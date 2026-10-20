@@ -55,7 +55,7 @@
 <% if (it.sentRef) { %>        <dt><%= B.sentRef %></dt><dd class="donnee"><%= it.sentRef %></dd>
 <% } %><% if (met) { %>        <dt><%= B.recapMet %></dt><dd><%= ty(met) %></dd>
 <% } %>        <dt><%= B.recapWish %></dt><dd><%= ty(wishes.join(' ; ')) %></dd>
-<% if (r.adult === 1 || r.adult === 0) { %>        <dt><%= B.recapAge %></dt><dd><%= ty(r.adult === 1 ? B.recapAdult : r.under15 ? B.recapUnder15 : r.decision === 'accord' ? B.recapMinorAgree : B.recapMinor) %></dd>
+<% if (r.adult === 1 || r.adult === 0) { %>        <dt><%= B.recapAge %></dt><dd><%= ty(r.adult === 1 ? B.recapAdult : r.under15 ? (r.decision === 'accord' ? B.recapUnder15Agree : B.recapUnder15) : r.decision === 'accord' ? B.recapMinorAgree : B.recapMinor) %></dd>
 <% } %>      </dl>
       <p class="champ-aide"><%= ty(B.recapNote) %></p>
     </section>
@@ -98,9 +98,9 @@
 <%~ err('adult') %>
       <label class="choix"><input id="bj-age-oui" type="radio" name="adult" value="oui"<%~ v.adult === 'oui' ? ' checked' : '' %><%~ bad('adult') %><%~ af('bj-age-oui') %>><span><%= h.adult %></span></label>
       <label class="choix"><input id="bj-age-non" type="radio" name="adult" value="non" data-revele<%~ v.adult === 'non' ? ' checked' : '' %><%~ bad('adult') %>><span><%= ty(h.minor) %></span></label>
-<% /* « Moins de 15 ans » : proposé seulement avec « Recevoir la photo » (sans script, par :has ; toujours là sur un vieux
-      navigateur) : l'adresse d'un parent remplace alors celle de la personne. */ %>
-      <label class="choix si-photo"><input id="bj-age-15" type="radio" name="adult" value="moins15" data-revele data-revele15<%~ v.adult === 'moins15' ? ' checked' : '' %><%~ bad('adult') %>><span><%= ty(h.under15) %></span></label>
+<% /* « Moins de 15 ans » : proposé dès que « Recevoir la photo » ou « J'accepte » est coché (sans script, par :has ;
+      toujours là sur un vieux navigateur) : l'adresse d'un parent remplace alors celle de la personne. */ %>
+      <label class="choix si-usage"><input id="bj-age-15" type="radio" name="adult" value="moins15" data-revele data-revele15<%~ v.adult === 'moins15' ? ' checked' : '' %><%~ bad('adult') %>><span><%= ty(h.under15) %></span></label>
       <div class="champ revele"><label for="bj-parent"><%= h.guardian %></label><p class="champ-aide" id="bj-parent-aide"><%= ty(h.guardianHint) %></p>
         <input id="bj-parent" name="guardian" value="<%= v.guardian || '' %>" maxlength="80" autocomplete="off"<%~ desc(ek('guardian'), 'bj-parent-aide') %><%~ bad('guardian') %><%~ af('bj-parent') %>><%~ err('guardian') %></div>
       <div class="champ revele-15"><label for="bj-parent-email"><%= h.guardianEmail %></label><p class="champ-aide" id="bj-parent-email-aide"><%= ty(h.guardianEmailHint) %></p>
@@ -113,7 +113,7 @@
       <fieldset class="groupe<%= e.scopes ? ' groupe--erreur' : '' %>"<%~ desc('bj-pub-aide', ek('scopes')) %>><legend><%= h.decision %></legend><p class="champ-aide" id="bj-pub-aide"><%= B.decisionHelp %></p>
 <%~ err('scopes') %>
         <label class="choix"><input type="radio" name="decision" value=""<%~ !v.decision ? ' checked' : '' %>><span><%= h.undecided %></span></label>
-        <label class="choix"><input type="radio" name="decision" value="accord"<%~ v.decision === 'accord' ? ' checked' : '' %>><span><%= ty(h.agree) %></span></label>
+        <label class="choix"><input id="bj-accord" type="radio" name="decision" value="accord"<%~ v.decision === 'accord' ? ' checked' : '' %>><span><%= ty(h.agree) %></span></label>
         <ul class="sous-choix" aria-label="<%= ty(h.agree).replace(/\s*:$/, '') %>">
 <% ['site', 'instagram', 'print', 'name'].forEach(s => { %>          <li><label class="choix"><input id="bj-scope-<%= s %>" type="checkbox" name="scope_<%= s %>"<%~ on(`scope_${s}`) ? ' checked' : '' %><%~ bad('scopes') %><%~ af(`bj-scope-${s}`) %>><span><%= h.scopes[s] %></span></label></li>
 <% }) %>        </ul>

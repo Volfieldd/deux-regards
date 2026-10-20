@@ -12,6 +12,8 @@ const I18N = {
   'Le nom de la personne est nécessaire avec son accord.': { en: 'The person’s name is needed with their consent.', de: 'Mit der Einwilligung ist der Name der Person nötig.' },
   'Indiquez si la personne est majeure.': { en: 'Say whether the person is an adult.', de: 'Geben Sie an, ob die Person volljährig ist.' },
   'Personne mineure : le nom du parent qui signe est nécessaire.': { en: 'Minor: the name of the signing parent is needed.', de: 'Minderjährige Person: Der Name des unterschreibenden Elternteils ist nötig.' },
+  'Indiquez l’âge de la personne : avant 15 ans, la photo est envoyée à un parent.': { en: 'Give the person’s age: under 15, the photo is sent to a parent.', de: 'Geben Sie das Alter der Person an: Unter 15 wird das Foto an ein Elternteil geschickt.' },
+  'Moins de 15 ans : l’e-mail d’un parent est nécessaire, la photo lui est envoyée.': { en: 'Under 15: a parent’s email is needed, the photo is sent to them.', de: 'Unter 15: Die E-Mail eines Elternteils ist nötig, das Foto wird dorthin geschickt.' },
   'La signature manque.': { en: 'The signature is missing.', de: 'Die Unterschrift fehlt.' },
   'Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.': { en: 'Nothing to save: a consent, a refusal, or at least an address to send the photo.', de: 'Nichts zu speichern: eine Einwilligung, eine Ablehnung oder mindestens eine Adresse zum Senden des Fotos.' },
 };
@@ -101,15 +103,23 @@ const tr = s => I18N[s]?.[document.documentElement.lang] ?? s;
   function problems() {
     const f = form.elements;
     const out = [];
-    const email = f.email.value.trim();
-    if (email && !EMAIL.test(email)) out.push([f.email, 'Adresse e-mail invalide.']);
+    // Avant 15 ans, l'adresse d'un parent remplace celle de la personne (jamais envoyée au serveur pour être gardée).
+    const under15 = f.adult.value === 'moins15';
+    const own = f.email.value.trim(), parent = f.guardian_email.value.trim();
+    const email = under15 ? parent : own;
+    if (email && !EMAIL.test(email)) out.push([under15 ? f.guardian_email : f.email, 'Adresse e-mail invalide.']);
+    else if (under15 && !email && (f.wants_photo.checked || own)) out.push([f.guardian_email, 'Moins de 15 ans : l’e-mail d’un parent est nécessaire, la photo lui est envoyée.']);
     if (f.decision.value === 'accord') {
       if (!['scope_site', 'scope_instagram', 'scope_print'].some(n => f[n].checked)) out.push([f.scope_site, 'Cochez au moins un usage accepté.']);
       if (!f.name.value.trim()) out.push([f.name, 'Le nom de la personne est nécessaire avec son accord.']);
       if (!f.adult.value) out.push([f.adult[0], 'Indiquez si la personne est majeure.']);
-      else if (f.adult.value === 'non' && !f.guardian.value.trim()) out.push([f.guardian, 'Personne mineure : le nom du parent qui signe est nécessaire.']);
+      else if (f.adult.value !== 'oui' && !f.guardian.value.trim()) out.push([f.guardian, 'Personne mineure : le nom du parent qui signe est nécessaire.']);
       if (!drawn) out.push([canvas, 'La signature manque.']);
-    } else if (!f.decision.value && !email && !f.wants_photo.checked) out.push([f.decision[0], 'Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.']);
+    } else {
+      // L'âge aussi pour la photo ou le récapitulatif (une adresse notée).
+      if (!f.adult.value && (f.wants_photo.checked || own || parent)) out.push([f.adult[0], 'Indiquez l’âge de la personne : avant 15 ans, la photo est envoyée à un parent.']);
+      if (!f.decision.value && !email && !f.wants_photo.checked && !(under15 && own)) out.push([f.decision[0], 'Rien à enregistrer : un accord, un refus, ou au moins une adresse pour envoyer la photo.']);
+    }
     return out;
   }
   function report(list) {
@@ -133,7 +143,8 @@ const tr = s => I18N[s]?.[document.documentElement.lang] ?? s;
       if (el === canvas) continue;
       if (el.type !== 'radio') { el.setAttribute('aria-invalid', 'true'); continue; }
       form.querySelectorAll(`input[type="radio"][name="${el.name}"]`).forEach(r => r.setAttribute('aria-invalid', 'true'));
-      const say = form.querySelector(`[data-err-for="${el.name}"]`);
+      // L'âge : la phrase d'un accord (18 ans ?) ou celle de la photo (quel âge ?).
+      const say = form.querySelector(`[data-err-for="${el.name}"]${el.name === 'adult' ? `[data-quand="${form.elements.decision.value === 'accord' ? 'accord' : 'photo'}"]` : ''}`);
       if (say) { say.hidden = false; say.closest('fieldset')?.setAttribute('aria-describedby', say.id); }
     }
     box.replaceChildren(ul);

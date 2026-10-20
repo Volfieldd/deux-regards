@@ -1,8 +1,11 @@
 <% /* Accueil (MQ-01 ; en v3, it.v3 : l'ouverture et les regards de views/v3/) : l'ouverture, puis où aller ensuite : les regards (la galerie de chacun), les séries (une rangée de
-      couvertures), et la galerie elle-même (MQ-02), à l'ancre #galerie que gardent les anciens liens. Les ancres
+      couvertures), et la galerie (MQ-02), à l'ancre #galerie que gardent les anciens liens : entière quand la page /galerie
+      n'existe pas, sinon un aperçu et « Toute la galerie ». Les ancres
       #regards, #series et #galerie mènent toujours quelque part. Pas de Carnets : la rubrique n'existe pas encore. */ %>
 <% const t = it.t, v = it.v2, ic = v.ic, authors = it.regards.slice(1).filter(r => r.count);
-   const series = it.seriesAll.filter(c => c.count && c.cover); %>
+   const series = it.seriesAll.filter(c => c.count && c.cover);
+   // Aperçu de la galerie (quand la page /galerie existe) : douze photos, trois rangées environ au bureau.
+   const APERCU = 12; %>
 <% if (it.hero.length && it.darkroom) { %>
 <%~ include('../themes/_ouverture', it) %>
 <% } else if (it.hero.length && it.v3) { /* v3 : plein cadre, puis la promesse (views/v3/_ouverture.eta) */ %>
@@ -22,7 +25,7 @@
 <% if (it.intro) { %>        <p class="acc-texte"><%= it.intro %></p>
 <% } %>      </div>
       <ul class="liste-liens" aria-label="<%= t.v2.seeGallery %>">
-        <li><a href="<%= it.u('/') %>#galerie"><span class="liste-liens-n"><%= it.regards[0].name %></span><span class="liste-liens-d"><%= t.v2.bothDesc(it.total) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
+        <li><a href="<%= it.galerieHref %>"><span class="liste-liens-n"><%= it.regards[0].name %></span><span class="liste-liens-d"><%= t.v2.bothDesc(it.total) %></span><%~ ic('fleche', { size: 18 }) %></a></li>
 <% /* Sous le nom, le nombre de photos, puis la description courte du photographe, son regard (« le matin, les quais,
       les fleuves » ; admin, page Photographes, migration 053), si elle est écrite. */
    authors.forEach(r => { %>        <li><a href="<%= it.galleryUrl({ regard: r.slug }) %>#filtres"><span class="liste-liens-n"><%= r.name %></span><span class="liste-liens-d"><%= t.photos(r.count) %><% if (r.short_bio) { %>&nbsp;· <%= v.typo(r.short_bio) %><% } %></span><%~ ic('fleche', { size: 18 }) %></a></li>
@@ -32,13 +35,25 @@
 <% } %>
 <% if (series.length) { %>
   <section class="wrap partie" id="series" aria-labelledby="acc-series-t">
-    <div class="partie-tete"><h2 class="titre-2" id="acc-series-t"><%= t.nav.series %></h2></div>
+    <div class="partie-tete"><h2 class="titre-2" id="acc-series-t"><%= t.nav.series %></h2><% if (it.galeriePage) { %><a class="lien" href="<%= it.seriesHref %>"><%= t.allSeries %><%~ ic('fleche', { size: 18 }) %></a><% } %></div>
 <%~ include('./_series', { ...it, list: series, labelledby: 'acc-series-t' }) %>
   </section>
 <% } else { %>
   <span id="series"></span>
 <% } %>
+<% if (it.galeriePage) { /* La page /galerie existe (v2, v3) : ici, un aperçu, les premières photos dans l'ordre de la
+      galerie, en rangées comme elle, puis « Toute la galerie ». L'ancre #galerie des anciens liens y mène encore. */
+   const apercu = it.photos.slice(0, APERCU); %>
+  <section class="partie acc-galerie acc-apercu" id="galerie" aria-labelledby="acc-galerie-t">
+    <div class="wrap partie-tete"><div><h2 class="titre-2" id="acc-galerie-t"><%= t.nav.gallery %></h2><p><%= t.v2.previewLead(apercu.length, it.total) %></p></div><a class="lien" href="<%= it.galerieHref %>"><%= t.v2.allGallery(it.total) %><%~ ic('fleche', { size: 18 }) %></a></div>
+<% if (apercu.length) { %>    <div class="wrap gal-grille" id="filtres">
+<%~ include('./_rangees', { ...it, list: apercu, labelledby: 'acc-galerie-t', eager: 0 }) %>
+      <div class="gal-fin"><a class="lien" href="<%= it.galerieHref %>"><%= t.v2.allGallery(it.total) %><%~ ic('fleche', { size: 18 }) %></a><% if (series.length) { %><a class="lien" href="<%= it.seriesHref %>"><%= t.v2.seeSeries(series.length) %><%~ ic('fleche', { size: 18 }) %></a><% } %></div>
+    </div>
+<% } %>  </section>
+<% } else { %>
   <section class="partie acc-galerie" id="galerie" aria-labelledby="acc-galerie-t">
     <div class="wrap partie-tete"><div><h2 class="titre-2" id="acc-galerie-t"><%= t.nav.gallery %></h2><p><%= t.v2.galleryLead(it.total, it.names) %></p></div></div>
 <%~ include('./_galerie', it) %>
   </section>
+<% } %>

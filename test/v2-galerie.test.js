@@ -4,7 +4,8 @@ import { setup, VIGIE_KEYS } from './helpers.js';
 import { fmt, rowSizes, ouvSizes, phoneShares, nobr } from '../server/v2-vues.js';
 
 // Site public v2 : accueil (MQ-01), galerie en rangées et filtres (MQ-02), page d'une série (MQ-03). Mêmes routes, mêmes
-// paramètres et mêmes données que la v1 (views/home.eta) : /, /auteur/<slug>, /serie/<slug>, ?regard=&serie=&ordre=.
+// paramètres et mêmes données que la v1 (views/home.eta) : /, /auteur/<slug>, /serie/<slug>, ?regard=&serie=&ordre= ; et
+// les pages de la v2 et de la v3 seulement, /galerie (mêmes paramètres) et /series (test/galerie-series.test.js).
 const site = async (t, opts = {}) => {
   const c = await setup(t, { seeded: true, ...opts });
   return { ...c, visit: (url, o = {}) => c.app.inject({ method: 'GET', url, ...o }) };
@@ -20,20 +21,23 @@ const order = (c, where = '1') => c.db.prepare(`SELECT p.slug FROM photos p JOIN
 
 test('galerie v2 : les rangées suivent l’ordre composé dans l’admin, et le suivent quand il change', async t => {
   const c = await v2(t);
-  assert.deepEqual(tiles((await c.visit('/')).body, 'g-h'), order(c));
+  assert.deepEqual(tiles((await c.visit('/galerie')).body, 'g-h'), order(c));
   // L'admin réordonne : la dernière passe en tête, la première en dernier.
   const ids = c.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY position, id").pluck().all();
   const set = c.db.prepare('UPDATE photos SET position = ? WHERE id = ?');
   [ids.at(-1), ...ids.slice(1, -1), ids[0]].forEach((id, i) => set.run(i, id));
   const expected = order(c);
   assert.equal(expected[0], c.db.prepare('SELECT slug FROM photos WHERE id = ?').pluck().get(ids.at(-1)));
-  assert.deepEqual(tiles((await c.visit('/')).body, 'g-h'), expected);
+  assert.deepEqual(tiles((await c.visit('/galerie')).body, 'g-h'), expected);
+  // L'aperçu de l'accueil : les douze premières, dans le même ordre.
+  assert.deepEqual(tiles((await c.visit('/')).body, 'acc-galerie-t'), expected.slice(0, 12));
   // Même ordre sur la page d'un regard, d'une série, et dans les trois langues.
   assert.deepEqual(tiles((await c.visit('/auteur/julien')).body, 'g-h'), order(c, "a.slug = 'julien'"));
   assert.deepEqual(tiles((await c.visit('/de/serie/rue')).body, 'g-h'), order(c, "c.slug = 'rue'"));
   assert.deepEqual(tiles((await c.visit('/en/?regard=sebastien&serie=paysage')).body, 'g-h'), order(c, "a.slug = 'sebastien' AND c.slug = 'paysage'"));
   // « Plus récentes d'abord » : l'ordre de publication, le plus récent en tête.
   const recent = c.db.prepare("SELECT slug FROM photos WHERE status = 'published' ORDER BY published_at DESC, id DESC").pluck().all();
+  assert.deepEqual(tiles((await c.visit('/galerie?ordre=recentes')).body, 'g-h'), recent);
   assert.deepEqual(tiles((await c.visit('/?ordre=recentes')).body, 'g-h'), recent);
 });
 
@@ -87,11 +91,11 @@ test('filtre par photographe : une adresse par choix, état actif, comptes qui s
   assert.match(b, /<title>Galerie, par Julien \(\d+ photos\) · Test<\/title>/);
   assert.match(b, /<h1 class="titre-page">Galerie<\/h1>/);
   assert.match(b, /<a class="filtre" href="\/auteur\/julien#filtres" aria-current="page"><span class="filtre-nom">Julien<\/span>/);
-  assert.match(b, /<a class="filtre" href="\/#filtres"><span class="filtre-nom">Les deux<\/span> <span class="filtre-n">12<\/span>/);
+  assert.match(b, /<a class="filtre" href="\/galerie#filtres"><span class="filtre-nom">Les deux<\/span> <span class="filtre-n">12<\/span>/);
   assert.match(b, /<h2 class="titre-2" id="g-h" tabindex="-1">Les photos de Julien<\/h2><p>6 sur 12&nbsp;· ordre choisi par nous<\/p>/);
   // Série sans photo de Julien : plus un lien, « 0 », et le lecteur d'écran sait pourquoi ; les autres gardent le regard.
   assert.match(b, /<span class="filtre filtre--vide">[\s\S]*?<span class="filtre-nom">Voyage<\/span> <span class="filtre-n">0<span class="sr-only"> photo : aucune de Julien<\/span>/);
-  assert.match(b, /href="\/\?regard=julien&amp;serie=rue#filtres"/);
+  assert.match(b, /href="\/galerie\?regard=julien&amp;serie=rue#filtres"/);
   // L'ordre, dans un <details>, garde le regard.
   assert.match(b, /<a href="\/auteur\/julien\?ordre=recentes#filtres">Plus récentes d’abord<\/a>/);
   // Deux filtres sans photo commune : la page le dit et propose les deux pistes ; chaque filtre se retire (✕).
@@ -112,7 +116,7 @@ test('page d’une série v2 : un H1, la fiche, les photos d’abord, sans couve
   assert.equal(b.match(/<h1/g).length, 1);
   assert.match(b, /<h1 class="titre-page">Rue<\/h1>/);
   assert.match(b, /<title>Rue — série de Sébastien et Julien · Test<\/title>/);
-  assert.match(b, /<nav class="ariane" aria-label="Fil d’Ariane"><ol><li><a href="\/#series">Séries<\/a><\/li><li aria-current="page">Rue<\/li><\/ol><\/nav>/);
+  assert.match(b, /<nav class="ariane" aria-label="Fil d’Ariane"><ol><li><a href="\/series">Séries<\/a><\/li><li aria-current="page">Rue<\/li><\/ol><\/nav>/);
   assert.match(b, new RegExp(`<li><b>${rue.length} photos</b>, ordre choisi par nous</li>`));
   assert.match(b, /<li>par <a href="\/auteur\/sebastien#filtres">Sébastien<\/a> et <a href="\/auteur\/julien#filtres">Julien<\/a><\/li>/);
   // La première image de la page est la première photo de la série, chargée d'emblée ; pas d'ouverture ni de diaporama.
@@ -122,7 +126,8 @@ test('page d’une série v2 : un H1, la fiche, les photos d’abord, sans couve
   assert.ok(main.indexOf(`/photo/${rue[0]}?serie=rue`) < main.indexOf('<img'));
   assert.doesNotMatch(b, /data-ouverture|ouverture-diapo/);
   // La même série par un seul regard, puis les autres séries (pas la série elle-même).
-  assert.match(b, /<a href="\/\?regard=julien&amp;serie=rue#filtres"><span class="liste-liens-n">Rue, par Julien<\/span>/);
+  assert.match(b, /<a href="\/galerie\?regard=julien&amp;serie=rue#filtres"><span class="liste-liens-n">Rue, par Julien<\/span>/);
+  assert.match(b, /<a class="lien" href="\/series">Toutes les séries/);
   const autres = b.slice(b.indexOf('id="a-h"'));
   assert.doesNotMatch(autres, /href="\/serie\/rue"/);
   assert.match(autres, /href="\/serie\/paysage"/);
@@ -149,25 +154,28 @@ test('accueil v2 : promesse en H1, diaporama à l’arrêt (une seule image char
   assert.doesNotMatch(ouv, /autoplay|data-auto/);
   // Les anciennes ancres arrivent quelque part.
   for (const id of ['regards', 'series', 'galerie', 'filtres']) assert.match(b, new RegExp(`id="${id}"`));
-  // Le menu : Galerie et Séries mènent aux parties de l'accueil ; ni Carnets ni Tirages.
-  assert.match(b, /<nav class="sh-nav" aria-label="Navigation">\s*<ul><li><a href="\/#galerie">Galerie<\/a><\/li><li><a href="\/#series">Séries<\/a><\/li>/);
+  // Le menu : Galerie et Séries mènent à leurs pages (/galerie, /series) ; ni Carnets ni Tirages. L'accueil garde un
+  // aperçu de la galerie et « Toute la galerie ».
+  assert.match(b, /<nav class="sh-nav" aria-label="Navigation">\s*<ul><li><a href="\/galerie">Galerie<\/a><\/li><li><a href="\/series">Séries<\/a><\/li>/);
+  assert.match(b, /<a class="lien" href="\/galerie">Toute la galerie \(12 photos\)/);
+  assert.match(b, /<a class="lien" href="\/series">Toutes les séries/);
   assert.match(b, /<nav class="sh-panneau" aria-label="Navigation \(téléphone\)">/);
 });
 
-test('v2 : rien de la boutique ni des Carnets, aucune route nouvelle, l’heure jamais hors de la page photo', async t => {
+test('v2 : rien de la boutique ni des Carnets, l’heure jamais hors de la page photo ; /galerie et /series, jamais un sous-chemin', async t => {
   const c = await v2(t);
   const p = c.db.prepare("SELECT id, slug FROM photos WHERE status = 'published' ORDER BY position LIMIT 1").get();
   c.db.prepare("UPDATE photos SET taken_on = '2025-05-01', taken_time = '14:32', show_time = 1 WHERE id = ?").run(p.id);
-  for (const url of ['/', '/auteur/julien', '/serie/rue', '/?regard=julien&serie=rue', '/?ordre=recentes', '/en/', '/de/serie/paysage']) {
+  for (const url of ['/', '/galerie', '/series', '/auteur/julien', '/serie/rue', '/?regard=julien&serie=rue', '/?ordre=recentes', '/en/', '/de/serie/paysage']) {
     const res = await c.visit(url);
     assert.equal(res.statusCode, 200, url);
     assert.doesNotMatch(res.body, /\/tirages|\/panier|\/carnet|Tirage|Kunstdruck|€/, `${url} : boutique ou carnet`);
     assert.doesNotMatch(res.body, /14\s*h\s*32|14:32|2:32/, `${url} : heure`);
-    // Seules les adresses du code : aucun lien vers /galerie ni /series (le lien piège de la Vigie mis à part).
-    assert.doesNotMatch(res.body, /href="(?:\/(?:en|de))?\/(?:galerie|series)\b(?!\/tout-telecharger)/, `${url} : adresse à créer`);
+    // Vers /galerie et /series, les pages elles-mêmes, jamais un sous-chemin (le lien piège de la Vigie mis à part).
+    assert.doesNotMatch(res.body, /href="(?:\/(?:en|de))?\/(?:galerie|series)\/(?!tout-telecharger")/, `${url} : sous-chemin`);
   }
   assert.match((await c.visit(`/photo/${p.slug}`)).body, /14 h 32|14 h 32/);
-  for (const url of ['/galerie', '/series']) assert.equal((await c.visit(url)).statusCode, 404, url);
+  for (const url of ['/galerie', '/series']) assert.equal((await c.visit(url)).statusCode, 200, url);
 });
 
 test('repli : la v1 reste celle des visiteurs tant que le réglage est v1', async t => {

@@ -516,7 +516,7 @@ test('recevoir la photo : l’âge est demandé ; avant 15 ans, l’adresse d’
   // Le récapitulatif le dit, sans aucune adresse.
   const k = [].concat(r.headers['set-cookie']).find(h => h.startsWith('bonjour_recap=')).split(';')[0].split('=')[1];
   const page = nb((await c.app.inject({ url: r.headers.location, cookies: { bonjour_recap: k } })).body);
-  assert.match(page, /<dt>Âge<\/dt><dd>moins de 15 ans : la photo est envoyée à votre parent<\/dd>/);
+  assert.match(page, /<dt>Âge<\/dt><dd>moins de 15 ans : nous écrivons à votre parent<\/dd>/);
   assert.ok(!page.includes('parent@exemple.fr') && !page.includes('enfant@exemple.fr') && !page.includes('Anne Parent'));
   // 15 à 17 ans : sa propre adresse, comme avant ; 18 ans ou plus aussi.
   await c.hello({ ref: 'J-0501', wants_photo: 'on', email: 'ado@exemple.fr', adult: 'non' });
@@ -536,10 +536,10 @@ test('recevoir la photo : l’âge est demandé ; avant 15 ans, l’adresse d’
   for (const v of ['parent@exemple.fr', 'enfant@exemple.fr', 'pere@exemple.fr', 'Anne Parent', 'Paul Père', 'moins15']) assert.ok(!all.includes(v), `« ${v} » dans un événement`);
 });
 
-test('moins de 15 ans : proposé seulement avec « Recevoir la photo » (sans script) ; phrase des deux parents sous le nom du parent (fr, en, de)', async t => {
+test('moins de 15 ans : proposé avec « Recevoir la photo » ou « J’accepte » (sans script) ; phrase des deux parents sous le nom du parent (fr, en, de)', async t => {
   const c = await site(t, { dataKey: false });
   const css = (await import('node:fs')).readFileSync(new URL('../public/css/v2/formulaires.css', import.meta.url), 'utf8');
-  assert.match(css, /\.form:not\(:has\(#bj-photo:checked\)\) \.si-photo:not\(:has\(input:checked\)\) \{ display: none; \}/);
+  assert.match(css, /\.form:not\(:has\(#bj-photo:checked\)\):not\(:has\(#bj-accord:checked\)\) \.si-usage:not\(:has\(input:checked\)\) \{ display: none; \}/);
   assert.match(css, /\.revele-si:not\(:has\(input\[data-revele15\]:checked\)\) \.revele-15 \{ display: none; \}/);
   const PHRASE = { '': 'avec l’accord des deux parents (ou du parent qui exerce seul l’autorité parentale)', '/en': 'with the consent of both parents (or of the parent who alone exercises parental authority)', '/de': 'mit Zustimmung beider Eltern erfolgt (oder des Elternteils, der das Sorgerecht allein ausübt)' };
   for (const version of ['v1', 'v2', 'v3']) {
@@ -547,7 +547,7 @@ test('moins de 15 ans : proposé seulement avec « Recevoir la photo » (sans sc
     for (const [p, phrase] of Object.entries(PHRASE)) {
       const b = nb((await c.app.inject(`${p}/bonjour`)).body);
       assert.ok(b.includes(phrase), `${version} ${p || '/'} : phrase des deux parents`);
-      if (version !== 'v1') assert.match(b, /<label class="choix si-photo"><input id="bj-age-15"/);
+      if (version !== 'v1') assert.match(b, /<label class="choix si-usage"><input id="bj-age-15"/);
     }
   }
 });

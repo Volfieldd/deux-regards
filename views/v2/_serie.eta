@@ -13,7 +13,7 @@
   <div class="wrap">
     <div class="ser-haut">
       <div class="ser-titre">
-        <nav class="ariane" aria-label="<%= t.v2.breadcrumb %>"><ol><li><a href="<%= it.u('/') %>#series"><%= t.nav.series %></a></li><li aria-current="page"><%= S.name %></li></ol></nav>
+        <nav class="ariane" aria-label="<%= t.v2.breadcrumb %>"><ol><li><a href="<%= it.seriesHref %>"><%= t.nav.series %></a></li><li aria-current="page"><%= S.name %></li></ol></nav>
         <h1 class="titre-page"><%= S.name %></h1>
         <ul class="ser-fiche" aria-label="<%= t.v2.serieBrief %>">
           <li><b><%= t.photos(n) %></b>, <%= f.ordre ? t.v2.orderLineRecent : t.v2.orderLineOurs %></li>
@@ -42,7 +42,7 @@
 <% } %>
 <% if (others.length) { %>
   <section class="wrap partie" aria-labelledby="a-h">
-    <div class="partie-tete"><h2 class="titre-2" id="a-h"><%= t.v2.otherSeries %></h2><a class="lien" href="<%= it.u('/') %>#series"><%= t.allSeries %><%~ ic('fleche', { size: 18 }) %></a></div>
+    <div class="partie-tete"><h2 class="titre-2" id="a-h"><%= t.v2.otherSeries %></h2><a class="lien" href="<%= it.seriesHref %>"><%= t.allSeries %><%~ ic('fleche', { size: 18 }) %></a></div>
 <%~ include('./_series', { ...it, list: others, labelledby: 'a-h' }) %>
   </section>
 <% } %>

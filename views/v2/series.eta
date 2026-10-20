@@ -1,0 +1,43 @@
+<% /* Index des séries, page /series de la v2 et de la v3 (/en/series, /de/series ; le fil d'Ariane de MQ-03 y mène, comme
+      « Toutes les séries » et le menu). Un seul H1, puis chaque série publiée dans l'ordre de l'admin : sa couverture (sa
+      première photo dans l'ordre de la galerie, au format de la photo, jamais recadrée : la planche des Carnets, MQ-11,
+      css/v2/pages.css § 7), son nom, son compte, ses photographes et ses années, et le début de son texte d'intention
+      (ses deux premières phrases ; rien s'il n'est pas écrit). Le nom est le seul lien, étendu à toute la carte : il mène
+      à /serie/<slug>. Pas de gabarit v1 : en v1, la page est introuvable, comme les Carnets. */ %>
+<% const t = it.t, v = it.v2, ic = v.ic, site = it.siteName, all = it.seriesAll.filter(c => c.count && c.cover);
+   const join = names => (names.length > 1 ? names.slice(0, -1).join(', ') + t.v2.and + names.at(-1) : names[0] || '');
+   const names = join(it.regards.slice(1).filter(r => r.count).map(r => r.name));
+   const sizesOf = g => (g.vertical
+     ? '(min-width: 1280px) 253px, (min-width: 900px) calc(20vw - 42px), (min-width: 768px) calc(40vw - 45px), calc(42vw - 27px)'
+     : `(min-width: 1280px) min(${Math.round(380 * g.r)}px, calc(50vw - 104px)), (min-width: 900px) min(${Math.round(300 * g.r)}px, calc(50vw - 72px)), (min-width: 768px) min(${Math.round(520 * g.r)}px, calc(100vw - 80px)), min(${Math.round(300 * g.r)}px, calc(100vw - 48px))`);
+   const pageTitle = `${t.v2.seriesTitle(names)} · ${site}`; %>
+<% layout('./layout', { pageTitle, description: v.typo(t.v2.seriesDescription(all.length, names, join(all.map(c => c.name)))) }) %>
+<%~ include('./_entete', { ...it, courant: 'series' }) %>
+<main id="contenu" class="wrap">
+  <div class="tete-page">
+    <h1 class="titre-page"><%= t.nav.series %></h1>
+    <p class="chapo"><%= v.typo(t.v2.seriesLead(all.length, names)) %></p>
+  </div>
+<% if (all.length) { %>
+  <ol class="ser-index" aria-label="<%= t.v2.seriesList(all.length) %>">
+<% all.forEach((c, i) => { const g = v.fmt(c.cover), mine = it.regards.slice(1).filter(r => r.count && it.photosAll.some(p => p.category_slug === c.slug && p.author_slug === r.slug));
+     const years = [...new Set(it.photosAll.filter(p => p.category_slug === c.slug).map(p => String(p.taken_on || '').slice(0, 4)).filter(y => /^\d{4}$/.test(y)))].sort();
+     const span = years.length ? (years[0] === years.at(-1) ? years[0] : `${years[0]}–${years.at(-1)}`) : '';
+     const intent = v.intentParts(c.intent); %>
+    <li>
+      <article class="ser-e<%= g.vertical ? ' ser-e--cote' : '' %>" aria-labelledby="s-<%= c.slug %>">
+        <div class="ser-e-txt">
+          <h2 class="ser-e-titre" id="s-<%= c.slug %>"><a href="<%= it.galleryUrl({ serie: c.slug }) %>"><%~ v.nobr(v.typo(c.name)) %></a></h2>
+<% if (intent.head) { %>          <p class="ser-e-int"><%= v.typo(intent.head) %></p>
+<% } %>          <p class="ser-e-meta"><b><%= v.typo(t.photos(c.count)).replace(' ', ' ') %></b><% if (mine.length) { %>&nbsp;· <%= t.by(join(mine.map(r => r.name))) %><% } %><% if (span) { %>&nbsp;· <%= span %><% } %></p>
+        </div>
+        <figure class="ser-e-img <%= g.cls %>"><%~ it.picture(c.cover, { sizes: sizesOf(g), eager: i === 0, alt: '' }) %></figure>
+      </article>
+    </li>
+<% }) %>  </ol>
+<% } else { %>
+  <div class="gal-vide"><div class="msg"><%~ ic('info', { size: 18 }) %><p><b><%= t.emptyGallery %></b></p></div></div>
+<% } %>
+  <div class="gal-fin series-fin"><a class="lien" href="<%= it.galerieHref %>"><%= t.v2.allGallery(it.total) %><%~ ic('fleche', { size: 18 }) %></a><% if (it.mapPage) { %><a class="lien" href="<%= it.u('/carte') %>"><%= t.v2.seeMap %><%~ ic('fleche', { size: 18 }) %></a><% } %></div>
+</main>
+<%~ include('./_pied', it) %>

@@ -192,7 +192,7 @@ test('visionneuse v2 : la photo d’abord, sizes à la hauteur de l’écran, ca
   assert.match(b, /<figcaption class="cartel cartel--grand vis-cartel">.*<h1 class="cartel-t">Brume sur la Loire<\/h1><span class="cartel-m">Sébastien · Anjou · mars 2024<\/span>/s);
   assert.ok(b.indexOf('<figcaption') < b.indexOf('<picture'));
   // Retour qui dit où il mène, flèches nommées, position.
-  assert.match(b, /<a class="sh-retour" href="\/#galerie" data-retour>.*<span class="sr-only">Retour\u202f: <\/span>Galerie<\/span><\/a>/s);
+  assert.match(b, /<a class="sh-retour" href="\/galerie#galerie" data-retour>.*<span class="sr-only">Retour\u202f: <\/span>Galerie<\/span><\/a>/s);
   assert.match(b, /rel="prev"><svg[^>]*>.*?<\/svg><span class="vis-fleche-t">Précédente<span class="sr-only">\u202f: /s);
   assert.match(b, /<span class="vis-compte donnee">1 \/ 12<\/span>/);
   // J'aime en bascule (POST, sans script), Partager (page sans script), Signaler, « Vous êtes sur cette photo ? ».

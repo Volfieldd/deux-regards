@@ -1,0 +1,10 @@
+{
+ "Indiquez l’âge de la personne : avant 15 ans, la photo est envoyée à un parent.": {
+  "en": "Give the person’s age: under 15, the photo is sent to a parent.",
+  "de": "Geben Sie das Alter der Person an: Unter 15 wird das Foto an ein Elternteil geschickt."
+ },
+ "Moins de 15 ans : l’e-mail d’un parent est nécessaire, la photo lui est envoyée.": {
+  "en": "Under 15: a parent’s email is needed, the photo is sent to them.",
+  "de": "Unter 15: Die E-Mail eines Elternteils ist nötig, das Foto wird dorthin geschickt."
+ }
+}

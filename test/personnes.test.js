@@ -86,7 +86,7 @@ test('rattacher à une sortie et à des photos ; l’app rattache une nouvelle r
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(Date.now());
   c.db.prepare("UPDATE encounters SET met_on = ? WHERE id = ?").run(today, a);
   assert.match((await c.get('/admin/rencontre')).body, new RegExp(`<option value="${pid}">I\\. · J-0800`));    // page tendue à la personne : initiales
-  const saved = await c.app.encounters.saveApp({ decision: '', email: 'ines@exemple.fr', person_id: String(pid), lang: 'fr' }, { author: { id: c.julien, slug: 'julien', card_prefix: '' } });
+  const saved = await c.app.encounters.saveApp({ decision: '', email: 'ines@exemple.fr', adult: 'oui', person_id: String(pid), lang: 'fr' }, { author: { id: c.julien, slug: 'julien', card_prefix: '' } });
   assert.equal(c.personOf(saved.id), pid);
   // Export : toutes les rencontres dans une archive ; effacement : la personne disparaît.
   const zip = await c.get(`/admin/personnes/${pid}/export.zip`);

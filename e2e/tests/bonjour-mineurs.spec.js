@@ -65,7 +65,7 @@ test('au clavier : l’âge avant les usages, le nom du parent apparaît sous «
   await expect(parent).toBeHidden();
   await page.keyboard.press('Tab');
   await expect(page.locator('#bj-photo')).toBeFocused();
-  // « Moins de 15 ans » n'est proposé qu'avec « Recevoir la photo » ; coché, l'adresse d'un parent apparaît, et la phrase
+  // « Moins de 15 ans » n'est proposé qu'avec « Recevoir la photo » ou « J'accepte » ; coché, l'adresse d'un parent apparaît, et la phrase
   // sous « Votre e-mail ».
   await expect(page.locator('#bj-age-15')).toBeHidden();
   await page.locator('#bj-photo').check();
@@ -77,6 +77,14 @@ test('au clavier : l’âge avant les usages, le nom du parent apparaît sous «
   await expect(page.locator('#bj-parent-aide')).toContainText('avec l’accord des deux parents (ou du parent qui exerce seul l’autorité parentale)');
   await page.locator('#bj-age-oui').check();
   await expect(page.locator('#bj-parent-email')).toBeHidden();
+  // Proposé aussi pour une publication seule, sans la photo : « J'accepte » suffit.
+  await page.locator('#bj-photo').uncheck();
+  await expect(page.locator('#bj-age-15')).toBeHidden();
+  await page.locator('#bj-accord').check();
+  await expect(page.locator('#bj-age-15')).toBeVisible();
+  await page.locator('#bj-age-15').check();
+  await expect(page.locator('#bj-parent-email')).toBeVisible();
+  await page.locator('#bj-age-oui').check();
   // La date se tape en texte libre (pas de calendrier natif).
   await expect(page.locator('#bj-date')).not.toHaveAttribute('type', 'date');
   await ctx.close();

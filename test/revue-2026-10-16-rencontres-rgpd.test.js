@@ -74,7 +74,7 @@ test('A034 : sans code, une rencontre saisie sur le téléphone (refus, « plus 
   const c = await world(t);
   const author = c.db.prepare('SELECT * FROM authors WHERE id = ?').get(c.jul);
   const refus = await c.enc.saveApp({ decision: 'refus', lang: 'fr' }, { author });
-  const later = await c.enc.saveApp({ decision: '', email: 'vraie@exemple.fr', name: 'Vraie', wants_photo: 'on', lang: 'fr' }, { author });
+  const later = await c.enc.saveApp({ decision: '', email: 'vraie@exemple.fr', name: 'Vraie', wants_photo: 'on', adult: 'oui', lang: 'fr' }, { author });
   await c.hello({ ref: refus.ref, decision: 'accord', adult: 'oui', scope_site: 'on', scope_instagram: 'on', name: 'X', email: 'attaquant@exemple.fr' });
   let e = c.enc.get(refus.id);
   assert.deepEqual([e.refused, e.consent, e.email, e.name, e.status], [1, null, '', '', 'nouvelle']);

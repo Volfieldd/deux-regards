@@ -95,15 +95,16 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: candidates(e, search, request), search, authors: request.mine('personnes.voir', repo.authors(), 'id'),
       code: e.ref ? enc.codeOrNull(e.ref) : null, shares: sharesOf(e, fmtOf(request.t)), errors: {}, values: null,
       // « Écrire » : l'objet du message dans la langue de la personne, comme le lien « photo offerte » (« Your photo
-      // (J-0142) · site »).
-      mailSubject: (([what, ...rest]) => [`${what}${e.ref ? ` (${e.ref})` : ''}`, ...rest].join(' · '))((UI[e.lang] || UI.fr).gift.mailSubject(app.siteName()).split(' · ')),
+      // (J-0142) · site ») ; à l'adresse d'un parent (moins de 15 ans), celui qui s'adresse au parent.
+      mailSubject: (([what, ...rest]) => [`${what}${e.ref ? ` (${e.ref})` : ''}`, ...rest].join(' · '))((g => (e.email_parent ? g.parentMailSubject : g.mailSubject)(app.siteName()))((UI[e.lang] || UI.fr).gift).split(' · ')),
       outingUrl: e.author_id ? app.outings.urlOf(e.author_id, e.session_day || e.met_on, e.met_time) : null, ...extra,
     });
   }
   // Adresse d'un lien mailto : encodée (une adresse saisie par un visiteur pourrait contenir « ?bcc=… » ou « &body=… »,
   // que la validation laisse passer : RFC 6068), l'arobase gardée lisible.
   const mailtoOf = email => `mailto:${encodeURIComponent(email).replace(/%40/g, '@')}`;
-  // Liens « photo offerte » : adresse, et message prêt à envoyer dans la langue de la personne (mailto).
+  // Liens « photo offerte » : adresse, et message prêt à envoyer dans la langue de la personne (mailto). À l'adresse d'un
+  // parent (moins de 15 ans, email_parent) : le message s'adresse au parent (« Voici la photo de Léa »), jamais à l'enfant.
   function sharesOf(e, fmt) {
     const g = UI[e.lang] ? UI[e.lang].gift : UI.fr.gift;
     const locale = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[e.lang] || 'fr-FR';
@@ -111,7 +112,8 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       const url = `${app.config.publicUrl}/pour-vous/${s.token}`;
       const date = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(s.expires_at);
       const author = repo.photo(s.photo_id) && repo.authors().find(a => a.id === repo.photo(s.photo_id).author_id)?.name;
-      const mail = e.email ? `${mailtoOf(e.email)}?${new URLSearchParams({ subject: g.mailSubject(app.siteName()), body: g.mail({ name: e.name, link: url, date, author: author || app.siteName() }) }).toString().replace(/\+/g, '%20')}` : null;
+      const [subject, body] = e.email_parent ? [g.parentMailSubject, g.parentMail] : [g.mailSubject, g.mail];
+      const mail = e.email ? `${mailtoOf(e.email)}?${new URLSearchParams({ subject: subject(app.siteName()), body: body({ name: e.name, link: url, date, author: author || app.siteName() }) }).toString().replace(/\+/g, '%20')}` : null;
       return { ...s, url, mail, expired: s.expires_at <= Date.now(), until: fmt(s.expires_at) };
     });
   }
@@ -197,14 +199,15 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     return appView(reply, 'app-qr', { title: request.t('Mon QR'), author, authors, letter: prefixOf(author), host: app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '') });
   });
 
-  // Récapitulatif pour la personne, dans sa langue : ce qu'elle a accepté ou refusé, et le lien vers sa page.
+  // Récapitulatif pour la personne, dans sa langue : ce qu'elle a accepté ou refusé, et le lien vers sa page. À l'adresse
+  // d'un parent (moins de 15 ans) : le même, adressé au parent.
   function recap(e) {
     const lang = UI[e.lang] ? e.lang : 'fr';
     const A = UI[lang].app;
     const accepted = e.consent ? SCOPES.filter(s => e.consent[s]).map(s => UI[lang].hello.scopes[s]).join(', ') : '';
     const date = e.created_at ? new Intl.DateTimeFormat(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(e.created_at) : '';
     const link = `${app.config.publicUrl}${lang === 'fr' ? '' : `/${lang}`}/bonjour/${e.ref}-${enc.codeOf(e.ref)}`;
-    return { link, subject: A.mailSubject(app.siteName()), text: A.mail({ name: e.name, date, place: e.place, accepted, refused: Boolean(e.refused), link, author: e.author || app.siteName() }) };
+    return { link, subject: A.mailSubject(app.siteName()), text: (e.email_parent ? A.mailParent : A.mail)({ name: e.name, date, place: e.place, accepted, refused: Boolean(e.refused), link, author: e.author || app.siteName() }) };
   }
   async function sendRecap(e) {
     const r = recap(e);

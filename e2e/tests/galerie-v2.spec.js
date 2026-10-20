@@ -81,7 +81,7 @@ test.describe('bureau', () => {
 
   test('filtre par photographe : une adresse, l’état actif, les seules photos du regard ; l’ordre dans un menu', async ({ browser }, info) => {
     const { ctx, page } = await apercu(browser, info, { viewport: { width: 1440, height: 900 } });
-    await page.goto('/');
+    await page.goto('/galerie');
     const regard = page.getByRole('navigation', { name: 'Regard' });
     await regard.getByRole('link', { name: /Julien/ }).click();
     await expect(page).toHaveURL(/\/auteur\/julien#filtres$/);
@@ -166,6 +166,7 @@ test('sans JavaScript : ouverture sans points ni « Lire », filtres et ordre en
   await expect(page.locator('.ouverture-cadre img')).toBeVisible();
   await expect(page.locator('.ouverture-ctl')).toBeHidden();
   await expect(page.locator('[data-ouv-cartel] a')).toBeVisible();
+  await page.goto('/galerie');
   await page.getByRole('navigation', { name: 'Regard' }).getByRole('link', { name: /Sébastien/ }).click();
   await expect(page).toHaveURL(/\/auteur\/sebastien#filtres$/);
   await page.locator('.deroulant > summary').click();

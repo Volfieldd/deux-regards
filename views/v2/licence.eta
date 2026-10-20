@@ -60,10 +60,10 @@
       <div class="photo-ref">
         <%~ it.picture(p, { sizes: '(max-width: 420px) 120px, 160px', alt: '' }) %>
         <div><p class="cartel"><span class="cartel-t"><%= p.title %></span><span class="cartel-m"><%= meta %></span></p>
-          <p><a class="lien" href="<%= it.u('/') %>#galerie"><%= l.other %></a></p></div>
+          <p><a class="lien" href="<%= it.galerieHref %>"><%= l.other %></a></p></div>
       </div>
 <% } else { %>      <p class="champ-aide"><%= ty(l.noPhoto) %></p>
-      <p><a class="lien" href="<%= it.u('/') %>#galerie"><%= l.choose %></a></p>
+      <p><a class="lien" href="<%= it.galerieHref %>"><%= l.choose %></a></p>
 <% } %>    </fieldset>
     <fieldset class="bloc groupe<%= e.usage ? ' groupe--erreur' : '' %>"<%~ desc(ek('usage')) %>><legend><%= l.usage %></legend>
 <%~ err('usage') %>
