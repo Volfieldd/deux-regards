@@ -606,3 +606,32 @@ test('revue 5 : caractères invisibles et de direction retirés des champs d’u
   db.close();
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('suppression d’un message : sensitive_delete (objet et numéro seuls) seulement si elle a lieu ; rien sur un 404 hors portée ni un refus CSRF', async t => {
+  const c = await site(t, 'v2', { vigie: true });
+  const form = formOf((await c.app.inject('/contact')).body, '/contact');
+  await post(c.app, '/contact', payloadOf(form, { ...CONTACT_OK, pour: 'julien' }), { ip: '198.51.100.70' });
+  const id = c.db.prepare('SELECT MAX(id) FROM messages').pluck().get();
+  const ph = await c.account('ph-seb', { roles: ['photographe'], author: c.authorId('sebastien') });
+  assert.equal((await ph.post(`/admin/messages/${id}/supprimer`)).statusCode, 404);
+  const root = await c.account('root', { roles: ['admin'] });
+  assert.equal((await root.post(`/admin/messages/${id}/supprimer`, {}, { token: null })).statusCode, 403);
+  assert.equal((await root.post(`/admin/messages/${id}/supprimer`, {}, { token: 'faux' })).statusCode, 403);
+  assert.equal(count(c), 1);
+  let v = await c.flush();
+  assert.deepEqual(v.of('sensitive_delete'), []);
+  await root.get(`/admin/messages/${id}`);
+  assert.equal((await root.post(`/admin/messages/${id}/supprimer`)).statusCode, 303);
+  assert.equal(count(c), 0);
+  v = await c.flush();
+  const del = v.of('sensitive_delete');
+  assert.equal(del.length, 1);
+  assert.deepEqual(del[0].detail, { objet: 'message', id });
+  assert.equal(typeof del[0].detail.id, 'number');
+  assert.deepEqual([del[0].severity, del[0].origine.composant, del[0].origine.emetteur], ['bas', 'site · admin', 'server/routes/messages.js · suppression']);
+  assert.equal(v.of('sensitive_read').find(e => e.detail.objet === 'message').detail.id, id);   // même numéro que la lecture
+  // Déjà supprimé : 404, rien de plus.
+  assert.equal((await root.post(`/admin/messages/${id}/supprimer`)).statusCode, 404);
+  v = await c.flush();
+  assert.equal(v.of('sensitive_delete').length, 1);
+});

@@ -63,7 +63,8 @@ export function registerMessages(app, { render, P, W, done, withReady }) {
   app.post('/admin/messages/:id/supprimer', W(PERM), async (request, reply) => {
     const r = load(request);
     if (!r) return reply.callNotFound();
-    messages.remove(r.id);
+    // Effacement signalé à la Vigie (BV-30, messages_effaces_en_masse), seulement s'il a eu lieu : le numéro seul.
+    if (messages.remove(r.id)) app.securite.emit('sensitive_delete', { request, emetteur: 'server/routes/messages.js · suppression', detail: { objet: 'message', id: r.id } });
     return done(reply, '/admin/messages', request.t('Message supprimé.'));
   });
 }

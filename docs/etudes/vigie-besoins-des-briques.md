@@ -53,7 +53,7 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-27 Saisie malveillante dans un message libre (Contact, demande de licence) | DS11 | ✓ site (aucune émission de plus) ; ✓ Vigie | site : `feat/page-contact` (#183) ; Vigie : #184, `malicious_input` dont tous les constats sont dans `body.message` ou `body.diffusion` pèse 0,5 (`vigie/poids.js`), 0 depuis une session de l'admin en gravité basse ; champ piège : rien à faire côté Vigie | fait |
 | BV-28 Formulaire de contact ou de licence forgé | DS12 | ✓ site | `feat/page-contact` (#183) ; règle `valeurs_impossibles_repetees` telle quelle | fait |
 | BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; ✓ Vigie | site : `feat/page-contact` (#183), plafond global de 50 messages acceptés par jour (503) et plafond des annonces (30 e-mails, compté dans la base), tous deux `limite: messages_global` (distingués par `detail.plafond`) ; Vigie : #184, règle `messages_satures` (`30-exploration.yml`, DS21, entité site « messages ») | fait |
-| BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; Vigie en partie | site : `feat/page-contact` (#183), `sensitive_read` (`objet: message`), `authz_fail` hors portée, journal ; Vigie : #184, `lectures_massives` compte le couple objet + id, `role_incoherent` connaît `messages.traiter` ; **à faire** : `messages_effaces_en_masse`, qui demande un type d'événement pour un effacement (aucun du vocabulaire ne convient, voir BV-30) | en partie |
+| BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; ✓ Vigie | site : `feat/page-contact` (#183), `sensitive_read` et `sensitive_delete` (`objet: message`, `id` numérique, la suppression seulement si elle a lieu), `authz_fail` hors portée, journal ; Vigie : #184 et #185, type `sensitive_delete`, corrélation `messages_effaces_en_masse` (10 messages distincts par compte en 1 h, DS18), `lectures_massives` par objet + id, `role_incoherent` qui exige `messages.traiter` pour supprimer, objets `personne` et `rencontre` sur les `sensitive_read` des fiches | fait |
 
 ---
 
@@ -917,11 +917,10 @@ valides : la boîte de l'admin s'emplit, les notifications épuisent le quota de
   `authz_fail` (`raison: 'hors portée'`, `permission: 'messages.traiter'`, `objet: 'message'`, `id`, `ecriture`),
   comme BV-14 ; règles `exploration_droits` et `ecriture_hors_portee` telles quelles.
 - **Suppressions** : journal d'audit (`POST /admin/messages/:id/supprimer`), avec le numéro seul.
-- **Effacement** (après #184) : aucun type du vocabulaire fermé ne dit « une donnée a été effacée » (`user_deleted` vaut
-  pour un compte de l'admin, `sensitive_export` pour une sortie de données) : le site n'émet donc rien à la suppression
-  d'un message (seul le journal d'audit la note, avec le numéro). Type à ajouter par la Vigie pour
-  `messages_effaces_en_masse` : `sensitive_delete` (gravité `bas`, composant `site · admin`), détail
-  `{ objet: 'message', id }`, émis par `POST /admin/messages/:id/supprimer` ; le site l'émettra dès qu'il existera.
+- **Effacement** : `POST /admin/messages/:id/supprimer` émet `sensitive_delete` (type ajouté par la Vigie, #185),
+  émetteur `server/routes/messages.js · suppression`, `detail: { objet: 'message', id }` (le numéro de la lecture),
+  seulement après une suppression réussie (rien sur un 404 hors portée, un refus CSRF ou un message déjà supprimé) ;
+  corrélation `messages_effaces_en_masse` (10 messages distincts par compte en 1 h, DS18) côté Vigie.
 - **Proposé à la Vigie** : `lectures_massives` (`40-donnees.yml`, 30 `detail.id` distincts en 1 h) compte les
   numéros sans leur objet : le message 12 et la fiche 12 comptent pour un. Grouper par `detail.objet` (absent pour les
   fiches : `personne`) ou compter le couple ; et, si elle le juge utile, une corrélation `messages_effaces_en_masse`
