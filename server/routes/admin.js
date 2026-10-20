@@ -2244,23 +2244,28 @@ export default async function adminRoutes(app) {
 
   app.post('/admin/apparence/compositions', W('site.apparence'), async (request, reply) => {
     const b = request.body || {};
+    const reject = message => {
+      app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/admin.js · compositions',
+        detail: { raison: 'configuration de thèmes invalide' } });
+      return reply.code(400).send({ error: request.t(message) });
+    };
+    const fields = Object.keys(b);
+    const allowed = b.reset === '1' ? ['_csrf', 'reset'] : ['_csrf', 'default', ...Object.keys(SECTIONS).map(s => `section_${s}`)];
+    if (fields.some(k => !allowed.includes(k))) return reject('Réglage de thème inconnu.');
     let value = null;
     if (b.reset !== '1') {
-      const fields = Object.keys(b);
-      if (fields.some(k => !['_csrf', 'default', 'reset', ...Object.keys(SECTIONS).map(s => `section_${s}`)].includes(k)))
-        return reply.code(400).send({ error: request.t('Réglage de thème inconnu.') });
       const sections = {};
       for (const section of Object.keys(SECTIONS)) {
         const id = b[`section_${section}`];
         if (id !== undefined && id !== 'inherit') sections[section] = id;
       }
       value = { default: b.default, sections };
-      if (!validDesignSettings(value)) return reply.code(400).send({ error: request.t('Thème inconnu. Aucun changement enregistré.') });
+      if (!validDesignSettings(value)) return reject('Thème inconnu. Aucun changement enregistré.');
     }
     const before = app.publicVersion.designSettings();
     app.publicVersion.saveDesign(value);
     request.audited = true;
-    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/compositions', target: 'site public', status: 303,
+    app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/compositions', target: 'site public', status: asJson(request) ? 200 : 303,
       detail: `compositions : ${JSON.stringify(before)} → ${JSON.stringify(value)}` });
     if (asJson(request)) return { ok: true, design: app.publicVersion.designSettings() };
     return done(reply, '/admin/apparence#compositions', request.t('Thèmes enregistrés.'));
@@ -2300,11 +2305,12 @@ export default async function adminRoutes(app) {
     const vue = typeof b.vue === 'string' ? b.vue : b.apercu === '1' ? 'v2' : b.apercu === '0' ? 'suivre' : '';
     if (!app.publicVersion.setView(request, vue)) return reply.code(400).send({ error: request.t('Vue inconnue.') });
     request.audited = true;
-    const applied = app.publicVersion.setting();
+    const to = safeNext(typeof b.vers === 'string' ? b.vers : '', vue === 'suivre' ? '/admin/apparence' : '/');
+    const target = /^\/(?:admin|auth)(?:[/?#]|$)/.test(to) && vue !== 'suivre' ? '/' : to;
+    const applied = app.publicVersion.forRequest({ url: target }).appliedDesign;
     app.audit.log({ sub: request.session.sub, name: request.session.name, action: 'POST /admin/apparence/apercu-v2', target: 'site public', status: 303,
       detail: vue === 'suivre' ? `vue de la session : suit le réglage (${applied})` : `vue de la session : ${vue} (visiteurs : ${applied})` });
-    const to = safeNext(typeof b.vers === 'string' ? b.vers : '', vue === 'suivre' ? '/admin/apparence' : '/');
-    return reply.redirect(/^\/(?:admin|auth)(?:[/?#]|$)/.test(to) && vue !== 'suivre' ? '/' : to, 303);
+    return reply.redirect(target, 303);
   });
 
   // Marque : quatre emplacements (emblème, icône, logo complet, image de partage). PNG, WebP ou JPEG ;

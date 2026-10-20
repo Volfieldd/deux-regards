@@ -1,4 +1,18 @@
 {
+  "securityAndVigieReview": {
+    "date": "2026-10-20",
+    "reviewedRange": "7a7755f96e03f04d18d96d468f6c6aa4158b7ce5..09f43aad41952ed64f5f6ba7e3df5280dddf345c",
+    "withVigieDistinctTestsPassed": 75,
+    "withoutVigieTestsPassed": 26,
+    "campaigns": [
+      { "log": "themes-vigie-review.log", "tests": 74, "passed": 74, "sha256": "ae54871c861858b33064109b47d96f60bd34604a5e62fcd64d1805270211a4bc" },
+      { "log": "themes-review-final-focused.log", "tests": 11, "passed": 11, "sha256": "4c57fb54499f74900a1efcae9e2e10bcc4003cec6dfce4730828e8541d967bc7" },
+      { "log": "themes-review-without-vigie.log", "tests": 26, "passed": 26, "sha256": "e40dd9a30f394ea371d2a3c14cfe95531d8dc2de6d8d3346195b19ec58c0d4cd" }
+    ],
+    "environment": "Node 22, image locale site-photo:latest, bases et stockage jetables ; modules réels de la Vigie par injection HTTP",
+    "productionChecked": false,
+    "newImagesOrScreenshots": false
+  },
   "date": "2026-10-20",
   "fixture": "Stockage et base jetables ; quatre images générées vérifiées par empreinte ; aucun média ni compte de production.",
   "generatedImages": [

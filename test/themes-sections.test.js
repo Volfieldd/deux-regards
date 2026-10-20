@@ -90,6 +90,10 @@ test('aperçu de composition réservé à la session, sans cache partagé, réve
   assert.match((await c.visit('/carnet')).body, /data-composition="contact"/);
   await c.admin.post('/admin/apparence/apercu-v2', { vue: 'suivre', vers: '/carnet' });
   assert.match((await c.admin.get('/carnet')).body, /data-composition="contact"/);
+  assert.equal(c.db.prepare("SELECT detail FROM audit_log WHERE action = 'POST /admin/apparence/apercu-v2' ORDER BY id DESC LIMIT 1").pluck().get(),
+    'vue de la session : suit le réglage (contact)', 'journal fondé sur le thème de la destination');
+  assert.equal((await c.admin.json('/admin/apparence/compositions', { default: 'obscura' })).statusCode, 200);
+  assert.equal(c.db.prepare("SELECT status FROM audit_log WHERE action = 'POST /admin/apparence/compositions' ORDER BY id DESC LIMIT 1").pluck().get(), 200);
   for (const version of ['v1','v2']) {
     await c.admin.post('/admin/version', { version, back: '/admin/apparence' });
     const r = await c.admin.get('/admin/apparence'); assert.equal(r.statusCode, 200);
@@ -101,4 +105,24 @@ test('résolution des rubriques : langues, détails, formulaires et fichiers pub
   for (const [url,expected] of Object.entries({ '/':'accueil', '/en':'accueil', '/de/?ordre=recentes':'galerie', '/en/galerie':'galerie', '/auteur/x':'galerie', '/serie/x':'galerie', '/recherche?q=x':'galerie', '/en/photo/x/partager':'photos', '/carnet/x/partager':'carnets', '/de/carnet/flux.xml':'carnets', '/voyage/x':'voyages', '/voyages':'voyages', '/carte':'carte', '/a-propos':'regards', '/contact':'contact', '/confidentialite':'informations' })) {
     assert.equal(sectionOf({url}),expected,url);
   }
+});
+
+test('les six compositions échappent les textes et excluent un brouillon choisi dans l’ouverture', async t => {
+  const c = await world(t);
+  c.db.prepare("UPDATE photos SET status = 'draft', title = 'PHOTO-NON-PUBLIEE' WHERE slug = 'deux-minuit'").run();
+  c.db.prepare("UPDATE photos SET title = ?, alt_text = ? WHERE slug = 'brume-sur-la-loire'")
+    .run('<script id="theme-xss">texte</script>', '" onload="theme-xss');
+  c.db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('hero', ?)").run(JSON.stringify(['deux-minuit', 'brume-sur-la-loire']));
+  for (const [id, design] of Object.entries(DESIGNS).filter(([, d]) => d.darkroom)) {
+    assert.ok(design.darkroom);
+    await save(c, { default: id });
+    for (const url of ['/', '/galerie']) {
+      const r = await c.visit(url);
+      assert.equal(r.statusCode, 200, `${id} ${url}`);
+      assert.doesNotMatch(r.body, /PHOTO-NON-PUBLIEE|href="\/photo\/deux-minuit"|<script id="theme-xss"| onload="theme-xss/);
+      assert.match(r.body, /&lt;script id=/);
+      assert.match(r.body, /&quot; onload=&quot;theme-xss/);
+    }
+  }
+  assert.equal((await c.visit('/photo/deux-minuit')).statusCode, 404);
 });

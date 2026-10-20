@@ -42,3 +42,29 @@ Les essais ont aussi nécessité d’adapter le jeu temporaire au format d’ide
 Les tests unitaires et HTTP réutilisent les jeux de test existants. Le serveur navigateur, lui, ne charge que les quatre images générées. Aucun nouvel outil de test générique, dépendance ou pipeline CI n’a été créé.
 
 Pas de certification RGAA/RGESN : lecteur d’écran réel, Safari/Firefox, zoom navigateur à 200 %, réseau mobile contraint, contenu réel volumineux et campagne complète de galeries privées ne sont pas couverts. Les opérations serveur et règles de publication existantes sont réutilisées. La mise en production et l’activation d’un thème n’ont pas été effectuées.
+
+## Relecture du code et compatibilité Vigie — 20 octobre 2026
+
+Revue des changements de la PR #188 depuis `7a7755f` jusqu’à `09f43aa`, puis relecture et tests des corrections. Aucun contournement exploitable des contrôles d’accès ni fuite de photo non publiée confirmé dans ce périmètre.
+
+Corrections :
+
+- Le journal de l’aperçu indique maintenant le thème des visiteurs de la rubrique de destination. Une écriture JSON réussie porte le statut 200 réel.
+- Les détails avant/après de `public_design` sont transmis à la Vigie, avec toutes les rubriques, sans valeur arbitraire issue d’une base altérée.
+- Les formulaires ambigus mêlant réinitialisation et sélection sont refusés sans écriture. Les valeurs inconnues et formes invalides sont signalées par `input_validation_fail`, sans recopier les saisies ni les jetons.
+
+| Parcours vérifié | Résultat |
+|---|---|
+| Choisir les neuf compositions, toutes les exceptions, puis revenir aux réglages historiques | Persistance et réception HMAC vérifiées dans la vraie base de la Vigie, chaîne intègre |
+| Réenregistrer le même choix, prévisualiser dans une session | Aucun faux changement public, aucune alerte ajoutée par les choix normaux |
+| CSRF faux, permission absente, configuration invalide | Refus effectifs, réglage inchangé, événements de sécurité conservés |
+| Identité à confirmer, compte gelé, administration verrouillée, réseau bloqué | Sélection et réinitialisation bloquées ; reprise possible après levée et nouvelle session si nécessaire |
+| Reprise de session depuis un autre navigateur, puis changement de thème | Corrélation existante DS23 produisant une alerte haute attribuée au compte |
+| Configuration altérée directement en base | Repli historique et signalement « invalide », contenu brut absent des événements |
+| Brouillon sélectionné pour l’ouverture, titres/alternatives contenant du HTML | Brouillon absent et textes échappés dans les six compositions, sur l’accueil et la galerie |
+
+**75 tests distincts passants avec Vigie**, répartis entre `themes-vigie`, `themes-sections`, `version-publique`, `vue-site`, `vigie-emission`, `vigie-valeurs-impossibles` et `vigie-admin-site`. Campagne de 74 tests, puis 11 tests ciblés après ajout du contrôle des brouillons/HTML (10 réexécutés, 1 nouveau). **26 tests passants sans Vigie** (`themes-sections`, `version-publique`, `vue-site`).
+
+Exécution sous Node 22 dans l’image locale `site-photo:latest`, avec `AVIF_EFFORT=0` et `TEST_AVEC_VIGIE=1` pour la campagne Vigie. `themes-vigie.test.js` raccorde les vrais modules de réception, stockage et règles par injection HTTP à deux bases temporaires. Les alertes de création du compte de test sont prises comme état initial ; les sessions du jeu de test portent le contexte du navigateur utilisé. Les verrous qui ferment une session sont vérifiés par un refus 401, les autres blocages par 403, ainsi que par l’absence d’écriture.
+
+Cette relecture ne constitue ni un audit intégral du dépôt ni un test de l’installation de production : réseau Docker, Cloudflare, Zitadel et transport HTTP externe non exercés. Aucun changement visuel supplémentaire, aucune nouvelle capture, aucune photo réelle ajoutée. Les tests navigateur précédents restent documentés séparément ci-dessus.
