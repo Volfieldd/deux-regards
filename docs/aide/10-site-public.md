@@ -88,6 +88,16 @@ La page **Signalements des visiteurs** (barre latérale, groupe Personnes ; admi
 - **Supprimer…** efface le message et l'adresse ; en admin v2, un dialogue le demande d'abord (Annuler en premier).
 - En admin v2, les filtres **Nouveaux** et **Traités** trient la liste ; chaque carte nomme la photo, dit le type par une pastille à symbole et montre le message dans sa langue.
 
+## Messages et demandes
+
+La page **Messages et demandes** (barre latérale, groupe Personnes ; administrateurs, et photographes pour les leurs) reçoit ce que les visiteurs envoient par la page **Contact** (`/contact`) et par une **demande de licence** (`/droits/demande`, ouverte par « Demander une licence » sous chaque photo en v2 et sur la page Droits).
+
+- **La liste** (50 messages par page) ne montre aucune donnée personnelle : la nature (message ou demande de licence), la date, à qui il est adressé, la photo et l'usage prévu d'une demande, la langue, l'état. Un photographe voit les messages qui lui sont adressés (une demande de licence va au photographe de la photo) et ceux adressés aux deux.
+- **Lire** ouvre le message : nom, société, adresse e-mail, diffusion et texte. Cette lecture est notée au journal (« Message lu »). Le texte s'affiche tel quel : un lien n'y est jamais cliquable (prudence avec un lien ou une adresse qui imite un éditeur ou un média).
+- **Répondre par e-mail** ouvre votre messagerie vers l'adresse du visiteur. Le site, lui, n'envoie rien au visiteur : pas d'accusé de réception.
+- **Marquer comme traité** range le message parmi les traités ; **Supprimer…** l'efface pour de bon (dans un dépliant en admin v1, un dialogue en admin v2).
+- Nom, adresse et message sont chiffrés et effacés 12 mois après l'envoi. « Aujourd'hui » compte les messages à lire. Si la messagerie du site est réglée, chaque photographe concerné reçoit « Un nouveau message vous attend » et le lien vers cette page, sans rien du message (30 e-mails par jour au plus ; au-delà, les messages attendent ici).
+
 ## Autres pages
 
 - **À propos :** logo complet, accroche, texte, biographies des auteurs.
@@ -106,6 +116,7 @@ La page **Signalements des visiteurs** (barre latérale, groupe Personnes ; admi
 - **« Je vous ai photographié »** (`/bonjour`) : la page du QR des cartes d’accord et des vêtements (`/bonjour/J` : avec le nom du photographe), sans lien dans le menu (voir [Rencontres](rencontres)).
 - **Mentions légales** (`/mentions-legales`, « Impressum » en allemand, lien en pied de chaque page) : éditeurs, adresse, contact (e-mail en lien, téléphone), directeur de la publication, hébergement (voir [Droits & confidentialité](reglages#mentions-légales-impressum)).
 - **Confidentialité** (`/confidentialite`, en trois langues, lien en pied de page) : qui est responsable, ce que le site collecte et pourquoi, combien de temps, qui le reçoit, et comment exercer ses droits (voir [Droits & confidentialité](reglages#droits-et-confidentialité)).
+- **Contact** (`/contact`, lien en pied de chaque page et depuis À propos, partie « Nous écrire ») : « Écrire à Sébastien, à Julien, ou aux deux » : le destinataire, le message, le nom et l'adresse e-mail du visiteur. **Demander une licence** (`/droits/demande`, préremplie avec la photo depuis la visionneuse v2 et la page Droits) : la photo, l'usage prévu (livre ou presse, site ou réseaux, publicité, autre), la diffusion et la durée, le message, le nom, la société, l'adresse. Les deux arrivent dans [Messages et demandes](site-public#messages-et-demandes) ; sans JavaScript, avec les mêmes protections que `/bonjour` (champ caché anti-robots, envoi depuis un autre site refusé, 8 envois par heure et par connexion, 50 messages par jour en tout : au-delà, le visiteur est invité à revenir le lendemain). Rien n'est envoyé au visiteur.
 - **Page introuvable :** pour une adresse inconnue ou une photo dépubliée.
 
 ## Autres pages en v2

@@ -1,0 +1,238 @@
+{
+ "Messages et demandes": {
+  "en": "Messages and requests",
+  "de": "Nachrichten und Anfragen"
+ },
+ "Message (page Contact)": {
+  "en": "Message (Contact page)",
+  "de": "Nachricht (Kontaktseite)"
+ },
+ "Demande de licence": {
+  "en": "Licence request",
+  "de": "Lizenzanfrage"
+ },
+ "livre ou presse imprimée": {
+  "en": "book or printed press",
+  "de": "Buch oder gedruckte Presse"
+ },
+ "site web ou réseaux sociaux": {
+  "en": "website or social media",
+  "de": "Website oder soziale Netzwerke"
+ },
+ "publicité, affiche": {
+  "en": "advertising, poster",
+  "de": "Werbung, Plakat"
+ },
+ "autre usage": {
+  "en": "other use",
+  "de": "sonstige Nutzung"
+ },
+ "Pour": {
+  "en": "To",
+  "de": "An"
+ },
+ "aucune photo choisie": {
+  "en": "no photo chosen",
+  "de": "kein Foto gewählt"
+ },
+ "Usage prévu": {
+  "en": "Intended use",
+  "de": "Geplante Nutzung"
+ },
+ "Diffusion et durée": {
+  "en": "Circulation and duration",
+  "de": "Verbreitung und Dauer"
+ },
+ "Société ou média": {
+  "en": "Company or media",
+  "de": "Firma oder Medium"
+ },
+ "Répondre par e-mail": {
+  "en": "Reply by email",
+  "de": "Per E-Mail antworten"
+ },
+ "Le message, le nom et l’adresse sont effacés. Cette action est définitive.": {
+  "en": "The message, the name and the address are deleted. This cannot be undone.",
+  "de": "Nachricht, Name und Adresse werden gelöscht. Diese Aktion ist endgültig."
+ },
+ "Supprimer le message": {
+  "en": "Delete the message",
+  "de": "Nachricht löschen"
+ },
+ "Pour {name}": {
+  "en": "To {name}",
+  "de": "An {name}"
+ },
+ "Pour les deux photographes": {
+  "en": "To both photographers",
+  "de": "An beide Fotografen"
+ },
+ "Envoyés depuis la page Contact et les demandes de licence du site. Nom, adresse et message chiffrés, effacés au bout de 12 mois ; ils ne s’affichent qu’en ouvrant le message (lecture notée au journal). Aucun accusé de réception n’est envoyé : répondez depuis le message.": {
+  "en": "Sent from the Contact page and the licence requests of the site. Name, address and message are encrypted and deleted after 12 months; they are only shown when you open the message (the reading is logged). No acknowledgement is sent: reply from the message.",
+  "de": "Gesendet über die Kontaktseite und die Lizenzanfragen der Website. Name, Adresse und Nachricht sind verschlüsselt und werden nach 12 Monaten gelöscht; sie erscheinen erst, wenn Sie die Nachricht öffnen (das Lesen wird protokolliert). Es wird keine Eingangsbestätigung versandt: Antworten Sie aus der Nachricht."
+ },
+ "Vous voyez les messages qui vous sont adressés et ceux adressés aux deux photographes.": {
+  "en": "You see the messages addressed to you and those addressed to both photographers.",
+  "de": "Sie sehen die an Sie gerichteten Nachrichten und die an beide Fotografen."
+ },
+ "Aucun message.": {
+  "en": "No messages.",
+  "de": "Keine Nachrichten."
+ },
+ "Lire la demande n° {id}": {
+  "en": "Read request no. {id}",
+  "de": "Anfrage Nr. {id} lesen"
+ },
+ "Lire le message n° {id}": {
+  "en": "Read message no. {id}",
+  "de": "Nachricht Nr. {id} lesen"
+ },
+ "contact, demande de licence, écrire aux photographes": {
+  "en": "contact, licence request, write to the photographers",
+  "de": "Kontakt, Lizenzanfrage, den Fotografen schreiben"
+ },
+ "Supprimer le message n° {id} ?": {
+  "en": "Delete message no. {id}?",
+  "de": "Nachricht Nr. {id} löschen?"
+ },
+ "Filtrer les messages par état": {
+  "en": "Filter messages by status",
+  "de": "Nachrichten nach Status filtern"
+ },
+ "Filtrer les messages par nature": {
+  "en": "Filter messages by type",
+  "de": "Nachrichten nach Art filtern"
+ },
+ "Toutes les natures": {
+  "en": "All types",
+  "de": "Alle Arten"
+ },
+ "Page Contact": {
+  "en": "Contact page",
+  "de": "Kontaktseite"
+ },
+ "Demandes de licence": {
+  "en": "Licence requests",
+  "de": "Lizenzanfragen"
+ },
+ "Aucun nouveau message : tout est traité.": {
+  "en": "No new messages: everything is handled.",
+  "de": "Keine neuen Nachrichten: Alles ist erledigt."
+ },
+ "Aucun message pour ce filtre.": {
+  "en": "No messages for this filter.",
+  "de": "Keine Nachrichten für diesen Filter."
+ },
+ "{n} messages": {
+  "en": "{n} messages",
+  "de": "{n} Nachrichten"
+ },
+ "{n} message": {
+  "en": "{n} message",
+  "de": "{n} Nachricht"
+ },
+ "Demande de licence n° {id}": {
+  "en": "Licence request no. {id}",
+  "de": "Lizenzanfrage Nr. {id}"
+ },
+ "Message n° {id}": {
+  "en": "Message no. {id}",
+  "de": "Nachricht Nr. {id}"
+ },
+ "photo « {title} »": {
+  "en": "photo “{title}”",
+  "de": "Foto „{title}“"
+ },
+ "{n} nouveaux messages vous attendent": {
+  "en": "{n} new messages are waiting for you",
+  "de": "{n} neue Nachrichten warten auf Sie"
+ },
+ "Un nouveau message vous attend": {
+  "en": "A new message is waiting for you",
+  "de": "Eine neue Nachricht wartet auf Sie"
+ },
+ "{n} nouveaux messages vous attendent dans l’admin (page Contact ou demande de licence).": {
+  "en": "{n} new messages are waiting for you in the admin (Contact page or licence request).",
+  "de": "{n} neue Nachrichten warten in der Verwaltung auf Sie (Kontaktseite oder Lizenzanfrage)."
+ },
+ "Un nouveau message vous attend dans l’admin (page Contact ou demande de licence).": {
+  "en": "A new message is waiting for you in the admin (Contact page or licence request).",
+  "de": "Eine neue Nachricht wartet in der Verwaltung auf Sie (Kontaktseite oder Lizenzanfrage)."
+ },
+ "Pour le lire, connectez-vous :": {
+  "en": "To read it, sign in:",
+  "de": "Um sie zu lesen, melden Sie sich an:"
+ },
+ "{n} messages ou demandes de licence à lire": {
+  "en": "{n} messages or licence requests to read",
+  "de": "{n} Nachrichten oder Lizenzanfragen zu lesen"
+ },
+ "{n} message ou demande de licence à lire": {
+  "en": "{n} message or licence request to read",
+  "de": "{n} Nachricht oder Lizenzanfrage zu lesen"
+ },
+ "envoyés depuis la page Contact ou une demande de licence": {
+  "en": "sent from the Contact page or a licence request",
+  "de": "über die Kontaktseite oder eine Lizenzanfrage gesendet"
+ },
+ "Lire": {
+  "en": "Read",
+  "de": "Lesen"
+ },
+ "Contact": {
+  "en": "Contact",
+  "de": "Kontakt"
+ },
+ "Demander une licence": {
+  "en": "Request a licence",
+  "de": "Lizenz anfragen"
+ },
+ "Message marqué comme traité.": {
+  "en": "Message marked as handled.",
+  "de": "Nachricht als erledigt markiert."
+ },
+ "Message supprimé.": {
+  "en": "Message deleted.",
+  "de": "Nachricht gelöscht."
+ },
+ "Message supprimé": {
+  "en": "Message deleted",
+  "de": "Nachricht gelöscht"
+ },
+ "Message traité": {
+  "en": "Message handled",
+  "de": "Nachricht erledigt"
+ },
+ "Message lu": {
+  "en": "Message read",
+  "de": "Nachricht gelesen"
+ },
+ "{name} a encore {n} message(s) de visiteurs : traitez-les puis supprimez-les (page Messages et demandes).": {
+  "en": "{name} still has {n} visitor message(s): handle them, then delete them (Messages and requests page).",
+  "de": "{name} hat noch {n} Besuchernachricht(en): Bearbeiten und löschen Sie sie (Seite Nachrichten und Anfragen)."
+ },
+ "Photographe supprimé depuis": {
+  "en": "Photographer since deleted",
+  "de": "Fotograf inzwischen gelöscht"
+ },
+ "Pages des messages": {
+  "en": "Message pages",
+  "de": "Seiten der Nachrichten"
+ },
+ "Page précédente": {
+  "en": "Previous page",
+  "de": "Vorherige Seite"
+ },
+ "Page suivante": {
+  "en": "Next page",
+  "de": "Nächste Seite"
+ },
+ "Page {p} sur {n}": {
+  "en": "Page {p} of {n}",
+  "de": "Seite {p} von {n}"
+ },
+ "Tous": {
+  "en": "All",
+  "de": "Alle"
+ }
+}

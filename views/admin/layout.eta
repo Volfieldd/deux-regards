@@ -50,6 +50,7 @@
     pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
     shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/>',
     flag: '<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5L12 13l8.5-6.5"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"/>',
     journal: '<path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
     carnet: '<path d="M6 3h8.5L19 7.5V21H6z"/><path d="M14 3v5h5M9 12.5h7M9 16.5h5"/>',
@@ -111,6 +112,7 @@
     <%~ item(['instagram', '/admin/instagram', 'Instagram', 'instagram', null, 'instagram.voir']) %>
     <%~ item(['stats', '/admin/statistiques', 'Statistiques', 'stats', null, 'statistiques.voir']) %>
 <% if (can('signalements.traiter')) { %>    <a href="/admin/signalements"<%~ it.section === 'reports' ? ' aria-current="page"' : '' %>><%~ ic('flag') %><%= t('Signalements') %><% if (it.reportsNew) { %><span class="nav-badge"><span aria-hidden="true"><%= it.reportsNew %></span><span class="sr-only"><%= it.reportsNew > 1 ? t('{n} nouveaux', { n: it.reportsNew }) : t('1 nouveau') %></span></span><% } %></a>
+<% } %><% if (can('messages.traiter')) { %>    <a href="/admin/messages"<%~ /^messages?$/.test(it.section || '') ? ' aria-current="page"' : '' %>><%~ ic('mail') %><%= t('Messages et demandes') %><% if (it.messagesNew) { %><span class="nav-badge"><span aria-hidden="true"><%= it.messagesNew %></span><span class="sr-only"><%= it.messagesNew > 1 ? t('{n} nouveaux', { n: it.messagesNew }) : t('1 nouveau') %></span></span><% } %></a>
 <% } %>  </nav>
 <% if (can('terrain.app')) { %>  <p class="grp" id="nav-field"><%= t('Sur le terrain') %></p>
   <nav class="nav" aria-labelledby="nav-field">

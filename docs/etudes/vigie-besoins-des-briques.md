@@ -50,6 +50,10 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-24 Données des invités lues ou exportées dans l'admin | DS18 | ✓ site ; `SENSITIVE` : Vigie | `feat/galeries-privees` : `sensitive_read` émis par la route (fiche d'un accès, activité, sélections ; `detail.id` : l'accès), lecture notée au journal ; export CSV en `config.audit` ; Vigie : `SENSITIVE` laissé tel quel (la route émet déjà `sensitive_read` : l'étendre compterait chaque lecture deux fois) | fait |
 | BV-25 Gestes d'invité impossibles pour l'interface | DS12, DS14 | ✓ site ; corrélation : Vigie ; ✓ Vigie | `feat/galeries-privees` : `input_validation_fail` (provenance, photo hors galerie, taille hors liste ou non permise, vue ou langue inconnue), `authz_csrf_fail` (`site · public`) ; Vigie (phase E1) : corrélation `csrf_repetes_invite` (par session visiteur) ; DS12 telle quelle | fait |
 | BV-26 Réponse privée servie par le cache de Cloudflare | DS18 | ✓ Vigie | bordure (phase C3), avant l'ouverture de la phase 37a ; Vigie (phase E1) : point `cache_prive` du Worker, événement `bordure_cache_prive`, règle (`70-bordure.yml`, haute) | fait |
+| BV-27 Saisie malveillante dans un message libre (Contact, demande de licence) | DS11 | ✓ site (aucune émission de plus) ; ✓ Vigie | site : `feat/page-contact` (#183) ; Vigie : #184, `malicious_input` dont tous les constats sont dans `body.message` ou `body.diffusion` pèse 0,5 (`vigie/poids.js`), 0 depuis une session de l'admin en gravité basse ; champ piège : rien à faire côté Vigie | fait |
+| BV-28 Formulaire de contact ou de licence forgé | DS12 | ✓ site | `feat/page-contact` (#183) ; règle `valeurs_impossibles_repetees` telle quelle | fait |
+| BV-29 Boîtes des photographes bombardées (messages acceptés en masse) | DS21, DS22 | ✓ site (émission) ; ✓ Vigie | site : `feat/page-contact` (#183), plafond global de 50 messages acceptés par jour (503) et plafond des annonces (30 e-mails, compté dans la base), tous deux `limite: messages_global` (distingués par `detail.plafond`) ; Vigie : #184, règle `messages_satures` (`30-exploration.yml`, DS21, entité site « messages ») | fait |
+| BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; ✓ Vigie | site : `feat/page-contact` (#183), `sensitive_read` et `sensitive_delete` (`objet: message`, `id` numérique, la suppression seulement si elle a lieu), `authz_fail` hors portée, journal ; Vigie : #184 et #185, type `sensitive_delete`, corrélation `messages_effaces_en_masse` (10 messages distincts par compte en 1 h, DS18), `lectures_massives` par objet + id, `role_incoherent` qui exige `messages.traiter` pour supprimer, objets `personne` et `rencontre` sur les `sensitive_read` des fiches | fait |
 
 ---
 
@@ -311,7 +315,7 @@ déjà mieux.
 | Admin v2 (MQ-07 à MQ-10) | choix v1/v2 par compte, nouveaux écrans | le choix par compte n'intéresse pas la Vigie ; garder le bandeau critique et les badges de la phase C sur les gabarits v2 |
 | Boutique (plus tard) | panier, paiement, commandes, factures | à étudier à part : fraude au paiement, énumération de commandes, données de facturation (DS18) |
 
-Les Carnets et les galeries privées, évalués avant tout code, ont désormais leur section ci-dessous.
+Les Carnets, les galeries privées, puis le Contact et la demande de licence, évalués avant tout code, ont désormais leur section ci-dessous.
 
 ---
 
@@ -777,6 +781,163 @@ cache-control », Always Online, M6, M20) et resservie sans passer par lui.
   quitter, téléchargements permis) et de la page du lien : zéro 404 ; aucune page publique ne pointe vers `/g/` ni
   `/prive/` (G35).
 - **BV-3 étendu** : BV-25.
+
+---
+
+## Brique : Contact et demande de licence
+
+Évaluation du 20 octobre 2026, avant tout code (PLAN.md, point 8 : « la page Contact (MQ-06, sans le tirage) ;
+`/droits/demande` et `/a-propos#contact` sont à créer, avec leur évaluation face à la Vigie »). Sources : maquette
+[MQ-06](../audit-ergonomie-2026-10-16/maquettes/MQ-06-contact-tirage.html) (cadres 1 à 12, **sans** la vente de tirages :
+ni « tirage hors catalogue », ni prix, ni stock), planche MQ-00 (formulaires, erreurs, états),
+[lexique](../audit-ergonomie-2026-10-16/maquettes/LEXIQUE-ET-DONNEES.md) (« Droits et licences », « Demander une
+licence » : un lien, jamais un bouton). Modèle : `/bonjour` et Signaler (`server/routes/public.js:503-520` : `sameSite`,
+`gate()`, `trapped()`), qui ont déjà tout ce qu'il faut. Décision de l'implémentation : un **formulaire** (et non un
+`mailto:` comme « Écrire aux auteurs » des Carnets, Tranché 9), parce que les photographes n'ont pas d'adresse publique
+et qu'une adresse de contact publiée attire le pourriel sans que la Vigie en voie rien.
+
+### Surfaces
+
+- **Routes publiques** (plugin `pages`, trois langues, `/en/…` et `/de/…`) :
+  - `GET /contact` et `?pour=<slug du photographe>|tous` (préremplit le destinataire) ; `POST /contact` ;
+    `GET /contact/merci` ;
+  - `GET /droits/demande` et `?photo=<slug>` (préremplie depuis la visionneuse v2 et la page Droits) ;
+    `POST /droits/demande` ; `GET /droits/demande/merci` et `?photo=<slug>` ;
+  - `/a-propos#contact` : une partie de la page À propos (aucune route de plus), qui mène à `/contact?pour=…` ;
+  - pages `noindex`, `no-store` (comme `/bonjour`) ; ni cookie, ni script, ni ressource tierce.
+- **Champs** (bornés par le serveur ; `maxlength` identiques dans la page) :
+  - Contact : `pour` (liste fermée : un photographe ou `tous`), `message` (2 000 signes, obligatoire), `name`
+    (100, obligatoire), `email` (200, obligatoire, même contrôle que Signaler), `website` (champ piège) ;
+  - Licence : `photo` (slug d'une photo publiée, champ caché ; facultatif), `usage` (liste fermée : `presse`, `web`,
+    `publicite`, `autre`), `diffusion` (300, facultatif), `message` (2 000), `name` (100), `company` (120,
+    facultatif), `email` (200), `website`.
+- **Limites** : 8 envois par heure et par adresse, communs aux deux formulaires (comme `/bonjour`), comptés après le
+  piège et la provenance ; 50 messages acceptés par jour au plus, tous formulaires confondus (503 au-delà) ; e-mails de
+  notification : 30 par jour au plus, tous messages confondus, compte gardé dans la base (comme les demandes
+  RGPD non vérifiées, `server/reminders.js:18`).
+- **Stockage** : table `messages` (migration 061) : `kind` (`contact` ou `licence`), photographe destinataire
+  (`author_id`, nul pour « les deux »), photo (`photo_id`, nulle si la photo est supprimée), `usage`, langue, état
+  (`nouveau`, `traite`), dates ; **nom, e-mail, société, diffusion et message chiffrés** par `DATA_KEY` (`server/vault.js`,
+  comme les signalements) ; effacés 12 mois après l'envoi (purge quotidienne, `server/app.js`).
+- **E-mails** : aucun au visiteur (pas d'accusé de réception : le site enverrait un e-mail à n'importe quelle adresse
+  saisie, voir plus bas) ; aux comptes du photographe concerné (ou aux deux), si la messagerie est configurée :
+  « Un nouveau message vous attend » et le lien `/admin/messages`, **sans** nom, adresse, société, ni message, ni
+  titre de photo, ni en-tête `Reply-To`.
+- **Admin** (`server/routes/messages.js`, enregistré depuis `admin.js` comme `voyages.js`) : `GET /admin/messages`
+  (liste **sans** donnée personnelle : date, nature, destinataire, photo, usage, langue, état), `GET /admin/messages/:id`
+  (le message déchiffré : lecture sensible), `POST /admin/messages/:id/traite`, `POST /admin/messages/:id/supprimer`
+  (après un dialogue), v1 et v2 ; une ligne dans « Aujourd'hui ». Permission nouvelle `messages.traiter`, avec portée
+  (Administrateur : tout ; Photographe : les siens, c'est-à-dire ceux qui lui sont adressés et ceux adressés aux deux) ;
+  ni Modérateur ni Relecteur (ils ne voient pas les adresses des personnes, `server/routes/admin.js:1062`).
+
+### Abus possibles et ce que la Vigie voit déjà
+
+| Surface | Abus possible | Déjà vu par la Vigie | Besoin |
+|---|---|---|---|
+| `POST /contact`, `POST /droits/demande` | robot (pourriel) qui remplit tous les champs | `trapped()` : `malicious_honeypot`, `detail.formulaire` = **`contact`** ou **`licence`** (même clé que `bonjour` et `signalement`), règle `piege` (DS15, 2 points sur l'adresse), `aspiration_distribuee` ; rien n'est stocké, réponse « merci » | aucun |
+| idem | envoi depuis un autre site (formulaire caché sur une page tierce, CSRF de visiteur) | `gate()` : `input_validation_fail` (`raison: formulaire envoyé depuis un autre site`, `formulaire`, `origine`), `valeurs_impossibles_repetees` (DS12) ; rien n'est stocké | aucun |
+| idem | rafale depuis une adresse | `gate()` : `excess_rate_limit_exceeded` (`detail.limite` = `contact` ou `licence`), 429, saisie gardée ; poids 1 (`vigie/poids.js`) | aucun |
+| idem | rafale répartie sur de nombreuses adresses (boîtes des photographes inondées, quota de la messagerie) | rien : chaque adresse reste sous sa limite | **BV-29** (plafond global de 50 par jour et plafond des annonces, signalés) |
+| `message`, `diffusion`, `name`, `company` | injection (SQL, XSS, gabarit) ; contenu malveillant | crochet commun (`server/securite/site.js:250-282`) : `malicious_input`, une seule fois par requête, `detail.constats[].champ` = `body.message`…, **longueur seule** (jamais l'extrait) ; `scanner` (DS11, 5 en 1 h) ; requêtes préparées, gabarits échappés, CSP | **BV-27** (poids du canal) |
+| `pour`, `usage`, `photo`, longueurs | formulaire forgé : valeur hors liste, texte au-delà du `maxlength` de la page (sondage, remplissage de la base) | rien : une valeur inconnue serait refusée sans rien dire | **BV-28** |
+| `?photo=` et `?pour=` (GET) | valeurs forgées dans l'adresse | crochet commun pour les motifs ; une valeur inconnue serait ignorée sans rien dire | BV-28 (même logique que `ignored()`, BV-3) |
+| `email` | hameçonnage par l'adresse de réponse : un faux éditeur, une adresse qui imite un média, un lien piégé dans le message | rien côté site ; le message est montré en texte (aucun lien cliquable, échappé), « Répondre » est un `mailto:` vers l'adresse saisie, aucune notification ne la contient | aucun (durcissement de l'affichage, prérequis plus bas) |
+| Accusé de réception (maquette, cadre 9) | relais de pourriel : le site écrirait à toute adresse saisie (bombardement, réputation du relais), comme la lettre (BV-15) | — | aucun : **pas d'accusé de réception** (écart volontaire avec la maquette) |
+| Données personnelles | collecte excessive, lecture par qui n'en a pas besoin, conservation sans fin | chiffrement au repos ; `crypto_decrypt_fail` (E20) au déchiffrement d'une valeur altérée (`server/vault.js`) ; 12 mois | **BV-30** |
+| `GET /admin/messages/:id` | lecture en masse par un compte volé (DS18) ; photographe qui ouvre le message de l'autre (DS10) | `lecture_fiche` / `lectures_massives` ne voient que `/admin/personnes/:id` et `/admin/rencontres/:id` (`SENSITIVE`, `site.js:29`) ; `lectures_massives` compte `detail.id` sans l'objet | **BV-30** |
+| `POST /admin/messages/:id/traite`, `/supprimer` | effacement des messages par un compte volé (preuve d'un hameçonnage détruite) ; écriture forcée depuis une page tierce | `authz_csrf_fail` (DS14), `authz_fail` (permission, DS10) ; journal d'audit | **BV-30** (hors portée et suppressions) |
+| Notification par e-mail | fuite du contenu par la messagerie ; injection d'en-têtes | — : aucun texte saisi n'entre dans l'e-mail (ni sujet, ni corps, ni en-tête) | aucun |
+| Réglages | adresse de destination remplacée par un compte volé | — : aucune adresse en réglage (les destinataires sont les comptes) ; `WATCHED` et `CONTACT` (`site.js:291-292`) inchangés | aucun (si une adresse devient un jour un réglage : ajoutée à `WATCHED` et `CONTACT`, comme `carnet_contact`) |
+
+Aucune valeur saisie n'est affichée sur le site public (la page « merci » ne redit rien de ce qui a été saisi ; la
+saisie n'est rendue qu'à son auteur, dans la réponse 422 ou 429) : rien à ajouter aux `SOURCES` de
+`server/securite/textes-publics.js` (BV-20, BV-21).
+
+### BV-27 — Saisie malveillante dans un message libre (Contact, demande de licence)
+
+Un message libre contient souvent un lien, un « < » (« 3 < 5 »), du SQL ou du HTML cité par un développeur.
+`scanValue` (`server/securite/detection.js:27-35`) n'examine dans un formulaire que les familles sans ambiguïté : un lien
+`https://` et un « < » isolé **n'émettent rien** ; `<script`, `javascript:`, `onerror=`, `union select`… émettent
+`malicious_input` (`moyen` sans session).
+
+- **Événement** : `malicious_input` (E14), existant, **une seule fois** par requête, par le crochet commun ; le site
+  n'émet rien d'autre pour la même valeur (comme le partage, `public.js:551`). Pas d'option `vigie.corps` : le corps
+  reste examiné.
+- **Détail** : `{ familles, constats: [{ famille, champ: 'body.message', longueur }] }`, plus la route (`/contact`,
+  `/droits/demande`, `/en/…`, `/de/…`) ; jamais le message, le nom ni l'adresse.
+- **Proposé à la Vigie** : régler le poids d'une saisie dont tous les constats sont dans `body.message` ou
+  `body.diffusion` de ces deux routes (un visiteur qui cite du code n'est pas un scanner) ; `scanner` (5 en 1 h par
+  adresse) reste tel quel, une saisie dans `body.name` ou `body.email` garde son poids (aucun nom ne contient
+  `<script`).
+- **Qui** : le site (aucune émission de plus, testée) ; la Vigie (poids du canal).
+
+### BV-28 — Formulaire de contact ou de licence forgé (BV-3 étendu)
+
+- **Événement** : `input_validation_fail` (E13), existant ; émetteur `server/routes/contact-public.js · contact` ou
+  `· licence`.
+- **Quand** : `pour` ou `usage` hors de la liste fermée (`raison: 'valeur hors liste'`, `formulaire`, `champ`, `valeur`
+  à 60 signes) ; texte plus long que le `maxlength` de la page (`raison: 'saisie hors formulaire'`, `formulaire`,
+  `champ`, `longueur` ; retours à la ligne comptés pour un signe, comme le navigateur) ; `?pour=` d'un destinataire
+  inconnu (GET) ; `?photo=` ou `photo` d'une photo inconnue de la base (`raison: 'valeur hors liste'`, `champ: 'photo'` ;
+  une photo connue mais dépubliée depuis, vieux lien : rien). Pas d'émission si le crochet commun a déjà signalé la
+  valeur (DS11).
+- **Réponse** : destinataire, usage ou longueur : 422, la saisie gardée, rien n'est stocké ; photo inconnue : la page
+  s'ouvre sans photo, et une demande envoyée arrive sans photo.
+- **Règle** : `valeurs_impossibles_repetees` (DS12, 2 en 10 minutes par adresse), telle quelle.
+- **Qui** : le site.
+
+### BV-29 — Boîtes des photographes bombardées (messages acceptés en masse)
+
+Chaque adresse reste sous sa limite (8 par heure), mais un réseau de machines peut déposer des centaines de messages
+valides : la boîte de l'admin s'emplit, les notifications épuisent le quota de la messagerie.
+
+- **Plafond global des messages** (revue de sécurité de la PR #183) : 50 messages acceptés par jour (heure de Paris),
+  tous formulaires et toutes adresses confondus ; au-delà, réponse 503 (saisie gardée) et `excess_rate_limit_exceeded`
+  (E15), `detail: { limite: 'messages_global', plafond: 'messages', formulaire, par_jour: 50 }`, gravité `moyen`, émetteur
+  `server/routes/contact-public.js · contact|licence`, à chaque envoi refusé (regroupé par adresse comme les autres
+  limites). La boîte de l'admin ne peut donc plus grossir que de 50 messages par jour.
+- **Plafond des annonces par e-mail** : 30 par jour, compté dans la base (réglage `messages_annonces`, jour de Paris :
+  un redémarrage ne le remet pas à zéro) ; au-delà, `excess_rate_limit_exceeded`, `detail: { limite: 'messages_global', plafond: 'annonces', envoyes, en_attente }`,
+  gravité `moyen`, émetteur `server/messages.js · notifications`, **une fois par jour** (les messages restent dans la
+  boîte et dans « Aujourd'hui » ; plus aucun e-mail ce jour-là).
+- **Règle** (Vigie) : `messages_satures`, sur le modèle de `lettre_confirmations_saturees` (BV-15) : `detail.limite: messages_global`
+  (les deux plafonds, distingués par `detail.plafond`), source unique sur l'entité `site` `messages`, `medium`, DS21 ; corrélation possible avec `aspiration_distribuee` (DS15) dans l'heure.
+- **Qui** : le site (émission) ; la Vigie (règle).
+
+### BV-30 — Messages lus ou effacés en masse dans l'admin
+
+- **Lecture** : `GET /admin/messages/:id` émet `sensitive_read` (E11) par la route (comme les galeries privées,
+  BV-24), `detail: { cible: '/admin/messages/:id', objet: 'message', id }`, et note la lecture au journal d'audit
+  (« message : lecture ») ; la liste ne déchiffre rien. Aucun export.
+- **Portée** (revue de sécurité de la PR #183) : un message « aux deux » est marqué (`to_all = 1`) et n'est visible que
+  d'un compte lié à un photographe ; un message dont le photographe a été supprimé depuis n'est plus visible que de qui
+  voit tout (sa suppression est d'ailleurs retenue tant qu'il a des messages) ; un compte Photographe sans photographe
+  lié ne voit rien.
+- **Hors portée** : le message d'un autre photographe demandé par un compte de portée « les miens » : 404 et
+  `authz_fail` (`raison: 'hors portée'`, `permission: 'messages.traiter'`, `objet: 'message'`, `id`, `ecriture`),
+  comme BV-14 ; règles `exploration_droits` et `ecriture_hors_portee` telles quelles.
+- **Suppressions** : journal d'audit (`POST /admin/messages/:id/supprimer`), avec le numéro seul.
+- **Effacement** : `POST /admin/messages/:id/supprimer` émet `sensitive_delete` (type ajouté par la Vigie, #185),
+  émetteur `server/routes/messages.js · suppression`, `detail: { objet: 'message', id }` (le numéro de la lecture),
+  seulement après une suppression réussie (rien sur un 404 hors portée, un refus CSRF ou un message déjà supprimé) ;
+  corrélation `messages_effaces_en_masse` (10 messages distincts par compte en 1 h, DS18) côté Vigie.
+- **Proposé à la Vigie** : `lectures_massives` (`40-donnees.yml`, 30 `detail.id` distincts en 1 h) compte les
+  numéros sans leur objet : le message 12 et la fiche 12 comptent pour un. Grouper par `detail.objet` (absent pour les
+  fiches : `personne`) ou compter le couple ; et, si elle le juge utile, une corrélation `messages_effaces_en_masse`
+  (10 suppressions en 10 minutes par compte, `low`, DS18) lue dans le journal d'audit.
+- **Qui** : le site (émission, journal) ; la Vigie (regroupement, corrélation).
+
+### Prérequis côté site (Contact et demande de licence)
+
+- **Mêmes accroches que `/bonjour`** : `trapped()`, `sameSite` et `gate()` repris tels quels (pas de copie) ; champ piège
+  `website` caché de la même façon (`.hello-trap` en v1, `.piege` en v2, mêmes règles CSS) ; lien piège du pied de page
+  présent sur les nouvelles pages ; réponse « merci » au piège et à l'autre site.
+- **Affichage** : message montré en texte dans l'admin (échappé, retours à la ligne gardés, aucun lien rendu
+  cliquable) ; « Répondre » en `mailto:` ; la liste sans donnée personnelle.
+- **BV-5 étendu** : `test/liens-internes.test.js` parcourt `/contact`, `/droits/demande` (et `?photo=`) et leurs pages
+  « merci » dans les trois langues, v1 et v2 : zéro 404.
+- **Registre RGPD et page Confidentialité** : ce qui est gardé, pourquoi, 12 mois, chiffré, qui le lit ; à relire par
+  le propriétaire.
 
 ---
 

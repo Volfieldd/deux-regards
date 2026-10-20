@@ -58,6 +58,11 @@
 .apropos-qui h3 { margin: 0; }
 .apropos-qui p { margin: 0; max-width: 60ch; color: var(--prose); line-height: 1.6; text-wrap: pretty; }
 .apropos-qui .lien { justify-self: start; }
+/* À propos, « Nous écrire » (#contact, MQ-06) : un lien par photographe et un pour les deux, vers la page Contact. */
+.apropos-contact { display: grid; gap: var(--esp-2); }
+.apropos-contact .chapo { margin: 0; }
+.apropos-ecrire { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--esp-4); }
+.apropos-ecrire .lien { display: inline-flex; align-items: center; gap: var(--esp-1); min-height: var(--cible); }
 
 /* ---------- 3. Recherche et page introuvable : un champ à libellé visible, son aide, le bouton plein ----------
    Champ à angles vifs, filet --field (3:1), 48 px de haut, 16 px de texte (pas de zoom forcé sur iOS) ; le libellé et

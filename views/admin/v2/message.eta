@@ -1,0 +1,59 @@
+<% const t = it.t, E = __eta.e, m = it.m; %>
+<% /* Un message (admin v2) : mêmes données, même route que la v1 (views/admin/message.eta) : déchiffré pour ce compte,
+      lecture notée au journal et signalée à la Vigie. Le message en citation, en texte (aucun lien cliquable) ; « Répondre
+      par e-mail » (mailto vers l'adresse saisie) ; « Marquer comme traité » ; « Supprimer… » par un dialogue (Annuler
+      d'abord ; sans script, le dialogue s'ouvre dans la page par son ancre), comme les Signalements. */ %>
+<% layout('./layout', { pageTitle: `${it.title} · ${t('Administration')} · ${it.siteName}` }) %>
+<% const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', encours: '<path d="M12 2.7a9.3 9.3 0 0 1 0 18.6z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>',
+     corbeille: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', coche: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+     mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5L12 13l8.5-6.5"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const KIND = { contact: ['afaire', t('Message (page Contact)')], licence: ['encours', t('Demande de licence')] };
+   const USAGE = { presse: t('livre ou presse imprimée'), web: t('site web ou réseaux sociaux'), publicite: t('publicité, affiche'), autre: t('autre usage') };
+   const LANGUE = { fr: t('en français'), en: t('en anglais'), de: t('en allemand') };
+   const when = ms => { const d = new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(ms); const h = new Intl.DateTimeFormat(it.locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Paris' }).format(ms); return t('{date} à {heure}', { date: d, heure: it.lang === 'fr' ? h.replace(/^0?(\d+):(\d\d)$/, '$1 h $2') : h }); };
+   const k = KIND[m.kind];
+   const mail = encodeURIComponent(m.email).replace(/%40/g, '@');
+   const csrf = '<input type="hidden" name="_csrf" value="' + E(it.csrf) + '">'; %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/suivi-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#site-public-messages-et-demandes"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-suivi">
+<p class="fil"><a class="lien-a" href="/admin/messages"><%= t('Messages et demandes') %></a></p>
+<header class="ep">
+  <div class="ep-titre"><h1><%= it.title %></h1></div>
+  <p class="ep-meta"><span><%= when(m.created_at) %></span><span><%= LANGUE[m.lang] || m.lang %></span></p>
+</header>
+<section class="panel sg msg-v2" id="msg-<%= m.id %>" aria-labelledby="msg-t">
+  <div class="sg-photo"><% if (m.photo && m.photo.ready) { %><%~ it.picture(m.photo, { sizes: '96px', alt: '' }) %><% } else { %><span class="sg-vide" aria-hidden="true"></span><% } %></div>
+  <div class="sg-corps">
+    <h2 class="sg-titre" id="msg-t"><%= m.author_name ? t('Pour {name}', { name: m.author_name }) : m.to_all ? t('Pour les deux photographes') : t('Photographe supprimé depuis') %></h2>
+    <p class="sg-etats"><%~ etat(k[0], k[1]) %><%~ m.status === 'nouveau' ? etat('attention', t('Nouveau')) : etat('abouti', t('Traité')) %></p>
+    <dl class="msg-def">
+<% if (m.kind === 'licence') { %>      <dt><%= t('Photo') %></dt><dd><% if (m.photo) { %><a class="lien-a" href="/admin/photos/<%= m.photo_id %>"><%= m.photo_title %></a><% } else { %><%= t('aucune photo choisie') %><% } %></dd>
+      <dt><%= t('Usage prévu') %></dt><dd><%= USAGE[m.usage] || m.usage %></dd>
+<% if (m.diffusion) { %>      <dt><%= t('Diffusion et durée') %></dt><dd><%= m.diffusion %></dd>
+<% } %><% } %>      <dt><%= t('Nom') %></dt><dd><%= m.name %></dd>
+<% if (m.company) { %>      <dt><%= t('Société ou média') %></dt><dd><%= m.company %></dd>
+<% } %>      <dt><%= t('E-mail') %></dt><dd><%= m.email %></dd>
+    </dl>
+    <blockquote class="sg-msg" lang="<%= m.lang %>"><p><%= m.message %></p></blockquote>
+    <div class="sg-actions btns-ligne">
+      <a class="btn" href="mailto:<%= mail %>"><%~ ic('mail', 16) %><%= t('Répondre par e-mail') %></a>
+<% if (m.status === 'nouveau') { %>      <form method="post" action="/admin/messages/<%= m.id %>/traite"><%~ csrf %><button class="btn ghost" type="submit"><%~ ic('coche', 16) %><%= t('Marquer comme traité') %></button></form>
+<% } %>      <a class="btn danger-c" href="#dlg-msg-<%= m.id %>" data-ouvre="dlg-msg-<%= m.id %>"><%= t('Supprimer…') %></a>
+    </div>
+  </div>
+</section>
+<dialog class="confirm cible" id="dlg-msg-<%= m.id %>" aria-labelledby="dlg-msg-<%= m.id %>-t" aria-describedby="dlg-msg-<%= m.id %>-d">
+  <form method="post" action="/admin/messages/<%= m.id %>/supprimer">
+    <%~ csrf %>
+    <h2 id="dlg-msg-<%= m.id %>-t"><%= t('Supprimer le message n° {id} ?', { id: m.id }) %></h2>
+    <p id="dlg-msg-<%= m.id %>-d"><%= t('Le message, le nom et l’adresse sont effacés. Cette action est définitive.') %></p>
+    <div class="actions"><a class="btn ghost" href="#msg-<%= m.id %>" data-annuler><%= t('Annuler') %></a><button class="btn danger" type="submit"><%~ ic('corbeille', 16) %><%= t('Supprimer le message') %></button></div>
+  </form>
+</dialog>
+</div>

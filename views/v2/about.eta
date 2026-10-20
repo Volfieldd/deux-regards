@@ -21,5 +21,13 @@
       </li>
 <% }) %>    </ul>
   </section>
-<% } %></main>
+<% } %>  <section class="wrap partie apropos-contact" id="contact" aria-labelledby="contact-t">
+    <div class="partie-tete"><h2 class="titre-2" id="contact-t"><%= t.contact.aboutTitle %></h2></div>
+    <p class="chapo"><%= v.typo(t.contact.aboutLead) %></p>
+    <ul class="apropos-ecrire">
+<% it.authors.forEach(a => { %>      <li><a class="lien" href="<%= it.u('/contact') %>?pour=<%= encodeURIComponent(a.slug) %>"><%= t.contact.write(a.name) %><%~ ic('fleche', { size: 18 }) %></a></li>
+<% }) %><% if (it.authors.length > 1) { %>      <li><a class="lien" href="<%= it.u('/contact') %>?pour=tous"><%= t.contact.writeBoth(it.authors.length) %><%~ ic('fleche', { size: 18 }) %></a></li>
+<% } %>    </ul>
+  </section>
+</main>
 <%~ include('./_pied', it) %>

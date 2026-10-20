@@ -196,3 +196,10 @@
 @media (max-width: 720px) { .v2-suivi .aide-section table[tabindex] { scroll-margin-bottom: 96px; scroll-margin-top: 16px; max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); overflow: auto; } }
 /* Les cellules passent à la ligne (mots longs allemands compris) : le tableau tient dans la largeur, sans défilement caché. */
 .v2-suivi .aide-section :is(td, th) { overflow-wrap: anywhere; hyphens: auto; }
+/* Messages et demandes (views/admin/v2/messages.eta, message.eta) : les cartes des Signalements ; la fiche d'un message. */
+.v2-suivi .fil { margin: 0 0 8px; }
+.v2-suivi .msg-def { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 0; }
+.v2-suivi .msg-def dt { color: var(--ink2); }
+.v2-suivi .msg-def dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 540px) { .v2-suivi .msg-def { grid-template-columns: minmax(0, 1fr); } .v2-suivi .msg-def dd { margin-bottom: 6px; } }
+.v2-suivi .msg-v2 .sg-actions .btn { gap: 6px; }

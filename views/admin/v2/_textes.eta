@@ -30,6 +30,7 @@
     [t('Voyages'), '/admin/voyages', 'sorties.voir', t('carnet de route')],
     [t('Personnes photographiées'), '/admin/personnes', 'personnes.voir', t('rencontres, accords, droit à l’image, RGPD')],
     [t('Signalements'), '/admin/signalements', 'signalements.traiter', t('plaintes, retraits')],
+    [t('Messages et demandes'), '/admin/messages', 'messages.traiter', t('contact, demande de licence, écrire aux photographes')],
     [t('App de terrain'), '/admin/terrain', 'terrain.app', t('cartes d’accord, QR, téléphone')],
     [t('Nouvelle rencontre'), '/admin/rencontre', 'terrain.app', t('accord, signature')],
     [t('À valider'), '/admin/a-valider', 'photos.publier', t('propositions, modération, publier')],

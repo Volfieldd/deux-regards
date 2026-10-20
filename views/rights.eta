@@ -13,6 +13,7 @@
 <% if (it.contact) { %>
     <p><%= r.contact %> <% if (it.contactHref) { %><a class="more" href="<%= it.contactHref %>"><%= it.contact %></a><% } else { %><%= it.contact %><% } %></p>
 <% } %>
+    <p><a class="more" href="<%= it.u('/droits/demande') %>"><%= it.t.licence.rightsLink %></a></p>
     <h2><%= r.audienceTitle %></h2>
     <p><%= r.audience %></p>
   </div>

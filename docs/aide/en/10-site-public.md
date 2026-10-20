@@ -88,6 +88,16 @@ The **Visitor reports** page (sidebar, People group; administrators and moderato
 - **Delete…** erases the message and the address; in admin v2, a dialog asks first (Cancel comes first).
 - In admin v2, the **New** and **Handled** filters sort the list; each card names the photo, gives the type as a badge with a symbol and shows the message in its language.
 
+## Messages and requests
+
+The **Messages and requests** page (sidebar, People group; administrators, and photographers for their own) receives what visitors send through the **Contact** page (`/contact`) and a **licence request** (`/droits/demande`, opened by “Request a licence” under each photo in v2 and on the Rights page).
+
+- **The list** (50 messages per page) shows no personal data: the type (message or licence request), the date, who it is addressed to, the photo and intended use of a request, the language, the status. A photographer sees the messages addressed to them (a licence request goes to the photographer of the photo) and those addressed to both.
+- **Read** opens the message: name, company, email address, circulation and text. This reading is logged (“Message read”). The text is shown as is: a link is never clickable (be careful with a link or an address that imitates a publisher or a media outlet).
+- **Reply by email** opens your mail program to the visitor's address. The site itself sends nothing to the visitor: no acknowledgement.
+- **Mark as handled** files the message among the handled ones; **Delete…** erases it for good (in a disclosure in admin v1, a dialog in admin v2).
+- Name, address and message are encrypted and erased 12 months after sending. “Today” counts the messages to read. If the site's mail server is set up, each photographer concerned receives “A new message is waiting for you” and the link to this page, with nothing from the message (30 emails a day at most; beyond that, the messages wait here).
+
 ## Other pages
 
 - **About:** full logo, tagline, text, authors’ biographies.
@@ -106,6 +116,7 @@ The **Visitor reports** page (sidebar, People group; administrators and moderato
 - **“I took your photo”** (`/bonjour`): the page behind the QR code on consent cards and clothing (`/bonjour/J`: with the photographer’s name), with no link in the menu (see [Encounters](rencontres)).
 - **Legal notice** (`/mentions-legales`, “Impressum” in German, linked in the footer of every page): publishers, address, contact (email as a link, phone), person responsible for the content (publication director), hosting (see [Rights & privacy](reglages#mentions-légales-impressum)).
 - **Privacy** (`/confidentialite`, in three languages, linked in the footer): who is responsible, what the site collects and why, for how long, who receives it, and how to exercise your rights (see [Rights & privacy](reglages#droits-et-confidentialité)).
+- **Contact** (`/contact`, link in the footer of every page and from About, part “Write to us”): “Write to Sébastien, to Julien, or to both”: the recipient, the message, the visitor's name and email address. **Request a licence** (`/droits/demande`, prefilled with the photo from the v2 viewer and the Rights page): the photo, the intended use (book or press, website or social media, advertising, other), circulation and duration, the message, the name, the company, the address. Both arrive in [Messages and requests](site-public#messages-et-demandes); without JavaScript, with the same protections as `/bonjour` (hidden anti-robot field, sending from another site refused, 8 sends per hour and per connection, 50 messages a day in all: beyond that, the visitor is asked to come back the next day). Nothing is sent to the visitor.
 - **Page not found:** for an unknown address or an unpublished photo.
 
 ## Other pages in v2

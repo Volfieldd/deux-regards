@@ -38,6 +38,7 @@ import { registerOutings } from './sorties.js';
 import { registerTrips } from './voyages.js';
 import { registerGaleries } from './galeries.js';
 import { registerCarnet } from './carnet.js';
+import { registerMessages } from './messages.js';
 import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
 import { legalMissing } from '../legal.js';
@@ -353,7 +354,7 @@ export default async function adminRoutes(app) {
       // par /admin/images/etat, réservé à ce droit).
       variants: request.can('site.filigrane') ? app.variants.status() : { running: false, total: 0, done: 0, errors: [] },
       local: request.session.sub.startsWith('local:') || !request.session.id_token, activity: tracker.active(),
-      translate: app.translator.enabled, encountersNew: newEncounters(request), reportsNew: request.can('signalements.traiter') ? app.feedback.pending() : 0, urgent: app.todo.urgentCount(perm => request.scope(perm)) + (securite?.task?.level === 'urgent' ? 1 : 0), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
+      translate: app.translator.enabled, encountersNew: newEncounters(request), reportsNew: request.can('signalements.traiter') ? app.feedback.pending() : 0, messagesNew: app.messages.pending(request.scope('messages.traiter')), urgent: app.todo.urgentCount(perm => request.scope(perm)) + (securite?.task?.level === 'urgent' ? 1 : 0), toValidate: (request.scope('photos.publier')?.all ? app.review.countFor('proposee') : 0) + (request.scope('instagram.file')?.all ? app.instagram.proposals().length : 0), description: '',
       // Billets proposés, à valider (Carnets) : pour qui publie tous les billets.
       carnetsPending: request.scope('carnet.publier')?.all ? app.carnet.countIn('propose') : 0,
       // adminLang : la langue de l'admin, que l'écran ne remplace pas (un billet passe la langue de son onglet dans lang).
@@ -993,6 +994,8 @@ export default async function adminRoutes(app) {
     if (page === 'carte') return t('Carte');
     if (page === 'confidentialite') return t('Confidentialité');
     if (page === 'bonjour') return t('Je vous ai photographié (/bonjour)');
+    if (page === 'contact') return t('Contact');
+    if (page === 'droits-demande') return t('Demander une licence');
     if (page === 'carnet') return t('Carnets');
     if (page.startsWith('carnet:')) { const slug = page.slice(7); return t('Billet « {title} »', { title: app.carnet.bySlug(slug)?.post?.title || slug }); }
     const [kind, slug] = page.split(':');
@@ -2391,6 +2394,7 @@ export default async function adminRoutes(app) {
   registerTrips(app, { repo, render, P, W, done, failed, withReady, noteChanges });
   registerGaleries(app, { repo, render, P, W, done, failed });
   registerCarnet(app, { repo, render, P, W, done, failed, withReady });
+  registerMessages(app, { render, P, W, done, withReady });
 
   // ---------- traductions ----------
   // Proposition de traduction d'un champ (LibreTranslate du réseau local) : l'auteur la relit avant d'enregistrer.

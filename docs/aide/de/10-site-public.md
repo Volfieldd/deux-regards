@@ -88,6 +88,16 @@ Die Seite **Meldungen von Besuchern** (Seitenleiste, Gruppe Personen; Administra
 - **Löschen…** löscht Nachricht und Adresse; in der Verwaltung v2 fragt zuerst ein Dialog (Abbrechen steht vorn).
 - In der Verwaltung v2 sortieren die Filter **Neu** und **Erledigt** die Liste; jede Karte nennt das Foto, zeigt die Art als Plakette mit Symbol und die Nachricht in ihrer Sprache.
 
+## Nachrichten und Anfragen
+
+Die Seite **Nachrichten und Anfragen** (Seitenleiste, Gruppe Personen; Administratoren, und Fotografen für ihre eigenen) empfängt, was Besucher über die Seite **Kontakt** (`/contact`) und über eine **Lizenzanfrage** (`/droits/demande`, geöffnet über „Lizenz anfragen“ unter jedem Foto in v2 und auf der Seite Rechte) senden.
+
+- **Die Liste** (50 Nachrichten pro Seite) zeigt keine personenbezogenen Daten: die Art (Nachricht oder Lizenzanfrage), das Datum, an wen sie gerichtet ist, Foto und geplante Nutzung einer Anfrage, die Sprache, den Status. Ein Fotograf sieht die an ihn gerichteten Nachrichten (eine Lizenzanfrage geht an den Fotografen des Fotos) und die an beide.
+- **Lesen** öffnet die Nachricht: Name, Firma, E-Mail-Adresse, Verbreitung und Text. Dieses Lesen wird protokolliert („Nachricht gelesen“). Der Text wird unverändert angezeigt: Ein Link ist darin nie anklickbar (Vorsicht bei einem Link oder einer Adresse, die einen Verlag oder ein Medium nachahmt).
+- **Per E-Mail antworten** öffnet Ihr E-Mail-Programm mit der Adresse des Besuchers. Die Website selbst sendet dem Besucher nichts: keine Eingangsbestätigung.
+- **Als erledigt markieren** ordnet die Nachricht unter den erledigten ein; **Löschen…** löscht sie endgültig (in einem Aufklappbereich in der Verwaltung v1, in einem Dialog in v2).
+- Name, Adresse und Nachricht werden verschlüsselt und 12 Monate nach dem Senden gelöscht. „Heute“ zählt die zu lesenden Nachrichten. Ist der E-Mail-Server der Website eingerichtet, erhält jeder betroffene Fotograf „Eine neue Nachricht wartet auf Sie“ und den Link zu dieser Seite, ohne etwas aus der Nachricht (höchstens 30 E-Mails pro Tag; darüber hinaus warten die Nachrichten hier).
+
 ## Weitere Seiten
 
 - **Reisen** (sobald eine Reise veröffentlicht ist, siehe [Fotografierte Personen](rencontres#les-voyages)): die Liste der Reisen, dann eine Seite pro Reise. Oben ein großes Foto, der Name, die Daten, die Fotografen, dann der Text. Danach eine **auf die Reise zugeschnittene Karte**: die Route als gepunktete Linie, eine nummerierte Markierung pro Etappe (zwei Tage hintereinander am selben Ort ergeben eine) und ein Kästchen „T1 · 1. Sept. · Lissabon“ an jeder Etappe; ein Klick auf eine Etappe führt zu ihrem Tag. Schließlich die Erzählung **Tag für Tag** mit den veröffentlichten Fotos jedes Tages, in der Reihenfolge der Aufnahme (das große Foto ist das erste, wie in der Verwaltung). Nur veröffentlichte Fotos erscheinen, und die Karte verortet nur die mit Häkchen bei „Auf der Weltkarte anzeigen“ (ohne sie keine Karte). Auf dem Telefon lässt sich die Karte mit dem Finger verschieben.
@@ -105,6 +115,7 @@ Die Seite **Meldungen von Besuchern** (Seitenleiste, Gruppe Personen; Administra
 - **„Ich habe Sie fotografiert“** (`/bonjour`): die Seite hinter dem QR-Code der Einwilligungskarten und der Kleidung (`/bonjour/J`: mit dem Namen des Fotografen), ohne Link im Menü (siehe [Begegnungen](rencontres)).
 - **Impressum** (`/mentions-legales`, „Impressum“ auf Deutsch, Link in der Fußzeile jeder Seite): Anbieter, Adresse, Kontakt (E-Mail als Link, Telefon), Verantwortlicher für den Inhalt, Hosting (siehe [Rechte & Datenschutz](reglages#mentions-légales-impressum)).
 - **Datenschutz** (`/confidentialite`, in drei Sprachen, Link in der Fußzeile): wer verantwortlich ist, was die Website erhebt und warum, wie lange, wer es erhält und wie man seine Rechte ausübt (siehe [Rechte & Datenschutz](reglages#droits-et-confidentialité)).
+- **Kontakt** (`/contact`, Link in der Fußzeile jeder Seite und von Über uns, Teil „Schreiben Sie uns“): „An Sébastien, an Julien oder an beide schreiben“: der Empfänger, die Nachricht, Name und E-Mail-Adresse des Besuchers. **Lizenz anfragen** (`/droits/demande`, mit dem Foto vorausgefüllt aus dem Bildbetrachter v2 und der Seite Rechte): das Foto, die geplante Nutzung (Buch oder Presse, Website oder soziale Netzwerke, Werbung, Sonstiges), Verbreitung und Dauer, die Nachricht, der Name, die Firma, die Adresse. Beide kommen in [Nachrichten und Anfragen](site-public#messages-et-demandes) an; ohne JavaScript, mit denselben Schutzmaßnahmen wie `/bonjour` (verstecktes Anti-Roboter-Feld, Senden von einer anderen Website abgelehnt, 8 Sendungen pro Stunde und Verbindung, insgesamt 50 Nachrichten pro Tag: darüber hinaus wird der Besucher gebeten, am nächsten Tag wiederzukommen). Dem Besucher wird nichts gesendet.
 - **Seite nicht gefunden:** für eine unbekannte Adresse oder ein zurückgezogenes Foto.
 
 ## Weitere Seiten in v2

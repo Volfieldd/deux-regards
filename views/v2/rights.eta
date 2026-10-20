@@ -10,7 +10,8 @@
     <div class="lecture-texte">
 <% it.paragraphs.forEach(p => { %>      <p><%= v.typo(p) %></p>
 <% }) %><% if (it.contact) { %>      <p class="lecture-contact"><%= v.typo(r.contact) %> <% if (it.contactHref) { %><a class="lien" href="<%= it.contactHref %>"><%= it.contact %></a><% } else { %><%= it.contact %><% } %></p>
-<% } %>      <section class="lecture-partie" aria-labelledby="audience">
+<% } %>      <p class="lecture-contact"><a class="lien" href="<%= it.u('/droits/demande') %>"><%= it.t.licence.rightsLink %></a></p>
+      <section class="lecture-partie" aria-labelledby="audience">
         <h2 class="titre-3" id="audience"><%= r.audienceTitle %></h2>
         <p><%= v.typo(r.audience) %></p>
       </section>

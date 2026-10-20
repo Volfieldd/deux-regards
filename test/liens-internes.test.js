@@ -140,11 +140,15 @@ for (const version of ['v1', 'v2', 'v3']) {
     assert.equal(r.broken.length, 0, `liens cassés :\n${report}`);
     // Le parcours a bien vu tout le site : chaque langue, les pages facultatives, les photos, les images.
     for (const lang of ['', '/en', '/de']) {
-      for (const p of ['/a-propos', '/droits', '/confidentialite', '/mentions-legales', '/carte', '/voyages', '/recherche', '/bonjour', '/photo/brume-sur-la-loire', '/serie/rue', '/auteur/julien'])
+      for (const p of ['/a-propos', '/droits', '/confidentialite', '/mentions-legales', '/carte', '/voyages', '/recherche', '/bonjour', '/contact', '/droits/demande', '/photo/brume-sur-la-loire', '/serie/rue', '/auteur/julien'])
         assert.ok([...r.seen.keys()].some(u => u === `${lang}${p}` || u.startsWith(`${lang}${p}?`)), `${lang}${p} parcourue (${version})`);
     }
     assert.ok([...r.seen.keys()].some(u => u.startsWith('/media/')), 'images suivies');
     assert.ok([...r.seen.keys()].some(u => u.startsWith('/voyage/')), 'voyage suivi');
+    // Contact et demande de licence : depuis le pied de page, À propos (#contact, ?pour=) et la page Droits ; la demande
+    // préremplie (?photo=) depuis la visionneuse v2 et v3.
+    for (const lang of ['', '/en', '/de']) assert.ok(r.seen.has(`${lang}/contact?pour=tous`), `${lang}/contact?pour=tous parcourue (${version})`);
+    assert.equal([...r.seen.keys()].some(u => u.startsWith('/droits/demande?photo=')), version !== 'v1', 'demande préremplie depuis la visionneuse');
     // Les Carnets : parcourus en v2 et en v3 (liste, filtres, billets, traduction, visionneuse ?carnet=, flux), jamais en v1.
     const carnet = [...r.seen.keys()].filter(u => /^(?:\/en|\/de)?\/carnet|[?&]carnet=/.test(u));
     if (version !== 'v1') {
