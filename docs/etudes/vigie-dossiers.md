@@ -12,7 +12,7 @@
 ## En bref
 
 - **Un dossier** (« case ») rassemble tout ce qui touche une même attaque probable : les alertes, les signaux qui n'en ont pas déclenché, les faits ordinaires qui deviennent suspects dans ce contexte, et les entités qui les relient (adresse, réseau, appareil, session, compte, accès de galerie, objet lu). Aujourd'hui, une alerte correspond à **une règle et une seule entité**. Une même attaque se lit donc en quatre ou cinq alertes séparées, et l'analyste fait le lien à la main.
-- **Deux niveaux, ATT&CK complet partout.** La détection, les règles, les signaux et les alertes gardent MITRE ATT&CK tel quel : 14 tactiques, techniques et sous-techniques (section 3.1). Les phases ne sont qu'une **projection** propre aux dossiers. Le dossier montre les deux : la frise par phases et la matrice ATT&CK complète. La console gagne aussi une vue ATT&CK de toute la détection (couverture et observé).
+- **Deux niveaux, ATT&CK complet partout.** La détection, les règles, les signaux et les alertes gardent MITRE ATT&CK tel quel : les 15 tactiques de la version 20.0 (13 octobre 2026), techniques et sous-techniques (section 3.1). Les phases ne sont qu'une **projection** propre aux dossiers. Le dossier montre les deux : la frise par phases et la matrice ATT&CK complète. La console gagne aussi une vue ATT&CK de toute la détection (couverture et observé).
 - **Les phases d'attaque sont le cœur du dossier.** Dans un dossier, chaque signal reçoit une phase parmi huit : **repérage, tentative, accès, exploration, ancrage, collecte, exfiltration, impact**. Deux marqueurs hors chaîne s'y ajoutent : la **dissimulation** (aveugler la Vigie) et l'**atteinte à la disponibilité**. La phase vient d'abord de la technique MITRE ATT&CK, plus précise que la tactique. Un champ explicite la remplace quand la technique trompe. Un test bloque toute règle non classée. Classement des 88 règles et des 10 détecteurs actuels : section 4.7.
 - **Distinguer les jalons des indices.** Un **jalon** prouve qu'une phase a eu lieu (lectures en masse, export, rôle donné). Un **indice** ne fait pas avancer l'attaque : il dit seulement qu'un accès est **douteux** (heure inhabituelle, nouvel appareil, pays inédit, adresses multiples, voyage impossible). Les indices règlent la **confiance**, les jalons la **progression**. C'est la réponse à la question de départ : une lecture ordinaire devient un jalon de collecte dès que l'accès qui la porte est douteux.
 - **Trois axes pour la gravité**, lisibles chacun en une ligne :
@@ -22,7 +22,7 @@
 
   Une grille fixe donne la gravité (section 6), sans formule cachée. Exemple d'explication : « Collecte atteinte, 4 phases dans l'ordre · confiance forte (cookie rejoué) · enjeu sensible (34 fiches de personnes) ».
 - **Corrélation entre entités sans dossier fourre-tout.** Les liens **forts** (session → compte, session → appareil) se suivent sans limite. Les liens **faibles** (adresse IP, réseau) se suivent d'un saut, sur une fenêtre bornée, et jamais à travers une adresse de confiance ou une adresse vue avec un administrateur. Les **cibles** (une fiche, une galerie) ne se traversent jamais : deux comptes qui lisent la même fiche ne fusionnent pas leurs dossiers, ils deviennent des dossiers voisins.
-- **Ce que ça corrige dans l'existant.** La chaîne d'attaque actuelle (`chaine_attaque`, DS23) ne voit une attaque que si repérage, tentative et accès tombent sur **la même entité**. Un scan depuis une adresse suivi d'un accès sur un compte ne se relie jamais. Elle ignore l'impact et le contrôle à distance, ainsi que les 6 règles qui ne portent qu'une technique, et elle oublie tout au redémarrage. De plus, le score d'entité perd la moitié de sa valeur chaque heure : un accès douteux à 9 h et des lectures à 14 h ne se rencontrent pas. Le dossier garde son histoire en base, sur des jours.
+- **Ce que ça corrige dans l'existant.** La chaîne d'attaque actuelle (`chaine_attaque`, DS23) ne voit une attaque que si repérage, tentative et accès tombent sur **la même entité**. Un scan depuis une adresse suivi d'un accès sur un compte ne se relie jamais. Elle ignore l'impact et le contrôle à distance, ainsi que les 6 règles qui ne portent qu'une technique (27 règles sur 88 ont des étiquettes fausses au regard d'ATT&CK 20.0, section 3.2), et elle oublie tout au redémarrage. De plus, le score d'entité perd la moitié de sa valeur chaque heure : un accès douteux à 9 h et des lectures à 14 h ne se rencontrent pas. Le dossier garde son histoire en base, sur des jours.
 - **Plan en cinq PR** (section 12) : phases, moteur des dossiers, maquettes, console, puis données personnelles (catégories, couverture, volume). Aucun changement côté site avant la cinquième.
 
 ---
@@ -59,14 +59,14 @@ Ce qu'il faut ajouter : une **phase** sur chaque signal, la **force** des liens,
 
 ---
 
-## 3. Pourquoi huit phases plutôt que les quatorze tactiques MITRE
+## 3. Pourquoi huit phases plutôt que les quinze tactiques MITRE
 
-MITRE ATT&CK Enterprise compte 14 tactiques. Les reprendre telles quelles dans la console pose quatre problèmes :
+MITRE ATT&CK Enterprise compte 15 tactiques depuis la version 20.0 (13 octobre 2026), qui a scindé Defense Evasion en Stealth et Defense Impairment. Les reprendre telles quelles dans la console pose quatre problèmes :
 
 1. **Elles ne sont pas ordonnées.** MITRE le dit lui-même : une tactique est un « pourquoi », pas une étape. Or un dossier a besoin d'un ordre pour mesurer la progression et vérifier que les étapes se suivent.
 2. **Certaines sont vides ici.** La Vigie ne voit ni « Resource Development » ni l'exécution sur un poste. L'exécution n'existe que côté serveur, comme moyen d'entrer.
 3. **Une même tactique mélange l'échec et la réussite.** Avec la technique T1078 (comptes valides), « Initial Access » couvre aussi bien une connexion refusée qu'une connexion réussie. La phase doit les séparer : c'est toute la différence entre **tentative** et **accès**.
-4. **« Defense Evasion » n'est pas une étape.** Effacer ses traces ou couper la surveillance peut arriver n'importe quand. Ce n'est pas un degré de progression : c'est un **aggravant**.
+4. **« Stealth » et « Defense Impairment » (l'ancienne Defense Evasion) ne sont pas des étapes.** Se fondre dans l'activité normale, effacer ses traces ou couper la surveillance peut arriver n'importe quand. Ce n'est pas un degré de progression : c'est un **aggravant**.
 
 Les huit phases retenues suivent l'ordre d'une attaque contre une application web à comptes, comme ce site. Elles **s'ajoutent** à ATT&CK, elles ne le remplacent pas.
 
@@ -76,17 +76,33 @@ Décision du propriétaire (20 octobre 2026) : « je veux conserver la vue ATT&C
 
 | Niveau | Référentiel | Où |
 |---|---|---|
-| **Détection** : règles Sigma, détecteurs, signaux, alertes, notifications | **MITRE ATT&CK Enterprise complet** : les 14 tactiques, techniques et sous-techniques, avec leurs identifiants (TA0001…, T1078, T1550.004) | `tags` des règles (inchangés), `vigie_signal`, fiche d'une alerte (déjà : tactiques en français et techniques, `vigie/console/ecrans/alertes.js:33`) |
+| **Détection** : règles Sigma, détecteurs, signaux, alertes, notifications | **MITRE ATT&CK Enterprise complet** : les 15 tactiques de la version en vigueur (20.0), techniques et sous-techniques, avec leurs identifiants (TA0001…, T1078, T1550.004) | `tags` des règles (inchangés), `vigie_signal`, fiche d'une alerte (déjà : tactiques en français et techniques, `vigie/console/ecrans/alertes.js:33`) |
 | **Dossiers** : progression, cohérence, frise, gravité | **Huit phases et deux marqueurs**, calculés à partir des étiquettes ATT&CK du signal | `dossier_signaux.phase` seulement |
 
 Conséquences :
 
 - **Les étiquettes ATT&CK restent la seule vérité.** La phase se déduit d'elles et ne les modifie jamais. Une règle n'est jamais réétiquetée pour obtenir la phase voulue : si la projection trompe, c'est le champ propre au dossier qui corrige (`vigie: { phase_dossier: … }`, section 4.5), pas les étiquettes.
-- **ATT&CK doit donc être complet et juste.** Un référentiel `vigie/attack.js` recense les 14 tactiques et les techniques employées par les règles, avec leur nom en français et en anglais et leurs tactiques officielles. Aujourd'hui, 39 techniques et 13 tactiques sont employées ; « Développement de ressources » ne l'est pas, car la Vigie ne peut pas l'observer. Un test vérifie :
-  - que chaque règle qui émet un signal porte au moins une tactique et une technique ;
-  - que chaque technique est rattachée à l'une de ses tactiques officielles.
+- **ATT&CK doit donc être complet et juste.** Un référentiel `vigie/attack-enterprise.json`, produit par `scripts/attack-referentiel.mjs` depuis le jeu STIX publié par MITRE, recense les 15 tactiques dans l'ordre de la matrice, les 706 techniques et sous-techniques en vigueur, et les 149 révoquées avec leur remplaçante. `vigie/attack.js` le lit et donne les noms français des tactiques et des techniques employées. Un test vérifie, pour chaque règle qui émet un signal et chaque détecteur :
+  - au moins une tactique, aucune tactique retirée ou inconnue ;
+  - aucune technique révoquée ou inconnue ;
+  - chaque technique rattachée à l'une de ses tactiques officielles (une sous-technique hérite de sa technique).
 
-  Les 6 règles qui n'ont qu'une technique reçoivent leur tactique (section 1).
+  À chaque nouvelle version d'ATT&CK (deux par an), on relance le script, et le test dit quelles règles corriger.
+
+### 3.2 ATT&CK 20.0 : ce qui a changé pour la Vigie
+
+La version 20.0, publiée le 13 octobre 2026, une semaine avant cette note, rend fausses les étiquettes de **27 règles sur 88** :
+
+| Changement d'ATT&CK | Règles touchées | Correction |
+|---|---|---|
+| Defense Evasion (TA0005) supprimée, scindée en **Stealth** (TA0005, se fondre dans l'activité normale) et **Defense Impairment** (TA0112, casser les outils et les flux de surveillance) | 17 règles | Defense Impairment pour ce qui aveugle la Vigie (surveillance réduite, canal, bordure, réseau, chaîne, contrôle des rôles, ingestion, moteur saturé, règles lentes, politique Zitadel) ; Stealth pour `bordure_entetes_faux` (T1036) et `messages_effaces_en_masse` (T1070) |
+| T1562 (Impair Defenses) révoquée → **T1685** (Disable or Modify Tools) ; T1562.004 → **T1686** (Disable or Modify System Firewall) | 7 règles | technique remplacée |
+| T1550.004 (cookie de session web) ne relève plus que de Lateral Movement | 4 règles | Lateral Movement ajouté |
+| Techniques portées sans l'une de leurs tactiques (inchangé en v20, mais faux avant) | 8 règles | tactique ajoutée (dont les 6 règles qui n'avaient qu'une technique) |
+
+Les 10 détecteurs portent désormais leurs étiquettes dans leur barème (`DETECTEURS`). Deux étaient incomplets : `heure_inhabituelle` (technique sans tactique) et `pivot_identifiants` (T1078 sans l'une de ses tactiques). Initial Access leur est ajouté.
+
+Effet sur la détection actuelle : la chaîne d'attaque (DS23) compte Stealth et Defense Impairment comme elle comptait Defense Evasion. Les règles qui gagnent une tactique alimentent aussi cette chaîne : Initial Access pour les tentatives, Lateral Movement et Collection pour l'accès. Les points, les seuils, les modes et les réponses ne changent pas.
 - **Les signaux ne portent pas la phase.** `vigie_signal` garde ses étiquettes ATT&CK ; le moteur des dossiers calcule la phase au rattachement. Changer la projection (la table de la section 4.5) ne touche ni la détection ni la chaîne, et recalcule les dossiers ouverts.
 - **Chaque dossier a aussi sa matrice ATT&CK complète** (section 8.2). La console gagne une **vue ATT&CK** de toute la détection (section 8.3).
 
@@ -106,7 +122,7 @@ Conséquences :
 | 6 | **Collecte** | Rassemble-t-on des données au-delà de l'usage ? | Collection (TA0009) | T1213, T1119, T1005 | `lectures_massives`, `aspiration_distribuee`, `bordure_rafale`, détecteur `vitesse` ; **lectures ordinaires sous un accès douteux** (4.6) |
 | 7 | **Exfiltration** | Les données sortent-elles, par téléchargement ou par publication ? | Exfiltration (TA0010), Collection qui rend public | T1530, T1041, T1048 | `exports_nombreux`, `telechargements_en_masse`, `acces_nouvel_appareil_puis_siphonage`, `exif_complet`, `heures_visibles_en_masse`, `reseau_sortie_directe` |
 | 8 | **Impact** | Détruit-on, défigure-t-on ou détourne-t-on le site ? | Impact (TA0040) sauf disponibilité | T1485, T1491, T1566 | `messages_effaces_en_masse`, `restauration`, `contact_public_change`, `textes_publics_en_serie`, `billets_modifies_en_masse` |
-| — | **Dissimulation** (marqueur) | Cherche-t-on à aveugler la Vigie ou à effacer ses traces ? | Defense Evasion (TA0005) | T1562, T1070 | `surveillance_reduite`, `chaine_rompue`, `integrite_comptes`, `configuration`, `bordure_muette`, `reseau_muet`, détecteur `silence` |
+| — | **Dissimulation** (marqueur) | Cherche-t-on à aveugler la Vigie ou à effacer ses traces ? | Stealth (TA0005), Defense Impairment (TA0112) | T1685, T1686, T1070 | `surveillance_reduite`, `chaine_rompue`, `integrite_comptes`, `configuration`, `bordure_muette`, `reseau_muet`, détecteur `silence` |
 | — | **Disponibilité** (marqueur) | Cherche-t-on à rendre le site indisponible ? | Impact : déni de service | T1498, T1499 | `messages_satures`, `galerie_scrypt_sature`, `zitadel_quota`, `mode_urgence`, `console_indisponible` |
 
 ### 4.2 Particularités de ce site
@@ -173,7 +189,7 @@ Deux règles de plus :
 
 L'ordre de priorité est le suivant, et le premier qui répond l'emporte :
 
-1. **Le champ explicite propre au dossier** dans le bloc `vigie` de la règle : `phase_dossier: exfiltration`, ou `nature_dossier: indice`. Il sert quand la technique trompe : 20 règles sur 88 (section 4.7). Il ne change ni les étiquettes ATT&CK ni la détection (section 3.1).
+1. **Le champ explicite propre au dossier** dans le bloc `vigie` de la règle : `phase_dossier: exfiltration`, ou `nature_dossier: indice`. Il sert quand la technique trompe : 14 phases et 6 natures (1 indice, 5 preuves), sur 88 règles (section 4.7). Il ne change ni les étiquettes ATT&CK ni la détection (section 3.1).
 2. **La table des techniques** (`vigie/phases.js`, à créer). La technique est plus précise que la tactique : T1078 veut dire « accès réussi », T1110 « tentative ». C'est elle qui sépare l'échec de la réussite.
 3. **La table des tactiques**, en dernier recours.
 4. **Plusieurs phases trouvées** : on retient la plus avancée. Exemple : `exports_nombreux`, étiquetée collection et exfiltration, est une exfiltration. Les marqueurs dissimulation et disponibilité s'ajoutent sans compter dans la progression. Par exemple, `messages_effaces_en_masse` est un impact, avec le marqueur dissimulation (T1070).
@@ -190,7 +206,7 @@ Table des techniques proposée :
 | T1213, T1119, T1005 | 6 collecte |
 | T1530, T1041, T1048 | 7 exfiltration |
 | T1485, T1491, T1566 | 8 impact |
-| T1562, T1070 | marqueur dissimulation |
+| T1685, T1686, T1070 | marqueur dissimulation |
 | T1498, T1499 | marqueur disponibilité |
 
 Un **test bloquant** vérifie que chaque règle qui émet un signal, et chaque détecteur, reçoit une phase ou une nature. Une règle ajoutée sans classement fait échouer `npm run test:vigie`, comme le registre des briques l'exige déjà pour les permissions surveillées.
@@ -222,28 +238,28 @@ Le seuil général de `lectures_massives` (30 fiches en 1 h) ne change pas : il 
 
 ### 4.7 Classement des règles actuelles
 
-Résultat de l'algorithme de la section 4.5 sur les 88 règles qui émettent un signal à ea0528b. Les règles marquées (e) reçoivent un champ explicite.
+Résultat de l'algorithme de la section 4.5 sur les 88 règles qui émettent un signal, avec leurs étiquettes corrigées pour ATT&CK 20.0 (section 3.2). Les 14 règles marquées (e) reçoivent un champ `phase_dossier`. `bordure_nouvel_operateur` reçoit `nature_dossier: indice` ; `cookie_rejoue`, `session_autre_appareil`, `ecritures_sans_identite`, `role_hors_application` et `acces_pays_multiples` reçoivent `nature_dossier: preuve`.
 
 | Phase | Nombre | Règles |
 |---|---|---|
 | 1 Repérage | 4 | `connexion_test`, `scanner`, `piege`, `bordure_erreurs` |
-| 2 Tentative | 18 | `saisie_compte_admin` (e), `fichier_piege`, `comptes_en_attente_rafale` (e), `oidc_echecs_repetes`, `csrf_repetes`, `cible_commune`, `valeurs_impossibles_repetees`, `enumeration_jetons`, `zitadel_echecs_repetes`, `rafale_erreurs`, `bordure_entetes_faux`, `galerie_echecs_adresse`, `galerie_essais_repartis`, `galerie_suspendue`, `acces_apres_revocation` (e), `csrf_repetes_invite`, `console_refus` (e), `console_refus_repetes` |
-| 3 Accès | 7 | `cookie_rejoue`, `session_autre_appareil`, `ecritures_sans_identite` (e), `acces_reseaux_multiples`, `acces_groupe_reseaux_multiples`, `acces_pays_multiples`, `acces_groupe_pays_multiples` |
-| Indice | 1 | `bordure_nouvel_operateur` (e) |
+| 2 Tentative | 18 | `saisie_compte_admin`, `fichier_piege`, `comptes_en_attente_rafale` (e), `oidc_echecs_repetes`, `csrf_repetes`, `cible_commune`, `valeurs_impossibles_repetees`, `enumeration_jetons`, `zitadel_echecs_repetes`, `rafale_erreurs`, `bordure_entetes_faux`, `galerie_echecs_adresse`, `galerie_essais_repartis`, `galerie_suspendue`, `acces_apres_revocation` (e), `csrf_repetes_invite`, `console_refus` (e), `console_refus_repetes` |
+| 3 Accès | 7 | `cookie_rejoue`, `session_autre_appareil`, `ecritures_sans_identite`, `acces_reseaux_multiples`, `acces_groupe_reseaux_multiples`, `acces_pays_multiples`, `acces_groupe_pays_multiples` |
+| Indice | 1 | `bordure_nouvel_operateur` |
 | 4 Exploration | 4 | `exploration_droits`, `reseau_flux_site`, `reseau_flux_repetes`, `ecriture_hors_portee` (e) |
 | 5 Ancrage | 17 | `role_hors_application`, `administrateur_donne`, `zitadel_critique`, `controle_roles`, `zitadel_facteur`, `zitadel_droits`, `zitadel_politique`, `reseau_sorties_variees`, `reseau_chaine_attaque`, `reglage_apres_session_reprise` (e), `acces_debloque_apres_suspension` (e), `acces_apres_session_reprise` (e), `acces_longue_echeance`, `billet_construction_active`, `billet_apres_session_reprise` (e), `console_arrivee`, `console_droits` |
 | 6 Collecte | 3 | `aspiration_distribuee`, `lectures_massives`, `bordure_rafale` |
-| 7 Exfiltration | 9 | `exports_nombreux`, `bordure_cache_prive` (e), `reseau_sortie_refusee`, `reseau_sortie_directe`, `exif_complet` (e), `heures_visibles_en_masse` (e), `telechargements_en_masse`, `acces_nouvel_appareil_puis_siphonage`, `acces_crees_en_masse` (e) |
-| 8 Impact | 7 | `restauration`, `messages_effaces_en_masse` (e), `contact_public_change`, `texte_public_contact` (e), `textes_publics_geste_massif`, `textes_publics_en_serie`, `billets_modifies_en_masse` |
-| Dissimulation | 13 | `integrite_comptes`, `chaine_rompue`, `configuration` (e), `dechiffrement` (e), `ingestion_refusee`, `trou_zitadel`, `moteur_sature` (e), `controle_roles_degrade`, `regle_lente` (e), `canal_echec`, `surveillance_reduite`, `bordure_muette`, `reseau_muet` |
+| 7 Exfiltration | 9 | `exports_nombreux`, `bordure_cache_prive`, `reseau_sortie_refusee`, `reseau_sortie_directe`, `exif_complet` (e), `heures_visibles_en_masse` (e), `telechargements_en_masse`, `acces_nouvel_appareil_puis_siphonage`, `acces_crees_en_masse` (e) |
+| 8 Impact | 7 | `restauration`, `messages_effaces_en_masse`, `contact_public_change`, `texte_public_contact`, `textes_publics_geste_massif`, `textes_publics_en_serie`, `billets_modifies_en_masse` |
+| Dissimulation | 13 | `integrite_comptes`, `chaine_rompue`, `configuration`, `dechiffrement` (e), `ingestion_refusee`, `trou_zitadel`, `moteur_sature` (e), `controle_roles_degrade`, `regle_lente` (e), `canal_echec`, `surveillance_reduite`, `bordure_muette`, `reseau_muet` |
 | Disponibilité | 5 | `messages_satures`, `zitadel_quota`, `mode_urgence`, `galerie_scrypt_sature`, `console_indisponible` |
 
 Ce que le classement révèle :
 
 - **La collecte est la phase la plus mince** : 3 règles et un détecteur. C'est le manque de départ (lectures de données personnelles). La section 4.6 et la PR E le comblent.
 - **`dechiffrement`** (une valeur chiffrée altérée, étiquetée T1005, collecte) relève de la dissimulation : quelqu'un a écrit dans la base sans passer par le site. La phase vient donc d'un champ explicite.
-- **`configuration`** (DS9, protections changées) relève aussi de la dissimulation, pas de l'impact : c'est l'attaquant qui baisse la garde.
-- **Les six règles qui n'ont qu'une technique** reçoivent une phase par la table des techniques. Il n'est pas nécessaire de les réécrire, mais on leur ajoutera la tactique, par cohérence.
+- **`configuration`** (DS9, protections changées) relève aussi de la dissimulation, pas de l'impact : c'est l'attaquant qui baisse la garde. Depuis ATT&CK 20.0, sa technique (T1685) le dit d'elle-même.
+- **Les six règles qui n'avaient qu'une technique** reçoivent leur tactique (section 3.2). Leur phase vient de la table des techniques.
 
 ### 4.8 Progression et cohérence
 
@@ -503,7 +519,7 @@ Maquettes à faire, en une seule passe de contrôle : MV-12 « Dossiers » et MV
    - un clic sur un satellite ouvre l'autre dossier ;
    - un clic sur un objet ouvre « qui l'a lu » (périmètre, 10.3).
 5. **Matrice ATT&CK du dossier**, en onglet à côté de la frise :
-   - les 14 tactiques en colonnes, dans l'ordre de MITRE, y compris celles que la Vigie n'observe pas (grisées, avec la mention « non observable ici ») ;
+   - les 15 tactiques en colonnes, dans l'ordre de MITRE, y compris celles que la Vigie n'observe pas (grisées, avec la mention « non observable ici ») ;
    - les techniques et sous-techniques vues dans le dossier, avec leur identifiant, leur nom, le nombre de signaux et le numéro d'ordre de leur première apparition (1, 2, 3…), ce qui donne le chemin de l'attaque dans la matrice ;
    - un clic sur une technique filtre la frise et le tableau des signaux sur elle ;
    - sous chaque technique, la phase de dossier qu'elle donne : le lien entre les deux vues reste lisible.
@@ -513,7 +529,7 @@ Maquettes à faire, en une seule passe de contrôle : MV-12 « Dossiers » et MV
 
 ### 8.3 Vue ATT&CK de la détection
 
-Un écran de la console, indépendant des dossiers : la matrice ATT&CK Enterprise complète (14 tactiques) pour toute la détection.
+Un écran de la console, indépendant des dossiers : la matrice ATT&CK Enterprise complète (15 tactiques, version du référentiel) pour toute la détection.
 
 - **Couverture** : pour chaque technique, les règles et les détecteurs qui la portent, leur mode (arrêt, observer, alerter, bloquer) et leur cas DS. Une technique sans règle reste visible, en vide : c'est là que la détection manque.
 - **Observé** : le nombre de signaux et d'alertes par technique sur une période (24 h, 7 jours, 30 jours), et les dossiers qui la contiennent.
@@ -635,7 +651,7 @@ Registre des briques : la PR E proposera **BV-31** (catégories de données pers
 
 | PR | Contenu | Taille |
 |---|---|---|
-| **A. ATT&CK et phases** | `vigie/attack.js` (14 tactiques, techniques employées, noms en français et en anglais, tactiques officielles) ; tactique ajoutée aux 6 règles qui n'ont qu'une technique ; test de complétude et de cohérence ATT&CK ; `vigie/phases.js` (projection : tables des techniques et des tactiques, détecteurs) ; champs `phase_dossier` et `nature_dossier` (20 règles) ; test bloquant de projection ; la fiche d'une alerte nomme ses techniques (identifiant et nom). Détection inchangée | petite |
+| **A. ATT&CK et phases** | référentiel ATT&CK 20.0 (`scripts/attack-referentiel.mjs`, `vigie/attack-enterprise.json`, `vigie/attack.js`) ; étiquettes des 27 règles et des 2 détecteurs corrigées (section 3.2) ; étiquettes des détecteurs dans leur barème ; test de cohérence ATT&CK ; `vigie/phases.js` (projection) ; champs `phase_dossier` (14 règles) et `nature_dossier` (6 règles) ; test bloquant de projection ; la fiche d'une alerte nomme ses tactiques v20 et ses techniques. Points, seuils, modes et réponses inchangés | petite |
 | **B. Moteur des dossiers** | migration (section 9) ; ouverture, rattachement, rattachement rétroactif, fusion, cycle de vie ; confiance, contre-indices, lectures sous accès douteux (4.6) ; enjeu par objet ; grille et explication ; `chaine_attaque` calculée sur le dossier ; ligne de commande `dossiers` ; les cinq scénarios en tests et au banc | la plus grosse |
 | **C. Maquettes** | MV-12 (dossiers), MV-13 (un dossier : frise, matrice ATT&CK, graphe), MV-14 (vue ATT&CK de la détection), bureau et téléphone, une seule passe de contrôle | moyenne |
 | **D. Console** | liste, fiche, frise, matrice ATT&CK du dossier, graphe, exploration, gestes de l'analyste, section « Dossiers » de la fiche d'entité, vue d'ensemble ; vue ATT&CK de la détection et export au format Navigator | moyenne |
@@ -651,7 +667,7 @@ Toutes les propositions sont validées par le propriétaire, D31 avec une préci
 
 | N° | Décision | Retenu |
 |---|---|---|
-| D31 | Découpage des phases | Huit phases ordonnées et deux marqueurs (dissimulation, disponibilité), **dans les dossiers seulement**. La détection garde ATT&CK complet (14 tactiques, techniques), la vue ATT&CK complète est conservée : matrice dans chaque dossier, vue ATT&CK de la détection, export Navigator (section 3.1) |
+| D31 | Découpage des phases | Huit phases ordonnées et deux marqueurs (dissimulation, disponibilité), **dans les dossiers seulement**. La détection garde ATT&CK complet (15 tactiques de la v20, techniques), la vue ATT&CK complète est conservée : matrice dans chaque dossier, vue ATT&CK de la détection, export Navigator (section 3.1) |
 | D32 | Origine de la phase | Champ explicite propre au dossier (`phase_dossier`), puis technique, puis tactique ; la plus avancée l'emporte ; test bloquant pour toute règle non classée ; les étiquettes ATT&CK ne sont jamais modifiées pour la projection |
 | D33 | Signaux faibles | Un indice seul n'ouvre jamais de dossier ; il règle la confiance d'un accès |
 | D34 | Liens faibles | Un saut, 72 h, jamais par une adresse privée, de confiance, vue avec un administrateur, ou partagée par plus de 5 comptes ; cibles jamais traversées ; 40 entités au plus |
