@@ -46,6 +46,34 @@
     ]
   },
   {
+    "version": "1.192.0",
+    "date": "2026-10-20",
+    "pr": 192,
+    "title": {
+      "fr": "Une page Galerie et une page Séries",
+      "en": "A Gallery page and a Series page",
+      "de": "Eine Galerie-Seite und eine Serien-Seite"
+    },
+    "items": [
+      {
+        "fr": "Sur le site en v2 et en v3, le menu Galerie ouvre sa propre page (/galerie) : toutes les photos, avec les mêmes filtres par regard, par série et par ordre, chacun à son adresse. Le menu Séries ouvre l’index des séries (/series) : la couverture de chacune, son nombre de photos, ses photographes, ses années et le début de son texte d’intention.",
+        "en": "On the v2 and v3 site, the Gallery menu opens its own page (/galerie): every photo, with the same filters by photographer, series and order, each with its own address. The Series menu opens the series index (/series): each one’s cover, number of photos, photographers, years and the start of its statement.",
+        "de": "Auf der Website in v2 und v3 öffnet das Menü Galerie eine eigene Seite (/galerie): alle Fotos, mit denselben Filtern nach Blick, Serie und Reihenfolge, jeder mit eigener Adresse. Das Menü Serien öffnet die Übersicht der Serien (/series): Titelbild, Zahl der Fotos, Fotografen, Jahre und der Anfang des Begleittexts."
+      },
+      {
+        "fr": "L’accueil garde son ouverture et montre un aperçu de la galerie (les douze premières photos, dans votre ordre), puis « Toute la galerie » ; « Toutes les séries » mène à l’index. Le fil d’Ariane d’une série ramène à l’index. En v1, rien ne change : ces deux pages n’existent pas.",
+        "en": "The home page keeps its opening and shows a preview of the gallery (the first twelve photos, in your order), then “The whole gallery”; “All series” leads to the index. A series’ breadcrumb leads back to the index. In v1 nothing changes: these two pages do not exist.",
+        "de": "Die Startseite behält ihre Eröffnung und zeigt eine Vorschau der Galerie (die ersten zwölf Fotos, in Ihrer Reihenfolge), dann „Die ganze Galerie“; „Alle Serien“ führt zur Übersicht. Die Brotkrümelnavigation einer Serie führt zur Übersicht zurück. In v1 ändert sich nichts: Diese beiden Seiten gibt es dort nicht."
+      },
+      {
+        "fr": "Statistiques : les vues de la Galerie et des Séries ont leur ligne.",
+        "en": "Statistics: Gallery and Series page views have their own line.",
+        "de": "Statistik: Aufrufe der Galerie und der Serien haben eine eigene Zeile.",
+        "perm": "statistiques.voir"
+      }
+    ]
+  },
+  {
     "version": "1.191.0",
     "date": "2026-10-20",
     "pr": 191,
