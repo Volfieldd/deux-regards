@@ -1234,5 +1234,9 @@
  "toutes les communes de France, plus de 500 habitants ailleurs": {
   "en": "every municipality in France, over 500 inhabitants elsewhere",
   "de": "alle Gemeinden Frankreichs, anderswo über 500 Einwohner"
+ },
+ "Remplacer le texte de remplacement déjà saisi par cette suggestion ?": {
+  "en": "Replace the alternative text already entered with this suggestion?",
+  "de": "Den bereits eingegebenen Alternativtext durch diesen Vorschlag ersetzen?"
  }
 }

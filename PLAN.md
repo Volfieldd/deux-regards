@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Édition des photos et aperçus (21 octobre 2026)
+
+Demande de description sans rechargement de la fiche, confirmation avant de remplacer un texte déjà saisi, Défaire des langues ajoutées dans l’admin v2. Aperçu du filigrane actualisable sur place sans enregistrer, respect de sa case d’activation. Bandeau de prévisualisation étendu aux neuf compositions, toujours réservé au droit `site.apparence` ; visionneuse publique inchangée. Tests ciblés du serveur et parcours navigateur dans les deux admins.
+
 ## Livraison — Vigie en dossiers, PR E #202, version 1.202.0 (21 octobre 2026)
 
 Après D1 #198, D2 #199, D3 #200 et la mise à jour documentaire #201 : extension des lectures personnelles livrée dans la PR #202 après accord du propriétaire. Catégories fermées et volumes par requête/session (BV-33), listes couvertes, enjeu par catégorie, indice des trois réseaux en 24 h, huit fiches comptées par session. Documentation : [étude, section 14.4](docs/etudes/vigie-dossiers.md#144-pr-e--catégories-et-volumes-des-lectures-bv-33), [Vigie](docs/wiki/Vigie.md), [RGPD](docs/wiki/RGPD.md). Les seuils 8/3 et les durées existantes restent inchangés ; pas de recalage sans le mois d’observation prévu.

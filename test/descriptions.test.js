@@ -70,7 +70,7 @@ test('sans traducteur : la description reste en anglais ; fiche : bloc, bouton, 
   const fiche = (await ctx.app.inject({ url: `/admin/photos/${id}`, cookies })).body;
   assert.match(fiche, /« A test photo\. »[\s\S]*en anglais : aucun traducteur configuré/);
   assert.match(fiche, /data-desc-use="A test photo\."/);
-  assert.deepEqual(await (await ctx.app.inject({ url: `/admin/photos/${id}/description`, cookies, headers: { accept: 'application/json' } })).json(), { ...ctx.app.describer.forPhoto(id, 'fr') });
+  assert.deepEqual(await (await ctx.app.inject({ url: `/admin/photos/${id}/description`, cookies, headers: { accept: 'application/json' } })).json(), { ...ctx.app.describer.forPhoto(id, 'fr'), use: { field: 'alt_text_en', text: 'A test photo.', de: '' } });
   // Éteindre et effacer.
   await post('/admin/series/descriptions', { action: 'off' });
   assert.equal(ctx.app.describer.settings().on, false);

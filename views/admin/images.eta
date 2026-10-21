@@ -6,8 +6,11 @@
 <div class="edit">
 <% if (it.previewId) { %>
   <figure class="preview">
-    <img src="/admin/images/apercu.webp?photo=<%= it.previewId %>" alt="<%= t('Aperçu du filigrane enregistré') %>" width="1280" height="853">
-    <figcaption class="mono"><%= t('Aperçu des réglages enregistrés (1280 px)') %><%= w.enabled ? '' : ` · ${t('filigrane désactivé')}` %></figcaption>
+    <img data-images-preview src="/admin/images/apercu.webp?photo=<%= it.previewId %>" alt="<%= t('Aperçu du filigrane enregistré') %>" width="1280" height="853">
+    <figcaption class="mono"><span data-images-caption><%= t('Aperçu des réglages enregistrés (1280 px)') %><%= w.enabled ? '' : ` · ${t('filigrane désactivé')}` %></span>
+    <p><button class="btn ghost" type="submit" form="images-form" formaction="/admin/images/apercu" formtarget="_blank"><%= t('Actualiser l’aperçu') %></button></p>
+    <p class="hint" role="status" data-images-status data-loading="<%= t('Actualisation de l’aperçu…') %>" data-ready="<%= t('Aperçu des réglages du formulaire, non enregistrés.') %>" data-error="<%= t('Impossible d’actualiser l’aperçu. Réessayez.') %>" data-dirty="<%= t('Réglages modifiés : actualisez l’aperçu.') %>"></p>
+    </figcaption>
   </figure>
 <% } else { %>
   <p class="panel"><%= t('Importez une photo pour voir un aperçu du filigrane.') %></p>
@@ -80,3 +83,5 @@
     <button class="btn" type="submit"><%= t('Envoyer le fichier') %></button>
   </form>
 </section>
+
+<script src="<%= it.asset('admin/images.js') %>" defer></script>

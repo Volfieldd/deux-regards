@@ -1169,7 +1169,10 @@ export default async function adminRoutes(app) {
     if (!request.headers.accept?.includes('text/html')) return { ok: true };
     return done(reply, `/admin/photos/${id}#description`, request.t('Description demandée : elle arrive dans une minute environ.'));
   });
-  app.get('/admin/photos/:id/description', P('photos.voir'), async request => app.describer.forPhoto(byId(request.params.id), request.t.lang) || { pending: false, text: '' });
+  app.get('/admin/photos/:id/description', P('photos.voir'), async request => {
+    const id = byId(request.params.id);
+    return { ...(app.describer.forPhoto(id, request.t.lang) || { pending: false, text: '' }), use: descriptionUse(id) };
+  });
 
   // Nouveautés : toutes les versions, la plus récente d'abord, et la version installée.
   app.get('/admin/nouveautes', P('admin.acceder'), async (request, reply) => render(request, reply, 'releases', {
@@ -2178,7 +2181,7 @@ export default async function adminRoutes(app) {
   // Aperçu des réglages du formulaire, sans les enregistrer (bouton « Aperçu »).
   app.post('/admin/images/apercu', W('site.filigrane'), async (request, reply) => {
     const { watermark: current } = app.variants.context();
-    return sendPreview(reply, byId(request.body?.preview_photo), { watermark: { ...normalizeWatermark(request.body || {}, current), enabled: true } });
+    return sendPreview(reply, byId(request.body?.preview_photo), { watermark: normalizeWatermark(request.body || {}, current) });
   });
 
   app.get('/admin/images/etat', P('site.filigrane'), async () => app.variants.status());

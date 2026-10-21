@@ -88,7 +88,7 @@ Compte connecté, rythme (créneaux), file d’attente, historique, puis réglag
 
 ## Filigrane et EXIF
 
-Le filigrane (texte ou logo, position, opacité, taille), le niveau de métadonnées des images servies, et un aperçu, avec ou sans enregistrement.
+Le filigrane (texte ou logo, position, opacité, taille), le niveau de métadonnées des images servies, et un aperçu actualisable sur place avec les réglages saisis, sans enregistrement (nouvel onglet sans JavaScript).
 
 ![Filigrane et EXIF](captures/admin/06-filigrane-exif-bureau.webp)
 

@@ -1090,5 +1090,25 @@
  "C’est la seule série : sa photo n’aurait nulle part où aller. Créez d’abord une autre série.": {
   "en": "This is the only series: its photo would have nowhere to go. Create another series first.",
   "de": "Dies ist die einzige Serie: Ihr Foto hätte keinen anderen Platz. Erstellen Sie zuerst eine weitere Serie."
+ },
+ "Actualiser l’aperçu": {
+  "en": "Refresh preview",
+  "de": "Vorschau aktualisieren"
+ },
+ "Aperçu des réglages du formulaire, non enregistrés.": {
+  "en": "Preview of the form settings, not saved.",
+  "de": "Vorschau der Formulareinstellungen, nicht gespeichert."
+ },
+ "Actualisation de l’aperçu…": {
+  "en": "Refreshing preview…",
+  "de": "Vorschau wird aktualisiert…"
+ },
+ "Impossible d’actualiser l’aperçu. Réessayez.": {
+  "en": "Could not refresh the preview. Try again.",
+  "de": "Die Vorschau konnte nicht aktualisiert werden. Versuchen Sie es erneut."
+ },
+ "Réglages modifiés : actualisez l’aperçu.": {
+  "en": "Settings changed: refresh the preview.",
+  "de": "Einstellungen geändert: Aktualisieren Sie die Vorschau."
  }
 }
