@@ -40,7 +40,9 @@ test('en allemand, aucun débordement sur les écrans de la v2', async ({ page }
       '/admin/instagram', '/admin/galeries', '/admin/carnet', '/admin/rencontre/qr',
       // Vague 4 (suivi et aide) : Journal, Statistiques, Signalements, Circuit, Aide, Nouveautés.
       '/admin/journal', '/admin/statistiques', '/admin/statistiques?periode=365', '/admin/signalements', '/admin/circuit', '/admin/aide', '/admin/nouveautes',
-      ...(writes ? [`/admin/galeries/${g}`, `/admin/galeries/${g}/reglages`, `/admin/galeries/${g}/acces/nouveau`, `/admin/carnet/${b}`, `/admin/rencontre/${m}/merci`] : [])];
+      // Finitions : Sur le terrain, cartes d'accord, un chapitre de l'aide, le Journal avec ses actions groupées.
+      '/admin/terrain', '/admin/rencontres/cartes', '/admin/aide/rencontres',
+      ...(writes ? [`/admin/galeries/${g}`, `/admin/galeries/${g}/reglages`, `/admin/galeries/${g}/photos`, `/admin/galeries/${g}/acces/nouveau`, `/admin/carnet/${b}`, `/admin/rencontre/${m}/merci`] : [])];
     for (const [w, h] of [[320, 640], [412, 839], [1032, 1250], [1376, 900], [1440, 900]]) {
       await page.setViewportSize({ width: w, height: h });
       for (const url of urls) {
