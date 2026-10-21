@@ -25,14 +25,15 @@ export function groupesFrise(points, x) {
 }
 export function frise(v, largeur = 760) {
   const id = `fr-${largeur}`, x0 = (largeur === 1120 ? 150 : 128) + 18, x1 = largeur - 46;
+  const couloirs = v.couloirs || COULOIRS, axe = 10 + 34 * couloirs.length;
   const X = t => x0 + Math.max(0, Math.min(1, (t - v.t0) / Math.max(1, v.t1 - v.t0))) * (x1 - x0);
   const Y = c => 10 + 34 * (c - 1) + 17;
-  const o = [debut(id, largeur, 424, 'Frise du dossier', 'Huit phases, indices, dissimulation et faits. Les formes disent la nature ; les libellés et le tableau donnent les détails.')];
-  COULOIRS.forEach((nom, i) => {
+  const o = [debut(id, largeur, axe + 40, 'Frise du dossier', 'Huit phases, puis indices, marqueurs et faits. Les formes disent la nature ; les libellés et le tableau donnent les détails.')];
+  couloirs.forEach((nom, i) => {
     o.push(`<rect class="ds-c-fond${i % 2 ? ' alt' : ''}" x="0" y="${10 + 34 * i}" width="${largeur}" height="34"/><text class="ds-c-t" x="10" y="${Y(i + 1) + 5}">${i < 8 ? i + 1 + ' ' : ''}${nom}</text>`);
     if (v.non.includes(i + 1) && !v.points.some(p => p.c === i + 1)) o.push(`<text class="ds-non-t" x="${x0 + 6}" y="${Y(i + 1) + 5}">non observé</text>`);
   });
-  for (const [i, t] of v.ticks.entries()) o.push(`<line class="ds-axe" x1="${f(X(t.t))}" x2="${f(X(t.t))}" y1="10" y2="390"/><text class="ds-graduation" x="${f(X(t.t))}" y="410" text-anchor="${i === 0 ? 'start' : i === v.ticks.length - 1 ? 'end' : 'middle'}">${mot(t.mot)}</text>`);
+  for (const [i, t] of v.ticks.entries()) o.push(`<line class="ds-axe" x1="${f(X(t.t))}" x2="${f(X(t.t))}" y1="10" y2="${axe + 6}"/><text class="ds-graduation" x="${f(X(t.t))}" y="${axe + 26}" text-anchor="${i === 0 ? 'start' : i === v.ticks.length - 1 ? 'end' : 'middle'}">${mot(t.mot)}</text>`);
   const premiers = v.suite.map(c => v.points.find(p => p.c === c && ['jalon', 'preuve', 'promu'].includes(p.forme))).filter(Boolean);
   if (premiers.length > 1) o.push(`<polyline class="ds-chaine" points="${premiers.map(p => `${f(X(p.t))},${Y(p.c)}`).join(' ')}"/>`);
   for (const g of groupesFrise(v.points, X)) {

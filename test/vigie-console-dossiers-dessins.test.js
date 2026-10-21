@@ -122,3 +122,16 @@ test('dessins : objets regroupés par nature sans créer de lien absent, tableau
   assert.equal((x.dessins.graphe.std.match(/class="ds-e /g) || []).length, 1);
   assert.equal(x.dessins.grapheCoupe, false);
 });
+
+test('dessins : une phase et ses marqueurs restent visibles ensemble, disponibilité hors de la progression', t => {
+  const v = environnement(t), id = v.dossier();
+  const double = v.signal(id, { phase: 5, marqueurs: '["dissimulation"]' });
+  const dispo = v.signal(id, { phase: null, marqueurs: '["disponibilite"]', nature: 'jalon' });
+  const x = vue(v, id).dessins;
+  assert.ok(x.blocs.find(b => b.nom === 'Ancrage').items.some(p => p.id === double));
+  assert.ok(x.blocs.find(b => b.nom === 'Dissimulation').items.some(p => p.id === double));
+  assert.deepEqual(x.blocs.find(b => b.nom === 'Disponibilité').items.map(p => p.id), [dispo]);
+  assert.equal(x.blocs.find(b => b.nom === 'Faits').items.length, 0);
+  assert.match(x.frise.std, /viewBox="0 0 760 458"/);
+  assert.equal(x.points, 3, 'trois repères pour deux signaux, sans inventer une phase');
+});

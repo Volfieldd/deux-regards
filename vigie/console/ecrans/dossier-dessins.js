@@ -35,16 +35,27 @@ export function dessins({ q, d, regles, query, texte, entite, signal }) {
   const fin = sources.at(-1)?.survenu_a ?? d.derniere, t1 = fin + Math.min(60e3, ZOOMS[filtres.zoom] / 100), t0 = t1 - ZOOMS[filtres.zoom];
   const filtrer = s => !filtres.technique || techniquesDe(regles.get(s.regle)).includes(filtres.technique);
   const retenus = sources.filter(s => s.survenu_a >= t0 && filtrer(s));
-  const points = retenus.filter(s => filtres.faits || s.nature !== 'fait').map(s => {
-    const m = lire(s.marqueurs), marqueur = Array.isArray(m) && m.includes('dissimulation'), vue = signal(s);
-    const c = s.nature === 'fait' ? 11 : s.nature === 'indice' ? 9 : marqueur ? 10 : s.phase >= 1 && s.phase <= 8 ? s.phase : 11;
-    return { id: s.id, t: s.survenu_a, c, forme: s.nature === 'fait' ? 'fait' : marqueur ? 'marqueur' : s.promu ? 'promu' : s.nature,
+  const disponibilite = retenus.some(s => Array.isArray(lire(s.marqueurs)) && lire(s.marqueurs).includes('disponibilite'));
+  const couloirs = disponibilite ? [...COULOIRS.slice(0, -1), 'Disponibilité', 'Faits'] : COULOIRS;
+  const points = retenus.filter(s => filtres.faits || s.nature !== 'fait').flatMap(s => {
+    const m = lire(s.marqueurs), marqueurs = Array.isArray(m) ? m : [], vue = signal(s);
+    const point = { id: s.id, t: s.survenu_a,
       grav: s.gravite, lib: `${vue.heure} · ${vue.nature} · ${vue.titre}${vue.marqueurs ? ' · ' + vue.marqueurs : ''}`,
       href: lienDessin(id, filtres, { avant: `${s.survenu_a}-${s.id + 1}` }, `signal-${s.id}`), vue };
+    const ps = [];
+    if (s.nature === 'fait') ps.push({ ...point, c: couloirs.length, forme: 'fait' });
+    else {
+      if (s.nature === 'indice') ps.push({ ...point, c: 9, forme: 'indice' });
+      else if (s.phase >= 1 && s.phase <= 8) ps.push({ ...point, c: s.phase, forme: s.promu ? 'promu' : s.nature });
+      // Phase et marqueur ne s'excluent pas. La disponibilité a son couloir seulement si elle est présente,
+      // sans devenir une neuvième phase ni être confondue avec les faits ordinaires.
+      for (const [cle, c] of [['dissimulation', 10], ['disponibilite', 11]]) if (marqueurs.includes(cle)) ps.push({ ...point, c, forme: 'marqueur' });
+    }
+    return ps;
   });
   const ticks = [0, 0.5, 1].map(n => { const t = t0 + (t1 - t0) * n; return { t, mot: filtres.zoom === '1h' ? heure(t) : dateHeure(t) }; });
-  const fr = { t0, t1, points, suite, non, ticks };
-  const blocs = COULOIRS.map((nom, i) => ({ nom, items: points.filter(p => p.c === i + 1), non: non.includes(i + 1) }));
+  const fr = { t0, t1, points, suite, non, ticks, couloirs };
+  const blocs = couloirs.map((nom, i) => ({ nom, items: points.filter(p => p.c === i + 1), non: non.includes(i + 1) }));
 
   // Le même signal peut porter plusieurs techniques et tactiques : une occurrence par technique, un ordre global
   // de première apparition, puis seules les tactiques effectivement portées par la règle sont remplies.
