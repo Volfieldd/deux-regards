@@ -10,10 +10,20 @@ La Vigie est un composant **à part** du site : son propre conteneur, sa propre 
 | B | Conteneur de la Vigie : réception signée, base chaînée, décisions signées appliquées par le site, interrupteurs, ligne de commande, lecture de Zitadel, sauvegarde | fait |
 | C1 | Moteur d'entités : score composite qui s'efface avec le temps, quorum entre sources (deux sources pour une alerte « moyen » ou « haut »), exceptions à source unique, alertes, modes par règle, réponses automatiques prudentes | fait |
 | C2 | Règles au format Sigma, détecteurs comportementaux, listes de menaces, contrôle des rôles sur les sauvegardes, verdicts agrégés | fait |
-| C3 | Capteur en bordure (Cloudflare Worker) | à venir |
-| D | Notifications (e-mail, Signal) ; console `vigie.nicephos.art` (Cloudflare Access + Zitadel) et affichage dans l'admin | notifications faites ; console et affichage à venir |
+| C3 | Capteur en bordure (Cloudflare Worker) | fait côté code ; configuration et essai du déploiement à suivre séparément |
+| D | Notifications (e-mail, Signal) ; console `vigie.nicephos.art` (Cloudflare Access + Zitadel) et affichage dans l’admin | fait côté code : notifications, console et intégration dans l’admin |
 | E2 | Jeu d'attaques rejouable (`npm run attaques`) : scénarios joués contre un site et une Vigie neufs, alertes attendues vérifiées | fait |
 | E4 | Source « réseau » : mandataire de sortie à liste autorisée, sorties directes et flux entre conteneurs hors liste rejetés et journalisés par l'hôte, journaux lus par la Vigie (BV-10, BV-11) | fait côté code ; à appliquer sur l'instance de test |
+
+Le chantier **« Vigie en dossiers »** a son propre découpage A à E, distinct des phases historiques ci-dessus. Sa console est entièrement livrée :
+
+| Livraison | PR fusionnée | Version | Contenu |
+|---|---|---|---|
+| D1 | [#198](https://github.com/Volfieldd/deux-regards/pull/198) | 1.198.0 | Liste et fiche des dossiers, filtres, compteurs, gestes confirmés, scission et correction du compte dans le signal de contrôle des rôles |
+| D2 | [#199](https://github.com/Volfieldd/deux-regards/pull/199) | 1.199.0 | Frise, graphe des entités et matrice ATT&CK en SVG serveur ; listes au téléphone et tableaux équivalents |
+| D3 | [#200](https://github.com/Volfieldd/deux-regards/pull/200) | 1.200.0 | Vue ATT&CK complète, fiches de techniques, calques Navigator et filtre technique du journal |
+
+Les comportements et limites sont décrits plus bas, dans [Console](#console-phase-d3). La prochaine étape de ce chantier, **E — données personnelles**, porte sur les catégories et volumes observés côté site, et leur exploitation par la Vigie ; elle requiert l’accord du propriétaire. La livraison du code ne vaut pas validation de la configuration Cloudflare/Zitadel ni déploiement sur Unraid.
 
 ---
 
@@ -241,7 +251,7 @@ du réseau `nicephos` en réseaux par flux est l'étape suivante (proposé dans 
 
 ## Console (phase D3)
 
-Adresse : `https://vigie.nicephos.art`, servie par la Vigie elle-même sur le port 4200, à son adresse fixe du réseau du tunnel (`VIGIE_CONSOLE_IP`, `172.29.42.20` par défaut). Facultative : sans `VIGIE_CONSOLE_CLIENT_ID`, rien n'écoute sur ce port. Écrans : maquettes MV-01 à MV-14 (`docs/maquettes-vigie/`). Le socle (D3a) apporte les verrous, les sessions, les droits et la vue d'ensemble ; les écrans de lecture (D3b) et les actions (D3c) sont faits ; l'intégration dans l'admin du site (D3d) suit.
+Adresse : `https://vigie.nicephos.art`, servie par la Vigie elle-même sur le port 4200, à son adresse fixe du réseau du tunnel (`VIGIE_CONSOLE_IP`, `172.29.42.20` par défaut). Facultative : sans `VIGIE_CONSOLE_CLIENT_ID`, rien n'écoute sur ce port. Écrans : maquettes MV-01 à MV-14 (`docs/maquettes-vigie/`). Le socle (D3a) apporte les verrous, les sessions, les droits et la vue d'ensemble ; les écrans de lecture (D3b) et les actions (D3c) sont faits ; l’intégration dans l’admin du site (D3d : entrée Sécurité, résumé et bandeau critique) est faite.
 
 - **Écrans de lecture** (D3b) : alertes (liste filtrée, fiche : règle, cas, tactiques MITRE, réponse faite, événements, score par source, historique), journal des événements (filtres sur un index, pages par numéro, fiche d'un événement avec ses deux heures, son origine et son maillon de chaîne), **export CSV** pour les Analystes (10 000 lignes au plus, cellules neutralisées contre les formules, chaque export noté au journal : `vigie_console_export`), entités (les plus chaudes, fiche : score, liens, alertes, décisions, derniers événements), santé (battement du site, analyse, Zitadel, contrôle des rôles, chaîne, canaux, bordure, listes de menaces, disque, version), **flux et provenance des alertes** (diagrammes de MV-11 sur 7 ou 30 jours, rendus par le serveur ; barre de provenance sur la vue d'ensemble). Un **bandeau** rappelle en tête de chaque page les alertes critiques sans intervenant.
 - **Dossiers** (chantier « Vigie en dossiers », D1) : `/dossiers`, avec filtres statut, piste, gravité minimale et phase atteinte ; 50 lignes par page, triées avant pagination. La barre latérale compte les dossiers non clos et la vue d'ensemble les présente à côté des alertes. La fiche `/dossiers/:id` donne les trois lignes d'explication, les entités, les signaux par pages de 40, les alertes, les réponses et le journal. Les fiches d'alerte et d'entité renvoient au dossier. Les tableaux se lisent en cartes au téléphone, sans JavaScript ; frise, graphe et matrice sont disponibles (D2), vue ATT&CK disponible (D3).
