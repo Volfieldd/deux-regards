@@ -8,13 +8,22 @@
 <% const fr = H.lang !== it.lang ? ' lang="fr"' : '';
    const chev = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>';
    const loupe = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
-   const toc = (id) => '<ol' + fr + '>' + H.sections.map(s => '<li><a href="#' + E(s.id) + '">' + E(s.title) + '</a>'
-     + (s.headings.length ? '<ol>' + s.headings.map(h => '<li><a href="#' + E(h.id) + '">' + E(h.text) + '</a></li>').join('') + '</ol>' : '') + '</li>').join('') + '</ol>'; %>
+   // Un chapitre sur sa page (/admin/aide/<chapitre>, UX-A-22) : le sommaire liste les chapitres (celui-ci avec ses titres) ;
+   // sinon toute l'aide, ses titres par chapitre.
+   const un = it.chapitre;
+   const heads = s => (s.headings.length ? '<ol>' + s.headings.map(h => '<li><a href="#' + E(h.id) + '">' + E(h.text) + '</a></li>').join('') + '</ol>' : '');
+   const toc = (id) => '<ol' + fr + '>' + H.sections.map(s => (un
+     ? '<li><a href="/admin/aide/' + E(s.id) + '"' + (s.id === un.id ? ' aria-current="page"' : '') + '>' + E(s.title) + '</a>' + (s.id === un.id ? heads(s) : '') + '</li>'
+     : '<li><a href="#' + E(s.id) + '">' + E(s.title) + '</a>' + heads(s) + '</li>')).join('') + '</ol>'; %>
 <link rel="stylesheet" href="<%= it.asset('admin/v2/suivi-v2.css') %>">
 <div class="v2-suivi">
 <header class="ep">
-  <div class="ep-titre"><h1><%= t('Aide') %></h1></div>
-  <p class="ep-meta"><span><%= t('{n} rubriques', { n: H.sections.length }) %></span><% if (H.lang !== it.lang) { %><span><%= t('L’aide est rédigée en français.') %></span><% } %></p>
+<% if (un) { %>  <a class="ep-retour" href="/admin/aide"><%= t('Toute l’aide') %></a>
+  <div class="ep-titre"><h1<%~ fr %>><%= un.title %></h1></div>
+  <p class="ep-meta"><span><%= t('Aide') %></span>
+<% } else { %>  <div class="ep-titre"><h1><%= t('Aide') %></h1></div>
+  <p class="ep-meta"><span><%= t('{n} rubriques', { n: H.sections.length }) %></span>
+<% } %><% if (H.lang !== it.lang) { %><span><%= t('L’aide est rédigée en français.') %></span><% } %></p>
 </header>
 <div class="aide">
   <nav class="aide-toc" aria-label="<%= t('Sommaire de l’aide') %>">
@@ -22,23 +31,30 @@
     <%~ toc() %>
   </nav>
   <div class="aide-corps">
-    <div class="aide-cherche js-seul" role="search" aria-label="<%= t('Rechercher dans l’aide') %>" data-aide-cherche>
+<% if (!un) { %>    <div class="aide-cherche js-seul" role="search" aria-label="<%= t('Rechercher dans l’aide') %>" data-aide-cherche>
       <div class="champ-a"><label for="aide-q"><%= t('Rechercher dans l’aide') %></label>
         <div class="aide-q"><%~ loupe %><input type="search" id="aide-q" autocomplete="off" placeholder="<%= t('ex. filigrane, ordre, supprimer') %>" aria-describedby="aide-statut" aria-controls="aide-resultats"></div></div>
       <p class="aide-statut" id="aide-statut" role="status" data-aide-statut></p>
       <ol class="aide-resultats" id="aide-resultats" data-aide-resultats hidden></ol>
     </div>
+<% } %>
     <details class="panel plier-p aide-toc-tel">
       <summary><%~ chev %><span><span class="h"><%= t('Sommaire') %></span><span class="sec"><%= t('{n} rubriques', { n: H.sections.length }) %></span></span></summary>
       <nav aria-label="<%= t('Sommaire') %>"><%~ toc() %></nav>
     </details>
-<% H.sections.forEach(s => { %>
+<% (un ? [un] : H.sections).forEach(s => { %>
     <section class="panel aide-section help-section" id="<%= s.id %>" data-help-section aria-labelledby="aide-t-<%= s.id %>"<%~ fr %>>
-      <h2 id="aide-t-<%= s.id %>"><%= s.title %></h2>
+      <h2 id="aide-t-<%= s.id %>"<%~ un ? ' class="sr-only"' : '' %>><%= s.title %></h2>
       <%~ s.html %>
       <p class="aide-haut"><a class="lien-a" href="#contenu"><%= t('Haut de l’aide') %></a></p>
     </section>
 <% }) %>
+<% if (un && (it.precedent || it.suivant)) { %>
+    <nav class="aide-pages" aria-label="<%= t('Chapitres de l’aide') %>"<%~ fr %>>
+<% if (it.precedent) { %>      <a class="btn ghost" href="/admin/aide/<%= it.precedent.id %>" rel="prev"><%= t('Chapitre précédent') %> : <%= it.precedent.title %></a>
+<% } %><% if (it.suivant) { %>      <a class="btn ghost" href="/admin/aide/<%= it.suivant.id %>" rel="next"><%= t('Chapitre suivant') %> : <%= it.suivant.title %></a>
+<% } %>    </nav>
+<% } %>
   </div>
 </div>
 </div>
