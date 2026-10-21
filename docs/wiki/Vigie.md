@@ -22,8 +22,9 @@ Le chantier **« Vigie en dossiers »** a son propre découpage A à E, distinct
 | D1 | [#198](https://github.com/Volfieldd/deux-regards/pull/198) | 1.198.0 | Liste et fiche des dossiers, filtres, compteurs, gestes confirmés, scission et correction du compte dans le signal de contrôle des rôles |
 | D2 | [#199](https://github.com/Volfieldd/deux-regards/pull/199) | 1.199.0 | Frise, graphe des entités et matrice ATT&CK en SVG serveur ; listes au téléphone et tableaux équivalents |
 | D3 | [#200](https://github.com/Volfieldd/deux-regards/pull/200) | 1.200.0 | Vue ATT&CK complète, fiches de techniques, calques Navigator et filtre technique du journal |
+| E | [#202](https://github.com/Volfieldd/deux-regards/pull/202) | 1.202.0 | Catégories et volumes des lectures personnelles, listes, enjeu des dossiers et indice des trois réseaux |
 
-Les comportements et limites sont décrits plus bas, dans [Console](#console-phase-d3). L’étape **E — données personnelles**, autorisée le 21 octobre 2026, ajoute les catégories et volumes des lectures (BV-33), leur enjeu dans les dossiers et l’indice des trois réseaux en 24 h. La livraison du code ne vaut pas validation de la configuration Cloudflare/Zitadel ni déploiement sur Unraid.
+Les comportements et limites sont décrits plus bas, dans [Console](#console-phase-d3). L’étape **E — données personnelles**, livrée dans #202 après accord du 21 octobre 2026, ajoute les catégories et volumes des lectures (BV-33), leur enjeu dans les dossiers et l’indice des trois réseaux en 24 h. La livraison du code ne vaut pas validation de la configuration Cloudflare/Zitadel ni déploiement sur Unraid.
 
 ---
 
