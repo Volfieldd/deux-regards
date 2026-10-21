@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.199.0",
+    "date": "2026-10-21",
+    "pr": 199,
+    "title": {
+      "fr": "Vigie : les dossiers se dessinent",
+      "en": "Vigie: visual case views",
+      "de": "Vigie: Fälle als Diagramme"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "La fiche d’un dossier présente sa frise, le graphe de ses entités et sa matrice ATT&CK. Zoom, faits ordinaires et filtre de technique fonctionnent sans JavaScript, avec des tableaux équivalents et une liste par phase au téléphone. La Lectrice conserve les adresses tronquées. Les dessins ne changent ni la détection ni les réponses.",
+        "en": "Each case now includes a timeline, an entity graph and an ATT&CK matrix. Time windows, ordinary events and technique filtering work without JavaScript, with equivalent tables and a phase list on phones. Readers retain truncated addresses. These views do not change detection or responses.",
+        "de": "Jeder Fall enthält jetzt eine Zeitleiste, ein Entitätendiagramm und eine ATT&CK-Matrix. Zeitfenster, gewöhnliche Ereignisse und Technikfilter funktionieren ohne JavaScript, ergänzt durch Tabellen und eine Phasenliste auf dem Smartphone. Lesende sehen weiterhin gekürzte Adressen. Erkennung und Reaktionen bleiben unverändert."
+      }
+    ]
+  },
+  {
     "version": "1.198.0",
     "date": "2026-10-20",
     "pr": 198,
