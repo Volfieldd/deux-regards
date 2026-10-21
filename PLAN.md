@@ -33,6 +33,10 @@ La purge des dossiers clos non incidents suit la durée du journal, soit 183 jou
 
 Le [complément RGPD](docs/wiki/RGPD-Vigie.md) décrit le traitement, les données, les rôles, les durées effectives, la mise en balance et le préexamen AIPD. Le registre et la procédure des violations sont actualisés ; aucune dispense générale d’AIPD n’est maintenue. Les validations et corrections restent explicites (LEG-V1 à LEG-V7), notamment la durée des incidents, la notice publique et le masquage incomplet des IP dans la graine et le titre des dossiers conservés, reproduit sur une base synthétique. Cette étape ne modifie pas le moteur ni l’interface.
 
+## Correction — Masquage des dossiers conservés (LEG-V3, 21 octobre 2026)
+
+Les copies d’adresses échues sont traitées dans la graine, le titre, les textes, les entités et les signaux, avec le masque canonique partagé par la console. Le rattrapage est transactionnel, reprend après redémarrage et préserve la priorité des adresses encore présentes. Les tests couvrent notamment les IPv6 accolées, les anciens réseaux mal formés, les collisions et les fusions/scissions. Les décisions de conservation encore ouvertes restent dans le [dossier légal](docs/wiki/RGPD-Vigie.md) ; voir l’[étude, § 14.9](docs/etudes/vigie-dossiers.md#149-leg-v3--masquage-des-copies-dadresses-conservées).
+
 ## Principes
 
 - Front simple : HTML/CSS/JS sans framework ni build, rendu côté serveur, dans l'esprit du prototype.

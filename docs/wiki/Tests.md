@@ -10,6 +10,8 @@ npm test
 
 Les tests BV-33 complètent `test/vigie-emission.test.js` (catégories et volumes, listes, absence de contenu, HEAD/refus), `test/chiffrement.test.js` (isolation des compteurs concurrents), `test/vigie-dossiers.test.js` (enjeu, seuil par session, relectures de listes, trois réseaux, fusion/scission/purge) et `test/vigie-console-evenements.test.js` (lecture échappée, masquage, droits et CSV). Ils réutilisent les serveurs et bases jetables existants.
 
+Les tests LEG-V3 de `test/vigie-dossiers.test.js` vérifient le masquage des graines, titres, notes et cibles, les IPv6 accolées ou anciennement mal tronquées, les collisions d’entités et leurs références, les stocks de plus de 1 000 dossiers, la priorité aux nouvelles adresses échues, la reprise transactionnelle et les fusions/scissions après purge. Le masque est partagé avec les écrans de la console.
+
 Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ 40 s. Chaque test travaille dans un dossier temporaire avec sa propre base. Le jeu de démonstration n'est généré qu'une fois par fichier, puis recopié pour chaque test.
 
 | Fichier | Couvre |

@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.210.0",
+    "date": "2026-10-21",
+    "pr": 210,
+    "title": {
+      "fr": "Vigie : masquage des dossiers conservés",
+      "en": "Vigie: masking retained cases",
+      "de": "Vigie: Maskierung aufbewahrter Fälle"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Après la durée de conservation, les dossiers conservés masquent aussi les adresses présentes dans leur titre, leurs explications et leurs anciennes clés. Le rattrapage se fait par lots, sans changer la chronologie ni la chaîne du journal. Les identifiants de compte et de session restent des références distinctes.",
+        "en": "After the retention period, retained cases also mask addresses in their titles, explanations and older keys. Existing cases are processed in batches, without changing their timeline or the event log chain. Account and session identifiers remain distinct references.",
+        "de": "Nach Ablauf der Aufbewahrungsfrist werden auch Adressen in Titeln, Erläuterungen und älteren Schlüsseln aufbewahrter Fälle maskiert. Bestehende Fälle werden stapelweise verarbeitet, ohne ihren zeitlichen Verlauf oder die Protokollkette zu ändern. Konto- und Sitzungskennungen bleiben eigenständige Referenzen."
+      }
+    ]
+  },
+  {
     "version": "1.209.0",
     "date": "2026-10-21",
     "pr": 209,
