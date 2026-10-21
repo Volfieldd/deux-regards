@@ -578,16 +578,16 @@ Les gestes sur un dossier sont des événements chaînés `vigie_dossier` : ouve
 
 ### 10.3 RGPD
 
-- **La surveillance est elle-même un traitement.** Les dossiers contiennent les adresses, les empreintes et les habitudes des comptes de l'équipe. La Vigie est déjà absente des textes du dossier légal du 18 octobre ; il faut l'y ajouter (registre des traitements, base légale : intérêt légitime à sécuriser le site, durée de conservation).
-- **Minimisation** : un dossier contient des clés (adresse, `sub`, `personne:12`), jamais le contenu d'une fiche ni un nom. La Vigie ne voit jamais le nom d'une personne photographiée. Les photographes retrouvent les fiches dans l'admin à partir des numéros.
+- **La surveillance est elle-même un traitement.** Les dossiers contiennent les adresses, les empreintes et les habitudes des comptes de l'équipe. Le complément du 21 octobre figure dans la [fiche RGPD de la Vigie](../wiki/RGPD-Vigie.md) et le [registre](../wiki/RGPD.md) : finalités, intérêt légitime et mise en balance, conservation réelle, préexamen AIPD et droits. Les validations des responsables et les écarts techniques restent suivis explicitement (§ 14.8).
+- **Minimisation** : le contrat BV-33 transmet des clés et catégories, pas le contenu ni le nom des personnes dans les fiches consultées. Cela ne rend pas la Vigie anonyme : comptes, noms des opérateurs de console, titres et motifs peuvent concerner une personne. Les photographes retrouvent les fiches dans l’admin à partir des numéros.
 - **Périmètre d'une violation** (articles 33 et 34) : depuis un dossier classé « incident », un export liste :
   - les objets touchés, par catégorie ;
   - la période ;
   - les comptes et sessions en cause ;
-  - les phases atteintes (lu, exporté, publié).
+  - les phases probantes, sans déduire une publication d’une phase (contrat livré en § 14.5).
 
-  Il sert à juger s'il faut notifier la CNIL sous 72 h, puis prévenir les personnes.
-- **Conservation** : les dossiers clos ordinaires sont effacés après la durée des événements (183 jours par défaut, `retentionDays`) depuis leur dernière activité. Les dossiers encore suivis restent présents ; leurs adresses complètes sont masquées à la même échéance. Les dossiers classés « incident » restent conservés pour le registre des violations (article 33.5), avec ce même masquage ; leur durée propre reste à fixer avec le dossier légal (D38, précisions en § 14.7).
+  Il aide à documenter le périmètre. La version livrée exige un incident clos : ne pas attendre sa clôture ni l’export pour évaluer le risque, notifier dans le délai courant depuis la prise de connaissance et, si nécessaire, informer les personnes.
+- **Conservation** : les dossiers clos ordinaires sont effacés après la durée des événements (183 jours par défaut, `retentionDays`) depuis leur dernière activité. Les dossiers encore suivis restent présents ; le masquage de leurs adresses à la même échéance est incomplet (graine et titre enregistré, § 14.8). Les dossiers classés « incident » restent conservés pour le registre des violations (article 33.5), avec ce même masquage partiel ; leur durée propre reste à fixer avec le dossier légal (D38, précisions en § 14.7).
 
 ---
 
@@ -752,8 +752,17 @@ Les deux écarts hors console relevés pendant E sont corrigés séparément : a
 
 Le choix retenu pour le site est **183 jours par défaut**, comme le journal. La [CNIL, « Tracer les opérations »](https://www.cnil.fr/fr/securite-tracer-les-operations) recommande une période glissante de six mois à un an pour les journaux, avec des exceptions justifiées. Le [guide ANSSI du 28 janvier 2022, § 3.4.5](https://messervices.cyber.gouv.fr/documents-guides/anssi-guide-recommandations_securite_architecture_systeme_journalisation.pdf) reprend cette plage. Ces recommandations soutiennent ce choix ; elles n’imposent pas exactement 183 jours.
 
-La purge des dossiers **clos non incidents** utilise désormais `store.retentionDays` (`VIGIE_RETENTION_DAYS`), au lieu des 395 jours fixes. Le point de départ reste `derniere`, la dernière activité du dossier, et non la date du classement. La limite exacte est conservée ; la purge efface ensuite le dossier et ses liens, conserve les alertes selon leur propre durée et laisse intacte la chaîne du journal. Les dossiers ouverts, en cours ou en sommeil ne sont pas effacés par cette purge. Leurs adresses, comme celles des incidents, restent masquées à l’échéance existante.
+La purge des dossiers **clos non incidents** utilise désormais `store.retentionDays` (`VIGIE_RETENTION_DAYS`), au lieu des 395 jours fixes. Le point de départ reste `derniere`, la dernière activité du dossier, et non la date du classement. La limite exacte est conservée ; la purge efface ensuite le dossier et ses liens, conserve les alertes selon leur propre durée et laisse intacte la chaîne du journal. Les dossiers ouverts, en cours ou en sommeil ne sont pas effacés par cette purge. Le masquage existant de leurs adresses, comme de celles des incidents, est inchangé ; le contrôle documentaire ultérieur a établi qu’il ne couvre pas toutes les copies (§ 14.8).
 
 Cette correction s’applique dès la prochaine purge aux dossiers déjà présents : avec le réglage par défaut, les dossiers clos ordinaires âgés de plus de 183 jours disparaîtront sans attendre 395 jours. Aucun changement des seuils, de la détection, des réponses automatiques, de l’interface ou des maquettes.
 
 La [fiche CNIL sur les violations](https://www.cnil.fr/fr/violations-de-donnees-personnelles-les-regles-suivre) décrit le contenu du registre, sans durée chiffrée générale. L’exception actuelle des dossiers « incident » est donc préservée, **sans la présenter comme une recommandation de conservation illimitée**. La durée propre au registre reste une décision à documenter avec le dossier légal ; elle ne se déduit pas automatiquement des six mois à un an des journaux.
+
+
+### 14.8 Complément du dossier légal
+
+La [fiche de traitement Vigie](../wiki/RGPD-Vigie.md) complète le registre, la répartition des responsabilités et la procédure de violation. Elle distingue le journal, les dossiers, les accès à la console, les exports et le registre des violations ; décrit les durées et leurs déclencheurs réels ; prépare la mise en balance et le préexamen AIPD. L’ancienne affirmation générale d’absence de surveillance ou de profilage est retirée. Les critères présents imposent de poursuivre l’analyse, sans présenter cette fiche comme une AIPD achevée.
+
+La durée des incidents n’est pas inventée à partir de la plage ANSSI/CNIL des journaux : D38 reste partiellement ouverte. Les responsables doivent aussi valider le périmètre réel, les prestataires, les transferts et les mesures déployées. L’information publique doit encore être complétée ; cette livraison est documentaire, sans écran ni maquette modifiés.
+
+**Écart de conservation reproduit sur données synthétiques** : après 200 jours, un incident issu d’une adresse garde l’IP complète dans `dossiers.graine_key` et `dossiers.explication`, alors que les entités et colonnes IP des signaux sont masquées. Les apprentissages légitimes expirent fonctionnellement à 90 jours mais ne sont retirés du réglage qu’à une nouvelle écriture ; les habilitations n’ont pas de purge dédiée. Ces limites sont suivies dans LEG-V3 et LEG-V4, sans changement du moteur dans cette étape. Les contrôles précédents de la purge ne couvraient pas la graine et le titre ; une correction devra étendre les tests et comparer le banc avant/après.
