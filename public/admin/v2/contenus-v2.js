@@ -18,6 +18,10 @@
     ($('input:not([type=hidden]), select, textarea', d) || $('summary', d))?.focus();
   });
 
+  // ----- cartes d'accord : le premier numéro suit le photographe choisi (la prochaine carte de sa lettre) -----
+  const cartesAuteur = $('[data-cards-author]');
+  if (cartesAuteur) cartesAuteur.addEventListener('change', () => { const from = $('[data-cards-from]'); if (from) from.value = cartesAuteur.selectedOptions[0].dataset.next; });
+
   // ----- un lien privé (photo offerte) se sélectionne en entier au focus, prêt à copier -----
   $$('[data-select-all]').forEach(i => i.addEventListener('focus', () => i.select()));
 

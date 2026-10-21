@@ -87,18 +87,21 @@ test('repli : un écran sans gabarit v2 s’affiche en v1, entier, identique à 
   const a = account(c, { sub: 'compte-a' });
   await a.get('/admin');
   const strip = html => html.replace(/\s*<form class="ver-choix"[\s\S]*?<\/form>/, '');
-  for (const url of ['/admin/terrain', '/admin/rencontres/cartes']) {
+  // Tous les écrans de l'admin ont leur gabarit v2 (« Sur le terrain » et les cartes d'accord, les derniers, y sont passés avec les
+  // finitions) ; reste la page de confirmation de la suppression de photos, que seule la v1 écrit : elle montre le repli.
+  const confirmation = () => a.post('/admin/photos/actions', { action: 'delete', ids: ['1'], back: '/admin/photos' });
+  for (const url of ['/admin/photos/actions']) {
     await a.version('v1');
-    const v1 = (await a.get(url)).body;
+    const v1 = (await confirmation()).body;
     await a.version('v2');
-    const res = await a.get(url);
+    const res = await confirmation();
     assert.equal(res.statusCode, 200, url);
     assert.ok(!isV2(res.body), `${url} : pas de gabarit v2, donc la v1`);
     assert.match(res.body, /<span class="ver-note">Écran pas encore en v2\.<\/span> <button type="submit">Revenir à l’admin v1<\/button>/, url);
     assert.equal(strip(res.body), strip(v1), `${url} : la v1 à l’octet près`);
   }
   // Les écrans de la v2 de ce lot.
-  for (const url of ['/admin', '/admin/droits', '/admin/images', '/admin/auteurs', '/admin/reglages/assistants', '/admin/compte', '/admin/photos/lot?ids=1,2', '/admin/photos', '/admin/photos/1', '/admin/a-valider', '/admin/instagram', '/admin/carnet', '/admin/galeries']) {
+  for (const url of ['/admin/terrain', '/admin/rencontres/cartes', '/admin', '/admin/droits', '/admin/images', '/admin/auteurs', '/admin/reglages/assistants', '/admin/compte', '/admin/photos/lot?ids=1,2', '/admin/photos', '/admin/photos/1', '/admin/a-valider', '/admin/instagram', '/admin/carnet', '/admin/galeries']) {
     const res = await a.get(url);
     assert.equal(res.statusCode, 200, url);
     assert.ok(isV2(res.body), `${url} en v2`);
