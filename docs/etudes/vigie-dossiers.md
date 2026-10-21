@@ -731,3 +731,14 @@ La mesure D3 a conduit à alimenter cet index dans `store.add`, uniquement pour 
 Les seuils de 8 lectures et 3 suppressions restent les valeurs initiales : le mois d’observation nécessaire au recalage n’est pas disponible. Les durées existantes ne changent pas (journal : 183 jours ; dossiers non incidents clos : 395 jours après la dernière activité ; incidents : conservation existante, durée D38 toujours à préciser). Confidentialité et RGPD décrivent les nouvelles métadonnées ; elles ne recopient pas les contenus personnels dans un second stockage.
 
 Les bandeaux de la fiche reprennent l’icône et l’enveloppe de texte du composant commun des alertes : le texte ne tombe plus dans la colonne étroite de l’icône. Aucune maquette modifiée. L’ajout visible est le résumé des catégories et volumes dans le journal existant et l’explication de l’enjeu du dossier, sans écran ni script supplémentaire.
+
+
+### 14.5 Périmètre exportable d’un incident (10.3)
+
+Depuis la fiche d’un incident clos non fusionné, `/dossiers/:id/export` présente le périmètre puis un POST avec `_csrf` produit `vigie-incident-<id>.json`. Le droit existant « exporter » réserve ce téléchargement aux Analystes et Administrateurs ; le plafond est relu au POST. Une empreinte lie la confirmation au contenu et un événement `vigie_console_export` doit être écrit avant l’envoi.
+
+Le JSON versionné contient la période, les comptes et sessions, les références d’objets regroupées selon les catégories fermées de BV-33, les signaux conservés et les phases des preuves et jalons. Les anciens objets sans métadonnées sont rangés dans « Catégorie non précisée ». Les volumes de listes sans identifiants sont des opérations à examiner, jamais un nombre de personnes distinctes. La publication n’est pas inférée d’une phase ; un fait non promu ne devient pas une preuve d’exfiltration. Les champs d’adresse réseau, les notes libres et les contenus personnels ne sont pas exportés.
+
+Les références persistent après purge des sources, selon la conservation existante du dossier. Un dossier tronqué ou des champs bornés sont signalés dans le fichier. Au-delà de 10 000 signaux, 2 000 comptes et sessions rattachés ou 10 Mio, refus explicite sans fichier partiel. Cet instantané sert à préparer le registre des violations ; effets, mesures et décision de notification restent à documenter par le responsable. D38 n’est pas modifiée ici.
+
+Écart aux maquettes : MV-13 n’avait ni lien ni confirmation d’export d’incident ; ces deux ajouts concrétisent la section 10.3 en reprenant les composants existants. Le JSON préserve les catégories multiples et les références sans créer de cellules exécutables dans un tableur. Aucune maquette n’est modifiée.

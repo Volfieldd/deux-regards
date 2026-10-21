@@ -124,7 +124,7 @@ export const LIBELLES = {
   vigie_console_refus: 'Accès à la console refusé',
   vigie_console_arrivee: 'Arrivée dans la console sans attribution',
   vigie_console_droits: 'Droits de la console changés',
-  vigie_console_export: 'Export du journal',
+  vigie_console_export: 'Export de la console',
 };
 
 // Le filtre « Type », par familles (MV-03).

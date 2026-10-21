@@ -1,0 +1,14 @@
+<%
+/* Confirmation de l'export : aucun identifiant personnel dans le titre ni dans cette présentation du périmètre. */
+const v = it.vue;
+layout('./layout', { titre: it.titre });
+%>
+<header class="ep"><a class="ep-retour" href="/dossiers/<%= v.id %>">Revenir au dossier #<%= v.id %></a><h1>Exporter l’incident #<%= v.id %></h1></header>
+<section class="ds-section"><h2>Préparer le registre des violations</h2>
+<% if (v.erreur) { %><p class="note-a"><%= v.erreur %></p><% } else { %>
+<p>Le fichier JSON contient les <%= v.signaux %> signaux conservés, les références des objets regroupées par catégorie, la période, les comptes, les sessions et les phases atteintes.</p>
+<p>Il ne contient ni le contenu des fiches, ni les adresses réseau, ni les notes libres. Les listes sans identifiants ne permettent pas de compter les personnes touchées. Une phase ne suffit pas à conclure qu’une publication a eu lieu.</p>
+<% if (v.tronque) { %><p class="note-a">Ce dossier est tronqué : le fichier le signalera. Il ne décrit pas nécessairement tout l’incident.</p><% } %>
+<p>Les références déjà conservées restent exportables après la purge du journal. Ce fichier aide à préparer le registre des violations ; les effets, les mesures prises et la décision de notification restent à documenter.</p>
+<form method="post" action="/dossiers/<%= v.id %>/export"><input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="revision" value="<%= v.revision %>"><p>Le téléchargement sera noté dans le journal de la Vigie. Conservez ce fichier dans l’espace réservé au traitement de l’incident.</p><div class="btns-ligne"><button class="btn" type="submit">Télécharger le périmètre en JSON</button><a class="btn ghost" href="/dossiers/<%= v.id %>">Annuler</a></div></form>
+<% } %></section>
