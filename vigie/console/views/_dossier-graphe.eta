@@ -1,0 +1,6 @@
+<% const x = it.vue.dessins; %>
+<% if (x.graphe) { %><div class="ds-graphe"><figure class="ds-dessin"><div class="ds-std"><%~ x.graphe.std %></div><div class="ds-large"><%~ x.graphe.large %></div><figcaption><ul class="ds-leg" aria-label="Lire le graphe"><% for (const [c, mot] of [['fort','lien fort'],['moyen','lien moyen'],['faible','lien faible'],['manuel','rattachement manuel']]) { %><li><span class="ds-sym e-<%= c %>" aria-hidden="true"></span><%= mot %></li><% } %></ul></figcaption></figure></div><% } %>
+<% if (x.sansActeur) { %><p>Aucun acteur réseau rattaché : aucune adresse n’est inventée dans le graphe.</p><% } %>
+<p class="sec"><%= x.note %> Les objets de même nature sont regroupés ; les dossiers voisins partagent un acteur, sans fusion implicite. Les entités détachées restent dans le tableau seulement.</p>
+<% if (x.grapheCoupe) { %><p class="note-a">Le graphe montre les 40 premiers nœuds d’entités actives ; le tableau donne la suite.</p><% } %>
+<% if (x.voisins.length) { %><p>Dossiers voisins, par un acteur commun : <% for (const d of x.voisins) { %><a class="vg-lien" href="/dossiers/<%= d.id %>">#<%= d.id %></a> <% } %><% if (x.voisinsCoupes) { %> (les 10 premiers)<% } %></p><% } %>

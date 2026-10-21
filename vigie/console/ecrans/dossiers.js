@@ -8,6 +8,8 @@ import { can } from '../droits.js';
 import { adresseDetail, masquer, dateHeure, gravite, nombre } from '../format.js';
 import { lire, titreDe, DECISIONS, MODES } from '../lexique.js';
 import { mitre } from './alertes.js';
+import { reglesAttack } from '../attack.js';
+import { dessins, filtresDessin, conditionTechnique, lienDessin } from './dossier-dessins.js';
 
 export const PAGE = 50, SIGNAUX = 40;
 const MAX = 10_000;
@@ -121,6 +123,7 @@ function entite(e, role) {
 function signal(s, role, regles) {
   const attaque = mitre(regles.get(s.regle)?.tags);
   return { id: s.id, heure: quand(s.survenu_a), phase: phase(s.phase), nature: s.promu ? 'Fait devenu jalon' : NATURES[s.nature] || 'Fait',
+    grav: gravite(s.gravite),
     marqueurs: (Array.isArray(lire(s.marqueurs)) ? lire(s.marqueurs) : []).slice(0, 2).map(m => texte(m, role, 40)).join(', '),
     titre: texte(titreDe(s.regle, regles), role), regle: texte(s.regle, role, 120), cas: texte(regles.get(s.regle)?.cas, role, 40), techniques: attaque?.techniques || [],
     entite: texte([s.entite_key, s.sub, s.session, s.ip, s.objet].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(' · '), role, 1000),
@@ -129,11 +132,12 @@ function signal(s, role, regles) {
 export function fiche({ db, engine, role = 'viewer', id, query = {} }) {
   const q = requetesDossiers(db), d = q.dossier.get(id);
   if (!d) return null;
-  const x = lire(d.explication) || {}, regles = new Map((engine?.rules?.() || []).map(r => [r.id, r]));
+  const x = lire(d.explication) || {}, regles = reglesAttack(engine), filtres = filtresDessin(query);
+  const technique = conditionTechnique(regles, filtres.technique);
   const avant = /^(\d{1,15})-(\d{1,12})$/.exec(str(query.avant));
   const rows = q.sql(`SELECT s.*, e.seq AS present FROM dossier_signaux s LEFT JOIN events e ON e.seq = s.seq WHERE s.dossier_id = ?
-    ${avant ? 'AND (s.survenu_a < ? OR (s.survenu_a = ? AND s.id < ?))' : ''} ORDER BY s.survenu_a DESC, s.id DESC LIMIT ${SIGNAUX + 1}`)
-    .all(id, ...(avant ? [Number(avant[1]), Number(avant[1]), Number(avant[2])] : []));
+    ${technique.sql} ${avant ? 'AND (s.survenu_a < ? OR (s.survenu_a = ? AND s.id < ?))' : ''} ORDER BY s.survenu_a DESC, s.id DESC LIMIT ${SIGNAUX + 1}`)
+    .all(id, ...technique.args, ...(avant ? [Number(avant[1]), Number(avant[1]), Number(avant[2])] : []));
   const derniers = rows.slice(0, SIGNAUX), dernier = derniers.at(-1);
   const ents = q.entites.all(id), histoires = q.histoire.all(id), alertes = q.alertes.all(id);
   const journal = histoires.slice(0, 50).map(h => {
@@ -144,13 +148,14 @@ export function fiche({ db, engine, role = 'viewer', id, query = {} }) {
   });
   const reponses = q.sql(`SELECT de.* FROM decisions de JOIN alerts a ON a.id = de.alerte_id WHERE a.dossier_id = ? ORDER BY de.id DESC LIMIT 51`).all(id);
   return { ...ligne(d, q, role), lecteur: !can(role, 'dossiers_traiter'), agir: can(role, 'dossiers_traiter') && !d.fusionne_dans,
+    dessins: dessins({ q, d, regles, query, texte: v => texte(v, role), entite: e => entite(e, role), signal: s => signal(s, role, regles) }),
     clos: d.statut === 'clos', tronque: Boolean(d.tronque), lignes: (Array.isArray(x.lignes) ? x.lignes : []).slice(0, 3).map(s => texte(s, role, 2000)),
     modifs: (Array.isArray(x.modificateurs) ? x.modificateurs : []).slice(0, 10).map(s => texte(s, role)),
     non: (Array.isArray(x.non_observees) ? x.non_observees : []).slice(0, 8).map(s => texte(s, role, 40)),
     entitesVue: ents.slice(0, 200).map(e => entite(e, role)), entitesCoupees: ents.length > 200,
     signaux: derniers.map(s => signal(s, role, regles)), avantInvalide: query.avant != null && !avant,
-    suivante: rows.length > SIGNAUX ? `/dossiers/${id}?avant=${dernier.survenu_a}-${dernier.id}#signaux` : null,
-    debut: avant ? `/dossiers/${id}#signaux` : null,
+    suivante: rows.length > SIGNAUX ? lienDessin(id, filtres, { avant: `${dernier.survenu_a}-${dernier.id}` }, 'signaux') : null,
+    debut: avant ? lienDessin(id, filtres, {}, 'signaux') : null,
     alertesVue: alertes.slice(0, 200).map(a => ({ id: a.id, titre: texte(titreDe(a.regle, regles), role), grav: gravite(a.gravite), mode: MODES[a.mode] || '', statut: a.statut === 'close' ? 'Close' : a.statut === 'en_cours' ? 'Prise en charge' : 'Ouverte' })), alertesCoupees: alertes.length > 200,
     reponses: reponses.slice(0, 50).map(r => ({ id: r.id, type: DECISIONS[r.kind] || r.kind, cible: texte(r.cible, role, 200), motif: texte(r.motif, role),
       alerte: r.alerte_id, date: quand(r.cree_a), fin: r.leve_a ? `levée le ${quand(r.leve_a)}` : `jusqu’au ${quand(r.fin)}` })), reponsesCoupees: reponses.length > 50,
