@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Console de la Vigie : le seul script de la page (chargé avec defer ; le thème s'applique avant, par theme.js). Rien n'en
 // dépend : sans lui, tout se lit et tout se fait (le menu du téléphone s'ouvre par #admin-nav, sans script).
 //   - bouton « thème » du pied de la barre latérale : bascule clair / sombre, mémorisée dans ce navigateur ;

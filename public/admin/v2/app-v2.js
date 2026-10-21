@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // App de terrain de la v2 (MQ-10) : amélioration progressive de l'écran « Nouvelle rencontre ». Sans ce script, le
 // formulaire part tel quel (POST multipart) et la langue de la personne change par :has() ; avec lui : position, photo de
 // repère réduite à 1 600 px, signature au doigt (gardée après un refus du serveur, « Effacer » puis « Défaire »),

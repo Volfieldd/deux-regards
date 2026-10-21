@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // La photothèque (admin v2) : ce que le script ajoute à views/admin/v2/photos.eta, après admin-v2.js (dont il reprend
 // $, T, post, toast, temoin, fieldError, onPick…). Repris de la v1 (public/admin/admin.js : planche, inspecteur, loupe,
 // glisser, import), avec les règles de la v2 : un champ refusé se dit sous lui (UX-A-14) ; chaque geste qui se défait

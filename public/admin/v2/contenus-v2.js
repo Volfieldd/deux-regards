@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Personnes, une rencontre, Séries, Sorties et Voyages (admin v2, vague 3b) : ce que le script ajoute à leurs gabarits
 // (views/admin/v2/), après admin-v2.js (dont il reprend $, $$, T, Th, esc, post, toast, temoin, fieldError, onPick).
 // Tout marche sans lui (formulaires POST et jeton, ancres, :target) ; avec lui : une série s'enregistre quand on quitte un

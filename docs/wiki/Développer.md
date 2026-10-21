@@ -1,6 +1,6 @@
 # Développer
 
-Cette page est pour qui reprend le code : où sont les choses, quelles règles suivre, comment une modification arrive en ligne. Les choix d'architecture et l'historique sont dans [`PLAN.md`](https://github.com/Volfieldd/deux-regards/blob/main/PLAN.md).
+Cette page est pour qui reprend le code : où sont les choses, quelles règles suivre, comment une modification arrive en ligne. Les choix d'architecture et l'historique sont dans [`PLAN.md`](https://github.com/Volfieldd/deux-regards/blob/main/PLAN.md). Pour un agent de code (Codex, Claude Code…), le point d'entrée est [`AGENTS.md`](https://github.com/Volfieldd/deux-regards/blob/main/AGENTS.md), à la racine du dépôt : il renvoie ici et ajoute les consignes propres à une machine partagée.
 
 ## Organisation du code
 
@@ -30,6 +30,7 @@ Cette page est pour qui reprend le code : où sont les choses, quelles règles s
 - **Réglages** : table `settings`, une clé par réglage, valeur JSON. Un texte « par défaut » est stocké vide et affiché tel quel dans l'admin (exemple : `server/rights.js`).
 - **Originaux** : jamais servis. Seules les variantes sortent (`/media/`, `/admin/media/` pour les brouillons).
 - **Accessibilité** : cibles d'au moins 44 px sur téléphone, focus visible, champs étiquetés ; l'admin doit rester utilisable sur iPhone (projet e2e `iphone`).
+- **Droits sur le code** : le code est propriétaire (`LICENSE`). Tout fichier JS ou CSS servi aux navigateurs (`public/`, `vigie/console/public/`) commence par la ligne `/*! © 2026 Sébastien Wojcicki. Tous droits réservés … */` ; copiez-la de `public/js/site.js`. `test/mention-droits.test.js` échoue si un fichier l'oublie.
 - **Tests** : toute correction de bogue arrive avec le test qui l'aurait détecté.
 
 ## Cycle d'une modification
