@@ -120,9 +120,20 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 | `test/aide.test.js` | aide en ligne : toutes les sections, **aucun lien interne cassé**, lien « Aide sur cette page » de chaque écran ; aide traduite (anglais, allemand) : mêmes titres et ancres que le français |
 | `test/db.test.js` | migrations, seed (12 photos, rien d'orphelin en cas d'échec), slugs |
 
-Outils partagés : `test/helpers.js` (base, dossier et application de test), `test/oidc-provider.js` (faux fournisseur OIDC), `test/fixtures/` (jetons FreeTSA réels).
+Outils partagés : `test/helpers.js` (base, dossier et application de test), `test/duree.js` (mesures de durée et attentes, voir ci-dessous), `test/oidc-provider.js` (faux fournisseur OIDC), `test/fixtures/` (jetons FreeTSA réels).
 
 L'encodage AVIF est mis au plus rapide pendant les tests (`AVIF_EFFORT=0`, dans le script `npm test`). L'horodatage y est désactivé (`TSA_URL=off`) : les tests qui en ont besoin utilisent un faux service, qui renvoie des jetons FreeTSA réels enregistrés dans `test/fixtures/`.
+
+### Tests de durée
+
+La machine de développement est souvent chargée (plusieurs agents en parallèle : charge de 60 à 95 sur 16 cœurs). Un seuil en millisecondes y échoue au hasard, puis passe relancé seul. Règle : **mesurer le travail ou comparer des durées relatives ; jamais un seuil absolu seul.** Dans l'ordre de préférence :
+
+1. **Durées relatives** : une saisie hostile contre une saisie ordinaire, 8 000 signes contre 1 000, une requête piégée contre la même requête sans piège. Un défaut (retour arrière d'une expression régulière, boucle quadratique) change le rapport d'un ordre de grandeur ; la charge, qui touche les deux mesures, ne le change pas.
+2. **Compter le travail** plutôt que l'horloge (appels, pas) : par exemple un `Set` qui compte ses `has()` pour les ancres d'intertitres (linéaire : au plus 2 par ancre).
+3. **Meilleur de N essais** (`meilleur()`, `meilleurAsync()` de `test/duree.js`) : la charge ne fait qu'allonger une mesure, jamais la raccourcir.
+4. **Un seuil multiplié**, justifié en commentaire par la durée du défaut mesurée, seulement si rien d'autre ne marche.
+
+Une **attente** n'est pas une mesure : on interroge jusqu'à une échéance large (`attendre()`, 30 s), jamais un nombre fixe de tentatives ni un délai fixe, et on libère les tâches simulées par une barrière plutôt que par une minuterie. Chaque test de durée doit encore échouer quand on réintroduit le défaut qu'il garde : on le vérifie en le réintroduisant dans une copie, puis on rétablit.
 
 ## Tests navigateur (Playwright)
 

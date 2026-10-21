@@ -40,11 +40,13 @@ const programmed = async (c, body = 'Version validée.\n\nphoto:brume-sur-la-loi
 test('revue 1a : ancres d’intertitres en temps linéaire, sans collision', () => {
   const ids = new Set();
   assert.deepEqual([ancre('Le quai', ids), ancre('Le quai', ids), ancre('le-quai-2', ids), ancre('Le quai', ids)], ['le-quai', 'le-quai-2', 'le-quai-2-2', 'le-quai-3']);
-  const many = new Set();
-  const t0 = performance.now();
+  // On compte le travail, pas l'horloge : chaque ancre doit coûter un nombre borné de recherches dans l'ensemble.
+  // La recherche pas à pas (a-2, a-3, a-4…) en ferait n²/2, soit 200 millions pour 20 000 ancres.
+  class Compte extends Set { recherches = 0; has(v) { this.recherches++; return super.has(v); } }
+  const many = new Compte();
   for (let i = 0; i < 20000; i++) ancre('a', many);
   assert.equal(many.size, 20000);
-  assert.ok(performance.now() - t0 < 1000, `20 000 ancres en ${Math.round(performance.now() - t0)} ms`);
+  assert.ok(many.recherches <= 2 * 20000, `20 000 ancres : ${many.recherches} recherches (linéaire : 20 000 à 40 000)`);
 });
 
 test('revue 1b : structure plafonnée à l’enregistrement ; un billet trop lourd déjà en base est rendu vide, sans erreur', async t => {
@@ -95,7 +97,9 @@ test('revue 1c : aperçu et enregistrement automatique : structure refusée (422
   let r = await c.seb.json(`/admin/carnet/${p.id}/apercu`, { langue: 'fr', body: '_a'.repeat(30000) });
   assert.equal(r.statusCode, 422);
   assert.match(r.json().error, /marques/);
-  assert.ok(performance.now() - t0 < 2000);
+  // Sans la garde, le rendu de ces 30 000 marques prend 26 s (mesuré) ; avec elle, quelques dizaines de millisecondes.
+  // Plafond à 10 s : cinq fois l'ancien seuil, toujours très loin du défaut, et la charge de la machine n'y change rien.
+  assert.ok(performance.now() - t0 < 10_000, `aperçu refusé en ${Math.round(performance.now() - t0)} ms`);
   assert.equal((await c.seb.json(`/admin/carnet/${p.id}/brouillon`, { langue: 'fr', body: '>'.repeat(3000) })).statusCode, 422);
   for (let i = 1; i < 60; i++) assert.equal((await c.seb.json(`/admin/carnet/${p.id}/apercu`, { langue: 'fr', body: 'Un texte.' })).statusCode, 200, `aperçu ${i}`);
   r = await c.seb.json(`/admin/carnet/${p.id}/apercu`, { langue: 'fr', body: 'Un texte.' });

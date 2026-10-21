@@ -125,12 +125,19 @@ test('descriptions : le calcul tourne dans un processus à part (le site n’att
   const make = (mode, extra = {}) => createFlorence({ dir, worker: FAKE_WORKER, args: [mode], ...extra });
   // 1,5 s de calcul sans rendre la main, dans l'autre processus : la boucle d'événements du site continue.
   const slow = make('lent');
-  let worst = 0, last = Date.now();
-  const iv = setInterval(() => { const n = Date.now(); worst = Math.max(worst, n - last); last = n; }, 10);
+  // Durée relative, pas un seuil en ms : si le calcul tournait dans le site, la boucle resterait figée pendant presque
+  // tout le calcul (le plus long intervalle sans battement ≈ la durée totale) ; sous charge, les battements prennent
+  // du retard mais jamais la moitié de la durée.
+  let worst = 0, last = performance.now();
+  const iv = setInterval(() => { const n = performance.now(); worst = Math.max(worst, n - last); last = n; }, 10);
+  const debut = performance.now();
   const text = await slow.describe(img, 'base');
+  const total = performance.now() - debut;
+  await new Promise(r => setTimeout(r, 30));                                                // un tour de minuteries : le battement en retard est compté
   clearInterval(iv);
   assert.match(text, /^A fake caption \(base, \d+ octets\)\.$/);
-  assert.ok(worst < 1000, `boucle bloquée ${worst} ms`);
+  assert.ok(total >= 1400, `le faux calcul dure 1,5 s (${Math.round(total)} ms)`);
+  assert.ok(worst < total / 2, `boucle bloquée ${Math.round(worst)} ms sur ${Math.round(total)} ms de calcul`);
   assert.equal(await slow.describe(img, 'base'), text);                                     // le processus resservi
   await slow.unload();
   // Le modèle ne se charge pas : erreur du modèle.
@@ -143,13 +150,13 @@ test('descriptions : le calcul tourne dans un processus à part (le site n’att
   await assert.rejects(make('ok').describe(Buffer.from('pas une image'), 'base'), err => !(err instanceof ModelError));
   // « Éteindre et effacer » en plein calcul : la tâche échoue tout de suite, le dossier du modèle disparaît.
   fs.mkdirSync(path.join(dir, 'onnx-community'), { recursive: true });
-  const busy = make('bloque');
+  // Pas de seuil en ms : le délai du calcul est long (30 s) ; si « Éteindre » attendait ce délai au lieu d'arrêter le
+  // processus, la tâche échouerait avec « trop longtemps » (ou le test dépasserait son délai), pas avec « arrêt demandé ».
+  const busy = make('bloque', { timeoutMs: 30_000 });
   const p = busy.describe(img, 'base');
   await new Promise(r => setTimeout(r, 300));
-  const t0 = Date.now();
   await busy.remove();
   await assert.rejects(p, err => err instanceof ModelError && /arrêt demandé/.test(err.message));
-  assert.ok(Date.now() - t0 < 1000);
   assert.equal(fs.existsSync(dir), false);
   // Éteint pendant la réduction de l'image : rien ne démarre ensuite.
   const early = make('ok');
