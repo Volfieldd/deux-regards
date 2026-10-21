@@ -53,10 +53,10 @@ test('ATT&CK : étiquettes historiques indépendantes de la règle actuelle et d
 
 test('ATT&CK : migration rattrapée sans réécrire la chaîne, doublons ignorés et index purgé', t => {
   const v = environnement(t);
-  v.db.exec('DROP TRIGGER events_techniques_ajout; DROP TRIGGER events_techniques_effacer; DROP TABLE events_techniques; DROP INDEX dossier_signaux_regle;');
   const seq = noter(v, { tags: [...tags, 'attack.T1078', 'attack.t1550.004', 'attack.t1078x'] });
   noter(v, {}, { detail: '{cassé' });
   const avant = v.db.prepare('SELECT seq,chain,detail FROM events ORDER BY seq').all();
+  v.db.exec('DROP TRIGGER events_techniques_effacer; DROP TABLE events_techniques; DROP INDEX dossier_signaux_regle;');
   v.db.exec(fs.readFileSync(new URL('../vigie/migrations/017_techniques_evenements.sql', import.meta.url), 'utf8'));
   assert.deepEqual(v.db.prepare('SELECT seq,chain,detail FROM events ORDER BY seq').all(), avant);
   assert.deepEqual(v.db.prepare('SELECT technique FROM events_techniques WHERE seq = ? ORDER BY technique').pluck().all(seq), ['T1078', 'T1550.004']);
@@ -152,4 +152,16 @@ test('ATT&CK : erreurs et identifiants hostiles refusés sans interpolation, fic
   assert.equal((await v.get(cookie, '/attack/T1001')).statusCode, 200);
   const r = await v.get(cookie, '/evenements?technique=' + encodeURIComponent(PIEGE));
   assert.equal(r.statusCode, 200); assert.match(r.body, /Technique inconnue/); assert.doesNotMatch(r.body, /<img src=x/);
+});
+
+// Le signal et son index se valident ensemble ; un événement rejeté plus tard dans le lot annule les deux.
+test('ATT&CK : index et maillon atomiques, lot rejeté et renvoi idempotent', t => {
+  const v = environnement(t), e = { id: randomUUID(), type: 'vigie_signal', severity: 'info', composant: 'vigie', canal: 'interne', confiance: 'constaté', detail: { tags } };
+  const avant = v.db.prepare('SELECT count(*) FROM events').pluck().get();
+  assert.throws(() => v.store.add([e, { id: randomUUID(), type: 'invalide', severity: 'info' }]), /événement invalide/);
+  assert.equal(v.db.prepare('SELECT count(*) FROM events').pluck().get(), avant);
+  assert.equal(v.db.prepare('SELECT count(*) FROM events_techniques').pluck().get(), 0);
+  assert.equal(v.store.add([e, e]), 1);
+  assert.equal(v.db.prepare('SELECT count(*) FROM events_techniques').pluck().get(), 1);
+  assert.ok(v.store.verify().ok);
 });

@@ -1071,3 +1071,6 @@ figure.fx-dessin { margin: 0; }
 .ak-sans a { overflow-wrap: anywhere; }
 .ak-export { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 12px; }
 .ak-export .btn { white-space: normal; }
+
+.ak-tactique .ak-tq a.vg-lien { display: block; }
+@media (max-width: 720px) { .ak-globale .ak-tac.ak-vide { display: block; } }
