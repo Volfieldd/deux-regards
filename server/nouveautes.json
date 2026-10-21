@@ -1,5 +1,27 @@
 [
   {
+    "version": "1.203.0",
+    "date": "2026-10-21",
+    "pr": 203,
+    "title": {
+      "fr": "Admin v2 : les dernières finitions",
+      "en": "Admin v2: the last finishing touches",
+      "de": "Admin v2: die letzten Feinschliffe"
+    },
+    "items": [
+      {
+        "fr": "Dans les Carnets et les galeries privées, les confirmations (révoquer, effacer, nouveau lien ou mot de passe, fermer, supprimer, renvoyer, retirer) s'ouvrent dans une fenêtre de la page. Les réglages d'une galerie et d'un accès s'enregistrent quand vous quittez le champ, avec « Défaire ». La liste des galeries prend le format des autres listes.",
+        "en": "In Carnets and private galleries, confirmations (revoke, erase, new link or password, close, delete, send back, withdraw) open in a window on the page. A gallery's or an access's settings are saved when you leave the field, with “Undo”. The gallery list now looks like the other lists.",
+        "de": "In den Carnets und privaten Galerien öffnen sich die Bestätigungen (widerrufen, löschen, neuer Link oder neues Passwort, schließen, löschen, zurückgeben, zurückziehen) in einem Fenster der Seite. Die Einstellungen einer Galerie und eines Zugangs werden beim Verlassen des Feldes gespeichert, mit „Rückgängig“. Die Galerieliste hat das Format der anderen Listen."
+      },
+      {
+        "fr": "« Sur le terrain » et les cartes d'accord passent en v2. Le Journal nomme le voyage ou la série concernés et détaille les actions groupées (« Publiées : 5 photos »). L'aide a une page par chapitre et un panneau d'aide à côté de la page ; une page refusée garde la mise en page de l'admin.",
+        "en": "“In the field” and the agreement cards move to v2. The Log names the trip or series concerned and details bulk actions (“Published: 5 photos”). The help has one page per chapter and a help panel beside the page; a refused page keeps the admin layout.",
+        "de": "„Unterwegs“ und die Einverständniskarten wechseln zu v2. Das Protokoll nennt die betroffene Reise oder Serie und beschreibt Sammelaktionen („Veröffentlicht: 5 Fotos“). Die Hilfe hat eine Seite pro Kapitel und ein Hilfefenster neben der Seite; eine verweigerte Seite behält das Admin-Layout."
+      }
+    ]
+  },
+  {
     "version": "1.202.0",
     "date": "2026-10-21",
     "pr": 202,
