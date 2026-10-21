@@ -112,10 +112,12 @@ test('BV-33 : catégories et volumes lisibles, bornés, échappés et exportable
   const v = setup(t);
   const seq = v.add({ type: 'sensitive_read', severity: 'info', sub: 'compte-e', session: 'session-e', ip: '198.51.100.23',
     detail: { objet: 'personne', id: PIEGE, categorie: ['identite', 'mineur', PIEGE], objets: 8, dechiffrements: 24, octets_servis: 4500, liste: true } });
+  v.add({ type: 'sensitive_read', severity: 'info', detail: { objet: 'personne', objets: 1, dechiffrements: 0 } });
   const lire = await v.login('lectrice-e', 'Lectrice', 'viewer');
   const journal = await lire('/evenements?type=sensitive_read');
   assert.equal(journal.statusCode, 200);
   for (const texte of ['identité', 'personne mineure et parent', '8 objets affichés', '24 déchiffrements', 'octets de réponse']) assert.ok(journal.body.includes(texte), texte);
+  assert.match(journal.body, /1 objet affiché/); assert.match(journal.body, /0 déchiffrement/);
   assert.ok(!journal.body.includes(PIEGE)); assert.doesNotMatch(journal.body, /198\.51\.100\.23/);
   const fiche = await lire(`/evenements/${seq}`);
   assert.equal(fiche.statusCode, 200); assert.match(fiche.body, /octets_servis/); assert.match(fiche.body, /&lt;img/);

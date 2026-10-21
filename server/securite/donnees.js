@@ -11,7 +11,7 @@ export function categoriesRencontre(e) {
     e.adult === 0 && e.guardian ? 'mineur' : null,
     e.hasSignature || e.signature_png || ((e.hasCard || e.card_jpeg) && e.consent_source === 'carte' && e.consent) ? 'accord_signe' : null,
     e.place || (e.lat != null && e.lon != null) ? 'localisation' : null,
-    e.details || e.last?.message ? 'message_libre' : null,
+    e.details || e.last?.message || e.messageHistorique ? 'message_libre' : null,
   ].filter(Boolean);
 }
 

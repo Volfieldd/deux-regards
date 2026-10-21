@@ -364,6 +364,30 @@ test('BV-33 : catégories des fiches, listes, comptes et cartes ; déchiffrement
   assert.deepEqual(vide.detail.categorie, []); assert.equal(vide.detail.objets, 0);
 });
 
+test('BV-33 : les messages de l’historique sont catégorisés seulement lorsqu’ils sont livrés', async t => {
+  const cle = 'cle-de-test-historique-01234567890123456789';
+  const c = await withVigie(t, { env: { DATA_KEY: cle } }), coffre = createVault(cle), cookies = await c.login();
+  const jul = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const id = Number(c.db.prepare("INSERT INTO encounters (ref, author_id, created_at, updated_at) VALUES ('J-0043', ?, ?, ?)").run(jul, Date.now(), Date.now()).lastInsertRowid);
+  c.app.people.sync();
+  const per = c.db.prepare('SELECT person_id FROM encounters WHERE id = ?').pluck().get(id);
+  const ajout = non_verifiee => c.db.prepare('INSERT INTO encounter_events (encounter_id, at, kind, detail) VALUES (?, ?, ?, ?)')
+    .run(id, Date.now(), 'visiteur', coffre.seal(JSON.stringify({ message: 'Message historique confidentiel', ...(non_verifiee ? { non_verifiee: true } : {}) })));
+  ajout(true);
+  const lire = async (url, type, message) => {
+    const r = await c.app.inject({ url, cookies }); assert.equal(r.statusCode, 200);
+    if (type === 'sensitive_read') assert.match(r.body, /Message historique confidentiel/);
+    const e = (await c.flush()).of(type).at(-1);
+    assert.equal(e.detail.categorie.includes('message_libre'), message, url);
+    assert.equal(e.detail.octets_servis, r.rawPayload.length);
+    assert.doesNotMatch(JSON.stringify(e), /Message historique confidentiel/);
+  };
+  await lire(`/admin/rencontres/${id}`, 'sensitive_read', true);
+  for (const url of [`/admin/rencontres/${id}/export.zip`, `/admin/personnes/${per}/export.zip`]) await lire(url, 'sensitive_export', false);
+  ajout(false);
+  for (const url of [`/admin/rencontres/${id}/export.zip`, `/admin/personnes/${per}/export.zip`]) await lire(url, 'sensitive_export', true);
+});
+
 test('déchiffrement impossible d’une donnée personnelle : signalé, regroupé par minute', async t => {
   const c = await withVigie(t);
   const sealed = createVault('a'.repeat(32)).seal('Camille');

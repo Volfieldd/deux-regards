@@ -92,10 +92,12 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   function detail(request, reply, id, extra = {}) {
     const e = enc.get(id);
     if (!e) return reply.callNotFound();
-    noterLecture(request, { objet: 'rencontre', id: String(id), categorie: categoriesRencontre(e) });
+    const events = enc.events(id);
+    // BV-33 : la fiche rend aussi les messages de l’historique, absents de enc.get(). Ne garder que leur présence.
+    noterLecture(request, { objet: 'rencontre', id: String(id), categorie: categoriesRencontre({ ...e, messageHistorique: events.some(ev => ev.kind === 'visiteur' && ev.detail?.message) }) });
     const search = String(request.query.q || '').slice(0, 100);
     return page(request, reply, 'encounter', {
-      title: e.ref ? request.t('Rencontre {ref}', { ref: e.ref }) : request.t('Rencontre du {date}', { date: fmtOf(request.t)(e.created_at) }), e, events: enc.events(id),
+      title: e.ref ? request.t('Rencontre {ref}', { ref: e.ref }) : request.t('Rencontre du {date}', { date: fmtOf(request.t)(e.created_at) }), e, events,
       photos: enc.photos(id).map(withReady), session: (s => ({ ...s, photos: s.photos.map(withReady) }))(enc.session(id)), candidates: candidates(e, search, request), search, authors: request.mine('personnes.voir', repo.authors(), 'id'),
       code: e.ref ? enc.codeOrNull(e.ref) : null, shares: sharesOf(e, fmtOf(request.t)), errors: {}, values: null,
       // « Écrire » : l'objet du message dans la langue de la personne, comme le lien « photo offerte » (« Your photo
@@ -495,7 +497,8 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const id = byId(request.params.id);
     const x = enc.exportData(id);
     if (!x) return reply.callNotFound();
-    noterLecture(request, { objet: 'rencontre', id: String(id), categorie: categoriesRencontre(enc.get(id)) });
+    // L’archive a déjà retiré les messages des demandes non vérifiées : classer seulement ce qui en sort.
+    noterLecture(request, { objet: 'rencontre', id: String(id), categorie: categoriesRencontre({ ...enc.get(id), messageHistorique: x.data.historique.some(ev => ev.message) }) });
     const entries = [{ name: 'LISEZMOI.txt', data: (README[x.lang] || README.fr)(app.siteName(), x.ref) }, { name: 'donnees.json', data: `${JSON.stringify(x.data, null, 2)}\n` }];
     if (x.files.signature) entries.push({ name: 'signature.png', data: x.files.signature });
     if (x.files.portrait) entries.push({ name: 'photo-de-reperage.jpg', data: x.files.portrait });
@@ -621,14 +624,14 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   // Droits : tout ce qui concerne la personne, toutes rencontres confondues.
   app.get('/admin/personnes/:id/export.zip', { config: { perm: 'personnes.exporter', audit: true } }, async (request, reply) => {   // au Journal
     const p = personOr404(request, reply); if (!p) return reply;
-    noterLecture(request, { objet: 'personne', id: String(p.id), categorie: p.meetings.flatMap(categoriesRencontre) });
     const lang = p.meetings.find(e => e.lang)?.lang || 'fr';
     const entries = [{ name: 'LISEZMOI.txt', data: (README[lang] || README.fr)(app.siteName(), null) }];
-    const data = [];
+    const data = [], categorie = [];
     const seen = new Set();
     for (const e of p.meetings) {
       const x = enc.exportData(e.id);
       if (!x) continue;
+      categorie.push(...categoriesRencontre({ ...e, messageHistorique: x.data.historique.some(ev => ev.message) }));
       const tag = x.ref || `rencontre-${e.id}`;
       data.push(x.data);
       if (x.files.signature) entries.push({ name: `${tag}/signature.png`, data: x.files.signature });
@@ -641,6 +644,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       }
       app.db.prepare('INSERT INTO encounter_events (encounter_id, at, kind, detail) VALUES (?, ?, ?, ?)').run(e.id, Date.now(), 'export', '{}');
     }
+    noterLecture(request, { objet: 'personne', id: String(p.id), categorie });
     entries.splice(1, 0, { name: 'donnees.json', data: `${JSON.stringify({ rencontres: data }, null, 2)}\n` });
     const name = `${app.siteName()}-donnees-personne-${p.id}`.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
     return reply.header('cache-control', 'no-store').header('content-disposition', `attachment; filename="${name}.zip"`).type('application/zip').send(zip(entries));

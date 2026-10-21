@@ -305,8 +305,8 @@ function detailEnMorceaux(r, d, role, t) {
       if (d.id != null) { sep(); txt(`n° ${propre(masquer(String(d.id), role), 40)}`); }
       const cats = Array.isArray(d.categorie) ? [...new Set(d.categorie.slice(0, 16).filter(c => typeof c === 'string' && Object.hasOwn(CATEGORIES_DONNEES, c)))] : [];
       if (cats.length) { sep(); txt(cats.map(c => CATEGORIES_DONNEES[c]).join(', ')); }
-      for (const [cle, nom] of [['objets', 'objets affichés'], ['dechiffrements', 'déchiffrements'], ['octets_servis', 'octets de réponse']]) {
-        if (Number.isSafeInteger(d[cle]) && d[cle] >= 0) { sep(); txt(`${nombre(d[cle])} ${nom}`); }
+      for (const [cle, singulier, pluriel] of [['objets', 'objet affiché', 'objets affichés'], ['dechiffrements', 'déchiffrement', 'déchiffrements'], ['octets_servis', 'octet de réponse', 'octets de réponse']]) {
+        if (Number.isSafeInteger(d[cle]) && d[cle] >= 0) { sep(); txt(`${nombre(d[cle])} ${d[cle] > 1 ? pluriel : singulier}`); }
       }
       if (m.length) return m;
       break;
