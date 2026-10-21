@@ -742,3 +742,8 @@ Le JSON versionné contient la période, les comptes et sessions, les référenc
 Les références persistent après purge des sources, selon la conservation existante du dossier. Un dossier tronqué ou des champs bornés sont signalés dans le fichier. Au-delà de 10 000 signaux, 2 000 comptes et sessions rattachés ou 10 Mio, refus explicite sans fichier partiel. Cet instantané sert à préparer le registre des violations ; effets, mesures et décision de notification restent à documenter par le responsable. D38 n’est pas modifiée ici.
 
 Écart aux maquettes : MV-13 n’avait ni lien ni confirmation d’export d’incident ; ces deux ajouts concrétisent la section 10.3 en reprenant les composants existants. Le JSON préserve les catégories multiples et les références sans créer de cellules exécutables dans un tableur. Aucune maquette n’est modifiée.
+
+
+### 14.6 Finitions du contrôle navigateur
+
+Les deux écarts hors console relevés pendant E sont corrigés séparément : aperçu A4 contenu dans un cadre défilable au clavier et au téléphone, dimensions imprimées inchangées ; choix de langue dans une navigation nommée contenant une liste native. Ce second choix préserve la sémantique dans Safari malgré `list-style: none`, sans `role="list"` redondant ([documentation MDN](https://developer.mozilla.org/fr/docs/Web/CSS/Reference/Properties/list-style)). Aucun changement du moteur, des droits, des événements ou des maquettes.

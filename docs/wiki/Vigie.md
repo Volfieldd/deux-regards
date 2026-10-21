@@ -444,3 +444,6 @@ L'offre gratuite de Zitadel Cloud compte **5 000 requêtes par mois** à son API
 ## Retirer la Vigie
 
 Vider `VIGIE_URL` (et retirer `COMPOSE_PROFILES=vigie`) dans le `.env` du site, **Compose Up**. Le site oublie les décisions et les événements en attente ; la base de la Vigie reste dans son dossier jusqu'à ce que vous l'effaciez.
+
+
+Les finitions du contrôle navigateur consécutif à E concernent le site : les planches A4 défilent dans un cadre au téléphone, sans changer leur impression ; le sélecteur de langue conserve une liste dans une navigation nommée, sans rôle ARIA redondant. Les lectures personnelles et leur audit restent inchangés.

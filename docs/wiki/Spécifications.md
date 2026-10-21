@@ -132,3 +132,6 @@ Source : [`docs/specs/`](https://github.com/Volfieldd/deux-regards/tree/main/doc
 | T2 | Accessibilité : focus visible, `prefers-reduced-motion`, textes alternatifs, alternatives clavier au glisser-déposer, erreurs de formulaire annoncées et reliées à leurs champs (site public compris : `/bonjour`, « Signaler »), bordures des champs à 3:1 au moins, liens ouvrant un nouvel onglet annoncés ; audit axe-core sans violation sur l'admin (clair et sombre, ordinateur et téléphone). |
 | T3 | Sobriété : pas de framework front ni de build, images au format et à la taille adaptés, chargement à la demande. |
 | T4 | Données : tout l'état dans `STORAGE_DIR` ; refus de démarrer sans montage en conteneur ; sauvegarde quotidienne de la base (copie compacte, sans les restes des données effacées) et des originaux (supprimés gardés 90 jours à part) ; restauration par script (site arrêté, sessions fermées, aucun original effacé ramené, actions à refaire listées). |
+
+
+Les planches A4 de cartes de rencontre disposent d’un aperçu nommé et défilable horizontalement, au clavier comme au téléphone. Le défilement reste contenu dans l’aperçu ; l’impression conserve les feuilles A4 et les cartes de 85 × 55 mm à taille réelle.
