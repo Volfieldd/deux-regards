@@ -4,7 +4,8 @@
 <% const t = it.t, lang = it.lang || 'fr', ic = it.v2.ic; %>
       <details class="lang-pick" data-lang-pick>
         <summary><span><%= lang.toUpperCase() %></span><span class="sr-only"> – <%= t.nav.langCurrent.replace(' :', '\u202f:') %></span><%~ ic('bas', { size: 16 }) %></summary>
-        <ul aria-label="<%= t.nav.lang %>">
+        <% /* Navigation nommée : Safari conserve la liste native malgré les puces masquées. */ %>
+        <nav aria-label="<%= t.nav.lang %>"><ul>
 <% it.langs.forEach(l => { %>          <li><a href="/langue/<%= l %>?vers=<%= encodeURIComponent(it.here) %>" hreflang="<%= l %>" lang="<%= l %>" rel="nofollow"<%~ l === lang ? ' aria-current="true"' : '' %>><%= it.langNames[l] %><% if (l === lang) { %><%~ ic('coche', { size: 18 }) %><% } %></a></li>
-<% }) %>        </ul>
+<% }) %>        </ul></nav>
       </details>

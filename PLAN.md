@@ -17,6 +17,10 @@ Après D1 #198, D2 #199, D3 #200 et la mise à jour documentaire #201 : extensio
 
 Export JSON depuis les incidents clos, confirmation et droit Analyste, audit obligatoire, limites explicites et références conservées après purge des sources. La [section 14.5 de l’étude](docs/etudes/vigie-dossiers.md#145-périmètre-exportable-dun-incident-103) précise le contrat et les écarts aux maquettes. Les durées D38 et le mois d’observation restent des étapes séparées.
 
+## Livraison — Finitions du contrôle navigateur après E, PR #206 (21 octobre 2026)
+
+La planche A4 conserve ses dimensions imprimées et défile dans un aperçu nommé au clavier ou au téléphone. Le sélecteur de langue partagé conserve sa liste native dans une navigation nommée, sans rôle ARIA redondant. Les contrôles de données et la Vigie restent inchangés.
+
 ## Livraison — D38, conservation des dossiers ordinaires (21 octobre 2026)
 
 La purge des dossiers clos non incidents suit la durée du journal, soit 183 jours par défaut depuis la dernière activité, au lieu des 395 jours fixes. Les dossiers encore suivis et les incidents sont préservés. La [section 14.7 de l’étude](docs/etudes/vigie-dossiers.md#147-d38--conservation-des-dossiers-ordinaires) donne les sources ANSSI/CNIL, l’application aux dossiers existants et la limite restante : la durée du registre des incidents doit être fixée avec le dossier légal.

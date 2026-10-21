@@ -258,6 +258,8 @@ Les listes de personnes, rencontres et comptes sont couvertes ; la planche de ca
 
 L’enjeu devient aussi sensible pour une personne mineure avec parent, un accord signé ou une localisation de rencontre. Les catégories et compteurs suivent le dossier après purge du journal, fusion ou scission (migration 018), selon ses durées de conservation existantes. La règle `compte_reseaux_multiples` ajoute un indice de 1,5 point pour trois réseaux en 24 h ; seule, elle n’ouvre pas de dossier et ne bloque rien. Voir les précisions et limites dans [l’étude, section 14.4](https://github.com/Volfieldd/deux-regards/blob/main/docs/etudes/vigie-dossiers.md#144-pr-e--catégories-et-volumes-des-lectures-bv-33).
 
+Les finitions du contrôle navigateur consécutif à E concernent le site : les planches A4 défilent dans un cadre au téléphone, sans changer leur impression ; le sélecteur de langue conserve une liste dans une navigation nommée, sans rôle ARIA redondant. Les lectures personnelles et leur audit restent inchangés.
+
 ## Console (phase D3)
 
 Adresse : `https://vigie.nicephos.art`, servie par la Vigie elle-même sur le port 4200, à son adresse fixe du réseau du tunnel (`VIGIE_CONSOLE_IP`, `172.29.42.20` par défaut). Facultative : sans `VIGIE_CONSOLE_CLIENT_ID`, rien n'écoute sur ce port. Écrans : maquettes MV-01 à MV-14 (`docs/maquettes-vigie/`). Le socle (D3a) apporte les verrous, les sessions, les droits et la vue d'ensemble ; les écrans de lecture (D3b) et les actions (D3c) sont faits ; l’intégration dans l’admin du site (D3d : entrée Sécurité, résumé et bandeau critique) est faite.

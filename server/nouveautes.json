@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.206.0",
+    "date": "2026-10-21",
+    "pr": 206,
+    "title": {
+      "fr": "Planches A4 et choix de langue accessibles",
+      "en": "Accessible A4 previews and language selection",
+      "de": "Zugängliche A4-Vorschau und Sprachauswahl"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Les planches de cartes défilent dans un aperçu utilisable au clavier et au téléphone, avec une aide en trois langues. L’impression garde ses dimensions A4. Les choix de langue du site conservent une liste accessible dans les trois versions publiques.",
+        "en": "Card sheets scroll within a preview usable by keyboard and on phones, with help in three languages. Printing retains A4 dimensions. The site’s language choices remain an accessible list in all three public versions.",
+        "de": "Kartenbögen lassen sich in einer per Tastatur und auf dem Smartphone bedienbaren Vorschau scrollen, mit Hinweisen in drei Sprachen. Das A4-Druckformat bleibt erhalten. Die Sprachauswahl bleibt in allen drei öffentlichen Website-Versionen eine zugängliche Liste."
+      }
+    ]
+  },
+  {
     "version": "1.204.0",
     "date": "2026-10-21",
     "pr": 204,

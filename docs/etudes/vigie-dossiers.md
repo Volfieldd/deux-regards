@@ -744,6 +744,10 @@ Les références persistent après purge des sources, selon la conservation exis
 Écart aux maquettes : MV-13 n’avait ni lien ni confirmation d’export d’incident ; ces deux ajouts concrétisent la section 10.3 en reprenant les composants existants. Le JSON préserve les catégories multiples et les références sans créer de cellules exécutables dans un tableur. Aucune maquette n’est modifiée.
 
 
+### 14.6 Finitions du contrôle navigateur
+
+Les deux écarts hors console relevés pendant E sont corrigés séparément : aperçu A4 contenu dans un cadre défilable au clavier et au téléphone, dimensions imprimées inchangées ; choix de langue dans une navigation nommée contenant une liste native. Ce second choix préserve la sémantique dans Safari malgré `list-style: none`, sans `role="list"` redondant ([documentation MDN](https://developer.mozilla.org/fr/docs/Web/CSS/Reference/Properties/list-style)). Aucun changement du moteur, des droits, des événements ou des maquettes.
+
 ### 14.7 D38 : conservation des dossiers ordinaires
 
 Le choix retenu pour le site est **183 jours par défaut**, comme le journal. La [CNIL, « Tracer les opérations »](https://www.cnil.fr/fr/securite-tracer-les-operations) recommande une période glissante de six mois à un an pour les journaux, avec des exceptions justifiées. Le [guide ANSSI du 28 janvier 2022, § 3.4.5](https://messervices.cyber.gouv.fr/documents-guides/anssi-guide-recommandations_securite_architecture_systeme_journalisation.pdf) reprend cette plage. Ces recommandations soutiennent ce choix ; elles n’imposent pas exactement 183 jours.
