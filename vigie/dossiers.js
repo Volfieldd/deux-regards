@@ -1,5 +1,6 @@
 import { PHASES, MARQUEURS } from './phases.js';
 import { lru } from './detecteurs.js';
+import { masquer, reseauVue } from './masquage.js';
 import { CATEGORIES_DONNEES } from '../server/securite/vocabulaire.js';
 
 // Dossiers de la Vigie (étude docs/etudes/vigie-dossiers.md ; décisions D31 à D39 du 20 octobre 2026) : tout ce qui
@@ -636,7 +637,48 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     }
     return { sommeil: dormir.length, clos: clore.length };
   }
-  const masquer = ip => (String(ip).includes(':') ? `${String(ip).split(':').slice(0, 3).join(':')}::/48` : String(ip).replace(/\.\d+$/, '.0/24'));
+  // D38 / LEG-V3 : les clés réseau suivent le parseur canonique, y compris les anciennes IPv6 mal tronquées.
+  // Les identifiants de comptes/sessions/objets restent des identifiants ; une cible peut contenir « confiance:<IP> ».
+  const cleMasquee = (kind, key) => kind === 'ip' ? reseauVue(key) : kind === 'reseau' ? reseauVue(key).replace(/\/(24|48)$/, '') : kind === 'cible' ? masquer(key) : key;
+  const texteMasque = v => v == null ? v : masquer(v);
+  function masquerDossier(d) {
+    const entites = db.prepare('SELECT * FROM dossier_entites WHERE dossier_id = ?').all(d.id);
+    const cles = new Map(entites.map(e => [`${e.kind}:${e.key}`, `${e.kind}:${cleMasquee(e.kind, e.key)}`]));
+    // « via » est soit une référence d’entité (dont l’identité doit rester cohérente), soit un texte d’opérateur.
+    const via = v => cles.get(v) ?? (/^(compte|session|acces|objet):/.test(v || '') ? v : texteMasque(v));
+    const groupes = new Map(), forces = ['faible', 'moyen', 'fort', 'manuel', 'graine'];
+    for (const e of entites) {
+      const key = cleMasquee(e.kind, e.key), k = JSON.stringify([e.kind, key]);
+      const groupe = groupes.get(k) || [];
+      groupe.push({ ...e, key, via: via(e.via) }); groupes.set(k, groupe);
+    }
+    // Plusieurs hôtes deviennent un même réseau : ne pas perdre l’entité active au profit d’une copie détachée.
+    const reduites = [...groupes.values()].map(g => {
+      const actifs = g.filter(e => e.detache_a == null), utiles = actifs.length ? actifs : g;
+      const meilleur = [...utiles].sort((a, b) => forces.indexOf(b.force) - forces.indexOf(a.force) || a.ajoute_a - b.ajoute_a)[0];
+      return { ...meilleur, role: utiles.some(e => e.role === 'acteur') ? 'acteur' : utiles.some(e => e.role === 'cible') ? 'cible' : 'contexte',
+        ajoute_a: Math.min(...g.map(e => e.ajoute_a)), detache_a: actifs.length ? null : Math.max(...g.map(e => e.detache_a)) };
+    });
+    if (JSON.stringify(entites) !== JSON.stringify(reduites)) {
+      db.prepare('DELETE FROM dossier_entites WHERE dossier_id = ?').run(d.id);
+      const inserer = db.prepare(`INSERT INTO dossier_entites (dossier_id, kind, key, role, force, via, ajoute_a, detache_a)
+        VALUES (@dossier_id, @kind, @key, @role, @force, @via, @ajoute_a, @detache_a)`);
+      for (const e of reduites) inserer.run(e);
+    }
+    db.prepare('UPDATE dossiers SET graine_key = ?, explication = ?, note = ?, traite_par = ? WHERE id = ?')
+      .run(cleMasquee(d.graine_kind, d.graine_key), texteMasque(d.explication), texteMasque(d.note), texteMasque(d.traite_par), d.id);
+    for (const s of q.signaux.all(d.id)) {
+      db.prepare('UPDATE dossier_signaux SET ip = NULL, entite_key = ?, cle = ? WHERE id = ?')
+        .run(s.entite_kind === 'ip' ? '(masquée)' : cleMasquee(s.entite_kind, s.entite_key), texteMasque(s.cle), s.id);
+    }
+    // Les exclusions de scission ont aussi une clé d’entité, notamment les anciens réseaux des signaux périodiques.
+    for (const s of db.prepare('SELECT rowid, * FROM dossier_signaux_ecartes WHERE dossier_id = ?').all(d.id)) {
+      const key = s.entite_kind === 'ip' ? '(masquée)' : cleMasquee(s.entite_kind, s.entite_key);
+      if (key === s.entite_key) continue;
+      const change = db.prepare('UPDATE OR IGNORE dossier_signaux_ecartes SET entite_key = ? WHERE rowid = ?').run(key, s.rowid);
+      if (!change.changes) db.prepare('DELETE FROM dossier_signaux_ecartes WHERE rowid = ?').run(s.rowid);
+    }
+  }
   function purge() {
     const t = now();
     db.prepare('DELETE FROM signaux_projetes WHERE survenu_a < ?').run(t - 30 * J);
@@ -650,17 +692,24 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
         db.prepare('UPDATE dossiers SET fusionne_dans = NULL WHERE fusionne_dans = ?').run(id);
         db.prepare('DELETE FROM dossiers WHERE id = ?').run(id);
       }
-      // Adresses gardées comme les événements (183 jours par défaut, D38) : au-delà, masquées dans les dossiers
-      // encore suivis et dans les incidents conservés pour le registre des violations.
-      const anciens = db.prepare("SELECT id FROM dossiers WHERE derniere < ? AND id IN (SELECT dossier_id FROM dossier_entites WHERE kind = 'ip' AND key NOT LIKE '%/%' UNION SELECT dossier_id FROM dossier_signaux WHERE ip IS NOT NULL) LIMIT 1000").pluck().all(t - store.retentionDays * J);
-      for (const id of anciens) {
-        for (const e of db.prepare("SELECT key FROM dossier_entites WHERE dossier_id = ? AND kind = 'ip' AND key NOT LIKE '%/%'").pluck().all(id)) {
-          db.prepare("UPDATE OR IGNORE dossier_entites SET key = ? WHERE dossier_id = ? AND kind = 'ip' AND key = ?").run(masquer(e), id, e);
-          db.prepare("DELETE FROM dossier_entites WHERE dossier_id = ? AND kind = 'ip' AND key = ?").run(id, e);
-        }
-        db.prepare("UPDATE dossier_signaux SET ip = NULL WHERE dossier_id = ? AND ip IS NOT NULL").run(id);
-        db.prepare("UPDATE dossier_signaux SET entite_key = ? WHERE dossier_id = ? AND entite_kind = 'ip'").run('(masquée)', id);
-      }
+      // Garder la priorité des adresses encore présentes : le stock d’incidents déjà masqués ne doit pas retarder
+      // les nouvelles échéances. Inclure aussi une graine seule, que l’ancienne sélection ne voyait pas (LEG-V3).
+      const prioritaires = db.prepare(`SELECT * FROM dossiers d WHERE derniere < ? AND (
+        (graine_kind = 'ip' AND instr(graine_key, '/') = 0 AND graine_key != 'masquée')
+        OR EXISTS (SELECT 1 FROM dossier_entites e WHERE e.dossier_id = d.id AND e.kind = 'ip' AND instr(e.key, '/') = 0 AND e.key != 'masquée')
+        OR EXISTS (SELECT 1 FROM dossier_signaux s WHERE s.dossier_id = d.id AND s.ip IS NOT NULL)) ORDER BY id LIMIT 1000`)
+        .all(t - store.retentionDays * J);
+      for (const d of prioritaires) masquerDossier(d);
+      const deja = new Set(prioritaires.map(d => d.id));
+      // Rattrapage distinct (au plus 1 000 autres dossiers) : anciennes purges partielles, textes et absorptions.
+      // Un curseur circulaire évite de retraiter toujours les 1 000 premiers incidents. Il avance dans la transaction,
+      // reprend après redémarrage et n’ajoute aucun travail au chemin d’ingestion ; le rattrapage peut prendre plusieurs jours.
+      const anciens = db.prepare('SELECT * FROM dossiers WHERE id > ? AND derniere < ? ORDER BY id LIMIT 1000');
+      const curseur = setting.get('dossiers_masquage_curseur', 0);
+      let lot = anciens.all(Number.isSafeInteger(curseur) && curseur > 0 ? curseur : 0, t - store.retentionDays * J);
+      if (!lot.length && curseur) lot = anciens.all(0, t - store.retentionDays * J);
+      for (const d of lot) if (!deja.has(d.id)) masquerDossier(d);
+      setting.set('dossiers_masquage_curseur', lot.length === 1000 ? lot.at(-1).id : 0);
     })();
   }
 

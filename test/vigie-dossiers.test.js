@@ -10,7 +10,7 @@ import { createDecisions } from '../vigie/decisions.js';
 import { createSwitches } from '../vigie/interrupteurs.js';
 import { createEngine } from '../vigie/moteur.js';
 import { ALL } from '../vigie/vocabulaire.js';
-import { coherence, entiteDossier } from '../vigie/dossiers.js';
+import { coherence, entiteDossier, createDossiers } from '../vigie/dossiers.js';
 
 // Dossiers de la Vigie (étude docs/etudes/vigie-dossiers.md) : les cinq scénarios de la section 7, de bout en bout (les
 // événements passent par le moteur, ses règles et ses détecteurs), puis le rattachement, la fusion, les exclusions
@@ -688,4 +688,126 @@ test('scission : panne au second événement de journal, rollback complet puis r
   assert.equal(v.D.scinder(a.id, choix), prochain);
   assert.equal(v.store.verify().ok, true);
   assert.equal(v.db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_dossier' AND json_extract(detail, '$.action') = 'scinde'").pluck().get(), 2);
+});
+
+
+test('LEG-V3 : les adresses périmées disparaissent de la graine, du titre et des textes, sans recalcul', t => {
+  for (const [ip, reseau] of [['203.0.113.90', '203.0.113.0/24'], ['2001:db8::bad:5', '2001:db8::/48'],
+    ['2001:0DB8:0001:0002:0000:0000:0000:0009', '2001:db8:1::/48'], ['2001:db8:1:2:3:4:5:6', '2001:db8:1::/48'], ['::ffff:203.0.113.90', '203.0.113.0/24'],
+    ['::ffff:cb00:715a', '203.0.113.0/24'], ['::192.0.2.67', '::/48'], ['200:db8:4:1c::5e', '200:db8:4::/48'],
+    ['a:2:3:4::5', 'a:2:3::/48']]) {
+    const v = vigieOf(t);
+    v.D.surAlerte({ id: 1, regle: 'sigma.piege', gravite: 'haut', entite: { kind: 'ip', key: ip } }, { survenu_a: v.clock.t, ip });
+    const [d] = v.dossiers();
+    assert.ok(d, ip);
+    v.D.classer(d.id, { classement: 'incident', note: `Constat depuis ${ip}, IP${ip}, abc${ip}`, par: `Opérateur depuis ${ip}` });
+    const avant = v.fiche(d.id), journal = v.db.prepare('SELECT * FROM events').all();
+    v.clock.t += 184 * J;
+    v.D.purge();
+    const apres = v.fiche(d.id);
+    assert.equal(apres.graine_key, reseau, ip);
+    assert.ok(apres.entites.some(e => e.kind === 'ip' && e.key === reseau && e.force === 'graine'));
+    assert.ok(!JSON.stringify(apres).includes(ip), ip);
+    assert.ok(apres.note.includes(`IP${reseau}`), 'le préfixe accolé ne décale pas les bits réseau');
+    assert.ok(apres.explication.titre.includes(reseau));
+    for (const k of ['gravite', 'confiance', 'phase_max', 'coherence', 'enjeu', 'statut', 'classement', 'derniere', 'dernier_jalon', 'traite_a']) assert.equal(apres[k], avant[k], k);
+    assert.deepEqual(v.db.prepare('SELECT * FROM events').all(), journal, 'aucune réécriture ni aggravation dans la chaîne');
+    assert.ok(v.store.verify().ok);
+    v.D.purge();
+    assert.deepEqual(v.fiche(d.id), apres, 'masquage idempotent');
+  }
+});
+
+test('LEG-V3 : rattraper les anciennes purges et les cibles de confiance, préserver les références et les entités actives', t => {
+  const v = vigieOf(t), ip = '203.0.113.90', cible = `vigie:confiance:${ip}`, sub = `compte-${ip}`;
+  v.D.surAlerte({ id: 1, regle: 'sigma.surveillance_reduite', gravite: 'haut', entite: { kind: 'vigie', key: `confiance:${ip}` } }, { survenu_a: v.clock.t });
+  const [d] = v.dossiers();
+  v.D.rattacher(d.id, 'compte', sub, { par: 'équipe' });
+  v.db.prepare(`INSERT INTO dossier_entites (dossier_id, kind, key, role, force, via, ajoute_a, detache_a) VALUES (?, 'ip', ?, 'acteur', ?, ?, ?, ?)`).run(d.id, '2001:db8::bad::/48', 'graine', `compte:${sub}`, v.clock.t, null);
+  v.db.prepare(`INSERT INTO dossier_entites (dossier_id, kind, key, role, force, ajoute_a, detache_a) VALUES (?, 'ip', ?, 'contexte', 'faible', ?, ?)`).run(d.id, '2001:db8::/48', v.clock.t, v.clock.t);
+  v.db.prepare(`INSERT INTO dossier_entites (dossier_id, kind, key, role, force, via, ajoute_a) VALUES (?, 'ip', '198.0.0.0/8', 'acteur', 'fort', ?, ?)`).run(d.id, `cible:${cible}`, v.clock.t);
+  v.db.prepare('UPDATE dossier_signaux SET ip = NULL, entite_key = ? WHERE dossier_id = ?').run(cible, d.id);
+  v.db.prepare(`INSERT INTO dossier_signaux_ecartes VALUES (?, 0, 'detecteur.reseau', ?, 'reseau', '2001:db8::bad::')`).run(d.id, v.clock.t);
+  v.D.classer(d.id, { classement: 'incident', par: 'équipe', note: `Depuis ${ip}` });
+  v.clock.t += 184 * J;
+  v.D.purge();
+  const apres = v.fiche(d.id), cibleMasquee = 'vigie:confiance:203.0.113.0/24';
+  assert.equal(apres.graine_key, cibleMasquee);
+  assert.ok(apres.entites.some(e => e.kind === 'cible' && e.key === cibleMasquee));
+  assert.ok(apres.signaux.every(s => s.entite_key === cibleMasquee));
+  const groupe = apres.entites.filter(e => e.key === '2001:db8::/48');
+  assert.equal(groupe.length, 1); assert.equal(groupe[0].detache_a, null); assert.equal(groupe[0].force, 'graine');
+  assert.equal(groupe[0].role, 'acteur'); assert.equal(groupe[0].via, `compte:${sub}`);
+  assert.ok(apres.entites.some(e => e.key === sub), 'un identifiant n’est pas réinterprété en adresse réseau');
+  assert.ok(apres.entites.some(e => e.key === '198.0.0.0/8' && e.via === `cible:${cibleMasquee}`));
+  assert.equal(v.db.prepare('SELECT entite_key FROM dossier_signaux_ecartes').pluck().get(), '2001:db8::');
+  assert.ok(!apres.note.includes(ip));
+});
+
+test('LEG-V3 : reprendre les graines et titres seuls, puis avancer au-delà de 1 000 dossiers après redémarrage', t => {
+  const v = vigieOf(t), ancien = v.clock.t - 184 * J;
+  const inserer = v.db.prepare(`INSERT INTO dossiers (piste, graine_kind, graine_key, statut, classement, ouvert_a, derniere, explication)
+    VALUES ('externe', 'ip', '203.0.113.90', 'clos', 'incident', ?, ?, ?)`);
+  v.db.transaction(() => { for (let i = 0; i < 1001; i++) inserer.run(ancien, ancien, JSON.stringify({ titre: 'Adresse 203.0.113.90' })); })();
+  const recent = Number(inserer.run(v.clock.t, v.clock.t, JSON.stringify({ titre: 'Adresse 203.0.113.90' })).lastInsertRowid);
+  v.D.purge();
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM dossiers WHERE graine_key = '203.0.113.0/24'").pluck().get(), 1000);
+  const repris = createDossiers({ store: v.store, now: () => v.clock.t });
+  repris.purge();
+  assert.equal(v.db.prepare("SELECT COUNT(*) FROM dossiers WHERE graine_key = '203.0.113.0/24'").pluck().get(), 1001);
+  assert.equal(v.fiche(recent).graine_key, '203.0.113.90', 'le dossier récent reste exploitable');
+  v.db.prepare("UPDATE dossiers SET note = 'Ajout depuis 203.0.113.99' WHERE id = 1").run();
+  repris.purge();
+  assert.equal(v.fiche(1).note, 'Ajout depuis 203.0.113.0/24', 'le parcours revient aux petits identifiants');
+});
+
+test('LEG-V3 : les incidents déjà masqués ne retardent pas les nouvelles adresses échues', t => {
+  const v = vigieOf(t), ancien = v.clock.t - 395 * J, echu = v.clock.t - 184 * J;
+  const inserer = v.db.prepare(`INSERT INTO dossiers (piste, graine_kind, graine_key, statut, classement, ouvert_a, derniere)
+    VALUES ('externe', 'ip', ?, 'clos', 'incident', ?, ?)`);
+  v.db.transaction(() => { for (let i = 0; i < 3000; i++) inserer.run('203.0.113.0/24', ancien, ancien); })();
+  const id = Number(inserer.run('198.51.100.90', echu, echu).lastInsertRowid);
+  v.D.purge();
+  assert.equal(v.fiche(id).graine_key, '198.51.100.0/24', 'masquée dès la première purge, malgré les anciens incidents');
+});
+
+test('LEG-V3 : une purge interrompue ne valide ni un masquage partiel ni son curseur', t => {
+  const v = vigieOf(t);
+  for (const ip of ['203.0.113.90', '198.51.100.80']) v.D.surAlerte({ id: v.dossiers().length + 1, regle: 'sigma.piege', gravite: 'haut', entite: { kind: 'ip', key: ip } }, { survenu_a: v.clock.t, ip });
+  for (const d of v.dossiers()) v.D.classer(d.id, { classement: 'incident', par: 'équipe' });
+  const avant = v.dossiers().map(d => v.fiche(d.id));
+  v.clock.t += 184 * J;
+  v.db.exec(`CREATE TRIGGER refuser_masquage BEFORE UPDATE ON dossiers WHEN OLD.id = 2 BEGIN SELECT RAISE(ABORT, 'interruption synthétique'); END`);
+  assert.throws(() => v.D.purge(), /interruption synthétique/);
+  assert.deepEqual(v.dossiers().map(d => v.fiche(d.id)), avant);
+  assert.equal(v.store.setting.get('dossiers_masquage_curseur', 0), 0);
+  v.db.exec('DROP TRIGGER refuser_masquage');
+  v.D.purge();
+  assert.ok(v.dossiers().every(d => d.graine_key.endsWith('/24')));
+});
+
+
+test('LEG-V3 : fusion et scission après purge ne réintroduisent pas les IP et gardent les références personnelles', t => {
+  const v = vigieOf(t);
+  for (const [i, ip] of ['203.0.113.90', '198.51.100.80'].entries()) {
+    v.D.surAlerte({ id: i + 1, regle: 'sigma.piege', gravite: 'haut', entite: { kind: 'ip', key: ip } }, { survenu_a: v.clock.t, ip });
+  }
+  v.db.prepare(`UPDATE dossier_signaux SET alerte_id = NULL, sub = 'compte-conserve', session = 'session-conserve',
+    objet = 'personne:17', donnees = '{"categorie":["identite"],"objets":1}'`).run();
+  v.clock.t += 184 * J;
+  v.D.purge();
+  const garde = v.D.fusionner(1, 2, { par: 'équipe' });
+  const f = v.fiche(garde), pris = f.signaux.filter(s => s.dossier_id === garde).slice(0, 1);
+  const autre = v.D.scinder(garde, { entites: ['ip:198.51.100.0/24'], signaux: pris.map(s => s.id), motif: 'deux incidents', par: 'équipe' });
+  for (const id of [garde, 2, autre]) {
+    const d = v.fiche(id);
+    assert.doesNotMatch(JSON.stringify(d), /203\.0\.113\.90|198\.51\.100\.80/);
+    for (const signal of d.signaux) {
+      assert.equal(signal.sub, 'compte-conserve'); assert.equal(signal.session, 'session-conserve');
+      assert.equal(signal.objet, 'personne:17'); assert.deepEqual(JSON.parse(signal.donnees), { categorie: ['identite'], objets: 1 });
+    }
+    assert.ok(d.entites.some(e => e.kind === d.graine_kind && e.key === d.graine_key));
+  }
+  assert.ok(v.db.prepare('SELECT 1 FROM dossier_separations WHERE gauche = ? AND droite = ?').get(garde, autre));
+  assert.ok(v.store.verify().ok);
 });

@@ -1,6 +1,6 @@
 # RGPD : fiche de traitement de la Vigie
 
-**État documentaire du 21 octobre 2026**, code examiné jusqu’à la version **1.207.0**. Cette fiche complète le [registre RGPD](RGPD), la [procédure de violation](RGPD#4-procédure-en-cas-de-violation-de-données-articles-33-et-34) et la documentation [Vigie](Vigie). Elle décrit le code ; elle ne certifie ni la configuration du serveur ni l’accomplissement des validations ci-dessous. Aucune donnée d’une instance réelle n’a été consultée pour la rédiger.
+**État documentaire du 21 octobre 2026**, code examiné en version **1.207.0**, complété par le correctif LEG-V3 décrit dans l’[étude, § 14.9](https://github.com/Volfieldd/deux-regards/blob/main/docs/etudes/vigie-dossiers.md#149-leg-v3--masquage-des-copies-dadresses-conservées). Cette fiche complète le [registre RGPD](RGPD), la [procédure de violation](RGPD#4-procédure-en-cas-de-violation-de-données-articles-33-et-34) et la documentation [Vigie](Vigie). Elle décrit le code ; elle ne certifie ni la configuration du serveur ni l’accomplissement des validations ci-dessous. Aucune donnée d’une instance réelle n’a été consultée pour la rédiger.
 
 ## 1. Traitement, finalités et personnes
 
@@ -52,13 +52,13 @@ La mise en balance préparée pour les responsables suit les trois examens de la
 
 Le choix ordinaire retenu est **183 jours**, réglable par `VIGIE_RETENTION_DAYS`. La [CNIL recommande six mois à un an pour la journalisation](https://www.cnil.fr/fr/securite-tracer-les-operations), avec des exceptions motivées ; le [guide ANSSI, § 3.4.5](https://messervices.cyber.gouv.fr/documents-guides/anssi-guide-recommandations_securite_architecture_systeme_journalisation.pdf), reprend cette plage. Cela soutient le choix de Nicephos, sans imposer exactement 183 jours ni fixer la durée d’un registre de violations.
 
-| Ensemble | Déclencheur et conservation dans le code 1.207.0 | Réserve ou décision restante |
+| Ensemble | Déclencheur et conservation dans le code | Réserve ou décision restante |
 |---|---|---|
 | Événements chaînés | 183 jours depuis la réception, purge par lots avec ancre de chaîne | Vérifier le réglage et l’exécution des purges ; les copies en dossier suivent une autre règle |
 | Signaux projetés ; entités et liens du moteur | Signaux : 30 jours depuis l’événement ; entités : 30 jours et liens : 90 jours depuis leur dernière activité | Les copies dans les dossiers ne sont pas effacées par ces purges |
 | Dossiers clos non incidents | 183 jours depuis la dernière activité, pas depuis le classement ; suppression du dossier et de ses liens à la purge suivante | D38, appliquée aussi aux dossiers existants depuis la PR #207 |
 | Dossiers encore suivis ; dossiers classés incident | Pas d’échéance globale automatique | Revoir les dossiers ouverts et définir une durée propre aux incidents ; aucune conservation illimitée n’est approuvée |
-| IP dans les dossiers conservés | Après 183 jours depuis la dernière activité du dossier : clés IP de `dossier_entites` tronquées, `dossier_signaux.ip` vidé, clé d’entité IP du signal masquée ; au plus 1 000 dossiers par passage | **Masquage incomplet** : `dossiers.graine_key` et `dossiers.explication` peuvent conserver l’IP complète. Le délai porte sur le dossier, pas sur chaque IP. Ne pas annoncer l’effacement de toutes les adresses à 183 jours |
+| IP dans les dossiers conservés | Après 183 jours depuis la dernière activité du dossier : graines, entités IP/réseau, titres, notes et autres textes dérivés tronqués en /24 ou /48 ; IP des signaux vidées, clés et exclusions corrigées | LEG-V3 corrigé : jusqu’à 1 000 dossiers avec IP à traiter en priorité, plus un parcours circulaire de 1 000 dossiers pour le rattrapage. Un stock important peut demander plusieurs purges quotidiennes. Le délai porte sur le dossier, pas sur chaque IP ; les identifiants de compte, session et objet restent personnels |
 | Alertes closes ; décisions levées ou échues | 395 jours depuis la dernière activité de l’alerte, la levée ou l’échéance de la décision | Durée distincte de celle des dossiers ; nécessité à justifier. Les éléments encore actifs ne suivent pas cette purge |
 | Habitudes classées légitimes, D39 | Effet limité à 90 jours ; au plus 2 000 entrées | L’expiration les rend inopérantes ; leur retrait physique du réglage intervient à une prochaine écriture de classement, pas à une purge périodique |
 | Sessions de console | Autorisation : 1 heure au plus, 15 minutes sans activité ; lignes en base supprimées après 7 jours depuis la création, contrôle horaire | Ne pas confondre expiration de l’accès et effacement de l’IP, du nom et du navigateur. Les transactions OIDC expirent à 10 minutes ; nettoyage lors de nouvelles connexions |
@@ -69,7 +69,7 @@ Le choix ordinaire retenu est **183 jours**, réglable par `VIGIE_RETENTION_DAYS
 
 La [CNIL demande de documenter les violations](https://www.cnil.fr/fr/violations-de-donnees-personnelles-les-regles-suivre) ; sa fiche ne donne pas de durée chiffrée générale pour ce registre. **D38 reste donc partiellement ouverte** : les responsables doivent fixer et justifier la durée, son point de départ, les exceptions de contentieux et les données strictement nécessaires. Garder l’intégralité du dossier technique indéfiniment ne découle pas de l’article 33.5. L’exception du moteur décrit un état actuel, pas une politique validée.
 
-Sources du constat technique : `vigie/store.js`, `vigie/moteur.js`, `vigie/dossiers.js`, `vigie/console/sessions.js`, `vigie/console/droits.js` et `vigie/backup.js`. Le défaut de masquage a été reproduit sur une base en mémoire avec une alerte synthétique : à 200 jours, l’entité est tronquée et la colonne IP du signal est vide, mais la graine et le titre enregistré gardent l’adresse entière. Aucun changement du moteur n’est livré avec cette fiche.
+Sources du constat technique : `vigie/store.js`, `vigie/moteur.js`, `vigie/dossiers.js`, `vigie/masquage.js`, `vigie/console/sessions.js`, `vigie/console/droits.js` et `vigie/backup.js`. Le défaut de copie résiduelle dans la graine et le titre, reproduit sur une base en mémoire, est corrigé par LEG-V3. Les tests couvrent aussi les IPv6 abrégées et accolées à du texte, les anciennes purges partielles, les cibles de confiance, les collisions entre entités, la reprise après interruption et les fusions/scissions. La correction ne réécrit pas le journal chaîné, qui garde sa propre purge, et ne modifie pas les sauvegardes déjà produites.
 
 ## 5. Garanties, information et exercice des droits
 
@@ -99,7 +99,7 @@ L’ancienne conclusion générale « pas de profilage, pas de surveillance syst
 |---|---|---|
 | Attribution erronée d’une attaque, blocage d’un compte légitime | Force des liens, explication, scission/détachement, classement humain et apprentissage limité | Mesurer les faux positifs, vérifier le recours et les effets des blocages |
 | Observation excessive des habitudes ou divulgation de l’activité | Métadonnées fermées, rôles, masquage à l’affichage, audit | Information des personnes, périmètre utile, revue des habilitations et du chiffrement réel |
-| Conservation ou réidentification au-delà du besoin | Purges ordinaires, limites de volume, exports bornés | Masquage incomplet, durée des incidents, habilitations et apprentissages expirés ; voir section 8 |
+| Conservation ou réidentification au-delà du besoin | Purges ordinaires, limites de volume, exports bornés | Rattrapage du masquage, durée des incidents, habilitations et apprentissages expirés ; voir section 8 |
 | Fuite d’un export, d’une sauvegarde ou d’un journal | Export détaillé réservé, confirmation et audit ; isolation du composant | Stockage des téléchargements, copies, supports et prestataires à contrôler |
 | Sous-estimation d’une violation ou absence d’information | Références et catégories conservées, indication des plafonds | Ne pas confondre absence de signal et absence de violation ; compléter l’enquête et la décision juridique |
 
@@ -123,7 +123,7 @@ L’export JSON de la Vigie exige actuellement un incident clos et un rôle Anal
 |---|---|---|
 | LEG-V1 | Fixer et justifier la durée et le point de départ du registre des violations et des dossiers incidents ; traiter séparément alertes et décisions à 395 jours | Responsables conjoints ; D38 partiellement ouverte, aucune durée universelle ANSSI/CNIL identifiée |
 | LEG-V2 | Achever l’AIPD et la mise en balance, en tenant compte des sources, volumes et blocages effectivement activés | Préexamen préparé ; validation non effectuée |
-| LEG-V3 | Corriger la purge des IP résiduelles et examiner les copies, titres et motifs ; ajouter les tests de non-régression et le banc exigés pour le moteur | Écart reproduit, correction technique à livrer séparément |
+| LEG-V3 | Corriger la purge des IP résiduelles et examiner les copies, titres et motifs ; ajouter les tests de non-régression et le banc exigés pour le moteur | Corrigé et testé dans le moteur et le masque partagé avec la console ; rattrapage des dossiers existants lors des purges, sauvegardes à traiter selon leur cycle propre |
 | LEG-V4 | Définir et appliquer l’effacement des habilitations inutiles et des apprentissages expirés ; prévoir le traitement des demandes de droits dans la Vigie | Limites identifiées dans le code ; ne pas confondre désactivation et effacement |
 | LEG-V5 | Compléter la notice publique et l’information des comptes habilités avec les durées et destinataires exacts | Dossier interne complété ; `server/privacy.js` non modifié dans cette livraison documentaire |
 | LEG-V6 | Vérifier les contrats, transferts, supports chiffrés, sauvegardes, purges et emplacement des exports sur l’installation réelle | Contrôle du propriétaire ; aucun accès aux données réelles dans ce travail |
