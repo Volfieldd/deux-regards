@@ -1,6 +1,6 @@
 # Développer
 
-Cette page est pour qui reprend le code : où sont les choses, quelles règles suivre, comment une modification arrive en ligne. Les choix d'architecture et l'historique sont dans [`PLAN.md`](https://github.com/Volfieldd/deux-regards/blob/main/PLAN.md).
+Cette page est pour qui reprend le code : où sont les choses, quelles règles suivre, comment une modification arrive en ligne. Les choix d'architecture et l'historique sont dans [`PLAN.md`](https://github.com/Volfieldd/deux-regards/blob/main/PLAN.md). Pour un agent de code (Codex, Claude Code…), le point d'entrée est [`AGENTS.md`](https://github.com/Volfieldd/deux-regards/blob/main/AGENTS.md), à la racine du dépôt : il renvoie ici et ajoute les consignes propres à une machine partagée.
 
 ## Organisation du code
 
