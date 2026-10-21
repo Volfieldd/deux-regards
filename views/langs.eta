@@ -4,7 +4,8 @@
 <% const t = it.t, lang = it.lang || 'fr'; const flag = l => it.asset(`flags/${l}.svg`); %>
   <details class="lang-pick" data-lang-pick>
     <summary><img class="flag" src="<%= flag(lang) %>" alt="" width="20" height="14"><span><%= lang.toUpperCase() %></span><span class="sr-only"> – <%= t.nav.langCurrent %></span></summary>
-    <ul role="list" aria-label="<%= t.nav.lang %>">
+    <% /* Dans nav, Safari conserve la sémantique de liste malgré list-style: none, sans rôle ARIA redondant. */ %>
+    <nav aria-label="<%= t.nav.lang %>"><ul>
 <% it.langs.forEach(l => { %>      <li><a href="/langue/<%= l %>?vers=<%= encodeURIComponent(it.here) %>" hreflang="<%= l %>" lang="<%= l %>" rel="nofollow"<%~ l === lang ? ' aria-current="true"' : '' %>><img class="flag" src="<%= flag(l) %>" alt="" width="20" height="14"><%= it.langNames[l] %></a></li>
-<% }) %>    </ul>
+<% }) %>    </ul></nav>
   </details>

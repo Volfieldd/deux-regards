@@ -12,8 +12,10 @@
 <body>
 <div class="bar"<%~ it.lang && it.lang !== 'fr' ? ` lang="${it.lang}"` : '' %>>
   <p><strong><%= it.title %></strong> · <%= it.sheets.length > 1 ? t('{n} feuilles A4.', { n: it.sheets.length }) : t('{n} feuille A4.', { n: it.sheets.length }) %> <%= t('Imprimez à 100 % (taille réelle), puis découpez le long des traits.') %></p>
+  <p id="aide-apercu"><%= t('Sur petit écran, faites défiler l’aperçu horizontalement. L’impression garde le format A4.') %></p>
   <p><button type="button" data-print><%= t('Imprimer') %></button> <a href="/admin/rencontres/cartes"><%= t('Retour') %></a></p>
 </div>
+<main class="apercu" tabindex="0" aria-label="<%= t('Aperçu des planches A4') %>" aria-describedby="aide-apercu">
 <% it.sheets.forEach(sheet => { %>
 <section class="sheet">
 <% sheet.forEach(p => { %>
@@ -40,5 +42,6 @@
 <% }) %>
 </section>
 <% }) %>
+</main>
 </body>
 </html>
