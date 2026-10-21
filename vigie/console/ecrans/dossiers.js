@@ -149,6 +149,7 @@ export function fiche({ db, engine, role = 'viewer', id, query = {} }) {
   const reponses = q.sql(`SELECT de.* FROM decisions de JOIN alerts a ON a.id = de.alerte_id WHERE a.dossier_id = ? ORDER BY de.id DESC LIMIT 51`).all(id);
   return { ...ligne(d, q, role), lecteur: !can(role, 'dossiers_traiter'), agir: can(role, 'dossiers_traiter') && !d.fusionne_dans,
     dessins: dessins({ q, d, regles, query, texte: v => texte(v, role), entite: e => entite(e, role), signal: s => signal(s, role, regles) }),
+    exporter: can(role, 'exporter') && d.statut === 'clos' && d.classement === 'incident' && !d.fusionne_dans,
     clos: d.statut === 'clos', tronque: Boolean(d.tronque), lignes: (Array.isArray(x.lignes) ? x.lignes : []).slice(0, 3).map(s => texte(s, role, 2000)),
     modifs: (Array.isArray(x.modificateurs) ? x.modificateurs : []).slice(0, 10).map(s => texte(s, role)),
     non: (Array.isArray(x.non_observees) ? x.non_observees : []).slice(0, 8).map(s => texte(s, role, 40)),

@@ -13,6 +13,10 @@ Références de design (artefacts claude.ai) :
 
 Après D1 #198, D2 #199, D3 #200 et la mise à jour documentaire #201 : extension des lectures personnelles livrée dans la PR #202 après accord du propriétaire. Catégories fermées et volumes par requête/session (BV-33), listes couvertes, enjeu par catégorie, indice des trois réseaux en 24 h, huit fiches comptées par session. Documentation : [étude, section 14.4](docs/etudes/vigie-dossiers.md#144-pr-e--catégories-et-volumes-des-lectures-bv-33), [Vigie](docs/wiki/Vigie.md), [RGPD](docs/wiki/RGPD.md). Les seuils 8/3 et les durées existantes restent inchangés ; pas de recalage sans le mois d’observation prévu.
 
+## Livraison — Périmètre exportable des incidents, PR #204, version 1.204.0 (21 octobre 2026)
+
+Export JSON depuis les incidents clos, confirmation et droit Analyste, audit obligatoire, limites explicites et références conservées après purge des sources. La [section 14.5 de l’étude](docs/etudes/vigie-dossiers.md#145-périmètre-exportable-dun-incident-103) précise le contrat et les écarts aux maquettes. Les durées D38 et le mois d’observation restent des étapes séparées.
+
 ## Principes
 
 - Front simple : HTML/CSS/JS sans framework ni build, rendu côté serveur, dans l'esprit du prototype.

@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.204.0",
+    "date": "2026-10-21",
+    "pr": 204,
+    "title": {
+      "fr": "Vigie : exporter le périmètre d’un incident",
+      "en": "Vigie: export an incident’s scope",
+      "de": "Vigie: Umfang eines Vorfalls exportieren"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Les Analystes et Administrateurs peuvent exporter les références d’un incident confirmé, ses catégories, sa période, ses comptes, ses sessions et ses phases. Une confirmation précède le téléchargement JSON, qui est noté au journal. Les limites du dossier restent explicites, sans recopier le contenu des fiches.",
+        "en": "Analysts and Administrators can export a confirmed incident’s references, categories, period, accounts, sessions and phases. Confirmation precedes the JSON download, which is recorded in the log. Case limitations remain explicit, without copying record contents.",
+        "de": "Analysten und Administratoren können Referenzen, Kategorien, Zeitraum, Konten, Sitzungen und Phasen eines bestätigten Vorfalls exportieren. Vor dem protokollierten JSON-Download ist eine Bestätigung erforderlich. Die Grenzen des Falls bleiben ausdrücklich sichtbar, ohne Inhalte der Datensätze zu kopieren."
+      }
+    ]
+  },
+  {
     "version": "1.203.0",
     "date": "2026-10-21",
     "pr": 203,

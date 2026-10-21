@@ -76,6 +76,8 @@ Une analyse d'impact complète (AIPD) n'est pas obligatoire ici : petit volume, 
 4. **Informer les personnes** sans tarder si le risque est élevé (par exemple noms et signatures en clair), par e-mail, en expliquant ce qui s'est passé et ce qu'elles peuvent faire.
 5. **Consigner** chaque incident, même sans notification :
 
+Avec la Vigie, un Analyste ou Administrateur peut exporter le périmètre d’un dossier clos classé « Incident confirmé » après confirmation. Le JSON regroupe les références d’objets par catégorie, la période, les comptes, les sessions et les phases probantes, sans contenu de fiche ni champ d’adresse réseau. Il signale les limites du dossier ; les listes sans identifiants ne donnent pas un nombre de personnes distinctes. Ranger ce fichier dans l’espace réservé au traitement de l’incident et compléter les effets, les mesures et la décision de notification dans le registre ci-dessous. Ce téléchargement est noté dans le journal de sécurité.
+
 | Date | Découvert par | Nature | Données et personnes | Mesures | Notifié CNIL (date) | Personnes informées |
 |---|---|---|---|---|---|---|
 | | | | | | | |
