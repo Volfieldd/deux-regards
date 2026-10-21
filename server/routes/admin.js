@@ -24,7 +24,7 @@ import { FONTS, POSITIONS, KINDS, TONE_LABELS } from '../watermark.js';
 import { DESIGNS, SECTIONS, validDesignSettings } from '../designs.js';
 import { THEMES, BRAND_MODES, BRAND_SLOTS } from '../themes.js';
 import { processEmblem, processIcon, processShare, BrandError, EMBLEM_MAX_BYTES } from '../brand.js';
-import { loadHelp } from '../help.js';
+import { loadHelp, chapterIds } from '../help.js';
 import { barsAndLine, sparkline } from '../charts.js';
 import { RIGHTS, LANGS, rightsDefaults, withoutDefaults } from '../rights.js';
 import { FRAMES, DEFAULT_TEMPLATE, normalizeSettings, parseTimes, captionWarnings, InstagramError } from '../instagram.js';
@@ -190,6 +190,21 @@ export default async function adminRoutes(app) {
   // notés dans le détail de sa ligne du journal : quel texte publié a changé, et sur quelle photo, série ou photographe
   // (la Vigie pourra les lire : registre des briques, BV-20 et BV-21).
   app.decorateRequest('auditChanges', null);
+  // Admin v2, Journal (UX-A-19) : ce que le journal note en plus pour se lire en toutes lettres. Jamais une valeur
+  // personnelle : le titre d'un voyage ou d'une série (un titre éditorial, publié sur le site) et, pour une action
+  // groupée, ce qu'elle a fait et combien de photos (« lot : publiees 5 »). Le titre d'une rencontre ou d'une personne n'y
+  // figure jamais : leur cible reste le numéro seul. Ajouté au détail de la ligne, après « champs : … » (dont les noms ne
+  // changent pas : la Vigie ne lit pas le journal, mais les tests et BV-20 et BV-21 les attendent tels quels).
+  app.decorateRequest('auditLot', null);
+  app.decorateRequest('auditNom', null);
+  const NOMMES = /^(?:POST) \/admin\/(voyages|series)\/:id(?:\/|$)/;
+  const nomDe = (genre, id) => (genre === 'voyages' ? app.trips.get(id)?.name : app.db.prepare('SELECT name FROM categories WHERE id = ?').pluck().get(id));
+  // Avant l'action : un voyage ou une série qu'elle efface a encore son titre.
+  app.addHook('preHandler', async request => {
+    if (!request.session || request.method !== 'POST') return;
+    const m = NOMMES.exec(`${request.method} ${request.routeOptions.url}`);
+    if (m) request.auditNom = JOURNAL.nomPropre(nomDe(m[1], Number(request.params.id)));
+  });
   const noteChanges = (request, before, after, label = '') => {
     const fields = Object.keys(after || {}).filter(k => !BOOKKEEPING.has(k) && String(before?.[k] ?? '') !== String(after[k] ?? ''));
     if (fields.length) (request.auditChanges ||= []).push(`${label}${fields.join(', ')}`);
@@ -204,8 +219,11 @@ export default async function adminRoutes(app) {
       // même les raccourcis d'une touche de la photothèque v2 (POST /admin/compte/raccourcis).
       if (!request.audited && !['POST /admin/langue', 'POST /admin/theme', 'POST /admin/version', 'POST /admin/compte/raccourcis', 'POST /admin/carnet/:id/apercu', 'POST /admin/carnet/:id/brouillon'].includes(action)) {
         // Statut gardé : celui de l'issue (422 pour un refus par failed(), redirigé en 303), lu « fait » ou « refusé ».
+        // Le titre d'après l'action (un voyage renommé : le nouveau), à défaut celui d'avant (un voyage supprimé).
+        const m = NOMMES.exec(action);
+        const nom = m ? JOURNAL.nomPropre(nomDe(m[1], Number(request.params.id))) || request.auditNom : null;
         app.audit.log({ sub: request.session.sub, name: request.session.name, action, target: Object.values(request.params || {}).join(' / '), status: request.refused && reply.statusCode < 400 ? 422 : reply.statusCode,
-          detail: request.auditChanges?.length ? `champs : ${request.auditChanges.join(' ; ')}` : '' });
+          detail: JOURNAL.detailDe({ champs: request.auditChanges?.length ? request.auditChanges.join(' ; ') : '', lot: request.auditLot, nom }) });
       }
     }
   });
@@ -343,7 +361,9 @@ export default async function adminRoutes(app) {
       // Choix de l'admin (menu du compte) ; en v2, les onglets des Réglages et le rôle affiché sous le nom.
       adminVersion: version, adminV2: v2,
       // shortcuts : raccourcis d'une touche de la photothèque (préférence du compte, « Mon compte »).
-      ...(v2 ? { settingsTabs: settingsTabs(request), roleNames: (request.session.roles || []).map(r => request.t(ROLES[r]?.label || r)), shortcuts: adminVersion.shortcuts(request.session.sub) } : {}),
+      ...(v2 ? { settingsTabs: settingsTabs(request), roleNames: (request.session.roles || []).map(r => request.t(ROLES[r]?.label || r)), shortcuts: adminVersion.shortcuts(request.session.sub),
+        // Les chapitres de l'aide que ce compte peut lire (le panneau d'aide contextuelle en reconnaît celui d'une ancre).
+        helpChapters: chapterIds().filter(id => helpAllowed(request, id)) } : {}),
       releasePopup, releaseCurrent: RELEASE_CURRENT, securite, identite: identityOf(request),
       // Retour après la bascule clair / sombre : la page affichée, si elle a été obtenue par GET.
       adminTheme: adminTheme(request), navSeries: navSeries(request), currentPath: request.method === 'GET' ? request.url : '/admin',
@@ -363,6 +383,14 @@ export default async function adminRoutes(app) {
       ...data, pageTitle: `${data.title} · ${request.t('Administration')} · ${siteName}`,
     });
   }
+
+  // Admin v2 : la page « Accès refusé » (403) dans la mise en page de l'admin, pour un compte en v2 qui a une session sur une
+  // adresse de l'admin (app.forbid l'appelle) ; null sinon, et la page du site s'affiche comme avant. Le refus lui-même
+  // (code 403, no-store, authz_fail vers la Vigie) est celui de app.forbid.
+  app.forbidPage.render = (request, reply) => {
+    if (!request.session || !request.t || !String(request.url).startsWith('/admin') || adminVersion.of(request.session.sub) !== 'v2') return null;
+    return render(request, reply, 'forbidden', { title: request.t('Accès refusé') });
+  };
 
   const byId = id => (Number.isInteger(Number(id)) ? Number(id) : -1);
   // Variantes prêtes : la plus grande existe (les brouillons tout juste envoyés n'en ont pas encore). La plus grande, pas la
@@ -1393,6 +1421,7 @@ export default async function adminRoutes(app) {
       const r1 = sure.length ? await app.review.propose(sure, by(request), { message: body.message, confirm: true }) : { proposed: [], verify: [], blocked: [], skipped: [] };
       const r2 = await app.review.propose(ids.filter(id => !sure.includes(id)), by(request), { message: body.message });
       const r = { proposed: [...r1.proposed, ...r2.proposed], verify: [...r1.verify, ...r2.verify], blocked: [...r1.blocked, ...r2.blocked], skipped: [...r1.skipped, ...r2.skipped] };
+      JOURNAL.noterLot(request, 'proposees', r.proposed.length);
       return (r.proposed.length ? done : failed)(reply, r.proposed.length ? '/admin/photos?manque=proposees' : to, proposedText(t, r));
     }
     if (next === 'publier') {
@@ -1400,12 +1429,14 @@ export default async function adminRoutes(app) {
       const before = repo.setStatuses(Object.fromEntries(g.ok.map(id => [id, 'published'])));
       queued(before);
       const held = g.verify.length + g.blocked.length;
+      JOURNAL.noterLot(request, 'publiees', g.ok.length);
       const published = g.ok.length > 1 ? t('{n} photos publiées.', { n: g.ok.length }) : t('{n} photo publiée.', { n: g.ok.length });
       const parts = [g.verify.length && t('{n} à vérifier (confirmez dans leur fiche)', { n: g.verify.length }),
         g.blocked.length && (g.blocked.length > 1 ? t('{n} bloquées par un refus', { n: g.blocked.length }) : t('{n} bloquée par un refus', { n: g.blocked.length }))].filter(Boolean);
       const rest = held ? ` ${held > 1 ? t('{n} restent en brouillon :', { n: held }) : t('{n} reste en brouillon :', { n: held })} ${parts.join(', ')}.` : '';
       return done(reply, '/admin/photos', `${published}${rest}`);
     }
+    JOURNAL.noterLot(request, 'enregistrees', ids.length);
     return done(reply, to, t('Modifications enregistrées.'));
   });
 
@@ -1461,6 +1492,7 @@ export default async function adminRoutes(app) {
     const map = raw => { let m; try { m = typeof raw === 'string' ? JSON.parse(raw) : raw || {}; } catch { m = {}; } return Object.fromEntries(Object.entries(m && typeof m === 'object' ? m : {}).slice(0, MAX_BULK).filter(([id]) => touchable(id))); };
     if (body.action === 'propose') {
       const r = await app.review.propose(ids, by(request), { message: body.message });
+      JOURNAL.noterLot(request, 'proposees', r.proposed.length);
       return ok(proposedText(request.t, r));
     }
 
@@ -1496,6 +1528,7 @@ export default async function adminRoutes(app) {
           const blocked = (r ? ` ${r > 1 ? t('{n} photos restent en brouillon : la personne photographiée refuse la publication (voir Personnes).', { n: r }) : t('{n} photo reste en brouillon : la personne photographiée refuse la publication (voir Personnes).', { n: r })}` : '')
             + (v ? ` ${v > 1 ? t('{n} photos à vérifier restent en brouillon : confirmez dans leur fiche.', { n: v }) : t('{n} photo à vérifier reste en brouillon : confirmez dans sa fiche.', { n: v })}` : '');
           const m = n - refused.length - g.verify.length - refusedOnline.length;
+          JOURNAL.noterLot(request, body.action === 'publish' ? 'publiees' : 'repassees', m);
           const main = body.action === 'publish'
             ? (m > 1 ? t('{n} photos publiées.', { n: m }) : t('{n} photo publiée.', { n: m }))
             : (m > 1 ? t('{n} photos repassées en brouillon.', { n: m }) : t('{n} photo repassée en brouillon.', { n: m }));
@@ -1508,6 +1541,7 @@ export default async function adminRoutes(app) {
           const before = repo.setOnMap(ids, body.action === 'map_on');
           edited(request, Object.keys(before));                          // seulement les photos dont la carte a changé
           const changed = Object.keys(before).length;
+          JOURNAL.noterLot(request, body.action === 'map_on' ? 'carte_ajoutees' : 'carte_retirees', changed);
           const skipped = body.action === 'map_on' ? n - repo.withCity(ids).length : 0;
           const word = c => (c > 1 ? t('{n} photos', { n: c }) : t('{n} photo', { n: c }));
           const text = body.action === 'map_on'
@@ -1615,6 +1649,7 @@ export default async function adminRoutes(app) {
             const file = repo.deletePhoto(id);
             if (file) removePhotoFiles(storageDir, file);
           }
+          JOURNAL.noterLot(request, 'supprimees', n);
           return ok(n > 1 ? t('{n} photos supprimées.', { n }) : t('{n} photo supprimée.', { n }));
         }
         default:
@@ -1904,6 +1939,7 @@ export default async function adminRoutes(app) {
     if (request.body?.quand === 'date' && !at) return failed(reply, '/admin/a-valider', request.t('Choisissez une date et une heure.'));
     try {
       const r = await app.review.approve(ids, by(request), { at });
+      JOURNAL.noterLot(request, at ? 'programmees' : 'validees', r.done.length);
       const text = [approvedText(request.t, r, at), stale ? (stale > 1 ? request.t('{n} photos ne sont plus proposées : rien n’a été fait pour elles.', { n: stale }) : request.t('{n} photo n’est plus proposée : rien n’a été fait pour elle.', { n: stale })) : ''].filter(Boolean).join(' ');
       return (r.done.length ? done : failed)(reply, '/admin/a-valider', text);
     } catch (err) {
@@ -2415,10 +2451,25 @@ export default async function adminRoutes(app) {
   // Chapitres de l'aide réservés : ils n'apparaissent qu'à qui peut ouvrir l'une des pages qu'ils décrivent.
   const HELP_PERMS = { preuves: ['photos.voir'], series: ['series.gerer'], auteurs: ['photographes.gerer'], 'filigrane-exif': ['site.filigrane'], apparence: ['site.apparence'],
     reglages: ['site.textes', 'reglages.droits', 'comptes.gerer', 'journal.voir'], statistiques: ['statistiques.voir'], instagram: ['instagram.voir'], rencontres: ['personnes.voir', 'terrain.app'], 'galeries-privees': ['galeries.voir'] };
+  const helpAllowed = (request, id) => !HELP_PERMS[id] || HELP_PERMS[id].some(perm => request.can(perm));
   app.get('/admin/aide', P('admin.acceder'), async (request, reply) => {
     const help = helpIn(request.t.lang);
-    const sections = help.sections.filter(sec => !HELP_PERMS[sec.id] || HELP_PERMS[sec.id].some(perm => request.can(perm)));
+    const sections = help.sections.filter(sec => helpAllowed(request, sec.id));
     return render(request, reply, 'help', { title: request.t('Aide'), help: { ...help, sections } });
+  });
+  // Admin v2 (UX-A-22) : un chapitre de l'aide sur sa page, et ce que le panneau d'aide contextuelle lit. Le contenu est celui
+  // de /admin/aide (mêmes ancres, mêmes chapitres réservés) ; une adresse en lecture seule derrière l'admin, par un nom de
+  // chapitre pris dans la liste fermée de docs/aide/ (jamais une valeur de la requête dans un chemin de fichier). Un chapitre
+  // inconnu ou réservé est introuvable ; un compte en v1 est renvoyé à la page entière, à l'ancre du chapitre.
+  app.get('/admin/aide/:chapitre', P('admin.acceder'), async (request, reply) => {
+    const id = String(request.params.chapitre);
+    if (!chapterIds().includes(id) || !helpAllowed(request, id)) return reply.callNotFound();
+    if (adminVersion.of(request.session.sub) !== 'v2') return reply.redirect(`/admin/aide#${id}`, 303);
+    const help = helpIn(request.t.lang);
+    const sections = help.sections.filter(sec => helpAllowed(request, sec.id));
+    const i = sections.findIndex(sec => sec.id === id);
+    if (i < 0) return reply.callNotFound();
+    return render(request, reply, 'help', { title: `${sections[i].title} · ${request.t('Aide')}`, help: { ...help, sections }, chapitre: sections[i], precedent: sections[i - 1] || null, suivant: sections[i + 1] || null });
   });
 
   // ---------- rencontres (page /bonjour, cartes) ----------
