@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import { setup, VIGIE_KEYS } from './helpers.js';
 import { createSessionStore } from '../server/sessions.js';
 import { readDay, MAX_DATE } from '../server/date-libre.js';
+import { meilleur } from './duree.js';
 
 // Page /bonjour : âge et nom du parent (les règles de l'app de terrain), date saisie en texte libre, récapitulatif après
 // l'envoi (PLAN.md, point 8 ; maquette MQ-05, cadres 5, 11 et 13 ; registre de la Vigie, « Bonjour : mineurs et date
@@ -79,14 +80,18 @@ test('date libre : temps borné face aux saisies hostiles (retour arrière, long
     '1/'.repeat(20), '1 '.repeat(20), 'a'.repeat(40), '1er'.repeat(13), `${'9'.repeat(39)}x`, '- - - - - - - - - - - - - - - - - - - - ',
     'é'.repeat(40), '́'.repeat(40), '12 mars '.repeat(5), `${'1'.repeat(1e6)}`, `${'1/'.repeat(5e5)}`, 'hier '.repeat(8),
   ];
-  const t0 = process.hrtime.bigint();
-  let n = 0;
-  for (let i = 0; i < 10000; i++) for (const s of hostile) { readDay(s, { lang: 'en', today: TODAY }); n++; }
-  const ms = Number(process.hrtime.bigint() - t0) / 1e6;
-  assert.ok(ms < 3000, `${n} saisies hostiles en ${ms.toFixed(0)} ms`);
+  // Une saisie hostile coûte autant qu'une saisie ordinaire. Durées relatives, meilleur de 5 essais (la charge de la
+  // machine n'allonge qu'une mesure) : un retour arrière coûterait des milliers de fois plus, pas quelques fois.
+  const reads = (s, n) => meilleur(() => { for (let i = 0; i < n; i++) readDay(s, { lang: 'en', today: TODAY }); });
+  const N = 500;
+  const ref = Math.max(...['14/10/2026', '12 mars 2026', 'yesterday'].map(s => reads(s, N)));
+  for (const s of hostile) {
+    const ms = reads(s, N);
+    assert.ok(ms < ref * 20 + 5, `${N} lectures de « ${s.slice(0, 24)}… » en ${ms.toFixed(1)} ms pour ${ref.toFixed(1)} ms d'une saisie ordinaire`);
+  }
   // Une saisie d'un million de signes coûte autant qu'une courte : la longueur est lue d'abord.
-  const one = s => { const a = process.hrtime.bigint(); for (let i = 0; i < 2000; i++) readDay(s, { today: TODAY }); return Number(process.hrtime.bigint() - a) / 1e6; };
-  assert.ok(one('1'.repeat(1e6)) < one('14/10/2026') * 20 + 50, 'saisie énorme refusée aussitôt');
+  const one = (s, n) => meilleur(() => { for (let i = 0; i < n; i++) readDay(s, { today: TODAY }); });
+  assert.ok(one('1'.repeat(1e6), 2000) < one('14/10/2026', 2000) * 20 + 50, 'saisie énorme refusée aussitôt');
 });
 
 // ---------- âge, parent, accord ----------

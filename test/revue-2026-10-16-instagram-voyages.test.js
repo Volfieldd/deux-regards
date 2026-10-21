@@ -8,6 +8,7 @@ import { createSearch } from '../server/search.js';
 import { search as cities } from '../server/geo/cities.js';
 import { renderCaption, parseTimes, InstagramError } from '../server/instagram.js';
 import { checkBudget, normalizeLimits, rateLimitFrom, whenText, LIMIT_DEFAULTS, BOUNDS, MAX_PAUSE } from '../server/instagram-limits.js';
+import { meilleur } from './duree.js';
 
 // Non-régression de la revue du 16 octobre 2026, sous-système « Instagram et voyages » : ville d'une photo hors
 // carte jamais montrée (voyage, recherche) ; aperçu d'un voyage selon la portée ; page publique d'un voyage soumise
@@ -277,9 +278,13 @@ test('page admin d’un voyage : sorties de ses journées et propositions borné
 
 test('légende : une légende de 2 000 espaces avec une variable vide sur sa ligne se rend aussitôt', () => {
   const photo = { title: 'T', legend: `a${' '.repeat(1998)}b`, ig_signature: 0, author_signature: 'sig' };
-  const t0 = performance.now();
-  const out = renderCaption('{titre}\n{legende} {signature}\n{hashtags}', photo, { hashtags: '#x' }, 'Site');
-  assert.ok(performance.now() - t0 < 50, `${performance.now() - t0} ms`);
+  const model = '{titre}\n{legende} {signature}\n{hashtags}';
+  const out = renderCaption(model, photo, { hashtags: '#x' }, 'Site');
+  // Durées relatives, meilleur de 5 essais : huit fois plus d'espaces ne doit coûter que ~8 fois plus (le retour arrière
+  // d'une expression régulière en coûterait 64 ou plus).
+  const avec = n => { const p = { ...photo, legend: `a${' '.repeat(n)}b` }; return meilleur(() => renderCaption(model, p, { hashtags: '#x' }, 'Site')); };
+  const [petit, grand] = [avec(500), avec(4000)];
+  assert.ok(grand < petit * 30 + 2, `${grand.toFixed(2)} ms pour 4 000 espaces, ${petit.toFixed(2)} ms pour 500`);
   assert.equal(out, 'T\na b\n#x');
   // Séparateurs orphelins toujours retirés, valeurs intactes.
   assert.equal(renderCaption('{titre} · {lieu} — {date}', { title: 'Brume', place: '' }, {}, 'S'), 'Brume');

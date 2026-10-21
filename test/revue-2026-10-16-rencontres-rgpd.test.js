@@ -10,6 +10,7 @@ import { rightsDue, createReminders } from '../server/reminders.js';
 import { transportOptions, maskAddresses } from '../server/mailer.js';
 import fs from 'node:fs';
 import { TEXTS } from '../server/cards.js';
+import { meilleur, meilleurAsync } from './duree.js';
 
 // Non-régression de la revue du 16 octobre 2026, sous-système « rencontres et RGPD » : demandes sans code sur /bonjour
 // (rencontre saisie sur le téléphone, demande de droits en cours, numérotation), portée « les miennes » (personne
@@ -55,19 +56,31 @@ async function world(t, opts = {}) {
 
 test('A132 : référence et heure bornées avant l’expression régulière (aucun blocage sur 100 Ko d’espaces)', async t => {
   const long = ' '.repeat(100_000);
-  let t0 = Date.now();
+  // Meilleur de 5 essais (la charge n'allonge qu'une mesure) et durées relatives, pas un seuil en ms. D'abord à petite
+  // échelle, pour échouer vite : sans le plafond de longueur, l'expression régulière de parseRef est quadratique (8 fois
+  // plus long = 64 fois plus de temps) ; avec lui, la lecture ne dépend plus de la longueur.
+  const [mille, huitMille] = [`J${' '.repeat(1_000)}!`, `J${' '.repeat(8_000)}!`];
+  const t1 = meilleur(() => parseRef(mille)), t8 = meilleur(() => parseRef(huitMille));
+  assert.ok(t8 < t1 * 30 + 5, `parseRef quadratique : ${t8.toFixed(2)} ms pour 8 000 espaces, ${t1.toFixed(2)} ms pour 1 000`);
+  // Puis les 100 Ko, contre une saisie courte.
   assert.equal(parseRef(`J${long}!`), null);
   assert.equal(normTime(`1h${long}!`), null);
-  assert.ok(Date.now() - t0 < 100, `trop lent : ${Date.now() - t0} ms`);
+  const court = meilleur(() => { parseRef('J !'); normTime('1h !'); });
+  const grand = meilleur(() => { parseRef(`J${long}!`); normTime(`1h${long}!`); });
+  assert.ok(grand < court * 20 + 20, `trop lent : ${grand.toFixed(2)} ms pour 100 Ko, ${court.toFixed(2)} ms pour une saisie courte`);
   // Les saisies normales restent comprises.
   assert.deepEqual(parseRef(' j 142 k7q '), { prefix: 'J', number: 142, ref: 'J-0142', code: 'K7Q' });
   assert.equal(normTime(' 9 h 05 '), '09:05');
   const c = await world(t);
-  t0 = Date.now();
-  const r = await c.hello({ ref: `J${long}!`, met_on: '2026-10-11', place: 'Nantes', decision: 'refus', met_time: `1h${'+'.repeat(30_000)}!` });
-  assert.equal(r.statusCode, 422);
-  assert.equal((await c.app.inject(`/bonjour/merci?ref=J${' '.repeat(15_000)}!`)).statusCode, 200);
-  assert.ok(Date.now() - t0 < 1500, `trop lent : ${Date.now() - t0} ms`);
+  // Même requête que ci-dessus, mais avec des saisies courtes : la référence de durée (meilleur de 3 essais).
+  const requete = (ref, heure, merci) => async () => {
+    const r = await c.hello({ ref, met_on: '2026-10-11', place: 'Nantes', decision: 'refus', met_time: heure });
+    assert.equal(r.statusCode, 422);
+    assert.equal((await c.app.inject(`/bonjour/merci?ref=${merci}`)).statusCode, 200);
+  };
+  const reference = await meilleurAsync(requete('J!', '1h!', 'J!'));
+  const hostile = await meilleurAsync(requete(`J${long}!`, `1h${'+'.repeat(30_000)}!`, `J${' '.repeat(15_000)}!`));
+  assert.ok(hostile < reference * 20 + 200, `trop lent : ${hostile.toFixed(0)} ms pour des saisies énormes, ${reference.toFixed(0)} ms pour des saisies courtes`);
 });
 
 test('A034 : sans code, une rencontre saisie sur le téléphone (refus, « plus tard ») ne change pas ; un refus n’est jamais levé', async t => {
