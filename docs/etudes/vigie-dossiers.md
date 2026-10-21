@@ -145,7 +145,7 @@ Une connexion réussie est un **fait d'accès**. La question n'est pas de savoir
 | Appareil jamais vu (90 jours) | site | 1,5 | même détecteur, `nouveau` contient « appareil » ; les deux se cumulent (3) |
 | Nouvel opérateur réseau | bordure | 1 | `bordure_nouvel_operateur` (DS4) |
 | Adresse sur une liste de menaces | listes | 1 à 2 (barème des listes) | `vigie/menaces.js` |
-| Trois réseaux ou plus pour un compte en 24 h | site | 1,5 | **à créer** (règle `value_count`, PR E) |
+| Trois réseaux ou plus pour un compte en 24 h | site | 1,5 | `compte_reseaux_multiples` (`value_count`, PR E) |
 | Réseau ou navigateur changé en cours de session (un des deux) | site | 2 | `session_context_change` « moyen » |
 | Empreinte TLS changée en cours de session | bordure | 1 | observée aujourd'hui, à compter quand elle sera jugée stable (NC3) |
 | Voyage impossible (> 500 km, > 900 km/h) | site, Zitadel | 3 | détecteur `voyage_impossible` (DS3) |
@@ -598,7 +598,7 @@ Les gestes sur un dossier sont des événements chaînés `vigie_dossier` : ouve
 | A, B, C, D | rien : aucune route, aucun événement nouveau | phases sur les règles et les détecteurs, migration des dossiers, console |
 | E | catégories des objets dans `detail` (`categorie`), lectures des listes (`/admin/personnes`, `/admin/rencontres`, planche des cartes, `/admin/comptes`), compteur de déchiffrements par requête (`server/vault.js`), octets servis par route classée | règle « trois réseaux ou plus pour un compte », enjeu par catégorie, seuils sous accès douteux recalés |
 
-Registre des briques : la PR E proposera **BV-31** (catégories de données personnelles lues ou exportées, et volume par session), rattaché à DS18.
+Registre des briques : la PR E ajoute **BV-33** (catégories de données personnelles lues ou exportées, et volume par session), rattaché à DS18.
 
 ---
 
@@ -610,9 +610,9 @@ Registre des briques : la PR E proposera **BV-31** (catégories de données pers
 | **B. Moteur des dossiers** | migration (section 9) ; ouverture, rattachement, rattachement rétroactif, fusion, cycle de vie ; confiance, contre-indices, lectures sous accès douteux (4.6) ; enjeu par objet ; grille et explication ; `chaine_attaque` calculée sur le dossier ; ligne de commande `dossiers` ; les cinq scénarios en tests et au banc | la plus grosse |
 | **C. Maquettes** | MV-12 (dossiers), MV-13 (un dossier : frise, matrice ATT&CK, graphe), MV-14 (vue ATT&CK de la détection), bureau et téléphone, une seule passe de contrôle | moyenne |
 | **D. Console** | liste, fiche, frise, matrice ATT&CK du dossier, graphe, exploration, gestes de l'analyste, section « Dossiers » de la fiche d'entité, vue d'ensemble ; vue ATT&CK de la détection et export au format Navigator | moyenne |
-| **E. Données personnelles** | site et Vigie (section 11) ; BV-31 | moyenne |
+| **E. Données personnelles** | site et Vigie (section 11) ; BV-33 | moyenne |
 
-La PR D est livrée et fusionnée en trois étapes : D1 (#198, version 1.198.0), D2 (#199, version 1.199.0), puis D3 (#200, version 1.200.0). Leurs périmètres, limites de lecture et écarts aux maquettes figurent en sections 14.1 à 14.3. Les maquettes n’ont pas été modifiées. La PR E constitue la prochaine étape distincte, soumise à l’accord du propriétaire.
+La PR D est livrée et fusionnée en trois étapes : D1 (#198, version 1.198.0), D2 (#199, version 1.199.0), puis D3 (#200, version 1.200.0). Leurs périmètres, limites de lecture et écarts aux maquettes figurent en sections 14.1 à 14.3. Les maquettes n’ont pas été modifiées. La PR E, autorisée par le propriétaire le 21 octobre 2026, est décrite en section 14.4.
 
 Chaque PR est suivie d'une revue de code et de sécurité, avant la suivante. Après la PR B, un mois d'observation (mode « observer ») sert à recaler les seuils et la grille, avant toute réponse automatique au niveau du dossier.
 
@@ -654,7 +654,7 @@ Précisions et écarts par rapport aux sections précédentes :
 | Alerte qui dure | Le dossier est recalculé quand l'alerte s'ouvre ou s'aggrave ; sinon, il avance seulement sa date, au plus une fois par minute. |
 | Chaîne d'attaque (DS23) | Ouverte une fois par dossier, sur son compte ou sa graine, quand trois phases ou plus se suivent dont l'accès (mode « observer », comme avant). L'ancienne chaîne par entité, en mémoire, est retirée. |
 | Ligne de commande | `dossiers [--tous]`, `dossier <id>`, `dossier <id> prendre`, `classer` (« légitime » : motif obligatoire), `detacher` (motif obligatoire), `rattacher`, `fusionner`, `scinder --entites "compte:a,session:s" --signaux "12,13" --motif "…"` (D1). |
-| Pas encore | Catégories de données personnelles et règle « trois réseaux ou plus » (PR E) ; empreinte TLS comme indice (après sa mesure de stabilité). |
+| Suite | Les catégories et la règle « trois réseaux ou plus » sont ajoutées par la PR E (14.4) ; l’empreinte TLS reste à mesurer avant de devenir un indice. |
 | Inchangé | Alertes, modes, seuils, notifications, réponses automatiques (D36, D37) ; aucun événement nouveau côté site. |
 | Coût mesuré | Banc, 20 000 événements d'historique : analyse ordinaire de 0,58 à 0,65 ms par événement (dans le bruit de la mesure) ; rafale de 5 000 événements sur une adresse dont l'alerte a son dossier, de 0,39 à 0,42 ms (voir [`vigie-capacite.md`](vigie-capacite.md)). |
 
@@ -714,3 +714,20 @@ Les calques de couverture et d’observation suivent le [format officiel Navigat
 Écarts à la maquette : les tactiques utilisent des dépliants natifs à toutes les largeurs ; les observations et liens reposent sur les données conservées, avec plafonds explicités, et les alertes sont nommées comme celles des règles. Aucune maquette modifiée. Le moteur, les modes, notifications et décisions ne changent pas. La PR E reste hors périmètre.
 
 La mesure D3 a conduit à alimenter cet index dans `store.add`, uniquement pour `vigie_signal` et dans la transaction du maillon. Un déclencheur d’insertion sur tout le journal imposait un surcoût même aux événements ordinaires ; il a été retiré avant fusion. Le rattrapage reste dans la migration et le déclencheur de suppression accompagne la purge. Un lot rejeté annule aussi son index ; un identifiant renvoyé ne le duplique pas.
+
+
+### 14.4 PR E — Catégories et volumes des lectures (BV-33)
+
+**PR #202, version 1.202.0 ; périmètre autorisé le 21 octobre 2026.** BV-31 étant déjà attribué au formulaire `/bonjour` forgé, cette livraison emploie BV-33, rattaché à DS18. Le site enrichit les événements existants ; aucun nouveau type, contenu de fiche, nom de personne, adresse e-mail, signature, jeton ou code de carte n’est transmis.
+
+- `detail.categorie` est une liste fermée : `identite`, `coordonnees`, `image`, `mineur`, `accord_signe`, `localisation`, `message_libre`. Les fiches de personne ou de rencontre et leurs exports utilisent les données préparées par le gestionnaire ; les messages et accès privés précisent aussi leurs catégories. Les messages de l’historique comptent quand ils sont affichés ou exportés ; ceux retirés de l’archive parce que non vérifiés ne lui ajoutent pas une catégorie. « Mineur » demande le nom du parent présent ; une carte sans accord n’est pas classée comme accord signé. Un lieu de rencontre renseigné est classé prudemment comme localisation : le texte ne permet pas de distinguer sûrement une ville d’une adresse précise. Ce sont des enjeux opérationnels, pas les catégories particulières de l’article 9 du RGPD.
+- Les listes `/admin/personnes`, `/admin/rencontres`, `/admin/comptes` et la planche des cartes émettent une lecture après une réponse GET réussie et authentifiée. `liste: true` et `objets` décrivent leur effectif, sans copier tous les identifiants. Les cartes vierges ont des catégories vides ; une liste vide ne prouve pas une collecte. Les requêtes HEAD, refus et erreurs n’émettent pas de lecture réussie.
+- `dechiffrements` compte les opérations réussies du coffre pendant la requête, texte et binaire, sans valeur déchiffrée. Les requêtes concurrentes sont isolées ; le compteur est fermé à la réponse. Une valeur déjà en clair, une clé absente et un échec ne comptent pas. Ce nombre inclut les lectures internes nécessaires à la page : ce n’est pas un nombre de personnes.
+- `octets_servis` mesure le corps préparé des réponses chaîne ou tampon (HTML, images, ZIP personnels), sans en-têtes, ni garantie de réception par le navigateur. La taille d’un flux non mesuré reste absente, jamais remplacée par zéro ou par Content-Length. Le journal affiche catégories et volumes ; la fiche et l’export CSV autorisé conservent ces champs et le rattachement à la session.
+- La migration 018 garde uniquement ces métadonnées fermées avec les faits du dossier ; elles suivent les fusions, scissions et la conservation du dossier après purge de l’événement. Les anciens faits restent interprétés par leur objet. Une catégorie personnelle établit l’enjeu personnel ; mineur avec parent, accord signé ou localisation établissent l’enjeu sensible. Un export personnel sous accès douteux est critique, même si l’événement n’avait pas de numéro de fiche.
+- Les effectifs des listes ne s’additionnent jamais entre requêtes : le maximum d’une liste et le nombre de fiches distinctes donnent un minimum connu. Dix objets personnels dans une liste suffisent pour l’enjeu sensible ; huit dans une même lecture sous accès de confiance moyenne suffisent pour la collecte. Les huit fiches sont comptées **par session**, comme en 4.6 ; les anciens événements sans session restent groupés entre eux. Le seuil général de 30 fiches distinctes en une heure reste inchangé et exclut les listes sans identifiants individuels.
+- `compte_reseaux_multiples` observe trois réseaux distincts sur 24 h pour un même compte, sur connexions réussies, sessions ou lectures/exports authentifiés du site. Une saisie de compte dans un échec ne compte pas. L’indice vaut 1,5 point, une seule fois même s’il se répète, sans ouverture de dossier ni réponse automatique à lui seul ; ATT&CK T1078, accès initial, nature explicite `indice`.
+
+Les seuils de 8 lectures et 3 suppressions restent les valeurs initiales : le mois d’observation nécessaire au recalage n’est pas disponible. Les durées existantes ne changent pas (journal : 183 jours ; dossiers non incidents clos : 395 jours après la dernière activité ; incidents : conservation existante, durée D38 toujours à préciser). Confidentialité et RGPD décrivent les nouvelles métadonnées ; elles ne recopient pas les contenus personnels dans un second stockage.
+
+Les bandeaux de la fiche reprennent l’icône et l’enveloppe de texte du composant commun des alertes : le texte ne tombe plus dans la colonne étroite de l’icône. Aucune maquette modifiée. L’ajout visible est le résumé des catégories et volumes dans le journal existant et l’explication de l’enjeu du dossier, sans écran ni script supplémentaire.

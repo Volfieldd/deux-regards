@@ -607,7 +607,7 @@ test('revue 5 : caractères invisibles et de direction retirés des champs d’u
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test('suppression d’un message : sensitive_delete (objet et numéro seuls) seulement si elle a lieu ; rien sur un 404 hors portée ni un refus CSRF', async t => {
+test('suppression d’un message : sensitive_delete (objet, numéro et catégories, aucun contenu) seulement si elle a lieu ; rien sur un 404 hors portée ni un refus CSRF', async t => {
   const c = await site(t, 'v2', { vigie: true });
   const form = formOf((await c.app.inject('/contact')).body, '/contact');
   await post(c.app, '/contact', payloadOf(form, { ...CONTACT_OK, pour: 'julien' }), { ip: '198.51.100.70' });
@@ -626,7 +626,7 @@ test('suppression d’un message : sensitive_delete (objet et numéro seuls) seu
   v = await c.flush();
   const del = v.of('sensitive_delete');
   assert.equal(del.length, 1);
-  assert.deepEqual(del[0].detail, { objet: 'message', id });
+  assert.deepEqual(del[0].detail, { objet: 'message', id, categorie: ['identite', 'coordonnees', 'message_libre'] });
   assert.equal(typeof del[0].detail.id, 'number');
   assert.deepEqual([del[0].severity, del[0].origine.composant, del[0].origine.emetteur], ['bas', 'site · admin', 'server/routes/messages.js · suppression']);
   assert.equal(v.of('sensitive_read').find(e => e.detail.objet === 'message').detail.id, id);   // même numéro que la lecture

@@ -21,6 +21,7 @@
 // texte y est tronquée) ; l'extrait d'une saisie suspecte est réservé aux Analystes et aux Administrateurs ; l'agent
 // utilisateur complet, aux rôles qui voient les adresses. Tout texte venu du site part échappé (gabarits <%= %>).
 import net from 'node:net';
+import { CATEGORIES_DONNEES } from '../../../server/securite/vocabulaire.js';
 import { filtreTechnique } from '../attack.js';
 import { ALL, rank } from '../../vocabulaire.js';
 import { alertOrder, isPrivate } from '../../moteur.js';
@@ -297,6 +298,19 @@ function detailEnMorceaux(r, d, role, t) {
   const txt = s => m.push({ t: s });
   const sep = () => { if (m.length) txt(' · '); };
   switch (r.type) {
+    case 'sensitive_read':
+    case 'sensitive_export':
+    case 'sensitive_delete': {
+      if (d.objet) txt(propre(masquer(d.objet, role), 60));
+      if (d.id != null) { sep(); txt(`n° ${propre(masquer(String(d.id), role), 40)}`); }
+      const cats = Array.isArray(d.categorie) ? [...new Set(d.categorie.slice(0, 16).filter(c => typeof c === 'string' && Object.hasOwn(CATEGORIES_DONNEES, c)))] : [];
+      if (cats.length) { sep(); txt(cats.map(c => CATEGORIES_DONNEES[c]).join(', ')); }
+      for (const [cle, singulier, pluriel] of [['objets', 'objet affiché', 'objets affichés'], ['dechiffrements', 'déchiffrement', 'déchiffrements'], ['octets_servis', 'octet de réponse', 'octets de réponse']]) {
+        if (Number.isSafeInteger(d[cle]) && d[cle] >= 0) { sep(); txt(`${nombre(d[cle])} ${d[cle] > 1 ? pluriel : singulier}`); }
+      }
+      if (m.length) return m;
+      break;
+    }
     case 'vigie_alerte':
       if (Number.isInteger(d.id)) {
         m.push({ t: `#${d.id}`, href: `/alertes/${d.id}` });

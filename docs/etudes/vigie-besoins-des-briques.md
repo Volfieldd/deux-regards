@@ -1098,6 +1098,17 @@ cookie, sans permission ni migration ; en v2 et en v3 seulement (en v1, 404 et a
 
 ---
 
+## BV-33 — Catégories et volumes des données personnelles lus ou exportés
+
+**DS18, chantier « Vigie en dossiers », PR E.** Numéro 33 : BV-31 est déjà attribué au formulaire `/bonjour` forgé.
+
+- **Site** : enrichissement de `sensitive_read`, `sensitive_export` et de la suppression des messages par `detail.categorie` (liste fermée). Lectures des listes de personnes, rencontres et comptes, et des cartes vierges ; `objets`, `liste`, `dechiffrements`, `octets_servis`. Compteur du coffre isolé par requête, seulement les opérations réussies ; émission après réponse GET réussie et authentifiée. Aucun contenu, nom, e-mail, signature ni secret recopié.
+- **Vigie** : enjeu par catégories et effectif minimal, conservation minimisée dans les faits du dossier (migration 018), seuil des huit lectures par session, indice `compte_reseaux_multiples` (trois réseaux, 24 h, 1,5 point, observer). Ni une liste répétée, ni une valeur de compteur ne deviennent des points par elles-mêmes.
+- **Console** : résumé des catégories et volumes, détail échappé et borné, CSV réservé aux rôles qui exportent ; masquage des adresses de la Lectrice conservé. Pas de nouveau droit ni de nouveau type d’événement.
+- **Limites** : pas de liste exhaustive des personnes dans le signal, donc pas de décompte distinct entre listes ; flux non mesuré sans taille ; volume du corps préparé, pas reçu. Recalage 8/3 après un mois d’observation, conservation des incidents (D38) à préciser. Contrat complet : [étude, section 14.4](vigie-dossiers.md#144-pr-e--catégories-et-volumes-des-lectures-bv-33).
+
+---
+
 ## Permissions et contrôle des rôles (Carnets et galeries privées)
 
 - **Côté site** : déclarer `carnet.*`, `lettre.gerer` et `galeries.*` dans `PERMISSIONS` (`server/permissions.js:10-50`)

@@ -108,6 +108,25 @@ function remplir(v) {
   return s;
 }
 
+test('BV-33 : catégories et volumes lisibles, bornés, échappés et exportables selon le rôle', async t => {
+  const v = setup(t);
+  const seq = v.add({ type: 'sensitive_read', severity: 'info', sub: 'compte-e', session: 'session-e', ip: '198.51.100.23',
+    detail: { objet: 'personne', id: PIEGE, categorie: ['identite', 'mineur', PIEGE], objets: 8, dechiffrements: 24, octets_servis: 4500, liste: true } });
+  v.add({ type: 'sensitive_read', severity: 'info', detail: { objet: 'personne', objets: 1, dechiffrements: 0 } });
+  const lire = await v.login('lectrice-e', 'Lectrice', 'viewer');
+  const journal = await lire('/evenements?type=sensitive_read');
+  assert.equal(journal.statusCode, 200);
+  for (const texte of ['identité', 'personne mineure et parent', '8 objets affichés', '24 déchiffrements', 'octets de réponse']) assert.ok(journal.body.includes(texte), texte);
+  assert.match(journal.body, /1 objet affiché/); assert.match(journal.body, /0 déchiffrement/);
+  assert.ok(!journal.body.includes(PIEGE)); assert.doesNotMatch(journal.body, /198\.51\.100\.23/);
+  const fiche = await lire(`/evenements/${seq}`);
+  assert.equal(fiche.statusCode, 200); assert.match(fiche.body, /octets_servis/); assert.match(fiche.body, /&lt;img/);
+  assert.equal((await lire('/evenements.csv?type=sensitive_read')).statusCode, 403);
+  const analyste = await v.login('sub-ana', 'Analyste', 'analyst');
+  const csv = await analyste('/evenements.csv?type=sensitive_read');
+  assert.equal(csv.statusCode, 200); assert.match(csv.body, /dechiffrements/); assert.match(csv.body, /4500/);
+});
+
 const balises = html => html.match(/<[a-zA-Z][^>]*>/g) || [];
 function sansEnLigne(html, url) {
   for (const b of balises(html)) {

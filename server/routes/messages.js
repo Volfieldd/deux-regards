@@ -1,3 +1,5 @@
+import { noterLecture } from '../securite/donnees.js';
+
 // Admin « Messages et demandes » : ce que les visiteurs envoient par la page Contact et par la demande de licence
 // (server/messages.js ; registre de la Vigie, BV-30). Permission messages.traiter, avec portée : « les miennes » = les
 // messages adressés au photographe du compte (la photo d'une demande de licence est la sienne) et ceux adressés aux deux.
@@ -48,7 +50,7 @@ export function registerMessages(app, { render, P, W, done, withReady }) {
     const m = messages.get(r.id);
     // Lecture sensible : le nom, l'adresse et le message, déchiffrés pour ce compte (BV-30).
     audit(request, r.id);
-    app.securite.emit('sensitive_read', { request, emetteur: 'server/routes/messages.js · lecture sensible', detail: { cible: request.routeOptions.url, objet: 'message', id: r.id } });
+    noterLecture(request, { objet: 'message', id: r.id, categorie: ['identite', 'coordonnees', 'message_libre'] });
     reply.header('cache-control', 'no-store');
     return render(request, reply, 'message', { title: m.kind === 'licence' ? request.t('Demande de licence n° {id}', { id: m.id }) : request.t('Message n° {id}', { id: m.id }), m: view(m) });
   });
@@ -64,7 +66,7 @@ export function registerMessages(app, { render, P, W, done, withReady }) {
     const r = load(request);
     if (!r) return reply.callNotFound();
     // Effacement signalé à la Vigie (BV-30, messages_effaces_en_masse), seulement s'il a eu lieu : le numéro seul.
-    if (messages.remove(r.id)) app.securite.emit('sensitive_delete', { request, emetteur: 'server/routes/messages.js · suppression', detail: { objet: 'message', id: r.id } });
+    if (messages.remove(r.id)) app.securite.emit('sensitive_delete', { request, emetteur: 'server/routes/messages.js · suppression', detail: { objet: 'message', id: r.id, categorie: ['identite', 'coordonnees', 'message_libre'] } });
     return done(reply, '/admin/messages', request.t('Message supprimé.'));
   });
 }

@@ -395,7 +395,9 @@ test('fiche d’une rencontre (v1 et v2) : l’âge et le parent venus de la pag
       assert.match(r.body, new RegExp(`<dt>Âge</dt><dd>${age}</dd>`), `${ref} : âge dans la fiche`);
       assert.ok(r.body.includes(line), `${ref} : historique`);
     }
-    const reads = list => list.filter(e => e.type === 'sensitive_read').map(e => e.detail);
+    const reads = list => list.filter(e => e.type === 'sensitive_read').map(e => ({ ...e.detail, octets_servis: 'mesuré sur la réponse' }));
+    assert.equal(after.slice(before, mid).find(e => e.type === 'sensitive_read').detail.octets_servis, a.rawPayload.length);
+    assert.equal(after.slice(mid).find(e => e.type === 'sensitive_read').detail.octets_servis, b.rawPayload.length);
     assert.deepEqual(reads(after.slice(before, mid)), reads(after.slice(mid)), `${ref} : mêmes lectures sensibles en v1 et en v2`);
     assert.deepEqual(reads(after.slice(mid)).map(d => [d.cible, d.objet]), [['/admin/rencontres/:id', 'rencontre']]);
   }

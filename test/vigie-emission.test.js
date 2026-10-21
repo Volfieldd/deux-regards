@@ -306,7 +306,7 @@ test('budget : par réseau et par type, jamais pour un compte connecté ni une c
   assert.equal(c.app.securite.emit('type_inconnu', {}), null);
 });
 
-test('fiches lues ou exportées : objet « personne » ou « rencontre » (BV-30), la personne n et la rencontre n restent deux fiches ; rien d’autre ne change', async t => {
+test('fiches lues ou exportées : objet et numéro distincts (BV-30), catégories et volumes sans contenu (BV-33)', async t => {
   const c = await withVigie(t);
   const cookies = await c.login();
   const jul = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
@@ -318,11 +318,74 @@ test('fiches lues ou exportées : objet « personne » ou « rencontre » (BV-30
   }
   const v = await c.flush();
   const vu = type => v.of(type).map(e => [e.detail.cible, e.detail.objet, e.detail.id, Object.keys(e.detail).join()]);
-  assert.deepEqual(vu('sensitive_read'), [['/admin/personnes/:id', 'personne', String(per), 'cible,objet,id'], ['/admin/rencontres/:id', 'rencontre', String(enc), 'cible,objet,id']]);
-  assert.deepEqual(vu('sensitive_export'), [['/admin/personnes/:id/export.zip', 'personne', String(per), 'cible,objet,id'], ['/admin/rencontres/:id/export.zip', 'rencontre', String(enc), 'cible,objet,id']]);
-  // Une page de l'admin qui n'est pas une fiche : rien d'émis, comme avant.
+  const cles = 'cible,objet,id,categorie,objets,dechiffrements,octets_servis';
+  assert.deepEqual(vu('sensitive_read'), [['/admin/personnes/:id', 'personne', String(per), cles], ['/admin/rencontres/:id', 'rencontre', String(enc), cles]]);
+  assert.deepEqual(vu('sensitive_export'), [['/admin/personnes/:id/export.zip', 'personne', String(per), cles], ['/admin/rencontres/:id/export.zip', 'rencontre', String(enc), cles]]);
+  // La liste est désormais couverte ; son effectif ne prétend pas identifier autant de nouvelles fiches.
   assert.equal((await c.app.inject({ url: '/admin/personnes', cookies })).statusCode, 200);
-  assert.equal((await c.flush()).of('sensitive_read').length, 2);
+  const lectures = (await c.flush()).of('sensitive_read');
+  assert.equal(lectures.length, 3);
+  assert.equal(lectures.at(-1).detail.liste, true);
+  assert.equal(lectures.at(-1).detail.objets, 1);
+  assert.equal(lectures.at(-1).detail.id, null);
+});
+
+test('BV-33 : catégories des fiches, listes, comptes et cartes ; déchiffrements et octets sans noms, adresses, messages ou codes', async t => {
+  const cle = 'cle-de-test-donnees-personnelles-0123456789';
+  const c = await withVigie(t, { env: { DATA_KEY: cle } }), coffre = createVault(cle);
+  const cookies = await c.login();
+  const jul = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const id = Number(c.db.prepare(`INSERT INTO encounters (ref, author_id, name, email, adult, guardian, lat, lon, details, signature_png, created_at, updated_at)
+    VALUES ('J-0043', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(jul, coffre.seal('Nom confidentiel'), coffre.seal('secret@example.invalid'), coffre.seal('0'), coffre.seal('Parent confidentiel'),
+    coffre.seal('47.123'), coffre.seal('-0.456'), coffre.seal('Message confidentiel'), coffre.sealBuf(Buffer.from('signature confidentielle')), Date.now(), Date.now()).lastInsertRowid);
+  c.app.people.sync();
+  const routes = [`/admin/rencontres/${id}`, '/admin/personnes', '/admin/rencontres', '/admin/comptes', `/admin/rencontres/cartes/planche?auteur=${jul}&generiques=1&nombre=2`, `/admin/rencontres/${id}/signature`, `/admin/rencontres/${id}/export.zip`];
+  const reponses = [];
+  for (const url of routes) { const r = await c.app.inject({ url, cookies }); assert.equal(r.statusCode, 200, url); reponses.push(r); }
+  const v = await c.flush(), lus = [...v.of('sensitive_read'), ...v.of('sensitive_export')];
+  assert.equal(lus.length, routes.length, 'un événement par lecture réussie');
+  const fiche = lus[0];
+  assert.deepEqual(fiche.detail.categorie, ['identite', 'coordonnees', 'mineur', 'accord_signe', 'localisation', 'message_libre']);
+  assert.ok(fiche.detail.dechiffrements >= 7);
+  for (let i = 0; i < lus.length; i++) assert.equal(lus[i].detail.octets_servis, reponses[i].rawPayload.length, routes[i]);
+  assert.ok(lus[1].detail.liste); assert.equal(lus[1].detail.objets, 1);
+  assert.deepEqual(lus[3].detail.categorie, ['identite', 'coordonnees']);
+  assert.deepEqual(lus[4].detail.categorie, []); assert.equal(lus[4].detail.objets, 2);
+  assert.deepEqual(lus[5].detail.categorie, ['accord_signe']);
+  assert.ok(lus[5].detail.dechiffrements >= 1);
+  assert.doesNotMatch(JSON.stringify(lus), /Nom confidentiel|Parent confidentiel|secret@example|Message confidentiel|signature confidentielle|47\.123|-0\.456|J-0043|enc1:/);
+  // HEAD et refus ne livrent aucune donnée personnelle. Les filtres saisis ne deviennent jamais des catégories.
+  await c.app.inject({ method: 'HEAD', url: routes[0], cookies });
+  assert.equal((await c.app.inject({ url: '/admin/rencontres/999999', cookies })).statusCode, 404);
+  await c.app.inject({ url: routes[0] });
+  assert.equal((await c.flush()).of('sensitive_read').length, 6);
+  await c.app.inject({ url: '/admin/personnes?q=introuvable&categorie=mineur', cookies });
+  const vide = (await c.flush()).of('sensitive_read').at(-1);
+  assert.deepEqual(vide.detail.categorie, []); assert.equal(vide.detail.objets, 0);
+});
+
+test('BV-33 : les messages de l’historique sont catégorisés seulement lorsqu’ils sont livrés', async t => {
+  const cle = 'cle-de-test-historique-01234567890123456789';
+  const c = await withVigie(t, { env: { DATA_KEY: cle } }), coffre = createVault(cle), cookies = await c.login();
+  const jul = c.db.prepare("SELECT id FROM authors WHERE slug = 'julien'").pluck().get();
+  const id = Number(c.db.prepare("INSERT INTO encounters (ref, author_id, created_at, updated_at) VALUES ('J-0043', ?, ?, ?)").run(jul, Date.now(), Date.now()).lastInsertRowid);
+  c.app.people.sync();
+  const per = c.db.prepare('SELECT person_id FROM encounters WHERE id = ?').pluck().get(id);
+  const ajout = non_verifiee => c.db.prepare('INSERT INTO encounter_events (encounter_id, at, kind, detail) VALUES (?, ?, ?, ?)')
+    .run(id, Date.now(), 'visiteur', coffre.seal(JSON.stringify({ message: 'Message historique confidentiel', ...(non_verifiee ? { non_verifiee: true } : {}) })));
+  ajout(true);
+  const lire = async (url, type, message) => {
+    const r = await c.app.inject({ url, cookies }); assert.equal(r.statusCode, 200);
+    if (type === 'sensitive_read') assert.match(r.body, /Message historique confidentiel/);
+    const e = (await c.flush()).of(type).at(-1);
+    assert.equal(e.detail.categorie.includes('message_libre'), message, url);
+    assert.equal(e.detail.octets_servis, r.rawPayload.length);
+    assert.doesNotMatch(JSON.stringify(e), /Message historique confidentiel/);
+  };
+  await lire(`/admin/rencontres/${id}`, 'sensitive_read', true);
+  for (const url of [`/admin/rencontres/${id}/export.zip`, `/admin/personnes/${per}/export.zip`]) await lire(url, 'sensitive_export', false);
+  ajout(false);
+  for (const url of [`/admin/rencontres/${id}/export.zip`, `/admin/personnes/${per}/export.zip`]) await lire(url, 'sensitive_export', true);
 });
 
 test('déchiffrement impossible d’une donnée personnelle : signalé, regroupé par minute', async t => {

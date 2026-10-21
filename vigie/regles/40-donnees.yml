@@ -36,7 +36,9 @@ generate: false
 detection:
   selection:
     type: sensitive_read
-  condition: selection
+  liste:
+    detail.liste: true
+  condition: selection and not liste
 level: informational
 vigie: { signal: false }
 ---

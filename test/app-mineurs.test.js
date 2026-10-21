@@ -325,11 +325,13 @@ test('Vigie : aucun âge, nom ni adresse dans un événement (app, page, photo o
   await c.app.inject('/pour-vous/jeton-faux-0123456789abcdefghijklmn');
   // Fiche ouverte en v1 et en v2 : les mêmes lectures sensibles (objet « rencontre »).
   const before = (await c.flush()).length;
-  await v1.get(`/admin/rencontres/${e.id}`);
+  const a = await v1.get(`/admin/rencontres/${e.id}`);
   const mid = (await c.flush()).length;
-  await v2.get(`/admin/rencontres/${e.id}`);
+  const b = await v2.get(`/admin/rencontres/${e.id}`);
   const all = await c.flush();
-  const reads = list => list.filter(x => x.type === 'sensitive_read').map(x => x.detail);
+  const reads = list => list.filter(x => x.type === 'sensitive_read').map(x => ({ ...x.detail, octets_servis: 'mesuré sur la réponse' }));
+  assert.equal(all.slice(before, mid).find(x => x.type === 'sensitive_read').detail.octets_servis, a.rawPayload.length);
+  assert.equal(all.slice(mid).find(x => x.type === 'sensitive_read').detail.octets_servis, b.rawPayload.length);
   assert.deepEqual(reads(all.slice(before, mid)), reads(all.slice(mid)));
   assert.deepEqual(reads(all.slice(mid)).map(d => [d.cible, d.objet]), [['/admin/rencontres/:id', 'rencontre']]);
   const text = JSON.stringify(all);
