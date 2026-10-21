@@ -6,7 +6,10 @@
    const LABELS = { acces: t('Accès'), photos: t('Photos'), selections: t('Sélections'), activite: t('Activité'), reglages: t('Réglages') };
    const N = { acces: s.nInvites, photos: s.nPhotos, selections: it.nSelections };
    const href = k => (k === 'acces' ? `/admin/galeries/${s.id}` : `/admin/galeries/${s.id}/${k}`);
-   const csrf = `<input type="hidden" name="_csrf" value="${it.csrf}">`; %>
+   const csrf = `<input type="hidden" name="_csrf" value="${it.csrf}">`;
+   // Admin v2 (it.corps) : fermer et supprimer passent par un dialogue de la page (views/admin/v2/_confirmer.eta) ; l’ordre des
+   // photos et les réglages s’enregistrent au geste, avec « Défaire » (publier-v2.js). Sans script, les boutons restent.
+   const go = (path, v1) => (it.corps ? `href="#dlg-${path}" data-ouvre="dlg-${path}"` : `href="${v1}"`); %>
 <div class="gp">
 <p class="help-link"><a href="/admin/aide#galeries-privees"><%= t('Aide sur cette page') %></a></p>
 <header class="ep">
@@ -38,14 +41,14 @@
 <% } else if (tab === 'photos') { %>
 <% if (it.exifAll) { %><div class="signal" role="alert"><p class="signal-t"><span aria-hidden="true">▲</span> <%= t('Réglage « Tout l’EXIF de l’original » actif : les invités ne voient aucune photo') %></p><p><%= t('Avec ce réglage, les images gardent la position GPS : la galerie privée ne les sert pas. Choisissez un autre mode dans Filigrane & EXIF.') %></p></div><% } %>
 <% if (!it.items.length) { %><p class="empty"><%= t('Aucune photo dans la galerie pour l’instant.') %></p>
-<% } else { %><ol class="gp-photos">
-<% it.items.forEach((p, k) => { %>  <li id="photo-<%= p.item_id %>"><img src="<%= p.thumb %>" srcset="<%= p.thumbSet %>" sizes="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>px" alt="" width="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(96 * p.height / p.width) : 96 %>" loading="lazy">
-    <div class="gp-photo-t"><span class="t"><%= p.n %>. <%= p.title %></span><span class="sec"><%= p.author %> · <%= p.status === 'published' ? t('publiée') : t('brouillon') %></span>
+<% } else { %><ol class="gp-photos"<%~ it.corps ? ' data-gp-photos' : '' %>>
+<% it.items.forEach((p, k) => { %>  <li id="photo-<%= p.item_id %>"<%~ it.corps ? ` data-gp-item data-titre="${String(p.title).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}"` : '' %>><img src="<%= p.thumb %>" srcset="<%= p.thumbSet %>" sizes="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>px" alt="" width="<%= p.width >= p.height ? 96 : Math.round(96 * p.width / p.height) %>" height="<%= p.width >= p.height ? Math.round(96 * p.height / p.width) : 96 %>" loading="lazy">
+    <div class="gp-photo-t"><span class="t"><span<%~ it.corps ? ' data-gp-rang' : '' %>><%= p.n %></span>. <%= p.title %></span><span class="sec"><%= p.author %> · <%= p.status === 'published' ? t('publiée') : t('brouillon') %></span>
       <span class="etat etat--<%= p.level === 'ok' ? 'abouti' : p.level === 'warn' ? 'attention' : 'arret' %>"><span aria-hidden="true"><%= p.level === 'ok' ? '●' : p.level === 'warn' ? '▲' : '✕' %></span><%= t('usage privé : {level}', { level: p.levelText }) %></span>
 <% if (p.level !== 'ok' && p.reasons.length) { %>      <span class="sec"><%= p.reasons.join(' ; ') %><% if (p.confirmed_at) { %> · <%= t('confirmé par {name}', { name: p.confirmed_by }) %><% } else { %> · <b><%= t('cachée aux invités') %></b><% } %></span><% } %></div>
 <% if (it.canManage) { %>    <div class="btns-ligne">
-<% if (k > 0) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/monter"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Monter') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
-<% if (k < it.items.length - 1) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/descendre"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Descendre') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
+<% if (k > 0 || it.corps) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/monter"<%~ it.corps ? ' data-gp-deplacer="monter"' : '' %>><%~ csrf %><button class="btn ghost" type="submit"<%~ it.corps && k === 0 ? ' disabled' : '' %>><%= t('Monter') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
+<% if (k < it.items.length - 1 || it.corps) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/descendre"<%~ it.corps ? ' data-gp-deplacer="descendre"' : '' %>><%~ csrf %><button class="btn ghost" type="submit"<%~ it.corps && k === it.items.length - 1 ? ' disabled' : '' %>><%= t('Descendre') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
 <% if (p.level === 'warn' && !p.confirmed_at) { %>      <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/confirmer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Confirmer l’usage privé') %><span class="sr-only"> : <%= p.title %></span></button></form><% } %>
       <form method="post" action="/admin/galeries/<%= s.id %>/photos/<%= p.item_id %>/retirer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Retirer de la galerie') %><span class="sr-only"> : <%= p.title %></span></button></form>
     </div>
@@ -73,15 +76,18 @@
 <% }) %></ol><% } %>
 <p class="hint"><%= t('Adresses IP tronquées, pays estimé par Cloudflare, aucun navigateur noté. Effacé avec l’accès, six mois après sa fin.') %></p></section>
 <% } else if (tab === 'reglages') { %>
-<form class="panel form gp-form" method="post" action="/admin/galeries/<%= s.id %>" novalidate><%~ csrf %>
+<form class="panel form gp-form" method="post" action="/admin/galeries/<%= s.id %>" novalidate<%~ it.corps && it.canManage ? ' data-gp-auto="galerie"' : '' %>><%~ csrf %>
 <% if (it.errors) { %>  <section class="resume-a" tabindex="-1" aria-labelledby="resume-t"><h2 id="resume-t"><%= t('Rien n’est enregistré : à corriger') %></h2><ul><% Object.keys(it.errors).forEach(k => { %><li><a href="#g-<%= k %>"><%= it.errors[k] %></a></li><% }) %></ul></section>
 <% } %><%~ include('./_galerie-champs', it) %>
-<% if (it.canManage) { %>  <div class="form-pied"><button class="btn" type="submit"><%= t('Enregistrer') %></button></div><% } %>
+<% if (it.canManage) { %>  <div class="form-pied<%= it.corps ? ' sans-script' : '' %>"><button class="btn" type="submit"><%= t('Enregistrer') %></button></div><% } %>
 </form>
 <% if (it.canManage) { %><section class="panel" aria-labelledby="etat-t"><h2 class="panel-t" id="etat-t"><%= t('Ouverture') %></h2>
-<% if (s.state === 'ouverte') { %><p><%= t('Fermer la galerie arrête tous ses accès tout de suite ; vous pourrez la rouvrir.') %></p><form method="post" action="/admin/galeries/<%= s.id %>/fermer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Fermer la galerie') %></button></form>
+<% if (s.state === 'ouverte') { %><p><%= t('Fermer la galerie arrête tous ses accès tout de suite ; vous pourrez la rouvrir.') %></p><% if (it.corps) { %><p><a class="btn ghost" <%~ go('fermer', '') %>><%= t('Fermer la galerie…') %></a></p><% } else { %><form method="post" action="/admin/galeries/<%= s.id %>/fermer"><%~ csrf %><button class="btn ghost" type="submit"><%= t('Fermer la galerie') %></button></form><% } %>
 <% } else { %><p><%= t('Ouverte, la galerie s’affiche aux personnes qui ont un accès valide.') %></p><form method="post" action="/admin/galeries/<%= s.id %>/ouvrir"><%~ csrf %><button class="btn" type="submit"><%= t('Ouvrir la galerie') %></button></form><% } %>
-<p class="hint"><%= t('Supprimer efface la galerie, ses accès et leurs données ; les photos restent dans la photothèque.') %></p><p><a class="btn danger-c" href="/admin/galeries/<%= s.id %>/supprimer"><%= t('Supprimer la galerie…') %></a></p></section>
+<p class="hint"><%= t('Supprimer efface la galerie, ses accès et leurs données ; les photos restent dans la photothèque.') %></p><p><a class="btn danger-c" <%~ go('supprimer', `/admin/galeries/${s.id}/supprimer`) %>><%= t('Supprimer la galerie…') %></a></p></section>
 <% } %>
 <% } %>
 </div>
+<% if (it.corps && it.confirmSupprimer) { %><%~ include('./v2/_confirmer', { c: it.confirmSupprimer, csrf: it.csrf, t, retour: '#etat-t' }) %><% if (s.state === 'ouverte') { %>
+<%~ include('./v2/_confirmer', { c: it.confirmFermer, csrf: it.csrf, t, retour: '#etat-t' }) %><% } %>
+<% } %>

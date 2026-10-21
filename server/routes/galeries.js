@@ -39,6 +39,8 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
   const host = () => app.config.publicUrl.replace(/^https?:\/\//, '');
   const authorsById = () => new Map(repo.authors().map(a => [a.id, a]));
   const t0 = request => request.t;
+  // Admin v2 : un geste qui se défait (réglages, ordre) part sans recharger et demande une réponse JSON (comme Instagram).
+  const wantsJson = request => Boolean(request.headers.accept?.includes('application/json'));
   const fmtDate = (ms, t, opts = { day: 'numeric', month: 'short', year: 'numeric' }) => new Intl.DateTimeFormat(t.locale, { ...opts, timeZone: 'Europe/Paris' }).format(ms);
   const fmtTime = (ms, t) => { const s = new Intl.DateTimeFormat(t.locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Paris' }).format(ms); return t.lang === 'fr' ? s.replace(':', ' h ').replace(/^0/, '') : s; };
   const fmtDay = ms => fmtDate(ms, { locale: 'fr-FR' }).replace(/ | /g, ' ');
@@ -145,7 +147,9 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     const t = request.t;
     const s = request.scope('galeries.voir');
     const authors = authorsById();
-    let list = spaces.list().filter(x => request.owns('galeries.voir', x.author_id)).map(x => spaceView(request, x, authors));
+    // Admin v2 : trois vignettes par galerie (les mêmes variantes que les onglets d'une galerie), sans requête de plus par photo.
+    let list = spaces.list().filter(x => request.owns('galeries.voir', x.author_id)).map(x => ({ ...spaceView(request, x, authors),
+      strip: spaces.items(x.id).slice(0, 3).map(p => ({ thumb: thumbOf(p), thumbSet: thumbSetOf(p), width: p.width, height: p.height })) }));
     const counts = { toutes: list.length, ouverte: list.filter(x => x.state === 'ouverte').length, brouillon: list.filter(x => x.state === 'brouillon').length, fermee: list.filter(x => x.state === 'fermee').length };
     const etat = ['ouverte', 'brouillon', 'fermee'].includes(request.query.etat) ? request.query.etat : 'toutes';
     if (etat !== 'toutes') list = list.filter(x => x.state === etat);
@@ -211,7 +215,11 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
       data.events = chrono(spaces.spaceEvents(s.id), t, items).map(e => ({ ...e, who: e.invite_id ? labels.get(e.invite_id) || t('accès effacé') : '' }));
       sensitiveRead(request, s, null, 'activité');
     }
-    if (tab === 'reglages') data.values = { ...s, closes: fmtDay(s.closes_at), ...(extra.values || {}) };
+    if (tab === 'reglages') {
+      data.values = { ...s, closes: fmtDay(s.closes_at), ...(extra.values || {}) };
+      data.confirmSupprimer = confirmSupprimer(request, s);
+      data.confirmFermer = confirmFermer(request, s);
+    }
     return render(request, reply, 'galerie', { ...data, ...extra });
   }
   app.get('/admin/galeries/:id', P('galeries.voir'), async (request, reply) => showSpace(request, reply, 'acces'));
@@ -230,12 +238,19 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     if (!s) return reply.callNotFound();
     if (forbidUnless(request, reply, 'galeries.gerer', s)) return reply;
     try {
+      // Les fins d'accès avant la mise à jour : avancer la fermeture raccourcit les accès plus longs, ce qui ne se défait pas.
+      const ends = new Map(spaces.invitesOf(s.id).map(i => [i.id, i.expires_at]));
       const after = spaces.updateSpace(s.id, request.body || {});
       audit(request, 'réglages', s, null, after.closes_at !== s.closes_at ? `fermeture dans ${Math.round((after.closes_at - Date.now()) / DAY)} jours` : '');
+      if (wantsJson(request)) {
+        const shortened = spaces.invitesOf(s.id).filter(i => i.expires_at < ends.get(i.id)).length;
+        return { ok: true, text: request.t('Galerie enregistrée.'), closes: fmtDay(after.closes_at), reversible: shortened === 0 };
+      }
       return done(reply, `/admin/galeries/${s.id}/reglages`, request.t('Galerie enregistrée.'));
     } catch (err) {
       if (!(err instanceof SpaceError)) throw err;
       reply.code(422);
+      if (wantsJson(request)) return { error: Object.values(spaceErrors(err, request.t))[0], errors: spaceErrors(err, request.t) };
       return showSpace(request, reply, 'reglages', { errors: spaceErrors(err, request.t), values: request.body || {} });
     }
   });
@@ -252,14 +267,19 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
       return done(reply, `/admin/galeries/${s.id}`, request.t(msg));
     });
   }
+  // Les mêmes mots sur la page de confirmation (v1, et v2 sans le dialogue) et dans le dialogue de la v2 (MQ-09 : ce qui ne se défait pas).
+  const confirmSupprimer = (request, s) => { const t = request.t; return { id: 'supprimer', title: t('Supprimer la galerie'), action: `/admin/galeries/${s.id}/supprimer`, back: `/admin/galeries/${s.id}/reglages`,
+    question: t('Supprimer la galerie « {title} » ?', { title: s.title }), text: t('Tous ses accès cessent de marcher tout de suite, puis la galerie, ses accès, leur journal et leurs favoris sont effacés. Rien ne pourra être rétabli.'),
+    consequences: [t('Les photos ne sont ni supprimées ni dépubliées : elles restent dans la photothèque.')], button: t('Supprimer la galerie') }; };
+  // Fermer : les autorisations des invités tombent, elles ne reviennent pas avec « Ouvrir » (G63) : un dialogue, pas « Défaire ».
+  const confirmFermer = (request, s) => { const t = request.t; return { id: 'fermer', title: t('Fermer la galerie'), action: `/admin/galeries/${s.id}/fermer`, back: `/admin/galeries/${s.id}/reglages`,
+    question: t('Fermer la galerie « {title} » ?', { title: s.title }), text: t('Tous ses accès cessent de marcher tout de suite et les personnes qui la regardent en sont déconnectées. Vous pourrez la rouvrir.'),
+    consequences: [t('Rouvrir la galerie ne reconnecte personne : chacun devra saisir de nouveau son mot de passe.'), t('Les photos, les accès et les favoris sont gardés.')], button: t('Fermer la galerie'), plain: true }; };
   app.get('/admin/galeries/:id/supprimer', P('galeries.gerer'), async (request, reply) => {
     const s = load(request);
     if (!s) return reply.callNotFound();
     if (forbidUnless(request, reply, 'galeries.gerer', s)) return reply;
-    const t = request.t;
-    return render(request, reply, 'galerie-confirmer', { title: t('Supprimer la galerie'), s: spaceView(request, s), action: `/admin/galeries/${s.id}/supprimer`, back: `/admin/galeries/${s.id}/reglages`,
-      question: t('Supprimer la galerie « {title} » ?', { title: s.title }), text: t('Tous ses accès cessent de marcher tout de suite, puis la galerie, ses accès, leur journal et leurs favoris sont effacés. Rien ne pourra être rétabli.'),
-      consequences: [t('Les photos ne sont ni supprimées ni dépubliées : elles restent dans la photothèque.')], button: t('Supprimer la galerie') });
+    return render(request, reply, 'galerie-confirmer', { ...confirmSupprimer(request, s), s: spaceView(request, s) });
   });
   app.post('/admin/galeries/:id/supprimer', W('galeries.gerer'), async (request, reply) => {
     const s = load(request);
@@ -298,6 +318,7 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
       else if (path === 'confirmer') spaces.confirmItem(s.id, item, request.session.name || request.session.sub);
       else spaces.moveItem(s.id, item, path === 'monter' ? 'haut' : 'bas');
       audit(request, label, s, null, `photo de la galerie ${item}`);
+      if (wantsJson(request) && (path === 'monter' || path === 'descendre')) return { ok: true, text: request.t('Ordre enregistré.') };
       const back = String(request.body?.retour || '') === 'nouvel-acces' ? `/admin/galeries/${s.id}/acces/nouveau` : `/admin/galeries/${s.id}/photos#photo-${item}`;
       return done(reply, back, { retirer: request.t('Photo retirée de la galerie (elle reste dans la photothèque).'), confirmer: request.t('Usage privé confirmé pour cette photo.'), monter: request.t('Ordre enregistré.'), descendre: request.t('Ordre enregistré.') }[path]);
     });
@@ -380,7 +401,10 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     sensitiveRead(request, s, inv, 'fiche d’un accès');
     const favs = spaces.favorites(inv.id).map(f => ({ ...items.find(p => p.item_id === f.item_id), added: f.added_at })).filter(p => p.item_id).map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p), when: fmtTime(p.added, t) }));
     const day = parisDayOf(Math.min(inv.expires_at, s.closes_at));
-    return render(request, reply, 'galerie-acces', { title: t('Accès de {name}', { name: inv.label }), s: spaceView(request, s), inv: v, favs, events: chrono(spaces.eventsOf(inv.id), t, items),
+    // Admin v2 : les confirmations en dialogues (mêmes mots que les pages de confirmation) ; le lien et le mot de passe d'un
+    // nouvel accès ne se montrent toujours qu'une fois, sur la page des secrets.
+    const confirms = Object.keys(CONFIRM).map(path => confirmInvite(request, s, inv, path));
+    return render(request, reply, 'galerie-acces', { title: t('Accès de {name}', { name: inv.label }), s: spaceView(request, s), inv: v, favs, confirms, events: chrono(spaces.eventsOf(inv.id), t, items),
       canShare: can(request, 'galeries.partager', s), canManage: can(request, 'galeries.gerer', s), nPhotos: items.length,
       values: { expires: fmtDay(inv.expires_at), favoris: inv.rights.favoris ? '1' : '', telecharger: inv.rights.telechargement !== 'non' ? '1' : '', grande: inv.rights.telechargement === 'grande' ? '1' : '', ...(extra.values || {}) },
       lu: lu(inv.expires_at, t), closesText: fmtDate(s.closes_at, t), purgeText: fmtDate(Math.max(inv.expires_at, inv.ended_at || 0) + PURGE_AFTER, t), sentText: inv.selection_sent_at ? `${fmtDate(inv.selection_sent_at, t, { day: 'numeric', month: 'short' })}, ${fmtTime(inv.selection_sent_at, t)}` : '',
@@ -396,10 +420,12 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     try {
       const after = spaces.updateInvite(inv.id, request.body || {}, request);
       audit(request, 'accès modifié', s, after, `${rightsText(after.rights)} ; fin dans ${Math.round((after.expires_at - Date.now()) / DAY)} jours`);
+      if (wantsJson(request)) return { ok: true, text: request.t('Accès enregistré.'), expires: fmtDay(after.expires_at), lu: lu(after.expires_at, request.t) };
       return done(reply, `/admin/galeries/${s.id}/acces/${inv.id}`, request.t('Accès enregistré.'));
     } catch (err) {
       if (!(err instanceof SpaceError)) throw err;
       reply.code(422);
+      if (wantsJson(request)) return { error: Object.values(spaceErrors(err, request.t))[0], errors: spaceErrors(err, request.t) };
       return showInvite(request, reply, { errors: spaceErrors(err, request.t), values: request.body || {} });
     }
   });
@@ -413,16 +439,19 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     'nouveau-lien': t => ({ title: t('Nouveau lien'), question: name => t('Donner un nouveau lien à {name} ?', { name }), text: t('L’ancien lien cesse de marcher aussitôt ; le mot de passe reste le même. Le nouveau lien s’affiche une seule fois.'), consequences: [], button: () => t('Créer un nouveau lien'), plain: true }),
     'nouveau-mot-de-passe': t => ({ title: t('Nouveau mot de passe'), question: name => t('Donner un nouveau mot de passe à {name} ?', { name }), text: t('L’ancien mot de passe cesse de marcher aussitôt ; le lien reste le même, et une pause ou une suspension en cours est levée. Le nouveau mot de passe s’affiche une seule fois.'), consequences: [], button: () => t('Créer un nouveau mot de passe'), plain: true }),
   };
-  for (const [path, conf] of Object.entries(CONFIRM)) {
+  function confirmInvite(request, s, inv, path) {
+    const c = CONFIRM[path](request.t);
+    return { id: path, title: c.title, action: `/admin/galeries/${s.id}/acces/${inv.id}/${path}`, back: `/admin/galeries/${s.id}/acces/${inv.id}`,
+      question: c.question(inv.label), text: c.text, consequences: c.consequences, button: c.button(inv.label), plain: Boolean(c.plain) };
+  }
+  for (const path of Object.keys(CONFIRM)) {
     app.get(`/admin/galeries/:id/acces/:inv/${path}`, P('galeries.partager'), async (request, reply) => {
       const s = load(request);
       if (!s) return reply.callNotFound();
       const inv = loadInvite(request, s);
       if (!inv) return reply.callNotFound();
       if (forbidUnless(request, reply, 'galeries.partager', s)) return reply;
-      const c = conf(request.t);
-      return render(request, reply, 'galerie-confirmer', { title: c.title, s: spaceView(request, s), action: `/admin/galeries/${s.id}/acces/${inv.id}/${path}`, back: `/admin/galeries/${s.id}/acces/${inv.id}`,
-        question: c.question(inv.label), text: c.text, consequences: c.consequences, button: c.button(inv.label), plain: Boolean(c.plain) });
+      return render(request, reply, 'galerie-confirmer', { ...confirmInvite(request, s, inv, path), s: spaceView(request, s) });
     });
   }
   const inviteAction = (path, fn) => app.post(`/admin/galeries/:id/acces/:inv/${path}`, W(path === 'selection/rouvrir' ? 'galeries.gerer' : 'galeries.partager'), async (request, reply) => {

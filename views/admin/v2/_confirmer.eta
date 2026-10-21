@@ -1,0 +1,16 @@
+<% /* Dialogue de confirmation de l'admin v2 (MQ-09, MQ-00 § 8) pour ce qui ne se défait pas : la question qui nomme l'objet, ce
+      qui part et ce qui reste, « Annuler » d'abord. Sans script, le lien « … » mène à son ancre et le dialogue s'affiche dans
+      la page (:target) ; avec admin-v2.js il devient modal ([data-ouvre]). Le formulaire est celui de la page de confirmation
+      de la v1 (même route, même jeton) : si la route refuse, elle y renvoie, avec son message.
+      it.c : { id, action, question, text, consequences, button, plain, field?: { name, label, maxlength } } ; it.csrf, it.t. */ %>
+<% const c = it.c, t = it.t, id = `dlg-${c.id}`; %>
+<dialog class="confirm cible" id="<%= id %>" aria-labelledby="<%= id %>-t" aria-describedby="<%= id %>-d">
+  <form method="post" action="<%= c.action %>">
+    <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+    <h2 id="<%= id %>-t"><%= c.question %></h2>
+    <p id="<%= id %>-d"><%= c.text %></p>
+<% if (c.consequences && c.consequences.length) { %>    <ul class="dlg-cons"><% c.consequences.forEach(x => { %><li><%= x %></li><% }) %></ul>
+<% } %><% if (c.field) { %>    <div class="champ-a"><label for="<%= id %>-f"><%= c.field.label %></label><textarea id="<%= id %>-f" name="<%= c.field.name %>" rows="4" maxlength="<%= c.field.maxlength || 1000 %>" required></textarea></div>
+<% } %>    <div class="actions"><a class="btn ghost" href="<%= it.retour || '#contenu' %>" data-annuler><%= t('Annuler') %></a><button class="btn<%= c.plain ? '' : ' danger' %>" type="submit"><% if (!c.plain) { %><span aria-hidden="true">✕</span> <% } %><%= c.button %></button></div>
+  </form>
+</dialog>

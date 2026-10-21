@@ -21,6 +21,9 @@
    const editable = r.text && (p.state !== 'publie' || r.live);
    const neverPublished = p.published_at == null;
    const form = 'billet';
+   // Admin v2 (it.corps) : renvoyer, retirer et supprimer sont des dialogues de la page (views/admin/v2/_confirmer.eta), pas des
+   // pages de confirmation ; la route de la v1 reste le recours (un refus y renvoie, avec son message).
+   const go = (path, v1) => (it.corps ? `href="#dlg-${path}" data-ouvre="dlg-${path}"` : `href="${v1}"`);
    const blocking = it.checks ? it.checks.blocking : [];
    const warnings = it.checks ? it.checks.warnings : [];
    const describe = b => {
@@ -50,8 +53,8 @@
   <p class="ep-meta"><span><%= who %></span><span><%= t(it.rubriques.find(x => x.slug === p.rubrique)?.name || '') %></span><span><%= t('commencé le {date}', { date: fmt(p.created_at) }) %></span><span role="status"><span class="enreg enreg--ok" data-enreg><%~ ICON(CHECK, 14) %><%= t('Enregistré à {time}', { time: time(it.fresh ? it.fresh.at : p.updated_at) }) %></span></span></p>
   <div class="ep-actions">
     <a class="btn ghost ep-secondaire" href="#apercu"><%~ ICON(EYE) %><%= t('Aperçu') %></a>
-<% if (r.write && neverPublished) { %>    <a class="btn danger-c ep-secondaire" href="/admin/carnet/<%= p.id %>/supprimer"><%= t('Supprimer…') %></a>
-<% } %>    <details class="menu ep-plus"><summary class="btn ghost" aria-label="<%= t('Plus d’actions') %>"><%~ ICON(DOTS, 18) %></summary><div class="menu-pop"><a href="#apercu"><%= t('Aperçu') %></a><a href="/admin/carnet/<%= p.id %>/versions"><%= t('Versions') %></a><% if (r.write && neverPublished) { %><a href="/admin/carnet/<%= p.id %>/supprimer"><%= t('Supprimer…') %></a><% } %></div></details>
+<% if (r.write && neverPublished) { %>    <a class="btn danger-c ep-secondaire" <%~ go('supprimer', `/admin/carnet/${p.id}/supprimer`) %>><%= t('Supprimer…') %></a>
+<% } %>    <details class="menu ep-plus"><summary class="btn ghost" aria-label="<%= t('Plus d’actions') %>"><%~ ICON(DOTS, 18) %></summary><div class="menu-pop"><a href="#apercu"><%= t('Aperçu') %></a><a href="/admin/carnet/<%= p.id %>/versions"><%= t('Versions') %></a><% if (r.write && neverPublished) { %><a <%~ go('supprimer', `/admin/carnet/${p.id}/supprimer`) %>><%= t('Supprimer…') %></a><% } %></div></details>
 <% if (editable && r.publish && ['brouillon', 'propose', 'a_reprendre'].includes(p.state)) { %>    <button class="btn" type="submit" form="<%= form %>" name="faire" value="publier"><%= t('Publier') %></button>
 <% } else if (editable && r.write && ['brouillon', 'a_reprendre'].includes(p.state)) { %>    <button class="btn" type="submit" form="<%= form %>" name="faire" value="proposer"><%= proposeLabel %></button>
 <% } else if (r.write && p.state === 'propose') { %>    <button class="btn" type="submit" form="<%= form %>" formaction="/admin/carnet/<%= p.id %>/retirer-proposition" formnovalidate><%= t('Retirer ma proposition') %></button>
@@ -134,12 +137,12 @@
     <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="langue" value="<%= lang %>">
     <fieldset class="choix-a choix-a--ligne"><legend><%= t('Quand') %></legend><label><input type="radio" name="quand" value="maintenant" checked><span><%= t('Maintenant') %></span></label><label><input type="radio" name="quand" value="programmer"><span><%= t('Programmer') %></span></label></fieldset>
     <div class="champ-a"><label for="quand"><%= t('Jour et heure') %> <span class="facultatif"><%= t('(pour programmer)') %></span></label><p class="aide" id="quand-aide"><%= t('Écrivez-les comme vous voulez : « samedi 8 h », « 17/10 8:00 ».') %></p><input type="text" id="quand" name="publish_at" value="" aria-describedby="quand-aide"></div>
-    <div class="form-pied"><% if (p.state === 'propose') { %><a class="btn ghost" href="/admin/carnet/<%= p.id %>/renvoyer"><%= t('Renvoyer…') %></a><% } %><button class="btn" type="submit" data-publier-bouton data-maintenant="<%= t('Publier') %>" data-programmer="<%= t('Programmer') %>"><%= t('Publier') %></button></div>
+    <div class="form-pied"><% if (p.state === 'propose') { %><a class="btn ghost" <%~ go('renvoyer', `/admin/carnet/${p.id}/renvoyer`) %>><%= t('Renvoyer…') %></a><% } %><button class="btn" type="submit" data-publier-bouton data-maintenant="<%= t('Publier') %>" data-programmer="<%= t('Programmer') %>"><%= t('Publier') %></button></div>
   </form>
 <% } else if (p.state === 'programme' && r.publish) { %>
-  <div class="form-pied"><a class="btn ghost" href="/admin/carnet/<%= p.id %>/renvoyer"><%= t('Renvoyer…') %></a><button class="btn ghost" type="submit" form="<%= form %>" formaction="/admin/carnet/<%= p.id %>/deprogrammer" formnovalidate><%= t('Déprogrammer') %></button></div>
+  <div class="form-pied"><a class="btn ghost" <%~ go('renvoyer', `/admin/carnet/${p.id}/renvoyer`) %>><%= t('Renvoyer…') %></a><button class="btn ghost" type="submit" form="<%= form %>" formaction="/admin/carnet/<%= p.id %>/deprogrammer" formnovalidate><%= t('Déprogrammer') %></button></div>
 <% } else if (p.state === 'publie' && r.publish) { %>
-  <div class="form-pied"><a class="btn danger-c" href="/admin/carnet/<%= p.id %>/retirer"><%= t('Retirer du site…') %></a></div>
+  <div class="form-pied"><a class="btn danger-c" <%~ go('retirer', `/admin/carnet/${p.id}/retirer`) %>><%= t('Retirer du site…') %></a></div>
 <% } else if (p.state === 'retire' && r.publish) { %>
   <p class="hint"><%= t('Retiré : {reason}', { reason: p.retired_reason }) %></p><div class="form-pied"><button class="btn" type="submit" form="<%= form %>" formaction="/admin/carnet/<%= p.id %>/republier" formnovalidate><%= t('Republier') %></button></div>
 <% } %>
@@ -185,3 +188,13 @@
     <div class="actions"><button class="btn ghost" value="annuler" type="submit"><%= t('Annuler') %></button><button class="btn" value="ok" type="submit" data-choix-ok><%= t('Insérer') %></button></div>
   </form>
 </dialog>
+<% if (it.corps) {
+     const dlg = [];
+     if (r.publish && ['propose', 'programme'].includes(p.state)) dlg.push({ id: 'renvoyer', action: `/admin/carnet/${p.id}/renvoyer`, question: t('Renvoyer « {title} »', { title: p.title }), plain: true,
+       text: t('Le billet revient à ses auteurs « à reprendre », avec votre remarque (dans l’éditeur et par e-mail).'), field: { name: 'message', label: t('Votre remarque') }, button: t('Renvoyer avec cette remarque') });
+     if (r.publish && p.state === 'publie') dlg.push({ id: 'retirer', action: `/admin/carnet/${p.id}/retirer`, question: t('Retirer « {title} » du site', { title: p.title }),
+       text: t('Le billet sort de la liste, du flux et du plan du site ; son adresse répond « retiré » (410). Il pourra être republié.'), field: { name: 'reason', label: t('Pourquoi le retirer') }, button: t('Retirer du site') });
+     if (r.write && neverPublished) dlg.push({ id: 'supprimer', action: `/admin/carnet/${p.id}/supprimer`, question: t('Supprimer « {title} » ?', { title: p.title }),
+       text: t('Le billet n’a jamais été publié : il est effacé, avec ses versions. Ses photos restent dans la photothèque.'), button: t('Supprimer le billet') });
+     dlg.forEach(c => { %><%~ include('./v2/_confirmer', { c, csrf: it.csrf, t: it.t, retour: '#publication' }) %>
+<% }) } %>
