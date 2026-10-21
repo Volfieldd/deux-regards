@@ -1,5 +1,22 @@
 [
   {
+    "version": "1.212.0",
+    "date": "2026-10-21",
+    "pr": 212,
+    "title": {
+      "fr": "Droits revérifiés au moment d’agir",
+      "en": "Permissions rechecked when acting",
+      "de": "Berechtigungen werden bei Aktionen erneut geprüft"
+    },
+    "items": [
+      {
+        "fr": "Les actions sur les photos, les brouillons de Carnet, les archives privées et les envois Instagram revérifient leurs droits et accords au dernier moment. Une saisie de lot refusée ne laisse plus de modification partielle.",
+        "en": "Actions on photos, post drafts, private archives and Instagram publishing now recheck permissions and consent at the last moment. A rejected batch edit no longer leaves a partial change.",
+        "de": "Aktionen an Fotos, Artikelentwürfen, privaten Archiven und Instagram-Veröffentlichungen prüfen Berechtigungen und Einwilligungen nun unmittelbar vor der Ausführung erneut. Eine abgelehnte Stapelbearbeitung hinterlässt keine Teiländerung mehr."
+      }
+    ]
+  },
+  {
     "version": "1.211.0",
     "date": "2026-10-21",
     "pr": 211,
