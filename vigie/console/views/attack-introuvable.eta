@@ -1,0 +1,2 @@
+<% layout('./layout', { titre: it.titre }); %>
+<header class="ep"><h1>Technique ou dossier introuvable</h1></header><p>Cette technique n’appartient pas au référentiel courant, ou le dossier n’existe pas.</p><p><a class="btn ghost" href="/attack">Revenir à ATT&amp;CK</a></p>

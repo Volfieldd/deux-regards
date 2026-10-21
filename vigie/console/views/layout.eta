@@ -44,6 +44,7 @@ const titrePage = (titreSeul ? titreSeul + ' · ' : '') + 'Vigie · Nicephos';
     <a href="/dossiers"<%~ cur('dossiers') %>><%~ include('./_ic', { icone: 'dossiers' }) %>Dossiers<% if (nbDossiers) { %><span class="nav-badge"><span aria-hidden="true"><%= nbDossiers %></span><span class="sr-only">, <%= nbDossiers %> non clos</span></span><% } %></a>
     <a href="/alertes"<%~ cur('alertes') %>><%~ include('./_ic', { icone: 'alertes' }) %>Alertes<% if (nbAlertes) { %><span class="nav-badge"><span aria-hidden="true"><%= nbAlertes %></span><span class="sr-only">, <%= nbAlertes %> <%= nbAlertes > 1 ? 'ouvertes' : 'ouverte' %></span></span><% } %></a>
     <a href="/flux"<%~ cur('flux') %>><%~ include('./_ic', { icone: 'flux' }) %>Flux</a>
+    <a href="/attack"<%~ cur('attack') %>><%~ include('./_ic', { icone: 'attack' }) %>ATT&amp;CK</a>
     <a href="/evenements"<%~ cur('evenements') %>><%~ include('./_ic', { icone: 'evenements' }) %>Événements</a>
     <a href="/entites"<%~ cur('entites') %>><%~ include('./_ic', { icone: 'entites' }) %>Entités</a>
     <a href="/sante"<%~ cur('sante') %>><%~ include('./_ic', { icone: 'sante' }) %>Santé<% if (nbSante) { %><span class="nav-badge attention"><span aria-hidden="true">▲ <%= nbSante %></span><span class="sr-only">, <%= nbSante %> <%= nbSante > 1 ? 'écarts' : 'écart' %></span></span><% } %></a>

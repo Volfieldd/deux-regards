@@ -1061,3 +1061,16 @@ figure.fx-dessin { margin: 0; }
 .ds-tel .ds-ph h3 { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 6px; font-size: 15px; }
 .ds-tel .ds-ph h3 .sec { font-size: 13px; font-weight: 400; }
 @media (forced-colors: active) { .ds-svg a:focus-visible { outline-color: Highlight; } .ds-point :is(rect,path,circle) { stroke: CanvasText; } }
+
+/* ATT&CK global (MV-14, D3) : dépliants natifs au téléphone comme au bureau, sans script. */
+.ak-tactique { min-width: 0; }
+.ak-tactique > summary { cursor: pointer; min-height: 44px; font-size: 15px; font-weight: 500; }
+.ak-tactique > summary .sec { display: block; color: var(--ink3); font-size: 13px; font-weight: 400; }
+.ak-tactique .ak-tq { margin-top: 12px; }
+.ak-tactique .ak-nm { display: block; overflow-wrap: anywhere; }
+.ak-sans a { overflow-wrap: anywhere; }
+.ak-export { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 12px; }
+.ak-export .btn { white-space: normal; }
+
+.ak-tactique .ak-tq a.vg-lien { display: block; }
+@media (max-width: 720px) { .ak-globale .ak-tac.ak-vide { display: block; } }

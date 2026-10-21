@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.200.0",
+    "date": "2026-10-21",
+    "pr": 200,
+    "title": {
+      "fr": "Vigie : explorer la couverture ATT&CK",
+      "en": "Vigie: explore ATT&CK coverage",
+      "de": "Vigie: ATT&CK-Abdeckung erkunden"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "La vue ATT&CK présente les quinze tactiques, les techniques couvertes et les signaux observés. Chaque technique mène à ses règles, ses dossiers et au journal filtré. Deux calques Navigator permettent de télécharger la couverture ou les comptes de signaux, sans données personnelles. Tout reste utilisable sans JavaScript.",
+        "en": "The ATT&CK view shows all fifteen tactics, covered techniques and observed signals. Each technique links to its rules, cases and filtered event log. Two Navigator layers let you download coverage or signal counts without personal data. Everything works without JavaScript.",
+        "de": "Die ATT&CK-Ansicht zeigt alle fünfzehn Taktiken, abgedeckte Techniken und beobachtete Signale. Jede Technik führt zu ihren Regeln, Fällen und zum gefilterten Ereignisprotokoll. Zwei Navigator-Ebenen enthalten die Abdeckung oder Signalzahlen, ohne personenbezogene Daten. Alles funktioniert ohne JavaScript."
+      }
+    ]
+  },
+  {
     "version": "1.199.0",
     "date": "2026-10-21",
     "pr": 199,

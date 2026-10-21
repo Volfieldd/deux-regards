@@ -64,6 +64,12 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
     head: db.prepare('SELECT seq, chain FROM events ORDER BY seq DESC LIMIT 1'),
     exists: db.prepare('SELECT 1 FROM events WHERE id = ?'),
     insert: db.prepare(`INSERT INTO events (${FIELDS.join(', ')}, chain) VALUES (${FIELDS.map(f => `@${f}`).join(', ')}, @chain)`),
+    // Index dérivé réservé aux signaux : un déclencheur INSERT sur tout le journal pénaliserait la rafale.
+    techniques: db.prepare(`INSERT OR IGNORE INTO events_techniques (seq, technique, recu_a)
+      SELECT @seq, upper(substr(j.value, 8)), @recu_a
+      FROM json_each(CASE WHEN json_valid(@detail) THEN
+        CASE WHEN json_type(@detail, '$.tags') = 'array' THEN json_extract(@detail, '$.tags') ELSE '[]' END ELSE '[]' END) j
+      WHERE j.type = 'text' AND (lower(j.value) GLOB 'attack.t[0-9][0-9][0-9][0-9]' OR lower(j.value) GLOB 'attack.t[0-9][0-9][0-9][0-9].[0-9][0-9][0-9]')`),
     daily: db.prepare(`INSERT INTO daily (day, type, severity, composant, n) VALUES (?, ?, ?, ?, 1)
       ON CONFLICT (day, type, severity, composant) DO UPDATE SET n = n + 1`),
   };
@@ -88,6 +94,8 @@ export function createStore({ db, logKey, retentionDays = 183, now = Date.now })
       row.retard = row.retard ? 1 : 0;
       row.chain = mac(prev, row);
       row.seq = Number(q.insert.run(row).lastInsertRowid);
+      // Même transaction que le maillon : ni index orphelin ni signal omis en cas de retour arrière.
+      if (row.type === 'vigie_signal') q.techniques.run({ seq: row.seq, recu_a: row.recu_a, detail: row.detail });
       added.push(row);
       q.daily.run(new Date(row.recu_a).toISOString().slice(0, 10), row.type, row.severity, row.composant);
       prev = row.chain;
