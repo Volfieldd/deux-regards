@@ -15,6 +15,7 @@ import { backupVigie } from '../vigie/backup.js';
 import { run as cli, keys } from '../vigie/cli.js';
 import { createSwitches } from '../vigie/interrupteurs.js';
 import { createDecisionsClient } from '../server/securite/decisions.js';
+import { attendre } from './duree.js';
 
 // Vigie, phase B : service à part (réception signée, base chaînée, décisions signées, Zitadel, sauvegarde, ligne de
 // commande) et application des décisions par le site.
@@ -141,10 +142,8 @@ test('décisions : bornées, jamais tout le monde, signées ; attente longue ren
   const url = `/v1/decisions?depuis=${version}`;
   const waiting = v.ingest.inject({ method: 'GET', url, headers: signed(`GET ${url}`) });
   // La décision n'arrive qu'une fois l'attente installée (jamais un délai fixe : la machine peut être chargée).
-  for (let i = 0; !v.decisions.events.listenerCount('change'); i++) {
-    assert.ok(i < 2000, 'l’attente longue ne s’est jamais installée');
-    await new Promise(r => setTimeout(r, 5));
-  }
+  // Échéance de 30 s, pas un nombre fixe de tours de 5 ms : sous charge, un tour peut en durer bien plus.
+  assert.ok(await attendre(() => v.decisions.events.listenerCount('change'), n => n > 0, { pas: 5 }), 'l’attente longue ne s’est jamais installée');
   // L'attente tient tant que rien ne change (avant le correctif, elle rendait la main dès la requête lue).
   await new Promise(r => setTimeout(r, 50));
   assert.equal(v.decisions.events.listenerCount('change'), 1, 'attente toujours en place');

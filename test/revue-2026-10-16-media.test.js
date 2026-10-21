@@ -18,6 +18,7 @@ import { overlayFor } from '../server/watermark.js';
 import { fillText } from '../server/variants.js';
 import { widthsFor, variantName } from '../server/images.js';
 import { zip } from '../server/zip.js';
+import { meilleur, meilleurAsync } from './duree.js';
 
 // Non-régression de la revue de sécurité et de code du 16 octobre 2026, sous-système « media » : EXIF piégé (lecture
 // bornée), import (décodage réel, HEIC, profondeur, panorama vertical), chaîne de la TSA, identifiant de photo repris
@@ -123,9 +124,9 @@ const smallJpeg = () => sharp({ create: { width: 64, height: 64, channels: 3, ba
 test('EXIF piégé : lecture bornée, ignorée en quelques millisecondes ; un EXIF réel est lu comme avant', async () => {
   const bomb = exifBomb(5400, 65_000);
   assert.ok(exifWork(bomb) > 1e9);                                      // ce qu'exif-reader aurait parcouru
-  let t0 = performance.now();
   assert.equal(readExif(bomb), null);
-  assert.ok(performance.now() - t0 < 500, 'lecture bornée');
+  // Meilleur de 5 essais : la charge n'allonge qu'une mesure. Lue en entier, cette bombe coûterait plus d'un milliard de pas.
+  assert.ok(meilleur(() => readExif(bomb)) < 500, 'lecture bornée');
   const real = await sharp({ create: { width: 32, height: 32, channels: 3, background: '#888' } })
     .withExif({ IFD0: { Make: 'Canon' }, IFD2: { DateTimeOriginal: '2024:02:29 23:59:59' }, IFD3: { GPSLatitudeRef: 'N', GPSLatitude: '48/1 51/1 24/1', GPSLongitudeRef: 'E', GPSLongitude: '2/1 21/1 3/1' } })
     .jpeg().toBuffer();
@@ -133,9 +134,12 @@ test('EXIF piégé : lecture bornée, ignorée en quelques millisecondes ; un EX
   assert.equal(readExif(exif).Image.Make, 'Canon');
   assert.equal(takenOnFromExif(exif), '2024-02-29');
   // À l'import : orientedSize ne relit plus le bloc trois fois, et ne fige plus le serveur.
-  t0 = performance.now();
-  const r = await importBuffer({ after() {} }, withApp1(await smallJpeg(), exifBomb(5400, 65_000)));
-  assert.ok(performance.now() - t0 < 2000, `import en ${Math.round(performance.now() - t0)} ms`);
+  // Durée relative à un import ordinaire de la même image, mesurés l'un après l'autre sous la même charge.
+  const small = await smallJpeg();
+  const ordinaire = await meilleurAsync(() => importBuffer({ after() {} }, small), 2);
+  let r;
+  const piege = await meilleurAsync(async () => { r = await importBuffer({ after() {} }, withApp1(small, exifBomb(5400, 65_000))); }, 2);
+  assert.ok(piege < ordinaire * 4 + 500, `import en ${Math.round(piege)} ms, contre ${Math.round(ordinaire)} ms pour la même image sans bombe`);
   assert.equal(r.takenOn, null);
 });
 
@@ -143,11 +147,16 @@ test('EXIF piégé envoyé par un photographe : réponse immédiate, photo gard�
   const c = await world(t);
   const ph = c.as('seb', ['photographe'], c.seb);
   const file = { name: 'piege.jpg', data: withApp1(await smallJpeg(), exifBomb(1200, 15_000)) };
+  // Durée relative à l'envoi de la même image sans bombe (8,3 s contre moins d'une demi-seconde avant le correctif).
+  const ordinaire = performance.now();
+  const sain = await ph.upload('/admin/photos/envoi', { category_id: 1, author_id: c.seb }, { name: 'sain.jpg', data: await smallJpeg() });
+  const ref = performance.now() - ordinaire;
+  assert.equal(sain.statusCode, 200, sain.body);
   const t0 = performance.now();
   const res = await ph.upload('/admin/photos/envoi', { category_id: 1, author_id: c.seb }, file);
   const ms = performance.now() - t0;
   assert.equal(res.statusCode, 200, res.body);
-  assert.ok(ms < 3000, `réponse en ${Math.round(ms)} ms (8,3 s avant)`);
+  assert.ok(ms < ref * 4 + 1000, `réponse en ${Math.round(ms)} ms, contre ${Math.round(ref)} ms pour la même image sans bombe`);
   assert.equal(c.db.prepare('SELECT taken_on FROM photos WHERE id = ?').pluck().get(res.json().id), null);
 });
 

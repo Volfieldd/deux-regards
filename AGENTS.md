@@ -32,7 +32,7 @@ Ce fichier est lu par les agents de code (Codex, Claude Code…). Il dit **ce qu
 
 ## Vérifier avant d'ouvrir une PR
 
-- `npm test` **et** `npm run test:vigie` passent. Rapporte les résultats tels quels, avec leurs nombres ; un test qui échoue n'est ni ignoré ni affaibli. Un test qui échoue seul sur l'horloge se relance, et la PR le dit.
+- `npm test` **et** `npm run test:vigie` passent. Rapporte les résultats tels quels, avec leurs nombres ; un test qui échoue n'est ni ignoré ni affaibli. Un test qui échoue seul sur l'horloge se relance, et la PR le dit. Un test de durée mesure le travail ou compare des durées relatives, jamais un seuil absolu seul ([Tests](docs/wiki/Tests.md#tests-de-durée)).
 - Une modification d'interface s'essaie dans un **vrai navigateur** (Playwright, voir [Tests](docs/wiki/Tests.md)) avant de dire qu'elle marche. `npm test` ne prouve pas l'affichage.
 - `node --test test/liens-internes.test.js` quand tu touches à la documentation.
 - Données de test : un serveur jetable ou l'instance de démonstration ([Développer](docs/wiki/Développer.md#serveur-de-test-jetable)). **Ne lis pas les données réelles** (bases et sauvegardes de l'instance de test ou de production).

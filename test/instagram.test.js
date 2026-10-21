@@ -4,6 +4,7 @@ import sharp from 'sharp';
 import crypto from 'node:crypto';
 import { createSessionStore } from '../server/sessions.js';
 import { setup } from './helpers.js';
+import { attendre } from './duree.js';
 import { renderCaption, normalizeSettings, captionWarnings, sealer, upcomingSlots, lastSlot, hashtagsFor, DEFAULTS, createInstagram } from '../server/instagram.js';
 
 const TOKEN = 'jeton-de-test-0123456789';
@@ -414,12 +415,7 @@ test('publier maintenant depuis la page : envoi en arrière-plan, avancement, jo
   assert.match(page, /data-ig-progress hidden/);
   const r = await c.json('POST', `/admin/instagram/${post}/publier`);
   assert.ok([200, 202].includes(r.statusCode));
-  let st;
-  for (let k = 0; k < 50; k++) {
-    st = (await c.json('GET', `/admin/instagram/${post}/etat`)).json();
-    if (st.done) break;
-    await new Promise(res => setTimeout(res, 20));
-  }
+  const st = await attendre(async () => (await c.json('GET', `/admin/instagram/${post}/etat`)).json(), s => s.done);
   assert.deepEqual([st.done, st.ok, st.percent, st.permalink], [true, true, 100, 'https://www.instagram.com/p/abc/']);
   assert.equal(st.label, 'Publiée sur Instagram.');
   const after = await c.html('/admin/instagram');
@@ -438,7 +434,7 @@ test('publier maintenant : un refus ou un échec revient avec l’état, et s’
   const post = c.app.instagram.enqueue(c.photo);
   const r = await c.json('POST', `/admin/instagram/${post}/publier`);
   let st = r.statusCode === 422 ? r.json().state : null;
-  for (let k = 0; !st?.done && k < 50; k++) { await new Promise(res => setTimeout(res, 20)); st = (await c.json('GET', `/admin/instagram/${post}/etat`)).json(); }
+  if (!st?.done) st = await attendre(async () => (await c.json('GET', `/admin/instagram/${post}/etat`)).json(), s => s.done);
   assert.equal(st.done, true);
   assert.equal(st.ok, false);
   assert.match(st.label, /^Pas envoyée : /);                                      // 1er essai : reste en file
