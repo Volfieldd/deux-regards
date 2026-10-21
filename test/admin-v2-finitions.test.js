@@ -446,3 +446,28 @@ test('Vigie sur les écrans touchés : entrée « Sécurité », badge, bandeau 
   assert.equal((await adm.post('/admin/rencontres/cartes', { author_id: String(c.authorId('julien')), mode: 'generiques', count: '2' })).statusCode, 303);
   assert.match((await adm.post('/admin/rencontres/cartes', { author_id: String(c.authorId('julien')), mode: 'generiques', count: '2' })).headers.location, /^\/auth\/verifier\?next=/);
 });
+
+test('403 de l’admin v2 : un seul authz_fail, code 403, no-store ; si le rendu v2 échoue (tout de suite ou à l’envoi), la 403 de la v1 est servie', async t => {
+  const c = await site(t);
+  const ph = await c.account('ph', { roles: ['photographe'], author: 'julien' });
+  const count = async () => (await c.security()).filter(e => e.type === 'authz_fail' && e.detail.raison === 'permission').length;
+  const n0 = await count();
+  const ok = await ph.get('/admin/comptes');
+  assert.equal(ok.statusCode, 403);
+  assert.ok(isV2(ok.body), 'la page v2');
+  assert.equal(ok.headers['cache-control'], 'no-store');
+  assert.equal(await count() - n0, 1, 'un authz_fail');
+  const real = c.app.forbidPage.render;
+  try {
+    for (const [nom, boom] of [['synchrone', () => { throw new Error('rendu v2 cassé'); }], ['asynchrone', () => Promise.reject(new Error('rendu v2 cassé'))]]) {
+      c.app.forbidPage.render = boom;
+      const n1 = await count();
+      const r = await ph.get('/admin/comptes');
+      assert.equal(r.statusCode, 403, nom);
+      assert.equal(r.headers['cache-control'], 'no-store', nom);
+      assert.ok(!isV2(r.body), `${nom} : la page du site`);
+      assert.match(r.body, /Revenir à l’administration/, nom);
+      assert.equal(await count() - n1, 1, `${nom} : un authz_fail, pas deux`);
+    }
+  } finally { c.app.forbidPage.render = real; }
+});
