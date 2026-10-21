@@ -25,6 +25,10 @@ La planche A4 conserve ses dimensions imprimées et défile dans un aperçu nomm
 
 La purge des dossiers clos non incidents suit la durée du journal, soit 183 jours par défaut depuis la dernière activité, au lieu des 395 jours fixes. Les dossiers encore suivis et les incidents sont préservés. La [section 14.7 de l’étude](docs/etudes/vigie-dossiers.md#147-d38--conservation-des-dossiers-ordinaires) donne les sources ANSSI/CNIL, l’application aux dossiers existants et la limite restante : la durée du registre des incidents doit être fixée avec le dossier légal.
 
+## Documentation — Dossier légal de la Vigie (21 octobre 2026)
+
+Le [complément RGPD](docs/wiki/RGPD-Vigie.md) décrit le traitement, les données, les rôles, les durées effectives, la mise en balance et le préexamen AIPD. Le registre et la procédure des violations sont actualisés ; aucune dispense générale d’AIPD n’est maintenue. Les validations et corrections restent explicites (LEG-V1 à LEG-V7), notamment la durée des incidents, la notice publique et le masquage incomplet des IP dans la graine et le titre des dossiers conservés, reproduit sur une base synthétique. Cette étape ne modifie pas le moteur ni l’interface.
+
 ## Principes
 
 - Front simple : HTML/CSS/JS sans framework ni build, rendu côté serveur, dans l'esprit du prototype.
