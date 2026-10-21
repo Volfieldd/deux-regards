@@ -73,3 +73,7 @@ export const EVENTS = {
 };
 
 export const isType = type => Object.hasOwn(EVENTS, type);
+// BV-33 : catégories fermées, sans contenu des fiches. « Sensible » est un enjeu opérationnel de la Vigie,
+// pas une qualification juridique des catégories particulières du RGPD.
+export const CATEGORIES_DONNEES = Object.freeze({ identite: 'identité', coordonnees: 'coordonnées', image: 'image d’une personne',
+  mineur: 'personne mineure et parent', accord_signe: 'accord signé', localisation: 'lieu d’une rencontre', message_libre: 'message libre' });

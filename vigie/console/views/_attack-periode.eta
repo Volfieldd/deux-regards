@@ -1,0 +1,6 @@
+<% const v = it.vue; %>
+<nav class="ds-zoom" aria-label="Période des signaux"><% for (const p of v.periodes) { %><a class="vg-lien" href="<%= p.href %>"<% if (p.k === v.f.periode) { %> aria-current="true"<% } %>><%= p.mot %></a><% } %></nav>
+<% if (v.f.invalide) { %><p class="note-a">Période inconnue : les 7 derniers jours sont montrés.</p><% } %>
+<% if (v.dossier) { %><p class="note-a">Signaux des copies conservées dans le <a class="vg-lien" href="/dossiers/<%= v.dossier.id %>">dossier #<%= v.dossier.id %></a>, sur toute sa durée ; la période ne les limite pas. Leurs étiquettes sont celles des règles actuelles, faute de copie historique dans le dossier. <a class="vg-lien" href="/attack">Revenir à tous les signaux</a>.</p><% } %>
+<% if (v.coupe) { %><p class="note-a">Lecture limitée aux <%= v.maximum %> lignes les plus récentes : les comptes observés sont des minimums. La couverture reste complète.</p><% } %>
+<% if (v.alertesCoupees) { %><p class="note-a">Compte des alertes limité aux 10 000 plus récentes.</p><% } %>

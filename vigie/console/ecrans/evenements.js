@@ -21,6 +21,8 @@
 // texte y est tronquée) ; l'extrait d'une saisie suspecte est réservé aux Analystes et aux Administrateurs ; l'agent
 // utilisateur complet, aux rôles qui voient les adresses. Tout texte venu du site part échappé (gabarits <%= %>).
 import net from 'node:net';
+import { CATEGORIES_DONNEES } from '../../../server/securite/vocabulaire.js';
+import { filtreTechnique } from '../attack.js';
 import { ALL, rank } from '../../vocabulaire.js';
 import { alertOrder, isPrivate } from '../../moteur.js';
 import { HALF_LIFE_MIN, THRESHOLDS } from '../../poids.js';
@@ -296,6 +298,19 @@ function detailEnMorceaux(r, d, role, t) {
   const txt = s => m.push({ t: s });
   const sep = () => { if (m.length) txt(' · '); };
   switch (r.type) {
+    case 'sensitive_read':
+    case 'sensitive_export':
+    case 'sensitive_delete': {
+      if (d.objet) txt(propre(masquer(d.objet, role), 60));
+      if (d.id != null) { sep(); txt(`n° ${propre(masquer(String(d.id), role), 40)}`); }
+      const cats = Array.isArray(d.categorie) ? [...new Set(d.categorie.slice(0, 16).filter(c => typeof c === 'string' && Object.hasOwn(CATEGORIES_DONNEES, c)))] : [];
+      if (cats.length) { sep(); txt(cats.map(c => CATEGORIES_DONNEES[c]).join(', ')); }
+      for (const [cle, singulier, pluriel] of [['objets', 'objet affiché', 'objets affichés'], ['dechiffrements', 'déchiffrement', 'déchiffrements'], ['octets_servis', 'octet de réponse', 'octets de réponse']]) {
+        if (Number.isSafeInteger(d[cle]) && d[cle] >= 0) { sep(); txt(`${nombre(d[cle])} ${d[cle] > 1 ? pluriel : singulier}`); }
+      }
+      if (m.length) return m;
+      break;
+    }
     case 'vigie_alerte':
       if (Number.isInteger(d.id)) {
         m.push({ t: `#${d.id}`, href: `/alertes/${d.id}` });
@@ -475,7 +490,7 @@ export function lireAdresse(brut) {
 export function urlJournal(f, extra = {}, base = '/evenements') {
   const p = new URLSearchParams();
   p.set('periode', f.periode || 'aujourdhui');
-  for (const k of ['gravite', 'source', 'type', 'adresse', 'compte']) if (f[k]) p.set(k, f[k]);
+  for (const k of ['gravite', 'source', 'type', 'adresse', 'compte', 'technique']) if (f[k]) p.set(k, f[k]);
   if (f.alerte) p.set('alerte', String(f.alerte));
   for (const [k, v] of Object.entries(extra)) if (v != null && v !== '') p.set(k, String(v));
   return `${base}?${p.toString()}`;
@@ -485,7 +500,7 @@ export function urlJournal(f, extra = {}, base = '/evenements') {
 // ramenée à son réseau (redirection) : elle n'est jamais acceptée dans l'adresse d'une page.
 export function lireFiltres(query, role, t) {
   const qy = query || {};
-  const f = { periode: 'aujourdhui', gravite: '', source: '', type: '', adresse: '', compte: '', alerte: null };
+  const f = { periode: 'aujourdhui', gravite: '', source: '', type: '', adresse: '', compte: '', technique: '', alerte: null };
   const saisie = { adresse: chaine(qy.adresse).slice(0, 100), compte: chaine(qy.compte).slice(0, 200) };
   const erreurs = {};
   const al = chaine(qy.alerte);
@@ -495,8 +510,14 @@ export function lireFiltres(query, role, t) {
   if (PERIODES.some(p => p.v === per)) f.periode = per; else if (f.alerte) f.periode = 'tout';
   if (GRAVITES_F.some(g => g.v === chaine(qy.gravite))) f.gravite = qy.gravite;
   if (Object.hasOwn(SOURCES, chaine(qy.source))) f.source = qy.source;
+  const tech = chaine(qy.technique).toUpperCase();
+  if (tech) {
+    f.technique = filtreTechnique(tech);
+    if (!f.technique) erreurs.technique = 'Technique inconnue : un identifiant ATT&CK en vigueur, par exemple T1078 ou T1550.004.';
+  }
   const ty = chaine(qy.type);
   if (ty === 'tout' || Object.hasOwn(ALL, ty)) f.type = ty;
+  else if (f.technique) f.type = 'vigie_signal';
   let adr = null;
   if (saisie.adresse.trim()) {
     adr = lireAdresse(saisie.adresse);
@@ -518,7 +539,8 @@ export function lireFiltres(query, role, t) {
   if (p.v === 'aujourdhui') debut = minuitParis(t); else if (p.ms) debut = t - p.ms;
   // Lecture : un seul index, celui du filtre le plus sélectif.
   let driver;
-  if (f.alerte) driver = { k: 'alerte', v: f.alerte };
+  if (f.technique) driver = { k: 'technique', v: f.technique, alerte: f.alerte };
+  else if (f.alerte) driver = { k: 'alerte', v: f.alerte };
   else if (adr?.kind === 'ip') driver = { k: 'ip', v: adr.ip };
   else if (adr?.kind === 'reseau') driver = { k: 'ip_net', v: adr.cle, formes: formesRecherche(adr.cle) };
   else if (f.compte) driver = { k: 'sub', v: f.compte };
@@ -529,7 +551,7 @@ export function lireFiltres(query, role, t) {
     && (minRang == null || rank(r.severity) >= minRang)
     && (!f.source || sourceDe(r.composant) === f.source)
     && (!f.type || f.type === 'tout' || r.type === f.type)
-    && (!routine || f.type !== '' || !Object.hasOwn(ROUTINE, r.type))
+    && (!routine || f.technique || f.type !== '' || !Object.hasOwn(ROUTINE, r.type))
     && (adr?.kind !== 'ip' || r.ip === adr.ip)
     && (adr?.kind !== 'reseau' || r.ip_net === adr.cle || cleReseau(r.ip_net) === adr.cle)
     && (!f.compte || r.sub === f.compte);
@@ -541,6 +563,13 @@ export function lireFiltres(query, role, t) {
 // décompte.
 export function lecture(db, driver, cols = '*') {
   const q = requetes(db);
+  if (driver.k === 'technique') {
+    const c = cols === '*' ? 'e.*' : cols.split(',').map(x => `e.${x.trim()}`).join(', ');
+    return q.prep(`technique|${Boolean(driver.alerte)}|${cols}`, `SELECT ${c} FROM events_techniques x JOIN events e ON e.seq = x.seq
+      WHERE x.technique = ? ${driver.alerte ? 'AND EXISTS (SELECT 1 FROM alert_events ae WHERE ae.alert_id = ? AND ae.seq = e.seq)' : ''}
+      AND x.recu_a >= ? AND x.recu_a <= ? AND (x.recu_a < ? OR (x.recu_a = ? AND x.seq < ?))
+      ORDER BY x.recu_a DESC, x.seq DESC LIMIT ?`);
+  }
   if (driver.k === 'alerte') {
     const c = cols === '*' ? 'e.*' : cols.split(',').map(x => `e.${x.trim()}`).join(', ');
     return q.prep(`alerte|${cols}`, `SELECT ${c} FROM alert_events ae JOIN events e ON e.seq = ae.seq WHERE ae.alert_id = ? AND ae.seq < ? ORDER BY ae.seq DESC LIMIT ?`);
@@ -565,6 +594,7 @@ export function parametres(lf, cle, limite) {
   if (driver.k === 'alerte') return [driver.v, cle ? cle.seq : Number.MAX_SAFE_INTEGER, limite];
   const r = cle ? cle.recu_a : Number.MAX_SAFE_INTEGER, s = cle ? cle.seq : Number.MAX_SAFE_INTEGER;
   const reste = [debut, Math.min(fin + 60e3, r), r, r, s, limite];
+  if (driver.k === 'technique') return [driver.v, ...(driver.alerte ? [driver.alerte] : []), ...reste];
   const fm = driver.k === 'ip_net' ? driver.formes : null;
   if (fm && (fm.exactes.length > 1 || fm.debut)) {
     return [...fm.exactes.flatMap(x => [x, ...reste]), ...(fm.debut ? [fm.debut, fm.debutFin, ...reste] : []), limite];
@@ -634,6 +664,7 @@ function resumeFiltres(lf) {
   parts.push(f.source ? SOURCES[f.source] : 'toutes sources');
   if (f.adresse) parts.push(f.adresse);
   if (f.compte) parts.push(f.compte);
+  if (f.technique) parts.push(`technique ${f.technique}`);
   if (f.alerte) parts.push(`alerte #${f.alerte}`);
   return parts.join(' · ');
 }
@@ -772,6 +803,7 @@ export async function exportCsv({ db, query, role, t, tranche = EXPORT_TRANCHE }
   const filtres = { periode: lf.f.periode };
   for (const k of ['gravite', 'source', 'type', 'compte']) if (lf.f[k]) filtres[k] = lf.f[k];
   if (lf.f.alerte) filtres.alerte = lf.f.alerte;
+  if (lf.f.technique) filtres.technique = lf.f.technique;
   if (lf.adr) filtres.adresse = lf.adr.kind === 'ip' ? `${reseauDe(lf.adr.ip)}/${suffixe(lf.adr.ip)}` : lf.adr.texte;
   const p = paris(t);
   // UTF-8 avec BOM, séparateur « ; », fin de ligne CRLF : ce qu'un tableur réglé en français ouvre sans question.

@@ -7,5 +7,6 @@ import * as reglages from './reglages.js';
 import * as droits from './droits.js';
 import * as actions from '../actions.js';
 import * as dossiers from './dossiers.js';
+import * as attack from './attack.js';
 
-export const ECRANS = [alertes, dossiers, evenements, santeFlux, decisionsE, reglages, droits, actions];
+export const ECRANS = [alertes, dossiers, attack, evenements, santeFlux, decisionsE, reglages, droits, actions];

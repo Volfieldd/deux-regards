@@ -1,0 +1,22 @@
+<%
+/* MV-14 : les quinze tactiques, couverture indépendante de la période, observations et tableau équivalent.
+   Les noms de MITRE et les métadonnées passent aussi par autoEscape. Aucun script nécessaire aux dépliants. */
+const v = it.vue;
+layout('./layout', { titre: it.titre });
+%>
+<header class="ep"><div class="ep-titre"><h1>MITRE ATT&amp;CK</h1></div><p class="ep-meta"><span>Enterprise <%= v.version %> · publié le <%= v.publiee %></span><span><%= v.maintenant %></span></p></header>
+<div class="vg-etat"><p class="phrase"><%= v.couverts %> techniques couvertes dans <%= v.tactiquesCouvertes %> tactiques.</p><p>Le développement de ressources n’est pas observable ici. Une règle configurée compte dans la couverture, même arrêtée ; sa fiche indique son mode et son expiration.</p></div>
+<p>La détection garde ATT&amp;CK complet ; les huit phases des dossiers en sont une projection.</p>
+<section aria-labelledby="t-matrice"><h2 class="vg-section-t" id="t-matrice">Couverture et signaux</h2>
+<%~ include('./_attack-periode', { vue: v }) %>
+<p><%= v.signaux ? v.signaux + ' signaux portant une technique connue' : 'Aucun signal portant une technique connue : la couverture ne change pas' %><%= v.dossier ? ' dans le dossier.' : ' sur ' + v.periode + '.' %> Un signal peut compter dans plusieurs techniques. Les alertes comptées sont celles de ces règles, actives pendant la période.</p>
+<% if (v.sansTechnique) { %><p class="sec"><%= v.sansTechnique %> signal(s) sans technique connue dans le référentiel courant ; leurs étiquettes restent dans le journal.</p><% } %>
+<ul class="ak-matrice ak-globale"><% for (const c of v.cartes) { %><li class="ak-tac<%= c.cle === 'resource_development' ? ' ak-hors' : !c.items.length ? ' ak-vide' : '' %>">
+<details class="ak-tactique"<% if (c.items.length) { %> open<% } %>><summary><span><%= c.nom_fr %><span class="sec"><%= c.id %> · <%= c.couverts %> technique(s) couverte(s)</span></span></summary>
+<% if (c.cle === 'resource_development') { %><p class="ak-rien">Non observable ici.</p><% } %>
+<% if (c.items.length) { %><ul class="ak-tq"><% for (const x of c.items) { %><li><a class="vg-lien" href="<%= x.href %>"><span class="ak-id"><%= x.id %></span> <span class="ak-nm"><%= x.nom %></span></a><span class="ak-ph"><%= x.regles %> règle(s) et détecteur(s) · <%= x.n %> signal(s) · <%= x.alertes %> alerte(s)</span><svg class="ak-barre" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="fond" width="100" height="6"/><rect width="<%= Math.round(100 * x.n / Math.max(1, ...c.items.map(z => z.n))) %>" height="6"/></svg></li><% } %></ul><% } else { %><p class="ak-rien">Aucune règle ni signal connu.</p><% } %>
+<% if (c.sans.length) { %><details class="ak-sans"><summary><%= c.sans.length %> techniques sans règle ni signal</summary><ul><% for (const x of c.sans) { %><li><a class="vg-lien" href="<%= x.href %>"><span class="ak-id"><%= x.id %></span> <span lang="en"><%= x.anglais %></span></a></li><% } %></ul></details><% } %>
+</details></li><% } %></ul>
+<details class="ds-table"><summary>Matrice en tableau</summary><div class="tablewrap"><table class="liste-a vg-ds-t"><caption>Toutes les tactiques et techniques du référentiel courant</caption><thead><tr><th scope="col">Tactique</th><th scope="col">Technique</th><th scope="col">Règles</th><th scope="col">Signaux</th><th scope="col">Alertes</th></tr></thead><tbody><% for (const c of v.cartes) { for (const x of [...c.items, ...c.sans]) { %><tr><td data-label="Tactique"><%= c.nom_fr %></td><th scope="row"><a class="vg-lien" href="<%= x.href %>"><%= x.id %> · <%= x.nom %></a></th><td data-label="Règles"><%= x.regles %></td><td data-label="Signaux"><%= x.n %></td><td data-label="Alertes"><%= x.alertes %></td></tr><% } } %></tbody></table></div></details>
+</section>
+<section class="panel" aria-labelledby="t-navigator"><h2 class="panel-t" id="t-navigator">Ouvrir dans ATT&amp;CK Navigator</h2><p>Ces fichiers JSON contiennent les comptes par technique et tactique, sans donnée personnelle. Ouvrez-les dans Navigator sur votre poste ou dans l’outil public de MITRE ; la Vigie n’envoie rien.</p><div class="ak-export"><a class="btn ghost" href="<%= v.couverture %>">Calque de couverture (JSON)</a><a class="btn ghost" href="<%= v.observe %>">Calque des signaux (JSON)</a></div></section>

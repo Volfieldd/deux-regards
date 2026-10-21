@@ -908,6 +908,105 @@ figure.fx-dessin { margin: 0; }
 .ds-zoom a { white-space: nowrap; }
 @media (pointer: coarse), (max-width: 720px) { :is(.vg-ds-t, .ds-zoom, .vg-dossiers .sec) a.vg-lien { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; } }
 
+/* La frise en couloirs : huit phases, puis Indices, Dissimulation, Faits ; l'heure en abscisse. La forme dit la nature (jalon
+   carré plein, preuve losange plein, indice rond cerné, fait petit rond, marqueur triangle), le trait relie le premier jalon
+   des phases qui se suivent dans l'ordre ; une phase non observée sous la plus avancée est hachurée et le dit. */
+.ds-frise { container: dsf / inline-size; margin: 0 0 12px; }
+.ds-frise .ds-dessin { display: none; margin: 0; }
+@container dsf (min-width: 706px) { .ds-frise .ds-dessin { display: block; } .ds-frise .ds-tel { display: none; } }
+.ds-frise .ds-large, .ds-graphe .ds-large { display: none; }
+@container dsf (min-width: 971px) { .ds-frise .ds-std { display: none; } .ds-frise .ds-large { display: block; } }
+.ds-svg { display: block; width: 100%; height: auto; overflow: hidden; }
+.ds-svg text { font-family: var(--sans); font-size: 14px; fill: var(--ink2); }
+.ds-svg.ds-l text { font-size: 15px; }   /* la grande boîte (1 120 unités) dès 971 px : 15 unités, 13 px au moins à l'écran */
+.ds-svg .ds-c-t { fill: var(--ink); }
+.ds-svg .ds-c-t.vide { fill: var(--ink3); }
+.ds-svg .ds-c-fond { fill: var(--s2); }
+.ds-svg .ds-c-fond.alt { fill: transparent; }
+.ds-svg .ds-non-t { fill: var(--ink3); font-style: italic; }
+.ds-svg .ds-axe { stroke: var(--line2); stroke-width: 1px; }
+.ds-svg .ds-graduation { fill: var(--ink3); font-variant-numeric: tabular-nums; }
+.ds-svg .ds-chaine { fill: none; stroke: var(--ink); stroke-width: 1.5px; }
+.ds-svg .ds-m-jalon { fill: var(--ink); }
+.ds-svg .ds-m-preuve { fill: var(--danger); stroke: var(--ink); stroke-width: 1px; }
+.ds-svg .ds-m-indice { fill: var(--bg); stroke: var(--ink); stroke-width: 2px; }
+.ds-svg .ds-m-fait { fill: var(--ink3); }
+.ds-svg .ds-m-promu { fill: var(--ink); stroke: var(--bg); stroke-width: 1px; }
+.ds-svg .ds-m-marqueur { fill: var(--warn); stroke: var(--ink); stroke-width: 1px; }
+.ds-svg .ds-m-nb { fill: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+.ds-sym { display: inline-block; flex: none; width: 12px; height: 12px; }
+.ds-sym.jalon { background: var(--ink); border-radius: 1px; }
+.ds-sym.preuve { width: 10px; height: 10px; margin: 0 1px; background: var(--danger); transform: rotate(45deg); box-shadow: 0 0 0 1px var(--ink); }
+.ds-sym.indice { border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink); }
+.ds-sym.fait { width: 8px; height: 8px; margin: 0 2px; border-radius: 50%; background: var(--ink3); }
+.ds-sym.marqueur { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 12px solid var(--warn); }
+.ds-sym.chaine { height: 2px; width: 22px; background: var(--ink); }
+/* Au téléphone : une phase par bloc, ses signaux dessous (la frise devient verticale). */
+.ds-tel { display: grid; gap: 10px; }
+.ds-tel .ds-ph { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.ds-tel .ds-ph h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 6px; font-size: 15px; font-weight: 500; }
+.ds-tel .ds-ph h3 .sec { color: var(--ink3); font-size: 13px; font-weight: 400; }
+.ds-tel .ds-ph.non { background: transparent; box-shadow: inset 0 0 0 1px var(--line2); }
+.ds-tel .ds-ph.non h4 { margin: 0; color: var(--ink3); }
+.ds-tel ol { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ds-tel li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: baseline; font-size: 13px; color: var(--ink2); }
+.ds-tel li .ds-sym { align-self: center; }
+.ds-tel li b { color: var(--ink); font-weight: 500; }
+/* Le graphe des entités : acteurs à gauche, compte et session au centre, cibles à droite ; la force du lien par le trait
+   (plein épais : fort, plein : moyen, tirets : faible, pointillés : rattaché à la main) ; les dossiers voisins en satellites. */
+.ds-graphe { container: dsg / inline-size; margin: 0 0 12px; }
+.ds-graphe .ds-dessin { display: none; margin: 0; }
+@container dsg (min-width: 706px) { .ds-graphe .ds-dessin { display: block; } }
+@container dsg (min-width: 971px) { .ds-graphe .ds-std { display: none; } .ds-graphe .ds-large { display: block; } }
+.ds-svg .ds-col { fill: var(--ink3); letter-spacing: .06em; }
+.ds-svg .ds-n { fill: var(--s2); stroke: var(--line2); stroke-width: 1px; }
+.ds-svg .ds-n.graine { stroke: var(--ink); stroke-width: 2px; }
+.ds-svg .ds-n.cible { fill: transparent; stroke: var(--ink3); stroke-dasharray: 4 3; }
+.ds-svg .ds-n.voisin { fill: transparent; stroke: var(--ink3); }
+.ds-svg .ds-n-t { fill: var(--ink); }
+.ds-svg .ds-n-k { fill: var(--ink3); }
+.ds-svg .ds-n-mono { font-family: var(--mono); fill: var(--ink); }
+.ds-svg .ds-e { fill: none; stroke: var(--ink3); }
+.ds-svg .ds-e.fort { stroke: var(--ink); stroke-width: 2.5px; }
+.ds-svg .ds-e.moyen { stroke: var(--ink2); stroke-width: 1.5px; }
+.ds-svg .ds-e.faible { stroke-width: 1.5px; stroke-dasharray: 6 4; }
+.ds-svg .ds-e.manuel { stroke: var(--ink2); stroke-width: 1.5px; stroke-dasharray: 2 3; }
+.ds-svg .ds-e.voisin { stroke-width: 1px; stroke-dasharray: 2 4; }
+.ds-sym.e-fort { height: 3px; width: 22px; background: var(--ink); }
+.ds-sym.e-moyen { height: 2px; width: 22px; background: var(--ink2); }
+.ds-sym.e-faible { height: 2px; width: 22px; background: repeating-linear-gradient(90deg, var(--ink3) 0 6px, transparent 6px 10px); }
+.ds-sym.e-manuel { height: 2px; width: 22px; background: repeating-linear-gradient(90deg, var(--ink2) 0 2px, transparent 2px 5px); }
+/* La matrice ATT&CK d'un dossier (MV-13) et de la détection (MV-14) : une carte par tactique, dans l'ordre de MITRE (15
+   tactiques depuis ATT&CK 20.0), qui passent à la ligne ; une tactique que la Vigie n'observe pas est dite, pas cachée. */
+.ak-matrice { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 10px; margin: 0 0 14px; padding: 0; list-style: none; }
+.ak-tac { display: grid; align-content: start; gap: 8px; padding: 12px; border-radius: 10px; background: var(--s1); box-shadow: inset 0 0 0 1px var(--line); }
+.ak-tac.ak-vide { background: transparent; box-shadow: inset 0 0 0 1px var(--line2); }
+.ak-tac.ak-hors { background: transparent; box-shadow: none; outline: 1px dashed var(--line2); outline-offset: -1px; }
+.ak-tac h3, .ak-tac h4 { display: grid; gap: 2px; margin: 0; font-size: 15px; font-weight: 500; line-height: 1.3; }
+.ak-tac h3 .sec, .ak-tac h4 .sec { color: var(--ink3); font-size: 13px; font-weight: 400; }
+.ak-tac .ak-cpt { margin: 0; color: var(--ink2); font-size: 13px; }
+.ak-tac .ak-cpt b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.ak-tac > p.ak-rien { margin: 0; color: var(--ink3); font-size: 13px; }
+.ak-tq { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ak-tq li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: baseline; padding-top: 6px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink2); }
+.ak-tq li:first-child { padding-top: 0; border-top: 0; }
+.ak-tq .ak-id { font-family: var(--mono); color: var(--ink); white-space: nowrap; }
+.ak-tq .ak-nm { grid-column: 1 / -1; color: var(--ink); }
+.ak-tq .ak-n { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.ak-tq .ak-ordre { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; margin-right: 6px; border-radius: 999px;
+  background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ak-tq .ak-ph { grid-column: 1 / -1; color: var(--ink3); }
+.ak-tq a.vg-lien { grid-column: 1 / -1; justify-self: start; }
+.ak-tq .ak-barre { grid-column: 1 / -1; display: block; width: 100%; height: 6px; }
+.ak-barre rect { fill: var(--ink3); } .ak-barre .fond { fill: var(--line2); }
+.ak-sans { margin: 0; font-size: 13px; color: var(--ink2); }
+.ak-sans summary { display: inline-flex; align-items: center; min-height: 32px; cursor: pointer; }
+.ak-sans ul { display: grid; gap: 2px; margin: 6px 0 0; padding: 0; list-style: none; }
+.ak-sans li .ak-id { font-family: var(--mono); color: var(--ink2); margin-right: 6px; white-space: nowrap; }
+@media (pointer: coarse) { .ak-sans summary { min-height: 44px; } .ak-tq a.vg-lien { display: inline-flex; align-items: center; min-height: 44px; } }
+.ak-vides-tel { display: none; }
+@media (max-width: 720px) { .ak-tac.ak-vide { display: none; } .ak-vides-tel { display: grid; } }
+
 .vg-ds-t td, .vg-ds-t th { vertical-align: top; }
 .vg-ds-t .c-h { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .vg-ds-t .c-nat { white-space: nowrap; }
@@ -944,3 +1043,34 @@ figure.fx-dessin { margin: 0; }
   .vg-dossiers .c-niv { min-width: 0; }
   .vg-dossiers .ds-niv { white-space: normal; }
 }
+
+/* D2 : la matrice reprend les cartes de la maquette dans deux SVG ; même bascule que la frise. */
+.ds-matrice { container: dsm / inline-size; }
+.ds-matrice .ds-dessin, .ds-matrice .ds-large { display: none; }
+@container dsm (min-width: 706px) { .ds-matrice .ds-dessin { display: block; } .ds-matrice .ds-tel { display: none; } }
+@container dsm (min-width: 971px) { .ds-matrice .ds-std { display: none; } .ds-matrice .ds-large { display: block; } }
+.ds-zoom { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.ds-zoom a[aria-current] { color: var(--ink); font-weight: 600; }
+/* Les mots courts des colonnes de rôle et de lien gardent leur largeur minimale. */
+.vigie .vg-ds-t td:is([data-label="Rôle"], [data-label="Lien"]) { overflow-wrap: normal; word-break: normal; }
+.ds-table { margin-top: 16px; }
+.ds-table summary { cursor: pointer; padding-block: 12px; }
+.ds-svg a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.ds-svg .ds-g-critique :is(rect,path,circle), .ds-svg .ds-g-haut :is(rect,path,circle) { stroke: var(--danger); stroke-width: 2px; }
+.ds-svg .ds-g-moyen :is(rect,path,circle) { stroke: var(--warn); stroke-width: 2px; }
+.ds-tel .ds-ph h3 { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 6px; font-size: 15px; }
+.ds-tel .ds-ph h3 .sec { font-size: 13px; font-weight: 400; }
+@media (forced-colors: active) { .ds-svg a:focus-visible { outline-color: Highlight; } .ds-point :is(rect,path,circle) { stroke: CanvasText; } }
+
+/* ATT&CK global (MV-14, D3) : dépliants natifs au téléphone comme au bureau, sans script. */
+.ak-tactique { min-width: 0; }
+.ak-tactique > summary { cursor: pointer; min-height: 44px; font-size: 15px; font-weight: 500; }
+.ak-tactique > summary .sec { display: block; color: var(--ink3); font-size: 13px; font-weight: 400; }
+.ak-tactique .ak-tq { margin-top: 12px; }
+.ak-tactique .ak-nm { display: block; overflow-wrap: anywhere; }
+.ak-sans a { overflow-wrap: anywhere; }
+.ak-export { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 12px; }
+.ak-export .btn { white-space: normal; }
+
+.ak-tactique .ak-tq a.vg-lien { display: block; }
+@media (max-width: 720px) { .ak-globale .ak-tac.ak-vide { display: block; } }

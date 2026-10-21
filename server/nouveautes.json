@@ -1,5 +1,59 @@
 [
   {
+    "version": "1.202.0",
+    "date": "2026-10-21",
+    "pr": 202,
+    "title": {
+      "fr": "Vigie : mieux décrire les lectures personnelles",
+      "en": "Vigie: describe personal data access more clearly",
+      "de": "Vigie: Zugriffe auf personenbezogene Daten genauer beschreiben"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Les lectures et exports indiquent leurs catégories, effectifs, déchiffrements et volumes, sans recopier le contenu des fiches. Les listes sont couvertes et les dossiers évaluent mieux l’enjeu des données. Un indice signale trois réseaux distincts pour un compte en 24 heures, sans blocage automatique. Le journal présente ces informations selon les droits existants.",
+        "en": "Reads and exports record categories, item counts, decryption operations and response sizes without copying record contents. Lists are covered, and cases assess the sensitivity of the data more accurately. An indicator flags three distinct networks for one account within 24 hours, without automatic blocking. The event log presents this information under existing permissions.",
+        "de": "Lesezugriffe und Exporte erfassen Kategorien, Objektzahlen, Entschlüsselungen und Antwortgrößen, ohne die Inhalte der Datensätze zu kopieren. Listen sind einbezogen, und Fälle bewerten die Sensibilität der Daten genauer. Ein Indiz zeigt drei verschiedene Netze für ein Konto innerhalb von 24 Stunden an, ohne automatische Sperre. Das Protokoll zeigt diese Angaben gemäß den bestehenden Berechtigungen."
+      }
+    ]
+  },
+  {
+    "version": "1.200.0",
+    "date": "2026-10-21",
+    "pr": 200,
+    "title": {
+      "fr": "Vigie : explorer la couverture ATT&CK",
+      "en": "Vigie: explore ATT&CK coverage",
+      "de": "Vigie: ATT&CK-Abdeckung erkunden"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "La vue ATT&CK présente les quinze tactiques, les techniques couvertes et les signaux observés. Chaque technique mène à ses règles, ses dossiers et au journal filtré. Deux calques Navigator permettent de télécharger la couverture ou les comptes de signaux, sans données personnelles. Tout reste utilisable sans JavaScript.",
+        "en": "The ATT&CK view shows all fifteen tactics, covered techniques and observed signals. Each technique links to its rules, cases and filtered event log. Two Navigator layers let you download coverage or signal counts without personal data. Everything works without JavaScript.",
+        "de": "Die ATT&CK-Ansicht zeigt alle fünfzehn Taktiken, abgedeckte Techniken und beobachtete Signale. Jede Technik führt zu ihren Regeln, Fällen und zum gefilterten Ereignisprotokoll. Zwei Navigator-Ebenen enthalten die Abdeckung oder Signalzahlen, ohne personenbezogene Daten. Alles funktioniert ohne JavaScript."
+      }
+    ]
+  },
+  {
+    "version": "1.199.0",
+    "date": "2026-10-21",
+    "pr": 199,
+    "title": {
+      "fr": "Vigie : les dossiers se dessinent",
+      "en": "Vigie: visual case views",
+      "de": "Vigie: Fälle als Diagramme"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "La fiche d’un dossier présente sa frise, le graphe de ses entités et sa matrice ATT&CK. Zoom, faits ordinaires et filtre de technique fonctionnent sans JavaScript, avec des tableaux équivalents et une liste par phase au téléphone. La Lectrice conserve les adresses tronquées. Les dessins ne changent ni la détection ni les réponses.",
+        "en": "Each case now includes a timeline, an entity graph and an ATT&CK matrix. Time windows, ordinary events and technique filtering work without JavaScript, with equivalent tables and a phase list on phones. Readers retain truncated addresses. These views do not change detection or responses.",
+        "de": "Jeder Fall enthält jetzt eine Zeitleiste, ein Entitätendiagramm und eine ATT&CK-Matrix. Zeitfenster, gewöhnliche Ereignisse und Technikfilter funktionieren ohne JavaScript, ergänzt durch Tabellen und eine Phasenliste auf dem Smartphone. Lesende sehen weiterhin gekürzte Adressen. Erkennung und Reaktionen bleiben unverändert."
+      }
+    ]
+  },
+  {
     "version": "1.198.0",
     "date": "2026-10-20",
     "pr": 198,

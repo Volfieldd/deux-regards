@@ -1,5 +1,6 @@
 import { PHASES, MARQUEURS } from './phases.js';
 import { lru } from './detecteurs.js';
+import { CATEGORIES_DONNEES } from '../server/securite/vocabulaire.js';
 
 // Dossiers de la Vigie (étude docs/etudes/vigie-dossiers.md ; décisions D31 à D39 du 20 octobre 2026) : tout ce qui
 // touche une même attaque probable, d'une entité à l'autre, au-dessus des alertes (qui ne changent pas).
@@ -36,9 +37,10 @@ const FAITS = { authn_login_success: 3, zitadel_connexion: 3, authn_login_fail: 
   session_context_change: 3, authn_reauth_success: null, session_created: 3 };
 // Points de confiance des indices (4.3) ; premiere_apparition : 1,5 par attribut inédit (pays, appareil).
 const POINTS = { 'detecteur.premiere_apparition': 1.5, 'detecteur.heure_inhabituelle': 1, 'sigma.bordure_nouvel_operateur': 1, 'detecteur.voyage_impossible': 3,
-  'detecteur.pivot_identifiants': 3, 'fait.session_context_change': 2 };
+  'detecteur.pivot_identifiants': 3, 'fait.session_context_change': 2, 'sigma.compte_reseaux_multiples': 1.5 };
 const LIBELLES = { 'detecteur.heure_inhabituelle': 'heure inhabituelle', 'sigma.bordure_nouvel_operateur': 'opérateur réseau inédit', 'detecteur.voyage_impossible': 'voyage impossible',
-  'detecteur.pivot_identifiants': 'échecs puis connexion', 'fait.session_context_change': 'session changée de réseau ou de navigateur' };
+  'detecteur.pivot_identifiants': 'échecs puis connexion', 'fait.session_context_change': 'session changée de réseau ou de navigateur',
+  'sigma.compte_reseaux_multiples': 'trois réseaux ou plus en 24 h' };
 // Enjeu (6.1) : règles qui touchent des droits d'administrateur (sensible) ; face publique ou rôle donné hors de
 // l'application (critique).
 const DROITS = new Set(['sigma.administrateur_donne', 'sigma.zitadel_droits', 'sigma.zitadel_critique', 'sigma.console_droits', 'sigma.controle_roles', 'detecteur.role_incoherent']);
@@ -55,6 +57,18 @@ const parse = s => { try { return s ? (typeof s === 'string' ? JSON.parse(s) : s
 // 200 caractères au plus. Compte, session, adresse et objet viennent des événements.
 const propre = v => String(v).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/g, '?').slice(0, 200);
 const NOM_PHASE = Object.fromEntries(PHASES.map(p => [p.n, p.nom]));
+
+// BV-33 : le dossier ne garde que le contrat fermé des faits personnels, jamais leur detail libre. Les effectifs
+// d'une liste ne s'additionnent pas entre requêtes : on connaît un minimum d'objets distincts, pas leur identité.
+function donneesDe(detail) {
+  const d = parse(detail);
+  if (!d || typeof d !== 'object' || !Array.isArray(d.categorie)) return null;
+  const categorie = [...new Set(d.categorie.slice(0, 16).filter(c => typeof c === 'string' && Object.hasOwn(CATEGORIES_DONNEES, c)))];
+  const entier = v => Number.isSafeInteger(v) && v >= 0 ? v : null;
+  return { categorie, objets: Math.min(entier(d.objets) ?? 0, 10000), liste: d.liste === true,
+    dechiffrements: entier(d.dechiffrements), octets_servis: entier(d.octets_servis) };
+}
+const tailleListe = d => d?.liste && d.categorie?.length ? d.objets : 0;
 
 // Entité d'une règle → entité de dossier : un accès de galerie (« site:acces:12 ») est un acteur ; une entité « site »
 // ou « vigie » est une cible (« site:configuration »).
@@ -105,8 +119,8 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
       role = CASE WHEN dossier_entites.role = 'contexte' THEN excluded.role ELSE dossier_entites.role END`),
     signaux: db.prepare('SELECT * FROM dossier_signaux WHERE dossier_id = ? ORDER BY survenu_a, id'),
     nbSignaux: db.prepare('SELECT COUNT(*) FROM dossier_signaux WHERE dossier_id = ?').pluck(),
-    ajouterSignal: db.prepare(`INSERT INTO dossier_signaux (dossier_id, seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, objet, alerte_id, cle)
-      SELECT @dossier_id, @seq, @regle, @survenu_a, @nature, @phase, @marqueurs, @points, @source, @gravite, @entite_kind, @entite_key, @sub, @session, @ip, @objet, @alerte_id, @cle
+    ajouterSignal: db.prepare(`INSERT INTO dossier_signaux (dossier_id, seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, objet, alerte_id, cle, donnees)
+      SELECT @dossier_id, @seq, @regle, @survenu_a, @nature, @phase, @marqueurs, @points, @source, @gravite, @entite_kind, @entite_key, @sub, @session, @ip, @objet, @alerte_id, @cle, @donnees
       WHERE NOT EXISTS (SELECT 1 FROM dossier_signaux_ecartes WHERE dossier_id = @dossier_id AND seq = COALESCE(@seq, 0) AND regle = @regle
         AND survenu_a = CASE WHEN @seq IS NULL THEN @survenu_a ELSE 0 END
         AND entite_kind = CASE WHEN @seq IS NULL THEN COALESCE(@entite_kind, '') ELSE '' END
@@ -129,7 +143,7 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     connexions: db.prepare("SELECT detail FROM events WHERE sub = ? AND type = 'authn_login_success' AND recu_a >= ? AND recu_a <= ? LIMIT 500").pluck(),
     // Faits d'un compte, pour l'ouverture sur lectures et le rattachement rétroactif.
     faitsSub: db.prepare(`SELECT * FROM events WHERE sub = ? AND recu_a >= ? AND type IN (${Object.keys(FAITS).map(t => `'${t}'`).join(', ')}) ORDER BY seq LIMIT 400`),
-    lecturesSub: db.prepare("SELECT type, detail FROM events WHERE sub = ? AND recu_a >= ? AND type IN ('sensitive_read', 'sensitive_export', 'sensitive_delete') LIMIT 1000"),
+    lecturesSub: db.prepare("SELECT type, session, detail FROM events WHERE sub = ? AND recu_a >= ? AND type IN ('sensitive_read', 'sensitive_export', 'sensitive_delete') LIMIT 1000"),
     // Rattachement rétroactif par entité.
     projetesSub: db.prepare('SELECT * FROM signaux_projetes WHERE (sub = ? OR (entite_kind = \'compte\' AND entite_key = ?)) AND survenu_a >= ? ORDER BY survenu_a LIMIT 400'),
     projetesIp: db.prepare('SELECT * FROM signaux_projetes WHERE (ip = ? OR (entite_kind = \'ip\' AND entite_key = ?)) AND survenu_a >= ? ORDER BY survenu_a LIMIT 400'),
@@ -263,7 +277,7 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     if (q.nbSignaux.get(id) >= MAX_SIGNAUX) { q.tronquer.run(id); return false; }
     const ajoute = q.ajouterSignal.run({ dossier_id: id, seq: s.seq ?? null, regle: s.regle, survenu_a: s.survenu_a, nature: s.nature, phase: s.phase ?? null, marqueurs: s.marqueurs || null,
       points: s.points ?? null, source: s.source ?? null, gravite: s.gravite ?? null, entite_kind: s.entite_kind ?? null, entite_key: s.entite_key ?? null, sub: s.sub ?? null,
-      session: s.session ?? null, ip: s.ip ?? null, objet: s.objet ?? null, alerte_id: s.alerte_id ?? null, cle: s.cle ?? null });
+      session: s.session ?? null, ip: s.ip ?? null, objet: s.objet ?? null, alerte_id: s.alerte_id ?? null, cle: s.cle ?? null, donnees: s.donnees ?? null });
     if (!ajoute.changes) return false;           // signal attribué à l'autre dossier lors d'une scission
     q.toucher.run(s.survenu_a, id);
     if ((s.nature === 'jalon' || s.nature === 'preuve') && (s.phase || s.marqueurs)) q.jalon.run({ id, t: s.survenu_a });
@@ -271,7 +285,8 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
   }
   // Fait (événement ordinaire) → entrée de dossier.
   const fait = row => ({ seq: row.seq, regle: `fait.${row.type}`, survenu_a: row.survenu_a ?? row.recu_a, nature: 'fait', phase: FAITS[row.type] ?? null, sub: row.sub, session: row.session,
-    ip: row.ip, objet: objetDe(row), gravite: row.severity, source: String(row.composant || '').startsWith('site') ? 'site' : row.composant === 'zitadel' ? 'zitadel' : null,
+    ip: row.ip, objet: objetDe(row), donnees: row.type.startsWith('sensitive_') ? JSON.stringify(donneesDe(row.detail)) : null,
+    gravite: row.severity, source: String(row.composant || '').startsWith('site') ? 'site' : row.composant === 'zitadel' ? 'zitadel' : null,
     points: row.type === 'session_context_change' && row.severity === 'moyen' ? POINTS['fait.session_context_change'] : null });
 
   // ---------- recherche, ouverture, fusion ----------
@@ -318,8 +333,8 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     for (const autre of autres) {
       db.prepare(`INSERT OR IGNORE INTO dossier_entites (dossier_id, kind, key, role, force, via, ajoute_a, detache_a)
         SELECT ?, kind, key, role, force, via, ajoute_a, detache_a FROM dossier_entites WHERE dossier_id = ?`).run(garde, autre);
-      db.prepare(`INSERT OR IGNORE INTO dossier_signaux (dossier_id, seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, objet, promu, alerte_id, cle)
-        SELECT ?, seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, objet, promu, alerte_id, cle FROM dossier_signaux WHERE dossier_id = ?`).run(garde, autre);
+      db.prepare(`INSERT OR IGNORE INTO dossier_signaux (dossier_id, seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, objet, promu, alerte_id, cle, donnees)
+        SELECT ?, seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, objet, promu, alerte_id, cle, donnees FROM dossier_signaux WHERE dossier_id = ?`).run(garde, autre);
       db.prepare('UPDATE alerts SET dossier_id = ? WHERE dossier_id = ?').run(garde, autre);
       const a = q.dossier.get(autre);
       db.prepare(`UPDATE dossiers SET ouvert_a = MIN(ouvert_a, ?), derniere = MAX(derniere, ?), dernier_jalon = MAX(COALESCE(dernier_jalon, 0), COALESCE(?, 0)),
@@ -401,9 +416,17 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
       const faits = sig.filter(s => s.nature === 'fait');
       const apres = type => faits.filter(s => s.regle === `fait.${type}` && s.survenu_a >= tA);
       const forte = conf.niveau === 'forte';
-      const lectures = apres('sensitive_read');
+      const lectures = apres('sensitive_read').filter(s => { const d = parse(s.donnees); return !d?.liste || tailleListe(d) > 0; });
       const promus = [];
-      if (forte || new Set(lectures.map(s => s.objet || s.seq)).size >= SEUILS.lectures_moyenne) promus.push(...lectures);
+      // Étude 4.6 : huit fiches dans une même session ; les événements anciens sans session restent groupés
+      // entre eux. Un compte qui ouvre deux sessions n'additionne pas leurs lectures pour franchir ce seuil.
+      const sessions = new Map();
+      for (const s of lectures) { const groupe = sessions.get(s.session) || []; groupe.push(s); sessions.set(s.session, groupe); }
+      for (const groupe of sessions.values()) {
+        const fiches = new Set(groupe.filter(s => !parse(s.donnees)?.liste).map(s => s.objet || s.seq)).size;
+        const liste = Math.max(0, ...groupe.map(s => tailleListe(parse(s.donnees))));
+        if (forte || Math.max(fiches, liste) >= SEUILS.lectures_moyenne) promus.push(...groupe);
+      }
       promus.push(...apres('sensitive_export'));
       const suppr = apres('sensitive_delete');
       if (forte || suppr.length >= SEUILS.suppressions_moyenne) promus.push(...suppr);
@@ -427,7 +450,9 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     const dissimulation = marqueurs.has('dissimulation');
     // Enjeu (6.1).
     const objets = new Set(sig.filter(s => s.objet && PERSONNELS.has(String(s.objet).split(':')[0])).map(s => s.objet));
-    const exportsPerso = sig.filter(s => s.regle === 'fait.sensitive_export' && s.objet && PERSONNELS.has(String(s.objet).split(':')[0]));
+    const categories = new Set(sig.flatMap(s => parse(s.donnees)?.categorie || []));
+    const effectif = Math.max(objets.size, ...sig.map(s => tailleListe(parse(s.donnees))));
+    const exportsPerso = sig.filter(s => s.regle === 'fait.sensitive_export' && ((s.objet && PERSONNELS.has(String(s.objet).split(':')[0])) || parse(s.donnees)?.categorie?.length));
     const exfil = sig.some(s => (s.nature === 'jalon' || s.nature === 'preuve') && s.phase === 7);
     const douteux = CONFIANCES.indexOf(niveau) >= 2;
     const enjeuEl = [];
@@ -435,10 +460,12 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     const monter = (e, txt) => { if (ENJEUX.indexOf(e) > ENJEUX.indexOf(enjeu)) enjeu = e; if (txt) enjeuEl.push(txt); };
     if (objets.size) monter('personnel', `${objets.size} objet${objets.size > 1 ? 's' : ''} personnel${objets.size > 1 ? 's' : ''} lu${objets.size > 1 ? 's' : ''} ou exporté${objets.size > 1 ? 's' : ''}`);
     if (ents.some(e => e.kind === 'acces')) monter('personnel', 'accès de galerie privée');
-    if (objets.size >= 10) monter('sensible');
+    if (categories.size) monter('personnel', [...categories].map(c => CATEGORIES_DONNEES[c]).join(', '));
+    if (effectif >= 10) monter('sensible', 'au moins 10 objets personnels');
+    if (['mineur', 'accord_signe', 'localisation'].some(c => categories.has(c))) monter('sensible');
     if (exportsPerso.length) monter('sensible', 'export de données personnelles');
     if (sig.some(s => DROITS.has(s.regle))) monter('sensible', 'droits d’administrateur en jeu');
-    if (douteux && (exportsPerso.some(s => s.promu) || (exfil && (objets.size || d.piste === 'invite')))) monter('critique', 'données personnelles sorties sous un accès douteux');
+    if (douteux && (exportsPerso.some(s => s.promu) || (exfil && (objets.size || categories.size || d.piste === 'invite')))) monter('critique', 'données personnelles sorties sous un accès douteux');
     const crit = sig.find(s => CRITIQUES.has(s.regle));
     if (crit) monter('critique', crit.regle === 'sigma.role_hors_application' ? 'rôle donné hors de l’application' : 'face publique du site changée');
     // Gravité (6.2).
@@ -583,10 +610,13 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
       return;
     }
     if (!row.sub || !LECTURES.has(row.type)) return;
+    const donnees = row.type === 'sensitive_read' ? donneesDe(row.detail) : null;
+    if (donnees?.liste && !tailleListe(donnees)) return;
     const c = confianceCompte(row.sub, t - 24 * H, t);
     if (CONFIANCES.indexOf(c.niveau) < 2 || c.debut == null) return;
-    const lus = q.lecturesSub.all(row.sub, c.debut - SEUILS.avant_acces_ms).map(x => ({ type: x.type, o: objetDe(x) }));
-    const n = new Set(lus.filter(x => x.type === 'sensitive_read').map(x => x.o)).size;
+    const lus = q.lecturesSub.all(row.sub, c.debut - SEUILS.avant_acces_ms).map(x => ({ type: x.type, session: x.session, o: objetDe(x), donnees: donneesDe(x.detail) }));
+    const lectures = lus.filter(x => x.type === 'sensitive_read' && x.session === (row.session ?? null));
+    const n = Math.max(new Set(lectures.filter(x => !x.donnees?.liste).map(x => x.o)).size, 0, ...lectures.map(x => tailleListe(x.donnees)));
     const ok = c.niveau === 'forte' || lus.some(x => x.type === 'sensitive_export') || n >= SEUILS.lectures_moyenne
       || lus.filter(x => x.type === 'sensitive_delete').length >= SEUILS.suppressions_moyenne;
     if (!ok) return;

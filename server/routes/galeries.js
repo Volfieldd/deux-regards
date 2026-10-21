@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { noterLecture } from '../securite/donnees.js';
 import { SpaceError, DOWNLOADS, LANGS, DAY, PURGE_AFTER, DEVICES_SIGNAL, endOfDay, parisDayOf, parseDay } from '../spaces.js';
 import { showPassword } from '../passwords.js';
 import { variantName, widthsFor } from '../images.js';
@@ -80,7 +81,7 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
   // Lecture des données d'un invité (BV-24) : notée au journal et signalée à la Vigie (lecture sensible, numéro de l'accès).
   function sensitiveRead(request, s, inv, cible) {
     audit(request, `lecture (${cible})`, s, inv);
-    app.securite.emit('sensitive_read', { request, emetteur: 'server/routes/galeries.js · lecture sensible', detail: { cible: request.routeOptions.url, objet: inv ? 'acces' : 'galerie', id: inv ? inv.id : s.id } });
+    noterLecture(request, { objet: inv ? 'acces' : 'galerie', id: inv ? inv.id : s.id, categorie: ['identite'] });
   }
 
   // ---------- vues ----------
@@ -507,6 +508,7 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     if (!inv) return reply.callNotFound();
     const items = spaces.items(s.id);
     const rows = spaces.favorites(inv.id).map(f => items.find(p => p.item_id === f.item_id)).filter(Boolean);
+    noterLecture(request, { objet: 'acces', id: inv.id, categorie: ['image'] });
     const csv = [['position', 'titre', 'fichier d’origine', 'adresse'].map(cell).join(';'), ...rows.map(p => [p.n, p.title, p.source_name || '', p.status === 'published' ? `${app.config.publicUrl}/photo/${p.slug}` : ''].map(cell).join(';'))].join('\r\n');
     return reply.header('cache-control', 'no-store').header('content-disposition', `attachment; filename="selection-galerie-${s.id}-acces-${inv.id}.csv"`).type('text/csv; charset=utf-8').send(`﻿${csv}\r\n`);
   });

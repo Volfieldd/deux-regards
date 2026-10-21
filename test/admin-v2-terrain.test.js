@@ -116,6 +116,11 @@ test('rencontre et personne v2 : mêmes lectures sensibles, mêmes déchiffremen
     const res = await a.get(url);
     const after = await c.security();
     const events = after.slice(before).filter(e => !e.type.startsWith('sys_') && !['authn_login_success', 'config_public_changed'].includes(e.type)).map(e => ({ type: e.type, detail: e.detail }));
+    // BV-33 : les métadonnées personnelles sont les mêmes ; chaque habillage a sa propre taille de réponse.
+    for (const e of events) if (e.detail?.octets_servis != null) {
+      assert.equal(e.detail.octets_servis, res.rawPayload.length, `${url} : taille mesurée`);
+      e.detail = { ...e.detail, octets_servis: 'mesuré sur la réponse' };
+    }
     return { res, events, decrypts: decrypts - d0 };
   };
   for (const url of [...Object.values(URLS), ...extra]) {
@@ -129,6 +134,9 @@ test('rencontre et personne v2 : mêmes lectures sensibles, mêmes déchiffremen
     if (/^\/admin\/(?:personnes|rencontres)\/\d+/.test(url)) {
       assert.deepEqual(b.events.map(e => e.type), ['sensitive_read'], url);
       assert.equal(b.events[0].detail.cible, url.startsWith('/admin/personnes') ? '/admin/personnes/:id' : '/admin/rencontres/:id', url);
+    } else if (['/admin/personnes', '/admin/rencontres'].includes(url)) {
+      assert.deepEqual(b.events.map(e => e.type), ['sensitive_read'], url);
+      assert.equal(b.events[0].detail.liste, true);
     } else assert.deepEqual(b.events, [], url);
   }
   // Exports : les mêmes liens, la même lecture journalisée (sensitive_export), la même trace dans l'historique.

@@ -44,6 +44,107 @@ const connexion = (v, sub, { ip, country = 'FR', appareil = 'fp-habituel', sessi
   v.add('authn_login_success', { sub, ip, ip_net: ip?.replace(/\.\d+$/, '.0'), country, session, detail: { methode: 'oidc', appareil } });
 const lecture = (v, sub, id, { ip, session, objet = 'personne' } = {}) =>
   v.add('sensitive_read', { sub, ip, session, detail: { cible: `/admin/${objet === 'personne' ? 'personnes' : `${objet}s`}/:id`, objet, id } });
+
+test('BV-33 : enjeu par catégorie fermée, métadonnées bornées ; objets anciens toujours compris', t => {
+  for (const [categorie, attendu] of [['identite', 'personnel'], ['coordonnees', 'personnel'], ['image', 'personnel'], ['message_libre', 'personnel'],
+    ['mineur', 'sensible'], ['accord_signe', 'sensible'], ['localisation', 'sensible'], ['<script>secret</script>', 'ordinaire'], ['__proto__', 'ordinaire']]) {
+    const v = vigieOf(t);
+    v.add('session_use_after_expire', { sub: 'compte-e', detail: { meme_reseau_et_navigateur: false } });
+    v.add('sensitive_read', { sub: 'compte-e', detail: { categorie: [categorie, categorie], objets: -8, dechiffrements: Infinity, octets_servis: '999', nom: 'secret à exclure' } });
+    const [d] = v.dossiers();
+    assert.equal(d.enjeu, attendu, categorie);
+    const donnees = v.fiche(d.id).signaux.find(s => s.regle === 'fait.sensitive_read').donnees;
+    assert.doesNotMatch(donnees, /secret|script|proto/);
+    const x = JSON.parse(donnees);
+    assert.equal(x.objets, 0); assert.equal(x.dechiffrements, null); assert.equal(x.octets_servis, null);
+    assert.ok(x.categorie.length <= 1);
+  }
+});
+
+test('BV-33 : export catégorisé sous accès hostile, enjeu critique sans objet ni contenu de fiche', t => {
+  const v = vigieOf(t);
+  v.add('session_use_after_expire', { sub: 'compte-e', detail: { meme_reseau_et_navigateur: false } });
+  v.add('sensitive_export', { sub: 'compte-e', detail: { categorie: ['coordonnees'], objets: 1, octets_servis: 4096, dechiffrements: 2 } });
+  const [d] = v.dossiers();
+  assert.equal(d.enjeu, 'critique'); assert.equal(d.phase_max, 7);
+  assert.match(d.explication, /coordonnées|données personnelles sorties/);
+});
+
+test('BV-33 : dix objets dans une liste rendent l’enjeu sensible, sans additionner des relectures', t => {
+  const v = vigieOf(t);
+  v.add('session_use_after_expire', { sub: 'compte-e', detail: { meme_reseau_et_navigateur: false } });
+  for (let i = 0; i < 12; i++) v.add('sensitive_read', { sub: 'compte-e', detail: { objet: 'compte', id: null, categorie: ['identite'], liste: true, objets: 3 } });
+  assert.equal(v.dossiers()[0].enjeu, 'personnel');
+  v.add('sensitive_read', { sub: 'compte-e', detail: { objet: 'compte', id: null, categorie: ['identite'], liste: true, objets: 10 } });
+  assert.equal(v.dossiers()[0].enjeu, 'sensible');
+});
+
+test('BV-33 : liste sous confiance moyenne, huit objets en une lecture ; relectures, cartes et liste vide ne suffisent pas', t => {
+  const v = vigieOf(t);
+  // Trois points, sans preuve : même construction que le scénario 7.3 (deux changements de contexte différents
+  // ne s'additionnent pas ; on combine ici le contexte à un opérateur inédit).
+  v.add('session_context_change', { sub: 'compte-e', session: 's-e', severity: 'moyen', detail: { reseau: true } });
+  v.D.surSignal({ regle: 'sigma.bordure_nouvel_operateur', entite: { kind: 'compte', key: 'compte-e' }, gravite: 'bas', sources: ['bordure'],
+    projection: { nature: 'indice', n: 3, marqueurs: [] } }, { seq: null, sub: 'compte-e', survenu_a: v.clock.t });
+  assert.equal(v.D.confianceCompte('compte-e', v.clock.t - H).niveau, 'moyenne');
+  for (let i = 0; i < 9; i++) v.add('sensitive_read', { sub: 'compte-e', session: 's-e', detail: { categorie: ['identite'], liste: true, objets: 7 } });
+  v.add('sensitive_read', { sub: 'compte-e', session: 's-e', detail: { categorie: [], liste: true, objets: 10000 } });
+  assert.equal(v.dossiers().length, 0);
+  v.add('sensitive_read', { sub: 'compte-e', session: 's-e', detail: { categorie: ['identite'], liste: true, objets: 8 } });
+  assert.equal(v.dossiers().length, 1); assert.equal(v.dossiers()[0].phase_max, 6);
+  assert.ok(v.fiche(v.dossiers()[0].id).signaux.filter(s => JSON.parse(s.donnees || 'null')?.categorie.length === 0).every(s => !s.promu));
+});
+
+test('BV-33 : trois réseaux pour un compte, indice de 1,5 ; pas de dossier seul, ni cumul par répétition', t => {
+  const v = vigieOf(t);
+  const lire = (sub, ip_net) => v.add('sensitive_read', { sub, ip_net, detail: { objet: 'personne', id: 1 } });
+  for (let i = 0; i < 8; i++) lire('compte-e', '192.0.2.0/24');
+  lire('compte-e', '2001:db8:1::/48'); lire('autre-compte', '203.0.113.0/24');
+  const indices = () => v.db.prepare("SELECT * FROM signaux_projetes WHERE regle = 'sigma.compte_reseaux_multiples'").all();
+  assert.equal(indices().length, 0);
+  lire('compte-e', '203.0.113.0/24');
+  assert.equal(indices().length, 1); assert.equal(indices()[0].nature, 'indice'); assert.equal(indices()[0].points, 1.5);
+  assert.equal(v.dossiers().length, 0); assert.equal(v.alerts().length, 0);
+  for (let i = 0; i < 5; i++) lire('compte-e', '203.0.113.0/24');
+  assert.equal(v.D.confianceCompte('compte-e', v.clock.t - H).points, 1.5);
+  v.clock.t += 25 * H;
+  const avant = indices().length;
+  lire('compte-e', '198.51.100.0/24'); lire('compte-e', '192.0.2.0/24');
+  assert.equal(indices().length, avant, 'fenêtre de 24 h');
+  for (const ip_net of ['203.0.113.0/24', '192.0.2.0/24', '198.51.100.0/24']) v.add('authn_login_fail', { sub: 'victime', ip_net });
+  assert.ok(indices().every(x => x.sub !== 'victime'), 'un nom de compte saisi dans un échec ne prouve pas son accès');
+});
+
+test('BV-33 : seuil de huit fiches par session, sans addition entre sessions du même compte', t => {
+  const v = vigieOf(t);
+  v.add('session_context_change', { sub: 'compte-e', session: 's-1', severity: 'moyen', detail: { reseau: true } });
+  v.D.surSignal({ regle: 'sigma.bordure_nouvel_operateur', entite: { kind: 'compte', key: 'compte-e' }, gravite: 'bas', sources: ['bordure'],
+    projection: { nature: 'indice', n: 3, marqueurs: [] } }, { seq: null, sub: 'compte-e', survenu_a: v.clock.t });
+  for (let i = 1; i <= 7; i++) lecture(v, 'compte-e', i, { session: 's-1' });
+  lecture(v, 'compte-e', 8, { session: 's-2' });
+  assert.equal(v.dossiers().length, 0);
+  lecture(v, 'compte-e', 8, { session: 's-1' });
+  const [d] = v.dossiers(); assert.ok(d); assert.equal(d.phase_max, 6);
+  const lus = v.fiche(d.id).signaux.filter(s => s.regle === 'fait.sensitive_read');
+  assert.ok(lus.filter(s => s.session === 's-1').every(s => s.promu));
+  assert.ok(lus.filter(s => s.session === 's-2').every(s => !s.promu));
+});
+
+test('BV-33 : catégories et volumes survivent à la fusion, à la scission et à la purge des événements', t => {
+  const v = vigieOf(t);
+  for (const sub of ['compte-e', 'compte-f']) v.add('session_use_after_expire', { sub, detail: { meme_reseau_et_navigateur: false } });
+  v.add('sensitive_read', { sub: 'compte-f', detail: { categorie: ['mineur'], objets: 1, dechiffrements: 7, octets_servis: 4500 } });
+  const [e, f] = v.dossiers(); v.D.fusionner(e.id, f.id, { par: 'test' });
+  const signaux = v.fiche(e.id).signaux.filter(s => s.sub === 'compte-f').map(s => s.id);
+  const nouveau = v.D.scinder(e.id, { entites: ['compte:compte-f'], signaux, par: 'test', motif: 'Deux attaques distinctes' });
+  const avant = v.fiche(nouveau).signaux.find(s => s.regle === 'fait.sensitive_read').donnees;
+  v.clock.t += 184 * J; v.engine.purge();
+  v.D.recalculer(nouveau);
+  const apres = v.fiche(nouveau);
+  assert.equal(apres.signaux.find(s => s.regle === 'fait.sensitive_read').donnees, avant);
+  assert.deepEqual(JSON.parse(avant), { categorie: ['mineur'], objets: 1, liste: false, dechiffrements: 7, octets_servis: 4500 });
+  assert.equal(v.db.prepare('SELECT enjeu FROM dossiers WHERE id = ?').pluck().get(nouveau), 'sensible');
+});
 // Historique ordinaire d'un compte : une connexion par jour à 9 h (UTC), depuis la France, avec son appareil.
 function historique(v, sub, jours, fin, { ip = '198.51.100.10', appareil = 'fp-habituel' } = {}) {
   for (let i = jours; i >= 1; i--) { v.clock.t = fin - i * J; connexion(v, sub, { ip, appareil }); }

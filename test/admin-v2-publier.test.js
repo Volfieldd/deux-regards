@@ -176,7 +176,9 @@ test('droits et portée : mêmes permissions que la v1 ; hors portée signalé ;
 
 test('galeries privées : émissions vers la Vigie et journal identiques depuis la v1 et depuis la v2 (BV-14, BV-23, BV-24) ; secrets une fois, no-store', async t => {
   const TYPES = ['privacy_exposure_changed', 'sensitive_read', 'sensitive_export', 'authz_fail'];
-  const norm = e => ({ type: e.type, severity: e.severity, emetteur: e.origine?.emetteur, composant: e.origine?.composant, sub: e.sub, detail: e.detail });
+  const norm = e => ({ type: e.type, severity: e.severity, emetteur: e.origine?.emetteur, composant: e.origine?.composant, sub: e.sub,
+    // BV-33 : les deux habillages ont des tailles différentes, vérifiées contre chaque réponse ci-dessous.
+    detail: e.detail?.octets_servis == null ? e.detail : { ...e.detail, octets_servis: 'mesuré sur la réponse' } });
   const run = async version => {
     const c = await site(t);
     const a = await c.account('adm', { version });
@@ -197,8 +199,10 @@ test('galeries privées : émissions vers la Vigie et journal identiques depuis 
     // Lectures, export, réglages, nouveaux secrets, révocation.
     const item = c.db.prepare('SELECT id FROM space_items WHERE space_id = ? LIMIT 1').pluck().get(id);
     c.db.prepare('INSERT INTO space_favorites (invite_id, item_id, added_at) VALUES (?, ?, ?)').run(inv, item, Date.now());
-    for (const url of [`/admin/galeries/${id}/acces/${inv}`, `/admin/galeries/${id}/activite`, `/admin/galeries/${id}/selections`]) assert.equal((await a.get(url)).statusCode, 200, `${version} ${url}`);
-    assert.equal((await a.get(`/admin/galeries/${id}/acces/${inv}/selection.csv`)).statusCode, 200);
+    const tailles = [];
+    for (const url of [`/admin/galeries/${id}/acces/${inv}`, `/admin/galeries/${id}/activite`, `/admin/galeries/${id}/selections`, `/admin/galeries/${id}/acces/${inv}/selection.csv`]) {
+      const lu = await a.get(url); assert.equal(lu.statusCode, 200, `${version} ${url}`); tailles.push(lu.rawPayload.length);
+    }
     await a.post(`/admin/galeries/${id}/acces/${inv}`, { expires: day(40), favoris: '1', telecharger: '1', grande: '1' });
     for (const k of ['nouveau-lien', 'nouveau-mot-de-passe']) {
       assert.equal((await a.get(`/admin/galeries/${id}/acces/${inv}/${k}`)).statusCode, 200);
@@ -212,7 +216,9 @@ test('galeries privées : émissions vers la Vigie et journal identiques depuis 
     const seb = await c.account('seb', { roles: ['photographe'], author: 'sebastien', version });
     await seb.get(`/admin/galeries/${id}/acces/${inv}`);
     await seb.post(`/admin/galeries/${id}/acces/${inv}/revoquer`);
-    const events = (await c.security()).filter(e => TYPES.includes(e.type)).map(norm);
+    const emis = (await c.security()).filter(e => TYPES.includes(e.type));
+    assert.deepEqual(emis.filter(e => ['sensitive_read', 'sensitive_export'].includes(e.type)).map(e => e.detail.octets_servis), tailles, `${version} : octets des réponses réellement préparées`);
+    const events = emis.map(norm);
     const audit = c.db.prepare("SELECT action, target, status FROM audit_log WHERE action LIKE 'galerie privée%' OR action LIKE 'GET /admin/galeries%' OR action LIKE 'POST /admin/galeries%' ORDER BY id").all();
     return { events, audit };
   };

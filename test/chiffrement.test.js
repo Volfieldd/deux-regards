@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
 import { setup } from './helpers.js';
-import { createVault, LOCKED } from '../server/vault.js';
+import { createVault, LOCKED, compterDechiffrements } from '../server/vault.js';
 import { createEncounters } from '../server/encounters.js';
 import { loadConfig } from '../server/config.js';
 
@@ -10,6 +10,25 @@ import { loadConfig } from '../server/config.js';
 const TOKEN = 'jeton-de-test-0123456789';
 const KEY = 'cle-de-test-0123456789-abcdefghijklmnop';
 const cookiesOf = res => Object.fromEntries(res.cookies.filter(c => c.value).map(c => [c.name, c.value]));
+
+test('BV-33 : compteurs de déchiffrement isolés entre requêtes concurrentes, sans clair, échecs ni tâches après réponse', async () => {
+  const v = createVault(KEY), autre = createVault(`${KEY}-autre`);
+  const texte = v.seal('ne jamais transmettre'), binaire = v.sealBuf(Buffer.from('signature privée'));
+  const a = { actif: true, nombre: 0 }, b = { actif: true, nombre: 0 };
+  let liberer;
+  const attente = new Promise(resolve => { liberer = resolve; });
+  await Promise.all([
+    compterDechiffrements(a, async () => {
+      v.open(texte); await attente; v.openBuf(binaire);
+      v.open('en clair'); autre.open(texte); autre.openBuf(binaire); createVault(null).open(texte);
+      a.actif = false; await Promise.resolve(); v.open(texte);
+    }),
+    compterDechiffrements(b, async () => { await Promise.resolve(); for (let i = 0; i < 7; i++) v.open(texte); liberer(); }),
+  ]);
+  v.open(texte);
+  assert.deepEqual(a, { actif: false, nombre: 2 });
+  assert.deepEqual(b, { actif: true, nombre: 7 });
+});
 
 test('coffre : aller-retour texte et binaire, mauvaise clé ou clé absente sans erreur, anciennes valeurs en clair lues', () => {
   const v = createVault(KEY);
