@@ -1441,7 +1441,6 @@ export default async function adminRoutes(app) {
       const rest = held ? ` ${held > 1 ? t('{n} restent en brouillon :', { n: held }) : t('{n} reste en brouillon :', { n: held })} ${parts.join(', ')}.` : '';
       return done(reply, '/admin/photos', `${published}${rest}`);
     }
-    JOURNAL.noterLot(request, 'enregistrees', ids.length);
     return done(reply, to, t('Modifications enregistrées.'));
   });
 

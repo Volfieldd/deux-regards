@@ -121,7 +121,7 @@ test('un compte en v1 voit la v1 (confirmations en pages), un compte en v2 des d
 
 test('les dialogues postent vers les routes de la v1 : mêmes émissions vers la Vigie et même journal depuis la v1 et la v2 ; secrets une fois, no-store, sans Referer', async t => {
   const TYPES = ['privacy_exposure_changed', 'sensitive_read', 'sensitive_export', 'authz_fail'];
-  const norm = e => ({ type: e.type, severity: e.severity, emetteur: e.origine?.emetteur, sub: e.sub, detail: e.detail });
+  const norm = e => ({ type: e.type, severity: e.severity, emetteur: e.origine?.emetteur, sub: e.sub, detail: { ...e.detail, octets_servis: undefined } });   // (la taille d'une page diffère : sa mise en page)
   const run = async version => {
     const c = await site(t);
     const a = await c.account('adm', { version });

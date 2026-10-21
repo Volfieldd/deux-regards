@@ -243,10 +243,10 @@ export const PERIODES = { '1': 1, '7': 7, '30': 30 };
 // reste « Rencontre n° 12 »). Rangé dans le détail de la ligne, après « champs : … » : « lot : publiees 5 ; nom : Lisbonne ».
 
 // Ce qu'une action groupée a fait (clé du verbe → libellé français au féminin pluriel : des photos).
-export const LOTS = ['publiees', 'repassees', 'proposees', 'validees', 'programmees', 'supprimees', 'carte_ajoutees', 'carte_retirees', 'enregistrees'];
+export const LOTS = ['publiees', 'repassees', 'proposees', 'validees', 'programmees', 'supprimees', 'carte_ajoutees', 'carte_retirees'];
 export const LOT_LIBELLES = {
   publiees: 'Publiées', repassees: 'Repassées en brouillon', proposees: 'Proposées', validees: 'Validées', programmees: 'Programmées', supprimees: 'Supprimées',
-  carte_ajoutees: 'Mises sur la carte', carte_retirees: 'Retirées de la carte', enregistrees: 'Enregistrées',
+  carte_ajoutees: 'Mises sur la carte', carte_retirees: 'Retirées de la carte',
 };
 // À appeler par la route, une fois l'action faite : combien de photos, et ce qui leur est arrivé.
 export function noterLot(request, verbe, n) {

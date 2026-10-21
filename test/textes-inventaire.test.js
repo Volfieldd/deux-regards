@@ -295,7 +295,7 @@ test('journal : chaque modification de ces textes est notée avec le nom du cham
   assert.deepEqual(audits(c.db, 'POST /admin/photos/:id').map(r => [r.target, r.detail]), [[String(p.id), 'champs : alt_text']]);
   assert.deepEqual(audits(c.db, 'POST /admin/photos/:id/champs').map(r => r.detail), ['champs : alt_text_en']);
   assert.deepEqual(audits(c.db, 'POST /admin/photos/:id/textes').map(r => r.detail), ['champs : legend, alt_text_de']);
-  assert.deepEqual(audits(c.db, 'POST /admin/series/:id').map(r => [r.target, r.detail]), [[String(s.id), 'champs : intent, intent_de']]);
+  assert.deepEqual(audits(c.db, 'POST /admin/series/:id').map(r => [r.target, r.detail]), [[String(s.id), `champs : intent, intent_de ; nom : ${s.name}`]]);
   assert.deepEqual(audits(c.db, 'POST /admin/auteurs/:id').map(r => r.detail), ['champs : short_bio']);
   assert.equal(c.db.prepare("SELECT COUNT(*) FROM audit_log WHERE detail LIKE '%secret%' OR detail LIKE '%quais%'").pluck().get(), 0);
   // Rien de changé : rien de noté en plus de l'action.
