@@ -292,6 +292,8 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     try {
       // Modifié par qui ne publie pas lui-même : une programmation repasse en proposition (server/carnet.js, edited).
       const res = c.update(post.id, input, by(request), { version: body.version, revised: body.revised === 'on', publisher: r.publish });
+      // Un enregistrement identique vaut acceptation du brouillon automatique seulement pour qui aurait pu l'écrire.
+      if (!res.changed.length && r.text && (post.state !== 'publie' || r.live)) c.dropDraft(post.id);
       note(request, res.changed);
       saved = res.post;
       signal(request, saved);
@@ -299,8 +301,11 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
       if (!(err instanceof CarnetError)) throw err;
       if (err.status === 409) {
         // Conflit (B33) : rien n'est écrasé ; le texte envoyé est gardé dans l'enregistrement automatique, à reprendre.
-        c.saveDraft(post.id, input, by(request));
-        return failed(reply, back(post.id, lang), t('Modifié par {name} à {time} : rien n’a été écrasé. Votre texte est gardé ci-dessous, à reprendre.', { name: err.details?.by || t('quelqu’un'), time: new Intl.DateTimeFormat(t.locale, { timeStyle: 'short', timeZone: 'Europe/Paris' }).format(err.details?.at || Date.now()) }));
+        if (r.text && (post.state !== 'publie' || r.live)) {
+          c.saveDraft(post.id, input, by(request));
+          return failed(reply, back(post.id, lang), t('Modifié par {name} à {time} : rien n’a été écrasé. Votre texte est gardé ci-dessous, à reprendre.', { name: err.details?.by || t('quelqu’un'), time: new Intl.DateTimeFormat(t.locale, { timeStyle: 'short', timeZone: 'Europe/Paris' }).format(err.details?.at || Date.now()) }));
+        }
+        return failed(reply, back(post.id, lang), msg(request, err));
       }
       return failed(reply, back(post.id, lang), msg(request, err));
     }
@@ -356,6 +361,9 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
   app.post('/admin/carnet/:id/brouillon/ecarter', W('carnet.voir'), async (request, reply) => {
     const post = load(request);
     if (!post) return reply.callNotFound();
+    const r = rights(request, post);
+    if (!r.text) return app.forbid(request, reply);
+    if (post.state === 'publie' && !r.live) return failed(reply, back(post.id, langOf(request.body?.langue)), request.t('Ce billet est en ligne : il ne se modifie qu’avec le droit de modifier les billets publiés. Demandez-le à un administrateur.'));
     c.dropDraft(post.id);
     return done(reply, back(post.id, langOf(request.body?.langue)), request.t('Texte enregistré automatiquement écarté : le billet reprend sa dernière version.'));
   });

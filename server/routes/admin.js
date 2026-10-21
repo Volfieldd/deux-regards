@@ -1562,18 +1562,23 @@ export default async function adminRoutes(app) {
         case 'appliquer': {
           if (!n) return ko(422, t('Aucune photo sélectionnée.'));
           if (body.category_id === 'new' && !request.can('series.gerer')) return app.forbid(request, reply);
-          const targetId = body.category_id === 'new' ? repo.saveCategory(null, { name: body.new_category }) : Number(body.category_id) || null;
-          const target = targetId ? repo.categories().find(c => c.id === targetId) : null;
-          if (body.category_id && !target) return ko(422, t('Choisissez une série.'));
+          const selected = body.category_id && body.category_id !== 'new' ? repo.categories().find(c => c.id === Number(body.category_id)) : null;
+          if (body.category_id && body.category_id !== 'new' && !selected) return ko(422, t('Choisissez une série.'));
           const city = String(body.city_label || '').trim();
-          if (!target && !String(body.place || '').trim() && !String(body.taken_on || '').trim() && !city) return ko(422, t('Rien à appliquer : choisissez une série, un lieu, une date ou une ville.'));
-          const snap = snapshot(ids);
-          const undo = { action: 'restaurer', map: Object.fromEntries(ids.map(id => { const p = repo.photo(id); return [id, { category_id: p.category_id, place: p.place, taken_on: p.taken_on, city_label: cities.labelOf(p, 'fr'), city_id: p.city_id ?? null, on_map: p.on_map }]; })) };
-          // La ville d'abord : introuvable, elle arrête tout avant le moindre changement (la même pour toutes les photos).
-          if (city) for (const id of ids) repo.patchPhoto(id, { city_label: city, city_id: body.city_id, on_map: repo.photo(id).on_map ? 'on' : '' });
-          if (String(body.place || '').trim() || String(body.taken_on || '').trim()) repo.setFields(ids, body);
-          if (target) repo.setCategories(each(target.id));
-          editedIfChanged(request, snap);
+          if (!body.category_id && !String(body.place || '').trim() && !String(body.taken_on || '').trim() && !city) return ko(422, t('Rien à appliquer : choisissez une série, un lieu, une date ou une ville.'));
+          // La création de série, la ville, les champs et le retour en proposition forment un seul geste : une saisie
+          // invalide ne doit laisser ni contenu modifié ni programmation encore active.
+          const { target, undo } = app.db.transaction(() => {
+            const targetId = body.category_id === 'new' ? repo.saveCategory(null, { name: body.new_category }) : selected?.id ?? null;
+            const target = targetId ? repo.categories().find(c => c.id === targetId) : null;
+            const snap = snapshot(ids);
+            const undo = { action: 'restaurer', map: Object.fromEntries(ids.map(id => { const p = repo.photo(id); return [id, { category_id: p.category_id, place: p.place, taken_on: p.taken_on, city_label: cities.labelOf(p, 'fr'), city_id: p.city_id ?? null, on_map: p.on_map }]; })) };
+            if (city) for (const id of ids) repo.patchPhoto(id, { city_label: city, city_id: body.city_id, on_map: repo.photo(id).on_map ? 'on' : '' });
+            if (String(body.place || '').trim() || String(body.taken_on || '').trim()) repo.setFields(ids, body);
+            if (target) repo.setCategories(each(target.id));
+            editedIfChanged(request, snap);
+            return { target, undo };
+          })();
           app.variants.schedule();
           const what = [target && t('série « {name} »', { name: target.name }), String(body.place || '').trim() && t('lieu'), String(body.taken_on || '').trim() && t('date'), city && t('ville de la carte')].filter(Boolean).join(', ');
           const photos = ids.map(id => { const p = repo.photoView(id); return { id, category_id: p.category_id, place: p.place, taken_on: p.taken_on, when: readDate(p.taken_on, t.lang), city: cities.labelOf(p, t.lang) }; });

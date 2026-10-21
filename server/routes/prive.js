@@ -402,6 +402,8 @@ export default async function privateRoutes(app) {
     if (!a.team && !allowed(a.invite.rights, taille)) { impossible(request, 'taille non permise', { taille, acces: a.invite.id }); return notFound(request, reply, lang); }
     if (a.team && !allowed({ telechargement: 'grande' }, taille)) return notFound(request, reply, lang);
     // Un HEAD (vérification d'un lien) n'est pas un téléchargement.
+    // Il ne prépare pas non plus le JPEG absent du cache : les mêmes contrôles ont déjà établi que le GET serait permis.
+    if (request.method === 'HEAD') return fileHeaders(reply, 'private, no-store').header('content-disposition', `attachment; filename="${fileName(p, taille)}"`).type('image/jpeg').send();
     if (!a.team && request.method === 'GET') {
       const over = downloadLimited(a.invite);
       if (over) {
@@ -444,7 +446,7 @@ export default async function privateRoutes(app) {
       fs.mkdirSync(spaces.dirs.archives, { recursive: true, mode: 0o700 });
       // Écrite en flux, photo par photo ; 1 Gio au plus.
       made = await writeZip(path.join(spaces.dirs.archives, file), entries, { shouldStop: bytes => bytes > ARCHIVE_MAX_BYTES });
-      spaces.archives.done(id, made.bytes, made.count);
+      spaces.archives.done(id, made.bytes, made.count, { taille, items: list.slice(0, made.count).map(p => ({ item: p.item_id, photo: p.id })) });
     } catch (err) {
       spaces.archives.drop(id);
       fs.rmSync(path.join(spaces.dirs.archives, file), { force: true });
@@ -459,6 +461,12 @@ export default async function privateRoutes(app) {
     if (!a || a.team) return deny(request, reply);
     const arch = /^\d{1,9}$/.test(request.params.n) ? spaces.archives.get(a.invite.id, Number(request.params.n)) : null;
     if (!arch) return notFound(request, reply, langOf(request, a));
+    let manifest = null;
+    try { manifest = arch.manifest ? JSON.parse(arch.manifest) : null; } catch { /* archive ancienne ou incomplète */ }
+    const current = new Map(spaces.items(a.space.id, { forGuests: true }).map(p => [p.item_id, p.id]));
+    const authorized = manifest && allowed(a.invite.rights, manifest.taille) && Array.isArray(manifest.items)
+      && manifest.items.length === arch.photos && manifest.items.every(x => Number.isInteger(x?.item) && current.get(x.item) === x.photo);
+    if (!authorized) return notFound(request, reply, langOf(request, a));
     const name = `${ascii(app.siteName()).replace(/\W+/g, '-').toLowerCase() || 'photos'}-${a.space.public_id}.zip`;
     return fileHeaders(reply, 'private, no-store').header('content-disposition', `attachment; filename="${name}"`).type('application/zip').send(fs.createReadStream(path.join(spaces.dirs.archives, arch.file)));
   });

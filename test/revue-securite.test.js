@@ -80,6 +80,39 @@ test('plusieurs rôles (photographe + relecteur) : voir toutes les photos ne per
   // Un texte, oui (relecteur), mais pas la ville (« plus que du texte »).
   assert.equal((await both.json(`/admin/photos/${theirs.id}/champs`, { title: 'Relu' })).statusCode, 200);
   assert.equal((await both.json(`/admin/photos/${theirs.id}/champs`, { city_label: '' })).statusCode, 403);
+  // La même lecture globale ne permet ni de lier la photo à sa rencontre, ni de la dépublier par un refus historique.
+  const encounter = c.app.encounters.saveCard(null, { ref: 'S-0999', signed: 'on', scope_site: 'on', met_on: '2026-10-13', author_id: c.seb, name: 'Personne test' });
+  c.db.prepare('UPDATE encounters SET refused = 1 WHERE id = ?').run(encounter);
+  await both.post(`/admin/rencontres/${encounter}/photos`, { photo: String(theirs.id) });
+  assert.equal(c.app.encounters.photos(encounter).some(p => p.id === theirs.id), false);
+  const mine = c.photoOf(c.seb);
+  await both.post(`/admin/rencontres/${encounter}/photos`, { photo: String(mine.id) });
+  assert.equal(c.app.encounters.photos(encounter).some(p => p.id === mine.id), true);
+  c.app.encounters.link(encounter, [theirs.id]);                                      // ancienne liaison, antérieure au correctif
+  await both.post(`/admin/rencontres/${encounter}/refus`);
+  assert.equal(c.row(mine.id).status, 'draft');
+  assert.equal(c.row(theirs.id).status, 'published');
+  assert.equal((await both.post(`/admin/rencontres/${encounter}/liens`, { photo_id: String(theirs.id) })).statusCode, 404);
+  const closes = new Date(Date.now() + 60 * 86400e3).toISOString().slice(0, 10);
+  const gallery = c.app.spaces.createSpace({ title: 'Sélection', closes }, { authorId: c.seb, by: 'test' });
+  await both.post(`/admin/galeries/${gallery}/photos`, { photos: String(theirs.id) });
+  assert.equal(c.app.spaces.items(gallery).length, 0);
+});
+
+test('lot rejeté : aucun champ ne change et la programmation validée reste celle d’avant', async t => {
+  const c = await world(t);
+  const ph = c.as('seb', ['photographe'], c.seb);
+  const photo = c.photoOf(c.seb);
+  const publishAt = Date.now() + 86400e3;
+  c.db.prepare("UPDATE photos SET status = 'draft', review = 'programmee', publish_at = ? WHERE id = ?").run(publishAt, photo.id);
+  const before = c.row(photo.id);
+  const r = await ph.json('/admin/photos/actions', { action: 'appliquer', ids: [photo.id], city_label: 'Paris', taken_on: 'date impossible' });
+  assert.equal(r.statusCode, 422);
+  const after = c.row(photo.id);
+  for (const key of ['city_id', 'city_name', 'city_cc', 'city_lat', 'city_lon', 'city_source', 'taken_on', 'review', 'publish_at']) assert.equal(after[key], before[key], key);
+  const valid = await ph.json('/admin/photos/actions', { action: 'appliquer', ids: [photo.id], place: 'Quai transactionnel' });
+  assert.equal(valid.statusCode, 200);
+  assert.deepEqual([c.row(photo.id).place, c.row(photo.id).review, c.row(photo.id).publish_at], ['Quai transactionnel', 'proposee', null]);
 });
 
 test('rencontres : la référence d’un autre photographe, sa liste et son récapitulatif restent hors d’atteinte', async t => {

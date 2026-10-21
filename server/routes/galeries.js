@@ -201,10 +201,10 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     if (tab === 'acces') data.invites = spaces.invitesOf(s.id).map(i => inviteView(request, s, i));
     if (tab === 'photos') {
       data.items = items.map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p), level: p.prive.level, levelText: levelText(p.prive.level, t), reasons: p.prive.reasons.map(x => t.msg(x)) }));
-      // Photos que le compte peut ajouter : celles qu'il voit (portée de photos.voir), pas encore dans la galerie.
+      // Ajouter une photo change son exposition : la lecture seule ne suffit pas.
       const inside = new Set(items.map(p => p.photo_id));
       const all = app.db.prepare('SELECT id, title, file, width, height, variant_key, author_id, status, taken_on FROM photos ORDER BY COALESCE(taken_on, \'\') DESC, id DESC LIMIT 400').all();
-      data.candidates = request.mine('photos.voir', all).filter(p => !inside.has(p.id)).slice(0, 200).map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p) }));
+      data.candidates = request.mine('photos.modifier', all).filter(p => !inside.has(p.id)).slice(0, 200).map(p => ({ ...p, thumb: thumbOf(p), thumbSet: thumbSetOf(p) }));
       data.exifAll = (() => { try { return JSON.parse(app.db.prepare("SELECT value FROM settings WHERE key = 'exif'").pluck().get() || '{}').mode === 'all'; } catch { return false; } })();
     }
     if (tab === 'selections') {
@@ -298,11 +298,11 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
     if (!s) return reply.callNotFound();
     if (forbidUnless(request, reply, 'galeries.gerer', s)) return reply;
     const ids = [].concat(request.body?.photos || []).map(Number).filter(Number.isInteger).slice(0, 500);
-    // Seulement des photos que le compte voit ; une autre est un geste que l'interface ne propose pas (BV-14).
+    // Seulement des photos que le compte peut modifier ; une autre est un geste que l'interface ne propose pas (BV-14).
     const rows = ids.map(id => repo.photo(id)).filter(Boolean);
-    const visible = rows.filter(p => request.owns('photos.voir', p.author_id));
-    if (visible.length < rows.length) outOfScope(request, 'photos.voir', 'photo', rows.find(p => !request.owns('photos.voir', p.author_id)).id, true);
-    const r = spaces.addPhotos(s.id, visible.map(p => p.id));
+    const editable = rows.filter(p => request.owns('photos.modifier', p.author_id));
+    if (editable.length < rows.length) outOfScope(request, 'photos.modifier', 'photo', rows.find(p => !request.owns('photos.modifier', p.author_id)).id, true);
+    const r = spaces.addPhotos(s.id, editable.map(p => p.id));
     audit(request, 'photos ajoutées', s, null, `${r.added.length} ajoutées, ${r.blocked.length} refusées (bloquées)`);
     const t = request.t;
     const msg = r.added.length > 1 ? t('{n} photos ajoutées à la galerie.', { n: r.added.length }) : r.added.length ? t('1 photo ajoutée à la galerie.') : t('Aucune photo ajoutée.');
@@ -314,7 +314,9 @@ export function registerGaleries(app, { repo, render, P, W, done, failed }) {
       if (!s) return reply.callNotFound();
       if (forbidUnless(request, reply, 'galeries.gerer', s)) return reply;
       const item = Number(request.params.item);
-      if (!spaces.item(s.id, item)) return reply.callNotFound();
+      const row = spaces.item(s.id, item);
+      if (!row) return reply.callNotFound();
+      if (path === 'confirmer' && !request.owns('photos.modifier', repo.photo(row.photo_id)?.author_id)) return reply.callNotFound();
       if (path === 'retirer') spaces.removeItem(s.id, item);
       else if (path === 'confirmer') spaces.confirmItem(s.id, item, request.session.name || request.session.sub);
       else spaces.moveItem(s.id, item, path === 'monter' ? 'haut' : 'bas');
