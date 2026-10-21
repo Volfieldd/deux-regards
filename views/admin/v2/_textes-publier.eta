@@ -7,6 +7,7 @@
     tk('« {title} » en place {n} dans la file.'), tk('« {title} » remise en place {n}.'), tk('Envoi en cours…'), tk('Voir le post'),
     tk('Mettre à jour la page'), tk('Suivi interrompu : rechargez la page pour voir où en est l’envoi.'),
     tk('Heures ignorées (format HH:MM attendu) : {times}.'), tk('Réglages Instagram rétablis.'),
+    tk('« {title} » en place {n} dans la galerie.'), tk('« {champ} » enregistré. Les accès plus longs ont été raccourcis : cela ne se défait pas.'),
   ]);
 %>
 <script type="application/json" id="v2-textes-page"><%~ JSON.stringify({ t: out }).replace(/</g, '\\u003c') %></script>

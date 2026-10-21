@@ -120,3 +120,19 @@ html.js .v2-instagram .ig-reglages .sans-script { display: none; }
 .app-after .msg { margin: 0; }
 .app-next summary { display: flex; align-items: center; min-height: 44px; }
 .app-after .app-btn, .app-after .app-link { min-height: 44px; }
+
+/* ---------- Finitions : la liste des galeries, les dialogues, les réglages au geste (PR admin-v2-finitions) ---------- */
+.v2-galeries .liste-a th[scope="row"] { font-weight: 400; }
+.v2-galeries .liste-a .ligne-lien { font-weight: 500; overflow-wrap: anywhere; }
+.v2-galeries .liste-a .c-galerie, .v2-galeries .liste-a .c-etat, .v2-galeries .liste-a .c-photos { min-width: 0; }
+.v2-galeries .etats-l { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+.v2-galeries .gal-photos { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.v2-galeries .gal-bande { flex-wrap: wrap; gap: 4px; min-width: 0; max-width: 100%; }
+.v2-galeries .gal-bande img { height: 40px; width: 40px; object-fit: cover; }
+.v2-galeries .filtres-l { flex-direction: column; align-items: flex-start; }
+/* Les dialogues de confirmation des Carnets et des galeries : même largeur que ceux des autres écrans, rien ne déborde. */
+.v2-publier dialog.confirm { overflow-wrap: anywhere; }
+.v2-publier .confirm .dlg-cons { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); }
+.v2-publier .confirm .champ-a textarea { width: 100%; }
+html.js .v2-publier .sans-script { display: none; }
+.v2-publier [data-gp-photos] .btns-ligne form { margin: 0; }

@@ -56,12 +56,12 @@
   <caption><%= [t(f.type ? J.FAMILLE_NOMS[f.type] : 'Toutes les actions'), qui ? (qui.name || qui.sub) : '', f.periode ? PERIODES[f.periode] : '', t('la plus récente d’abord'), pages > 1 ? t('page {n} sur {total}', { n: page, total: pages }) : ''].filter(Boolean).join(' · ') %></caption>
   <thead><tr><th scope="col"><%= t('Quand') %></th><th scope="col"><%= t('Action') %></th><th scope="col"><%= t('Qui') %></th><th scope="col"><%= t('Cible') %></th><th scope="col"><%= t('Résultat') %></th></tr></thead>
   <tbody>
-<% vues.forEach(e => { const ok = e.status == null || e.status < 400; const c = J.cible(e.action, e.target); const jr = jourF.format(new Date(e.at)); %>
+<% vues.forEach(e => { const ok = e.status == null || e.status < 400; const x = J.extraire(e.detail); const c = J.cible(e.action, e.target, x.nom); const jr = jourF.format(new Date(e.at)); %>
     <tr>
       <td class="jr-quand"><time datetime="<%= new Date(e.at).toISOString() %>"><%= jr %>, <%= e.n > 1 ? t('de {debut} à {fin}', { debut: heure(e.first), fin: heure(e.at) }) : heure(e.at) %></time></td>
-      <th scope="row" class="jr-action"><%= nomAction(e) %><% if (e.n > 1) { %> <span class="jr-fois"><%= t('{n} fois ce jour-là', { n: e.n }) %></span><% } %><% if (e.detail) { %><span class="sec jr-detail"><%= e.detail %></span><% } %><% if (!J.libelle(e.action) && !e.action.startsWith('galerie privée')) { %><span class="sec"><%= t('action notée telle quelle') %></span><% } %></th>
+      <th scope="row" class="jr-action"><%= nomAction(e) %><% if (e.n > 1) { %> <span class="jr-fois"><%= t('{n} fois ce jour-là', { n: e.n }) %></span><% } %><% if (x.lot) { %><span class="jr-lot"><%= t(J.LOT_LIBELLES[x.lot.verbe]) %> : <%= x.lot.n > 1 ? t('{n} photos', { n: x.lot.n }) : t('{n} photo', { n: x.lot.n }) %></span><% } %><% if (x.reste) { %><span class="sec jr-detail"><%= x.reste %></span><% } %><% if (!J.libelle(e.action) && !e.action.startsWith('galerie privée')) { %><span class="sec"><%= t('action notée telle quelle') %></span><% } %></th>
       <td class="jr-qui"><%= e.name || e.sub || '—' %></td>
-      <td class="jr-cible"><% if (!c) { %><span class="sec">—</span><% } else if (c.href) { %><a class="ligne-lien" href="<%= c.href %>"><%= t(c.kind, { id: c.id }) %></a><% } else { %><%= t(c.kind, { id: c.id }) %><% } %></td>
+      <td class="jr-cible"><% if (!c) { %><span class="sec">—</span><% } else if (c.href) { %><a class="ligne-lien" href="<%= c.href %>"><%= t(c.kind, { id: c.id, nom: c.nom }) %></a><% } else { %><%= t(c.kind, { id: c.id, nom: c.nom }) %><% } %></td>
       <td class="jr-res"><%~ ok ? etat('abouti', t('Fait')) : etat('arret', t('Refusé')) %></td>
     </tr>
 <% }) %>

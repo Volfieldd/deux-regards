@@ -1,0 +1,15 @@
+<% layout('./layout') %>
+<% const t = it.t; %>
+<% /* Accès refusé (403) dans l'admin v2 : la page du refus dans la mise en page de l'admin (menu, bandeaux de la Vigie), qui dit
+      pourquoi et quoi faire. Le refus est celui de app.forbid (code 403, no-store, signalé à la Vigie) ; rien n'est lu. */ %>
+<div class="v2-terrain">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Accès refusé') %></h1></div>
+</header>
+<section class="panel" aria-labelledby="refus-t">
+  <h2 id="refus-t"><%= t('Ce compte n’a pas le droit de faire cela.') %></h2>
+  <p><%= it.roleNames && it.roleNames.length ? t('Votre rôle : {roles}. Rien n’a été modifié.', { roles: it.roleNames.join(', ') }) : t('Rien n’a été modifié.') %></p>
+  <p class="hint"><%= t('Si vous en avez besoin, demandez-le à un administrateur : il donne les droits dans « Comptes et rôles ».') %></p>
+  <p class="actions"><a class="btn" href="/admin"><%= t('Revenir à Aujourd’hui') %></a> <a class="btn ghost" href="/admin/aide"><%= t('Ouvrir l’aide') %></a></p>
+</section>
+</div>

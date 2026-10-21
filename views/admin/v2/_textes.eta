@@ -17,7 +17,8 @@
     tk('Aucune photo cochée : cochez-en une pour changer sa série, son lieu, sa ville ou sa date.'), tk('Appliquer aux {n} photos'),
     tk('Appliquer à la photo'), tk('Cocher les {n} photos'), tk('Quitter sans enregistrer ?'),
     tk('Ce qui n’est pas enregistré sera perdu : {champs}. Le reste l’est déjà.'), tk('Quitter quand même'), tk('Rester'), tk('Allumé'),
-    tk('Éteint'), tk('Signature effacée.'), tk('Envoi…')
+    tk('Éteint'), tk('Signature effacée.'), tk('Envoi…'), tk('Aide sur cette page'), tk('Ouvrir le chapitre'), tk('Fermer l’aide'), tk('Chargement de l’aide…'),
+    tk('L’aide n’a pas pu être chargée : ouvrez-la sur sa page.')
   ]);
   // Pages proposées par la palette (Ctrl K), avec leurs synonymes (MQ-07, état 16) : seulement celles que le compte peut ouvrir.
   const can = it.can || (() => true);
@@ -54,4 +55,4 @@
     [t('Nouveautés'), '/admin/nouveautes', 'admin.acceder', t('versions, changements')],
   ].filter(([, , perm]) => can(perm)).map(([label, href, , also]) => ({ label, href, also }));
 %>
-<script type="application/json" id="v2-textes"><%~ JSON.stringify({ t: out, pages: PAGES }).replace(/</g, '\\u003c') %></script>
+<script type="application/json" id="v2-textes"><%~ JSON.stringify({ t: out, pages: PAGES, aide: it.helpChapters || [] }).replace(/</g, '\\u003c') %></script>

@@ -139,11 +139,22 @@ export function registerPermissions(app, { renderError }) {
     this.grants ??= grantsOf(this.session?.roles, this.session?.adjust);
     return this.grants.get(perm) || false;
   });
+  // La page refusée de l'admin v2 : posée par views/routes de l'admin (un plugin à part, dont les décorations ne remontent pas à
+  // ce niveau), d'où un objet partagé que la route remplit.
+  const forbidPage = { render: null };
+  app.decorate('forbidPage', forbidPage);
   const forbid = (request, reply) => {
     app.securite?.emit('authz_fail', { request, emetteur: 'server/permissions.js · droit refusé', detail: { raison: 'permission', permission: request.routeOptions?.config?.perm ?? null } });
     const json = !String(request.headers.accept || '').includes('text/html');
     reply.code(403).header('cache-control', 'no-store');
     const t = request.t || (x => x);                                            // langue de l'admin (posée avant ce contrôle)
+    // Admin v2 : la page refusée dans la mise en page de l'admin (menu, bandeaux de la Vigie), pour un compte en v2 seulement.
+    // Si le rendu v2 échoue (tout de suite ou à l'envoi), la page du site (v1) est servie : un refus ne devient jamais une erreur 500.
+    const siteVersion = () => renderError(reply, 403, { t: request.t, title: t('Accès refusé'), message: t('Ce compte n’a pas le droit de faire cela.'), adminLink: true });
+    if (!json && forbidPage.render) {
+      const lost = err => { request.log.error({ err }, 'page refusée v2 : repli sur la page du site'); return siteVersion(); };
+      try { const page = forbidPage.render(request, reply); if (page) return typeof page.then === 'function' ? page.catch(lost) : page; } catch (err) { return lost(err); }
+    }
     return json ? reply.send({ error: t('Accès refusé : ce compte n’a pas ce droit.') })
       : renderError(reply, 403, { t: request.t, title: t('Accès refusé'), message: t('Ce compte n’a pas le droit de faire cela.'), adminLink: true });
   };
