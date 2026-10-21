@@ -777,3 +777,13 @@ La purge garde un lot prioritaire de 1 000 dossiers avec adresses encore présen
 Aucun recalcul de gravité, confiance, phase ou date, aucune réécriture du journal chaîné, aucun travail supplémentaire à l’ingestion. Les fusions et scissions conservent les références personnelles nécessaires à l’enquête. Les autres magasins et les sauvegardes suivent leurs propres purges ; LEG-V1, LEG-V2 et LEG-V4 à LEG-V7 restent ouverts dans la fiche légale.
 
 Les tests couvrent les représentations d’IP, les textes accolés, les collisions et références, le rattrapage après redémarrage, la priorité après 3 000 incidents déjà masqués, l’annulation transactionnelle, l’idempotence et les fusions/scissions. Le contrôle navigateur vérifie les dossiers anciens et récents pour Lectrice et Administrateur, au bureau et au téléphone, sans JavaScript. Aucune maquette modifiée : seul le masquage des données change, sans nouveau composant visuel.
+
+### 14.10 Suites de la revue de sécurité
+
+Trois corrections dans le périmètre existant, sans changement des regroupements ou des décisions D31 à D39 :
+
+- Avant un blocage automatique, vérifier les exemptions sur la cible réelle (/64 IPv6), avec comparaison binaire des adresses. Un contrôle d’administrateur tronqué ne permet jamais un blocage.
+- Côté site, une liste signée reçue ne vaut pas preuve d’application. La migration 063 conserve un reçu par accès et début de décision, écrit dans la même transaction que la suspension, son journal et le retrait des autorisations. Les échecs sont retentés, y compris avec la même liste ou après redémarrage. Une levée manuelle reste respectée. Les anciens caches ambigus sont réservés à une **vérification manuelle**, choix explicite du propriétaire ; [procédure dans la fiche Vigie](../wiki/Vigie.md#reprise-des-suspensions-de-galeries-privées).
+- Dans les réglages, masquer pour la Lectrice les adresses de l’auteur, du motif et de la raison de fin du mode urgence. Rendu serveur et échappement conservés, textes bornés.
+
+Les reçus ne recopient ni nom, ni adresse, ni motif ; leur échéance, leur effacement et leur remise sur demande figurent dans le registre RGPD. La revue a aussi vérifié la prolongation d’un cas historique manuel et l’effacement suivi d’une nouvelle invitation : l’exception manuelle suit la nouvelle échéance, et un compteur global empêche de réattribuer les numéros d’accès. Aucune maquette modifiée : la disposition reste identique, seuls les textes personnels sont masqués. Ces corrections ne ferment pas les autres actions légales ouvertes.

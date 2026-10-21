@@ -7,7 +7,7 @@ import { createDetectors, lru, DETECTEURS } from './detecteurs.js';
 import { projeter, projeterDetecteur } from './phases.js';
 import { createDossiers } from './dossiers.js';
 import { LISTS } from './menaces.js';
-import { parseDuration } from './decisions.js';
+import { parseDuration, parseTarget } from './decisions.js';
 import { cleReseau } from '../server/securite/adresses-ip.js';
 
 // Moteur de détection de la Vigie (phases C1 et C2, recadrage du 17 octobre 2026, concepts de marlinOS) :
@@ -249,11 +249,32 @@ export function createEngine({ store, decisions, switches, threats = null, now =
       // Sans contrôle des rôles réussi, les adresses des administrateurs ne sont pas connues : aucun blocage automatique
       // d'adresse (il serait aussi appliqué en bordure).
       else if (!setting.get('controle_roles_admins', null)) done.push('aucun contrôle des rôles réussi : aucun blocage automatique d’adresse');
-      else if (trusted().has(entite.key)) done.push('adresse de confiance : aucune réponse');
-      else if (q.linkedSubs.all(entite.key, now() - 30 * 864e5).some(s => adm.has(s))) done.push('adresse d’une connexion d’administrateur : aucun blocage automatique');
-      // IPv6 : le /64 (une machine en change d'adresse à volonté dans son /64 ; bloquer le /128 ne servirait à rien et
-      // gonflerait la liste).
-      else make('bloquer', net.isIPv6(entite.key) ? net64(entite.key) : entite.key, '24h', { portee: 'tout' });
+      else {
+        // Revue sécurité : les exemptions portent sur la cible réelle, donc tout le /64 IPv6. BlockList compare les
+        // adresses binaires : une autre écriture de la même IPv6 ne doit pas contourner la protection.
+        try {
+          const cible = parseTarget(net.isIPv6(entite.key) ? net64(entite.key) : entite.key);
+          const reseau = new net.BlockList();
+          reseau.addSubnet(cible.address, cible.prefix, cible.family);
+          const dedans = ip => { const v = net.isIP(ip); return v && reseau.check(ip, v === 6 ? 'ipv6' : 'ipv4'); };
+          let protege = false, incomplet = false;
+          if ([...trusted()].some(dedans)) done.push('adresse de confiance : aucune réponse');
+          else {
+            // Préparé seulement pour une réponse bloquante : aucun travail ajouté à l'ingestion ou à l'observation.
+            const adressesAdmin = adm.size ? db.prepare("SELECT DISTINCT ip FROM events WHERE sub = ? AND type IN ('authn_login_success', 'session_created') AND recu_a > ? AND ip IS NOT NULL LIMIT 1001").pluck() : null;
+            for (const sub of adm) {
+              const ips = adressesAdmin.all(sub, now() - 30 * 864e5);
+              protege ||= ips.some(dedans);
+              // Travail borné ; dépasser la limite interdit de conclure que le réseau ne contient aucun administrateur.
+              incomplet ||= ips.length > 1000;
+              if (protege || incomplet) break;
+            }
+            if (protege) done.push('adresse d’une connexion d’administrateur : aucun blocage automatique');
+            else if (incomplet) done.push('contrôle des adresses d’administrateurs incomplet : aucun blocage automatique');
+            else make('bloquer', cible.cible, '24h', { portee: 'tout' });
+          }
+        } catch (err) { done.push(`bloquer refusé : ${err.message}`); }
+      }
     }
     q.respond.run(done.join(' ; ') || 'aucune réponse prévue pour cette règle', id);
   }

@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Trois constats de la revue Vigie (21 octobre 2026)
+
+Exemptions des blocages automatiques vérifiées sur le réseau réel, /64 IPv6 compris ; reçu transactionnel des suspensions de galerie et reprise des échecs, sans reposer une suspension levée par l’équipe ; masquage par rôle des textes du mode urgence. Les anciennes suspensions ambiguës restent à vérifier manuellement, selon le choix du propriétaire. Migration 063, tests de panne et de redémarrage, contrôle navigateur, banc avant/après. Aucune maquette modifiée. Détail dans [Vigie](docs/wiki/Vigie.md#reprise-des-suspensions-de-galeries-privées).
+
 ## Correction — Édition des photos et aperçus, PR #209, version 1.209.0 (21 octobre 2026)
 
 Demande de description sans rechargement de la fiche, confirmation avant de remplacer un texte déjà saisi, Défaire des langues ajoutées dans l’admin v2. Aperçu du filigrane actualisable sur place sans enregistrer, respect de sa case d’activation. Bandeau de prévisualisation étendu aux neuf compositions, toujours réservé au droit `site.apparence` ; visionneuse publique inchangée. Tests ciblés du serveur et parcours navigateur dans les deux admins.

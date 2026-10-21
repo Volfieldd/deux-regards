@@ -87,6 +87,12 @@ Références : [RGPD, articles 33 et 34, texte publié par la CNIL](https://cni
 
 Avec la Vigie, un Analyste ou Administrateur peut exporter le périmètre d’un dossier clos classé « Incident confirmé » après confirmation. Le JSON regroupe les références d’objets par catégorie, la période, les comptes, les sessions et les phases probantes, sans contenu de fiche ni champ d’adresse réseau. Il signale les limites du dossier ; les listes sans identifiants ne donnent pas un nombre de personnes distinctes. Ce téléchargement est noté dans le journal de sécurité. **Ne pas attendre la clôture ou l’export pour évaluer et notifier** : l’instantané ne remplace ni l’enquête ni la décision des responsables. Lui attribuer un emplacement protégé et une échéance de conservation avec les autres pièces.
 
+### Reçus de suspension d’un accès de galerie
+
+Pour éviter qu’une panne perde une suspension ou qu’un redémarrage annule le choix de l’équipe de la lever, le site garde un reçu technique : numéro d’accès, début et fin de décision (`space_vigie_suspensions`). Aucun nom, adresse, motif, lien ou secret n’est recopié ; le nom de l’invité reste dans le coffre existant. Le reçu est supprimé à l’échéance de la décision (purge horaire), à l’effacement de l’accès ou au retrait de la Vigie. Une prolongation prolonge sa fin. Les cas historiques à vérifier manuellement sont repérés dans le cache local jusqu’à leur échéance.
+
+Sur demande d’accès d’un invité, joindre ces trois valeurs aux données de sa galerie après vérification de son identité. L’export des rencontres ne couvre pas les invités des galeries : ce complément est remis manuellement, depuis la base du site, en filtrant exclusivement le numéro d’accès vérifié : `SELECT invite_id, depuis, fin FROM space_vigie_suspensions WHERE invite_id = ?`. Convertir les dates en dates lisibles et expliquer qu’il s’agit de l’application d’une décision de sécurité, pas d’une preuve d’infraction. Ne jamais remettre le cache de décisions complet, qui concerne d’autres personnes. La page Confidentialité décrit cette conservation technique. La finalité et la base du traitement « Galeries privées » restent inchangées.
+
 ## 5. Ce qui reste à faire de votre côté
 
 - [ ] **`DATA_KEY`** dans le `.env` de la pile (`openssl rand -base64 32`), avec une copie dans un gestionnaire de mots de passe : perdue, les données chiffrées sont illisibles.

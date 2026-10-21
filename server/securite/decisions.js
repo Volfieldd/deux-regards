@@ -78,9 +78,11 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
   const cacheFile = path.join(storageDir, 'securite-decisions.json');
   let state = null;                    // { version, emis_a, lists… }
   let running = false, timer = null, controller = null;
-  // Suspensions d'accès déjà appliquées (« accès|depuis ») : une suspension levée par l'équipe dans l'admin n'est jamais
-  // reposée par la même décision. Celles de la liste gardée sur le disque l'ont été avant le redémarrage.
-  const suspended = new Set();
+  // Optimisation locale seulement : les reçus de spaces.suspend, atomiques avec l'effet, font foi après redémarrage.
+  const suspended = new Map();
+  // Les anciens caches ne distinguent pas un échec d'une suspension levée par l'équipe : vérification manuelle choisie
+  // par le propriétaire. Ce marqueur local n'est jamais lu dans une réponse HTTP (il ne fait pas partie de la signature).
+  let historiques = new Map();
 
   // Liste reçue : vérifiée, contrôlée, puis appliquée en entier (ou pas du tout).
   function accept(signed, { fromCache = false } = {}) {
@@ -96,7 +98,10 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     // Plus ancienne que celle en place : refusée, sauf si elle est fraîche à notre horloge (horloge de la Vigie revenue
     // en arrière, base de la Vigie restaurée) — jamais bloqué sur une vieille liste.
     if (state && p.emis_a < state.emis_a && t - p.emis_a > 5 * 60e3) throw new Error('liste plus ancienne que celle en place');
-    if (state && signed.payload === state.payload) return state;               // même liste (attente longue écoulée)
+    if (state && signed.payload === state.payload) {
+      if (apply) suspendAccesses(state.acces); // attente longue écoulée : les échecs restent à retenter
+      return state;
+    }
     const cap = (fin, max) => Math.min(Number(fin) || 0, t + max);
     // Vérifications d'identité (liste absente d'une Vigie d'avant ce genre : aucune).
     if (p.verifications != null && !Array.isArray(p.verifications)) throw new Error('vérifications d’identité invalides');
@@ -136,12 +141,27 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
       acces,
       counts: { blocages: (p.blocages || []).length, sessions: (p.sessions || []).length, comptes: (p.comptes || []).length, gels: (p.gels || []).length, verrouillage: Boolean(lock), acces: acces.length, verifications: (p.verifications || []).length },
     };
-    if (fromCache) for (const a of acces) suspended.add(`${a.id}|${a.depuis}`);
-    else if (apply) suspendAccesses(acces);
+    const cles = new Set(acces.map(a => `${a.id}|${a.depuis}`));
+    if (fromCache) {
+      const suivi = signed.suspensions;
+      const valide = suivi?.version === 1 && Array.isArray(suivi.historiques) && suivi.historiques.length <= 10_000 &&
+        suivi.historiques.every(x => Array.isArray(x) && x.length === 2 && typeof x[0] === 'string' && x[0].length <= 100 && Number.isFinite(x[1]));
+      historiques = new Map(valide ? suivi.historiques : acces.map(a => [`${a.id}|${a.depuis}`, a.fin]));
+      for (const a of acces) if (historiques.has(`${a.id}|${a.depuis}`)) log?.warn({ acces: a.id, depuis: a.depuis }, 'Vigie : ancienne suspension, vérification manuelle requise');
+    }
+    for (const a of acces) {
+      const k = `${a.id}|${a.depuis}`;
+      if (historiques.has(k)) historiques.set(k, Math.max(historiques.get(k), a.fin));
+    }
+    // Une liste transitoirement vide n'efface pas les cas ambigus : une ancienne liste fraîche peut encore revenir.
+    for (const [k, fin] of historiques) if (fin <= t) historiques.delete(k);
+    for (const k of suspended.keys()) if (!cles.has(k)) suspended.delete(k);
+    if (apply) suspendAccesses(acces);
     if (!fromCache) {
       try {
         const tmp = `${cacheFile}.tmp`;
-        fs.writeFileSync(tmp, JSON.stringify(signed), { mode: 0o600 });
+        fs.writeFileSync(tmp, JSON.stringify({ payload: signed.payload, signature: signed.signature,
+          suspensions: { version: 1, historiques: [...historiques] } }), { mode: 0o600 });
         fs.renameSync(tmp, cacheFile);
       } catch (err) { log?.warn({ err: err.message }, 'Vigie : décisions non gardées sur le disque'); }
     }
@@ -150,17 +170,20 @@ export function createDecisionsClient({ url, key, pubkey, storageDir, log, apply
     return state;
   }
   // Accès à suspendre : chacun une fois. Galeries privées absentes (avant leur mise en service, ou sans app.spaces) :
-  // rien, sans erreur ; un échec du site est noté au journal et retenté à la liste suivante.
+  // rien, sans erreur ; un échec du site est noté au journal et retenté à la réception suivante, même de la même liste.
   function suspendAccesses(list) {
     let s = null;
     try { s = spaces(); } catch { s = null; }
     if (!list.length || typeof s?.suspend !== 'function') return;
     for (const a of list) {
       const k = `${a.id}|${a.depuis}`;
-      if (suspended.has(k)) continue;
+      if (a.fin <= now() || historiques.has(k) || (suspended.get(k) || 0) >= a.fin) continue;
       try {
-        s.suspend(a.id, 'vigie');
-        suspended.add(k);
+        if (s.suspend(a.id, 'vigie', { depuis: a.depuis, fin: a.fin }) !== true) {
+          log?.warn({ acces: a.id }, 'Vigie : suspension d’un accès non appliquée, nouvelle tentative à la prochaine liste');
+          continue;
+        }
+        suspended.set(k, a.fin);
         log?.info({ acces: a.id }, 'Vigie : accès de galerie privée suspendu');
       } catch (err) { log?.warn({ err: err.message, acces: a.id }, 'Vigie : suspension d’un accès impossible'); }
     }
