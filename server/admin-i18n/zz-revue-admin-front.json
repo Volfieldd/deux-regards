@@ -126,5 +126,13 @@
  "1 nouveau": {
   "en": "1 new",
   "de": "1 neue"
+ },
+ "Sur petit écran, faites défiler l’aperçu horizontalement. L’impression garde le format A4.": {
+  "en": "On a small screen, scroll the preview horizontally. Printing keeps the A4 format.",
+  "de": "Auf kleinen Bildschirmen können Sie die Vorschau horizontal verschieben. Der Druck bleibt im A4-Format."
+ },
+ "Aperçu des planches A4": {
+  "en": "A4 sheet preview",
+  "de": "Vorschau der A4-Bögen"
  }
 }

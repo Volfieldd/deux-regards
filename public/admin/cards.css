@@ -38,6 +38,11 @@ body { margin: 0; background: #d9d6cf; color: #1d1c1a; font-family: Jost, Arial,
 .eux .qrt { position: absolute; right: 4.6mm; top: 26.8mm; width: 24mm; text-align: right; font-size: 5.4pt; line-height: 1.3; color: #5f5a52; }
 .eux .url { position: absolute; left: 4.6mm; bottom: 8.6mm; font-family: 'IBM Plex Mono', monospace; font-size: 6.2pt; }
 .eux .brand { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 9pt; }
+/* L’aperçu défile dans son cadre au téléphone et au clavier ; les dimensions papier restent celles de la planche. */
+@media screen {
+  .apercu { overflow-x: auto; }
+  .apercu:focus-visible { outline: 3px solid #1d1c1a; outline-offset: -3px; }
+}
 @media print {
   body { background: #fff; }
   .bar { display: none; }

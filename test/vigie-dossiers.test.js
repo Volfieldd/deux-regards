@@ -20,12 +20,12 @@ const LOG_KEY = 'cle-de-chaine-vigie-dossiers-0123456789';
 const H = 3600e3, J = 864e5, MIN = 60e3;
 const tmp = t => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-dossiers-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };
 
-function vigieOf(t, { start = Date.parse('2026-10-20T08:00:00Z') } = {}) {
+function vigieOf(t, { start = Date.parse('2026-10-20T08:00:00Z'), retentionDays = 183 } = {}) {
   const db = openVigieDb(path.join(tmp(t), 'vigie.db'));
   t.after(() => db.close());
   const clock = { t: start };
   const now = () => clock.t;
-  const store = createStore({ db, logKey: LOG_KEY, now });
+  const store = createStore({ db, logKey: LOG_KEY, now, retentionDays });
   const decisions = createDecisions({ store, privateKey: VIGIE_KEYS.privateKey, now });
   const switches = createSwitches({ store, now });
   const engine = createEngine({ store, decisions, switches, now, log: { warn() {}, info() {}, error: (o, m) => { throw new Error(`${m} : ${o.err} (${o.quoi})`); } } });
@@ -426,7 +426,8 @@ test('purge : signaux projetés gardés 30 jours ; dossier « incident » gardé
   at(v, '2026-01-10T10:00:00Z');
   v.add('session_use_after_expire', { sub: 'compte-m', ip: '203.0.113.90', session: 's-m', detail: { meme_reseau_et_navigateur: false } });
   v.add('session_use_after_expire', { sub: 'compte-o', ip: '192.0.2.91', session: 's-o', detail: { meme_reseau_et_navigateur: false } });
-  const [d, autre] = v.dossiers();
+  v.add('session_use_after_expire', { sub: 'compte-ouvert', ip: '192.0.2.92', session: 's-ouvert', detail: { meme_reseau_et_navigateur: false } });
+  const [d, autre, ouvert] = v.dossiers();
   v.D.classer(d.id, { classement: 'incident', note: 'vol de cookie', par: 'x' });
   v.D.classer(autre.id, { classement: 'faux_positif', note: 'essai', par: 'x' });
   v.clock.t += 200 * J;
@@ -437,12 +438,69 @@ test('purge : signaux projetés gardés 30 jours ; dossier « incident » gardé
   assert.ok(f.entites.some(e => e.kind === 'ip' && e.key === '203.0.113.0/24'));
   assert.ok(!f.entites.some(e => e.key === '203.0.113.90'));
   assert.ok(!f.signaux.some(s => s.ip), 'adresses des signaux effacées');
-  const g = v.fiche(autre.id);
+  assert.equal(v.fiche(autre.id), null, 'le dossier clos ordinaire suit les 183 jours du journal');
+  const g = v.fiche(ouvert.id);
   assert.ok(g && g.entites.some(e => e.key === '192.0.2.0/24'), 'tout dossier : adresses masquées après 183 jours');
   v.clock.t += 200 * J;
   v.engine.purge();
   assert.ok(v.fiche(d.id), 'incident gardé au-delà de 13 mois');
-  assert.equal(v.fiche(autre.id), null, 'les autres effacés 13 mois après leur clôture');
+  assert.ok(v.fiche(ouvert.id), 'la purge ne ferme ni n’efface un dossier encore ouvert');
+});
+
+test('D38 : limite de conservation du journal, dernière activité et dossiers encore suivis', t => {
+  for (const retentionDays of [183, 365]) {
+    const v = vigieOf(t, { retentionDays }), debut = v.clock.t;
+    const ids = {};
+    for (const nom of ['automatique', 'test', 'faux_positif', 'legitime', 'incident', 'ouvert', 'sommeil', 'en_cours']) {
+      v.add('session_use_after_expire', { sub: nom, detail: { meme_reseau_et_navigateur: false } });
+      ids[nom] = v.dossiers().at(-1).id;
+    }
+    v.clock.t += 100 * J;
+    for (const classement of ['test', 'faux_positif', 'legitime', 'incident']) {
+      v.D.classer(ids[classement], { classement, note: 'Essai de conservation', par: 'test' });
+    }
+    v.db.prepare("UPDATE dossiers SET statut = 'clos' WHERE id = ?").run(ids.automatique);
+    // La purge doit respecter les statuts ; le passage en sommeil relève de tick(), testé séparément.
+    v.db.prepare("UPDATE dossiers SET statut = 'sommeil' WHERE id = ?").run(ids.sommeil);
+    v.D.prendre(ids.en_cours, 'test');
+    v.clock.t = debut + retentionDays * J;
+    v.engine.purge();
+    for (const id of Object.values(ids)) assert.ok(v.fiche(id), 'limite exacte incluse');
+    v.clock.t++;
+    v.engine.purge();
+    for (const nom of ['automatique', 'test', 'faux_positif', 'legitime']) {
+      assert.equal(v.fiche(ids[nom]), null, `${retentionDays} jours après le signal, pas après le classement`);
+    }
+    for (const nom of ['incident', 'ouvert', 'sommeil', 'en_cours']) assert.ok(v.fiche(ids[nom]), nom);
+    assert.equal(v.store.verify().ok, true, 'le journal chaîné n’est pas altéré');
+  }
+});
+
+test('D38 : purger un dossier scindé nettoie ses liens et préserve l’autre branche et les alertes', t => {
+  const v = vigieOf(t), debut = v.clock.t;
+  for (const sub of ['a', 'b']) v.add('session_use_after_expire', { sub, detail: { meme_reseau_et_navigateur: false } });
+  const [a, b] = v.dossiers();
+  v.clock.t += 100 * J;
+  v.D.fusionner(a.id, b.id, { par: 'test' });
+  const f = v.fiche(a.id);
+  const nouveau = v.D.scinder(a.id, { entites: ['compte:b'], signaux: f.signaux.filter(s => s.sub === 'b').map(s => s.id),
+    motif: 'Deux acteurs distincts', par: 'test' });
+  v.D.classer(a.id, { classement: 'faux_positif', note: 'Essai', par: 'test' });
+  const alertes = v.fiche(a.id).alertes.map(x => x.id), autre = v.fiche(nouveau);
+  assert.ok(alertes.length);
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM dossier_separations').pluck().get(), 1);
+  v.clock.t = debut + 183 * J + 1;
+  v.engine.purge();
+  assert.equal(v.fiche(a.id), null);
+  assert.equal(v.fiche(b.id).fusionne_dans, null, 'l’ancienne fusion plus récente ne pointe plus vers un dossier effacé');
+  assert.deepEqual(v.fiche(nouveau), autre, 'la branche encore ouverte garde ses signaux et entités sans IP');
+  for (const table of ['dossier_signaux', 'dossier_entites', 'dossier_signaux_ecartes']) {
+    assert.equal(v.db.prepare(`SELECT COUNT(*) FROM ${table} WHERE dossier_id = ?`).pluck().get(a.id), 0);
+  }
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM dossier_separations').pluck().get(), 0);
+  for (const id of alertes) assert.equal(v.db.prepare('SELECT dossier_id FROM alerts WHERE id = ?').get(id).dossier_id, null);
+  assert.deepEqual(v.db.pragma('foreign_key_check'), []);
+  assert.equal(v.store.verify().ok, true);
 });
 
 test('clés propres : caractères de contrôle d’un compte ou d’un objet retirés avant la ligne de commande', t => {

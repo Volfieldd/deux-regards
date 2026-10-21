@@ -35,6 +35,8 @@ test('planches de cartes : paires numérotées (QR, code de contrôle), numéros
   assert.equal(labels.length, 7);
   assert.equal(labels[6].slice(0, 6), 'J-0007');
   for (const l of labels) assert.equal(c.app.encounters.card(l).verified, true);            // le code imprimé est accepté
+  assert.match(sheet.body, /<main class="apercu" tabindex="0" aria-label="Aperçu des planches A4" aria-describedby="aide-apercu">/);
+  assert.match(sheet.body, /faites défiler l’aperçu horizontalement/);
   assert.doesNotMatch(sheet.body, /style="/);                                               // CSP
   // La série continue : prochaine planche à J-0008.
   assert.match((await c.as({ url: '/admin/rencontres/cartes' })).body, /prochaine carte J-0008/);
