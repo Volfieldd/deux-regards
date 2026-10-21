@@ -10,7 +10,7 @@
 
   // ----- une suggestion dans un champ : rien n'est enregistré avant « Enregistrer » ; « Défaire » la retire -----
   // status : la ligne (role="status") où le dire.
-  function suggest(field, value, status) {
+  function suggest(field, value, status, others = []) {
     if (!field) return;
     const before = field.value;
     field.closest('details')?.setAttribute('open', '');
@@ -23,12 +23,12 @@
       save.className = 'btn ghost';
       save.textContent = T('Enregistrer');
       save.dataset.enregistrerSuggestion = '';
-      save.addEventListener('click', () => { field._commit?.(); });
+      save.addEventListener('click', () => { field._commit?.(); others.forEach(({ el }) => el._commit?.()); });
       const undo = document.createElement('button');
       undo.type = 'button';
       undo.className = 'btn ghost';
       undo.textContent = T('Défaire');
-      undo.addEventListener('click', () => { field.value = before; temoin.drop(field); status.textContent = T('Suggestion retirée.'); field.focus(); });
+      undo.addEventListener('click', () => { field.value = before; temoin.drop(field); others.forEach(({ el, before }) => { el.value = before; temoin.drop(el); }); status.textContent = T('Suggestion retirée.'); field.focus(); });
       status.append(save, ' ', undo);
     }
     field.focus();
@@ -108,15 +108,14 @@
       const use = e.target.closest('[data-desc-use]');
       if (use) {
         const main = $(use.dataset.descField === 'alt_text_en' ? '#alt_text_en' : '#alt_text');
+        if (!main || main.value.trim() && main.value !== use.dataset.descUse && !confirm(desc.dataset.descConfirm)) return;
         // Les autres langues déjà traduites : seulement dans un champ encore vide (un texte écrit à la main reste).
         const others = [];
         for (const [name, t] of [['alt_text_en', use.dataset.descEn], ['alt_text_de', use.dataset.descDe]]) {
           const el = $(`#${name}`);
-          if (el && el !== main && t && !el.value.trim()) { el.closest('details')?.setAttribute('open', ''); el.value = t; temoin.ko(el, el.dataset.label); others.push(el); }
+          if (el && el !== main && t && !el.value.trim()) { el.closest('details')?.setAttribute('open', ''); const before = el.value; el.value = t; temoin.ko(el, el.dataset.label); others.push({ el, before }); }
         }
-        suggest(main, use.dataset.descUse, status);
-        // « Enregistrer » enregistre aussi les autres langues remplies ici.
-        $('[data-enregistrer-suggestion]', status)?.addEventListener('click', () => others.forEach(el => el._commit?.()));
+        suggest(main, use.dataset.descUse, status, others);
         return;
       }
       if (e.target.closest('[data-desc-ignorer]')) { desc.hidden = true; $('#alt_text')?.focus(); }
@@ -144,7 +143,7 @@
             polling = false;
             delete desc.dataset.descPending;
             text.textContent = d.text ? `« ${d.text} »` : d.error ? T('Dernier essai sans succès : {error}', { error: d.error }) : '';
-            const field = LANG === 'fr' && d.translated ? 'alt_text' : d.en ? 'alt_text_en' : null;
+            const field = d.use?.text ? d.use.field : null;
             let use = $('[data-desc-use]', desc);
             if (field && !use) {
               use = document.createElement('button');
@@ -153,11 +152,13 @@
               $('.actions', desc).prepend(use);
             }
             if (use && field) {
-              use.dataset.descUse = field === 'alt_text' ? d.text : d.en;
+              use.hidden = false;
+              use.dataset.descUse = d.use.text;
               use.dataset.descField = field;
               use.textContent = field === 'alt_text' ? T('Reprendre ce texte') : T('Reprendre comme texte de remplacement anglais');
-              delete use.dataset.descEn; delete use.dataset.descDe;
+              use.dataset.descEn = d.use.en || ''; use.dataset.descDe = d.use.de || '';
             }
+            if (use && !field) use.hidden = true;
             status.textContent = d.text ? T('Description prête : à relire, puis « Reprendre ce texte ».') : '';
             return;
           }

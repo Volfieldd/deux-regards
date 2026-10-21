@@ -14,6 +14,8 @@ Exemple : **Obscura** pour le thème général, **V1 — Originale** pour l’ac
 
 Les rubriques sont l’accueil, les galeries/séries/recherche, la visionneuse, la carte, les voyages, les Carnets, la présentation des regards, le contact et les informations. Ce sont des pages et leurs pages de détail, pas les blocs d’une même page : les aperçus de galerie présents dans l’accueil gardent le thème de l’accueil. Le menu Galerie ouvre une page distincte (`/galerie`), et le menu Séries l'index des séries (`/series`), avec le choix de la rubrique des galeries ; en V1, ces deux pages n'existent pas.
 
+Le bandeau des pages publiques propose les neuf présentations, y compris les six chambres noires. Il est réservé aux comptes connectés ayant le droit **Identité et apparence** (`site.apparence`), attribué aux administrateurs par défaut. La visionneuse des photos publiées reste accessible aux visiteurs.
+
 **Découvrir les thèmes sans les appliquer** ouvre un aperçu pour votre session seulement. Les visiteurs gardent leurs thèmes ; **Revenir au thème des visiteurs** met fin à l’aperçu. Un changement de thème ne publie pas de photo ou de billet et n’active pas une carte désactivée. Les galeries privées conservent leur présentation dédiée.
 
 Les Carnets restent disponibles dans le nouveau système, même si le thème général est V1 : cette rubrique utilise alors le socle V2. La photo, ses connexes, sa carte lorsqu’un lieu est publié, les voyages et les billets utilisent les fonctions existantes. Les six chambres noires partagent ces fonctions.

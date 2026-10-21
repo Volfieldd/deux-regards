@@ -1147,3 +1147,9 @@ Le propriétaire a validé les dix recommandations le 18 octobre 2026 : elles va
 | 8 | Carnets : étiquettes (étude B10, B70) ou rubrique et regard (MQ-11) | **Rubrique et regard** (`?rubrique=`, `?par=`), le vocabulaire de la galerie ; fixe la liste de BV-13. |
 | 9 | « Écrire aux auteurs » : `mailto:` (B79) ou formulaire (B80) | **`mailto:`** : rien à stocker ni à surveiller. |
 | 10 | Seuil de BV-21 pour les billets | Une corrélation à part (3 billets en 1 h) plutôt que le seuil commun de 20 en 10 minutes. |
+
+## Corrections de l’édition des photos et des aperçus (21 octobre 2026)
+
+Les demandes et lectures de description réutilisent `/admin/photos/:id/description`, avec les permissions et la portée existantes. Le GET fournit aussi les textes de reprise déjà présents dans la fiche ; aucun champ n’est écrit par cette lecture. L’aperçu du filigrane réutilise le POST `/admin/images/apercu` (`site.filigrane`, CSRF, image réduite, `no-store`), sans enregistrer les réglages. Le bandeau propose toutes les compositions déjà admises par `/admin/apparence/apercu-v2` ; le droit `site.apparence`, la session privée et le retour borné restent obligatoires.
+
+La Vigie consomme les refus existants `authz_fail` (DS10) et `authz_csrf_fail` (DS14). Le changement de vue reste au journal d’audit. Annuler une suggestion dans le navigateur n’écrit rien et n’appelle pas le serveur : aucun événement de sécurité supplémentaire à demander. Aucun nouveau besoin BV ni changement du moteur.

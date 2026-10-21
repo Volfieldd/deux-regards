@@ -38,13 +38,15 @@ const ORDRE = { v1: ['v2', 'v3'], v2: ['v1', 'v3'], v3: ['v2', 'v1'] };
 // v2) ; sansV1 : la page n'a pas de gabarit v1 (les Carnets).
 export function vueSite({ pv, lang, url, csrf, rendu, sansV1 }) {
   const t = TEXTES[lang] || TEXTES.fr;
-  const cibles = (ORDRE[pv.version] || VERSIONS.filter(v => v !== pv.version)).filter(v => VERSIONS.includes(v));
+  const actuelle = pv.design || pv.version;
+  const historiques = VERSIONS.includes(actuelle) ? ORDRE[actuelle] : VERSIONS;
+  const cibles = [...historiques, ...Object.keys(DESIGNS).filter(v => !VERSIONS.includes(v))].filter(v => v !== actuelle);
   const boutons = cibles.map(cible => {
     // Une page née avec la v2 (Carnets) est introuvable en v1, comme pour un visiteur : le bouton n'y mène pas, il ouvre
     // l'accueil en v1 et le dit.
     const accueil = cible === 'v1' && sansV1;
     // Revenir à la version des visiteurs, c'est oublier la vue (« suivre » le réglage), pas la forcer.
-    return { vue: cible === (pv.appliedDesign || pv.applied) ? 'suivre' : cible, vers: accueil ? PREFIX[lang] || '/' : url, bouton: accueil ? t.accueil(cible) : t.voir(cible) };
+    return { vue: cible === (pv.appliedDesign || pv.applied) ? 'suivre' : cible, vers: accueil ? PREFIX[lang] || '/' : url, bouton: accueil ? t.accueil(cible) : t.voir(VERSIONS.includes(cible) ? cible : DESIGNS[cible].label) };
   });
   if (pv.darkroom || pv.configured || (pv.view && !VERSIONS.includes(pv.view))) {
     const labels = { fr: ['Présentation', 'Visiteurs', 'Revenir au thème des visiteurs'], en: ['Design', 'Visitors', 'Return to the visitors’ design'], de: ['Gestaltung', 'Besucher', 'Zur Besucheransicht zurückkehren'] }[lang] || ['Présentation', 'Visiteurs', 'Revenir au thème des visiteurs'];

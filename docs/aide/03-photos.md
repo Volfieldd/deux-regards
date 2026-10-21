@@ -126,6 +126,8 @@ Si l’enregistrement échoue (session expirée…), l’ordre précédent revie
 
 Cliquez sur **Enregistrer**. Les traductions se saisissent dans la fiche ; modifier un champ depuis la photothèque ou « Compléter et publier » ne les efface pas.
 
+**Description suggérée (admins v1 et v2)** : demander une description ou la recevoir ne recharge pas la fiche et conserve les saisies. Reprendre une suggestion demande confirmation si le texte de remplacement est déjà rempli ; annuler conserve tous les champs. Les traductions existantes restent intactes. La suggestion attend **Enregistrer** ; dans l’admin v2, **Défaire** rétablit aussi les langues remplies avec elle.
+
 L'aperçu à gauche montre l'image telle que servie (filigrane compris) et ses dimensions. Pour une photo publiée, **voir sur le site** l'ouvre dans la galerie.
 
 Plus bas :

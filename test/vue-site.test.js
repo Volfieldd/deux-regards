@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { setup } from './helpers.js';
 import { as, billet, visitor } from './carnet-helpers.js';
+import { DESIGNS } from '../server/designs.js';
 import { VUE_TEXTES } from '../server/vue-site.js';
 
 // Bouton « Voir en v1 / Voir en v2 » des pages publiques et vue de la session (server/vue-site.js,
@@ -282,5 +283,25 @@ test('page Apparence : explique le bouton, montre la vue de la session et la cha
     for (const k of ['Votre vue suit ce réglage, comme les visiteurs.', 'Revenir à la version des visiteurs', 'Voir le site en {v}', 'Vue inconnue.', 'La v1 est appliquée : tous les visiteurs la voient.']) {
       assert.notEqual(translator(l)(k), k, `${l} : ${k}`);
     }
+  }
+});
+
+
+test('bandeau : toutes les compositions sont proposées depuis chaque présentation, sans changer celle des visiteurs', async t => {
+  const c = await site(t);
+  const a = c.admin();
+  for (const current of Object.keys(DESIGNS)) {
+    await a.post('/admin/apparence/apercu-v2', { vue: current, vers: PHOTO });
+    const res = await a.get(PHOTO);
+    assert.equal(res.statusCode, 200);
+    const f = form(res.body);
+    assert.ok(f, current);
+    const buttons = [f, ...f.autres];
+    for (const target of Object.keys(DESIGNS).filter(v => v !== current)) {
+      const value = target === 'v1' ? 'suivre' : target;
+      assert.ok(buttons.some(b => b.vue === value && b.vers === PHOTO), `${current} → ${target}`);
+    }
+    assert.equal(res.headers['cache-control'], 'private, no-store');
+    assert.ok(isV1((await c.see(PHOTO)).body), 'le visiteur garde la v1');
   }
 });

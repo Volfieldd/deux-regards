@@ -28,9 +28,9 @@ Ces réglages concernent les **images servies sur le site**. Les originaux ne so
 ## Essayer avant d'enregistrer
 
 1. Choisissez la **Photo d'aperçu**.
-2. Cliquez sur **Aperçu sans enregistrer** : l'image s'ouvre dans un nouvel onglet avec les réglages du formulaire. **Rien n'est enregistré.**
+2. Après un changement de type, texte, position ou photo, cliquez sur **Actualiser l’aperçu**, sous l’image, ou **Aperçu sans enregistrer**. L’image se met à jour sur place avec les réglages du formulaire. **Rien n’est enregistré.** Sans JavaScript, elle s’ouvre dans un nouvel onglet.
 
-L'image à gauche de la page montre, elle, les réglages **enregistrés**.
+À l’ouverture de la page, l’image montre les réglages **enregistrés**. Après une actualisation, sa légende indique qu’il s’agit des réglages **non enregistrés**. La case d’activation est respectée : décochée, l’aperçu n’a pas de filigrane. Seul **Enregistrer et mettre à jour les images** applique le changement au site.
 
 ## Mettre le logo du site en grand, estompé
 

@@ -221,6 +221,12 @@ test('page Images, aperçus et état de la mise à jour', async t => {
   const id = c.db.prepare('SELECT id FROM photos LIMIT 1').pluck().get();
   const draft = await c.post('/admin/images/apercu', { ...ENABLE, wm_enabled: '', preview_photo: String(id) });
   assert.equal(draft.headers['content-type'], 'image/webp');
+  const unchanged = await c.as({ url: `/admin/images/apercu.webp?photo=${id}` });
+  assert.deepEqual(draft.rawPayload, unchanged.rawPayload, 'filigrane décoché : aperçu sans filigrane');
+  const marked = await c.post('/admin/images/apercu', { ...ENABLE, preview_photo: String(id) });
+  assert.equal(marked.statusCode, 200);
+  assert.notDeepEqual(marked.rawPayload, draft.rawPayload, 'le nouveau filigrane change réellement le rendu');
+  assert.deepEqual((await c.as({ url: `/admin/images/apercu.webp?photo=${id}` })).rawPayload, unchanged.rawPayload, 'l’aperçu ne modifie pas le rendu enregistré');
   assert.deepEqual(c.db.prepare("SELECT COUNT(*) FROM settings WHERE key = 'watermark'").pluck().get(), 0);   // rien enregistré
   assert.equal((await c.post('/admin/images/apercu', { _csrf: 'faux' })).statusCode, 403);
   assert.equal((await c.app.inject('/admin/images/apercu.webp')).statusCode, 302);

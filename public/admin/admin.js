@@ -13,6 +13,9 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const LANG = ['en', 'de'].includes(document.documentElement.lang) ? document.documentElement.lang : 'fr';
 const LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[LANG];
 const I18N = {
+  "Reprendre comme texte de remplacement": {"en": "Use as alternative text", "de": "Als Alternativtext übernehmen"},
+  "Reprendre comme texte de remplacement anglais": {"en": "Use as English alternative text", "de": "Als englischen Alternativtext übernehmen"},
+  "en cours de calcul…": {"en": "calculating…", "de": "wird berechnet…"},
   "annuler-action": {"fr": "Annuler", "en": "Undo", "de": "Rückgängig"},
   "Annuler": {"en": "Cancel", "de": "Abbrechen"},
   "Session expirée ? Rechargez la page.": {"en": "Session expired? Reload the page.", "de": "Sitzung abgelaufen? Laden Sie die Seite neu."},
@@ -2195,6 +2198,7 @@ document.addEventListener('click', e => {
   // Le champ de la langue de la description : français (traduite), sinon anglais (rubrique des traductions).
   const main = field(b.dataset.descField === 'alt_text_en' ? 'alt_text_en' : 'alt_text');
   if (!main) return;
+  if (main.value.trim() && main.value !== b.dataset.descUse && !confirm(b.closest('[data-desc]').dataset.descConfirm)) return;
   const put = (el, text) => { const fold = el.closest('details'); if (fold) fold.open = true; el.value = text; el.dispatchEvent(new Event('input', { bubbles: true })); };
   put(main, b.dataset.descUse);
   // Les autres langues déjà traduites : seulement dans un champ encore vide (un texte écrit à la main reste).
@@ -2204,30 +2208,59 @@ document.addEventListener('click', e => {
   }
   main.focus();
 });
-document.querySelectorAll('[data-desc-pending]').forEach(box => {
-  // Saisie en cours dans la fiche (valeur différente de celle de la page) : on ne recharge pas, elle serait perdue.
-  const form = box.closest('form');
-  const dirty = () => Boolean(form) && [...form.elements].some(el => (el.type === 'checkbox' || el.type === 'radio' ? el.checked !== el.defaultChecked
-    : el.tagName === 'SELECT' ? [...el.options].some(o => o.selected !== o.defaultSelected) : 'defaultValue' in el && el.value !== el.defaultValue));
-  let n = 0;
-  const poll = async () => {
-    if (++n > 120) return;
+document.querySelectorAll('[data-desc]').forEach(box => {
+  // Demander ou recevoir une description ne quitte jamais la fiche : les saisies restent intactes.
+  const requestForm = $('#desc-form');
+  const text = $('[data-desc-text]', box);
+  let polling = false;
+  function watch() {
+    if (polling) return;
+    polling = true;
+    let n = 0;
+    const poll = async () => {
+      if (++n > 120) { polling = false; return; }
+      try {
+        const r = await fetch(box.dataset.descUrl, { headers: { accept: 'application/json' } });
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        if (!d.pending) {
+          polling = false;
+          box.removeAttribute('data-desc-pending');
+          text.textContent = d.text ? `« ${d.text} »` : d.error ? tr('Dernier essai sans succès : {error}', { error: d.error }) : '';
+          let use = $('[data-desc-use]', box);
+          if (d.use?.text) {
+            if (!use) {
+              use = document.createElement('button');
+              use.type = 'button';
+              use.className = 'btn ghost sm';
+              $('.actions', box).prepend(use);
+            }
+            use.hidden = false;
+            use.dataset.descUse = d.use.text;
+            use.dataset.descField = d.use.field;
+            use.dataset.descEn = d.use.en || '';
+            use.dataset.descDe = d.use.de || '';
+            use.textContent = tr(d.use.field === 'alt_text' ? 'Reprendre comme texte de remplacement' : 'Reprendre comme texte de remplacement anglais');
+          } else if (use) use.hidden = true;
+          return;
+        }
+      } catch { /* réseau : on réessaie */ }
+      setTimeout(poll, 5000);
+    };
+    setTimeout(poll, 1000);
+  }
+  requestForm?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const button = e.submitter;
+    if (button) button.disabled = true;
     try {
-      const d = await (await fetch(box.dataset.descUrl, { headers: { accept: 'application/json' } })).json();
-      if (!d.pending) {
-        if (!dirty()) { location.reload(); return; }
-        const text = $('[data-desc-text]', box);
-        text.textContent = d.text ? `« ${d.text} »` : d.error ? tr('Dernier essai sans succès : {error}', { error: d.error }) : '';   // mêmes mots que la fiche
-        box.removeAttribute('data-desc-pending');
-        const note = document.createElement('span');
-        note.className = 'hint';
-        note.setAttribute('role', 'status');
-        note.textContent = ` ${tr('Description prête : enregistrez vos modifications, puis rechargez la page pour la reprendre.')}`;
-        text.after(note);
-        return;
-      }
-    } catch { /* réseau : on réessaie */ }
-    setTimeout(poll, 5000);
-  };
-  setTimeout(poll, 4000);
+      const r = await fetch(requestForm.action, { method: 'POST', headers: { accept: 'application/json' }, body: new URLSearchParams(new FormData(requestForm)) });
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.error || tr('Erreur {status}', { status: r.status }));
+      text.textContent = tr('en cours de calcul…');
+      watch();
+    } catch (err) { text.textContent = err.message; }
+    finally { if (button) button.disabled = false; }
+  });
+  if (box.hasAttribute('data-desc-pending')) watch();
 });
