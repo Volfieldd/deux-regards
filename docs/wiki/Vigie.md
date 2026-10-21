@@ -23,7 +23,7 @@ Le chantier **« Vigie en dossiers »** a son propre découpage A à E, distinct
 | D2 | [#199](https://github.com/Volfieldd/deux-regards/pull/199) | 1.199.0 | Frise, graphe des entités et matrice ATT&CK en SVG serveur ; listes au téléphone et tableaux équivalents |
 | D3 | [#200](https://github.com/Volfieldd/deux-regards/pull/200) | 1.200.0 | Vue ATT&CK complète, fiches de techniques, calques Navigator et filtre technique du journal |
 
-Les comportements et limites sont décrits plus bas, dans [Console](#console-phase-d3). La prochaine étape de ce chantier, **E — données personnelles**, porte sur les catégories et volumes observés côté site, et leur exploitation par la Vigie ; elle requiert l’accord du propriétaire. La livraison du code ne vaut pas validation de la configuration Cloudflare/Zitadel ni déploiement sur Unraid.
+Les comportements et limites sont décrits plus bas, dans [Console](#console-phase-d3). L’étape **E — données personnelles**, autorisée le 21 octobre 2026, ajoute les catégories et volumes des lectures (BV-33), leur enjeu dans les dossiers et l’indice des trois réseaux en 24 h. La livraison du code ne vaut pas validation de la configuration Cloudflare/Zitadel ni déploiement sur Unraid.
 
 ---
 
@@ -248,6 +248,14 @@ du réseau `nicephos` en réseaux par flux est l'étape suivante (proposé dans 
 | `notifier essai <signal\|email>` | message d'essai sur le canal |
 | `bordure` | état de la bordure : copie des blocages, battement du Worker, constats, en-têtes refusés par le site (et leur motif), part des sessions dont l'empreinte TLS change (grille de lecture de l'essai) |
 | `reseau`, `reseau --lire` | source « réseau » (phase E4) : journaux lus, positions, battements du mandataire et des règles de l'hôte, constats sur 24 h, noms refusés et acceptés ; `--lire` : un passage de lecture tout de suite |
+
+## Données personnelles observées (chantier dossiers, E)
+
+Les lectures et exports sensibles portent des catégories fermées, un effectif d’objets, le nombre de déchiffrements réussis et, pour les réponses mesurables, les octets du corps préparé. Le journal et sa fiche les affichent ; un Analyste peut les retrouver dans l’export CSV avec le compte et la session. Ces nombres ne contiennent ni nom, ni message, ni signature, ni coordonnées de la personne. Ils mesurent une activité, pas une preuve de téléchargement reçu.
+
+Les listes de personnes, rencontres et comptes sont couvertes ; la planche de cartes vierges est notée sans catégorie personnelle. Les refus, erreurs et HEAD ne comptent pas comme lectures réussies. Les relectures d’une liste ne s’additionnent pas en nouvelles fiches. Sous accès douteux, huit fiches dans une même session ou huit objets dans une seule liste établissent la collecte ; dix objets personnels établissent l’enjeu sensible. Les seuils 8/3 restent en observation.
+
+L’enjeu devient aussi sensible pour une personne mineure avec parent, un accord signé ou une localisation de rencontre. Les catégories et compteurs suivent le dossier après purge du journal, fusion ou scission (migration 018), selon ses durées de conservation existantes. La règle `compte_reseaux_multiples` ajoute un indice de 1,5 point pour trois réseaux en 24 h ; seule, elle n’ouvre pas de dossier et ne bloque rien. Voir les précisions et limites dans [l’étude, section 14.4](https://github.com/Volfieldd/deux-regards/blob/main/docs/etudes/vigie-dossiers.md#144-pr-e--catégories-et-volumes-des-lectures-bv-33).
 
 ## Console (phase D3)
 

@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { noterLecture } from '../securite/donnees.js';
 import { FOCALS } from '../point-focal.js';
 import { ROLES, PERMISSIONS, SCOPES, grantsOf } from '../permissions.js';
 import { MailError } from '../mailer.js';
@@ -1145,11 +1146,15 @@ export default async function adminRoutes(app) {
   // Rôles proposés, dans l'ordre.
   const ROLE_ORDER = ['admin', 'photographe', 'moderateur', 'relecteur'];
   const STATUS_FR = { actif: 'actif', en_attente: 'en attente', desactive: 'désactivé' };
-  app.get('/admin/comptes', P('comptes.gerer'), async (request, reply) => render(request, reply, 'accounts', {
-    title: request.t('Comptes et rôles'), accounts: app.accounts.list(), authors: repo.authors(), me: request.session.sub,
-    roles: ROLE_ORDER.map(key => ({ key, label: ROLES[key].label })), guarded: (app.config.adminSubs || []).length > 0,
-    mail: { enabled: app.mailer.enabled, from: app.mailer.from, mine: (a => a?.notify_to || a?.email || request.session.email || '')(app.accounts.bySub(request.session.sub)) },
-  }));
+  app.get('/admin/comptes', P('comptes.gerer'), async (request, reply) => {
+    const accounts = app.accounts.list();
+    noterLecture(request, { objet: 'compte', liste: true, objets: accounts.length, categorie: accounts.length ? ['identite', 'coordonnees'] : [] });
+    return render(request, reply, 'accounts', {
+      title: request.t('Comptes et rôles'), accounts, authors: repo.authors(), me: request.session.sub,
+      roles: ROLE_ORDER.map(key => ({ key, label: ROLES[key].label })), guarded: (app.config.adminSubs || []).length > 0,
+      mail: { enabled: app.mailer.enabled, from: app.mailer.from, mine: (a => a?.notify_to || a?.email || request.session.email || '')(app.accounts.bySub(request.session.sub)) },
+    });
+  });
   // Description suggérée d'une photo : la demander (elle passe avant la file de nuit), et son état (suivi sans recharger).
   app.post('/admin/photos/:id/description', W('photos.textes'), async (request, reply) => {
     const id = byId(request.params.id);

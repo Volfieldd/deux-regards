@@ -101,3 +101,35 @@ correlation:
   condition: { gte: 3, field: ip }
 level: high
 vigie: { cas: DS31, points: 4 }
+---
+# BV-33, étude dossiers 4.3 : un indice, jamais une preuve ni une alerte à lui seul. Le réseau tronqué vient du
+# contexte authentifié du site (/24 ou /48), pas d'un nom de compte saisi dans un formulaire de connexion refusée.
+title: Accès authentifié d’un compte depuis un réseau
+name: compte_reseau
+id: 1bcfb247-1f7c-4c72-a879-526a44c5cc86
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+generate: false
+detection:
+  selection:
+    type: [authn_login_success, session_created, session_context_change, sensitive_read, sensitive_export]
+    sub|exists: true
+    ip_net|exists: true
+  condition: selection
+level: informational
+vigie: { signal: false }
+---
+title: Trois réseaux ou plus pour un compte en 24 h
+name: compte_reseaux_multiples
+id: a83c039d-6fa7-49aa-8941-421963301983
+author: Nicephos (Vigie)
+logsource: { product: nicephos, service: vigie }
+tags: [attack.initial_access, attack.t1078]
+correlation:
+  type: value_count
+  rules: [compte_reseau]
+  group-by: [sub]
+  timespan: 24h
+  condition: { gte: 3, field: ip_net }
+level: low
+vigie: { cas: DS18, entite: { kind: compte, champ: sub }, points: 1.5, mode: observer, nature_dossier: indice }

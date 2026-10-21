@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { noterLecture, categoriesRencontre } from '../securite/donnees.js';
 import path from 'node:path';
 import sharp from 'sharp';
 import { EncounterError, SCOPES, SCOPE_LABELS } from '../encounters.js';
@@ -83,12 +84,15 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
 
   app.get('/admin/rencontres', P('personnes.voir'), async (request, reply) => {
     const status = Object.hasOwn(STATUS, request.query.statut) ? request.query.statut : undefined;
-    return page(request, reply, 'encounters', { title: request.t('Personnes photographiées'), list: request.mine('personnes.voir', enc.list({ status, authorId: scopeAuthor(request, 'personnes.voir') })), status, authors: request.mine('personnes.voir', repo.authors(), 'id'), errors: {}, values: {} });
+    const list = request.mine('personnes.voir', enc.list({ status, authorId: scopeAuthor(request, 'personnes.voir') }));
+    noterLecture(request, { objet: 'rencontre', liste: true, objets: list.length, categorie: list.flatMap(categoriesRencontre) });
+    return page(request, reply, 'encounters', { title: request.t('Personnes photographiées'), list, status, authors: request.mine('personnes.voir', repo.authors(), 'id'), errors: {}, values: {} });
   });
 
   function detail(request, reply, id, extra = {}) {
     const e = enc.get(id);
     if (!e) return reply.callNotFound();
+    noterLecture(request, { objet: 'rencontre', id: String(id), categorie: categoriesRencontre(e) });
     const search = String(request.query.q || '').slice(0, 100);
     return page(request, reply, 'encounter', {
       title: e.ref ? request.t('Rencontre {ref}', { ref: e.ref }) : request.t('Rencontre du {date}', { date: fmtOf(request.t)(e.created_at) }), e, events: enc.events(id),
@@ -277,6 +281,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     app.get(`/admin/rencontres/:id/${name}`, P('personnes.voir'), async (request, reply) => {
       const buf = get(byId(request.params.id));
       if (!buf) return reply.callNotFound();
+      noterLecture(request, { objet: 'rencontre', id: request.params.id, categorie: [name === 'portrait' ? 'image' : 'accord_signe'] });
       // Vignette ronde des listes (visage) : 160 px suffisent.
       if (name === 'portrait' && request.query.mini === '1') {
         return reply.header('cache-control', 'no-store').type('image/jpeg').send(await sharp(buf).resize(160, 160, { fit: 'cover' }).jpeg({ quality: 75 }).toBuffer());
@@ -362,6 +367,8 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const from = Math.max(1, Math.round(Number(request.query.de)) || 1);
     if (!author || (!generic && from + count - 1 > 9999)) return reply.callNotFound();
     const { host, pairs } = await buildPairs({ publicUrl: app.config.publicUrl, prefix: prefixOf(author), from, count, generic, codeOf: ref => enc.codeOf(ref) });
+    // Cartes vierges : ni personne, ni nom, ni jeton, ni code de contrôle dans le signal (BV-33).
+    noterLecture(request, { objet: 'carte', liste: true, objets: pairs.length });
     return reply.header('cache-control', 'no-store').render('admin/cards-sheet', {
       title: generic ? request.t('Cartes génériques · {name}', { name: author.name }) : request.t('Cartes {from} à {to} · {name}', { from: pairs[0].ref, to: pairs.at(-1).ref, name: author.name }), author, T: TEXTS, host, sheets: sheets(pairs), generic, siteName: app.siteName(), t: request.t, lang: request.t.lang,
     });
@@ -418,6 +425,8 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   app.get('/admin/rencontres/:id/carte', P('personnes.voir'), async (request, reply) => {
     const jpeg = enc.cardJpeg(byId(request.params.id));
     if (!jpeg) return reply.callNotFound();
+    const e = enc.get(byId(request.params.id));
+    noterLecture(request, { objet: 'rencontre', id: request.params.id, categorie: e?.consent_source === 'carte' && e.consent ? ['accord_signe'] : [] });
     return reply.header('cache-control', 'no-store').type('image/jpeg').send(jpeg);
   });
 
@@ -486,6 +495,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const id = byId(request.params.id);
     const x = enc.exportData(id);
     if (!x) return reply.callNotFound();
+    noterLecture(request, { objet: 'rencontre', id: String(id), categorie: categoriesRencontre(enc.get(id)) });
     const entries = [{ name: 'LISEZMOI.txt', data: (README[x.lang] || README.fr)(app.siteName(), x.ref) }, { name: 'donnees.json', data: `${JSON.stringify(x.data, null, 2)}\n` }];
     if (x.files.signature) entries.push({ name: 'signature.png', data: x.files.signature });
     if (x.files.portrait) entries.push({ name: 'photo-de-reperage.jpg', data: x.files.portrait });
@@ -535,12 +545,15 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   const personPage = (request, reply, view, data) => page(request, reply, view, { section: 'people', ...data });
   app.get('/admin/personnes', P('personnes.voir'), async (request, reply) => {
     const search = String(request.query.q || '').slice(0, 100);
-    return personPage(request, reply, 'people', { title: request.t('Personnes photographiées'), list: people.list({ search, authorId: scopeAuthor(request, 'personnes.voir') }).map(p => ownPerson(request, p)).filter(Boolean), search });
+    const list = people.list({ search, authorId: scopeAuthor(request, 'personnes.voir') }).map(p => ownPerson(request, p)).filter(Boolean);
+    noterLecture(request, { objet: 'personne', liste: true, objets: list.length, categorie: list.flatMap(p => p.meetings.flatMap(categoriesRencontre)) });
+    return personPage(request, reply, 'people', { title: request.t('Personnes photographiées'), list, search });
   });
   app.get('/admin/personnes/:id', P('personnes.voir'), async (request, reply) => {
     const id = byId(request.params.id);
     const person = ownPerson(request, people.get(id));
     if (!person) return reply.callNotFound();
+    noterLecture(request, { objet: 'personne', id: String(id), categorie: person.meetings.flatMap(categoriesRencontre) });
     const search = String(request.query.q || '').slice(0, 100);
     const all = request.scope('personnes.voir').all;
     const others = all ? people.suggestions(id).map(o => people.get(o)).filter(Boolean) : [];
@@ -608,6 +621,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   // Droits : tout ce qui concerne la personne, toutes rencontres confondues.
   app.get('/admin/personnes/:id/export.zip', { config: { perm: 'personnes.exporter', audit: true } }, async (request, reply) => {   // au Journal
     const p = personOr404(request, reply); if (!p) return reply;
+    noterLecture(request, { objet: 'personne', id: String(p.id), categorie: p.meetings.flatMap(categoriesRencontre) });
     const lang = p.meetings.find(e => e.lang)?.lang || 'fr';
     const entries = [{ name: 'LISEZMOI.txt', data: (README[lang] || README.fr)(app.siteName(), null) }];
     const data = [];

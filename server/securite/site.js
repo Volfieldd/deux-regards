@@ -4,7 +4,7 @@ import { createSecurite } from './index.js';
 import { createDecisionsClient } from './decisions.js';
 import { createPublicTexts } from './textes-publics.js';
 import { scanObject, isAttackTool } from './detection.js';
-import { onDecryptFail } from '../vault.js';
+import { onDecryptFail, compterDechiffrements } from '../vault.js';
 import { clientKey } from '../ratelimit.js';
 import { TRAP_PATH } from './piege.js';
 import { settingsOf, SESSION_TRIGGER } from './retrait.js';
@@ -32,6 +32,10 @@ const SENSITIVE = /^\/admin\/(personnes|rencontres)\/:id(?:\/|$)/;
 // la personne 12 et la rencontre 12 sont deux fiches. Les autres exports (originaux, sélections des galeries) : aucun.
 const OBJETS = { personnes: 'personne', rencontres: 'rencontre' };
 const objetOf = route => OBJETS[SENSITIVE.exec(route)?.[1]];
+// BV-33 : les routes résolues seulement, jamais l'URL ni les filtres saisis. Les galeries précisent dans leur
+// gestionnaire quelles vues lisent les données d'un invité ; les autres vues n'émettent pas de lecture.
+const LISTES = { '/admin/personnes': 'personne', '/admin/rencontres': 'rencontre', '/admin/comptes': 'compte', '/admin/rencontres/cartes/planche': 'carte' };
+const CLASSEES = /^\/admin\/(?:messages\/:id$|galeries\/:id(?:\/|$))/;
 const NOT_FOUND_LIMIT = 20, NOT_FOUND_WINDOW = 10 * 60e3;
 
 // Chemin comme le voit le routeur : gabarit de la route trouvée, sinon chemin décodé et normalisé (« /%61dmin »,
@@ -79,6 +83,28 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   const settings = settingsOf(db);
   const sec = createSecurite({ url: config.vigie.url, key: config.vigie.ingestKey, storageDir: config.storageDir, log: app.log, send, timers });
   app.decorate('securite', sec);
+  app.decorateRequest('vigieLecture', null);
+  app.addHook('onRequest', (request, reply, done) => {
+    const route = request.routeOptions?.url || '';
+    if (!['GET', 'HEAD'].includes(request.method) || !(SENSITIVE.test(route) || LISTES[route] || CLASSEES.test(route) || request.routeOptions?.config?.audit)) return done();
+    const c = { actif: true, nombre: 0, octets: null, detail: null };
+    request.vigieLecture = c;
+    compterDechiffrements(c, done);
+  });
+  const mesurer = (request, reply, payload, done) => {
+    const c = request.vigieLecture;
+    // Les fiches, listes, images et ZIP personnels sont des chaînes ou des tampons. Une taille de flux inconnue
+    // reste absente : Content-Length n'est pas une preuve des octets transmis. HEAD ne livre aucun corps.
+    if (c) c.octets = request.method === 'HEAD' ? 0 : typeof payload === 'string' ? Buffer.byteLength(payload) : Buffer.isBuffer(payload) ? payload.length : null;
+    done(null, payload);
+  };
+  // Crochet de route, après ceux de l'application et de ses plugins : la typographie peut encore modifier le HTML
+  // dans onSend. Mesurer avant elle sous-compterait le corps réellement préparé (test de parité admin v1/v2).
+  app.addHook('onRoute', options => {
+    const route = options.url;
+    if (SENSITIVE.test(route) || LISTES[route] || CLASSEES.test(route) || options.config?.audit) options.onSend = [...(options.onSend ? [].concat(options.onSend) : []), mesurer];
+  });
+  app.addHook('onRequestAbort', (request, done) => { if (request.vigieLecture) request.vigieLecture.actif = false; done(); });
   // Décisions de la Vigie (blocages, révocations, gels, verrouillage), lues et appliquées par le site.
   const decisions = createDecisionsClient({ url: config.vigie.url, key: config.vigie.ingestKey, pubkey: config.vigie.decisionsPubkey, storageDir: config.storageDir,
     log: app.log, apply: config.vigie.apply, adminSubs: config.adminSubs || [], spaces: () => app.spaces, ...(decisionsFetch ? { fetchImpl: decisionsFetch } : {}) });
@@ -365,6 +391,7 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   // Rafales de 404 par adresse (exploration), lectures sensibles de l'admin.
   const notFound = new Map();
   app.addHook('onResponse', (request, reply, done) => {
+    if (request.vigieLecture) request.vigieLecture.actif = false;
     try { afterResponse(request, reply); } catch (err) { app.log.error({ err: err.message }, 'Vigie : réponse'); }
     done();
   });
@@ -387,11 +414,15 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     }
     // Écriture d'un compte de l'admin : réglages publics et données exposées comparés à l'état d'avant (BV-1, BV-2).
     if (request.session && request.method !== 'GET' && request.method !== 'HEAD') { watchWrites(request); return; }
-    if (!request.session || status >= 300 || (request.method !== 'GET' && request.method !== 'HEAD')) return;
+    if (!request.session || status >= 300 || request.method !== 'GET') return;
     const route = request.routeOptions?.url || '';
-    const detail = { cible: route, objet: objetOf(route), id: request.params?.id ?? null };
+    const c = request.vigieLecture;
+    // Les gestionnaires fournissent des catégories et des effectifs seulement après leurs contrôles d'accès.
+    // Le volume désigne le corps préparé pour une réponse réussie, sans les en-têtes ni garantie de réception.
+    const detail = { cible: route, objet: objetOf(route) || LISTES[route], id: request.params?.id ?? null, ...c?.detail,
+      ...(c ? { dechiffrements: c.nombre, ...(c.octets != null ? { octets_servis: c.octets } : {}) } : {}) };
     if (request.routeOptions?.config?.audit) sec.emit('sensitive_export', { request, status, emetteur: 'server/routes · lecture sensible', detail });
-    else if (SENSITIVE.test(route)) sec.emit('sensitive_read', { request, status, emetteur: 'server/routes · lecture sensible', detail });
+    else if (SENSITIVE.test(route) || LISTES[route] || c?.detail) sec.emit('sensitive_read', { request, status, emetteur: 'server/routes · lecture sensible', detail });
   };
 
   return sec;

@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 // Chiffrement des données personnelles dans la base (AES-256-GCM), clé DATA_KEY du .env, jamais dans la base :
 // une sauvegarde volée ou un disque perdu ne révèle ni noms, ni adresses, ni signatures.
@@ -14,6 +15,12 @@ const MAGIC = Buffer.from('NCE1');
 const failures = new Set();
 export const onDecryptFail = fn => { failures.add(fn); return () => failures.delete(fn); };
 const failed = kind => { for (const fn of failures) { try { fn(kind); } catch { /* jamais d'erreur pour l'appelant */ } } };
+
+// BV-33 : opérations réussies, jamais les valeurs déchiffrées. run() isole les requêtes concurrentes ; le compteur
+// est fermé à la réponse pour qu'un travail différé ne grossisse pas le volume attribué à cette lecture.
+const lectures = new AsyncLocalStorage();
+export const compterDechiffrements = (compteur, suite) => lectures.run(compteur, suite);
+const compter = () => { const c = lectures.getStore(); if (c?.actif) c.nombre = Math.min(Number.MAX_SAFE_INTEGER, c.nombre + 1); };
 
 export const LOCKED = '« donnée chiffrée : clé DATA_KEY absente ou différente »';
 
@@ -46,13 +53,13 @@ export function createVault(secret) {
     open(v) {
       if (!isText(v)) return v;
       if (!key) return LOCKED;
-      try { return decrypt(Buffer.from(v.slice(TEXT.length), 'base64')).toString('utf8'); } catch { failed('texte'); return LOCKED; }
+      try { const texte = decrypt(Buffer.from(v.slice(TEXT.length), 'base64')).toString('utf8'); compter(); return texte; } catch { failed('texte'); return LOCKED; }
     },
     sealBuf: b => (key && Buffer.isBuffer(b) ? Buffer.concat([MAGIC, encrypt(b)]) : b),
     openBuf(b) {
       if (!isBuf(b)) return b;
       if (!key) return null;
-      try { return decrypt(b.subarray(4)); } catch { failed('binaire'); return null; }
+      try { const buf = decrypt(b.subarray(4)); compter(); return buf; } catch { failed('binaire'); return null; }
     },
   };
 }
