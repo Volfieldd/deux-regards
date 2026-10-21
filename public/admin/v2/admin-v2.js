@@ -629,3 +629,84 @@ $$('[data-suivi]').forEach(el => {
     }, 1500);
   }
 })();
+
+// ----- aide contextuelle (UX-A-22) : « Aide sur cette page » ouvre, à côté de la page, le passage de l'aide qui la concerne,
+// sans la quitter. Sans script, le lien mène à l'aide entière, à la même ancre. Avec lui : le chapitre (/admin/aide/<chapitre>,
+// une page de l'aide, en lecture seule) est lu une fois, et seul le passage visé est montré, avec « Ouvrir le chapitre ». -----
+(function () {
+  const chapitres = DATA.aide || [];
+  if (!chapitres.length || !window.DOMParser) return;
+  // Le chapitre d'une ancre : l'identifiant le plus long dont elle commence (« rencontres-les-sorties » → « rencontres »).
+  const chapitreDe = ancre => chapitres.filter(c => ancre === c || ancre.startsWith(`${c}-`)).sort((a, b) => b.length - a.length)[0];
+  let dlg = null;
+  const cache = new Map();
+  const panneau = () => {
+    if (dlg) return dlg;
+    dlg = document.createElement('dialog');
+    dlg.className = 'aide-panneau';
+    dlg.setAttribute('aria-labelledby', 'aide-p-t');
+    dlg.innerHTML = `<header><h2 id="aide-p-t"></h2><button type="button" class="btn ghost" data-aide-fermer></button></header><div class="aide-p-corps" tabindex="-1"></div><footer><a class="btn ghost" data-aide-ouvrir></a></footer>`;
+    $('h2', dlg).textContent = T('Aide sur cette page');
+    $('[data-aide-fermer]', dlg).textContent = T('Fermer l’aide');
+    $('[data-aide-ouvrir]', dlg).textContent = T('Ouvrir le chapitre');
+    dlg.addEventListener('click', e => { if (e.target === dlg || e.target.closest('[data-aide-fermer]')) dlg.close(); });
+    document.body.append(dlg);
+    return dlg;
+  };
+  // Le passage d'une ancre dans la page d'un chapitre : sa section entière, ou un titre et ce qui le suit jusqu'au titre suivant
+  // du même niveau ou d'un niveau au-dessus.
+  const passage = (doc, chap, ancre) => {
+    const section = doc.getElementById(chap);
+    const cible = doc.getElementById(ancre);
+    const out = document.createDocumentFragment();
+    if (!section) return { titre: '', noeuds: out };
+    const niveau = el => (/^H([1-6])$/.exec(el.tagName) || [])[1] * 1 || 0;
+    const garder = [];
+    if (!cible || cible === section) {
+      for (const el of section.children) if (!el.matches('h2, .aide-haut')) garder.push(el);
+      return { titre: $('h2', section)?.textContent || '', noeuds: garder };
+    }
+    garder.push(cible);
+    const n0 = niveau(cible);
+    for (let el = cible.nextElementSibling; el; el = el.nextElementSibling) {
+      if (niveau(el) && niveau(el) <= n0) break;
+      if (el.matches('.aide-haut')) continue;
+      garder.push(el);
+    }
+    return { titre: $('h2', section)?.textContent || '', noeuds: garder };
+  };
+  document.addEventListener('click', async e => {
+    const a = e.target.closest('.help-link a[href^="/admin/aide#"]');
+    if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const ancre = decodeURIComponent(a.hash.slice(1));
+    const chap = chapitreDe(ancre);
+    if (!chap) return;
+    e.preventDefault();
+    const d = panneau();
+    const corps = $('.aide-p-corps', d);
+    $('[data-aide-ouvrir]', d).href = `/admin/aide/${chap}#${encodeURIComponent(ancre)}`;
+    corps.replaceChildren(Object.assign(document.createElement('p'), { textContent: T('Chargement de l’aide…') }));
+    d.dataset.retour = '';
+    d.showModal();
+    d.addEventListener('close', () => a.focus(), { once: true });
+    corps.focus();
+    try {
+      if (!cache.has(chap)) {
+        const res = await fetch(`/admin/aide/${chap}`, { credentials: 'same-origin', headers: { accept: 'text/html' } });
+        if (!res.ok) throw new Error(String(res.status));
+        cache.set(chap, new DOMParser().parseFromString(await res.text(), 'text/html'));
+      }
+      const { noeuds } = passage(cache.get(chap), chap, ancre);
+      const frag = document.createDocumentFragment();
+      for (const n of noeuds) frag.append(document.importNode(n, true));
+      // Rien de la page de l'aide ne reste dans celle-ci : ni identifiant en double, ni ancre qui quitterait la page ouverte.
+      $$('[id]', frag).forEach(el => el.removeAttribute('id'));
+      $$('a[href^="#"]', frag).forEach(l => { l.href = `/admin/aide/${chap}${l.getAttribute('href')}`; });
+      corps.replaceChildren(frag);
+    } catch {
+      const p = document.createElement('p');
+      p.textContent = T('L’aide n’a pas pu être chargée : ouvrez-la sur sa page.');
+      corps.replaceChildren(p);
+    }
+  });
+})();

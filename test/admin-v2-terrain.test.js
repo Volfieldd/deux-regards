@@ -206,7 +206,8 @@ test('Séries v2 : champ par champ en JSON (route de la v1), erreur sous le cham
   assert.deepEqual(r.json(), { ok: true, serie: { name: c.cat.name, slug: c.cat.slug } });
   assert.match(c.db.prepare('SELECT intent FROM categories WHERE id = ?').pluck().get(c.cat.id), /^Ce que la ville garde/);
   const log = c.audits('POST /admin/series/:id').at(-1);
-  assert.equal(log.detail, 'champs : intent');
+  // Le titre d'une série est noté en plus (Journal de l'admin v2) : jamais le texte saisi.
+  assert.equal(log.detail, `champs : intent ; nom : ${c.cat.name}`);
   assert.doesNotMatch(log.detail, /ville/);
   const ev = (await c.security()).slice(before).filter(e => e.type === 'config_public_changed');
   assert.ok(ev.some(e => e.detail.objet === 'textes_publics' && e.detail.champs.includes('categories.intent')), 'BV-21');
@@ -240,7 +241,7 @@ test('Voyage v2 : champ par champ en JSON, journal avec les noms des champs, pag
   assert.equal(r.statusCode, 200);
   assert.equal(r.json().ok, true);
   assert.equal(c.app.trips.get(c.trip).intro, 'Trois journées le long du fleuve.');
-  assert.equal(c.audits('POST /admin/voyages/:id').at(-1).detail, 'champs : intro');
+  assert.equal(c.audits('POST /admin/voyages/:id').at(-1).detail, `champs : intro ; nom : ${c.app.trips.get(c.trip).name}`);
   const n = await adm.json(`/admin/voyages/${c.trip}`, { name: '' });
   assert.equal(n.statusCode, 422);
   assert.match(n.json().error, /nom/);
@@ -249,7 +250,7 @@ test('Voyage v2 : champ par champ en JSON, journal avec les noms des champs, pag
   const on = await adm.post(`/admin/voyages/${c.trip}`, { public_set: '1', public: 'on' });
   assert.equal(on.statusCode, 303);
   assert.equal(Boolean(c.app.trips.get(c.trip).public), true);
-  assert.equal(c.audits('POST /admin/voyages/:id').at(-1).detail, 'champs : public');
+  assert.equal(c.audits('POST /admin/voyages/:id').at(-1).detail, `champs : public ; nom : ${c.app.trips.get(c.trip).name}`);
   assert.match((await adm.get(`/admin/voyages/${c.trip}`)).body, /id="dlg-retirer"/);
   await adm.post(`/admin/voyages/${c.trip}`, { public_set: '1' });
   assert.equal(Boolean(c.app.trips.get(c.trip).public), false);

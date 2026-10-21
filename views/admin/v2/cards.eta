@@ -1,0 +1,40 @@
+<% layout('./layout') %>
+<% const t = it.t; const v = it.values || {}, e = it.errors || {}; %>
+<% /* Cartes d'accord (admin v2, finitions) : choisir le photographe, numérotées ou génériques, le premier numéro et le nombre de
+      paires, puis « Préparer la planche ». Mêmes champs, même route et mêmes contrôles que la v1 (views/admin/cards.eta ;
+      GET et POST /admin/rencontres/cartes, permission terrain.cartes) ; la planche à imprimer reste la page autonome de la v1
+      (A4, à 100 %). La v2 : l'en-tête et le retour des autres écrans, les erreurs sous le champ et en résumé, la prochaine
+      carte du photographe dite sous le premier numéro. */ %>
+<% const err = k => e[k] ? `<p class="err" id="cartes-${k}-err"><span><b>${t('Erreur :')}</b> ${__eta.e(e[k])}</span></p>` : '';
+   const by = k => (e[k] ? ` aria-invalid="true" aria-describedby="cartes-${k}-err"` : ''); %>
+<p class="help-link"><a href="/admin/aide#rencontres-les-cartes"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <a class="ep-retour" href="/admin/terrain"><%= t('Sur le terrain') %></a>
+  <div class="ep-titre"><h1><%= t('Cartes d’accord') %></h1></div>
+</header>
+<p class="rub-intro"><%~ t('Des paires de cartes au format carte de visite (85 × 55 mm) : à gauche la carte <strong>« pour nous »</strong> (l’accord, signé, que vous gardez), à droite la carte <strong>« pour eux »</strong> (le merci, la référence et le QR vers <code>/bonjour</code>). Cinq paires par feuille A4, d’un seul côté : rien à aligner au recto et au verso.') %></p>
+<% if (!it.authors.length) { %>
+<p class="panel hint"><%= t('Aucun photographe à votre portée : les cartes se préparent pour un photographe.') %></p>
+<% } else { %>
+<form class="panel form cartes-form" method="post" action="/admin/rencontres/cartes" novalidate>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+<% if (Object.keys(e).length) { %>  <section class="resume-a" tabindex="-1" aria-labelledby="cartes-resume"><h2 id="cartes-resume"><%= t('Rien n’est préparé : à corriger') %></h2><ul><% Object.keys(e).forEach(k => { %><li><a href="#cartes-<%= k === 'author' ? 'auteur' : k %>"><%= e[k] %></a></li><% }) %></ul></section>
+<% } %>  <div class="champ-a"><label for="cartes-auteur"><%= t('Photographe') %></label><select id="cartes-auteur" name="author_id" data-cards-author<%~ by('author') %>>
+<% it.authors.forEach(a => { %>    <option value="<%= a.id %>" data-next="<%= a.next %>"<%~ Number(v.author_id) === a.id ? ' selected' : '' %>><%= t('{name} (lettre {prefix}, prochaine carte {card})', { name: a.name, prefix: a.prefix, card: `${a.prefix}-${String(a.next).padStart(4, '0')}` }) %></option>
+<% }) %>  </select><%~ err('author') %></div>
+  <fieldset class="choix-a"><legend><%= t('Cartes') %></legend>
+    <label><input type="radio" name="mode" value="numerotees"<%~ v.mode !== 'generiques' ? ' checked' : '' %>><span><%~ t('<strong>Numérotées</strong> — référence et QR propres à chaque paire, avec le code de contrôle (la demande arrive « carte vérifiée ») ; à imprimer chez vous ou en boutique') %></span></label>
+    <label><input type="radio" name="mode" value="generiques"<%~ v.mode === 'generiques' ? ' checked' : '' %>><span><%~ t('<strong>Génériques</strong> — sans numéro, QR vers <code>/bonjour</code> : le modèle à confier à un imprimeur ; numérotez ensuite les deux cartes de chaque paire au tampon numéroteur') %></span></label>
+  </fieldset>
+  <div class="row">
+    <div class="champ-a"><label for="cartes-from"><%= t('Premier numéro') %> <span class="facultatif"><%= t('cartes numérotées') %></span></label><input type="number" id="cartes-from" name="from" min="1" max="9999" value="<%= v.from || (it.authors[0] ? it.authors[0].next : 1) %>" data-cards-from<%~ by('from') %>><%~ err('from') %></div>
+    <div class="champ-a"><label for="cartes-count"><%= t('Nombre de paires') %> <span class="facultatif"><%= t('{n} par feuille', { n: it.PER_SHEET }) %></span></label><input type="number" id="cartes-count" name="count" min="1" max="<%= it.MAX_PAIRS %>" step="1" value="<%= v.count || 10 %>"<%~ by('count') %>><%~ err('count') %></div>
+  </div>
+  <p class="hint"><%~ t('Les numéros imprimés sont retenus : la planche suivante commence après. Imprimez à <strong>100 %</strong> (« taille réelle », sans « ajuster à la page »), de préférence sur du papier épais (250 à 350 g/m²), puis découpez le long des traits.') %></p>
+  <p class="form-pied"><button class="btn" type="submit"><%= t('Préparer la planche') %></button></p>
+</form>
+<% } %>
+</div>
+<%~ include('./_textes-contenus', it) %>
+<script src="<%= it.asset('admin/v2/contenus-v2.js') %>" defer></script>

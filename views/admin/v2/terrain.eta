@@ -1,0 +1,56 @@
+<% layout('./layout') %>
+<% const t = it.t, E = __eta.e; const a = it.chosen; %>
+<% /* Sur le terrain (admin v2, finitions) : ce qui part dans la rue, l'app, les cartes d'accord et le QR des vêtements. Mêmes
+      données, mêmes droits (terrain.app) et même route que la v1 (views/admin/terrain.eta ; GET /admin/terrain) : la v2 met la
+      liste « Avant de partir » en états à symbole (jamais la couleur seule) et l'en-tête, les filtres et les panneaux des
+      autres écrans. Aucune donnée personnelle ici : le prochain numéro de carte et le QR du photographe seulement. */ %>
+<% const IC = { abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>', attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>' };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>'; %>
+<p class="help-link"><a href="/admin/aide#rencontres-sur-le-terrain"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-terrain">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Sur le terrain') %></h1></div>
+<% if (a) { %>  <p class="ep-meta"><span><%= t('Prochaine carte de {name} : {ref}', { name: a.name, ref: `${it.prefix}-${String(it.next).padStart(4, '0')}` }) %></span></p>
+<% } %></header>
+<p class="rub-intro"><%= t('Ce qui part dans la rue avec vous : l’app sur le téléphone, les cartes d’accord à faire signer, et le QR à porter sur vos vêtements.') %></p>
+<% if (!a) { %>
+<p class="panel hint"><%~ t('Ajoutez d’abord un photographe dans <a class="more" href="/admin/auteurs">Photographes</a>.') %></p>
+<% } else { %>
+<% if (it.authors.length > 1) { %>
+<div class="filtres-l"><nav class="chips" aria-label="<%= t('Photographe') %>">
+<% it.authors.forEach(x => { %>  <a class="chip" href="/admin/terrain?photographe=<%= x.id %>"<%~ x.id === a.id ? ' aria-current="page"' : '' %>><%= x.name %> · <%= x.card_prefix || x.slug.charAt(0).toUpperCase() %></a>
+<% }) %></nav></div>
+<% } %>
+<div class="terrain-outils">
+  <section class="panel" aria-labelledby="tool-app">
+    <h2 id="tool-app"><%= t('L’app Rencontre') %></h2>
+    <p class="hint"><%= t('Sur l’iPhone : nouvelle rencontre, accord signé au doigt, visage, position arrondie. Prochaine carte de {name} :', { name: a.name }) %> <strong><%= it.prefix %>-<%= String(it.next).padStart(4, '0') %></strong>.</p>
+    <p class="hint"><%= t('À installer une fois : dans Safari, ouvrez') %> <code><%= it.host %>/admin/rencontre</code><%= t(', puis Partager → Sur l’écran d’accueil.') %></p>
+    <p class="actions"><a class="btn" href="/admin/rencontre"><%= t('Nouvelle rencontre') %></a></p>
+  </section>
+  <section class="panel" aria-labelledby="tool-cards">
+    <h2 id="tool-cards"><%= t('Cartes d’accord') %></h2>
+    <p class="hint"><%= t('Paires « à signer » (pour vous) et « à remettre » (pour la personne, avec son QR), numérotées ou génériques pour un imprimeur.') %></p>
+    <p class="hint"><%= it.left ? (it.left > 1 ? t('{n} cartes numérotées imprimées pas encore utilisées.', { n: it.left }) : t('{n} carte numérotée imprimée pas encore utilisée.', { n: it.left })) : t('Aucune carte numérotée en réserve.') %></p>
+    <p class="actions"><a class="btn ghost" href="/admin/rencontres/cartes"><%= t('Préparer une planche') %></a></p>
+  </section>
+  <section class="panel" aria-labelledby="tool-qr">
+    <h2 id="tool-qr"><%= t('QR des vêtements') %></h2>
+<% const f = `/admin/auteurs/${a.id}/qr/vertical-noir`; %>
+    <figure class="qr-model noir"><img src="<%= f %>.svg?apercu=1" alt="<%= t('QR de {name} avec le logo, vers {url}', { name: a.name, url: `${it.host}/bonjour/${it.prefix}` }) %>" width="240" height="396" loading="lazy">
+      <figcaption class="mono"><%= it.host %>/bonjour/<%= it.prefix %> · <%= t('dos de tee-shirt ou sac, 12 × 19,8 cm') %></figcaption></figure>
+    <p class="hint"><%= t('À montrer tel quel : la personne le scanne et arrive sur la page de {name}, sans numéro de carte. QR de 8 à 10 cm au moins, marge blanche gardée.', { name: a.name }) %></p>
+    <p class="actions"><a class="btn ghost" href="<%= f %>.svg"><%= t('SVG pour l’imprimeur') %></a><a class="btn ghost" href="/admin/auteurs/<%= a.id %>/qr/vertical-blanc.svg"><%= t('Encre blanche (textile foncé)') %></a></p>
+  </section>
+</div>
+<section class="panel" aria-labelledby="checklist">
+  <h2 id="checklist"><%= t('Avant de partir') %></h2>
+  <ul class="avant-depart">
+    <li><%~ etat(it.until ? 'abouti' : 'attention', t('Connexion')) %> <span><%= it.until ? t('Votre connexion reste valable jusqu’à {until} : reconnectez-vous avant une longue sortie.', { until: it.until }) : t('Connexion : durée inconnue, reconnectez-vous en début de sortie.') %></span></li>
+    <li><%~ etat(it.left ? 'abouti' : 'attention', t('Cartes')) %> <span><%= it.left ? (it.left > 1 ? t('{n} cartes numérotées en réserve.', { n: it.left }) : t('{n} carte numérotée en réserve.', { n: it.left })) : t('Plus de cartes numérotées : imprimez une planche, ou utilisez l’app.') %></span></li>
+    <li><%~ etat(it.smtp ? 'abouti' : 'afaire', t('Récapitulatif')) %> <span><%= it.smtp ? t('Récapitulatif envoyé automatiquement par e-mail après une rencontre.') : t('Récapitulatif par e-mail : préparé dans l’app Mail (envoi automatique non configuré).') %></span></li>
+  </ul>
+</section>
+<% } %>
+</div>

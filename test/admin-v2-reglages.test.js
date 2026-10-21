@@ -100,7 +100,8 @@ test('écrans en v2 ; un compte en v1 voit la v1 (son gabarit, son script), sans
   assert.match((await v2.get('/admin/site')).body, /<a href="\/admin\/site" aria-current="page">[^]*?Site public<\/a>/);
   assert.match((await v2.get('/admin/comptes')).body, /<a href="\/admin\/comptes" aria-current="page">[^]*?Comptes et rôles<\/a>/);
   // Un écran pas encore en v2 reste en repli.
-  const rep = await v2.get('/admin/terrain');
+  // (Tous les écrans ont leur v2 : reste la confirmation de suppression de photos, que seule la v1 écrit.)
+  const rep = await v2.post('/admin/photos/actions', { action: 'delete', ids: ['1'], back: '/admin/photos' });
   assert.ok(!isV2(rep.body));
   assert.match(rep.body, /Écran pas encore en v2/);
 });
