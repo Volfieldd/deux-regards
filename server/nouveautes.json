@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.198.0",
+    "date": "2026-10-20",
+    "pr": 198,
+    "title": {
+      "fr": "Vigie : les dossiers dans la console",
+      "en": "Vigie: cases in the console",
+      "de": "Vigie: Fälle in der Konsole"
+    },
+    "items": [
+      {
+        "fr": "La console présente les dossiers avec leurs filtres, leur explication en trois lignes, leurs entités, signaux, alertes et historique. Les Intervenants, Analystes et Administrateurs peuvent les prendre en charge, les classer, rattacher ou détacher une entité, les fusionner ou les scinder après confirmation. Le contrôle des rôles retrouve le dossier du compte concerné. Les Lectrices restent en lecture seule, avec les adresses tronquées. Les notifications et les réponses des alertes ne changent pas.",
+        "en": "The console now shows cases with filters, a three-line explanation, entities, signals, alerts and history. Responders, Analysts and Administrators can take ownership, classify cases, attach or detach an entity, merge cases or split them after confirmation. The role check finds the case for the account concerned. Readers retain read-only access with truncated addresses. Alert notifications and responses are unchanged.",
+        "de": "Die Konsole zeigt Fälle mit Filtern, einer Erklärung in drei Zeilen, Entitäten, Signalen, Warnungen und Verlauf. Einsatzkräfte, Analysten und Administratoren können Fälle übernehmen, einstufen, Entitäten zuordnen oder lösen sowie Fälle nach Bestätigung zusammenführen oder aufteilen. Die Rollenprüfung findet den Fall des betroffenen Kontos. Lesende behalten nur Lesezugriff mit gekürzten Adressen. Benachrichtigungen und Reaktionen auf Warnungen bleiben unverändert.",
+        "perm": "securite.voir"
+      }
+    ]
+  },
+  {
     "version": "1.194.0",
     "date": "2026-10-20",
     "pr": 194,

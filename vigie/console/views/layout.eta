@@ -10,7 +10,7 @@ const nom = String(moi.nom || '').trim() || String(moi.sub || '').trim() || 'Com
 const initiale = (nom.match(/[\p{L}\p{N}]/u) || ['?'])[0].toUpperCase();
 const n = x => Math.max(0, Math.trunc(Number(x) || 0));
 const c = it.compteurs || {};
-const nbAlertes = n(c.alertes), nbSante = n(c.sante), nbDecisions = n(c.decisions);
+const nbAlertes = n(c.alertes), nbDossiers = n(c.dossiers), nbSante = n(c.sante), nbDecisions = n(c.decisions);
 const cur = k => (k === page ? ' aria-current="page"' : '');
 // Titre de l'onglet : « Page · Vigie · Nicephos » (un titre déjà suffixé « · Vigie » ou réduit à « Vigie » n'est pas doublé).
 const titreSeul = String(it.titre || '').replace(/\s*·\s*Vigie(\s*·\s*Nicephos)?\s*$/, '').replace(/^Vigie$/, '');
@@ -41,6 +41,7 @@ const titrePage = (titreSeul ? titreSeul + ' · ' : '') + 'Vigie · Nicephos';
   </nav>
   <p class="grp" id="nav-surveiller">Surveiller</p>
   <nav class="nav" aria-labelledby="nav-surveiller">
+    <a href="/dossiers"<%~ cur('dossiers') %>><%~ include('./_ic', { icone: 'dossiers' }) %>Dossiers<% if (nbDossiers) { %><span class="nav-badge"><span aria-hidden="true"><%= nbDossiers %></span><span class="sr-only">, <%= nbDossiers %> non clos</span></span><% } %></a>
     <a href="/alertes"<%~ cur('alertes') %>><%~ include('./_ic', { icone: 'alertes' }) %>Alertes<% if (nbAlertes) { %><span class="nav-badge"><span aria-hidden="true"><%= nbAlertes %></span><span class="sr-only">, <%= nbAlertes %> <%= nbAlertes > 1 ? 'ouvertes' : 'ouverte' %></span></span><% } %></a>
     <a href="/flux"<%~ cur('flux') %>><%~ include('./_ic', { icone: 'flux' }) %>Flux</a>
     <a href="/evenements"<%~ cur('evenements') %>><%~ include('./_ic', { icone: 'evenements' }) %>Événements</a>

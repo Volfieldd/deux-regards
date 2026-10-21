@@ -296,12 +296,35 @@ test('contrôle des rôles sur la sauvegarde du site : administrateur non décla
   s2.prepare("INSERT INTO accounts (sub, name, roles, status, created_at) VALUES ('zitadel-cache', 'B', '[\"admin\"]', 'actif', 2)").run();
   s2.close();
   v.add('sys_state', 'info', { composant: 'site · système', detail: { administrateurs: ['zitadel-admin', 'zitadel-cache'] } });
+  v.add('privilege_permissions_changed', 'critique', { composant: 'site · base', detail: { compte: 'zitadel-cache', hors_application: true } });
   const r = checkRoles({ store: v.store, siteBackupDir: backups });
   assert.deepEqual(r.unknownAdmins, []);
   assert.deepEqual(r.unexplained, ['zitadel-cache'], 'le site peut mentir dans ses déclarations, pas dans le journal des comptes');
   assert.deepEqual(r.missing, ['account_changes_conserve']);
+  const rapport = v.db.prepare("SELECT sub, detail FROM events WHERE type = 'vigie_controle_roles' ORDER BY seq DESC LIMIT 1").get();
+  assert.equal(rapport.sub, 'zitadel-cache', 'le compte concerné est transmis au signal');
+  assert.deepEqual(JSON.parse(rapport.detail).comptes, ['zitadel-cache']);
   const a = v.alerts().find(x => x.regle === 'sigma.controle_roles');
   assert.equal(a.gravite, 'critique');
+  assert.equal(a.dossier_id, v.alerts().find(x => x.regle === 'sigma.role_hors_application').dossier_id,
+    'les alertes du rôle hors application et de son contrôle rejoignent le même dossier');
+});
+
+test('contrôle des rôles : plusieurs comptes concernés restent tous acteurs du même signal', t => {
+  const v = vigieOf(t, { start: Date.now() }), backups = tmp(t);
+  fs.mkdirSync(path.join(backups, 'db'));
+  const site = openDb(path.join(backups, 'db', snapshotName(Date.now() - 3600e3)));
+  migrate(site);
+  for (const sub of ['admin-a', 'admin-b']) site.prepare("INSERT INTO accounts (sub, name, roles, status, created_at) VALUES (?, ?, '[\"admin\"]', 'actif', 1)").run(sub, sub);
+  site.close();
+  v.add('sys_state', 'info', { composant: 'site · système', detail: { administrateurs: [] } });
+  checkRoles({ store: v.store, siteBackupDir: backups });
+  const rapports = v.db.prepare("SELECT sub, detail FROM events WHERE type = 'vigie_controle_roles'").all();
+  assert.equal(rapports.length, 1); assert.equal(rapports[0].sub, null);
+  assert.deepEqual(JSON.parse(rapports[0].detail).comptes, ['admin-a', 'admin-b']);
+  const a = v.alerts().find(x => x.regle === 'sigma.controle_roles');
+  const comptes = v.db.prepare("SELECT key FROM dossier_entites WHERE dossier_id = ? AND kind = 'compte' ORDER BY key").pluck().all(a.dossier_id);
+  assert.deepEqual(comptes, ['admin-a', 'admin-b']);
 });
 
 test('contrôle des rôles : déclencheur vidé sous le même nom → critique ; sauvegarde trop ancienne ou absente → haut', async t => {
@@ -329,6 +352,9 @@ test('contrôle des rôles : déclencheur vidé sous le même nom → critique ;
   const r2 = checkRoles({ store: v.store, siteBackupDir: backups });
   assert.deepEqual(r2.altered, ['account_changes_immuable']);
   assert.equal(r2.ok, false);
+  const rapport = v.db.prepare("SELECT sub, detail FROM events WHERE type = 'vigie_controle_roles' ORDER BY seq DESC LIMIT 1").get();
+  assert.equal(rapport.sub, null, 'un défaut de déclencheur n’invente pas de compte');
+  assert.equal(JSON.parse(rapport.detail).comptes, undefined);
 });
 
 test('admin : contact remplacé, EXIF complet, heures visibles en masse, réglage changé après une session reprise (BV-1, BV-2)', async t => {

@@ -106,7 +106,11 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     signaux: db.prepare('SELECT * FROM dossier_signaux WHERE dossier_id = ? ORDER BY survenu_a, id'),
     nbSignaux: db.prepare('SELECT COUNT(*) FROM dossier_signaux WHERE dossier_id = ?').pluck(),
     ajouterSignal: db.prepare(`INSERT INTO dossier_signaux (dossier_id, seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, objet, alerte_id, cle)
-      VALUES (@dossier_id, @seq, @regle, @survenu_a, @nature, @phase, @marqueurs, @points, @source, @gravite, @entite_kind, @entite_key, @sub, @session, @ip, @objet, @alerte_id, @cle)
+      SELECT @dossier_id, @seq, @regle, @survenu_a, @nature, @phase, @marqueurs, @points, @source, @gravite, @entite_kind, @entite_key, @sub, @session, @ip, @objet, @alerte_id, @cle
+      WHERE NOT EXISTS (SELECT 1 FROM dossier_signaux_ecartes WHERE dossier_id = @dossier_id AND seq = COALESCE(@seq, 0) AND regle = @regle
+        AND survenu_a = CASE WHEN @seq IS NULL THEN @survenu_a ELSE 0 END
+        AND entite_kind = CASE WHEN @seq IS NULL THEN COALESCE(@entite_kind, '') ELSE '' END
+        AND entite_key = CASE WHEN @seq IS NULL THEN COALESCE(@entite_key, '') ELSE '' END)
       ON CONFLICT (dossier_id, seq, regle) DO UPDATE SET alerte_id = COALESCE(excluded.alerte_id, dossier_signaux.alerte_id)`),
     promouvoir: db.prepare("UPDATE dossier_signaux SET promu = 1, nature = 'jalon' WHERE id = ? AND nature = 'fait'"),
     alertesDe: db.prepare('SELECT id, regle, gravite FROM alerts WHERE dossier_id = ?'),
@@ -131,6 +135,8 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     projetesIp: db.prepare('SELECT * FROM signaux_projetes WHERE (ip = ? OR (entite_kind = \'ip\' AND entite_key = ?)) AND survenu_a >= ? ORDER BY survenu_a LIMIT 400'),
     projetesEntite: db.prepare('SELECT * FROM signaux_projetes WHERE entite_kind = ? AND entite_key = ? AND survenu_a >= ? ORDER BY survenu_a LIMIT 400'),
     evenements: db.prepare('SELECT * FROM events WHERE seq = ?'),
+    separations: db.prepare(`SELECT gauche, droite FROM dossier_separations
+      WHERE gauche IN (SELECT value FROM json_each(?)) AND droite IN (SELECT value FROM json_each(?))`),
   };
 
   // ---------- adresses : exclusions (D34) ----------
@@ -158,6 +164,10 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     if (!row) return out;
     const d = parse(row.detail);
     if (row.sub) out.push({ kind: 'compte', key: propre(row.sub), role: 'acteur', force: 'fort' });
+    if (row.type === 'vigie_controle_roles' && Array.isArray(d.comptes)) {
+      for (const sub of d.comptes.slice(0, MAX_ENTITES)) if (typeof sub === 'string' && sub && !out.some(e => e.kind === 'compte' && e.key === propre(sub)))
+        out.push({ kind: 'compte', key: propre(sub), role: 'acteur', force: 'fort' });
+    }
     if (row.session) out.push({ kind: 'session', key: propre(row.session), role: 'acteur', force: 'fort' });
     if (d.acces != null && /^[1-9]\d{0,14}$/.test(String(d.acces))) out.push({ kind: 'acces', key: `acces:${d.acces}`, role: 'acteur', force: 'fort' });
     if (row.ip && !exclue(row.ip).tout) out.push({ kind: 'ip', key: propre(row.ip), role: 'acteur', force: 'moyen' });
@@ -251,9 +261,10 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
   const entrer = (id, items, via) => { const nouvelles = ajouterEntites(id, items, via).filter(e => e && e.role === 'acteur' && e.force !== 'faible'); if (nouvelles.length) retro(id, nouvelles); };
   function ajouterSignal(id, s) {
     if (q.nbSignaux.get(id) >= MAX_SIGNAUX) { q.tronquer.run(id); return false; }
-    q.ajouterSignal.run({ dossier_id: id, seq: s.seq ?? null, regle: s.regle, survenu_a: s.survenu_a, nature: s.nature, phase: s.phase ?? null, marqueurs: s.marqueurs || null,
+    const ajoute = q.ajouterSignal.run({ dossier_id: id, seq: s.seq ?? null, regle: s.regle, survenu_a: s.survenu_a, nature: s.nature, phase: s.phase ?? null, marqueurs: s.marqueurs || null,
       points: s.points ?? null, source: s.source ?? null, gravite: s.gravite ?? null, entite_kind: s.entite_kind ?? null, entite_key: s.entite_key ?? null, sub: s.sub ?? null,
       session: s.session ?? null, ip: s.ip ?? null, objet: s.objet ?? null, alerte_id: s.alerte_id ?? null, cle: s.cle ?? null });
+    if (!ajoute.changes) return false;           // signal attribué à l'autre dossier lors d'une scission
     q.toucher.run(s.survenu_a, id);
     if ((s.nature === 'jalon' || s.nature === 'preuve') && (s.phase || s.marqueurs)) q.jalon.run({ id, t: s.survenu_a });
     return true;
@@ -264,13 +275,25 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     points: row.type === 'session_context_change' && row.severity === 'moyen' ? POINTS['fait.session_context_change'] : null });
 
   // ---------- recherche, ouverture, fusion ----------
-  function trouver(acteurs, { jalon = false } = {}) {
-    const ids = new Set();
+  function trouver(acteurs, { jalon = false, serveur = null } = {}) {
+    const ids = new Set(), poids = new Map();
     const t = now();
     for (const a of acteurs) {
       if (a.role !== 'acteur' || !ACTEURS.has(a.kind)) continue;
       if (a.kind === 'ip' && exclue(a.key).lookup) continue;
-      for (const d of q.trouver.all(a.kind, a.key, jalon ? t - RECIDIVE : Number.MAX_SAFE_INTEGER)) if (d.statut !== 'clos' || jalon) ids.add(d.id);
+      for (const d of q.trouver.all(a.kind, a.key, jalon ? t - RECIDIVE : Number.MAX_SAFE_INTEGER)) if (d.statut !== 'clos' || jalon) {
+        ids.add(d.id);
+        poids.set(d.id, Math.max(poids.get(d.id) || 0, ['compte', 'session', 'acces'].includes(a.kind) ? 2 : 1));
+      }
+    }
+    if (serveur) { ids.add(serveur); if (!poids.has(serveur)) poids.set(serveur, 0); }
+    // Seulement quand plusieurs dossiers se rencontrent : une scission prévaut sur l'ancienne liaison.
+    // Compte/session/accès avant adresse/réseau ; à égalité, le plus ancien. Aucun coût par événement de rafale.
+    if (ids.size > 1) {
+      const json = JSON.stringify([...ids]);
+      for (const { gauche, droite } of q.separations.all(json, json)) {
+        if (ids.has(gauche) && ids.has(droite)) ids.delete(poids.get(droite) > poids.get(gauche) ? gauche : droite);
+      }
     }
     return [...ids].sort((a, b) => a - b);
   }
@@ -302,6 +325,23 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
       db.prepare(`UPDATE dossiers SET ouvert_a = MIN(ouvert_a, ?), derniere = MAX(derniere, ?), dernier_jalon = MAX(COALESCE(dernier_jalon, 0), COALESCE(?, 0)),
         chaine_signalee = MAX(chaine_signalee, ?), tronque = MAX(tronque, ?) WHERE id = ?`).run(a.ouvert_a, a.derniere, a.dernier_jalon, a.chaine_signalee, a.tronque, garde);
       db.prepare("UPDATE dossiers SET fusionne_dans = ?, statut = 'clos', derniere = ? WHERE id = ?").run(garde, now(), autre);
+      // Une fusion avec un troisième dossier transporte les séparations décidées auparavant : le numéro absorbé
+      // cesse d'être une cible de recherche, la séparation doit donc suivre le numéro conservé.
+      for (const s of db.prepare('SELECT gauche, droite FROM dossier_separations WHERE gauche = ? OR droite = ?').all(autre, autre)) {
+        const voisin = s.gauche === autre ? s.droite : s.gauche;
+        if (voisin !== garde) db.prepare('INSERT OR IGNORE INTO dossier_separations (gauche, droite) VALUES (?, ?)').run(Math.min(garde, voisin), Math.max(garde, voisin));
+      }
+      db.prepare('DELETE FROM dossier_separations WHERE gauche = ? OR droite = ?').run(autre, autre);
+      db.prepare(`INSERT OR IGNORE INTO dossier_signaux_ecartes (dossier_id, seq, regle, survenu_a, entite_kind, entite_key)
+        SELECT ?, seq, regle, survenu_a, entite_kind, entite_key FROM dossier_signaux_ecartes WHERE dossier_id = ?`).run(garde, autre);
+      // Les signaux réunis appartiennent de nouveau au dossier : leur éventuel complément d'alerte ne doit plus
+      // être bloqué par l'exclusion créée lors de la scission.
+      db.prepare(`DELETE FROM dossier_signaux_ecartes WHERE dossier_id = ? AND EXISTS
+        (SELECT 1 FROM dossier_signaux s WHERE s.dossier_id = dossier_signaux_ecartes.dossier_id
+          AND COALESCE(s.seq, 0) = dossier_signaux_ecartes.seq AND s.regle = dossier_signaux_ecartes.regle
+          AND (s.seq IS NOT NULL OR (s.survenu_a = dossier_signaux_ecartes.survenu_a
+            AND COALESCE(s.entite_kind, '') = dossier_signaux_ecartes.entite_kind
+            AND COALESCE(s.entite_key, '') = dossier_signaux_ecartes.entite_key)))`).run(garde);
       noter('fusionne', { action: 'fusionne', id: garde, absorbe: autre, par });
     }
     return garde;
@@ -460,8 +500,7 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     const cibles = e && !ACTEURS.has(e.kind) ? [{ kind: e.kind, key: e.key, role: 'cible', force: 'moyen' }] : [];
     const propres = acteurs.filter(a => a.force);
     const estJalon = s.nature === 'jalon' || s.nature === 'preuve' || projection.jalon_acces;
-    let ids = trouver(propres, { jalon: estJalon });
-    if (e?.kind === 'cible' && SERVEUR.test(e.key)) { const sv = q.serveur.get(t - H); if (sv && !ids.includes(sv)) ids.push(sv); }
+    let ids = trouver(propres, { jalon: estJalon, serveur: e?.kind === 'cible' && SERVEUR.test(e.key) ? q.serveur.get(t - H) : null });
     // Dissimulation sans acteur : à tous les dossiers ouverts (6.2) ; elle n'en ouvre pas (son alerte, si elle en a une,
     // ouvre un dossier « surveillance »).
     if (!propres.some(a => a.role === 'acteur') && projection.marqueurs.includes('dissimulation') && !projection.phase) {
@@ -499,8 +538,7 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     // Le signal de la même règle sur le même événement, s'il a été projeté, porte la phase.
     const p = row?.seq != null ? db.prepare('SELECT * FROM signaux_projetes WHERE seq = ? AND regle = ? ORDER BY id DESC LIMIT 1').get(row.seq, regle) : null;
     const entree = p ? { ...projeteVersSignal(p), alerte_id: alerteId } : item;
-    let ids = trouver(propres, { jalon: true });
-    if (e.kind === 'cible' && SERVEUR.test(e.key)) { const sv = q.serveur.get(t - H); if (sv && !ids.includes(sv)) ids.push(sv); }
+    let ids = trouver(propres, { jalon: true, serveur: e.kind === 'cible' && SERVEUR.test(e.key) ? q.serveur.get(t - H) : null });
     let id;
     if (ids.length) {
       id = ids.length > 1 ? fusionner(ids) : ids[0];
@@ -640,9 +678,89 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
   }
   function fusionnerManuel(id, autre, { par }) {
     exiger(id); exiger(autre);
-    const garde = fusionner([id, autre], par);
-    recalculer(garde);
-    return garde;
+    return db.transaction(() => {
+      // Réunir explicitement une scission rétablit ses entités actives, même si le premier dossier gardait leur
+      // détachement. Cette exception concerne uniquement la paire séparée par une personne.
+      const paire = q.separations.all(JSON.stringify([id, autre]), JSON.stringify([id, autre]));
+      if (paire.length) {
+        db.prepare(`DELETE FROM dossier_entites WHERE dossier_id IN (?, ?) AND detache_a IS NOT NULL
+          AND EXISTS (SELECT 1 FROM dossier_entites e WHERE e.dossier_id IN (?, ?) AND e.kind = dossier_entites.kind
+          AND e.key = dossier_entites.key AND e.detache_a IS NULL)`).run(id, autre, id, autre);
+        db.prepare('DELETE FROM dossier_separations WHERE gauche = ? AND droite = ?').run(Math.min(id, autre), Math.max(id, autre));
+      }
+      const garde = fusionner([id, autre], par);
+      recalculer(garde);
+      return garde;
+    })();
+  }
+
+  // Scission explicite : les entités et les signaux sont choisis séparément (un signal peut citer plusieurs acteurs).
+  // Une alerte et tous ses signaux restent ensemble ; aucun des deux dossiers ne doit être vidé. L'aperçu et le geste
+  // emploient le même validateur. Les numéros de signaux sont ceux de dossier_signaux, jamais ceux du journal.
+  function preparerScission(id, { entites = [], signaux = [] } = {}) {
+    const d = exiger(id);
+    if (d.statut === 'clos') throw new Error('un dossier clos ne se scinde pas');
+    if (!Array.isArray(entites) || !Array.isArray(signaux) || entites.length > MAX_ENTITES || signaux.length > 2000) throw new Error('sélection de scission invalide');
+    const es = q.entites.all(id), ss = q.signaux.all(id);
+    const keys = new Set(entites), nums = new Set(signaux.map(Number));
+    const choisies = es.filter(e => keys.has(`${e.kind}:${e.key}`)), pris = ss.filter(s => nums.has(s.id));
+    if (!choisies.length || choisies.length !== keys.size || choisies.length === es.length) throw new Error('choisissez une partie des entités actives, en laissant une entité dans chaque dossier');
+    if (!pris.length || pris.length !== nums.size || pris.length === ss.length) throw new Error('choisissez une partie des signaux, en laissant un signal dans chaque dossier');
+    const alertes = [...new Set(pris.map(s => s.alerte_id).filter(Boolean))];
+    if (ss.some(s => s.alerte_id && alertes.includes(s.alerte_id) && !nums.has(s.id))) throw new Error('tous les signaux d’une même alerte doivent rester ensemble');
+    if (alertes.some(a => !q.alertesDe.all(id).some(x => x.id === a))) throw new Error('une alerte a changé de dossier : rechargez la sélection');
+    return { dossier: d, entites: choisies, signaux: pris, alertes, restantes: es.filter(e => !keys.has(`${e.kind}:${e.key}`)),
+      restants: ss.filter(s => !nums.has(s.id)) };
+  }
+  function scinder(id, { entites, signaux, motif, par }) {
+    const m = motifDe(motif);
+    return db.transaction(() => {
+      const p = preparerScission(id, { entites, signaux });
+      const graine = p.entites.find(e => e.role === 'acteur') || p.entites[0];
+      const nouveau = Number(q.inserer.run(pisteDe(graine, p.entites.filter(e => e.role === 'acteur')), graine.kind, graine.key, now(), now()).lastInsertRowid);
+      const copier = db.prepare(`INSERT INTO dossier_entites (dossier_id, kind, key, role, force, via, ajoute_a, detache_a)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
+      for (const e of [...p.entites, ...p.restantes]) {
+        const deplace = p.entites.includes(e);
+        copier.run(nouveau, e.kind, e.key, e.role, e === graine ? 'graine' : e.force, e.via, e.ajoute_a, deplace ? null : now());
+        if (deplace) db.prepare('UPDATE dossier_entites SET detache_a = ? WHERE dossier_id = ? AND kind = ? AND key = ?').run(now(), id, e.kind, e.key);
+      }
+      // Les décisions plus anciennes suivent les deux branches d'une nouvelle scission. Les entités déjà
+      // détachées et les signaux déjà écartés ne doivent pas rentrer à nouveau par la recherche rétroactive.
+      db.prepare(`INSERT INTO dossier_entites (dossier_id, kind, key, role, force, via, ajoute_a, detache_a)
+        SELECT ?, kind, key, role, force, via, ajoute_a, detache_a FROM dossier_entites
+        WHERE dossier_id = ? AND detache_a IS NOT NULL ON CONFLICT DO NOTHING`).run(nouveau, id);
+      db.prepare(`INSERT INTO dossier_signaux_ecartes (dossier_id, seq, regle, survenu_a, entite_kind, entite_key)
+        SELECT ?, seq, regle, survenu_a, entite_kind, entite_key FROM dossier_signaux_ecartes WHERE dossier_id = ?`).run(nouveau, id);
+      for (const s of db.prepare('SELECT gauche, droite FROM dossier_separations WHERE gauche = ? OR droite = ?').all(id, id)) {
+        const voisin = s.gauche === id ? s.droite : s.gauche;
+        db.prepare('INSERT INTO dossier_separations (gauche, droite) VALUES (?, ?)').run(Math.min(nouveau, voisin), Math.max(nouveau, voisin));
+      }
+      const exclusion = db.prepare(`INSERT OR IGNORE INTO dossier_signaux_ecartes
+        (dossier_id, seq, regle, survenu_a, entite_kind, entite_key) VALUES (?, ?, ?, ?, ?, ?)`);
+      // Les détecteurs périodiques n'ont pas d'événement source. Leur règle ne suffit pas à les identifier :
+      // l'heure et l'entité distinguent l'occurrence déplacée des futurs signaux et des autres réseaux.
+      const ecarter = (dossier, s) => exclusion.run(dossier, s.seq ?? 0, s.regle,
+        s.seq == null ? s.survenu_a : 0, s.seq == null ? s.entite_kind ?? '' : '', s.seq == null ? s.entite_key ?? '' : '');
+      for (const s of p.signaux) {
+        ecarter(id, s);
+        db.prepare('UPDATE dossier_signaux SET dossier_id = ? WHERE id = ?').run(nouveau, s.id);
+      }
+      for (const s of p.restants) ecarter(nouveau, s);
+      for (const a of p.alertes) db.prepare('UPDATE alerts SET dossier_id = ? WHERE id = ?').run(nouveau, a);
+      const reste = p.restantes.find(e => e.force === 'graine') || p.restantes.find(e => e.role === 'acteur') || p.restantes[0];
+      db.prepare('UPDATE dossiers SET graine_kind = ?, graine_key = ? WHERE id = ?').run(reste.kind, reste.key, id);
+      db.prepare('INSERT INTO dossier_separations (gauche, droite) VALUES (?, ?)').run(id, nouveau);
+      for (const n of [id, nouveau]) {
+        db.prepare(`UPDATE dossiers SET derniere = (SELECT MAX(survenu_a) FROM dossier_signaux WHERE dossier_id = ?),
+          dernier_jalon = (SELECT MAX(survenu_a) FROM dossier_signaux WHERE dossier_id = ? AND nature IN ('jalon','preuve') AND (phase IS NOT NULL OR marqueurs IS NOT NULL)),
+          chaine_signalee = ? WHERE id = ?`).run(n, n, p.dossier.chaine_signalee, n);
+        recalculer(n);
+        noter('scinde', { action: 'scinde', id: n, origine: id, nouveau, par, motif: m,
+          entites: p.entites.map(e => ({ kind: e.kind, key: e.key })), signaux: p.signaux.map(s => s.id), alertes: p.alertes });
+      }
+      return nouveau;
+    })();
   }
 
   // ---------- lecture ----------
@@ -659,5 +777,5 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
       signaux: q.signaux.all(id), alertes: db.prepare('SELECT id, regle, gravite, statut, mode FROM alerts WHERE dossier_id = ? ORDER BY id').all(id) };
   }
 
-  return { surSignal, surAlerte, alerteDure, surFait, tick, purge, recalculer, prendre, classer, detacher, rattacher, fusionner: fusionnerManuel, liste, fiche, confianceCompte };
+  return { surSignal, surAlerte, alerteDure, surFait, tick, purge, recalculer, prendre, classer, detacher, rattacher, fusionner: fusionnerManuel, preparerScission, scinder, liste, fiche, confianceCompte };
 }

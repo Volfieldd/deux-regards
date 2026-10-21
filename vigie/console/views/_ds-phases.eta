@@ -1,0 +1,2 @@
+<% /* Progression en HTML : le texte porte l'information que les huit cases répètent visuellement. */ const p = it.prog; %>
+<div class="ds-prog"><ol class="ds-phases" aria-hidden="true"><% for (const c of p.cases) { %><li class="<%= c %>"></li><% } %></ol><span class="sr-only"><%= p.phrase %></span><span class="mot" aria-hidden="true"><%= p.mot %></span><span class="sec" aria-hidden="true"><%= p.suite %></span></div>

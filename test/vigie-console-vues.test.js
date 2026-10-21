@@ -182,7 +182,7 @@ test('vue d’ensemble : données de la base, ordre des alertes, santé, décisi
   assert.equal(vue.alertes.total, 6);
   const { bandeau, ...nombres } = c;
   assert.deepEqual(nombres, vue.compteurs, 'la barre latérale et la vue d’ensemble ne divergent pas');
-  assert.deepEqual(nombres, { alertes: 6, sante: 1, decisions: 3 });
+  assert.deepEqual(nombres, { alertes: 6, dossiers: 0, sante: 1, decisions: 3 });
   assert.match(bandeau.texte, /^2 alertes critiques sans intervenant/);
   assert.equal(bandeau.id, a413);
 

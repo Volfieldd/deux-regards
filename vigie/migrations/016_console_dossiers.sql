@@ -1,0 +1,24 @@
+-- Journal d'un dossier, sans parcourir le journal général (même garde JSON que l'index des alertes).
+CREATE INDEX events_dossier ON events
+  ((CASE WHEN json_valid(detail) THEN json_extract(detail, '$.id') END), seq)
+  WHERE type = 'vigie_dossier';
+
+-- Une scission est une décision durable : le même lien ne réunit pas à nouveau les deux dossiers.
+-- Les signaux déplacés restent dans la chaîne ; seule leur appartenance aux dossiers change.
+CREATE TABLE dossier_separations (
+  gauche INTEGER NOT NULL REFERENCES dossiers(id) ON DELETE CASCADE,
+  droite INTEGER NOT NULL REFERENCES dossiers(id) ON DELETE CASCADE,
+  PRIMARY KEY (gauche, droite),
+  CHECK (gauche < droite)
+);
+CREATE TABLE dossier_signaux_ecartes (
+  dossier_id INTEGER NOT NULL REFERENCES dossiers(id) ON DELETE CASCADE,
+  seq INTEGER NOT NULL,                  -- 0 : signal sans événement source
+  regle TEXT NOT NULL,
+  -- Sans événement, seule cette occurrence est écartée : jamais les suivantes de la même règle.
+  survenu_a INTEGER NOT NULL DEFAULT 0,
+  entite_kind TEXT NOT NULL DEFAULT '',
+  entite_key TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (dossier_id, seq, regle, survenu_a, entite_kind, entite_key)
+);
+CREATE INDEX dossier_separations_droite ON dossier_separations (droite);

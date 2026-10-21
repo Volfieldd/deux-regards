@@ -1,0 +1,2 @@
+<% layout('./layout', { titre: it.titre }); %>
+<header class="ep"><h1>Dossier introuvable</h1></header><p>Ce dossier n’existe pas, ou ce geste n’est plus disponible après une fusion.</p><p><a class="btn ghost" href="/dossiers">Revenir aux dossiers</a></p>

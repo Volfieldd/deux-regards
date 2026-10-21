@@ -492,6 +492,7 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
 
   return {
     id: a.id,
+    dossier: a.dossier_id || null,
     lecteur: roleVu === 'viewer',
     titre,
     grav: { mot: g.mot, classe: g.classe },

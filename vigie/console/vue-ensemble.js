@@ -35,6 +35,8 @@ function requetes(db) {
   q = {
     reglage: db.prepare('SELECT value FROM settings WHERE key = ?').pluck(),
     nbAlertes: db.prepare("SELECT COUNT(*) FROM alerts WHERE statut != 'close'").pluck(),
+    nbDossiers: db.prepare("SELECT COUNT(*) FROM dossiers WHERE fusionne_dans IS NULL AND statut != 'clos'").pluck(),
+    dossiersGravite: db.prepare("SELECT gravite, COUNT(*) n FROM dossiers WHERE fusionne_dans IS NULL AND statut != 'clos' GROUP BY gravite"),
     critiques: db.prepare("SELECT id, regle, premiere FROM alerts WHERE statut = 'ouverte' AND gravite = 'critique' AND mode != 'observer' ORDER BY premiere DESC, id DESC LIMIT 4"),
     parGravite: db.prepare("SELECT gravite, statut, COUNT(*) n FROM alerts WHERE statut != 'close' GROUP BY gravite, statut"),
     alertes: db.prepare(`SELECT id, regle, cas, entite_kind, entite_key, gravite, mode, statut, premiere, derniere, compteur, score, sources, reponse, traite_par, traite_a
@@ -60,7 +62,7 @@ const reglage = (q, cle, defaut = null) => { const v = lire(q.reglage.get(cle));
 export function compteurs({ db, engine, switches, now = Date.now }) {
   const q = requetes(db);
   const t = now();
-  return { alertes: q.nbAlertes.get(), sante: ecartsSante({ db, engine, switches, now }).n, decisions: q.nbDecisions.get(t), bandeau: bandeauDe(q, engine) };
+  return { alertes: q.nbAlertes.get(), dossiers: q.nbDossiers.get(), sante: ecartsSante({ db, engine, switches, now }).n, decisions: q.nbDecisions.get(t), bandeau: bandeauDe(q, engine) };
 }
 
 // Bandeau des critiques (maquettes MV-02 à MV-11, en tête de chaque page en session sauf la vue d'ensemble, qui le dit
@@ -288,7 +290,8 @@ export function overview({ db, engine, switches, now = Date.now, role }) {
     lecteur,
     // Interrupteurs : « Arrêter… » (vers les réglages) et « Remettre en marche maintenant » pour qui a le droit des réglages.
     peutRegler: Boolean(role) && can(role, 'reglages'),
-    compteurs: { alertes: nb.alertes, sante: nb.sante, decisions: nb.decisions },
+    compteurs: { alertes: nb.alertes, dossiers: q.nbDossiers.get(), sante: nb.sante, decisions: nb.decisions },
+    dossiers: { total: q.nbDossiers.get(), gravites: q.dossiersGravite.all().map(d => ({ n: d.n, mot: gravite(d.gravite).mot })) },
     phrase: phraseDe(compte),
     faits: faits.slice(0, 3),
     aussi: { prefixe: total > 0, items: aussi },

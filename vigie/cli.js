@@ -39,6 +39,7 @@ const HELP = `Commandes :
   dossier <id>                             explication, entités, signaux et faits (40 derniers), alertes
   dossier <id> prendre | classer <incident|faux_positif|test|legitime> [--note "…"]   (« legitime » : motif obligatoire)
   dossier <id> detacher <type:clé> --motif "…" | rattacher <type:clé> | fusionner <id2>
+  dossier <id> scinder --entites "compte:a,session:s" --signaux "12,13" --motif "…"   (numéros de dossier_signaux)
   entites                                  entités les plus chaudes (score, sources)
   regles                                   règles et leur mode
   regle <règle> <arret|observer|alerter|bloquer> [--duree 4h] [--motif "…"]   motif obligatoire pour réduire
@@ -184,7 +185,8 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
           if (geste === 'detacher') { const [k, v] = entite(); D.detacher(id, k, v, { motif, par }); return `Dossier #${id} : ${k} ${v} détaché.`; }
           if (geste === 'rattacher') { const [k, v] = entite(); D.rattacher(id, k, v, { par }); return `Dossier #${id} : ${k} ${v} rattaché.`; }
           if (geste === 'fusionner') return `Dossier #${D.fusionner(id, Number(rest[2]), { par })} : fusion faite.`;
-          if (geste) throw new DecisionError('geste : prendre, classer, detacher, rattacher ou fusionner');
+          if (geste === 'scinder') return `Dossier #${D.scinder(id, { entites: String(opt.entites || '').split(',').filter(Boolean), signaux: String(opt.signaux || '').split(',').filter(Boolean), motif, par })} : créé par scission du dossier #${id}.`;
+          if (geste) throw new DecisionError('geste : prendre, classer, detacher, rattacher, fusionner ou scinder');
         } catch (err) { if (err instanceof DecisionError) throw err; throw new DecisionError(err.message); }
         const d = D.fiche(id);
         if (!d) return 'Dossier inconnu.';
@@ -194,7 +196,7 @@ export function run(argv, { config, now = Date.now, user = whoami() } = {}) {
           ...(x.lignes || []), ...(x.modificateurs?.length ? [`Modificateurs : ${x.modificateurs.join(', ')}`] : []),
           `Ouvert ${iso(d.ouvert_a)} UTC, dernier signe ${iso(d.derniere)} UTC`,
           'Entités :', ...d.entites.map(e => `  ${e.role.padEnd(8)} ${e.kind.padEnd(8)} ${e.key}  (${e.force}${e.via ? `, par ${e.via}` : ''})${e.detache_a ? '  DÉTACHÉE' : ''}`),
-          'Signaux et faits (heure de la source) :', ...d.signaux.slice(-40).map(s => `  ${iso(s.survenu_a)}  ${(s.phase ? `${s.phase}` : '·')} ${s.nature.padEnd(6)}${s.promu ? '*' : ' '} ${s.regle}${s.entite_key ? `  ${s.entite_kind} ${s.entite_key}` : ''}${s.objet ? `  ${s.objet}` : ''}${s.alerte_id ? `  alerte #${s.alerte_id}` : ''}`),
+          'Signaux et faits (heure de la source) :', ...d.signaux.slice(-40).map(s => `  [${s.id}] ${iso(s.survenu_a)}  ${(s.phase ? `${s.phase}` : '·')} ${s.nature.padEnd(6)}${s.promu ? '*' : ' '} ${s.regle}${s.entite_key ? `  ${s.entite_kind} ${s.entite_key}` : ''}${s.objet ? `  ${s.objet}` : ''}${s.alerte_id ? `  alerte #${s.alerte_id}` : ''}`),
           `Alertes : ${d.alertes.map(a => `#${a.id} ${a.regle} (${a.gravite}, ${a.statut})`).join(', ') || 'aucune'}`].join('\n');
       }
       case 'entites': return engine.top(20).map(e => `${e.kind.padEnd(8)} ${e.key}  score ${e.score.toFixed(1)}  sources ${e.sources.join('+') || '—'}  ${e.signaux} signaux`).join('\n') || 'Aucune entité active.';

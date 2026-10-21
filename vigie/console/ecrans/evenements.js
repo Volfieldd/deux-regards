@@ -29,6 +29,7 @@ import { actionsForcees, lienLever } from './decisions.js';
 import { FINE, NBSP, adresseDetail, cibleBlocage, cleReseau, formesReseau, masquer, reseauVue, dateHeure, duree, gravite, guillemets, heure, jour, jusqua, minuitParis, nombre, paris, quand } from '../format.js';
 import { CLASSEMENTS, DECISIONS, ENTITES, ENTITES_NOM, MODES, PORTEES, SOURCES, aQuand, lire, periode, pluriel, titreDe, typo, virgule } from '../lexique.js';
 import { sansContacts } from '../../util.js';
+import { dossiersEntite } from './dossiers.js';
 
 export const PAGE = 50;                   // lignes par page du journal
 export const LECTURE_MAX = 10_000;        // lignes lues au plus pour une page (fenêtre de lecture)
@@ -1114,7 +1115,8 @@ export function register(app, ctx) {
     const message = ctx.isRefresh(req) ? null : ctx.sessions.takeMessage(req.moi.sid);
     const kind = String(req.params.kind), cle = String(req.params.cle ?? '');
     const actions = actionsForcees({ db, kind, key: cle, req, t: now(), retour: `/entites/${kind}/${encodeURIComponent(cle)}`, message, prefixe: 'e' });
-    return ctx.view(reply, req, 'entite', { page: 'entites', titre: `Fiche ${de} · Vigie`, f, actions, message });
+    const dossiers = dossiersEntite({ db, kind, key: cle, role: req.moi.role });
+    return ctx.view(reply, req, 'entite', { page: 'entites', titre: `Fiche ${de} · Vigie`, f, actions, message, dossiers });
   });
 
 }

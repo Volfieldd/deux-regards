@@ -1,0 +1,26 @@
+<%
+/* MV-12 : état en une phrase, filtres GET, tableau devenu cartes au téléphone. Toutes les valeurs sont échappées. */
+const v = it.vue, f = v.f;
+layout('./layout', { titre: it.titre });
+%>
+<header class="ep"><div class="ep-titre"><h1>Dossiers</h1></div><p class="ep-meta"><span><%= v.maintenant %></span><span class="tel-non">au-dessus des alertes, qui ne changent pas</span></p></header>
+<% if (v.lecteur) { %><p class="note-a"><b>Lecture seule : vous lisez les dossiers, vous n’y agissez pas.</b> Les adresses sont tronquées (/24, /48).</p><% } %>
+<div class="panel"><p class="vg-lede"><%= v.total %> <%= v.total === '1' ? 'dossier' : 'dossiers' %> · <%= v.resume %>.</p><% if (v.prioritaire) { %><p>Le dossier critique #<%= v.prioritaire.id %> attend un intervenant.</p><a class="btn" href="/dossiers/<%= v.prioritaire.id %>">Ouvrir le dossier critique #<%= v.prioritaire.id %></a><% } %><p class="hint">Les alertes, leurs modes et leurs notifications ne changent pas.</p></div>
+<% if (v.ignores.length) { %><p class="note-a">Filtres ignorés : <%= v.ignores.join(', ') %>. Leur valeur n’est pas reconnue.</p><% } %>
+<p class="vg-replie-lien"><span><%= v.resume %></span><a href="#filtres">Modifier<span class="sr-only"> les filtres</span></a></p>
+<form class="vg-filtres vg-replie" id="filtres" method="get" action="/dossiers" role="search" aria-label="Filtrer les dossiers">
+<% for (const [cle, label, choix] of [['statut', 'Statut', v.statuts], ['piste', 'Piste', v.pistes], ['gravite', 'Gravité', v.gravites], ['phase', 'Phase atteinte', v.phases]]) { %>
+<div class="champ-a"><label for="f-<%= cle %>"><%= label %></label><select id="f-<%= cle %>" name="<%= cle %>"><% if (cle !== 'statut') { %><option value="">Toutes</option><% } %><% for (const [val, mot] of Object.entries(choix)) { %><option value="<%= val %>"<% if (f[cle] === val) { %> selected<% } %>><%= mot %></option><% } %></select></div><% } %>
+<div class="pied"><a class="lien-a" href="/dossiers">Tout effacer</a><button class="btn" type="submit">Filtrer</button></div></form>
+<div class="vg-resume"><div><h2 class="vg-section-t"><%= v.total %> dossiers</h2><p>Le plus grave d’abord ; à gravité égale, la phase la plus avancée, puis la confiance, puis le dernier jalon. Les clos et fusionnés viennent ensuite, du plus récent au plus ancien.</p></div></div>
+<% if (!v.lignes.length) { %><div class="panel"><p>Aucun dossier pour ces filtres : <%= v.resume %>.</p><a class="vg-lien" href="/dossiers">Voir les dossiers ouverts</a> · <a class="vg-lien" href="/dossiers?statut=tous">Tous les dossiers</a></div><% } else { %>
+<ul class="ds-leg" aria-label="Lire la progression"><li>Cases sombres : phases dans l’ordre</li><li>Cases grises : observées hors de la suite</li><li>Tirets : non observées sous la phase atteinte</li></ul>
+<div class="liste-wrap tablewrap"><table class="liste-a vg-dossiers"><caption><%= v.total %> dossiers · <%= v.resume %></caption><thead><tr><th scope="col">Gravité</th><th scope="col">Dossier</th><th scope="col">Progression</th><th scope="col">Confiance et enjeu</th><th scope="col">Entités</th><th scope="col">Dernier signe</th><th scope="col">Statut</th></tr></thead><tbody>
+<% for (const d of v.lignes) { %><tr<% if (d.grav.classe === 'critique') { %> class="vg-crit"<% } %>>
+<td class="c-grav"><%~ include('./_grav', { gravClasse: d.grav.classe, gravMot: d.grav.mot }) %></td>
+<th scope="row"><a class="ligne-lien" href="/dossiers/<%= d.id %>"><%= d.titre %><span class="sr-only"> (dossier #<%= d.id %>)</span></a><span class="sec">#<%= d.id %> · piste <%= d.piste %><% if (d.alertes.length) { %> · alertes <%= d.alertes.map(n => '#' + n).join(', ') %><% } %></span></th>
+<td class="c-prog" data-label="Progression"><%~ include('./_ds-phases', { prog: d.prog }) %></td>
+<td class="c-niv" data-label="Confiance et enjeu"><% for (const [mot, valeur, niveaux] of [['confiance', d.confiance, { faible: 1, moyenne: 2, forte: 3 }], ['enjeu', d.enjeu, { sensible: 2, critique: 3 }]]) { %><span class="ds-niv n<%= niveaux[valeur] || 0 %>"><span class="barres" aria-hidden="true"><i></i><i></i><i></i></span><span><span class="k"><%= mot %></span> <%= valeur %></span></span><% } %></td>
+<td class="c-ent num" data-label="Entités"><%= d.entites %></td><td class="c-der" data-label="Dernier signe"><%= d.derniere %><span class="sec">ouvert le <%= d.ouvert %></span></td>
+<td class="c-etat"><%~ include('./_etat', { etatK: d.etat, etatMot: d.statut }) %><% if (d.fusion) { %><span class="sec">dans <a class="vg-lien" href="/dossiers/<%= d.fusion %>">le dossier #<%= d.fusion %></a></span><% } %><% if (d.classement) { %><span class="sec"><%= d.classement %></span><% } %><% if (d.par) { %><span class="sec">par <%= d.par %></span><% } %><% if (d.note) { %><span class="sec"><%= d.note %></span><% } %><% if (d.recidive) { %><span class="sec">Récidive</span><% } %></td></tr><% } %>
+</tbody></table></div><div class="pied-liste"><span><%= v.position %></span><% if (v.precedente) { %><a class="btn ghost" href="<%= v.precedente %>">Page précédente</a><% } %><% if (v.suivante) { %><a class="btn ghost" href="<%= v.suivante %>">Page suivante</a><% } %></div><% } %>
