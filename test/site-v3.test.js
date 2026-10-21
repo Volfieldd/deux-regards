@@ -96,7 +96,7 @@ test('Carnets : ouverts en v3 comme en v2, introuvables en v1', async t => {
   assert.match((await c.see('/carnet')).body, V3CSS);
 });
 
-test('administrateur : vue v3 pour lui seul, boutons vers les deux autres versions ; journal d’audit', async t => {
+test('administrateur : vue v3 pour lui seul, boutons vers les huit autres compositions ; journal d’audit', async t => {
   const c = await site(t);
   const a = c.admin();
   assert.equal((await a.post('/admin/apparence/apercu-v2', { vue: 'v3', vers: PHOTO })).statusCode, 303);
@@ -106,7 +106,8 @@ test('administrateur : vue v3 pour lui seul, boutons vers les deux autres versio
   const aside = page.body.slice(page.body.indexOf('<aside class="vue-site'), page.body.indexOf('</aside>') + 8);
   assert.match(aside, /vue-site--forcee/);
   assert.deepEqual([...aside.matchAll(/name="vue" value="([^"]+)"><input type="hidden" name="vers" value="[^"]*"><button class="vue-site-b" type="submit">([^<]+)</g)].map(m => [m[1], m[2]]),
-    [['v2', 'Voir en v2'], ['suivre', 'Voir en v1']]);
+    [['v2', 'Voir en v2'], ['suivre', 'Voir en v1'], ['obscura', 'Voir en Obscura'], ['panoramique', 'Voir en Panoramique'],
+      ['contact', 'Voir en Contact'], ['resonances', 'Voir en Résonances'], ['itinerance', 'Voir en Itinérance'], ['hors-cadre', 'Voir en Hors cadre']]);
   assert.ok(c.db.prepare("SELECT 1 FROM audit_log WHERE detail = 'vue de la session : v3 (visiteurs : v1)'").get());
   // Le visiteur, en même temps : la v1.
   assert.doesNotMatch((await c.see(PHOTO)).body, V3CSS);

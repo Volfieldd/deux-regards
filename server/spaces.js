@@ -106,8 +106,9 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
     invites: db.prepare('SELECT * FROM space_invites WHERE space_id = ? ORDER BY revoked_at IS NOT NULL, created_at DESC, id DESC'),
     byToken: db.prepare('SELECT * FROM space_invites WHERE token_hash = ?'),
     oldLink: db.prepare('SELECT o.*, i.space_id FROM space_invite_old_links o JOIN space_invites i ON i.id = o.invite_id WHERE o.token_hash = ?'),
-    insertInvite: db.prepare(`INSERT INTO space_invites (space_id, token_hash, password_hash, label, lang, is_group, rights, expires_at, created_by, created_at)
-      VALUES (@space_id, @token_hash, @password_hash, @label, @lang, @is_group, @rights, @expires_at, @created_by, @t)`),
+    nextInvite: db.prepare('UPDATE space_invite_compteur SET dernier_id = MAX(dernier_id, (SELECT COALESCE(MAX(id), 0) FROM space_invites)) + 1 WHERE id = 1 RETURNING dernier_id').pluck(),
+    insertInvite: db.prepare(`INSERT INTO space_invites (id, space_id, token_hash, password_hash, label, lang, is_group, rights, expires_at, created_by, created_at)
+      VALUES (@id, @space_id, @token_hash, @password_hash, @label, @lang, @is_group, @rights, @expires_at, @created_by, @t)`),
     grants: db.prepare('SELECT * FROM visitor_grants WHERE session_id = ?'),
     grantsOfInvite: db.prepare('SELECT session_id FROM visitor_grants WHERE invite_id = ?').pluck(),
     devices: db.prepare('SELECT COUNT(*) FROM space_invite_devices WHERE invite_id = ?').pluck(),
@@ -310,8 +311,10 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
     const f = readInviteFields(body, s);
     const token = newLinkToken(), password = generatePassword();
     const hash = await hashPassword(password);
-    const id = Number(q.insertInvite.run({ space_id: s.id, token_hash: hashToken(token), password_hash: hash, label: vault.seal(f.label), lang: f.lang, is_group: f.is_group,
-      rights: JSON.stringify(f.rights), expires_at: f.expires_at, created_by: by, t: now() }).lastInsertRowid);
+    // Une décision encore signée peut survivre à l'effacement de l'accès : son numéro ne désignera jamais un nouvel
+    // invité. Allocation et insertion ensemble ; une création échouée ne consomme pas de numéro.
+    const id = db.transaction(() => Number(q.insertInvite.run({ id: q.nextInvite.get(), space_id: s.id, token_hash: hashToken(token), password_hash: hash, label: vault.seal(f.label), lang: f.lang, is_group: f.is_group,
+      rights: JSON.stringify(f.rights), expires_at: f.expires_at, created_by: by, t: now() }).lastInsertRowid))();
     logEvent(s.id, id, 'cree', {});
     const inv = invite(id);
     exposure(request, 'cree', { space: s, invite: inv });
@@ -386,14 +389,22 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
   }
   // Suspension (30 refus, G19 ; ou décision suspendre_acces de la Vigie, BV-18) : les autorisations ouvertes tombent
   // aussi, le lien ayant fui ; l'équipe débloque, ou donne un nouveau mot de passe.
-  function suspend(id, raison = 'refus') {
+  function suspend(id, raison = 'refus', decision = null) {
+    if (decision && (raison !== 'vigie' || !Number.isFinite(decision.depuis) || !Number.isFinite(decision.fin) || decision.fin <= now())) throw new Error('décision de suspension invalide ou échue');
     const inv = q.invite.get(Number(id));
     if (!inv) return false;
     db.transaction(() => {
+      // Revue sécurité : le reçu fait foi après un redémarrage, même si le cache n'a pas pu être écrit. Une même décision
+      // ne repose jamais la suspension levée par l'équipe ; prolonger sa durée prolonge seulement celle du reçu.
+      if (decision && db.prepare('SELECT 1 FROM space_vigie_suspensions WHERE invite_id = ? AND depuis = ?').get(inv.id, decision.depuis)) {
+        db.prepare('UPDATE space_vigie_suspensions SET fin = MAX(fin, ?) WHERE invite_id = ? AND depuis = ?').run(decision.fin, inv.id, decision.depuis);
+        return;
+      }
       db.prepare('UPDATE space_invites SET suspended_at = COALESCE(suspended_at, ?) WHERE id = ?').run(now(), inv.id);
       revokeGrantsOf([inv.id], inv.space_id, 'acces_suspendu');
+      logEvent(inv.space_id, inv.id, 'suspension', { detail: raison });
+      if (decision) db.prepare('INSERT INTO space_vigie_suspensions (invite_id, depuis, fin) VALUES (?, ?, ?)').run(inv.id, decision.depuis, decision.fin);
     })();
-    logEvent(inv.space_id, inv.id, 'suspension', { detail: raison });
     return true;
   }
 
@@ -570,6 +581,7 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
       for (const id of old) { removeArchives(id); n += db.prepare('DELETE FROM space_invites WHERE id = ?').run(id).changes; }
       db.prepare('DELETE FROM visitor_grants WHERE expires_at <= ?').run(t);
       db.prepare('DELETE FROM visitor_grants_revoked WHERE revoked_at < ?').run(t - 48 * 3600e3);
+      db.prepare('DELETE FROM space_vigie_suspensions WHERE fin <= ?').run(t);
     })();
     // Archives : 24 h.
     for (const a of db.prepare('SELECT id, file FROM space_archives WHERE created_at < ?').all(t - DAY)) {

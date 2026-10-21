@@ -10,6 +10,7 @@ import { createDecisions } from '../vigie/decisions.js';
 import { createSwitches } from '../vigie/interrupteurs.js';
 import { createEngine } from '../vigie/moteur.js';
 import { createIngest } from '../vigie/ingest.js';
+import { createDecisionsClient } from '../server/securite/decisions.js';
 import { loadVigieConfig } from '../vigie/config.js';
 import { run as cli, keys } from '../vigie/cli.js';
 
@@ -147,6 +148,45 @@ test('modes : arrêt (rien), alerter ; détection arrêtée : rien ; blocage aut
   v.store.setting.set('controle_roles_admins', null);
   for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip: '192.0.2.200' }); v.zitadel('zitadel_echec', 'moyen', { ip: '192.0.2.200' }); }
   assert.match(v.alerts().find(x => x.entite_key === '192.0.2.200').reponse, /aucun contrôle des rôles réussi/);
+});
+
+test('blocage automatique : tout le /64 est exempté s’il contient une adresse protégée, même écrite autrement', async t => {
+  for (const protection of ['confiance', 'administrateur']) await t.test(protection, t => {
+    const v = engineOf(t);
+    v.engine.setMode('entite.score', 'bloquer', 'test');
+    const ip = '2001:0DB8:0001:0002:0000:0000:0000:0001';
+    if (protection === 'confiance') v.store.setting.set('adresses_confiance', [{ ip, jusqua: v.clock.t + 3600e3 }]);
+    else {
+      v.store.setting.set('controle_roles_admins', { administrateurs: ['admin'], instantane_a: v.clock.t });
+      // Plus de 200 adresses : la connexion protégée ne doit pas disparaître dans une troncature de la requête.
+      for (let i = 0; i < 205; i++) v.site('session_created', 'info', { sub: 'admin', ip: `2001:db8:3:${i.toString(16)}::1` });
+      v.site('authn_login_success', 'info', { sub: 'admin', ip });
+    }
+    const burst = ip => { for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip }); v.zitadel('zitadel_echec', 'moyen', { ip }); } };
+    burst('2001:db8:1:2::2');
+    burst('2001:db8:1:2::1');
+    burst('2001:db8:1:3::2');
+    const client = createDecisionsClient({ pubkey: VIGIE_KEYS.publicKey, storageDir: v.dir, now: () => v.clock.t });
+    client.accept(v.decisions.signed());
+    assert.equal(client.blocked(ip, '/'), null, 'la décision signée ne bloque pas l’adresse protégée');
+    assert.equal(client.blocked('2001:db8:1:2::2', '/'), null, 'le voisin appartient au même réseau protégé');
+    assert.ok(client.blocked('2001:db8:1:3::2', '/'), 'le /64 voisin reste bloquable');
+  });
+});
+
+test('blocage automatique : aucune conclusion de sûreté après troncature ; confiance et connexion échues ne protègent plus', t => {
+  const v = engineOf(t);
+  v.engine.setMode('entite.score', 'bloquer', 'test');
+  v.store.setting.set('controle_roles_admins', { administrateurs: ['admin'], instantane_a: v.clock.t });
+  v.store.setting.set('adresses_confiance', [{ ip: '2001:db8:1:2::1', jusqua: v.clock.t - 1 }]);
+  v.site('authn_login_success', 'info', { sub: 'admin', ip: '2001:db8:1:2::1', recu_a: v.clock.t - 31 * 864e5 });
+  const burst = ip => { for (let i = 0; i < 3; i++) { v.site('malicious_input', 'moyen', { ip }); v.zitadel('zitadel_echec', 'moyen', { ip }); } };
+  burst('2001:db8:1:2::2');
+  assert.ok(v.decisions.active().some(d => d.cible === '2001:db8:1:2::/64'));
+  for (let i = 0; i < 1001; i++) v.site('session_created', 'info', { sub: 'admin', ip: `2001:db8:3:${i.toString(16)}::1` });
+  burst('2001:db8:2:2::2');
+  assert.ok(!v.decisions.active().some(d => d.cible === '2001:db8:2:2::/64'));
+  assert.match(v.alerts().find(a => a.entite_key === '2001:db8:2:2::2').reponse, /contrôle.*incomplet/);
 });
 
 test('alerte : rouverte après 24 h de calme, aggravation notée, réponse rejouée si la décision a été levée', async t => {

@@ -148,6 +148,16 @@ Concepts repris de marlinOS ([recadrage](https://github.com/Volfieldd/deux-regar
 | `controle` | contrôle des rôles sur la dernière sauvegarde du site, tout de suite (alertes ouvertes comme dans le service) |
 | `controle --accepter --motif "…"` | après vérification d'un écart expliqué ailleurs (administrateur ajouté directement dans la base, par exemple) : l'instantané actuel devient la référence |
 
+### Reprise des suspensions de galeries privées
+
+Une décision `suspendre_acces` n’est tenue pour appliquée qu’après confirmation du site. Un échec, une galerie absente ou un retour négatif restent à retenter à chaque liste reçue, même identique, et au redémarrage. Le reçu local (`space_vigie_suspensions`, migration 063) est écrit dans la transaction qui suspend l’accès et retire ses autorisations. Il survit au déblocage ou au changement de mot de passe par l’équipe : une même décision ne repose pas la suspension. Prolonger la décision prolonge seulement le reçu. Les décisions échues ne sont pas retentées ; les reçus sont purgés à leur échéance, à l’effacement de l’accès ou au retrait de la Vigie.
+
+Les numéros des nouveaux accès ne sont jamais réattribués après effacement : un compteur global, initialisé au plus grand numéro présent lors de la migration, empêche qu’une décision encore active touche une nouvelle invitation. Ce compteur ne garde aucun historique d’invité. Il reste présent sans la Vigie.
+
+**Première mise à jour : vérification manuelle des cas historiques**, choisie par le propriétaire. Les anciens caches ne permettent pas de distinguer une suspension échouée d’une suspension appliquée puis levée. Le journal du site indique « ancienne suspension, vérification manuelle requise », avec le numéro d’accès et le début de décision. Pour chaque cas, vérifier l’état de l’accès dans l’administration et la décision dans la console. Si la suspension reste nécessaire, lever l’ancienne décision puis en créer une nouvelle avec un motif ; sinon, lever l’ancienne décision. Aucun rejeu automatique de ces seuls cas ambigus. Leur repère local reste jusqu’à l’échéance, même si une liste transitoire les omet. Une métadonnée non signée reçue par HTTP ne peut pas placer une nouvelle décision dans cette exception.
+
+**Blocages automatiques et affichage.** Les exemptions de confiance et de connexion d’administrateur portent sur tout le réseau effectivement bloqué, notamment le /64 IPv6, indépendamment de son écriture. Au-delà de 1 000 adresses distinctes récentes pour un administrateur, le contrôle ne conclut pas : aucun blocage automatique, explication dans l’alerte. L’auteur, le motif et la raison de fin du mode urgence sont bornés et échappés ; leurs adresses sont tronquées pour la Lectrice comme dans les autres réglages.
+
 ## Bordure Cloudflare (phase C3, facultative)
 
 Un **Worker** Cloudflare (`bordure/worker.js`, offre gratuite) devant l'admin, la connexion et les pages :

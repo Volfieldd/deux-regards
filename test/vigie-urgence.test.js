@@ -87,3 +87,36 @@ test('console : mode urgence pour un Analyste avec ré-authentification, alerte 
   await post({ etat: 'arret' });
   assert.equal(cf.level, 'medium');
 });
+
+test('urgence : auteur, motif et raison de fin sont masqués pour la Lectrice, échappés et bornés pour tous', async t => {
+  let actif = true;
+  let texte = '198.51.100.42 ; 2001:db8:abcd:12::42 <img src=x onerror=alert(1)>';
+  const v = setup(t, { roles: 'zitadel', adminSubs: [], extra: { urgence: {
+    maxMs: 864e5, etat: () => ({ actif, depuis: v.clock.t, jusqua: v.clock.t + 3600e3, par: `console · ${texte}`, motif: texte,
+      fin: v.clock.t, fin_raison: texte }),
+  } } });
+  for (const role of ['viewer', 'handler', 'analyst', 'admin']) {
+    v.ceilings[`sub-${role}`] = role;
+    const { cookie, headers } = await v.login({ sub: `sub-${role}`, roles: [`vigie.${role}`] });
+    for (const etat of [true, false]) {
+      actif = etat;
+      const r = await v.app.inject({ url: '/reglages', headers, cookies: { '__Host-vigie': cookie } });
+      assert.equal(r.statusCode, 200);
+      assert.equal(r.headers['cache-control'], 'no-store');
+      assert.equal(r.headers['referrer-policy'], 'no-referrer');
+      assert.doesNotMatch(r.body, /<img src=x|onerror="|style=/);
+      assert.match(r.body, /&lt;img/);
+      if (role === 'viewer') {
+        assert.doesNotMatch(r.body, /198\.51\.100\.42|2001:db8:abcd:12::42/);
+        assert.match(r.body, /198\.51\.100\.0\/24/);
+        assert.match(r.body, /2001:db8:abcd::\/48/);
+        assert.doesNotMatch(r.body, /action="\/urgence"/);
+      } else assert.match(r.body, /198\.51\.100\.42/);
+    }
+  }
+  texte = 'x'.repeat(301) + 'fin-trop-longue';
+  const { cookie, headers } = await v.login({ sub: 'sub-admin', roles: ['vigie.admin'] });
+  const r = await v.app.inject({ url: '/reglages', headers, cookies: { '__Host-vigie': cookie } });
+  assert.match(r.body, new RegExp('x{300}'));
+  assert.doesNotMatch(r.body, /x{301}|fin-trop-longue/);
+});

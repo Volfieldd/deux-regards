@@ -412,7 +412,14 @@ test('décision suspendre_acces : numéro d’accès exigé, signée pour le sit
   // Avec les galeries : appliquée une fois, même si la liste revient (attente longue, nouvelle version).
   const calls = [];
   const dir = tmp(t);
-  const client = createDecisionsClient({ url: 'http://x', key: KEY, pubkey, storageDir: dir, spaces: () => ({ suspend: (n, raison) => { calls.push([n, raison]); return true; } }) });
+  // Double du contrat idempotent de spaces ; la vraie transaction et sa reprise sont testées dans vigie-reprise-suspensions.
+  const recus = new Set();
+  const suspend = effet => (n, raison, d) => {
+    const cle = `${n}|${d.depuis}`;
+    if (!recus.has(cle)) { effet(n, raison); recus.add(cle); }
+    return true;
+  };
+  const client = createDecisionsClient({ url: 'http://x', key: KEY, pubkey, storageDir: dir, spaces: () => ({ suspend: suspend((n, raison) => calls.push([n, raison])) }) });
   client.accept(signed);
   assert.deepEqual(calls, [[12, 'vigie']]);
   assert.equal(client.state.counts.acces, 1);
@@ -421,7 +428,7 @@ test('décision suspendre_acces : numéro d’accès exigé, signée pour le sit
   assert.deepEqual(calls, [[12, 'vigie']], 'l’équipe a pu débloquer entre-temps : jamais reposée par la même décision');
   // Redémarrage du site : la liste gardée sur le disque ne la repose pas.
   const again = [];
-  const restarted = createDecisionsClient({ url: 'http://x', key: KEY, pubkey, storageDir: dir, spaces: () => ({ suspend: n => again.push(n) }) });
+  const restarted = createDecisionsClient({ url: 'http://x', key: KEY, pubkey, storageDir: dir, spaces: () => ({ suspend: suspend(n => again.push(n)) }) });
   restarted.accept(v.decisions.signed());
   assert.deepEqual(again, []);
   // Une nouvelle décision sur le même accès (après sa levée) : appliquée.
@@ -444,7 +451,7 @@ test('décision suspendre_acces : numéro d’accès exigé, signée pour le sit
   assert.deepEqual(off, []);
   let fails = 1;
   const flaky = [];
-  const fc = createDecisionsClient({ url: 'http://x', key: KEY, pubkey, storageDir: tmp(t), spaces: () => ({ suspend: n => { if (fails-- > 0) throw new Error('base occupée'); flaky.push(n); } }) });
+  const fc = createDecisionsClient({ url: 'http://x', key: KEY, pubkey, storageDir: tmp(t), spaces: () => ({ suspend: n => { if (fails-- > 0) throw new Error('base occupée'); flaky.push(n); return true; } }) });
   fc.accept(v.decisions.signed());
   v.decisions.create({ kind: 'bloquer', cible: '192.0.2.8', portee: 'tout', duree: '1h', par: 'test' });
   fc.accept(v.decisions.signed());

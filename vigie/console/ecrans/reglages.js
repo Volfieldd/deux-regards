@@ -274,10 +274,12 @@ export function register(app, ctx) {
     const reglages = vueReglages({ db, store, engine, switches, notifications: ctx.notifications, now, role: req.moi.role, query: req.query || {}, message, authA: req.moi.authA });
     // Mode urgence de Cloudflare (« I'm Under Attack ») : seulement s'il est réglé.
     const u = ctx.urgence ? ctx.urgence.etat() : null;
+    // Comme les autres motifs des réglages : le gabarit échappe le texte, le rôle décide des adresses visibles.
+    const texteUrgence = valeur => masquer(String(valeur || '').slice(0, 300), req.moi.role);
     const urgence = ctx.urgence ? {
       actif: Boolean(u?.actif), jusqua: u?.actif ? dateHeure(u.jusqua) : null, depuis: u?.actif ? dateHeure(u.depuis) : null,
-      par: u?.par ? String(u.par).replace(/^console · /, '') : null, motif: u?.motif || null,
-      fin: !u?.actif && u?.fin ? `${dateHeure(u.fin)} (${u.fin_raison || 'levé'})` : null,
+      par: u?.par ? texteUrgence(String(u.par).replace(/^console · /, '')) : null, motif: texteUrgence(u?.motif),
+      fin: !u?.actif && u?.fin ? `${dateHeure(u.fin)} (${texteUrgence(u.fin_raison || 'levé')})` : null,
       max: Math.round(ctx.urgence.maxMs / 3600e3), peut: can(req.moi.role, 'reglages'),
     } : null;
     return view(reply, req, 'reglages', { page: 'reglages', titre: 'Règles et réglages · Vigie', reglages, message, urgence });

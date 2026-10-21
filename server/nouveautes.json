@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.211.0",
+    "date": "2026-10-21",
+    "pr": 211,
+    "title": {
+      "fr": "Vigie : blocages, suspensions et confidentialité",
+      "en": "Vigie: blocks, suspensions and privacy",
+      "de": "Vigie: Sperren, Zugangssperren und Datenschutz"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Les blocages automatiques protègent aussi les voisins IPv6 des adresses de confiance ou d’administrateurs. Une suspension de galerie échouée est retentée après redémarrage, sans reposer celle levée par l’équipe. Les anciens cas ambigus restent à vérifier manuellement. Les textes du mode urgence masquent leurs adresses pour la Lectrice.",
+        "en": "Automatic blocks also protect IPv6 neighbours of trusted or administrator addresses. Failed gallery suspensions are retried after restart without reapplying those lifted by the team. Ambiguous older cases still require manual review. Emergency mode text masks addresses for viewers.",
+        "de": "Automatische Sperren schützen auch IPv6-Nachbarn vertrauenswürdiger oder von Administratoren verwendeter Adressen. Fehlgeschlagene Zugangssperren für Galerien werden nach einem Neustart erneut versucht, ohne vom Team aufgehobene Sperren wiederherzustellen. Unklare Altfälle bleiben manuell zu prüfen. Texte zum Notfallmodus maskieren Adressen für Lesende."
+      }
+    ]
+  },
+  {
     "version": "1.210.0",
     "date": "2026-10-21",
     "pr": 210,
