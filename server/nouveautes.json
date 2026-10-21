@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.207.0",
+    "date": "2026-10-21",
+    "pr": 207,
+    "title": {
+      "fr": "Vigie : conservation des dossiers ordinaires",
+      "en": "Vigie: retention of closed cases",
+      "de": "Vigie: Aufbewahrung abgeschlossener Fälle"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Les dossiers clos non incidents suivent désormais la durée du journal, soit 183 jours par défaut depuis leur dernière activité, au lieu de 395 jours. La prochaine purge applique cette règle aux dossiers existants. Les incidents et les dossiers encore suivis restent conservés, avec le masquage prévu des adresses.",
+        "en": "Closed cases not classified as incidents now follow the event log’s retention period: 183 days by default since their last activity, instead of 395 days. The next purge applies this rule to existing cases. Incidents and cases still being handled are retained, with the existing address masking.",
+        "de": "Abgeschlossene Fälle, die nicht als Vorfall eingestuft sind, folgen nun der Aufbewahrungsdauer des Ereignisprotokolls: standardmäßig 183 statt 395 Tage seit ihrer letzten Aktivität. Die nächste Bereinigung wendet diese Regel auch auf vorhandene Fälle an. Vorfälle und noch bearbeitete Fälle bleiben mit der vorgesehenen Maskierung der Adressen erhalten."
+      }
+    ]
+  },
+  {
     "version": "1.206.0",
     "date": "2026-10-21",
     "pr": 206,

@@ -21,6 +21,10 @@ Export JSON depuis les incidents clos, confirmation et droit Analyste, audit obl
 
 La planche A4 conserve ses dimensions imprimées et défile dans un aperçu nommé au clavier ou au téléphone. Le sélecteur de langue partagé conserve sa liste native dans une navigation nommée, sans rôle ARIA redondant. Les contrôles de données et la Vigie restent inchangés.
 
+## Livraison — D38, conservation des dossiers ordinaires, PR #207 (21 octobre 2026)
+
+La purge des dossiers clos non incidents suit la durée du journal, soit 183 jours par défaut depuis la dernière activité, au lieu des 395 jours fixes. Les dossiers encore suivis et les incidents sont préservés. La [section 14.7 de l’étude](docs/etudes/vigie-dossiers.md#147-d38--conservation-des-dossiers-ordinaires) donne les sources ANSSI/CNIL, l’application aux dossiers existants et la limite restante : la durée du registre des incidents doit être fixée avec le dossier légal.
+
 ## Principes
 
 - Front simple : HTML/CSS/JS sans framework ni build, rendu côté serveur, dans l'esprit du prototype.

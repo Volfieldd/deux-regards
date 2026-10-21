@@ -587,7 +587,7 @@ Les gestes sur un dossier sont des événements chaînés `vigie_dossier` : ouve
   - les phases atteintes (lu, exporté, publié).
 
   Il sert à juger s'il faut notifier la CNIL sous 72 h, puis prévenir les personnes.
-- **Conservation** : celle des événements (183 jours, `retentionDays`), sauf les dossiers classés « incident », gardés sans les adresses complètes pour le registre des violations (article 33.5) (D38).
+- **Conservation** : les dossiers clos ordinaires sont effacés après la durée des événements (183 jours par défaut, `retentionDays`) depuis leur dernière activité. Les dossiers encore suivis restent présents ; leurs adresses complètes sont masquées à la même échéance. Les dossiers classés « incident » restent conservés pour le registre des violations (article 33.5), avec ce même masquage ; leur durée propre reste à fixer avec le dossier légal (D38, précisions en § 14.7).
 
 ---
 
@@ -631,7 +631,7 @@ Toutes les propositions sont validées par le propriétaire, D31 avec une préci
 | D35 | Gravité | Grille progression × confiance ; enjeu ordinaire −1 cran, critique +1 ; dissimulation +1 ; plancher à l'alerte la plus grave ; pas de score affiché |
 | D36 | Notifications | Inchangées (par alerte) pendant le mois d'observation ; ensuite, une notification par dossier et par aggravation, au lieu d'une par alerte |
 | D37 | Réponses automatiques par dossier | Aucune au départ ; à rediscuter après le mois d'observation (par exemple : vérifier l'identité dès qu'un dossier atteint la collecte avec une confiance moyenne) |
-| D38 | Conservation | 183 jours comme les événements ; dossiers « incident » gardés sans adresses complètes pour le registre des violations, durée à fixer avec le dossier légal |
+| D38 | Conservation | Dossiers clos ordinaires : durée du journal, 183 jours par défaut depuis la dernière activité ; dossiers « incident » gardés avec masquage des adresses complètes à cette échéance, durée du registre à fixer avec le dossier légal (§ 14.7) |
 | D39 | Classement « légitime » | Apprend les indices identiques (pays, appareil) pour ce compte pendant 90 jours, avec motif obligatoire, geste chaîné |
 
 ---
@@ -728,7 +728,7 @@ La mesure D3 a conduit à alimenter cet index dans `store.add`, uniquement pour 
 - Les effectifs des listes ne s’additionnent jamais entre requêtes : le maximum d’une liste et le nombre de fiches distinctes donnent un minimum connu. Dix objets personnels dans une liste suffisent pour l’enjeu sensible ; huit dans une même lecture sous accès de confiance moyenne suffisent pour la collecte. Les huit fiches sont comptées **par session**, comme en 4.6 ; les anciens événements sans session restent groupés entre eux. Le seuil général de 30 fiches distinctes en une heure reste inchangé et exclut les listes sans identifiants individuels.
 - `compte_reseaux_multiples` observe trois réseaux distincts sur 24 h pour un même compte, sur connexions réussies, sessions ou lectures/exports authentifiés du site. Une saisie de compte dans un échec ne compte pas. L’indice vaut 1,5 point, une seule fois même s’il se répète, sans ouverture de dossier ni réponse automatique à lui seul ; ATT&CK T1078, accès initial, nature explicite `indice`.
 
-Les seuils de 8 lectures et 3 suppressions restent les valeurs initiales : le mois d’observation nécessaire au recalage n’est pas disponible. Les durées existantes ne changent pas (journal : 183 jours ; dossiers non incidents clos : 395 jours après la dernière activité ; incidents : conservation existante, durée D38 toujours à préciser). Confidentialité et RGPD décrivent les nouvelles métadonnées ; elles ne recopient pas les contenus personnels dans un second stockage.
+Les seuils de 8 lectures et 3 suppressions restent les valeurs initiales : le mois d’observation nécessaire au recalage n’est pas disponible. À la livraison de E, les durées n’avaient pas changé (journal : 183 jours ; dossiers non incidents clos : 395 jours après la dernière activité ; incidents : conservation existante). La correction D38 des dossiers ordinaires est décrite en § 14.7 ; la durée du registre des incidents reste à préciser. Confidentialité et RGPD décrivent les nouvelles métadonnées ; elles ne recopient pas les contenus personnels dans un second stockage.
 
 Les bandeaux de la fiche reprennent l’icône et l’enveloppe de texte du composant commun des alertes : le texte ne tombe plus dans la colonne étroite de l’icône. Aucune maquette modifiée. L’ajout visible est le résumé des catégories et volumes dans le journal existant et l’explication de l’enjeu du dossier, sans écran ni script supplémentaire.
 
@@ -747,3 +747,13 @@ Les références persistent après purge des sources, selon la conservation exis
 ### 14.6 Finitions du contrôle navigateur
 
 Les deux écarts hors console relevés pendant E sont corrigés séparément : aperçu A4 contenu dans un cadre défilable au clavier et au téléphone, dimensions imprimées inchangées ; choix de langue dans une navigation nommée contenant une liste native. Ce second choix préserve la sémantique dans Safari malgré `list-style: none`, sans `role="list"` redondant ([documentation MDN](https://developer.mozilla.org/fr/docs/Web/CSS/Reference/Properties/list-style)). Aucun changement du moteur, des droits, des événements ou des maquettes.
+
+### 14.7 D38 : conservation des dossiers ordinaires
+
+Le choix retenu pour le site est **183 jours par défaut**, comme le journal. La [CNIL, « Tracer les opérations »](https://www.cnil.fr/fr/securite-tracer-les-operations) recommande une période glissante de six mois à un an pour les journaux, avec des exceptions justifiées. Le [guide ANSSI du 28 janvier 2022, § 3.4.5](https://messervices.cyber.gouv.fr/documents-guides/anssi-guide-recommandations_securite_architecture_systeme_journalisation.pdf) reprend cette plage. Ces recommandations soutiennent ce choix ; elles n’imposent pas exactement 183 jours.
+
+La purge des dossiers **clos non incidents** utilise désormais `store.retentionDays` (`VIGIE_RETENTION_DAYS`), au lieu des 395 jours fixes. Le point de départ reste `derniere`, la dernière activité du dossier, et non la date du classement. La limite exacte est conservée ; la purge efface ensuite le dossier et ses liens, conserve les alertes selon leur propre durée et laisse intacte la chaîne du journal. Les dossiers ouverts, en cours ou en sommeil ne sont pas effacés par cette purge. Leurs adresses, comme celles des incidents, restent masquées à l’échéance existante.
+
+Cette correction s’applique dès la prochaine purge aux dossiers déjà présents : avec le réglage par défaut, les dossiers clos ordinaires âgés de plus de 183 jours disparaîtront sans attendre 395 jours. Aucun changement des seuils, de la détection, des réponses automatiques, de l’interface ou des maquettes.
+
+La [fiche CNIL sur les violations](https://www.cnil.fr/fr/violations-de-donnees-personnelles-les-regles-suivre) décrit le contenu du registre, sans durée chiffrée générale. L’exception actuelle des dossiers « incident » est donc préservée, **sans la présenter comme une recommandation de conservation illimitée**. La durée propre au registre reste une décision à documenter avec le dossier légal ; elle ne se déduit pas automatiquement des six mois à un an des journaux.

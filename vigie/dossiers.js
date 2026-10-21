@@ -641,7 +641,8 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     const t = now();
     db.prepare('DELETE FROM signaux_projetes WHERE survenu_a < ?').run(t - 30 * J);
     db.transaction(() => {
-      const vieux = db.prepare("SELECT id FROM dossiers WHERE statut = 'clos' AND derniere < ? AND COALESCE(classement, '') != 'incident'").pluck().all(t - 395 * J);
+      // D38 : les dossiers clos ordinaires suivent le journal ; un classement ne repousse pas la dernière activité.
+      const vieux = db.prepare("SELECT id FROM dossiers WHERE statut = 'clos' AND derniere < ? AND COALESCE(classement, '') != 'incident'").pluck().all(t - store.retentionDays * J);
       for (const id of vieux) {
         db.prepare('DELETE FROM dossier_signaux WHERE dossier_id = ?').run(id);
         db.prepare('DELETE FROM dossier_entites WHERE dossier_id = ?').run(id);
@@ -649,8 +650,8 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
         db.prepare('UPDATE dossiers SET fusionne_dans = NULL WHERE fusionne_dans = ?').run(id);
         db.prepare('DELETE FROM dossiers WHERE id = ?').run(id);
       }
-      // Adresses gardées comme les événements (183 jours, D38) : au-delà, masquées dans tout dossier (un incident est gardé
-      // pour le registre des violations, les autres sont effacés 13 mois après leur clôture, comme les alertes).
+      // Adresses gardées comme les événements (183 jours par défaut, D38) : au-delà, masquées dans les dossiers
+      // encore suivis et dans les incidents conservés pour le registre des violations.
       const anciens = db.prepare("SELECT id FROM dossiers WHERE derniere < ? AND id IN (SELECT dossier_id FROM dossier_entites WHERE kind = 'ip' AND key NOT LIKE '%/%' UNION SELECT dossier_id FROM dossier_signaux WHERE ip IS NOT NULL) LIMIT 1000").pluck().all(t - store.retentionDays * J);
       for (const id of anciens) {
         for (const e of db.prepare("SELECT key FROM dossier_entites WHERE dossier_id = ? AND kind = 'ip' AND key NOT LIKE '%/%'").pluck().all(id)) {
