@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // À valider (admin v2) : ce que le script ajoute à views/admin/v2/review.eta, après admin-v2.js. Valider les photos
 // cochées passe d'abord par un dialogue qui dit combien de photos partent, quand, et lesquelles gardent un titre
 // provisoire (UX-A-03) ; « Annuler » d'abord, le focus revient au bouton. Sans script, le formulaire part tel quel.

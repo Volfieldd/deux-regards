@@ -1,3 +1,4 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
 // Console de la Vigie : thème choisi, appliqué AVANT l'affichage (chargé sans defer dans <head>, sans rien d'autre).
 // <html data-theme="light|dark"> si un choix est mémorisé ; sinon rien : la préférence du système (prefers-color-scheme).
 // La classe « js » montre ce qui demande un script (.js-seul : bouton du thème, « actualisée chaque minute »).
