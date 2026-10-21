@@ -1050,6 +1050,8 @@ figure.fx-dessin { margin: 0; }
 @container dsm (min-width: 971px) { .ds-matrice .ds-std { display: none; } .ds-matrice .ds-large { display: block; } }
 .ds-zoom { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
 .ds-zoom a[aria-current] { color: var(--ink); font-weight: 600; }
+/* Les mots courts des colonnes de rôle et de lien gardent leur largeur minimale. */
+.vigie .vg-ds-t td:is([data-label="Rôle"], [data-label="Lien"]) { overflow-wrap: normal; word-break: normal; }
 .ds-table { margin-top: 16px; }
 .ds-table summary { cursor: pointer; padding-block: 12px; }
 .ds-svg a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
