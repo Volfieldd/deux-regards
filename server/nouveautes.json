@@ -1,5 +1,35 @@
 [
   {
+    "version": "1.209.0",
+    "date": "2026-10-21",
+    "pr": 209,
+    "title": {
+      "fr": "Saisies préservées et aperçus complets",
+      "en": "Preserved edits and complete previews",
+      "de": "Erhaltene Eingaben und vollständige Vorschauen"
+    },
+    "items": [
+      {
+        "perm": "photos.textes",
+        "fr": "Les descriptions suggérées arrivent sans recharger la fiche. Remplacer un texte déjà saisi demande confirmation ; les traductions existantes sont conservées et « Défaire » retire aussi les langues ajoutées dans l’admin v2.",
+        "en": "Suggested descriptions arrive without reloading the photo form. Replacing existing text requires confirmation; existing translations are preserved, and Undo also removes added languages in admin v2.",
+        "de": "Beschreibungsvorschläge erscheinen ohne Neuladen des Fotoformulars. Vorhandener Text wird erst nach Bestätigung ersetzt; bestehende Übersetzungen bleiben erhalten. Rückgängig entfernt in Admin v2 auch hinzugefügte Sprachfassungen."
+      },
+      {
+        "perm": "site.apparence",
+        "fr": "Le bandeau de prévisualisation propose les neuf présentations du site, dont les six chambres noires. Votre choix ne change pas la présentation des visiteurs.",
+        "en": "The preview bar offers all nine site designs, including the six darkroom designs. Your choice does not change what visitors see.",
+        "de": "Die Vorschauleiste bietet alle neun Website-Gestaltungen einschließlich der sechs Dunkelkammer-Varianten. Ihre Auswahl ändert die Besucheransicht nicht."
+      },
+      {
+        "perm": "site.filigrane",
+        "fr": "« Actualiser l’aperçu » montre le filigrane choisi sur place, sans enregistrer les réglages. La case d’activation est respectée ; sans JavaScript, l’aperçu s’ouvre dans un nouvel onglet.",
+        "en": "Refresh preview displays the selected watermark in place without saving settings. The enable checkbox is respected; without JavaScript, the preview opens in a new tab.",
+        "de": "Vorschau aktualisieren zeigt das gewählte Wasserzeichen direkt an, ohne Einstellungen zu speichern. Das Aktivierungskästchen wird berücksichtigt; ohne JavaScript öffnet sich die Vorschau in einem neuen Tab."
+      }
+    ]
+  },
+  {
     "version": "1.207.0",
     "date": "2026-10-21",
     "pr": 207,

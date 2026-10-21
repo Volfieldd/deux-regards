@@ -9,7 +9,7 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
-## Correction — Édition des photos et aperçus (21 octobre 2026)
+## Correction — Édition des photos et aperçus, PR #209, version 1.209.0 (21 octobre 2026)
 
 Demande de description sans rechargement de la fiche, confirmation avant de remplacer un texte déjà saisi, Défaire des langues ajoutées dans l’admin v2. Aperçu du filigrane actualisable sur place sans enregistrer, respect de sa case d’activation. Bandeau de prévisualisation étendu aux neuf compositions, toujours réservé au droit `site.apparence` ; visionneuse publique inchangée. Tests ciblés du serveur et parcours navigateur dans les deux admins.
 
