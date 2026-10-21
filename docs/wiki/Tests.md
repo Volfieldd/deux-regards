@@ -12,6 +12,7 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 
 | Fichier | Couvre |
 |---|---|
+| `test/vigie-console-dossiers-dessins.test.js` | Dessins D2 : géométrie déterministe, échappement SVG, masquage des adresses, compte des techniques par tactique, filtres et pagination, bornes, voisins et objets regroupés, phases et marqueurs simultanés |
 | `test/app.test.js` | en-têtes de sécurité, configuration « en ligne », versionnage CSS/JS |
 | `test/public.test.js` | pages publiques, filtres, ordre « Plus récentes » (tri, filtres cumulés, navigation, canonique) et date de première publication (déclencheur), visionneuse (navigation en boucle dans le filtre), Open Graph, bouton pause de l'ouverture, polices, isolement des originaux et des brouillons |
 | `test/auth.test.js` | flux OIDC de bout en bout contre un faux fournisseur, sessions, CSRF, redirections, limite de débit |
