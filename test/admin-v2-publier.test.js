@@ -105,7 +105,11 @@ test('un compte en v1 voit la v1, un compte en v2 la v2 : Instagram, Carnets, Ga
   // coquille. Les Carnets gardent leur feuille et leur script d'éditeur.
   for (const url of [`/admin/galeries/${g}/reglages`, `/admin/carnet/${p.id}`]) {
     const actions = html => [...html.replace(/<aside class="side"[^]*?<\/aside>/, '').matchAll(/<form[^>]*action="(\/admin\/(?:galeries|carnet)[^"]*)"/g)].map(m => m[1]).sort();
-    assert.deepEqual(actions((await v2.get(url)).body), actions((await v1.get(url)).body), url);
+    // La v2 confirme par des dialogues de la page (finitions) : leurs formulaires (supprimer, fermer, renvoyer, retirer) sont de
+    // plus, vers les routes de la v1 ; tout ce que la v1 poste, la v2 le poste.
+    const v1a = actions((await v1.get(url)).body), v2a = actions((await v2.get(url)).body);
+    assert.deepEqual(v1a.filter(x => !v2a.includes(x)), [], url);
+    assert.ok(v2a.filter(x => !v1a.includes(x)).every(x => /\/(supprimer|renvoyer|retirer|fermer)$/.test(x)), `${url} : ${v2a.join(' ')}`);
   }
   const ed = (await v2.get(`/admin/carnet/${p.id}`)).body;
   assert.match(ed, /\/static\/admin\/carnet\.css/);

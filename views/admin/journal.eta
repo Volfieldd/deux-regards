@@ -23,7 +23,7 @@
 <div class="table-wrap"><table class="journal">
   <thead><tr><th><%= t('Quand') %></th><th><%= t('Qui') %></th><th><%= t('Action') %></th><th><%= t('Cible') %></th><th><%= t('Résultat') %></th></tr></thead>
   <tbody>
-<% it.entries.forEach(e => { const ok = e.status == null || e.status < 400; %>    <tr><td class="mono"><%= it.when(e.at) %></td><td><%= e.name || e.sub || '—' %></td><td><%= LABELS[e.action] || e.action %><% if (e.detail) { %><br><span class="mono"><%= e.detail %></span><% } %></td><td class="mono"><%= e.target %></td><td><span class="enc-tag <%= ok ? 'ok' : 'no' %>"><%= ok ? t('fait') : t('refusé') %></span></td></tr>
+<% it.entries.forEach(e => { const ok = e.status == null || e.status < 400; %>    <tr><td class="mono"><%= it.when(e.at) %></td><td><%= e.name || e.sub || '—' %></td><td><%= LABELS[e.action] || e.action %><% const dt = it.journal.extraire(e.detail).reste; if (dt) { %><br><span class="mono"><%= dt %></span><% } %></td><td class="mono"><%= e.target %></td><td><span class="enc-tag <%= ok ? 'ok' : 'no' %>"><%= ok ? t('fait') : t('refusé') %></span></td></tr>
 <% }) %>  </tbody>
 </table></div>
 <% } %>

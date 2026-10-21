@@ -204,3 +204,12 @@
 .v2-suivi .msg-def dd { margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 540px) { .v2-suivi .msg-def { grid-template-columns: minmax(0, 1fr); } .v2-suivi .msg-def dd { margin-bottom: 6px; } }
 .v2-suivi .msg-v2 .sg-actions .btn { gap: 6px; }
+
+/* Journal : le détail d'une action groupée (« Publiées : 5 photos »), sous le libellé de l'action. */
+.v2-suivi .jr-lot { display: block; margin-top: 2px; color: var(--ink2); font-size: var(--at-petit); font-weight: 400; }
+
+/* Un chapitre de l'aide sur sa page : le chapitre d'avant et celui d'après. */
+.v2-suivi .aide-pages { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; margin: 0 0 16px; }
+.v2-suivi .aide-pages .btn { white-space: normal; text-wrap: balance; line-height: 1.25; text-align: center; }
+.v2-suivi .aide-pages a[rel="next"] { margin-left: auto; }
+@media (max-width: 720px), (pointer: coarse) { .v2-suivi .aide-pages .btn { min-height: 44px; } }

@@ -159,3 +159,22 @@
 .v2-terrain .voyage-page { display: grid; gap: 8px; margin: 0 0 16px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
 .v2-terrain .voyage-page p { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
 .v2-terrain .voyage-form { max-width: 720px; }
+
+/* ---------- Sur le terrain et Cartes d'accord (admin v2, finitions) ---------- */
+.v2-terrain .terrain-outils { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px; margin: 0 0 18px; }
+.v2-terrain .terrain-outils > .panel { margin: 0; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.v2-terrain .terrain-outils .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.v2-terrain .terrain-outils .btn { white-space: normal; text-wrap: balance; line-height: 1.25; padding-block: 6px; text-align: center; }
+.v2-terrain .terrain-outils code, .v2-terrain .terrain-outils .mono { overflow-wrap: anywhere; }
+.v2-terrain .qr-model { max-width: 240px; margin: 0; }
+.v2-terrain .qr-model img { width: 100%; height: auto; }
+.v2-terrain .avant-depart { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.v2-terrain .avant-depart > li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.v2-terrain .avant-depart .etat { min-width: 9em; }
+.v2-terrain .avant-depart > li > span:last-child { flex: 1 1 24ch; min-width: 0; overflow-wrap: anywhere; }
+.v2-terrain .cartes-form { display: grid; gap: 16px; max-width: 720px; }
+.v2-terrain .cartes-form .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+.v2-terrain .cartes-form .row > .champ-a { flex: 1 1 200px; }
+.v2-terrain .cartes-form .champ-a :is(select, input:not([type="radio"])) { width: 100%; max-width: 100%; }
+.v2-terrain .cartes-form .choix-a label span { overflow-wrap: anywhere; }
+@media (max-width: 720px), (pointer: coarse) { .v2-terrain .terrain-outils .btn, .v2-terrain .cartes-form .btn, .v2-terrain .chip, .v2-terrain .ep-retour { min-height: 44px; } }

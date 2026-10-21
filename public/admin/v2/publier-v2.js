@@ -185,3 +185,108 @@ $$('.v2-publier [data-copier]').forEach(b => b.addEventListener('click', async (
     }
   });
 })();
+
+// ----- Galeries privées : l'ordre des photos, sans recharger, avec « Défaire » (le geste inverse) -----
+(function () {
+  const list = $('[data-gp-photos]');
+  if (!list) return;
+  const items = () => $$(':scope > li[data-gp-item]', list);
+  // Rangs et flèches : la première ne monte pas, la dernière ne descend pas.
+  const sync = () => items().forEach((li, i, all) => {
+    const rang = $('[data-gp-rang]', li);
+    if (rang) rang.textContent = String(i + 1);
+    const up = $('form[data-gp-deplacer="monter"] button', li), down = $('form[data-gp-deplacer="descendre"] button', li);
+    if (up) up.disabled = i === 0;
+    if (down) down.disabled = i === all.length - 1;
+  });
+  const move = (li, dir, undoing = false) => enFile(async () => {
+    const form = $(`form[data-gp-deplacer="${dir}"]`, li);
+    const title = li.dataset.titre;
+    try {
+      await post(form.action, {});
+      if (dir === 'monter' && li.previousElementSibling) li.previousElementSibling.before(li);
+      if (dir === 'descendre' && li.nextElementSibling) li.nextElementSibling.after(li);
+      sync();
+      const n = items().indexOf(li) + 1;
+      // Le focus reste sur la flèche du même sens, ou sur l'autre si elle est devenue inactive.
+      const same = $(`form[data-gp-deplacer="${dir}"] button`, li), other = $(`form[data-gp-deplacer="${dir === 'monter' ? 'descendre' : 'monter'}"] button`, li);
+      (same && !same.disabled ? same : other)?.focus();
+      if (undoing) { toast.show(Th('« {title} » remise en place {n}.', { title, n })); return; }
+      toast.show(Th('« {title} » en place {n} dans la galerie.', { title, n }), { undo: async () => { await move(li, dir === 'monter' ? 'descendre' : 'monter', true); } });
+    } catch (err) {
+      toast.show(esc(err.message), { error: true, retry: err.kind === 'reseau' || err.kind === 'session' ? () => move(li, dir, undoing) : null });
+    }
+  });
+  list.addEventListener('submit', e => {
+    const form = e.target.closest('form[data-gp-deplacer]');
+    if (!form) return;
+    e.preventDefault();
+    move(form.closest('li[data-gp-item]'), form.dataset.gpDeplacer);
+  });
+})();
+
+// ----- Galeries privées : les réglages d'une galerie et d'un accès au geste (le formulaire entier part, comme sans script) -----
+// Un champ quitté s'enregistre, « Défaire » remet l'état d'avant. Ce qui ne se défait pas (une fermeture avancée qui a raccourci
+// des accès) le dit et ne propose pas « Défaire ».
+$$('form[data-gp-auto]').forEach(form => {
+  const fields = () => $$('input:not([type="hidden"]), select, textarea', form).filter(el => el.name);
+  const snapshot = () => fields().map(el => [el, el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value]);
+  const restore = snap => snap.forEach(([el, v]) => { if (el.type === 'checkbox' || el.type === 'radio') el.checked = v; else el.value = v; });
+  // Les cases décochées ne partent pas dans un formulaire : le serveur lit leur absence comme « non », sans script comme ici.
+  const body = () => {
+    const b = {};
+    for (const [k, v] of new FormData(form)) if (k !== '_csrf') b[k] = v;
+    return b;
+  };
+  // Le nom d'un champ pour le témoin et le message : son libellé, sans « (facultatif) ».
+  const labelOf = el => {
+    const l = el.id && form.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+    const text = (l ? [...l.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('') : el.closest('label')?.textContent || el.closest('fieldset')?.querySelector('legend')?.textContent || el.name).trim();
+    return text || el.name;
+  };
+  let saved = snapshot();
+  const apply = r => {
+    // Les valeurs telles que gardées par le serveur (une date écrite « 30 nov. » revient en toutes lettres).
+    const closes = $('[name="closes"]', form), expires = $('[name="expires"]', form), lu = $('#fin-s-lu', form);
+    if (closes && r.closes) closes.value = r.closes;
+    if (expires && r.expires) expires.value = r.expires;
+    if (lu && r.lu) lu.textContent = r.lu;
+  };
+  const send = (field, previous, undoing = false) => enFile(async () => {
+    const label = labelOf(field);
+    try {
+      const r = await post(form.action, body());
+      fields().forEach(el => fieldError(el, ''));
+      temoin.ok(field);
+      apply(r);
+      saved = snapshot();
+      if (undoing) { toast.show(Th('« {champ} » rétabli.', { champ: label })); field.focus(); return; }
+      if (r.reversible === false) { toast.show(Th('« {champ} » enregistré. Les accès plus longs ont été raccourcis : cela ne se défait pas.', { champ: label })); return; }
+      toast.show(Th('« {champ} » enregistré.', { champ: label }), { undo: async () => { restore(previous); await send(field, null, true); } });
+    } catch (err) {
+      const msg = Object.entries(err.data?.errors || {}).find(([k]) => k === field.name)?.[1] || err.message;
+      fieldError(field, T('Erreur : {msg}', { msg }));
+      temoin.ko(field, label);
+      if (err.kind === 'reseau' || err.kind === 'session') toast.show(esc(err.message), { error: true, retry: () => send(field, previous, undoing) });
+    }
+  });
+  form.addEventListener('submit', e => { if (!e.submitter || !e.submitter.closest('.sans-script')) e.preventDefault(); });
+  fields().forEach(field => {
+    const commit = () => {
+      const now = snapshot();
+      if (now.every(([, v], i) => saved[i][1] === v)) {
+        // Revenu à la valeur enregistrée après un refus : plus rien à enregistrer.
+        if (field.getAttribute('aria-invalid') === 'true') { fieldError(field, ''); temoin.ok(field); }
+        return;
+      }
+      const previous = saved;
+      send(field, previous);
+    };
+    if (field.matches('select')) onPick(field, commit);
+    else if (field.type === 'checkbox' || field.type === 'radio') field.addEventListener('change', () => { if (field.type !== 'radio' || field.checked) commit(); });
+    else {
+      field.addEventListener('change', commit);
+      if (field.matches('input')) field.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+    }
+  });
+});

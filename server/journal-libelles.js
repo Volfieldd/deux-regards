@@ -192,9 +192,15 @@ const OBJETS = [
   [/^POST \/admin\/remarques\/:id\b/, 'Remarque n° {id}', null],
   [/^POST \/admin\/instagram\/propositions\/:pid\b/, 'Photo n° {id}', id => `/admin/photos/${id}`],
 ];
-export function cible(action, target) {
+export function cible(action, target, nom = '') {
   const a = String(action || ''), tg = String(target ?? '').trim();
   if (!tg) return null;
+  // Voyage ou série nommés au moment de l'action : « Voyage « Lisbonne » ». Le numéro seul sinon (lignes d'avant).
+  if (nom && /^[0-9]+$/.test(tg.split(' / ')[0])) {
+    const id = tg.split(' / ')[0];
+    if (/^POST \/admin\/voyages\/:id\b/.test(a)) return { kind: 'Voyage « {nom} »', id, nom, href: /\/supprimer$/.test(a) ? null : `/admin/voyages/${id}` };
+    if (/^POST \/admin\/series\/:id\b/.test(a)) return { kind: 'Série « {nom} »', id, nom, href: /\/delete$/.test(a) ? null : '/admin/series' };
+  }
   // Sorties : « auteur / jour ».
   const so = /^POST \/admin\/sorties\/:author\/:day\b/.test(a) && /^([a-z0-9-]+) \/ (\d{4}-\d{2}-\d{2})$/.exec(tg);
   if (so) return { kind: 'Sortie du {id}', id: `${so[2]} (${so[1]})`, href: `/admin/sorties/${so[1]}/${so[2]}` };
@@ -231,3 +237,37 @@ export function regrouper(entries) {
 
 // Période (filtre) : la valeur et sa durée en jours ; « tout » : les 13 mois gardés.
 export const PERIODES = { '1': 1, '7': 7, '30': 30 };
+
+// ----- Ce que l'écriture du journal note en plus (finitions de l'admin v2) : le titre d'un voyage ou d'une série, et le détail
+// d'une action groupée. Jamais une valeur personnelle : le titre d'une rencontre ou d'une personne n'est pas noté (leur cible
+// reste « Rencontre n° 12 »). Rangé dans le détail de la ligne, après « champs : … » : « lot : publiees 5 ; nom : Lisbonne ».
+
+// Ce qu'une action groupée a fait (clé du verbe → libellé français au féminin pluriel : des photos).
+export const LOTS = ['publiees', 'repassees', 'proposees', 'validees', 'programmees', 'supprimees', 'carte_ajoutees', 'carte_retirees'];
+export const LOT_LIBELLES = {
+  publiees: 'Publiées', repassees: 'Repassées en brouillon', proposees: 'Proposées', validees: 'Validées', programmees: 'Programmées', supprimees: 'Supprimées',
+  carte_ajoutees: 'Mises sur la carte', carte_retirees: 'Retirées de la carte',
+};
+// À appeler par la route, une fois l'action faite : combien de photos, et ce qui leur est arrivé.
+export function noterLot(request, verbe, n) {
+  if (LOTS.includes(verbe) && Number.isInteger(n) && n >= 0) request.auditLot = { verbe, n };
+}
+// Un titre pour une ligne du journal : une ligne, sans caractère de commande, 80 signes au plus ; vide si rien.
+export function nomPropre(nom) {
+  const s = String(nom ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim();
+  return s.length > 80 ? `${s.slice(0, 79)}…` : s;
+}
+// Le détail d'une ligne : « champs : … ; lot : publiees 5 ; nom : Lisbonne » (les parties absentes sont omises).
+export function detailDe({ champs = '', lot = null, nom = '' } = {}) {
+  return [champs ? `champs : ${champs}` : '', lot ? `lot : ${lot.verbe} ${lot.n}` : '', nom ? `nom : ${nom}` : ''].filter(Boolean).join(' ; ');
+}
+// L'inverse, pour l'affichage : le reste du détail (les champs), l'action groupée et le titre. Le titre est la dernière partie
+// (il peut contenir « ; »).
+export function extraire(detail) {
+  let rest = String(detail ?? ''), nom = '', lot = null;
+  const n = /(?:^| ; )nom : ([^]*)$/.exec(rest);
+  if (n) { nom = n[1]; rest = rest.slice(0, n.index); }
+  const l = /(?:^| ; )lot : ([a-z_]+) (\d+)$/.exec(rest);
+  if (l && LOTS.includes(l[1])) { lot = { verbe: l[1], n: Number(l[2]) }; rest = rest.slice(0, l.index); }
+  return { reste: rest, lot, nom };
+}

@@ -1,4 +1,61 @@
 <% layout('./layout') %>
-<% /* Galeries privées (MQ-18) dans la coquille de l'admin v2 : le contenu de views/admin/galeries.eta, ses formulaires et ses routes, tels quels
-      (views/admin/v2/_coquille-publier.eta). */ %>
-<%~ include('./_coquille-publier', { ...it, vue: 'galeries' }) %>
+<% const t = it.t, E = __eta.e; %>
+<% /* Galeries privées (MQ-18, état 13), la liste au format des autres listes de l'admin v2 (Sorties, Voyages) : filtres à état
+      courant et à symbole, un tableau en cartes sous 1 100 px, des vignettes, les états en symbole et en mot, et les signaux
+      (sélection envoyée, accès en pause ou suspendu, lien ouvert sur plus de 3 appareils) en pastilles « à regarder » plutôt qu'en
+      lignes ambrées. Mêmes données, mêmes droits et même route que la v1 (views/admin/galeries.eta ; GET /admin/galeries). */ %>
+<% const q = (k, v) => { const p = new URLSearchParams(); if (k !== 'etat' && it.etat !== 'toutes') p.set('etat', it.etat); if (k !== 'de' && it.de) p.set('de', it.de); if (v) p.set(k, v); const s = p.toString(); return s ? `?${s}` : '/admin/galeries'; };
+   const IC = {
+     afaire: '<circle cx="12" cy="12" r="8" fill="none" stroke-width="2.6"/>', abouti: '<circle cx="12" cy="12" r="9.3" fill="currentColor" stroke="none"/>',
+     attention: '<path d="M12 2.5l10.5 18.5H1.5z" fill="currentColor" stroke="none"/>', arret: '<path d="M5 5l14 14M19 5L5 19" stroke-width="3"/>',
+   };
+   const ic = (k, s = 12) => '<svg class="ic" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IC[k] + '</svg>';
+   const etat = (k, label) => '<span class="etat etat--' + k + '">' + ic(k) + E(label) + '</span>';
+   const nSignals = it.list.reduce((n, g) => n + g.signals.length, 0); %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/publier-v2.css') %>">
+<p class="help-link"><a href="/admin/aide#galeries-privees"><%= t('Aide sur cette page') %></a></p>
+<div class="v2-publier v2-galeries" data-vue="galeries">
+<header class="ep">
+  <div class="ep-titre"><h1><%= t('Galeries privées') %></h1></div>
+  <p class="ep-meta"><span><%= it.list.length > 1 ? t('{n} galeries', { n: it.list.length }) : t('{n} galerie', { n: it.list.length }) %></span><span><%= t('{n} accès', { n: it.nInvites }) %></span><% if (nSignals) { %><span><%= t('{n} à regarder', { n: nSignals }) %></span><% } %><span><%= t('heure de Paris') %></span></p>
+<% if (it.canCreate) { %>  <div class="ep-actions"><a class="btn" href="/admin/galeries/nouvelle"><%= t('Nouvelle galerie') %></a></div>
+<% } %></header>
+<div class="filtres-l">
+  <nav class="chips" aria-label="<%= t('Filtrer les galeries par état') %>">
+    <a class="chip" href="<%= q('etat', '') %>"<%~ it.etat === 'toutes' ? ' aria-current="page"' : '' %>><%= t('Toutes') %> <span class="n"><%= it.counts.toutes %></span></a>
+    <a class="chip" href="<%= q('etat', 'ouverte') %>"<%~ it.etat === 'ouverte' ? ' aria-current="page"' : '' %>><span class="chip-st chip-st--abouti"><%~ ic('abouti') %></span><%= t('Ouvertes') %> <span class="n"><%= it.counts.ouverte %></span></a>
+    <a class="chip" href="<%= q('etat', 'brouillon') %>"<%~ it.etat === 'brouillon' ? ' aria-current="page"' : '' %>><span class="chip-st chip-st--afaire"><%~ ic('afaire') %></span><%= t('Brouillons') %> <span class="n"><%= it.counts.brouillon %></span></a>
+    <a class="chip" href="<%= q('etat', 'fermee') %>"<%~ it.etat === 'fermee' ? ' aria-current="page"' : '' %>><span class="chip-st chip-st--arret"><%~ ic('arret') %></span><%= t('Fermées') %> <span class="n"><%= it.counts.fermee %></span></a>
+  </nav>
+<% if (it.authors.length > 1) { %>  <nav class="chips" aria-label="<%= t('Photographe') %>">
+    <a class="chip" href="<%= q('de', '') %>"<%~ !it.de ? ' aria-current="page"' : '' %>><%= it.authors.length === 2 ? t('Les deux') : t('Tous') %></a>
+<% it.authors.forEach(a => { %>    <a class="chip" href="<%= q('de', a.slug) %>"<%~ it.de === a.slug ? ' aria-current="page"' : '' %>><%= a.name %></a>
+<% }) %>  </nav>
+<% } %></div>
+<% if (!it.list.length) { %>
+<p class="panel hint"><%= t('Aucune galerie privée pour l’instant.') %><% if (it.canCreate) { %> <a class="more" href="/admin/galeries/nouvelle"><%= t('Créer la première') %></a><% } %></p>
+<% } else { %>
+<table class="liste-a galeries-liste">
+  <caption><%= t('{n} galeries : les ouvertes d’abord, par date de fermeture. Un accès « ouvert » : son mot de passe a été accepté, pas seulement son lien chargé.', { n: it.list.length }) %></caption>
+  <thead><tr><th scope="col"><%= t('Galerie') %></th><th scope="col"><%= t('Photos') %></th><th scope="col"><%= t('Accès ouverts') %></th><th scope="col"><%= t('Dernière activité') %></th><th scope="col"><%= t('État') %></th></tr></thead>
+  <tbody>
+<% it.list.forEach(g => { %>
+    <tr>
+      <th scope="row" class="c-galerie"><a class="ligne-lien" href="/admin/galeries/<%= g.id %>"><%= g.title %></a><span class="sec"><%= g.author_id ? g.who : t('commune') %></span>
+<% if (g.signals.length) { %>        <span class="etats-l"><% g.signals.forEach(sg => { %><%~ etat('attention', sg) %><% }) %></span>
+<% } %>      </th>
+      <td class="c-photos"><div class="gal-photos"><span class="vignettes-a gal-bande" aria-hidden="true"><% g.strip.forEach(p => { %><img src="<%= p.thumb %>" srcset="<%= p.thumbSet %>" sizes="48px" alt="" width="48" height="48" loading="lazy"><% }) %></span><span><%= g.nPhotos > 1 ? t('{n} photos', { n: g.nPhotos }) : t('{n} photo', { n: g.nPhotos }) %></span></div></td>
+      <td class="c-demi" data-label="<%= t('Accès ouverts') %>"><%= t('{n} sur {total}', { n: g.nOpened, total: g.nLive }) %><% if (g.groups) { %><span class="sec"><%= t('lien de groupe') %></span><% } %></td>
+      <td class="c-demi" data-label="<%= t('Dernière activité') %>"><%= g.last ? new Intl.DateTimeFormat(it.locale, { day: 'numeric', month: 'short', timeZone: 'Europe/Paris' }).format(g.last) : t('aucune') %></td>
+      <td class="c-etat"><%~ include('../_galerie-etat', { key: g.stateKey, text: g.stateText }) %><span class="sec"><%= g.stateSec %></span></td>
+    </tr>
+<% }) %>
+  </tbody>
+</table>
+<% } %>
+<div class="pied-liste"><ul class="etats-legende" aria-label="<%= t('États d’une galerie') %>">
+<li class="etat--afaire"><span aria-hidden="true">○</span><%= t('Brouillon (l’équipe seule)') %></li><li class="etat--abouti"><span aria-hidden="true">●</span><%= t('Ouverte') %></li><li class="etat--attention"><span aria-hidden="true">▲</span><%= t('Ferme dans 7 jours') %></li><li class="etat--arret"><span aria-hidden="true">✕</span><%= t('Fermée') %></li></ul>
+<p class="hint"><%= t('Les pastilles « à regarder » sont des signaux, pas des états : sélection envoyée, accès en pause ou suspendu, lien ouvert sur plus de 3 appareils. Chaque photographe voit ses galeries, l’administrateur toutes ; Modérateur et Relecteur n’y ont pas accès.') %></p></div>
+</div>
+<%~ include('./_textes-publier', it) %>
+<script src="<%= it.asset('admin/v2/publier-v2.js') %>" defer></script>

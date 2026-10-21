@@ -1,4 +1,5 @@
 import { TIME } from '../outings.js';
+import { noterLot } from '../journal-libelles.js';
 
 // Admin « Sorties » : une ligne par journée de prise de vue (photographe + jour, découpable), et la fiche d'une
 // sortie : ses photos et ses personnes côte à côte, pour trier après la rue.
@@ -80,6 +81,7 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
     const ids = o.photos.filter(p => p.status === 'draft' && !p.review && request.owns('photos.proposer', p.author_id)).map(p => p.id);
     const r = await app.review.propose(ids, { sub: request.session.sub, name: request.session.name });
     const n = r.proposed.length;
+    noterLot(request, 'proposees', n);
     return done(reply, back(o), n > 1 ? request.t('{n} photos proposées à la publication.', { n }) : n ? request.t('{n} photo proposée à la publication.', { n }) : request.t('Aucune photo proposée.'));
   });
   app.post('/admin/sorties/:author/:day/publier', W('photos.publier'), async (request, reply) => {
@@ -92,6 +94,7 @@ export function registerOutings(app, { repo, render, done, failed, P, W, withRea
     app.instagram.onPublished(Object.keys(before).map(Number));
     for (const id of Object.keys(before).map(Number)) app.review.clear(id);   // publiée directement : hors circuit
     const t = request.t, n = Object.keys(before).length, rest = drafts.length - n;
+    noterLot(request, 'publiees', n);
     const published = n > 1 ? t('{n} photos publiées.', { n }) : n === 1 ? t('1 photo publiée.') : t('0 photo publiée.');
     const left = rest > 1 ? t('{n} restent en brouillon (à vérifier ou bloquées) : ouvrez leur fiche.', { n: rest }) : t('1 reste en brouillon (à vérifier ou bloquée) : ouvrez leur fiche.');
     return done(reply, back(o), `${published}${rest ? ` ${left}` : ''}`);

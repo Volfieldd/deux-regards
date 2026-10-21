@@ -34,3 +34,5 @@ The **Accesses** tab gives one line per access: its rights, its end, its last vi
 - **Private pages**: never indexed, never cached, with no link to another website; images are only served to a session allowed to see them, never through the public address of photos.
 - **Log**: every access created, widened, extended, unblocked, revoked or deleted is recorded in the [Log](reglages#journal) with its number (never the link, the password or the name), as is every reading of an access page or of the activity; the Vigie, if running, receives it too.
 - **Retention**: everything about an access (name, activity, favourites, selection) is deleted six months after it ends; a person can ask for earlier deletion (**Delete the access and its data…**).
+
+In admin v2, revoking, erasing, giving a new link or a new password, closing and deleting a gallery are confirmed in a window on the page; a gallery's or an access's settings are saved when you leave the field, with “Undo” (except an earlier closing date, which shortens accesses and cannot be undone). “Help on this page” opens this part of the help beside the page.

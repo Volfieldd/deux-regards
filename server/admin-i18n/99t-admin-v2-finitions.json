@@ -1,0 +1,154 @@
+{
+ "Aucun photographe à votre portée : les cartes se préparent pour un photographe.": {
+  "en": "No photographer within your scope: cards are prepared for a photographer.",
+  "de": "Kein Fotograf in Ihrem Zuständigkeitsbereich: Karten werden für einen Fotografen vorbereitet."
+ },
+ "Chapitre précédent": {
+  "en": "Previous chapter",
+  "de": "Voriges Kapitel"
+ },
+ "Chapitre suivant": {
+  "en": "Next chapter",
+  "de": "Nächstes Kapitel"
+ },
+ "Chapitres de l’aide": {
+  "en": "Help chapters",
+  "de": "Kapitel der Hilfe"
+ },
+ "Chargement de l’aide…": {
+  "en": "Loading help…",
+  "de": "Hilfe wird geladen …"
+ },
+ "Enregistrées": {
+  "en": "Saved",
+  "de": "Gespeichert"
+ },
+ "Fermer la galerie « {title} » ?": {
+  "en": "Close the gallery “{title}”?",
+  "de": "Galerie „{title}“ schließen?"
+ },
+ "Fermer la galerie…": {
+  "en": "Close the gallery…",
+  "de": "Galerie schließen …"
+ },
+ "Fermer l’aide": {
+  "en": "Close help",
+  "de": "Hilfe schließen"
+ },
+ "Les pastilles « à regarder » sont des signaux, pas des états : sélection envoyée, accès en pause ou suspendu, lien ouvert sur plus de 3 appareils. Chaque photographe voit ses galeries, l’administrateur toutes ; Modérateur et Relecteur n’y ont pas accès.": {
+  "en": "The “to look at” badges are signals, not states: selection sent, access paused or suspended, link opened on more than 3 devices. Each photographer sees their galleries, the administrator all of them; Moderator and Proofreader have no access.",
+  "de": "Die Markierungen „zu prüfen“ sind Hinweise, keine Zustände: Auswahl gesendet, Zugang pausiert oder gesperrt, Link auf mehr als 3 Geräten geöffnet. Jeder Fotograf sieht seine Galerien, der Administrator alle; Moderator und Korrekturleser haben keinen Zugriff."
+ },
+ "Les photos, les accès et les favoris sont gardés.": {
+  "en": "Photos, accesses and favourites are kept.",
+  "de": "Fotos, Zugänge und Favoriten bleiben erhalten."
+ },
+ "L’aide n’a pas pu être chargée : ouvrez-la sur sa page.": {
+  "en": "The help could not be loaded: open it on its own page.",
+  "de": "Die Hilfe konnte nicht geladen werden: Öffnen Sie sie auf ihrer eigenen Seite."
+ },
+ "Mises sur la carte": {
+  "en": "Put on the map",
+  "de": "Auf die Karte gesetzt"
+ },
+ "Ouvrir le chapitre": {
+  "en": "Open the chapter",
+  "de": "Kapitel öffnen"
+ },
+ "Ouvrir l’aide": {
+  "en": "Open the help",
+  "de": "Hilfe öffnen"
+ },
+ "Prochaine carte de {name} : {ref}": {
+  "en": "Next card for {name}: {ref}",
+  "de": "Nächste Karte von {name}: {ref}"
+ },
+ "Programmées": {
+  "en": "Scheduled",
+  "de": "Geplant"
+ },
+ "Proposées": {
+  "en": "Proposed",
+  "de": "Vorgeschlagen"
+ },
+ "Publiées": {
+  "en": "Published",
+  "de": "Veröffentlicht"
+ },
+ "Renvoyer « {title} »": {
+  "en": "Send back “{title}”",
+  "de": "„{title}“ zurückgeben"
+ },
+ "Repassées en brouillon": {
+  "en": "Moved back to draft",
+  "de": "Auf Entwurf zurückgesetzt"
+ },
+ "Retirer « {title} » du site": {
+  "en": "Withdraw “{title}” from the site",
+  "de": "„{title}“ von der Website nehmen"
+ },
+ "Retirées de la carte": {
+  "en": "Removed from the map",
+  "de": "Von der Karte genommen"
+ },
+ "Revenir à Aujourd’hui": {
+  "en": "Back to Today",
+  "de": "Zurück zu Heute"
+ },
+ "Rien n’a été modifié.": {
+  "en": "Nothing was changed.",
+  "de": "Es wurde nichts geändert."
+ },
+ "Rien n’est préparé : à corriger": {
+  "en": "Nothing is prepared: to correct",
+  "de": "Nichts ist vorbereitet: zu korrigieren"
+ },
+ "Rouvrir la galerie ne reconnecte personne : chacun devra saisir de nouveau son mot de passe.": {
+  "en": "Reopening the gallery does not reconnect anyone: everyone will have to enter their password again.",
+  "de": "Das Wiederöffnen der Galerie verbindet niemanden erneut: Jeder muss sein Passwort neu eingeben."
+ },
+ "Si vous en avez besoin, demandez-le à un administrateur : il donne les droits dans « Comptes et rôles ».": {
+  "en": "If you need it, ask an administrator: they give rights in “Accounts and roles”.",
+  "de": "Wenn Sie es brauchen, fragen Sie einen Administrator: Er vergibt die Rechte unter „Konten und Rollen“."
+ },
+ "Supprimées": {
+  "en": "Deleted",
+  "de": "Gelöscht"
+ },
+ "Série « {nom} »": {
+  "en": "Series “{nom}”",
+  "de": "Serie „{nom}“"
+ },
+ "Tous ses accès cessent de marcher tout de suite et les personnes qui la regardent en sont déconnectées. Vous pourrez la rouvrir.": {
+  "en": "All its accesses stop working at once and the people viewing it are disconnected. You can reopen it.",
+  "de": "Alle Zugänge funktionieren sofort nicht mehr, und wer die Galerie ansieht, wird abgemeldet. Sie können sie wieder öffnen."
+ },
+ "Toute l’aide": {
+  "en": "All the help",
+  "de": "Die ganze Hilfe"
+ },
+ "Validées": {
+  "en": "Approved",
+  "de": "Freigegeben"
+ },
+ "Votre rôle : {roles}. Rien n’a été modifié.": {
+  "en": "Your role: {roles}. Nothing was changed.",
+  "de": "Ihre Rolle: {roles}. Es wurde nichts geändert."
+ },
+ "Voyage « {nom} »": {
+  "en": "Trip “{nom}”",
+  "de": "Reise „{nom}“"
+ },
+ "{n} à regarder": {
+  "en": "{n} to look at",
+  "de": "{n} zu prüfen"
+ },
+ "« {champ} » enregistré. Les accès plus longs ont été raccourcis : cela ne se défait pas.": {
+  "en": "“{champ}” saved. Longer accesses were shortened: this cannot be undone.",
+  "de": "„{champ}“ gespeichert. Längere Zugänge wurden verkürzt: Das lässt sich nicht rückgängig machen."
+ },
+ "« {title} » en place {n} dans la galerie.": {
+  "en": "“{title}” is now in position {n} in the gallery.",
+  "de": "„{title}“ steht jetzt an Position {n} der Galerie."
+ }
+}

@@ -16,6 +16,10 @@ const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 const frenchIds = (id, md) => new Marked().lexer(md).filter(tk => tk.type === 'heading' && tk.depth > 1)
   .map(tk => `${id}-${anchor(decode(tk.text.replace(/<[^>]+>/g, '').replace(/[*_`]/g, '')))}`);
 
+// Les identifiants des chapitres (docs/aide/NN-section.md → « section »), dans l'ordre : sans rendre le Markdown. L'admin v2 les
+// donne au script du panneau d'aide contextuelle, qui en reconnaît le chapitre d'une ancre sans rien demander au serveur.
+export const chapterIds = () => fs.readdirSync(DIR).filter(f => /^\d+-[a-z0-9-]+\.md$/.test(f)).sort().map(f => f.replace(/^\d+-/, '').replace(/\.md$/, ''));
+
 // Aide en ligne : docs/aide/NN-section.md (français, source), traduite dans docs/aide/en/ et docs/aide/de/ avec les
 // mêmes titres dans le même ordre ; source de l'aide de l'admin et des pages « Aide » du wiki.
 // Rendu une fois par langue (contenu du dépôt, de confiance) : sections, sommaire, ancres et liens internes réécrits.

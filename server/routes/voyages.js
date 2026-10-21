@@ -1,5 +1,6 @@
 import { TripError, isDay } from '../trips.js';
 import { outingUrl } from './sorties.js';
+import { noterLot } from '../journal-libelles.js';
 
 // Admin « Voyages » : des sorties regroupées (journées entières). Un voyage est celui d'un photographe, ou commun aux
 // deux (réglé par qui gère toutes les sorties). Portée « les miennes » : ses voyages, ses journées.
@@ -200,6 +201,7 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
     const ids = trips.photos(tr.id).filter(p => p.status === 'draft' && !p.review && request.owns('photos.proposer', p.author_id)).map(p => p.id);
     const r = await app.review.propose(ids, { sub: request.session.sub, name: request.session.name });
     const n = r.proposed.length;
+    noterLot(request, 'proposees', n);
     return done(reply, back(tr.id), n > 1 ? request.t('{n} photos proposées à la publication.', { n }) : n ? request.t('{n} photo proposée à la publication.', { n }) : request.t('Aucune photo proposée.'));
   });
   app.post('/admin/voyages/:id/publier', W('photos.publier'), async (request, reply) => {
@@ -212,6 +214,7 @@ export function registerTrips(app, { repo, render, done, failed, P, W, withReady
     for (const id of Object.keys(before).map(Number)) app.review.clear(id);
     // Compte réel : setStatuses écarte encore une photo refusée par la personne photographiée.
     const n = Object.keys(before).length, rest = drafts.length - n, t = request.t;
+    noterLot(request, 'publiees', n);
     const published = n > 1 ? t('{n} photos publiées.', { n }) : n === 1 ? t('1 photo publiée.') : t('0 photo publiée.');
     const left = rest > 1 ? t('{n} restent en brouillon (à vérifier ou bloquées) : ouvrez leur fiche.', { n: rest }) : t('1 reste en brouillon (à vérifier ou bloquée) : ouvrez leur fiche.');
     return done(reply, back(tr.id), `${published}${rest ? ` ${left}` : ''}`);
