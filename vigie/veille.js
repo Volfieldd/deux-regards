@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { readLimited } from './zitadel.js';
 import { createAlertesVeille, cleVeille } from './veille-alertes.js';
 
-// BV-34 : inventaires déclarés, sans score d'attaque ni dossier. Les alertes de maintenance sont journalisées.
+// BV-34 : inventaires déclarés, sans score d'attaque ni ouverture de dossier. Les alertes de maintenance sont journalisées.
 // OSV associe lui-même nom et version ; les correctifs affichés ne sont pas des consignes de mise à jour.
 export const JOUR = 864e5, REESSAI = 3600e3;
 const CLE = 'veille_npm_v1', MAX_PAQUETS = 3000, MAX_AVIS = 300;

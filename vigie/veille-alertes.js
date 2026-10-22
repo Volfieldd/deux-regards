@@ -16,9 +16,12 @@ export function createAlertesVeille({ store, switches = null }) {
     creer: db.prepare(`INSERT INTO alerts (regle, cas, entite_kind, entite_key, gravite, mode, premiere, derniere, sources)
       VALUES (?, 'BV-34', 'vigie', ?, ?, 'alerter', ?, ?, '["vigie"]')`),
     toucher: db.prepare('UPDATE alerts SET derniere = MAX(derniere, ?), gravite = ?, compteur = compteur + ? WHERE id = ?'),
-    garder: db.prepare(`INSERT INTO veille_alertes (cle, avis, nom, version, cibles, alerte_id, gravite, presente, verifie_a)
-      VALUES (@cle, @avis, @nom, @version, @cibles, @alerte_id, @gravite, 1, @t)
-      ON CONFLICT(cle) DO UPDATE SET cibles = excluded.cibles, alerte_id = excluded.alerte_id, gravite = excluded.gravite, presente = 1, verifie_a = excluded.verifie_a`),
+    garder: db.prepare(`INSERT INTO veille_alertes (cle, avis, nom, version, cibles, cibles_actuelles, alerte_id, gravite, presente, verifie_a)
+      VALUES (@cle, @avis, @nom, @version, @cibles, @actuelles, @alerte_id, @gravite, 1, @t)
+      ON CONFLICT(cle) DO UPDATE SET cibles = excluded.cibles, cibles_actuelles = excluded.cibles_actuelles,
+        alerte_id = excluded.alerte_id, gravite = excluded.gravite, presente = 1, verifie_a = excluded.verifie_a
+      WHERE cibles != excluded.cibles OR cibles_actuelles != excluded.cibles_actuelles OR alerte_id IS NOT excluded.alerte_id
+        OR gravite != excluded.gravite OR presente != 1 OR verifie_a != excluded.verifie_a`),
     presents: db.prepare('SELECT * FROM veille_alertes WHERE presente = 1'),
     absent: db.prepare('UPDATE veille_alertes SET presente = 0, verifie_a = ? WHERE cle = ?'),
     clore: db.prepare(`UPDATE alerts SET statut = 'close', classement = NULL, note = ?, traite_par = 'Vigie (veille)', traite_a = ? WHERE id = ? AND statut != 'close'`),
@@ -52,7 +55,8 @@ export function createAlertesVeille({ store, switches = null }) {
         q.toucher.run(t, g, aggravee || etendue ? 1 : 0, id);
         if (aggravee || etendue) action = aggravee ? 'aggravee' : 'etendue';
       }
-      q.garder.run({ cle, avis: v.id, nom: p.nom, version: p.version, cibles: JSON.stringify(cibles), alerte_id: id, gravite: g, t });
+      q.garder.run({ cle, avis: v.id, nom: p.nom, version: p.version, cibles: JSON.stringify(cibles),
+        actuelles: JSON.stringify([...new Set(p.usages.map(u => u.cible))].sort()), alerte_id: id, gravite: g, t });
       if (action) noter({ action, id, gravite: g, entite, avant: aggravee ? avant.gravite : undefined,
         avis: v.id, bibliotheque: p.nom, version: p.version, cibles: p.usages.map(u => u.cible), inventaire: 'déclaré' });
     }

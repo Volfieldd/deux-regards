@@ -787,3 +787,18 @@ Trois corrections dans le périmètre existant, sans changement des regroupement
 - Dans les réglages, masquer pour la Lectrice les adresses de l’auteur, du motif et de la raison de fin du mode urgence. Rendu serveur et échappement conservés, textes bornés.
 
 Les reçus ne recopient ni nom, ni adresse, ni motif ; leur échéance, leur effacement et leur remise sur demande figurent dans le registre RGPD. La revue a aussi vérifié la prolongation d’un cas historique manuel et l’effacement suivi d’une nouvelle invitation : l’exception manuelle suit la nouvelle échéance, et un compteur global empêche de réattribuer les numéros d’accès. Aucune maquette modifiée : la disposition reste identique, seuls les textes personnels sont masqués. Ces corrections ne ferment pas les autres actions légales ouvertes.
+
+
+### 14.11 Veille : pondération contextuelle des dossiers (BV-34)
+
+**Complément de D35 validé par le propriétaire le 22 octobre 2026.** Après la gravité habituelle et son plancher, ajouter **un cran maximum** si une alerte de veille haute ou critique encore active concerne le service visé. Le plafond reste Critique ; ni le nombre d’avis ni le nombre de cibles ne multiplient la majoration. La confiance et les phases ne changent pas. Une vulnérabilité déclarée n’est pas une preuve d’exploitation ; elle ne crée pas de dossier. Les décisions D33, D34, D36 et D37 restent applicables.
+
+Le rapprochement retient les cibles actives explicites `site:*` / `vigie:*`, les signaux de source site et les règles de console Vigie. Les contrôles Vigie génériques, Zitadel, la bordure ou le réseau seuls ne désignent pas une bibliothèque npm d’un service. Le rapprochement reste au niveau du service : il ne prétend pas relier techniquement un événement à l’exploitation d’une CVE. Les bibliothèques réellement installées ne sont pas attestées.
+
+Les alertes justificatives sont conservées séparément des signaux, dans l’explication du dossier. Elles peuvent servir à plusieurs dossiers sans les fusionner ni prendre leur plancher comme une preuve à source unique. La fiche présente la gravité avant pondération, l’effet réel et 20 justificatifs maximum (liste abrégée signalée), liés aux alertes puis à la veille. Pas de nouvelle phase ATT&CK ni de retouche des étiquettes. Cet encart complète MV-13 selon la demande du propriétaire.
+
+Les dossiers non clos, y compris en sommeil, sont actualisés par lots de 100 au cycle d’une minute, sans changer activité, jalon, statut ou réponse. Le curseur persiste pour reprendre après redémarrage. Un classement de l’alerte ou une disparition après rapprochement complet retire le cran ; une panne ou couverture partielle conserve le contexte daté. Les dossiers clos gardent leur photographie. La prise en charge d’une alerte la laisse active ; une alerte classée ne pondère plus. Détection arrêtée suspend le rattrapage.
+
+La migration 020 distingue les cibles actuellement déclarées de l’union historique de déduplication et ajoute une révision transactionnelle du contexte. Le cache suit aussi les classements depuis un autre processus ; un jeton neuf empêche de réutiliser un résultat issu d’une transaction annulée. Les changements de pondération sont tracés par `vigie_dossier`, sans événement quotidien pour une simple date de vérification. Les notifications restent par alerte pendant l’observation (D36). Aucun nouveau champ personnel ni durée de conservation ; le contexte suit le dossier.
+
+Vérifications : tests ciblés de la majoration, des services, du plafond, des classements, des disparitions partielles/complètes, des reprises et annulations, du rattrapage borné, des interrupteurs et du rendu Lectrice ; parcours navigateur sur bureau et iPhone simulé, sans JavaScript ; banc moteur avant/après.

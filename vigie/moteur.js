@@ -359,14 +359,15 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   // Le curseur de la file est enregistré dans la même transaction : un arrêt brutal ne fait jamais analyser un lot deux
   // fois (revue C3). Détection arrêtée : le curseur avance quand même (ces événements ne seront pas analysés plus tard).
   const processAll = db.transaction((rows, cursorTo) => {
-    // Détection arrêtée : seule la réduction de la surveillance est encore analysée (c'est elle qui le signale).
-    const on = switches.isOn('detection');
-    {
+    const avant = dossiers.preparerContexteVeille();
+    try {
+      // Détection arrêtée : seule la réduction de la surveillance est encore analysée (c'est elle qui le signale).
+      const on = switches.isOn('detection');
       for (const row of on ? rows : rows.filter(r => r.type === 'vigie_surveillance_reduite')) {
         try { processOne(row); } catch (err) { log?.error({ err: err.message, type: row.type }, 'Vigie : moteur'); }
       }
-    }
-    if (cursorTo != null) setting.set('moteur_curseur', cursorTo);
+      if (cursorTo != null) setting.set('moteur_curseur', cursorTo);
+    } finally { dossiers.restaurerContexteVeille(avant); }
   });
   function process(rows, cursorTo = null) {
     if (!rows.length || (cursorTo == null && !switches.isOn('detection') && !rows.some(r => r.type === 'vigie_surveillance_reduite'))) return;
@@ -433,6 +434,7 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     surDossiers('cycle', () => dossiers.tick());
     if (now() - lastClose >= 3600e3) { lastClose = now(); closeQuiet(); }
     if (!switches.isOn('detection')) return;
+    surDossiers('veille', () => dossiers.actualiserVeille());
     for (const s of detectors.periodic()) signal({ regle: `detecteur.${s.nom}`, titre: s.nom.replaceAll('_', ' '), ...s }, null, ['site']);
     const last = q.lastSite.get();
     if (last && now() - last > 3 * 60e3) {
@@ -502,12 +504,19 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     if (n) store.own('vigie_alerte', { emetteur: par, detail: { action: 'note', id, note: t } });
     return n;
   }
-  function classify(id, { classement, note = '', par, statut = 'close' }) {
+  const classify = db.transaction((id, { classement, note = '', par, statut = 'close' }) => {
     if (!['incident', 'faux_positif', 'test', null].includes(classement)) throw new Error('classement : incident, faux_positif ou test');
     const n = db.prepare('UPDATE alerts SET statut = ?, classement = ?, note = ?, traite_par = ?, traite_a = ? WHERE id = ?').run(statut, classement, String(note).slice(0, 500), par, now(), id).changes;
-    if (n) store.own('vigie_alerte', { emetteur: par, detail: { action: statut === 'close' ? 'close' : 'prise en charge', id, classement, note: String(note).slice(0, 200) } });
+    if (n) {
+      // Console et CLI passent ici : le classement et l'invalidation du contexte restent atomiques, sans poser
+      // un déclencheur sur toutes les mises à jour d'alertes du chemin d'ingestion.
+      if (db.prepare('SELECT regle FROM alerts WHERE id = ?').pluck().get(id) === REGLE_VEILLE) {
+        db.prepare('UPDATE veille_revision SET revision = lower(hex(randomblob(16))) WHERE id = 1').run();
+      }
+      store.own('vigie_alerte', { emetteur: par, detail: { action: statut === 'close' ? 'close' : 'prise en charge', id, classement, note: String(note).slice(0, 200) } });
+    }
     return n;
-  }
+  });
   // Arrêt d'une règle : toujours pour une durée (7 jours au plus), comme un interrupteur, et signalé (surveillance
   // réduite) ; les autres modes restent tels quels.
   const setMode = (regle, mode, par, { duree = null, motif = '' } = {}) => {
