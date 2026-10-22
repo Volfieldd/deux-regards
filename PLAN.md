@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Constats résiduels de l’audit de sécurité, PR #216, version 1.216.0 (22 octobre 2026)
+
+Sept commentaires ont été réexaminés sur la version courante. La revalidation des archives privées et la protection de la suppression des autosauvegardes étaient déjà livrées par la PR #212. Les cinq écarts restants sont corrigés : droit d’édition exigé pour la mutation `revised` d’un billet publié, refus local avant la relecture Zitadel propre à une action, deux rendus privés distincts au plus, analyse des sources indépendantes et des alertes locales avant le délestage du moteur, et frontière `INPUT` vers l’hôte. Les refus de rendu ne comptent ni téléchargement ni export réussi et ne laissent aucune archive réservée. Les types de la Vigie restent inchangés. Les règles réseau réelles, les ACL et les services de l’hôte devront être contrôlés sur l’instance de test avant leur application sur Unraid.
+
 ## Correction — Dépendances d’installation d’ONNX Runtime, PR #215, version 1.215.0 (22 octobre 2026)
 
 Les neuf avis npm signalés concernent `adm-zip 0.5.18` (huit) et `sprintf-js 1.1.3` (un), dans la chaîne de l’installateur ONNX. `adm-zip` est imposé en **0.6.1** et `global-agent` en **4.1.3**, ce qui retire `roarr` et `sprintf-js`. Le moteur ONNX reste en **1.22.0** : la comparaison réelle avec 1.30.0 a produit des empreintes CLIP différentes (cosinus ≈ 0,994 sur deux images neutres), incompatibles avec une validation de stabilité des empreintes déjà conservées. Le retrait des modules d’installation de l’image finale et le réglage `skip` sont conservés. Trois tests couvrent un ZIP ordinaire, les noms dupliqués et la sortie par un lien symbolique. Le site et la Vigie doivent être livrés depuis la même révision pour actualiser aussi l’inventaire de veille. Voir [Sécurité](docs/wiki/Sécurité.md) et [Tests](docs/wiki/Tests.md).

@@ -1,5 +1,28 @@
 [
   {
+    "version": "1.216.0",
+    "date": "2026-10-22",
+    "pr": 216,
+    "title": {
+      "fr": "Durcissement après l’audit de sécurité",
+      "en": "Hardening after the security audit",
+      "de": "Härtung nach dem Sicherheitsaudit"
+    },
+    "items": [
+      {
+        "fr": "Les droits d’édition des Carnets sont revérifiés pour chaque modification. Les téléchargements privés déjà en cache restent disponibles sous charge ; les nouveaux rendus sont temporairement refusés au-delà de deux calculs simultanés.",
+        "en": "Editing permissions for Carnets are now rechecked for every change. Cached private downloads remain available under load; new renders are temporarily rejected when two calculations are already running.",
+        "de": "Die Bearbeitungsrechte für Carnets werden bei jeder Änderung erneut geprüft. Bereits zwischengespeicherte Downloads aus privaten Galerien bleiben unter Last verfügbar; neue Berechnungen werden vorübergehend abgewiesen, wenn bereits zwei Vorgänge laufen."
+      },
+      {
+        "perm": "securite.voir",
+        "fr": "La Vigie refuse localement les actions interdites avant d’interroger Zitadel, protège ses sources indépendantes sous saturation et surveille aussi les connexions des réseaux Nicephos vers l’hôte. Les règles réseau restent à valider sur l’instance de test.",
+        "en": "Vigie rejects forbidden actions locally before querying Zitadel, protects its independent sources under saturation, and also monitors connections from Nicephos networks to the host. The network rules still need validation on the test instance.",
+        "de": "Die Vigie weist lokal verbotene Aktionen ab, bevor sie Zitadel abfragt, schützt unabhängige Quellen bei Überlastung und überwacht nun auch Verbindungen der Nicephos-Netze zum Host. Die Netzwerkregeln müssen weiterhin auf der Testinstanz geprüft werden."
+      }
+    ]
+  },
+  {
     "version": "1.215.0",
     "date": "2026-10-22",
     "pr": 215,
