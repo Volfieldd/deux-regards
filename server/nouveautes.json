@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.213.0",
+    "date": "2026-10-22",
+    "pr": 213,
+    "title": {
+      "fr": "Une reconnexion explicite à la Vigie",
+      "en": "Sign in again explicitly to Vigie",
+      "de": "Erneute Anmeldung bei Vigie"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Après la fin d’une session, la Vigie demande à Zitadel de vous authentifier à nouveau pour éviter de reprendre une ancienne connexion sans second facteur. Les protections restent actives.",
+        "en": "After a session ends, Vigie asks Zitadel to authenticate you again to avoid reusing an old sign-in without a second factor. Security checks remain active.",
+        "de": "Nach dem Ende einer Sitzung fordert Vigie eine erneute Authentifizierung bei Zitadel an, damit keine frühere Anmeldung ohne zweiten Faktor übernommen wird. Die Sicherheitsprüfungen bleiben aktiv."
+      }
+    ]
+  },
+  {
     "version": "1.212.0",
     "date": "2026-10-21",
     "pr": 212,
