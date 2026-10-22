@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.214.0",
+    "date": "2026-10-22",
+    "pr": 214,
+    "title": {
+      "fr": "Veille des vulnérabilités dans la Vigie",
+      "en": "Vulnerability watch in Vigie",
+      "de": "Schwachstellenbeobachtung in der Vigie"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Le nouvel onglet Veille suit chaque jour les avis connus sur les bibliothèques directes et indirectes du site et de la Vigie. Filtres, gravité, versions correctives publiées, date de vérification et limites des inventaires déclarés sont affichés. Aucun blocage ni mise à jour automatique.",
+        "en": "The new Veille tab checks known advisories daily for the website’s and Vigie’s direct and indirect libraries. Filters, severity, published fixes, check date and declared inventory limits are shown. No automatic blocking or updates.",
+        "de": "Der neue Tab Veille prüft täglich bekannte Meldungen zu direkten und indirekten Bibliotheken der Website und der Vigie. Filter, Schweregrad, veröffentlichte Korrekturen, Prüfdatum und Grenzen der deklarierten Inventare werden angezeigt. Keine automatischen Sperren oder Updates."
+      }
+    ]
+  },
+  {
     "version": "1.212.0",
     "date": "2026-10-21",
     "pr": 212,

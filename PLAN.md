@@ -9,7 +9,7 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
-## Livraison — Veille des vulnérabilités npm (22 octobre 2026)
+## Livraison — Veille des vulnérabilités npm, PR #214, version 1.214.0 (22 octobre 2026)
 
 À la demande du propriétaire, périmètre retenu : bibliothèques du site et de la Vigie, directes et indirectes, limites affichées. L’onglet `/veille` consulte les inventaires de production déclarés dans les deux fichiers de verrouillage embarqués avec la Vigie. OSV est interrogé quotidiennement en arrière-plan ; avis, gravité publiée, versions et correctifs déclarés sont consultables par tous les rôles existants. Cache persistant lié à l’empreinte de l’inventaire, réessai horaire après échec, ancienneté et couverture incomplète explicites. Aucun avis ne devient une attaque ni une réponse automatique. L’inventaire installé, Node.js, le système et les services externes restent hors périmètre. Contrat : [Veille](docs/wiki/Vigie.md#veille-des-vulnérabilités), besoin [BV-34](docs/etudes/vigie-besoins-des-briques.md#bv-34--veille-des-vulnérabilités-des-bibliothèques).
 
