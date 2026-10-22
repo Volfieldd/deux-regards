@@ -373,7 +373,13 @@ docker exec nicephos-vigie node vigie/cli.js console
 
 Après une correction dans Zitadel : **Se reconnecter**. `VIGIE_ADMIN_SUBS` ne suffit pas seule : elle règle l'attribution côté Vigie, le plafond vient toujours de Zitadel.
 
-**Ancienne connexion reprise sur téléphone** : chaque nouvelle connexion de la console demande désormais à Zitadel de réauthentifier l’utilisateur (`prompt=login`). Cela évite que **Se reconnecter** reprenne sans interaction une ancienne connexion sans second facteur et revienne au même refus `mfa`. Une session de console encore valable reste utilisable ; après expiration, la reconnexion passe par Zitadel. Le second facteur et les règles DS30 restent exigés, et `max_age=300` reste réservé aux confirmations d’actions sensibles. Le comportement de `prompt` est décrit dans la [documentation Zitadel](https://zitadel.com/docs/apis/openidoauth/endpoints#additional-parameters).
+### « Session expirée » et refus répétés au retour sur téléphone
+
+Un navigateur peut rouvrir un ancien retour de connexion (`/auth/callback`). Avant la correction de la PR #213, ce retour affichait « Session expirée », même s’il s’agissait de la tentative OIDC plutôt que d’une session inactive. Il effaçait aussi le cookie d’une connexion commencée dans un autre onglet ; recharger la page répétait le refus `etat`. Quatre refus en une heure suffisent à l’alerte haute « Connexions à la console refusées à répétition » (DS30). « Aucune réponse automatique » signifie que cette alerte ne bloque pas le compte.
+
+Le retour invalide reste refusé et journalisé, mais mène désormais vers `/auth/reprendre`, sans code ni state, avec le message **Connexion à recommencer**. Recharger cette page ne répète plus la tentative. Si une connexion est en cours dans un autre onglet, son cookie est conservé : terminez-la dans cet onglet. Sinon, choisissez **Se reconnecter**. Une session réellement inactive conserve son message **Session expirée**.
+
+En attendant la mise à jour, ouvrez directement `https://vigie.nicephos.art/auth/login` dans un nouvel onglet, puis utilisez l’adresse d’accueil `https://vigie.nicephos.art/` pour le favori ou le raccourci. Ne conservez pas une adresse `/auth/callback` et ne transmettez pas ses paramètres. Si le refus persiste, la raison exacte figure dans `docker exec nicephos-vigie node vigie/cli.js console` ; `etat` concerne la transaction OIDC, `mfa` le second facteur, `role` les droits.
 
 ## Horodatages et capacité
 

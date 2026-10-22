@@ -22,8 +22,7 @@ export function createConsoleOidc({ issuer, clientId, clientSecret, projectId, o
   };
   return {
     origin: new URL(issuer).origin,
-    // Toujours redemander l’authentification : une ancienne connexion Zitadel sans second facteur ferait boucler
-    // « Se reconnecter » sur le refus MFA (D9). Pour une action sensible, max_age=300 reste vérifié au retour.
+    // reauth : ré-authentification (max_age=300 et prompt=login : Zitadel redemande la clé d'accès).
     async start({ reauth = false } = {}) {
       const cfg = await server();
       const tx = { verifier: client.randomPKCECodeVerifier(), state: client.randomState(), nonce: client.randomNonce() };
@@ -34,9 +33,8 @@ export function createConsoleOidc({ issuer, clientId, clientSecret, projectId, o
         code_challenge_method: 'S256',
         state: tx.state,
         nonce: tx.nonce,
-        prompt: 'login',
       };
-      if (reauth) params.max_age = '300';
+      if (reauth) Object.assign(params, { max_age: '300', prompt: 'login' });
       return { url: client.buildAuthorizationUrl(cfg, params).href, tx };
     },
     async finish(query, tx) {

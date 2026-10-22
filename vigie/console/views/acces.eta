@@ -4,11 +4,11 @@
 const cas = it.cas;
 const local = r => (typeof r === 'string' && r.startsWith('/') && !r.startsWith('//') && !r.startsWith('/\\') ? r : '/');
 const retour = local(it.retour);
-const CAS = ['refusee', 'mfa', 'reauth', 'autre', 'expiree', 'interdit', 'zitadel'];
+const CAS = ['refusee', 'mfa', 'reauth', 'autre', 'expiree', 'connexion', 'interdit', 'zitadel'];
 // Le 403 sans Cloudflare Access (et tout cas inconnu) : la page la plus nue, sans marque ni lien.
 const nu = !CAS.includes(cas) || (cas === 'interdit' && it.raison !== 'droit');
 const TITRES = { refusee: 'Connexion refusée', mfa: 'Clé d’accès exigée', reauth: 'Confirmez votre identité', autre: 'Confirmation refusée',
-  expiree: 'Session expirée', interdit: it.raison === 'droit' ? 'Droit insuffisant' : 'Accès refusé', zitadel: 'Connexion impossible pour l’instant' };
+  expiree: 'Session expirée', connexion: 'Connexion à recommencer', interdit: it.raison === 'droit' ? 'Droit insuffisant' : 'Accès refusé', zitadel: 'Connexion impossible pour l’instant' };
 const titre = TITRES[cas] || 'Accès refusé';
 // Le titre propre au cas, sauf si le serveur en donne un plus précis que « Vigie ».
 layout('./hors-session', nu ? { titreNu: 'Accès refusé' } : { titre: it.titre && it.titre !== 'Vigie' ? it.titre : titre });
@@ -68,6 +68,14 @@ const FAVORI = 'Ouvrez la Vigie depuis votre favori ; elle ne demande jamais v
 <p class="lede">Zitadel a confirmé un autre compte que le vôtre. L’action n’est pas partie.</p>
 <p class="sec">Recommencez avec votre propre compte. Si vous partagez cet appareil, déconnectez l’autre compte de Zitadel d’abord.</p>
 <div class="hors-actions"><a class="btn" href="<%= retour %>">Revenir à la page</a></div>
+</section>
+<p class="hors-pied"><%= FAVORI %></p>
+<% } else if (cas === 'connexion') { %>
+<section class="hors-carte" aria-labelledby="t-page">
+<h1 class="hors-titre" id="t-page"><%~ include('./_ic', { icone: 'horloge', taille: 26 }) %>Connexion à recommencer</h1>
+<p class="lede">Cette tentative de connexion n’est plus valable. Elle a pu expirer, être déjà utilisée ou être remplacée par une autre.</p>
+<p class="sec">Si vous avez commencé une connexion dans un autre onglet, terminez-la dans cet onglet. Sinon, reconnectez-vous ci-dessous.</p>
+<div class="hors-actions"><a class="btn" href="/auth/login">Se reconnecter</a></div>
 </section>
 <p class="hors-pied"><%= FAVORI %></p>
 <% } else if (cas === 'expiree') { %>

@@ -11,7 +11,7 @@ Références de design (artefacts claude.ai) :
 
 ## Correction — Reconnexion à la console de la Vigie, PR #213, version 1.213.0 (22 octobre 2026)
 
-Chaque nouvelle connexion demande `prompt=login` à Zitadel : le bouton « Se reconnecter » ne doit plus reprendre silencieusement une ancienne connexion sans second facteur et revenir au refus MFA (DS30). Les sessions de console encore valables et les contrôles de second facteur, de droits, de transaction et de fraîcheur des actions sensibles sont conservés. Tests dans `test/vigie-console.test.js` ; détails et dépannage dans [Vigie](docs/wiki/Vigie.md#connexion-refusée-ou-clé-daccès-exigée-dans-la-console). La cause du signalement sur l’iPhone réel reste à confirmer avec son message exact.
+Un ancien retour OIDC ne supprime plus le cookie d’une connexion plus récente. Un retour invalide reste refusé et journalisé (DS30), puis redirige vers `/auth/reprendre`, sans code ni state : recharger cette page ne rejoue plus la tentative et ne multiplie plus les alertes. Le message « Connexion à recommencer » distingue cette situation de l’expiration d’une session après inactivité. Les contrôles de transaction, de second facteur, de droits et de fraîcheur des actions sensibles sont conservés. Tests dans `test/vigie-console.test.js` et `test/vigie-console-vues.test.js` ; détails dans [Vigie](docs/wiki/Vigie.md#session-expirée-et-refus-répétés-au-retour-sur-téléphone).
 
 ## Correction — Audit de code et de sécurité hors Vigie, PR #212, version 1.212.0 (21 octobre 2026)
 

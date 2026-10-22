@@ -4,7 +4,6 @@ import { loadVigieConfig } from '../vigie/config.js';
 import { createAccessVerifier } from '../vigie/console/access.js';
 import { createRights, createCeilingReader, ceilingOf, can, RightsError } from '../vigie/console/droits.js';
 import { safeRetour } from '../vigie/console/server.js';
-import { createConsoleOidc } from '../vigie/console/oidc.js';
 import { setup, accessJwt, b64, TEAM, AUD, ISS, CERTS, START, other } from './console-env.js';
 import { VIGIE_KEYS } from './helpers.js';
 import crypto from 'node:crypto';
@@ -50,7 +49,7 @@ test('jeton Cloudflare Access : signature, émetteur, audience, dates, algorithm
 
 test('sans jeton Access : 403 sobre partout (fichiers statiques et connexion compris), DS30 noté une fois par adresse et par 10 minutes', async t => {
   const v = setup(t);
-  for (const url of ['/', '/static/vigie.css', '/auth/login', '/auth/callback?state=x', '/robots.txt', '/inexistant']) {
+  for (const url of ['/', '/static/vigie.css', '/auth/login', '/auth/reprendre', '/auth/callback?state=x', '/robots.txt', '/inexistant']) {
     const r = await v.app.inject({ url });
     assert.equal(r.statusCode, 403, url);
     assert.equal(r.headers['cache-control'], 'no-store');
@@ -65,29 +64,6 @@ test('sans jeton Access : 403 sobre partout (fichiers statiques et connexion com
   assert.equal(refus[0].composant, 'vigie · console');
   // Alerte DS30 (moyenne).
   assert.equal(v.alerts().find(a => a.regle === 'sigma.console_refus')?.gravite, 'moyen');
-});
-
-test('connexion Zitadel : une ancienne connexion ne dispense pas de se réauthentifier, même hors action sensible', async t => {
-  const issuer = 'https://idp.example';
-  t.mock.method(globalThis, 'fetch', async url => {
-    assert.equal(String(url), `${issuer}/.well-known/openid-configuration`);
-    return Response.json({ issuer, authorization_endpoint: `${issuer}/authorize` });
-  });
-  const oidc = createConsoleOidc({ issuer, clientId: 'console', clientSecret: 'secret-de-test', projectId: '100', orgId: '200', url: 'https://vigie.example' });
-  const states = new Set();
-  for (const options of [undefined, { reauth: true }]) {
-    const { url, tx } = await oidc.start(options);
-    const p = new URL(url).searchParams;
-    assert.equal(p.get('prompt'), 'login', 'la connexion ordinaire doit aussi redemander l’authentification');
-    assert.equal(p.get('max_age'), options?.reauth ? '300' : null, 'la fraîcheur des actions sensibles est conservée');
-    assert.equal(p.get('redirect_uri'), 'https://vigie.example/auth/callback');
-    assert.equal(p.get('state'), tx.state);
-    assert.equal(p.get('nonce'), tx.nonce);
-    assert.equal(p.get('code_challenge_method'), 'S256');
-    assert.equal(p.get('code_challenge'), crypto.createHash('sha256').update(tx.verifier).digest('base64url'));
-    assert.ok(!states.has(tx.state), 'chaque tentative ouvre une transaction neuve');
-    states.add(tx.state);
-  }
 });
 
 test('connexion : PKCE chez Zitadel, session ouverte (cookie __Host-, HttpOnly, Secure, Lax), retour local, en-têtes stricts', async t => {
@@ -112,7 +88,10 @@ test('connexion : PKCE chez Zitadel, session ouverte (cookie __Host-, HttpOnly, 
   assert.deepEqual(ev[0].detail, { role: 'admin', plafond: 'admin', amr: ['user', 'mfa'] });
   // Le state ne sert qu'une fois.
   const again = await v.app.inject({ url: `/auth/callback?code=code&state=${tx.value}`, headers: v.h(), cookies: { '__Host-vigie-tx': tx.value } });
-  assert.equal(again.statusCode, 400);
+  assert.equal(again.statusCode, 303);
+  assert.equal(again.headers.location, '/auth/reprendre');
+  assert.equal(v.events('vigie_console_connexion').length, 1, 'le rejeu n’ouvre pas de session');
+  assert.equal(v.events('vigie_console_refus').at(-1).detail.raison, 'etat');
   // En-têtes.
   const page = await v.app.inject({ url: '/alertes', headers: v.h(), cookies: { '__Host-vigie': cookie } });
   assert.equal(page.statusCode, 200);
@@ -145,7 +124,10 @@ test('connexion refusée (DS30) : sans second facteur, sans rôle vigie.*, rôle
   // State sans son cookie (lien de retour forgé) : refusé.
   const r3 = await v.app.inject({ url: '/auth/login', headers: v.h() });
   const st3 = r3.cookies.find(x => x.name === '__Host-vigie-tx').value;
-  assert.equal((await v.app.inject({ url: `/auth/callback?code=c&state=${st3}`, headers: v.h() })).statusCode, 400);
+  const sansCookie = await v.app.inject({ url: `/auth/callback?code=c&state=${st3}`, headers: v.h() });
+  assert.equal(sansCookie.statusCode, 303);
+  assert.equal(sansCookie.headers.location, '/auth/reprendre');
+  assert.ok(v.db.prepare('SELECT 1 FROM console_tx WHERE state = ?').get(st3), 'sans preuve du navigateur, la transaction n’est pas consommée');
   // Jeton refusé par openid-client (signature, nonce…) : page « connexion impossible », noté.
   v.oidc.claims = new Error('unexpected JWT "nonce" claim value');
   const r4 = await v.app.inject({ url: '/auth/login', headers: v.h() });
@@ -157,6 +139,66 @@ test('connexion refusée (DS30) : sans second facteur, sans rôle vigie.*, rôle
   // Plus de 3 en une heure : alerte haute (DS30).
   const high = v.alerts().find(a => a.regle === 'sigma.console_refus_repetes');
   assert.equal(high?.gravite, 'haut');
+});
+
+test('ancien retour OIDC : la nouvelle tentative survit et recharger la page de reprise ne rejoue pas le refus', async t => {
+  const v = setup(t);
+  const finish = t.mock.method(v.oidc, 'finish');
+  const debut = async () => {
+    const r = await v.app.inject({ url: '/auth/login', headers: v.h() });
+    return r.cookies.find(c => c.name === '__Host-vigie-tx').value;
+  };
+  const ancien = await debut(), nouveau = await debut();
+  const cookies = { '__Host-vigie-tx': nouveau };
+  const r = await v.app.inject({ url: `/auth/callback?code=ancien-code&state=${ancien}`, headers: v.h(), cookies });
+  assert.equal(r.cookies.some(c => c.name === '__Host-vigie-tx'), false, 'un ancien onglet ne détruit pas le cookie de la nouvelle tentative');
+  assert.equal(r.statusCode, 303);
+  assert.equal(r.headers.location, '/auth/reprendre', 'adresse propre, sans code ni state');
+  assert.equal(r.headers['cache-control'], 'no-store');
+  assert.equal(finish.mock.callCount(), 0, 'aucun échange du code non lié au navigateur');
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM console_tx').pluck().get(), 2);
+  for (let i = 0; i < 5; i++) {
+    const page = await v.app.inject({ url: r.headers.location, headers: v.h(), cookies });
+    assert.equal(page.statusCode, 400);
+    assert.match(page.body, /Connexion à recommencer/);
+    assert.match(page.body, /href="\/auth\/login">Se reconnecter/);
+    assert.doesNotMatch(page.body, /15 minutes|ancien-code/);
+    assert.ok(!page.body.includes(ancien) && !page.body.includes(nouveau));
+    assert.equal(page.headers['cache-control'], 'no-store');
+    assert.equal(page.headers['referrer-policy'], 'no-referrer');
+    assert.equal(page.cookies.length, 0);
+  }
+  assert.equal(v.events('vigie_console_refus').length, 1, 'le refus initial reste journalisé, les lectures de sa page ne sont pas des tentatives');
+  assert.ok(!v.alerts().some(a => a.regle === 'sigma.console_refus_repetes'));
+  v.oidc.claims = { sub: 'sub-seb', nom: 'Compte de test', amr: ['user', 'mfa'], authTime: v.clock.t, roles: ['vigie.admin'] };
+  const ok = await v.app.inject({ url: `/auth/callback?code=nouveau-code&state=${nouveau}`, headers: v.h(), cookies });
+  assert.equal(ok.statusCode, 302);
+  assert.equal(finish.mock.callCount(), 1);
+  assert.equal(v.events('vigie_console_connexion').length, 1);
+  assert.ok(v.sessionOf(ok.cookies.find(c => c.name === '__Host-vigie').value));
+});
+
+test('retour OIDC expiré : cookie effacé, aucune session ouverte, puis reconnexion ; les rejets directs répétés alertent toujours', async t => {
+  const v = setup(t);
+  const finish = t.mock.method(v.oidc, 'finish');
+  const debut = await v.app.inject({ url: '/auth/login', headers: v.h() });
+  const state = debut.cookies.find(c => c.name === '__Host-vigie-tx').value;
+  v.clock.t += 10 * 60e3 + 1;
+  const url = `/auth/callback?code=code&state=${state}`;
+  const r = await v.app.inject({ url, headers: v.h(), cookies: { '__Host-vigie-tx': state } });
+  assert.equal(r.statusCode, 303);
+  assert.equal(r.headers.location, '/auth/reprendre');
+  const efface = r.cookies.find(c => c.name === '__Host-vigie-tx');
+  assert.ok(efface.secure && efface.httpOnly && efface.path === '/' && !efface.value);
+  assert.equal(finish.mock.callCount(), 0);
+  assert.equal(v.db.prepare('SELECT COUNT(*) FROM console_sessions').pluck().get(), 0);
+  // Répéter volontairement le retour invalide reste détecté (DS30), contrairement au rechargement de la page propre.
+  for (let i = 0; i < 3; i++) await v.app.inject({ url, headers: v.h() });
+  assert.equal(v.events('vigie_console_refus').length, 4);
+  assert.equal(v.alerts().find(a => a.regle === 'sigma.console_refus_repetes')?.gravite, 'haut');
+  const fresh = await v.login();
+  assert.equal(fresh.r2.statusCode, 302);
+  assert.ok(fresh.cookie);
 });
 
 test('session : liée à l’identité Access de son ouverture, 15 min sans activité, 1 h au plus ; le rafraîchissement ne la prolonge pas', async t => {
