@@ -1153,3 +1153,7 @@ Le propriétaire a validé les dix recommandations le 18 octobre 2026 : elles va
 Les demandes et lectures de description réutilisent `/admin/photos/:id/description`, avec les permissions et la portée existantes. Le GET fournit aussi les textes de reprise déjà présents dans la fiche ; aucun champ n’est écrit par cette lecture. L’aperçu du filigrane réutilise le POST `/admin/images/apercu` (`site.filigrane`, CSRF, image réduite, `no-store`), sans enregistrer les réglages. Le bandeau propose toutes les compositions déjà admises par `/admin/apparence/apercu-v2` ; le droit `site.apparence`, la session privée et le retour borné restent obligatoires.
 
 La Vigie consomme les refus existants `authz_fail` (DS10) et `authz_csrf_fail` (DS14). Le changement de vue reste au journal d’audit. Annuler une suggestion dans le navigateur n’écrit rien et n’appelle pas le serveur : aucun événement de sécurité supplémentaire à demander. Aucun nouveau besoin BV ni changement du moteur.
+
+## Reconnexion à la console (22 octobre 2026)
+
+La demande OIDC envoie `prompt=login` à chaque nouvelle connexion pour éviter la reprise silencieuse d’une ancienne connexion Zitadel sans second facteur. La Vigie consomme toujours `vigie_console_refus` (notamment `raison: mfa`, DS30) et `vigie_console_connexion` après vérification du second facteur et des droits. L’expiration pour inactivité ne produit pas de refus de sécurité. Aucun nouveau champ personnel, événement, besoin BV ou changement de règle ; le diagnostic du téléphone réel nécessite encore le message exact du refus.

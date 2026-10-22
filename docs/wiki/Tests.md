@@ -16,6 +16,7 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 
 | Fichier | Couvre |
 |---|---|
+| `test/vigie-console.test.js` | Authentification de la console, Access, droits et sessions ; `prompt=login` à chaque nouvelle connexion Zitadel, PKCE/state/nonce conservés, expiration sans alerte, refus sans second facteur puis reconnexion avec une session neuve |
 | `test/vigie-console-attack.test.js` | ATT&CK D3 : couverture et observations historiques, exceptions de projection, index rattrapé et purgé sans réécriture du journal, atomicité et idempotence, pagination et CSV filtrés, droits, XSS et masquage, calques Navigator sans donnée personnelle, bornes et erreurs |
 | `test/vigie-console-dossiers-dessins.test.js` | Dessins D2 : géométrie déterministe, échappement SVG, masquage des adresses, compte des techniques par tactique, filtres et pagination, bornes, voisins et objets regroupés, phases et marqueurs simultanés |
 | `test/app.test.js` | en-têtes de sécurité, configuration « en ligne », versionnage CSS/JS |

@@ -4,6 +4,7 @@ import { loadVigieConfig } from '../vigie/config.js';
 import { createAccessVerifier } from '../vigie/console/access.js';
 import { createRights, createCeilingReader, ceilingOf, can, RightsError } from '../vigie/console/droits.js';
 import { safeRetour } from '../vigie/console/server.js';
+import { createConsoleOidc } from '../vigie/console/oidc.js';
 import { setup, accessJwt, b64, TEAM, AUD, ISS, CERTS, START, other } from './console-env.js';
 import { VIGIE_KEYS } from './helpers.js';
 import crypto from 'node:crypto';
@@ -64,6 +65,29 @@ test('sans jeton Access : 403 sobre partout (fichiers statiques et connexion com
   assert.equal(refus[0].composant, 'vigie · console');
   // Alerte DS30 (moyenne).
   assert.equal(v.alerts().find(a => a.regle === 'sigma.console_refus')?.gravite, 'moyen');
+});
+
+test('connexion Zitadel : une ancienne connexion ne dispense pas de se réauthentifier, même hors action sensible', async t => {
+  const issuer = 'https://idp.example';
+  t.mock.method(globalThis, 'fetch', async url => {
+    assert.equal(String(url), `${issuer}/.well-known/openid-configuration`);
+    return Response.json({ issuer, authorization_endpoint: `${issuer}/authorize` });
+  });
+  const oidc = createConsoleOidc({ issuer, clientId: 'console', clientSecret: 'secret-de-test', projectId: '100', orgId: '200', url: 'https://vigie.example' });
+  const states = new Set();
+  for (const options of [undefined, { reauth: true }]) {
+    const { url, tx } = await oidc.start(options);
+    const p = new URL(url).searchParams;
+    assert.equal(p.get('prompt'), 'login', 'la connexion ordinaire doit aussi redemander l’authentification');
+    assert.equal(p.get('max_age'), options?.reauth ? '300' : null, 'la fraîcheur des actions sensibles est conservée');
+    assert.equal(p.get('redirect_uri'), 'https://vigie.example/auth/callback');
+    assert.equal(p.get('state'), tx.state);
+    assert.equal(p.get('nonce'), tx.nonce);
+    assert.equal(p.get('code_challenge_method'), 'S256');
+    assert.equal(p.get('code_challenge'), crypto.createHash('sha256').update(tx.verifier).digest('base64url'));
+    assert.ok(!states.has(tx.state), 'chaque tentative ouvre une transaction neuve');
+    states.add(tx.state);
+  }
 });
 
 test('connexion : PKCE chez Zitadel, session ouverte (cookie __Host-, HttpOnly, Secure, Lax), retour local, en-têtes stricts', async t => {
@@ -158,6 +182,37 @@ test('session : liée à l’identité Access de son ouverture, 15 min sans acti
   v.clock.t += 6 * 60e3;
   assert.equal((await v.app.inject({ url: '/alertes', headers: v.h(), cookies: { '__Host-vigie': c3 } })).statusCode, 401);
   assert.equal(v.sessionOf(c3).ferme_raison, 'inactivite');
+});
+
+test('reconnexion après inactivité : nouvelle transaction, second facteur toujours exigé, puis session neuve', async t => {
+  const v = setup(t);
+  const { cookie } = await v.login();
+  const cookies = { '__Host-vigie': cookie };
+  // Une session encore valable reste utilisable, sans nouveau passage chez Zitadel.
+  const active = await v.app.inject({ url: '/auth/login?retour=/alertes', headers: v.h(), cookies });
+  assert.equal(active.headers.location, '/alertes');
+  assert.equal(v.oidc.starts.length, 1);
+  v.clock.t += 16 * 60e3;
+  const expired = await v.app.inject({ url: '/alertes', headers: v.h(), cookies });
+  assert.equal(expired.statusCode, 401);
+  assert.equal(v.sessionOf(cookie).ferme_raison, 'inactivite');
+  assert.equal(v.events('vigie_console_refus').length, 0, 'l’inactivité seule n’est pas une attaque');
+  // Si le fournisseur renvoie encore une connexion sans second facteur, aucune session n’est créée.
+  const refused = await v.login({ amr: ['pwd'] });
+  assert.equal(refused.r2.statusCode, 403);
+  assert.equal(refused.cookie, undefined);
+  assert.match(refused.r2.body, /Se reconnecter/);
+  assert.equal(v.events('vigie_console_refus').at(-1).detail.raison, 'mfa');
+  const fresh = await v.login({ retour: '/alertes' });
+  assert.equal(fresh.r2.statusCode, 302);
+  assert.equal(fresh.r2.headers.location, '/alertes');
+  assert.notEqual(fresh.state, refused.state);
+  assert.notEqual(fresh.cookie, cookie);
+  assert.equal(v.sessionOf(fresh.cookie).ferme_a, null);
+  const page = await v.app.inject({ url: '/alertes', headers: v.h(), cookies: { '__Host-vigie': fresh.cookie } });
+  assert.equal(page.statusCode, 200);
+  assert.equal(v.events('vigie_console_refus').length, 1, 'la reconnexion aboutie n’ajoute aucun refus');
+  assert.equal(v.events('vigie_console_connexion').length, 2);
 });
 
 test('plafond relu chez Zitadel toutes les 5 minutes : rôle retiré → session fermée et DS29 ; Zitadel injoignable : 15 min de grâce', async t => {

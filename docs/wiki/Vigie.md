@@ -373,6 +373,8 @@ docker exec nicephos-vigie node vigie/cli.js console
 
 Après une correction dans Zitadel : **Se reconnecter**. `VIGIE_ADMIN_SUBS` ne suffit pas seule : elle règle l'attribution côté Vigie, le plafond vient toujours de Zitadel.
 
+**Ancienne connexion reprise sur téléphone** : chaque nouvelle connexion de la console demande désormais à Zitadel de réauthentifier l’utilisateur (`prompt=login`). Cela évite que **Se reconnecter** reprenne sans interaction une ancienne connexion sans second facteur et revienne au même refus `mfa`. Une session de console encore valable reste utilisable ; après expiration, la reconnexion passe par Zitadel. Le second facteur et les règles DS30 restent exigés, et `max_age=300` reste réservé aux confirmations d’actions sensibles. Le comportement de `prompt` est décrit dans la [documentation Zitadel](https://zitadel.com/docs/apis/openidoauth/endpoints#additional-parameters).
+
 ## Horodatages et capacité
 
 - **Deux heures par événement** : `survenu_a`, l'heure de la source (site, Zitadel), et `recu_a`, l'heure de réception par la Vigie. Les détecteurs (heure inhabituelle, voyage impossible) prennent l'heure de la source, bornée à 30 jours en arrière et 5 minutes en avant ; hors bornes, l'heure reçue est gardée telle quelle dans le détail (`horodatage_site_brut`). Les horloges du site et de la Vigie ne peuvent pas diverger de plus de 60 s : un lot signé plus décalé est refusé.
