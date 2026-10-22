@@ -1,4 +1,5 @@
 import net from 'node:net';
+import { REGLE_VEILLE } from './veille-alertes.js';
 import { fileURLToPath } from 'node:url';
 import { pointsOf, THRESHOLDS, HALF_LIFE_MIN, SOURCE_MIN, QUORUM, sourceOf, MODES } from './poids.js';
 import { rank } from './vocabulaire.js';
@@ -413,7 +414,8 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   // charge par un intervenant reste à lui.
   function closeQuiet() {
     const t = now();
-    const ids = db.prepare("SELECT id FROM alerts WHERE statut = 'ouverte' AND derniere < ? LIMIT 1000").pluck().all(t - QUIET_CLOSE);
+    // La veille clôt ses avis après un rapprochement complet ; le silence d'OSV n'est pas un correctif installé.
+    const ids = db.prepare("SELECT id FROM alerts WHERE statut = 'ouverte' AND regle != ? AND derniere < ? LIMIT 1000").pluck().all(REGLE_VEILLE, t - QUIET_CLOSE);
     if (!ids.length) return 0;
     db.transaction(() => {
       const up = db.prepare("UPDATE alerts SET statut = 'close', note = 'sans suite : 7 jours sans nouvel événement', traite_par = 'Vigie (clôture automatique)', traite_a = ? WHERE id = ?");

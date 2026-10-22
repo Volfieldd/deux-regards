@@ -1111,12 +1111,13 @@ cookie, sans permission ni migration ; en v2 et en v3 seulement (en v1, 404 et a
 
 ## BV-34 — Veille des vulnérabilités des bibliothèques
 
-**Pris : onglet Veille, à la demande du propriétaire (22 octobre 2026).** Périmètre explicitement retenu : bibliothèques du site et de la Vigie, directes et indirectes, avec limites affichées.
+**Pris : onglet Veille et alertes, à la demande du propriétaire (22 octobre 2026).** Périmètre explicitement retenu : bibliothèques du site et de la Vigie, directes et indirectes, avec limites affichées.
 
 - **Besoin** : repérer les avis connus qui concernent les versions npm déclarées, y compris les dépendances indirectes, sans confondre une vulnérabilité publiée avec son exploitation.
 - **Entrées** : fichiers de verrouillage du site et de la Vigie embarqués dans l’image Vigie ; API OSV par nom/version. Les entrées de développement, Git et locales sont exclues et comptées. Aucun événement du site n’est nécessaire ; vocabulaire fermé inchangé.
 - **Console** : lecture pour les rôles existants, filtres, gravité publiée ou inconnue, versions correctives publiées, liens OSV, inventaire et limites ; dates, panne et ancienneté visibles. Cache persistant, actualisation quotidienne et réessai horaire, bornes réseau et pagination. Aucun geste d’écriture depuis la page.
-- **Impact sur le moteur** : aucun signal, seuil, score, dossier, notification, blocage ni correction automatique. Ce besoin de maintenance n’est pas un nouveau cas DS d’attaque.
+- **Alertes** : une alerte par avis/bibliothèque/version, regroupée entre cibles, dédupliquée après redémarrage et classement. Hautes/critiques notifiées par le circuit existant ; aggravation et nouvelle cible après classement rouvrent un suivi. Une disparition après vérification complète clôt sans attester de correctif installé ; panne et couverture partielle ne clôturent rien. Migration 019 pour la mémoire ; événements existants `vigie_alerte`, vocabulaire inchangé.
+- **Impact sur le moteur** : aucun score, dossier, blocage ni correction automatique. La clôture sur sept jours de silence exclut ces alertes, synchronisées par la veille. Interrupteurs Détection et Alertes respectés. Ce besoin de maintenance n’est pas un nouveau cas DS d’attaque.
 - **Couverture restante** : inventaire réellement installé et révision du site déployé, Node.js, système, bibliothèques natives, images et services externes. Une déclaration optionnelle ou retirée lors de la construction peut produire un avis sans présence dans l’image. Voir [Vigie](../wiki/Vigie.md#veille-des-vulnérabilités).
 
 ## Permissions et contrôle des rôles (Carnets et galeries privées)

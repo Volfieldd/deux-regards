@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { readLimited } from './zitadel.js';
 import { sansContacts } from './util.js';
+import { REGLE_VEILLE, TITRE_VEILLE } from './veille-alertes.js';
 
 // Notifications de la Vigie (phase D, annexe architecture sections 4.3 et 8, décision D10) : Signal (passerelle
 // signal-cli-rest-api sur un réseau interne), l'e-mail en secours. Un message court, SANS adresse, sans compte, sans
@@ -159,6 +160,8 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
   // Alerte ouverte ou aggravée → message, selon la gravité, le mode et l'interrupteur.
   async function onAlert(detail, t = now()) {
     if (!['ouverte', 'aggravee'].includes(detail.action)) return false;
+    // Une transaction de publication peut être annulée après l'abonnement : ne notifier que son événement commis.
+    if (detail.regle === REGLE_VEILLE && detail.evenement && !store.db.prepare('SELECT 1 FROM events WHERE id = ?').get(detail.evenement)) return false;
     const a = store.db.prepare('SELECT * FROM alerts WHERE id = ?').get(detail.id);
     if (!a || !['alerter', 'bloquer'].includes(a.mode)) return false;
     // La surveillance réduite part toujours (y compris quand c'est l'interrupteur des alertes qu'on vient d'arrêter),
@@ -170,7 +173,7 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
     let sources = [];
     try { sources = JSON.parse(a.sources); } catch { /* illisible */ }
     const decisions = store.db.prepare('SELECT kind, cree_a, fin FROM decisions WHERE alerte_id = ? AND auto = 1 ORDER BY id').all(a.id);
-    return send(messageOf({ id: a.id, gravite: detail.gravite, titre: rule?.titre || a.regle, sources, t, console: consoleUrl, action: detail.action, reponse: responseOf(decisions) }));
+    return send(messageOf({ id: a.id, gravite: detail.gravite, titre: a.regle === REGLE_VEILLE ? TITRE_VEILLE : rule?.titre || a.regle, sources, t, console: consoleUrl, action: detail.action, reponse: responseOf(decisions) }));
   }
 
   // Abonnement : les alertes écrites dans la chaîne (vigie_alerte), traitées hors de l'écriture.
@@ -184,7 +187,7 @@ export function createNotifier({ store, engine, switches, config = {}, fetchImpl
   store.onAdded(rows => {
     for (const r of rows) {
       if (r.type !== 'vigie_alerte' && r.type !== 'vigie_surveillance_reduite') continue;
-      try { const d = JSON.parse(r.detail); queue.push(r.type === 'vigie_alerte' ? d : { reduite: true, detail: d, t: r.survenu_a }); } catch { /* illisible */ }
+      try { const d = JSON.parse(r.detail); queue.push(r.type === 'vigie_alerte' ? { ...d, ...(d.regle === REGLE_VEILLE ? { evenement: r.id } : {}) } : { reduite: true, detail: d, t: r.survenu_a }); } catch { /* illisible */ }
     }
     if (queue.length) setImmediate(drainQueue);
   });

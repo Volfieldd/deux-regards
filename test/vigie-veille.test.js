@@ -66,7 +66,8 @@ test('Veille : correspondance OSV persistée, source fixe et minimisation des re
   assert.equal(etat.avis[0].gravite, 'haute');
   assert.deepEqual(etat.avis[0].paquets[0].correctifs, ['1.0.1']);
   assert.equal(etat.avis[0].paquets[0].usages.length, 2);
-  assert.equal(e.db.prepare('SELECT count(*) AS n FROM events').get().n, 0);
+  assert.equal(e.db.prepare("SELECT count(*) AS n FROM events WHERE type = 'vigie_alerte'").get().n, 1);
+  assert.equal(etat.avis[0].paquets[0].alerte.statut, 'ouverte');
   assert.deepEqual(JSON.parse(appels[0].opts.body), { queries: [{ package: { ecosystem: 'npm', name: 'exemple' }, version: '1.0.0' }] });
   assert.ok(appels.every(x => x.url.startsWith('https://api.osv.dev/v1/') && x.opts.redirect === 'error' && x.opts.signal));
   const reprise = createVeille(e.args);

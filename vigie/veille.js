@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { readLimited } from './zitadel.js';
+import { createAlertesVeille, cleVeille } from './veille-alertes.js';
 
-// BV-34 : inventaires déclarés, indépendants du journal et du moteur. Aucun avis n'est une preuve d'attaque.
+// BV-34 : inventaires déclarés, sans score d'attaque ni dossier. Les alertes de maintenance sont journalisées.
 // OSV associe lui-même nom et version ; les correctifs affichés ne sont pas des consignes de mise à jour.
 export const JOUR = 864e5, REESSAI = 3600e3;
 const CLE = 'veille_npm_v1', MAX_PAQUETS = 3000, MAX_AVIS = 300;
@@ -81,22 +82,37 @@ function reduireAvis(v, id, paquets) {
     }) };
 }
 
-export function createVeille({ store, fetchImpl = fetch, now = Date.now, inventaire = lireInventaire() }) {
+export function createVeille({ store, switches = null, fetchImpl = fetch, now = Date.now, inventaire = lireInventaire() }) {
   let encours = null, controle = null, ferme = false;
+  const alertes = createAlertesVeille({ store, switches });
+  const complet = !inventaire.cibles.some(c => c.erreur || c.exclus);
+  // Cache, déduplication, alertes et journal réussissent ensemble. Une reprise après échec peut tout retenter.
+  const publier = store.db.transaction(resultat => {
+    alertes.synchroniser(resultat.avis, { complet, t: resultat.succes });
+    store.setting.set(CLE, resultat);
+  });
   const lire = () => {
     const ancien = store.setting.get(CLE);
     return ancien?.empreinte === inventaire.empreinte ? ancien : { empreinte: inventaire.empreinte, tentative: null, succes: null, erreur: null, avis: [] };
   };
   const etat = () => {
-    const s = lire();
-    return { ...s, inventaire, encours: Boolean(encours), perime: s.succes != null && now() - s.succes >= JOUR,
-      incomplet: inventaire.cibles.some(c => c.erreur || c.exclus), prochain: s.tentative == null ? null : s.erreur ? s.tentative + REESSAI : s.succes + JOUR };
+    const s = lire(), liens = alertes.liens();
+    return { ...s, avis: s.avis.map(v => ({ ...v, paquets: v.paquets.map(p => ({ ...p, alerte: liens.get(cleVeille(v.id, p)) || null })) })),
+      inventaire, encours: Boolean(encours), perime: s.succes != null && now() - s.succes >= JOUR,
+      incomplet: !complet, prochain: s.tentative == null ? null : s.erreur ? s.tentative + REESSAI : s.succes + JOUR };
   };
   const actualiser = () => {
     if (ferme) return Promise.resolve();
     if (encours) return encours;
     const avant = lire(), t = now();
-    if (avant.tentative != null && t - avant.tentative < (avant.erreur ? REESSAI : JOUR)) return Promise.resolve();
+    if (avant.tentative != null && t - avant.tentative < (avant.erreur ? REESSAI : JOUR)) {
+      // Rattrapage d'un cache frais créé avant les alertes, ou pendant un arrêt de la détection.
+      if (!avant.erreur && avant.succes != null) {
+        try { publier(avant); }
+        catch { store.setting.set(CLE, { ...avant, tentative: t, erreur: 'Publication des alertes indisponible. Nouvel essai dans une heure.' }); }
+      }
+      return Promise.resolve();
+    }
     controle = new AbortController();
     const signal = AbortSignal.any([controle.signal, AbortSignal.timeout(120e3)]);
     const demander = async (chemin, corps) => {
@@ -149,7 +165,7 @@ export function createVeille({ store, fetchImpl = fetch, now = Date.now, inventa
         avis.sort((a, b) => ordre.indexOf(a.gravite) - ordre.indexOf(b.gravite) || a.id.localeCompare(b.id));
         const resultat = { empreinte: inventaire.empreinte, tentative: t, succes: now(), erreur: null, avis };
         if (Buffer.byteLength(JSON.stringify(resultat)) > 5 * 1024 * 1024) throw new Error('Résultats OSV trop grands.');
-        if (!ferme) store.setting.set(CLE, resultat);
+        if (!ferme) publier(resultat);
       } catch {
         // Pas de corps distant dans les logs ni de résultat partiel présenté comme une vérification réussie.
         if (!ferme) store.setting.set(CLE, { ...avant, tentative: t, erreur: 'Vérification incomplète ou source OSV indisponible. Nouvel essai dans une heure.' });

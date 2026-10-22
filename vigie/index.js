@@ -34,7 +34,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   // sans attendre l'analyse).
   const switches = createSwitches({ store, now });
   const threats = createThreats({ store, fetchImpl, now, log, enabled: config.threatLists });
-  const veille = createVeille({ store, fetchImpl, now });
+  const veille = createVeille({ store, switches, fetchImpl, now });
   const engine = createEngine({ store, decisions, switches, threats, now, log });
   store.onAdded(() => engine.enqueue());
   // Notifications (phase D) : Signal, e-mail en secours ; alertes hautes et critiques hors observation.

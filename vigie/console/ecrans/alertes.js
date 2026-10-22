@@ -7,6 +7,7 @@
 // les gabarits est déjà mis en forme (dates à l'heure de Paris, mots du lexique) ; un Lecteur ne voit que des adresses
 // tronquées (adresseDetail), ni le texte brut de la réponse automatique (qui peut citer une adresse).
 import { alertOrder } from '../../moteur.js';
+import { REGLE_VEILLE, TITRE_VEILLE } from '../../veille-alertes.js';
 import { lire as lireAttack, libelleTactique, nomTechnique } from '../../attack.js';
 import { SOURCE_MIN, QUORUM, sourceOf } from '../../poids.js';
 import { can } from '../droits.js';
@@ -87,6 +88,7 @@ export function mitre(tags) {
 // Registre des règles (titres, cas, mode actuel), du moteur.
 function registre(engine) {
   const m = new Map();
+  m.set(REGLE_VEILLE, { id: REGLE_VEILLE, titre: TITRE_VEILLE, cas: 'BV-34', mode: 'alerter' });
   for (const r of engine?.rules?.() || []) m.set(r.id, r);
   return m;
 }
@@ -334,7 +336,7 @@ function raisonsReponse(texte, role) {
 
 const parQui = (e, role = 'viewer') => {
   const s = String(e || '');
-  if (/^vigie\/moteur\.js/.test(s) || /^Vigie\b/.test(s)) return 'la Vigie';
+  if (/^vigie\/(moteur|veille-alertes)\.js/.test(s) || /^Vigie\b/.test(s)) return 'la Vigie';
   return nomDe(s, role) || 'inconnu';
 };
 
@@ -349,6 +351,7 @@ function historique(q, a, t, role = 'viewer') {
     let texte;
     if (d.action === 'ouverte') texte = `Ouverte${g ? `, gravité ${g}` : ''}${d.mode ? `, mode ${MODES[d.mode] || d.mode}` : ''}`;
     else if (d.action === 'aggravee') texte = `Aggravée${d.avant && g ? `${FINE}: ${gravite(d.avant).mot}, puis ${g}` : g ? `${FINE}: ${g}` : ''}`;
+    else if (d.action === 'etendue' && a.regle === REGLE_VEILLE) texte = 'Bibliothèque aussi déclarée dans une nouvelle cible';
     else if (d.action === 'prise en charge') texte = `Prise en charge par ${parQui(r.emetteur, role)}`;
     else if (d.action === 'close') texte = d.classement ? `Classée ${CLASSEMENTS[d.classement] || d.classement} par ${parQui(r.emetteur, role)}, alerte close` : `Close par ${parQui(r.emetteur, role)}`;
     else if (d.action === 'note') texte = `Note de ${parQui(r.emetteur, role)}`;
@@ -466,7 +469,8 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
   };
 
   // Règle : titre, cas, nature, tactiques MITRE.
-  const nature = a.regle === 'entite.score' ? `Alerte de score${FINE}: le score de l’entité a franchi son seuil, et deux sources au moins y contribuent (quorum).`
+  const nature = a.regle === REGLE_VEILLE ? 'Avis OSV rapproché d’une version npm déclarée. La présence dans le déploiement et son exploitation ne sont pas attestées.'
+    : a.regle === 'entite.score' ? `Alerte de score${FINE}: le score de l’entité a franchi son seuil, et deux sources au moins y contribuent (quorum).`
     : a.regle.startsWith('detecteur.') ? `Détecteur de comportement${FINE}: la Vigie compare l’entité à son habitude.`
       : r?.sourceUnique ? `Une seule observation suffit${FINE}: preuve à source unique, sans attendre le score.` : null;
   const regle = { id: a.regle, titre, cas: a.cas && a.cas !== 'quorum' ? a.cas : null, nature, mitre: mitre(r?.tags) };
@@ -492,6 +496,7 @@ export function fiche({ db, engine, now = Date.now, role, id, avant = null }) {
 
   return {
     id: a.id,
+    veille: a.regle === REGLE_VEILLE ? { href: `/veille?${new URLSearchParams({ q: String(a.entite_key).split(' · ')[0] })}` } : null,
     dossier: a.dossier_id || null,
     lecteur: roleVu === 'viewer',
     titre,
@@ -543,7 +548,7 @@ export function actionsFiche({ db, req, t, id, message = null }) {
     prendre: a.statut === 'ouverte' ? `/alertes/${a.id}/prendre` : null,
     classer: close ? null : { action: `/alertes/${a.id}/classer`, choix: CHOIX.map(c => ({ ...c, coche: errC?.valeurs.classement === c.v })), note: errC?.valeurs.note || '', err: place(errC, ['classement', 'note']) },
     note: { action: `/alertes/${a.id}/note`, valeur: errN?.valeurs.note || '', err: place(errN, ['note']) },
-    forcees: close ? null : actionsForcees({ db, kind: a.entite_kind, key: a.entite_key, req, t, retour: `/alertes/${a.id}`, alerte: a.id, message, prefixe: 'a' }),
+    forcees: close || a.regle === REGLE_VEILLE ? null : actionsForcees({ db, kind: a.entite_kind, key: a.entite_key, req, t, retour: `/alertes/${a.id}`, alerte: a.id, message, prefixe: 'a' }),
   };
 }
 

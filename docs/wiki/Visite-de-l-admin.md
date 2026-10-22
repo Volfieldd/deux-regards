@@ -108,7 +108,7 @@ Les personnes photographiées : demandes reçues sur `/bonjour` (nouvelles en t�
 
 ## Sécurité et veille
 
-L’entrée **Sécurité**, lorsqu’elle est disponible pour le compte, ouvre la console indépendante de la Vigie. Son onglet **Veille** liste les avis de vulnérabilité concernant les bibliothèques npm déclarées du site et de la Vigie. Cible, gravité et recherche filtrent les avis ; le détail indique les versions et les correctifs publiés. La date de vérification et les limites de l’inventaire restent visibles. Cet onglet fonctionne sans JavaScript, sur ordinateur comme sur téléphone ; il ne déclenche aucune mise à jour. Voir [Vigie](Vigie#veille-des-vulnérabilités).
+L’entrée **Sécurité**, lorsqu’elle est disponible pour le compte, ouvre la console indépendante de la Vigie. Son onglet **Veille** liste les avis de vulnérabilité concernant les bibliothèques npm déclarées du site et de la Vigie. Cible, gravité et recherche filtrent les avis ; le détail indique les versions et les correctifs publiés. Les correspondances créent des alertes accessibles depuis l’avis ; les hautes/critiques suivent les notifications configurées, sans répétition quotidienne. La date de vérification et les limites de l’inventaire restent visibles. Cet onglet fonctionne sans JavaScript, sur ordinateur comme sur téléphone ; il ne déclenche aucune mise à jour. Voir [Vigie](Vigie#veille-des-vulnérabilités).
 
 ## Sur mobile
 

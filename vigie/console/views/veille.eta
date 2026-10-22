@@ -16,6 +16,7 @@ layout('./layout', { titre: it.titre });
 <% if (e.succes == null && !e.erreur && !e.encours) { %><p>Le premier essai est programmé une minute après le démarrage de la Vigie.</p><% } %>
 <% if (e.incomplet) { %><p><strong>Couverture incomplète :</strong> certains inventaires ou paquets ne peuvent pas être interrogés. Voir les limites ci-dessous.</p><% } %>
 <p>Ces avis concernent les <strong>versions déclarées dans les inventaires embarqués</strong>. Ils ne prouvent ni leur présence dans les conteneurs déployés ni une exploitation sur le site.</p>
+<p>Chaque nouvelle correspondance avis/bibliothèque/version ouvre une alerte, sans répétition quotidienne. Les hautes et critiques suivent les notifications configurées, si leur interrupteur est en marche. Une détection arrêtée suspend la création d’alertes.</p>
 </section>
 <section class="ds-section" aria-labelledby="veille-avis"><h2 id="veille-avis">Avis à examiner</h2>
 <form method="get" action="/veille" class="veille-filtres">
@@ -30,6 +31,7 @@ layout('./layout', { titre: it.titre });
 <article class="panel veille-avis-item"><p class="veille-gravite"><% if (a.gravite === 'inconnue') { %><strong>Gravité non précisée</strong><% } else { %><%~ include('./_grav', { gravClasse: a.gravite, gravMot: v.gravites[a.gravite] }) %><% } %> · <%= a.id %><%= a.aliases.length ? ' · ' + a.aliases.join(', ') : '' %></p><h3><%= a.titre %></h3>
 <ul><% for (const p of a.paquets) { %><li><strong><%= p.nom %></strong> <%= p.version %><ul><% for (const u of p.usages) { %><li><%= cible(u.cible) %> · <%= u.direct ? 'directe' : 'indirecte' %><%= u.optionnel ? ' · optionnelle' : '' %></li><% } %></ul>
 <p>Versions correctives publiées : <%= p.correctifs.length ? p.correctifs.join(', ') + (p.correctifsTronques ? '… (liste abrégée)' : '') : 'aucune indiquée par la source' %>.</p></li><% } %></ul>
+<div class="veille-pagination"><% for (const p of a.paquets.filter(p => p.alerte)) { %><a class="btn ghost" href="/alertes/<%= p.alerte.id %>">Alerte #<%= p.alerte.id %> · <%= p.nom %> <%= p.version %><%= p.alerte.statut === 'close' ? ' · close' : p.alerte.statut === 'en_cours' ? ' · prise en charge' : '' %></a><% } %></div>
 <a class="btn ghost" href="https://osv.dev/vulnerability/<%= encodeURIComponent(a.id) %>" rel="noreferrer noopener">Consulter l’avis <%= a.id %></a>
 </article><% } %></div>
 <% if (v.pages > 1) { %><nav class="veille-pagination" aria-label="Pages des avis"><% if (v.precedent) { %><a class="btn ghost" href="<%= v.precedent %>">Précédente</a><% } %><span>Page <%= v.page %> sur <%= v.pages %></span><% if (v.suivant) { %><a class="btn ghost" href="<%= v.suivant %>">Suivante</a><% } %></nav><% } %>
