@@ -13,7 +13,7 @@ const LONG = 'IGQVJlongtoken0123456789abcdef';
 const HTTPS = { PUBLIC_URL: 'https://nicephos.example', COOKIE_SECRET: 'x'.repeat(40), INSTAGRAM_APP_ID: '123456', INSTAGRAM_APP_SECRET: 'app-secret-0123456789' };
 
 // Faux service Meta : enregistre les appels ; `fail` force une erreur sur une étape.
-function fakeMeta({ getApp, fail = null } = {}) {
+function fakeMeta({ getApp, fail = null, beforeFinished = null, beforePublishReturn = null } = {}) {
   let published = 0;
   const calls = [];
   const json = (body, status = 200) => ({ ok: status < 400, status, json: async () => body });
@@ -34,10 +34,11 @@ function fakeMeta({ getApp, fail = null } = {}) {
       calls.at(-1).image = { status: img.statusCode, type: img.headers['content-type'], body: img.rawPayload };
       return json({ id: 'container-1' });
     }
-    if (u.pathname.endsWith('/container-1')) return json({ status_code: 'FINISHED' });
+    if (u.pathname.endsWith('/container-1')) { await beforeFinished?.(getApp()); return json({ status_code: 'FINISHED' }); }
     if (u.pathname.endsWith('/1784/media_publish')) {
       published++;
       if (fail === 'publish') return json({ error: { message: 'Service temporairement indisponible' } }, 500);
+      await beforePublishReturn?.(getApp());
       return json({ id: 'media-9' });
     }
     if (u.pathname.endsWith('/media-9')) return json({ permalink: 'https://www.instagram.com/p/abc/' });
@@ -46,9 +47,9 @@ function fakeMeta({ getApp, fail = null } = {}) {
   return { calls, fetchImpl, published: () => published };
 }
 
-async function igApp(t, { fail, clock } = {}) {
+async function igApp(t, { fail, clock, beforeFinished, beforePublishReturn } = {}) {
   let app;
-  const meta = fakeMeta({ getApp: () => app, fail });
+  const meta = fakeMeta({ getApp: () => app, fail, beforeFinished, beforePublishReturn });
   let now = clock || new Date('2026-10-11T10:00:00Z');
   const ctx = await setup(t, { seeded: true, env: HTTPS, instagramOptions: { manual: true, fetchImpl: meta.fetchImpl, sleep: async () => {}, now: () => now, timeoutMs: 100 } });
   app = ctx.app;
@@ -144,6 +145,43 @@ test('envoi complet : image servie le temps de l’envoi, post publié, jeton ja
   // Après l'envoi, l'adresse de l'image ne répond plus.
   assert.equal((await app.inject(new URL(media.form.image_url).pathname)).statusCode, 404);
   assert.equal((await app.inject('/partage/instagram/nimporte-quoi-de-tres-long-xx.jpg')).statusCode, 404);
+});
+
+test('retrait d’accord pendant un envoi : jeton coupé et aucun appel à media_publish', async t => {
+  let revoke = () => {};
+  const { app, db, meta } = await igApp(t, { beforeFinished: () => revoke() });
+  await app.instagram.connect('code');
+  const photo = db.prepare("SELECT id, author_id FROM photos WHERE status = 'published' LIMIT 1").get();
+  const prefix = db.prepare('SELECT upper(substr(name, 1, 1)) FROM authors WHERE id = ?').pluck().get(photo.author_id);
+  const encounter = app.encounters.saveCard(null, { ref: `${prefix}-0042`, signed: 'on', scope_site: 'on', scope_instagram: 'on', met_on: '2026-10-10', author_id: photo.author_id, name: 'Personne test' });
+  app.encounters.link(encounter, [photo.id]);
+  revoke = () => {
+    db.prepare('UPDATE encounters SET refused = 1 WHERE id = ?').run(encounter);
+    app.instagram.dropBlocked();
+  };
+  const post = app.instagram.enqueue(photo.id);
+  await assert.rejects(app.instagram.publish(post), /bloquée|refuse/);
+  assert.equal(meta.calls.some(c => c.path.endsWith('/media_publish')), false);
+  const row = db.prepare('SELECT status, media_token FROM instagram_posts WHERE id = ?').get(post);
+  assert.deepEqual(row, { status: 'failed', media_token: null });
+});
+
+test('retrait d’accord pendant media_publish : le succès tardif ne rétablit pas le post', async t => {
+  let revoke = () => {};
+  const { app, db } = await igApp(t, { beforePublishReturn: () => revoke() });
+  await app.instagram.connect('code');
+  const photo = db.prepare("SELECT id, author_id FROM photos WHERE status = 'published' LIMIT 1").get();
+  const prefix = db.prepare('SELECT upper(substr(name, 1, 1)) FROM authors WHERE id = ?').pluck().get(photo.author_id);
+  const encounter = app.encounters.saveCard(null, { ref: `${prefix}-0043`, signed: 'on', scope_site: 'on', scope_instagram: 'on', met_on: '2026-10-10', author_id: photo.author_id, name: 'Personne test' });
+  app.encounters.link(encounter, [photo.id]);
+  revoke = () => {
+    db.prepare('UPDATE encounters SET refused = 1 WHERE id = ?').run(encounter);
+    app.instagram.dropBlocked();
+  };
+  const post = app.instagram.enqueue(photo.id);
+  await assert.rejects(app.instagram.publish(post), /peut-être abouti/);
+  const row = db.prepare('SELECT status, media_token, ig_media_id FROM instagram_posts WHERE id = ?').get(post);
+  assert.deepEqual(row, { status: 'failed', media_token: null, ig_media_id: null });
 });
 
 test('échec : message sans jeton, nouvel essai au créneau suivant, abandon après 3 essais', async t => {

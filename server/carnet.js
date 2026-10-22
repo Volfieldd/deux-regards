@@ -252,7 +252,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
     // explicitement, et l'ancienne mène à la nouvelle (301, B3).
     if (!v.slug && post.published_at == null && v.title && v.title !== post.title) v.slug = uniqueSlug(v.title, post.id);
     const changed = Object.keys(v).filter(k => (k === 'authors' ? v.authors.join(',') !== post.authors.join(',') : String(v[k] ?? '') !== String(post[k] ?? '')));
-    if (!changed.length && !(revised && post.state === 'publie')) { q.dropDraft.run(id); return { changed: [], post }; }
+    if (!changed.length && !(revised && post.state === 'publie')) return { changed: [], post };
     const t = now();
     db.transaction(() => {
       const cols = changed.filter(k => k !== 'authors');

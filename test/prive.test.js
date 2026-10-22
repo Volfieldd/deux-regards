@@ -354,6 +354,9 @@ test('téléchargements : refusés sans le droit ou hors liste (signalés) ; JPE
   assert.equal((await c.app.inject({ url: `${base}/1/originale`, remoteAddress: '192.0.2.12', headers: { cookie: dl.cookie } })).statusCode, 404);
   assert.equal((await c.app.inject({ url: `${base}/9/web`, remoteAddress: '192.0.2.13', headers: { cookie: dl.cookie } })).statusCode, 404);
   assert.equal((await c.app.inject({ method: 'HEAD', url: `${base}/1/web`, headers: { cookie: dl.cookie } })).statusCode, 200);
+  const renders = path.join(c.config.storageDir, 'private', 'telechargements');
+  assert.equal(fs.existsSync(renders) ? fs.readdirSync(renders).length : 0, 0, 'HEAD ne prépare aucun JPEG');
+  assert.equal(c.db.prepare('SELECT downloads FROM space_invites WHERE id = ?').pluck().get(d.invite), 0);
   const r = await c.app.inject({ url: `${base}/1/web`, headers: { cookie: dl.cookie } });
   assert.equal(r.statusCode, 200);
   assert.equal(r.headers['content-type'], 'image/jpeg');
@@ -406,6 +409,36 @@ test('archive : ZIP de la galerie, 3 par jour et par accès au plus, export sign
   assert.equal(v.of('sensitive_export').length, 3);
   assert.deepEqual(Object.keys(v.of('sensitive_export')[0].detail).sort(), ['acces', 'espace', 'nature', 'octets', 'photos', 'portail', 'taille']);
   assert.ok(v.of('excess_rate_limit_exceeded').some(e => e.detail.limite === 'archives'));
+});
+
+test('archive historique : droits, résolution et photos visibles sont revérifiés à chaque téléchargement', async t => {
+  const c = await site(t);
+  const g = await gallery(c, { n: 2, rights: { telecharger: '1', grande: '1' } });
+  const { cookie } = await enter(c, g);
+  const csrf = csrfOf((await c.app.inject({ url: `/prive/${g.s.public_id}`, headers: { cookie } })).body);
+  const make = async () => {
+    const r = await c.app.inject({ method: 'POST', url: `/prive/${g.s.public_id}/archive`, headers: { ...FORM, cookie }, payload: enc({ csrf }) });
+    assert.equal(r.statusCode, 303);
+    return r.headers.location;
+  };
+  const first = await make();
+  assert.equal((await c.app.inject({ url: first, headers: { cookie } })).statusCode, 200);
+  c.app.spaces.updateInvite(g.invite, { telecharger: '1', expires: day(30) }, null);       // grande → web
+  assert.equal((await c.app.inject({ url: first, headers: { cookie } })).statusCode, 404);
+  c.app.spaces.updateInvite(g.invite, { telecharger: '1', grande: '1', expires: day(30) }, null);
+  assert.equal((await c.app.inject({ url: first, headers: { cookie } })).statusCode, 200);
+  const item = c.db.prepare('SELECT id, photo_id FROM space_items WHERE space_id = ? ORDER BY position LIMIT 1').get(g.s.id);
+  c.app.spaces.removeItem(g.s.id, item.id);
+  assert.equal((await c.app.inject({ url: first, headers: { cookie } })).statusCode, 404);
+
+  c.app.spaces.addPhotos(g.s.id, [item.photo_id]);
+  const second = await make();
+  const author = c.db.prepare('SELECT author_id FROM photos WHERE id = ?').pluck().get(item.photo_id);
+  const prefix = c.db.prepare('SELECT upper(substr(name, 1, 1)) FROM authors WHERE id = ?').pluck().get(author);
+  const encounter = c.app.encounters.saveCard(null, { ref: `${prefix}-0042`, signed: 'on', scope_site: 'on', scope_instagram: 'on', scope_print: 'on', met_on: day(-1), author_id: author, name: 'Personne test' });
+  c.app.encounters.link(encounter, [item.photo_id]);
+  c.db.prepare('UPDATE encounters SET refused = 1 WHERE id = ?').run(encounter);
+  assert.equal((await c.app.inject({ url: second, headers: { cookie } })).statusCode, 404);
 });
 
 test('écritures de l’invité : Origin du site (ou Sec-Fetch-Site) et jeton CSRF exigés ; favori, sélection envoyée puis reprise, figée une fois vue (T32, G28, G48, G50, BV-25)', async t => {

@@ -70,6 +70,15 @@ test('droits refusés : photographe sans « publier » (403), relecteur qui corr
   assert.equal((await rel.post('/admin/carnet', { title: 'Nouveau' })).statusCode, 403);
   // La modératrice publie, mais n'écrit pas.
   assert.equal((await mod.post(`/admin/carnet/${p.id}`, { langue: 'fr', body: 'Réécrit.' })).statusCode, 403);
+  c.app.carnet.saveDraft(p.id, { body: 'Brouillon automatique partagé.' }, { sub: 'z-seb', name: 'Sébastien' });
+  assert.equal((await mod.post(`/admin/carnet/${p.id}/brouillon/ecarter`)).statusCode, 403);
+  assert.equal(c.app.carnet.draftOf(p.id).data.body, 'Brouillon automatique partagé.');
+  // Un POST vide de lecteur n'est pas un second chemin de suppression du brouillon.
+  assert.equal((await mod.post(`/admin/carnet/${p.id}`, { langue: 'fr' })).statusCode, 303);
+  assert.equal(c.app.carnet.draftOf(p.id).data.body, 'Brouillon automatique partagé.');
+  assert.doesNotMatch((await mod.get(`/admin/carnet/${p.id}`)).body, />Écarter</);
+  assert.equal((await rel.post(`/admin/carnet/${p.id}/brouillon/ecarter`)).statusCode, 303);
+  assert.equal(c.app.carnet.draftOf(p.id), null);
   // En ligne : un photographe privé de « modifier ses billets publiés » ne le change plus.
   const q = await billet(c, { title: 'En ligne', authors: ['sebastien'] });
   const sebSans = as(c, { sub: 'z-seb', name: 'Sébastien', roles: ['photographe'], adjust: { add: [], remove: ['carnet.publies.modifier'] } });

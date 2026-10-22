@@ -631,7 +631,7 @@ export function createSpaces({ db, vault, readiness, encounters, storageDir, sec
         if (db.prepare('SELECT COUNT(*) FROM space_archives WHERE invite_id = ? AND created_at > ?').pluck().get(inviteId, now() - DAY) >= max) return null;
         return Number(db.prepare('INSERT INTO space_archives (invite_id, file, bytes, photos, created_at) VALUES (?, ?, 0, 0, ?)').run(inviteId, file, now()).lastInsertRowid);
       }),
-      done: (id, bytes, photos) => db.prepare('UPDATE space_archives SET bytes = ?, photos = ? WHERE id = ?').run(bytes, photos, id),
+      done: (id, bytes, photos, manifest) => db.prepare('UPDATE space_archives SET bytes = ?, photos = ?, manifest = ? WHERE id = ?').run(bytes, photos, JSON.stringify(manifest), id),
       drop: id => db.prepare('DELETE FROM space_archives WHERE id = ?').run(id),
       get: (inviteId, id) => db.prepare('SELECT * FROM space_archives WHERE id = ? AND invite_id = ? AND created_at > ? AND photos > 0').get(id, inviteId, now() - DAY) || null,
     },

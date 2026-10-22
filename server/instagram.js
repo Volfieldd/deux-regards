@@ -361,6 +361,19 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     if (r.level === 'warn' && !confirmedFor(photoId)) return verifyReason(r.reasons);
     return null;
   }
+  // Juste avant l'opération irréversible, l'envoi doit encore être actif, la photo publique et son accord valable.
+  // Un changement d'accord annule aussi le jeton d'image que Meta pourrait encore tenter de lire.
+  function publishingPhoto(postId) {
+    const current = q.post.get(postId);
+    if (!current || current.status !== 'publishing') throw new InstagramError(current?.error || 'envoi annulé');
+    const photo = q.photo.get(current.photo_id);
+    const reason = !photo || photo.status !== 'published' ? 'photo dépubliée sur le site' : hold(photo.id);
+    if (reason) {
+      db.prepare("UPDATE instagram_posts SET status = 'failed', media_token = NULL, error = ? WHERE id = ? AND status = 'publishing'").run(reason, postId);
+      throw new InstagramError(reason);
+    }
+    return photo;
+  }
   function enqueue(photoId, opts = {}) {
     const existing = q.active.get(photoId);
     const id = enqueueRaw(photoId, opts);
@@ -538,7 +551,15 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
     if (!b.ok) { busy = false; throw new InstagramError(b.reason); }
     let phase = 'prepare';                            // « publish » : Meta a peut-être déjà publié
     const mediaToken = crypto.randomBytes(24).toString('base64url');
-    db.prepare("UPDATE instagram_posts SET status = 'publishing', media_token = ?, media_token_at = ?, attempts = attempts + 1, error = NULL WHERE id = ?").run(mediaToken, now().getTime(), postId);
+    const current = q.post.get(postId), latestPhoto = current && q.photo.get(current.photo_id);
+    const stopped = !latestPhoto || latestPhoto.status !== 'published' ? 'photo dépubliée sur le site' : hold(latestPhoto.id);
+    if (current?.status !== 'queued' || stopped) {
+      if (stopped) db.prepare("UPDATE instagram_posts SET status = 'failed', media_token = NULL, error = ? WHERE id = ? AND status = 'queued'").run(stopped, postId);
+      busy = false;
+      throw new InstagramError(stopped || current?.error || 'envoi annulé');
+    }
+    const started = db.prepare("UPDATE instagram_posts SET status = 'publishing', media_token = ?, media_token_at = ?, attempts = attempts + 1, error = NULL WHERE id = ? AND status = 'queued'").run(mediaToken, now().getTime(), postId);
+    if (!started.changes) { busy = false; throw new InstagramError(q.post.get(postId)?.error || 'envoi annulé'); }
     event(post, 'info', 'Envoi à Instagram commencé', byName);
     step(postId, 'envoi');
     let pin = null;
@@ -558,15 +579,18 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
         if (st.status_code === 'ERROR' || st.status_code === 'EXPIRED') throw new InstagramError(`image refusée par Instagram (${scrub(st.status || st.status_code)})`);
       }
       if (phase !== 'ready') throw new InstagramError('Instagram n’a pas fini de traiter l’image');
+      publishingPhoto(postId);
       phase = 'publish';
       step(postId, 'publication');
       const media = await call(api(`${a.ig_user_id}/media_publish`), { kind: 'publish', form: { creation_id: container.id, access_token: token } });
-      phase = 'done';
       let permalink = null;
       try { permalink = (await call(api(media.id, { fields: 'permalink', access_token: token }), { kind: 'permalink' })).permalink || null; } catch { /* le post existe ; lien plus tard */ }
       if (permalink && !/^https:\/\/(www\.)?instagram\.com\//.test(permalink)) permalink = null;      // affiché comme lien : Instagram seulement
-      db.prepare(`UPDATE instagram_posts SET status = 'published', media_token = NULL, ig_media_id = ?, permalink = ?, published_at = ?, error = NULL WHERE id = ?`)
+      const saved = db.prepare(`UPDATE instagram_posts SET status = 'published', media_token = NULL, ig_media_id = ?, permalink = ?, published_at = ?, error = NULL WHERE id = ? AND status = 'publishing'`)
         .run(String(media.id), permalink, now().getTime(), postId);
+      // Meta a répondu après une révocation concurrente : ne pas rétablir l'envoi dans l'historique local.
+      if (!saved.changes) throw new InstagramError(`${q.post.get(postId)?.error || 'envoi annulé'} — la publication a peut-être abouti : vérifiez sur Instagram`);
+      phase = 'done';
       if (state().pauseLevel) setState({ pauseLevel: 0 });
       log?.info({ post: postId, photo: post.photo_id }, 'publié sur Instagram');
       event(post, 'ok', 'Publiée sur Instagram', byName);
@@ -577,7 +601,7 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       // reste en tête de file et l'essai n'est pas compté.
       if (err instanceof RateLimitError) {
         // D'abord remise en file (même si la suite échouait, l'envoi ne reste pas « en cours »), puis la pause.
-        db.prepare('UPDATE instagram_posts SET status = \'queued\', media_token = NULL, attempts = MAX(attempts - 1, 0) WHERE id = ?').run(postId);
+        db.prepare("UPDATE instagram_posts SET status = 'queued', media_token = NULL, attempts = MAX(attempts - 1, 0) WHERE id = ? AND status = 'publishing'").run(postId);
         const e = pause(err);
         db.prepare('UPDATE instagram_posts SET error = ? WHERE id = ?').run(e.message, postId);
         throw e;
@@ -589,7 +613,8 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       // Échec pendant la publication elle-même : le post existe peut-être déjà ; pas de nouvel essai (doublon).
       const final = phase === 'publish' || attempts >= LIMITS.attempts;
       if (phase === 'publish') msg = `${msg} — la publication a peut-être abouti : vérifiez sur Instagram avant de réessayer`;
-      db.prepare('UPDATE instagram_posts SET status = ?, media_token = NULL, error = ? WHERE id = ?').run(final ? 'failed' : 'queued', msg, postId);
+      // Une révocation concurrente a déjà fixé l'échec et son motif : elle ne doit jamais être remise en file.
+      db.prepare("UPDATE instagram_posts SET status = ?, media_token = NULL, error = ? WHERE id = ? AND status = 'publishing'").run(final ? 'failed' : 'queued', msg, postId);
       log?.warn({ post: postId, err: msg }, 'publication Instagram impossible');
       throw new InstagramError(msg);
     } finally {
@@ -737,10 +762,9 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
   // Photos de la file que les accords bloquent désormais : sorties de la file, en échec avec la raison (visible
   // dans l'historique et sur la fiche). Appelé à chaque changement d'accord et avant chaque créneau.
   function dropBlocked() {
-    const fail = db.prepare("UPDATE instagram_posts SET status = 'failed', error = ? WHERE id = ? AND status = 'queued'");
+    const fail = db.prepare("UPDATE instagram_posts SET status = 'failed', media_token = NULL, error = ? WHERE id = ? AND status IN ('queued', 'publishing')");
     const out = [];
     for (const p of q.queue.all()) {
-      if (p.status !== 'queued') continue;
       const held = hold(p.photo_id);
       if (held && fail.run(held, p.id).changes) { out.push(p.photo_id); event(p, 'error', `Sortie de la file : ${held}`); }
     }
@@ -754,13 +778,14 @@ export function createInstagram({ db, storageDir, config, variants, siteName, lo
       const state = read('instagram_state', { lastSlot: null });
       if (state.lastSlot) q.save.run('instagram_state', JSON.stringify({ ...state, lastSlot: [state.lastSlot, lastSlot(s.times, now())].sort().at(-1) }));
     },
-    // Photos repassées en brouillon : retirées de la file (pas l'historique).
+    // Photos repassées en brouillon : attente supprimée ; envoi commencé gardé en échec dans l'historique.
     onUnpublished(ids) {
       const del = db.prepare("DELETE FROM instagram_posts WHERE photo_id = ? AND status = 'queued'");
-      db.transaction(() => ids.forEach(id => del.run(id)))();
+      const fail = db.prepare("UPDATE instagram_posts SET status = 'failed', media_token = NULL, error = 'photo dépubliée sur le site' WHERE photo_id = ? AND status = 'publishing'");
+      db.transaction(() => ids.forEach(id => { del.run(id); fail.run(id); }))();
     },
     account: { get: account.get, remove: account.remove, state: () => account.state(), connected: () => account.state() === 'ok' },
-    isPublic: photoId => q.photo.get(photoId)?.status === 'published',
+    isPublic: photoId => q.photo.get(photoId)?.status === 'published' && !hold(photoId),
     image, enqueue, cancel, move, onPublished, publish, retry, requestRetry, retryRequests, captionOf, optionsOf, dropBlocked,
     blocked: photoId => { const r = readinessOf(photoId) || OK; return r.level === 'no' ? r.reasons : []; },
     caption: (photoId, s = settings()) => { const p = q.photo.get(photoId); return p ? renderCaption(s.template, p, s, siteName()) : ''; },

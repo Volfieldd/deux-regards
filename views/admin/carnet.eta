@@ -70,7 +70,7 @@
 <% } %>
 <% if (it.fresh) { %>
   <div class="signal reprise" role="status"><p class="signal-t"><%~ ICON(WARN) %><%= t('Texte repris de l’enregistrement automatique de {time}, pas encore enregistré dans le billet.', { time: time(it.fresh.at) }) %></p>
-    <button class="btn ghost" type="submit" name="faire" value="enregistrer"><%= t('Enregistrer dans le billet') %></button><button class="btn ghost" type="submit" formaction="/admin/carnet/<%= p.id %>/brouillon/ecarter" formnovalidate><%= t('Écarter') %></button></div>
+<% if (editable) { %>    <button class="btn ghost" type="submit" name="faire" value="enregistrer"><%= t('Enregistrer dans le billet') %></button><button class="btn ghost" type="submit" formaction="/admin/carnet/<%= p.id %>/brouillon/ecarter" formnovalidate><%= t('Écarter') %></button><% } %></div>
 <% } %>
 <% if (p.state === 'a_reprendre' && it.lastRemark) { %>
   <div class="signal" role="note"><p class="signal-t"><%~ ICON(WARN) %><%= t('Renvoyé par {name} :', { name: it.lastRemark.by_name || t('le modérateur') }) %></p><p><%= it.lastRemark.message %></p></div>

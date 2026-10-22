@@ -70,7 +70,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
       if (imported >= day && imported <= new Date(Date.parse(day) + 14 * 864e5).toISOString().slice(0, 10)) return 2;
       return p.taken_on && day.startsWith(p.taken_on.slice(0, 7)) ? 1 : 0;
     };
-    return request.mine('photos.voir', repo.photos({ q: search, author: search ? undefined : author }))
+    return request.mine('photos.modifier', repo.photos({ q: search, author: search ? undefined : author }))
       .filter(p => !linked.has(p.id))
       .map(p => ({ ...p, score: score(p) }))
       .sort((a, b) => b.score - a.score || String(b.created_at).localeCompare(String(a.created_at)))
@@ -126,8 +126,10 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   app.post('/admin/rencontres/:id/liens', W('personnes.offrir'), async (request, reply) => {
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
+    const photo = repo.photo(Number(request.body?.photo_id));
+    if (!request.owns('photos.modifier', photo?.author_id)) return reply.callNotFound();
     try {
-      enc.createShare(id, Number(request.body?.photo_id));
+      enc.createShare(id, photo.id);
     } catch (err) {
       if (!(err instanceof EncounterError)) throw err;
       return failed(reply, `/admin/rencontres/${id}#photos`, request.t.msg(err.message));
@@ -445,7 +447,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     if (!enc.get(id)) return reply.callNotFound();
     const out = request.body?.exclure === '1';
     const pid = byId(request.params.pid);
-    if (!request.owns('photos.voir', repo.photo(pid)?.author_id)) return reply.callNotFound();
+    if (!request.owns('photos.modifier', repo.photo(pid)?.author_id)) return reply.callNotFound();
     enc.exclude(id, pid, out);
     // Depuis la fiche photo (« Pas sur cette photo ») : retour à la fiche.
     const back = request.body?.depuis === 'photo' ? `/admin/photos/${pid}#rencontres` : `/admin/rencontres/${id}#session`;
@@ -456,7 +458,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const id = byId(request.params.id);
     const e = enc.get(id);
     if (!e) return reply.callNotFound();
-    const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger).filter(pid => request.owns('photos.voir', repo.photo(pid)?.author_id));
+    const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger).filter(pid => request.owns('photos.modifier', repo.photo(pid)?.author_id));
     if (!ids.length) return failed(reply, `/admin/rencontres/${id}#photos`, request.t('Cochez au moins une photo.'));
     enc.link(id, ids);
     const refusal = e.refused ? ` ${request.t('La personne refuse la publication : appliquez le refus pour dépublier les photos liées.')}` : '';
@@ -467,7 +469,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const id = byId(request.params.id);
     if (!enc.get(id)) return reply.callNotFound();
     // La photo aussi doit être à lui : défaire le lien d'un refus avec la photo d'un autre la débloquerait.
-    if (!request.owns('photos.voir', repo.photo(byId(request.params.pid))?.author_id)) return reply.callNotFound();
+    if (!request.owns('photos.modifier', repo.photo(byId(request.params.pid))?.author_id)) return reply.callNotFound();
     enc.unlink(id, byId(request.params.pid));
     return done(reply, `/admin/rencontres/${id}#photos`, request.t('Photo retirée de la rencontre.'));
   });
@@ -478,8 +480,10 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const e = enc.get(id);
     if (!e) return reply.callNotFound();
     if (!e.refused) return failed(reply, `/admin/rencontres/${id}`, request.t('Cette personne n’a pas refusé la publication.'));
-    const ids = enc.applyRefusal(id);
-    app.instagram.onUnpublished(enc.photos(id).map(p => p.id));
+    // Le refus ne donne pas la main sur les photos d'un autre photographe qui auraient été liées auparavant.
+    const permitted = enc.photos(id).filter(p => request.owns('photos.modifier', p.author_id)).map(p => p.id);
+    const ids = enc.applyRefusal(id, permitted);
+    app.instagram.onUnpublished(ids);
     app.variants.schedule();
     return done(reply, `/admin/rencontres/${id}`, ids.length > 1 ? request.t('{n} photos repassées en brouillon et retirées de la file Instagram.', { n: ids.length })
       : ids.length ? request.t('1 photo repassée en brouillon et retirée de la file Instagram.') : request.t('Aucune photo publiée : les photos liées restent en brouillon et ne pourront pas être publiées.'));
@@ -565,7 +569,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
     const attachable = (exclusive(request, people.get(id)) ? request.mine('personnes.gerer', enc.list({ authorId: scopeAuthor(request, 'personnes.gerer') })) : []).filter(e => e.person_id !== id && !e.anonymized)
       .filter(e => !needle || [e.ref, e.name, e.email].some(v => String(v || '').toLowerCase().includes(needle))).slice(0, 20);
     const linked = new Set(person.photos.map(p => p.id));
-    const photoCandidates = request.mine('photos.voir', repo.photos({ q: search })).filter(p => !linked.has(p.id) && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on || '')).slice(0, 24).map(withReady);
+    const photoCandidates = request.mine('photos.modifier', repo.photos({ q: search })).filter(p => !linked.has(p.id) && /^\d{4}-\d{2}-\d{2}$/.test(p.taken_on || '')).slice(0, 24).map(withReady);
     const outings = request.mine('sorties.voir', app.outings.list().map(o => ({ ...o, author_id: o.author?.id }))).slice(0, 40).map(o => ({ author: o.author, day: o.day, starts: o.starts, place: o.place }));
     return personPage(request, reply, 'person', { title: person.name || person.ref || request.t('Personne'), person: { ...person, photos: person.photos.map(withReady) },
       others, attachable, photoCandidates, outings, search, canManage: exclusive(request, people.get(id)), outingUrl: (aid, d, t) => app.outings.urlOf(aid, d, t) });
@@ -616,7 +620,7 @@ export function registerEncounters(app, { repo, render, P, W, done, failed, with
   app.post('/admin/personnes/:id/photos', W('personnes.gerer'), async (request, reply) => {
     const p = personOr404(request, reply); if (!p) return reply;
     if (!exclusive(request, p)) return app.forbid(request, reply);                // personne partagée : l'administrateur s'en charge
-    const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger).filter(pid => request.owns('photos.voir', repo.photo(pid)?.author_id));
+    const ids = [].concat(request.body?.photo || []).map(Number).filter(Number.isInteger).filter(pid => request.owns('photos.modifier', repo.photo(pid)?.author_id));
     if (!ids.length) return failed(reply, toPerson(p.id), request.t('Cochez au moins une photo.'));
     const n = people.linkPhotos(p.id, ids);
     return done(reply, toPerson(p.id), n > 1 ? request.t('{n} photos liées à cette personne (à sa rencontre de la sortie de chaque photo).', { n }) : request.t('{n} photo liée à cette personne (à sa rencontre de la sortie de chaque photo).', { n }));

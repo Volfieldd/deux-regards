@@ -89,7 +89,7 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
       ORDER BY card_prefix = @p DESC, id LIMIT 1`),
     event: db.prepare('INSERT INTO encounter_events (encounter_id, at, kind, verified, detail) VALUES (?, ?, ?, ?, ?)'),
     events: db.prepare('SELECT * FROM encounter_events WHERE encounter_id = ? ORDER BY at, id'),
-    photos: db.prepare(`SELECT p.id, p.title, p.slug, p.status, p.file, p.width, p.height, p.variant_key, p.taken_on FROM encounter_photos ep
+    photos: db.prepare(`SELECT p.id, p.author_id, p.title, p.slug, p.status, p.file, p.width, p.height, p.variant_key, p.taken_on FROM encounter_photos ep
       JOIN photos p ON p.id = ep.photo_id WHERE ep.encounter_id = ? ORDER BY p.position, p.id`),
     forPhoto: db.prepare(`SELECT e.id, e.ref, e.name, e.consent, e.consent_source, e.refused, e.verified, e.anonymized, (e.portrait_jpeg IS NOT NULL) AS has_portrait
       FROM encounter_photos ep JOIN encounters e ON e.id = ep.encounter_id WHERE ep.photo_id = ? ORDER BY e.id`),
@@ -396,8 +396,9 @@ export function createEncounters({ db, now = () => Date.now(), vault = createVau
     log(id, 'liaison', { retiree: Number(photoId) });
   }
   // Refus : les photos liées repassent en brouillon (l'appelant retire aussi la file Instagram).
-  function applyRefusal(id) {
-    const ids = q.photos.all(id).filter(p => p.status === 'published').map(p => p.id);
+  function applyRefusal(id, photoIds = null) {
+    const permitted = photoIds == null ? null : new Set(photoIds.map(Number));
+    const ids = q.photos.all(id).filter(p => p.status === 'published' && (!permitted || permitted.has(p.id))).map(p => p.id);
     const set = db.prepare("UPDATE photos SET status = 'draft', updated_at = datetime('now') WHERE id = ?");
     db.transaction(() => { for (const p of ids) set.run(p); log(id, 'refus_applique', { photos: ids }); touch(id); })();
     return ids;

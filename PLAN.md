@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Audit de code et de sécurité hors Vigie, PR #212, version 1.212.0 (21 octobre 2026)
+
+Six chemins sont refermés avec leurs tests de non-régression : une action groupée rejetée est atomique et ne contourne plus la relecture d’une photo programmée ; voir les photos des autres ne permet plus de les lier, offrir, exposer ou dépublier ; seuls les éditeurs écartent un brouillon automatique de Carnet ; une archive privée revérifie droits, résolution et photos encore autorisées ; un retrait d’accord arrête un envoi Instagram avant `media_publish` ; `HEAD` vérifie un téléchargement privé sans produire son JPEG. La migration 064 ajoute le manifeste d’autorisation temporaire des archives.
+
 ## Correction — Trois constats de la revue Vigie, PR #211, version 1.211.0 (21 octobre 2026)
 
 Exemptions des blocages automatiques vérifiées sur le réseau réel, /64 IPv6 compris ; reçu transactionnel des suspensions de galerie et reprise des échecs, sans reposer une suspension levée par l’équipe ; masquage par rôle des textes du mode urgence. Les anciennes suspensions ambiguës restent à vérifier manuellement, selon le choix du propriétaire. Migration 063, tests de panne et de redémarrage, contrôle navigateur, banc avant/après. Aucune maquette modifiée. Détail dans [Vigie](docs/wiki/Vigie.md#reprise-des-suspensions-de-galeries-privées).
