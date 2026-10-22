@@ -14,8 +14,8 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force \
  && rm -rf node_modules/onnxruntime-web/dist/*.map node_modules/onnxruntime-web/dist/*webgl* node_modules/onnxruntime-web/dist/*webgpu* node_modules/onnxruntime-web/dist/*.wasm \
            node_modules/@huggingface/transformers/dist/*.map node_modules/@huggingface/transformers/dist/transformers.js node_modules/@huggingface/transformers/dist/transformers.min.js \
            node_modules/@huggingface/transformers/dist/ort-wasm-*
-# Script d'installation d'ONNX Runtime (déjà passé, sans rien télécharger) et ses seules dépendances : jamais chargés à
-# l'exécution, mais signalés par npm audit (adm-zip, sprintf-js). Puis contrôle que le site charge toujours ses modèles.
+# Script d'installation d'ONNX Runtime (déjà passé, sans rien télécharger) et ses seules dépendances : retrait conservé
+# après leur mise à jour de sécurité. Puis contrôle que le site charge toujours ses modèles.
 RUN rm -rf node_modules/onnxruntime-node/script node_modules/adm-zip node_modules/global-agent node_modules/roarr \
            node_modules/sprintf-js node_modules/matcher node_modules/escape-string-regexp node_modules/serialize-error \
            node_modules/type-fest node_modules/boolean node_modules/es6-error node_modules/detect-node \

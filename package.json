@@ -47,6 +47,8 @@
     "@huggingface/transformers": {
       "onnxruntime-node": "$onnxruntime-node",
       "sharp": "$sharp"
-    }
+    },
+    "adm-zip": "0.6.1",
+    "global-agent": "4.1.3"
   }
 }
