@@ -373,6 +373,14 @@ docker exec nicephos-vigie node vigie/cli.js console
 
 Après une correction dans Zitadel : **Se reconnecter**. `VIGIE_ADMIN_SUBS` ne suffit pas seule : elle règle l'attribution côté Vigie, le plafond vient toujours de Zitadel.
 
+### « Session expirée » et refus répétés au retour sur téléphone
+
+Un navigateur peut rouvrir un ancien retour de connexion (`/auth/callback`). Avant la correction de la PR #213, ce retour affichait « Session expirée », même s’il s’agissait de la tentative OIDC plutôt que d’une session inactive. Il effaçait aussi le cookie d’une connexion commencée dans un autre onglet ; recharger la page répétait le refus `etat`. Quatre refus en une heure suffisent à l’alerte haute « Connexions à la console refusées à répétition » (DS30). « Aucune réponse automatique » signifie que cette alerte ne bloque pas le compte.
+
+Le retour invalide reste refusé et journalisé, mais mène désormais vers `/auth/reprendre`, sans code ni state, avec le message **Connexion à recommencer**. Recharger cette page ne répète plus la tentative. Si une connexion est en cours dans un autre onglet, son cookie est conservé : terminez-la dans cet onglet. Sinon, choisissez **Se reconnecter**. Une session réellement inactive conserve son message **Session expirée**.
+
+En attendant la mise à jour, ouvrez directement `https://vigie.nicephos.art/auth/login` dans un nouvel onglet, puis utilisez l’adresse d’accueil `https://vigie.nicephos.art/` pour le favori ou le raccourci. Ne conservez pas une adresse `/auth/callback` et ne transmettez pas ses paramètres. Si le refus persiste, la raison exacte figure dans `docker exec nicephos-vigie node vigie/cli.js console` ; `etat` concerne la transaction OIDC, `mfa` le second facteur, `role` les droits.
+
 ## Horodatages et capacité
 
 - **Deux heures par événement** : `survenu_a`, l'heure de la source (site, Zitadel), et `recu_a`, l'heure de réception par la Vigie. Les détecteurs (heure inhabituelle, voyage impossible) prennent l'heure de la source, bornée à 30 jours en arrière et 5 minutes en avant ; hors bornes, l'heure reçue est gardée telle quelle dans le détail (`horodatage_site_brut`). Les horloges du site et de la Vigie ne peuvent pas diverger de plus de 60 s : un lot signé plus décalé est refusé.

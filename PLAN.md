@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Reconnexion à la console de la Vigie, PR #213, version 1.213.0 (22 octobre 2026)
+
+Un ancien retour OIDC ne supprime plus le cookie d’une connexion plus récente. Un retour invalide reste refusé et journalisé (DS30), puis redirige vers `/auth/reprendre`, sans code ni state : recharger cette page ne rejoue plus la tentative et ne multiplie plus les alertes. Le message « Connexion à recommencer » distingue cette situation de l’expiration d’une session après inactivité. Les contrôles de transaction, de second facteur, de droits et de fraîcheur des actions sensibles sont conservés. Tests dans `test/vigie-console.test.js` et `test/vigie-console-vues.test.js` ; détails dans [Vigie](docs/wiki/Vigie.md#session-expirée-et-refus-répétés-au-retour-sur-téléphone).
+
 ## Correction — Audit de code et de sécurité hors Vigie, PR #212, version 1.212.0 (21 octobre 2026)
 
 Six chemins sont refermés avec leurs tests de non-régression : une action groupée rejetée est atomique et ne contourne plus la relecture d’une photo programmée ; voir les photos des autres ne permet plus de les lier, offrir, exposer ou dépublier ; seuls les éditeurs écartent un brouillon automatique de Carnet ; une archive privée revérifie droits, résolution et photos encore autorisées ; un retrait d’accord arrête un envoi Instagram avant `media_publish` ; `HEAD` vérifie un téléchargement privé sans produire son JPEG. La migration 064 ajoute le manifeste d’autorisation temporaire des archives.

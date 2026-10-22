@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.213.0",
+    "date": "2026-10-22",
+    "pr": 213,
+    "title": {
+      "fr": "Reprendre une connexion à la Vigie",
+      "en": "Resume signing in to Vigie",
+      "de": "Anmeldung bei Vigie fortsetzen"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Un ancien retour de connexion ne remplace plus une tentative plus récente. La page « Connexion à recommencer » permet de repartir sans répéter le refus à chaque rechargement. Les contrôles de sécurité restent actifs.",
+        "en": "An old sign-in callback no longer disrupts a newer attempt. The restart page lets you sign in again without repeating the rejection every time the page is reloaded. Security checks remain active.",
+        "de": "Ein alter Anmelderückruf unterbricht keinen neueren Versuch mehr. Auf der neuen Seite können Sie die Anmeldung erneut starten, ohne bei jedem Neuladen eine weitere Ablehnung auszulösen. Die Sicherheitsprüfungen bleiben aktiv."
+      }
+    ]
+  },
+  {
     "version": "1.212.0",
     "date": "2026-10-21",
     "pr": 212,
