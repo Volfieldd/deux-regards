@@ -106,6 +106,10 @@ Nom du site, accroche, textes (et leur version anglaise et allemande, repliée s
 
 Les personnes photographiées : demandes reçues sur `/bonjour` (nouvelles en tête, compteur dans la barre latérale, badge rouge pour une demande RGPD avec son échéance), fiche d'une rencontre (personne, historique, photos liées, carte signée, photo offerte par lien privé, droits : export et effacement), **Nouvelle rencontre** (l'app de l'iPhone : position, photo de repère, consentement en trois langues, signature au doigt, écran « Merci » avec QR). **Sur le terrain** réunit l'app, les cartes d'accord à imprimer et le QR des vêtements (une composition, avec le logo), avec une liste de contrôle avant de partir. Pas encore de capture : voir [Aide → Rencontres](Aide-Rencontres).
 
+## Sécurité et veille
+
+L’entrée **Sécurité**, lorsqu’elle est disponible pour le compte, ouvre la console indépendante de la Vigie. Son onglet **Veille** liste les avis de vulnérabilité concernant les bibliothèques npm déclarées du site et de la Vigie. Cible, gravité et recherche filtrent les avis ; le détail indique les versions et les correctifs publiés. Les correspondances créent des alertes accessibles depuis l’avis ; les hautes/critiques suivent les notifications configurées, sans répétition quotidienne. Une alerte haute ou critique active peut aussi majorer d’un cran maximum un dossier visant le même service ; sa fiche affiche les justificatifs et la gravité avant pondération, sans changer les preuves ou les phases. La date de vérification et les limites de l’inventaire restent visibles. Cet onglet fonctionne sans JavaScript, sur ordinateur comme sur téléphone ; il ne déclenche aucune mise à jour. Voir [Vigie](Vigie#veille-des-vulnérabilités).
+
 ## Sur mobile
 
 Toutes les pages s'adaptent au téléphone ; les boutons, champs et liens y font au moins 44 px de haut.

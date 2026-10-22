@@ -142,7 +142,7 @@ export function fiche({ db, engine, role = 'viewer', id, query = {} }) {
   const ents = q.entites.all(id), histoires = q.histoire.all(id), alertes = q.alertes.all(id);
   const journal = histoires.slice(0, 50).map(h => {
     const a = lire(h.detail) || {};
-    const mots = { ouvert: 'Ouvert', fusionne: 'Fusion', aggrave: 'Aggravation', sommeil: 'Mise en sommeil', clos: 'Clôture', classe: 'Classement', detache: 'Entité détachée', rattache: 'Entité rattachée', scinde: 'Scission', 'prise en charge': 'Prise en charge' };
+    const mots = { ouvert: 'Ouvert', fusionne: 'Fusion', aggrave: 'Aggravation', ponderation: 'Pondération par la veille', sommeil: 'Mise en sommeil', clos: 'Clôture', classe: 'Classement', detache: 'Entité détachée', rattache: 'Entité rattachée', scinde: 'Scission', 'prise en charge': 'Prise en charge' };
     return { heure: quand(h.recu_a), action: mots[a.action] || texte(a.action, role, 60), par: texte(a.par || 'Vigie', role, 200),
       detail: texte([CLASSEMENTS[a.classement], a.motif, a.note, a.entite ? `${a.entite.kind} ${a.entite.key}` : '', a.absorbe ? `dossier absorbé #${a.absorbe}` : '', a.nouveau ? `dossiers #${a.origine} et #${a.nouveau}` : ''].filter(Boolean).join(' · '), role, 1000), href: `/evenements/${h.seq}` };
   });
@@ -152,6 +152,12 @@ export function fiche({ db, engine, role = 'viewer', id, query = {} }) {
     exporter: can(role, 'exporter') && d.statut === 'clos' && d.classement === 'incident' && !d.fusionne_dans,
     clos: d.statut === 'clos', tronque: Boolean(d.tronque), lignes: (Array.isArray(x.lignes) ? x.lignes : []).slice(0, 3).map(s => texte(s, role, 2000)),
     modifs: (Array.isArray(x.modificateurs) ? x.modificateurs : []).slice(0, 10).map(s => texte(s, role)),
+    veille: x.veille && Array.isArray(x.veille.alertes) ? { base: gravite(x.veille.base).mot,
+      majoration: x.veille.majoration === 1 ? 1 : 0, tronque: Boolean(x.veille.tronque),
+      alertes: x.veille.alertes.slice(0, 20).filter(a => numero(a.id)).map(a => ({ id: a.id, avis: texte(a.avis, role, 120),
+        nom: texte(a.nom, role, 214), version: texte(a.version, role, 100), gravite: gravite(a.gravite).mot,
+        cibles: (Array.isArray(a.cibles) ? a.cibles : []).filter(c => ['site', 'vigie'].includes(c)).map(c => c === 'site' ? 'Site' : 'Vigie').join(', '),
+        verification: quand(a.verifie_a) })) } : null,
     non: (Array.isArray(x.non_observees) ? x.non_observees : []).slice(0, 8).map(s => texte(s, role, 40)),
     entitesVue: ents.slice(0, 200).map(e => entite(e, role)), entitesCoupees: ents.length > 200,
     signaux: derniers.map(s => signal(s, role, regles)), avantInvalide: query.avant != null && !avant,

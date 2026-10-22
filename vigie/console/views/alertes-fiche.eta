@@ -23,6 +23,7 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <% } %>
 </header>
 <% if (vue.dossier) { %><p class="note-a">Cette alerte appartient au <a class="vg-lien" href="/dossiers/<%= vue.dossier %>">dossier #<%= vue.dossier %></a>.</p><% } %>
+<% if (vue.veille) { %><section class="panel"><h2 class="panel-t">Vulnérabilité publiée, présence à confirmer</h2><p>L’avis concerne une bibliothèque de l’inventaire déclaré. Vérifiez sa présence dans l’image déployée et les versions correctives avant d’agir. Cette alerte ne prouve pas une attaque et ne déclenche aucun blocage.</p><a class="btn ghost" href="<%= vue.veille.href %>">Voir l’avis et les correctifs dans Veille</a></section><% } %>
 <% if (ac && ac.prendre) { %><form class="form-cache" id="f-prendre" method="post" action="<%= ac.prendre %>"><input type="hidden" name="_csrf" value="<%= ac.csrf %>"><input type="hidden" name="formulaire" value="prendre"></form>
 <% } %>
 <% if (vue.lecteur) { %>
@@ -110,7 +111,7 @@ const RETOUR = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill=
 <% if (vue.classement.par) { %><dt>Par</dt><dd><%= vue.classement.par %><%= vue.classement.quand ? `, ${vue.classement.quand}` : '' %></dd><% } %>
 <% if (vue.classement.note) { %><dt>Note</dt><dd><%= vue.classement.note %></dd><% } %>
 </dl>
-<p class="panel-pied"><span>Si le signal revient, une nouvelle alerte s’ouvre.</span></p>
+<p class="panel-pied"><span><%= vue.veille ? 'Le même avis ne rouvre pas cette alerte chaque jour. Une aggravation, une nouvelle cible ou une réapparition après disparition complète ouvre un nouveau suivi.' : 'Si le signal revient, une nouvelle alerte s’ouvre.' %></span></p>
 </section>
 <% } else { %>
 <% if (ac && ac.classer) { const c = ac.classer; const ce = c.err; const en = k => Boolean(ce && ce.place === k); %>

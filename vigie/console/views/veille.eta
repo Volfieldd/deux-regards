@@ -1,0 +1,50 @@
+<%
+const v = it.vue, e = v.etat;
+const cible = id => id === 'site' ? 'Site' : 'Vigie';
+layout('./layout', { titre: it.titre });
+%>
+<div class="vg-veille">
+<header class="ep"><div class="ep-titre"><h1>Veille des vulnérabilités</h1></div><p>Bibliothèques du site et de la Vigie · avis connus dans OSV</p></header>
+<% if (!e) { %>
+<div class="vg-bandeau vg-bandeau--attention" role="status"><p>La veille est indisponible sur ce service. Aucune vérification n’est attestée.</p></div>
+<% } else { %>
+<section class="vg-etat" aria-labelledby="veille-etat"><h2 id="veille-etat"><%= e.succes == null ? 'Vérification en attente' : e.perime || e.erreur ? 'Vérification à renouveler' : 'Dernière vérification disponible' %></h2>
+<p>Dernière vérification réussie : <strong><%= v.date(e.succes) %></strong>. Actualisation quotidienne.</p>
+<% if (e.encours) { %><p role="status">Vérification en cours. Rechargez cette page dans quelques instants.</p><% } %>
+<% if (e.erreur) { %><p role="status"><%= e.erreur %> Dernier essai : <%= v.date(e.tentative) %>.<%= e.succes != null ? ' Les derniers résultats réussis restent affichés.' : ' Aucun résultat disponible.' %></p><% } %>
+<% if (e.perime) { %><p><strong>Résultats anciens : plus de 24 heures sans vérification réussie.</strong></p><% } %>
+<% if (e.succes == null && !e.erreur && !e.encours) { %><p>Le premier essai est programmé une minute après le démarrage de la Vigie.</p><% } %>
+<% if (e.incomplet) { %><p><strong>Couverture incomplète :</strong> certains inventaires ou paquets ne peuvent pas être interrogés. Voir les limites ci-dessous.</p><% } %>
+<p>Ces avis concernent les <strong>versions déclarées dans les inventaires embarqués</strong>. Ils ne prouvent ni leur présence dans les conteneurs déployés ni une exploitation sur le site.</p>
+<p>Chaque nouvelle correspondance avis/bibliothèque/version ouvre une alerte, sans répétition quotidienne. Les hautes et critiques suivent les notifications configurées, si leur interrupteur est en marche. Une détection arrêtée suspend la création d’alertes.</p>
+</section>
+<section class="ds-section" aria-labelledby="veille-avis"><h2 id="veille-avis">Avis à examiner</h2>
+<form method="get" action="/veille" class="veille-filtres">
+<div class="veille-champ"><label for="veille-cible">Cible</label><select id="veille-cible" name="cible"><% for (const [id, nom] of [['tous', 'Site et Vigie'], ['site', 'Site'], ['vigie', 'Vigie']]) { %><option value="<%= id %>"<% if (id === v.cible) { %> selected<% } %>><%= nom %></option><% } %></select></div>
+<div class="veille-champ"><label for="veille-gravite">Gravité</label><select id="veille-gravite" name="gravite"><option value="toutes">Toutes</option><% for (const [id, nom] of Object.entries(v.gravites)) { %><option value="<%= id %>"<% if (id === v.gravite) { %> selected<% } %>><%= nom %></option><% } %></select></div>
+<div class="veille-champ"><label for="veille-q">Bibliothèque ou avis</label><input id="veille-q" type="search" name="q" value="<%= v.q %>" maxlength="100" placeholder="Nom, CVE ou GHSA"></div>
+<button class="btn" type="submit">Filtrer</button><a class="btn ghost" href="/veille">Réinitialiser</a>
+</form>
+<% if (e.succes != null) { %><p><%= v.total %> avis<%= v.cible !== 'tous' || v.gravite !== 'toutes' || v.q ? ' pour ces filtres' : ' sur les bibliothèques interrogées' %>. La gravité est celle publiée par la source, lorsqu’elle est précisée.</p><% } %>
+<% if (!v.avis.length) { %><p class="panel"><%= e.succes == null ? 'Les avis apparaîtront après une vérification réussie.' : v.total === 0 && (v.cible !== 'tous' || v.gravite !== 'toutes' || v.q) ? 'Aucun avis ne correspond à ces filtres.' : 'Aucun avis connu trouvé lors de cette vérification. Cela ne garantit pas l’absence de vulnérabilités.' %></p><% } %>
+<div class="veille-avis"><% for (const a of v.avis) { %>
+<article class="panel veille-avis-item"><p class="veille-gravite"><% if (a.gravite === 'inconnue') { %><strong>Gravité non précisée</strong><% } else { %><%~ include('./_grav', { gravClasse: a.gravite, gravMot: v.gravites[a.gravite] }) %><% } %> · <%= a.id %><%= a.aliases.length ? ' · ' + a.aliases.join(', ') : '' %></p><h3><%= a.titre %></h3>
+<ul><% for (const p of a.paquets) { %><li><strong><%= p.nom %></strong> <%= p.version %><ul><% for (const u of p.usages) { %><li><%= cible(u.cible) %> · <%= u.direct ? 'directe' : 'indirecte' %><%= u.optionnel ? ' · optionnelle' : '' %></li><% } %></ul>
+<p>Versions correctives publiées : <%= p.correctifs.length ? p.correctifs.join(', ') + (p.correctifsTronques ? '… (liste abrégée)' : '') : 'aucune indiquée par la source' %>.</p></li><% } %></ul>
+<div class="veille-pagination"><% for (const p of a.paquets.filter(p => p.alerte)) { %><a class="btn ghost" href="/alertes/<%= p.alerte.id %>">Alerte #<%= p.alerte.id %> · <%= p.nom %> <%= p.version %><%= p.alerte.statut === 'close' ? ' · close' : p.alerte.statut === 'en_cours' ? ' · prise en charge' : '' %></a><% } %></div>
+<a class="btn ghost" href="https://osv.dev/vulnerability/<%= encodeURIComponent(a.id) %>" rel="noreferrer noopener">Consulter l’avis <%= a.id %></a>
+</article><% } %></div>
+<% if (v.pages > 1) { %><nav class="veille-pagination" aria-label="Pages des avis"><% if (v.precedent) { %><a class="btn ghost" href="<%= v.precedent %>">Précédente</a><% } %><span>Page <%= v.page %> sur <%= v.pages %></span><% if (v.suivant) { %><a class="btn ghost" href="<%= v.suivant %>">Suivante</a><% } %></nav><% } %>
+<p>Avant une mise à jour, vérifier la branche concernée et la compatibilité. Une version corrective publiée peut concerner une autre branche que celle utilisée. Aucune mise à jour ni réponse automatique n’est déclenchée.</p>
+</section>
+<section class="panel ds-section" aria-labelledby="veille-couverture"><h2 id="veille-couverture">Inventaires et limites de couverture</h2>
+<ul><% for (const c of e.inventaire.cibles) { %><li><strong><%= c.nom %></strong> · version déclarée <%= c.version || 'inconnue' %> : <%= c.directs %> bibliothèques directes, <%= c.indirects %> indirectes (couples nom/version), dont <%= c.optionnels %> optionnelles. <%= c.developpement %> entrées de développement exclues, <%= c.exclus %> entrées non interrogeables.<% if (c.erreur) { %> <strong><%= c.erreur %></strong><% } %></li><% } %></ul>
+<p>Source : fichiers package-lock.json du site et de la Vigie, livrés avec cette image de la Vigie. Déployez le site et la Vigie depuis la même révision pour les faire correspondre. Les options de plateforme et les suppressions faites lors de la construction peuvent laisser des bibliothèques déclarées mais absentes des images.</p>
+<p>Hors périmètre : dépendances de développement, sources Git ou locales, Node.js, paquets système, bibliothèques natives embarquées, images Docker et services externes (Zitadel, Cloudflare…). L’inventaire réel des conteneurs n’est pas mesuré ici.</p>
+<p>OSV reçoit uniquement les noms et versions npm interrogeables. La couverture dépend des avis publiés et indexés par cette source ; aucun événement, compte ou adresse du journal ne lui est envoyé.</p>
+<details class="ds-table"><summary>Voir les <%= v.paquets.length %> bibliothèques correspondant à la cible et au nom recherchés</summary>
+<ul class="veille-inventaire"><% for (const p of v.paquets) { %><li><strong><%= p.nom %></strong> <%= p.version %> — <%= p.usages.map(u => cible(u.cible) + ' (' + (u.direct ? 'directe' : 'indirecte') + (u.optionnel ? ', optionnelle' : '') + ')').join(' · ') %></li><% } %></ul>
+</details>
+</section>
+<% } %>
+</div>

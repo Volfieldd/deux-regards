@@ -37,7 +37,7 @@ export function safeRetour(v) {
 }
 
 export function createConsole({ config, store, engine, switches, decisions, zitadel, logger = true, fetchImpl = fetch, now = Date.now,
-  access: accessImpl, oidc: oidcImpl, readCeiling: readCeilingImpl, notifications = {}, edge = null, urgence = null, siteBackupDir = null, verifyChain = null }) {
+  access: accessImpl, oidc: oidcImpl, readCeiling: readCeilingImpl, notifications = {}, edge = null, urgence = null, veille = null, siteBackupDir = null, verifyChain = null }) {
   const { db } = store;
   const access = accessImpl || createAccessVerifier({ ...config.access, fetchImpl, now });
   const oidc = oidcImpl || createConsoleOidc(config);
@@ -330,7 +330,7 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   // Écrans, un module par groupe (vigie/console/ecrans/*.js) : chacun déclare ses routes avec ce contexte. Les routes
   // héritent des trois verrous (crochets ci-dessus) ; une route d'action appelle guard().
   const ctx = { db, store, engine, switches, decisions, rights, now, view, render, page, guard, isRefresh, log, sessions,
-    notifications, edge, urgence, siteBackupDir, verifyChain, safeRetour,
+    notifications, edge, urgence, veille, siteBackupDir, verifyChain, safeRetour,
     moiVue: req => ({ nom: req.moi.nom, sub: req.moi.sub, role: req.moi.role }) };
   for (const mod of ECRANS) mod.register(app, ctx);
 

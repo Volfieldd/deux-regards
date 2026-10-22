@@ -4,6 +4,7 @@
 // Mots : docs/maquettes-vigie/LEXIQUE-ET-DONNEES.md. Dates, nombres et espaces : format.js (dont ce module dépend).
 // Les rôles ont leur seule source dans droits.js (LABELS) ; le barème des détecteurs, dans vigie/detecteurs.js.
 import { responseOf } from '../notifications.js';
+import { REGLE_VEILLE, TITRE_VEILLE } from '../veille-alertes.js';
 import { FINE, NBSP, dateHeure, heure, jour, nombre, paris, quand } from './format.js';
 
 // Sources d'une alerte ou d'un événement (celles du quorum, vigie/poids.js).
@@ -60,6 +61,7 @@ export function periode(a, b, t) {
 // Titre lisible d'une règle : titres, une Map identifiant → titre (texte) ou règle du moteur ({ titre }). Un détecteur
 // dont le moteur ne donne que le nom brut prend son titre du lexique.
 export function titreDe(regle, titres = new Map()) {
+  if (regle === REGLE_VEILLE) return TITRE_VEILLE;
   const v = titres.get(regle);
   const brut = v && typeof v === 'object' ? v.titre : v;
   const nom = regle.startsWith('detecteur.') ? regle.slice(10) : null;

@@ -2,6 +2,7 @@ import { PHASES, MARQUEURS } from './phases.js';
 import { lru } from './detecteurs.js';
 import { masquer, reseauVue } from './masquage.js';
 import { CATEGORIES_DONNEES } from '../server/securite/vocabulaire.js';
+import { createVeilleDossiers, MOTIF_VEILLE } from './veille-dossiers.js';
 
 // Dossiers de la Vigie (étude docs/etudes/vigie-dossiers.md ; décisions D31 à D39 du 20 octobre 2026) : tout ce qui
 // touche une même attaque probable, d'une entité à l'autre, au-dessus des alertes (qui ne changent pas).
@@ -102,6 +103,17 @@ export function coherence(premieres) {
 
 export function createDossiers({ store, now = Date.now, adresses, menaces = () => [], hooks = {} }) {
   const { db, setting } = store;
+  const veille = createVeilleDossiers(db);
+  let contexteLot = null;
+  // Le moteur tient une transaction par lot : une seule lecture de révision suffit pour tous ses dossiers.
+  // Les gestes isolés continuent de relire la révision ; les appels imbriqués restaurent le contexte précédent.
+  function preparerContexteVeille() {
+    const avant = contexteLot;
+    try { contexteLot = veille.lire(); }
+    catch { contexteLot = null; } // Le dossier réessaiera sous surDossiers, qui journalise l'erreur sans arrêter la détection.
+    return avant;
+  }
+  const restaurerContexteVeille = avant => { contexteLot = avant; };
   const q = {
     projeter: db.prepare(`INSERT INTO signaux_projetes (seq, regle, survenu_a, nature, phase, marqueurs, points, source, gravite, entite_kind, entite_key, sub, session, ip, cle)
       VALUES (@seq, @regle, @survenu_a, @nature, @phase, @marqueurs, @points, @source, @gravite, @entite_kind, @entite_key, @sub, @session, @ip, @cle)`),
@@ -392,6 +404,42 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
   }
 
   // ---------- recalcul (4.4, 4.8, 6) ----------
+  // Complément de D35 validé le 22 octobre 2026 : +1 après le plancher habituel, sans cumul d'avis ni de cibles.
+  // Les dossiers clos conservent leur photographie ; une veille ne rouvre rien et ne produit aucun jalon.
+  function ponderer(d, ents, sig, base, explication) {
+    const precedent = d.explication.includes('"veille"') ? parse(d.explication)?.veille : null;
+    const contexte = d.statut === 'clos' ? precedent : veille.pourDossier(ents, sig, contexteLot || undefined);
+    if (!contexte?.alertes?.length && !precedent) return { gravite: base, explication };
+    const gravite = contexte?.alertes?.length ? cran(base, 1) : base;
+    const retenu = contexte?.alertes?.length ? { ...contexte, base, majoration: GRAVITES.indexOf(gravite) - GRAVITES.indexOf(base) } : null;
+    const modificateurs = (explication.modificateurs || []).filter(m => m !== MOTIF_VEILLE);
+    if (retenu) modificateurs.push(MOTIF_VEILLE);
+    const lignes = [...(explication.lignes || [])];
+    if (lignes[0]) lignes[0] = lignes[0].replace(/^[^·]+·/, `${gravite[0].toUpperCase() + gravite.slice(1)} ·`);
+    // Les dates de vérification sont affichées, sans écrire un nouveau geste pour chaque passage quotidien.
+    const empreinte = v => JSON.stringify(v && { base: v.base, majoration: v.majoration, cibles: v.cibles, tronque: v.tronque,
+      alertes: v.alertes.map(({ verifie_a, ...a }) => a) });
+    if (empreinte(precedent || null) !== empreinte(retenu)) noter('ponderation', { action: 'ponderation', id: d.id,
+      avant: d.gravite, gravite, base, alertes: retenu?.alertes.map(a => a.id) || [], motif: retenu ? MOTIF_VEILLE : 'veille : majoration retirée' });
+    return { gravite, explication: { ...explication, lignes, modificateurs, veille: retenu } };
+  }
+
+  // Lots repris après redémarrage, hors ingestion. Seule la gravité contextuelle change : pas de recalcul des
+  // indices, des faits promus, de la chaîne d'attaque, du sommeil ou des réponses pendant ce rattrapage.
+  const actualiserVeille = db.transaction(() => {
+    const revision = veille.lire().revision, ancien = setting.get('dossiers_veille', {});
+    const suivi = ancien.revision === revision ? ancien : { revision, curseur: 0, termine: false };
+    if (suivi.termine) return 0;
+    const lot = db.prepare("SELECT * FROM dossiers WHERE id > ? AND statut != 'clos' AND fusionne_dans IS NULL ORDER BY id LIMIT 100").all(suivi.curseur);
+    for (const d of lot) {
+      const x = parse(d.explication), base = GRAVITES.includes(x.veille?.base) ? x.veille.base : d.gravite;
+      const p = ponderer(d, q.entites.all(d.id), q.signaux.all(d.id), base, x);
+      db.prepare('UPDATE dossiers SET gravite = ?, explication = ? WHERE id = ?').run(p.gravite, JSON.stringify(p.explication), d.id);
+    }
+    setting.set('dossiers_veille', { revision, curseur: lot.at(-1)?.id ?? suivi.curseur, termine: lot.length < 100 });
+    return lot.length;
+  });
+
   function recalculer(id) {
     const d = q.dossier.get(id);
     if (!d || d.fusionne_dans) return null;
@@ -481,7 +529,8 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
     // Piste : un compte entré dans un dossier externe en fait un dossier d'identité.
     const piste = comptes.length ? 'identite' : ents.some(e => e.kind === 'acces') ? 'invite' : d.piste;
     const non = phaseMax ? PHASES.filter(p => p.n < phaseMax && !premieres.has(p.n)).map(p => p.nom.toLowerCase()) : [];
-    const explication = expliquer({ d, ents, comptes, gravite, phaseMax, chaine, non, niveau, conf, enjeu, enjeuEl, modifs, objets, marqueurs });
+    let explication = expliquer({ d, ents, comptes, gravite, phaseMax, chaine, non, niveau, conf, enjeu, enjeuEl, modifs, objets, marqueurs });
+    ({ gravite, explication } = ponderer(d, ents, sig, gravite, explication));
     q.maj.run({ id, piste, phase_max: phaseMax, coherence: chaine.length, confiance: niveau, enjeu, gravite, dissimulation: dissimulation ? 1 : 0, explication: JSON.stringify(explication) });
     if (GRAVITES.indexOf(gravite) > GRAVITES.indexOf(d.gravite)) noter('aggrave', { action: 'aggrave', id, gravite, avant: d.gravite });
     // Chaîne d'attaque (DS23), calculée sur le dossier : une fois par dossier.
@@ -857,5 +906,5 @@ export function createDossiers({ store, now = Date.now, adresses, menaces = () =
       signaux: q.signaux.all(id), alertes: db.prepare('SELECT id, regle, gravite, statut, mode FROM alerts WHERE dossier_id = ? ORDER BY id').all(id) };
   }
 
-  return { surSignal, surAlerte, alerteDure, surFait, tick, purge, recalculer, prendre, classer, detacher, rattacher, fusionner: fusionnerManuel, preparerScission, scinder, liste, fiche, confianceCompte };
+  return { surSignal, surAlerte, alerteDure, surFait, tick, purge, recalculer, actualiserVeille, preparerContexteVeille, restaurerContexteVeille, prendre, classer, detacher, rattacher, fusionner: fusionnerManuel, preparerScission, scinder, liste, fiche, confianceCompte };
 }
