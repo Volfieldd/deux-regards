@@ -6,6 +6,7 @@ import { createIngest } from './ingest.js';
 import { createZitadelReader } from './zitadel.js';
 import { createEngine } from './moteur.js';
 import { createThreats } from './menaces.js';
+import { createVeille } from './veille.js';
 import { checkRoles } from './controle-roles.js';
 import { createSwitches } from './interrupteurs.js';
 import { createEdge } from './bordure.js';
@@ -33,6 +34,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
   // sans attendre l'analyse).
   const switches = createSwitches({ store, now });
   const threats = createThreats({ store, fetchImpl, now, log, enabled: config.threatLists });
+  const veille = createVeille({ store, fetchImpl, now });
   const engine = createEngine({ store, decisions, switches, threats, now, log });
   store.onAdded(() => engine.enqueue());
   // Notifications (phase D) : Signal, e-mail en secours ; alertes hautes et critiques hors observation.
@@ -90,6 +92,8 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     setInterval(safe('nonces', () => store.db.prepare('DELETE FROM nonces WHERE at < ?').run(now() - 10 * 60e3)), 60e3),
   ];
   plusTard(safe('purge', daily), 60e3);
+  plusTard(safe('veille des bibliothèques', veille.actualiser), 60e3);
+  timers.push(setInterval(safe('veille des bibliothèques', veille.actualiser), 3600e3));
   // Site silencieux et fenêtres de corrélation échues : chaque minute ; détecteurs périodiques : chaque heure ; listes de menaces : chaque jour (première après 2 min) ;
   // contrôle des rôles : à chaque nouvelle sauvegarde du site (vérifié chaque heure).
   timers.push(setInterval(safe('détecteurs', () => { engine.tick(); engine.enqueue(); notifier.tick().catch(() => {}); }), 60e3));   // enqueue : écrits de la ligne de commande
@@ -128,7 +132,7 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
 
   // Console (phase D3) : son propre port, sur le réseau du tunnel ; la réception reste sur le réseau interne.
   const consoleApp = config.console ? createConsole({ config: config.console, store, engine, switches, decisions, zitadel, logger, fetchImpl, now,
-    notifications: config.notifications || {}, edge, urgence, siteBackupDir: config.siteBackupDir, verifyChain: verifyShared }) : null;
+    notifications: config.notifications || {}, edge, urgence, veille, siteBackupDir: config.siteBackupDir, verifyChain: verifyShared }) : null;
 
   await ingest.listen({ host: config.host, port: config.ingestPort });
   // La console est facultative : si elle ne peut pas écouter (adresse absente du conteneur, port pris), la réception, le
@@ -142,8 +146,8 @@ export async function startVigie({ config, logger = true, fetchImpl, now = Date.
     }
   }
   return {
-    store, decisions, ingest, zitadel, engine, switches, threats, edge, cfList, urgence, reseau, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
-    async close() { for (const t of timers) clearInterval(t); for (const t of delais) clearTimeout(t); zitadel?.stop(); edge?.stop(); cfList?.stop(); urgence?.stop(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
+    store, decisions, ingest, zitadel, engine, switches, threats, veille, edge, cfList, urgence, reseau, notifier, console: consoleApp, consoleUp, verifyChain: verifyShared,
+    async close() { for (const t of timers) clearInterval(t); for (const t of delais) clearTimeout(t); zitadel?.stop(); edge?.stop(); cfList?.stop(); urgence?.stop(); await veille.close(); await consoleApp?.close().catch(() => {}); await ingest.close(); await engine.drain(); db.close(); },
   };
 }
 

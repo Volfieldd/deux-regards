@@ -9,5 +9,6 @@ import * as actions from '../actions.js';
 import * as dossiers from './dossiers.js';
 import * as attack from './attack.js';
 import * as incident from './incident.js';
+import * as veille from './veille.js';
 
-export const ECRANS = [alertes, dossiers, incident, attack, evenements, santeFlux, decisionsE, reglages, droits, actions];
+export const ECRANS = [alertes, dossiers, incident, attack, veille, evenements, santeFlux, decisionsE, reglages, droits, actions];

@@ -21,6 +21,8 @@ RUN echo '{ "private": true, "license": "UNLICENSED", "type": "module" }' > pack
 COPY LICENSE ./
 COPY --from=deps /app/vigie/node_modules ./vigie/node_modules
 COPY vigie ./vigie
+# Inventaire déclaré du site, de la même révision que l'image Vigie ; aucun code ni donnée du site.
+COPY package-lock.json ./package-lock.json
 COPY server/securite/vocabulaire.js ./server/securite/vocabulaire.js
 COPY server/securite/adresses-ip.js ./server/securite/adresses-ip.js
 # Worker de bordure (trois fichiers, sans dépendance) : déployé chez Cloudflare par le service « bordure » du compose,

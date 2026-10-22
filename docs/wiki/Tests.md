@@ -127,6 +127,12 @@ Outils partagés : `test/helpers.js` (base, dossier et application de test), `te
 
 L'encodage AVIF est mis au plus rapide pendant les tests (`AVIF_EFFORT=0`, dans le script `npm test`). L'horodatage y est désactivé (`TSA_URL=off`) : les tests qui en ont besoin utilisent un faux service, qui renvoie des jetons FreeTSA réels enregistrés dans `test/fixtures/`.
 
+### Veille des vulnérabilités
+
+`test/vigie-veille.test.js` couvre les inventaires npm (directes, indirectes imbriquées, alias, optionnelles, développement, Git et liens locaux), la correspondance OSV par version, la pagination, les avis retirés, la minimisation des requêtes, les bornes de réponse, les échecs partiels, le cache persistant, le changement d’inventaire, l’ancienneté, le réessai et l’arrêt. Les routes sont vérifiées avec les verrous de la console, le rôle Lectrice, les filtres et l’échappement des textes distants. Une consultation ne crée pas d’alerte ni d’appel externe.
+
+Vérification ciblée : `node --test test/vigie-veille.test.js test/vigie-service.test.js test/vigie-console.test.js test/vigie-console-vues.test.js test/mention-droits.test.js`. Le parcours navigateur utilise un serveur jetable et les bibliothèques Playwright existantes : ouvrir Veille, filtrer cible/gravité/nom, déplier l’inventaire, puis simuler une panne après succès et constater la conservation datée des avis. Bureau et iPhone simulé, sans JavaScript ; aucun accès aux données des instances.
+
 ### Reprise des décisions de la Vigie
 
 `vigie-reprise-suspensions.test.js` vérifie la suspension réelle et les autorisations en base : panne, retour négatif, galerie absente, liste identique, redémarrage, levée manuelle, prolongation, cache absent ou impossible à écrire, annulation transactionnelle, historique manuel, métadonnée HTTP non signée, expiration, purge et effacement. `vigie-moteur.test.js` vérifie l’exemption de tout le /64 par application de la décision signée, ses écritures IPv6 équivalentes, le réseau voisin et le refus de conclure après troncature. `vigie-urgence.test.js` vérifie les quatre rôles, l’état actif et terminé, l’échappement et les bornes des textes. Le contrôle navigateur des réglages s’effectue sans JavaScript, au bureau et au téléphone.

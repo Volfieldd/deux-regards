@@ -101,6 +101,8 @@ Das Menü zeigt nur die Seiten, die das Konto öffnen darf.
 
 ## Sicherheit
 
+In der Vigie-Konsole zeigt **Surveiller → Veille** bekannte Schwachstellenmeldungen für direkte und indirekte Bibliotheken der Website und der Vigie. Nach Ziel, Schweregrad oder Name filtern und die Meldung zur Prüfung der Korrekturen öffnen. Die Prüfung erfolgt täglich; Datum, Fehler und Abdeckungsgrenzen werden angezeigt. Die Inventare werden mit der Vigie ausgeliefert und erfassen nicht die tatsächlich installierten Container. Node.js, Betriebssystem und externe Dienste sind nicht abgedeckt. Es werden keine Updates oder automatischen Gegenmaßnahmen ausgelöst.
+
 **Sicherheit** (Gruppe Einstellungen, nach Protokoll) öffnet in einem neuen Tab die Konsole der **Vigie**, der Sicherheitskomponente der Website (`https://vigie.nicephos.art`). Der Eintrag erscheint nur für Konten, die ihn sehen dürfen (die Rolle Administrator hat das Recht, die anderen Rollen nicht), und nur, wenn die Vigie installiert ist. Die Konsole hat eigene Sperren (Cloudflare Access, ihr Zitadel-Konto mit Zwei-Faktor-Authentifizierung): Administrator der Website zu sein, genügt nicht, um hineinzukommen.
 
 Die Verwaltung weiß nur, was die Vigie ihr jede Minute signiert schickt: die Anzahl offener Sicherheitswarnungen je Schweregrad, Uhrzeit und Nummer der schwersten; nie den Titel einer Regel, eine Adresse oder ein Konto.

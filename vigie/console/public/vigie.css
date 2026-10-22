@@ -1074,3 +1074,15 @@ figure.fx-dessin { margin: 0; }
 
 .ak-tactique .ak-tq a.vg-lien { display: block; }
 @media (max-width: 720px) { .ak-globale .ak-tac.ak-vide { display: block; } }
+
+/* Veille : filtres et avis restent lisibles sans script, y compris les longs noms npm et identifiants CVE. */
+.vg-veille { overflow-wrap: anywhere; }
+.veille-filtres, .veille-pagination { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-block: 16px; }
+.veille-champ { display: grid; gap: 6px; flex: 1 1 160px; min-width: 0; }
+.veille-filtres :is(input, select) { width: 100%; min-width: 0; min-height: 44px; }
+.veille-avis { display: grid; gap: 16px; }
+.veille-avis-item h3 { font-size: 18px; margin-top: 8px; }
+.veille-avis-item ul { padding-left: 22px; }
+.vg-veille .btn { white-space: normal; }
+.veille-inventaire { padding-left: 22px; }
+.veille-inventaire li { padding-block: 6px; }
