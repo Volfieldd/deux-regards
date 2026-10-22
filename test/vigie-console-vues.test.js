@@ -112,6 +112,7 @@ test('pages hors session : chaque cas, sans style ni script en ligne, échappée
     reauth: { action: `Geler le compte ${PIEGE} pendant 7 jours`, retour: '/alertes/412', csrf: 'jeton"<csrf>' },
     autre: { retour: '/alertes/412' },
     expiree: { raison: 'inactivite' },
+    connexion: {},
     interdit: { raison: 'droit', requis: 'Intervenant' },
     zitadel: {},
   };

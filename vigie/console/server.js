@@ -263,12 +263,17 @@ export function createConsole({ config, store, engine, switches, decisions, zita
 
   app.post('/reauth', async (req, reply) => startLogin(req, reply, { retour: safeRetour(req.body?.retour), reauth: req.moi.sid }));
 
+  // Adresse sans code ni state : recharger cette page ne rejoue pas le retour OIDC refusé (DS30).
+  app.get('/auth/reprendre', { config: { public: true } }, async (req, reply) => page(reply, 'connexion', {}, 400));
+
   app.get('/auth/callback', { config: { public: true } }, async (req, reply) => {
     const q = req.query || {};
     const cookieState = req.cookies[TX];
-    reply.clearCookie(TX, EFFACE);
-    const tx = typeof q.state === 'string' && q.state === cookieState ? sessions.takeTx(q.state) : null;
-    if (!tx) { refuse(req, 'etat'); return page(reply, 'expiree', { raison: 'inactivite' }, 400); }
+    const memeTentative = typeof q.state === 'string' && q.state === cookieState;
+    // Un ancien onglet peut revenir pendant une nouvelle connexion : il ne doit pas effacer son cookie.
+    if (memeTentative) reply.clearCookie(TX, EFFACE);
+    const tx = memeTentative ? sessions.takeTx(q.state) : null;
+    if (!tx) { refuse(req, 'etat'); return reply.redirect('/auth/reprendre', 303); }
     if (q.error) {
       refuse(req, 'zitadel', { detail: { erreur: clean(q.error, 60) } });
       return page(reply, 'refusee', { qui: req.access.email }, 403);
