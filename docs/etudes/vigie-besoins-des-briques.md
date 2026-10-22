@@ -42,7 +42,7 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-16 Force brute du mot de passe d'un accès | DS16, DS21, DS31 | ✓ site ; types et règles : Vigie ; ✓ Vigie | `feat/galeries-privees` : `authn_login_fail` (`site · public`, `bas`, `portail: galerie_privee`) ; palier posé en `authn_login_disabled` avec `type_attendu: authn_login_lock` (type absent du vocabulaire, à ajouter par la Vigie) ; `excess_rate_limit_exceeded` (`galerie_mot_de_passe`, `mot_de_passe_global`) ; Vigie (phase E1) : type `authn_login_lock` (`site · public`) ; règles `galerie_echecs_adresse`, `galerie_essais_repartis`, `galerie_suspendue` (deux formes, dont `authn_login_disabled` avec `type_attendu`), `galerie_scrypt_sature` | fait |
 | BV-17 Énumération des liens et des espaces | DS16 | ✓ site ; ✓ Vigie | `feat/galeries-privees` : `token_guess` (`lien de galerie privée`, `espace privé`, `image privée`), limite `galerie_lien` (61e ouverture en 1 h) ; Vigie (phase E1) : `enumeration_jetons` (DS16) telle quelle | fait |
 | BV-18 Accès qui fuit (nombreux réseaux ou pays) | DS18, DS3 | ✓ site (émission) ; règles et décision : Vigie ; ✓ Vigie | `feat/galeries-privees` : `session_created` (`site · public`, réseau seul, pays dans `detail.pays`) ; suspension applicable par le site (`spaces.suspend`) ; décision `suspendre_acces` à créer par la Vigie (Tranché 5) ; Vigie (phase E1) : règles `acces_reseaux_multiples` (4 en 7 j ; 10 pour un lien de groupe), `acces_pays_multiples` (3 en 24 h ; 5 pour un groupe) ; décision `suspendre_acces` (appliquée par le site avec `app.spaces.suspend`), réponse de `acces_pays_multiples` en mode Bloquer seulement | fait |
-| BV-19 Téléchargement en masse | DS15, DS18 | ✓ site ; règles : Vigie ; ✓ Vigie | `feat/galeries-privees` : `excess_rate_limit_exceeded` (`telechargements` 50/h, `archives` 3/jour), `sensitive_export` (`site · public`, archive) ; Vigie (phase E1) : règles `telechargements_en_masse`, `acces_nouvel_appareil_puis_siphonage` | fait |
+| BV-19 Téléchargement en masse | DS15, DS18 | ✓ site ; règles : Vigie ; ✓ Vigie | `feat/galeries-privees` : `excess_rate_limit_exceeded` (`telechargements` 50/h, `archives` 3/jour, `rendus_telechargements_global` au troisième rendu distinct simultané), `sensitive_export` (`site · public`, archive) ; Vigie (phase E1) : règles `telechargements_en_masse`, `acces_nouvel_appareil_puis_siphonage` | fait |
 | BV-20 Texte publié qui gagne un lien, un e-mail ou un téléphone | DS9 | ✓ Vigie | `watchWrites` (`server/securite/site.js`), `config_public_changed` (`objet: 'texte_public'`) ; billets compris : côté site (`feat/carnets`), chaque écriture d'un billet passe par `app.audit.log` avec les noms des champs (`champs : body_de, title`), jamais leurs valeurs ; la version en ligne ne change que par l'enregistrement d'un billet publié, la publication, la republication, le rétablissement d'une version ou **`app.carnet.runDue()`** (server/carnet.js), seule fonction de la publication programmée (sans session : `sub` nul, « publication programmée », notée au journal) à brancher sur `watchWrites` ; réglage `carnet_contact` (adresse de « Écrire aux auteurs ») à ajouter à `WATCHED` et `CONTACT` ; fin de D ou phase E ; Vigie (phase E1) : `server/securite/textes-publics.js` (photos publiées avec leurs lieux et mots-clés, séries, photographes, voyages en ligne, billets publiés ; textes des réglages affichés sur le site : nom, accroche, introduction, « À propos », droits, sous-titre de la marque), publication programmée comprise (sub nul), règle `texte_public_contact` | fait |
 | BV-21 Textes publiés modifiés en masse (défacement) | DS9 | ✓ Vigie | corrélation sur le modèle de `heures_visibles_en_masse` ; billets : corrélation sœur `billets_modifies_en_masse` (3 billets publiés modifiés ou retirés par un même compte en 1 h, décision 10), à partir des lignes du journal d'audit des Carnets (`POST /admin/carnet/:id`, `/retirer`, `/republier`, `/versions/:rev/retablir`, `carnet · publication programmée`) ; Vigie (phase E1) : `textes_publics_geste_massif` (50 textes d'un geste), `textes_publics_en_serie` (20 gestes en 10 min), `billets_modifies_en_masse` (3 en 1 h) | fait |
 | BV-22 Accès gardé après révocation | DS1 | ✓ site ; règle : Vigie ; ✓ Vigie | `feat/galeries-privees` : `session_use_after_expire` (`site · public`, `portail: galerie_privee`, `jeton: lien \ ; Vigie (phase E1) : règle `acces_apres_revocation` | fait | site fait |
@@ -240,8 +240,9 @@ version mineure de l'image) ; nodemailer prend son mandataire par l'option `prox
 téléchargés une fois puis Hugging Face retiré de la liste.
 
 **Forcer le passage.** Une règle de l'hôte (chaîne `DOCKER-USER`) n'autorise depuis l'adresse du site, hors des réseaux
-internes, que le mandataire, et **rejette et journalise** tout le reste. Un site sain, réglé pour le mandataire, ne sort
-jamais en direct : une tentative directe prouve qu'un code qui n'est pas le nôtre tourne.
+internes, que le mandataire, et **rejette et journalise** tout le reste. Une chaîne distincte, appelée en tête d'`INPUT`,
+rejette les nouvelles connexions des trois réseaux vers les services de l'hôte. Un site sain, réglé pour le mandataire, ne
+sort jamais en direct et ne joint pas l'hôte : une tentative prouve qu'un code qui n'est pas le nôtre tourne.
 
 **Signaler.** La Vigie lit, en lecture seule, le journal du mandataire et celui des rejets de l'hôte (comme elle lit
 déjà les sauvegardes), sans passer par le site. Événements proposés (source « réseau », confiance « constaté ») :
@@ -275,8 +276,9 @@ besoin d'en résoudre d'autres que ceux des conteneurs).
 | `backup`, `vigie-backup` | aucun | sauvegardes locales (`network_mode: none` à vérifier pour `backup`) |
 
 **Signaler.** Ce qu'un découpage ne peut pas interdire (deux conteneurs qui partagent légitimement un réseau) passe par
-la même chaîne `DOCKER-USER` : tout paquet entre deux adresses des réseaux Nicephos qui n'est pas dans la liste est
-rejeté et journalisé. Événement proposé : `reseau_flux_hors_liste` (source, destination, port), gravité `haut`,
+la chaîne `DOCKER-USER` ; les destinations locales passent par `INPUT`. Tout paquet hors de la liste entre deux adresses
+des réseaux Nicephos, ou d'un de ces réseaux vers l'hôte, est rejeté et journalisé. Événement proposé :
+`reseau_flux_hors_liste` (source, destination, port), gravité `haut`,
 exception à source unique quand la source est le site (mouvement latéral : MV16, le site qui sonde la console ou la
 passerelle). Les refus déjà vus par les services eux-mêmes restent comptés à part (`vigie_ingestion_refusee`, DS30).
 
@@ -290,7 +292,7 @@ adresses résolues (un nom autorisé qui mène au réseau local est refusé), jo
 battement horaire, liste tirée du `.env` au démarrage. Relevé du code : toutes les sorties du site passent par `fetch`
 (openid-client, Instagram, horodatage, modèles), sauf nodemailer ; Hugging Face sert les modèles depuis `*.hf.co`
 (`us.aws.cdn.hf.co` à l'essai). Règles de l'hôte : `deploy/unraid/reseau/regles.sh` (`--afficher`, `--retirer`,
-`--battement`, `--rsyslog`), chaînes `NICEPHOS*` appelées en tête de `DOCKER-USER`, posées d'un coup, sur des
+`--battement`, `--rsyslog`), chaînes `NICEPHOS*` appelées en tête de `DOCKER-USER` et d'`INPUT`, posées d'un coup, sur des
 sous-réseaux et des adresses fixes (le site et le traducteur ont désormais la leur). Essai en conteneurs (sans iptables) :
 sortie autorisée réussie (FreeTSA, Hugging Face), noms refusés journalisés, journal lu par la Vigie en lecture seule,
 alertes ouvertes. Guide : [`deploy/unraid/reseau/README.md`](../../deploy/unraid/reseau/README.md). Restent à valider
@@ -657,11 +659,14 @@ Une ligne par photo téléchargée ferait du volume (J2) et des points sur l'adr
 galerie de 48 photos, plus une rafale vue en bordure, ferait le quorum). Seuls les seuils et les archives émettent.
 
 - **Événements** : `excess_rate_limit_exceeded` (E16), existant, quand un accès passe 50 téléchargements unitaires en
-  1 h (`limite: 'telechargements'`, proposition) ou la limite de 3 archives par jour (G46, `limite: 'archives'`), avec
+  1 h (`limite: 'telechargements'`, proposition), la limite de 3 archives par jour (G46, `limite: 'archives'`) ou la
+  borne globale de deux rendus distincts absents du cache (`limite: 'rendus_telechargements_global'`, 503, une fois par
+  minute au plus), avec
   `{ portail: 'galerie_privee', acces, espace, taille: 'web' | 'grande' }` ; `sensitive_export` (E12), existant,
   composant `site · public`, à chaque archive préparée (`{ portail, acces, espace, nature: 'archive', photos, octets,
   taille }`), donc 3 par jour et par accès au plus. Un `HEAD` n'est pas un téléchargement (comme `/pour-vous`,
-  `public.js:112`).
+  `public.js:112`) et ne prépare aucun rendu ; un refus de calcul n'incrémente pas le compteur métier et abandonne la
+  réservation d'archive.
 - **Règles** (Vigie) : `telechargements_en_masse` (`excess_rate_limit_exceeded` avec `detail.portail: galerie_privee` →
   `medium`, source unique sur `{ kind: site, champ: detail.acces }`, DS15 transposé : siphonage) ; la corrélation de
   BV-18 (nouveau réseau puis archive, DS18). `exports_nombreux` et `role_incoherent` groupent par `sub` : ils ne voient

@@ -9,7 +9,7 @@ Trois pièces, chacune utile seule, qui se complètent :
 | Pièce | Ce qu'elle fait | Où |
 |---|---|---|
 | Mandataire de sortie (service `sortie`, profil « sortie ») | le site ne joint Internet que par lui ; il n'accepte que les noms de la liste ; refus et sorties acceptées journalisés (nom, port, octets ; jamais un chemin ni un contenu) | `mandataire.js`, `compose.yaml` |
-| Règles de l'hôte (`regles.sh`, chaîne `DOCKER-USER`) | **forcent** le passage par le mandataire : toute autre sortie du site, et tout flux entre conteneurs hors de la liste, est rejeté et journalisé (`NICEPHOS-SORTIE`, `NICEPHOS-FLUX`) | `regles.sh` |
+| Règles de l'hôte (`regles.sh`, chaînes `DOCKER-USER` et `INPUT`) | **forcent** le passage par le mandataire : toute autre sortie du site, tout flux entre conteneurs hors de la liste et toute nouvelle connexion d'un réseau Nicephos vers l'hôte sont rejetés et journalisés (`NICEPHOS-SORTIE`, `NICEPHOS-FLUX`) | `regles.sh` |
 | Source « réseau » de la Vigie | lit ces deux journaux en lecture seule et en tire `reseau_sortie_refusee`, `reseau_sortie_directe`, `reseau_flux_hors_liste`, `vigie_reseau_silence` | `vigie/reseau.js`, `vigie/regles/75-reseau.yml` |
 
 ## Pourquoi un mandataire écrit ici
@@ -57,10 +57,14 @@ traducteur ne passent pas par lui.
 
 Tout autre paquet entre deux adresses des trois réseaux de Nicephos : rejeté, journalisé `NICEPHOS-FLUX`. Sorties vers
 l'extérieur de ces réseaux : permises au tunnel, à la Vigie et au traducteur ; pour tout autre conteneur de la pile (le site,
-la sauvegarde), rejetées et journalisées `NICEPHOS-SORTIE`. Journal limité à 20 lignes par minute (rafales de 40). Les
-réponses des connexions acceptées passent ; rien d'autre de l'hôte n'est visé (ni les autres conteneurs, ni les règles de
-Docker). Les règles se posent d'un coup (`iptables-restore --noflush` sur les chaînes `NICEPHOS*`) ; relancé, le script ne
-double rien ; `--retirer` enlève tout.
+la sauvegarde), rejetées et journalisées `NICEPHOS-SORTIE`. La chaîne `NICEPHOS-HOTE`, appelée en tête d'`INPUT`, rejette
+aussi toute nouvelle connexion des trois réseaux vers un service de l'hôte ; les réponses aux connexions initiées par
+l'hôte passent. Journal limité à 20 lignes par minute (rafales de 40). Les autres sources et les règles de Docker ne sont
+pas modifiées. Les règles se posent d'un coup (`iptables-restore --noflush` sur les chaînes `NICEPHOS*`) ; relancé, le
+script remet exactement un appel en tête de chaque chaîne ; `--retirer` enlève tout ce qu'il a posé.
+
+Aucun service de l'hôte n'est nécessaire aux conteneurs dans la pile fournie. Si l'exploitation en ajoute un, son exception
+doit nommer la source, l'adresse de destination, le protocole et le port, avant les rejets de `NICEPHOS-HOTE`.
 
 Pour cela, le site et le traducteur ont désormais une **adresse fixe** (`SITE_IP`, `TRADUCTION_IP`, hors de la plage des
 adresses automatiques, comme le tunnel et la console) ; si vous avez changé `NET_SUBNET`, changez-les avec.
@@ -107,6 +111,7 @@ libres (`docker network inspect` de chaque réseau, `ip route`) ; sinon réglez 
    sudo bash deploy/unraid/reseau/regles.sh --env /chemin/du/.env              # poser
    sudo bash deploy/unraid/reseau/regles.sh --env /chemin/du/.env --battement  # premier battement
    sudo iptables -L DOCKER-USER -n --line-numbers | head -3                     # NICEPHOS en tête
+   sudo iptables -L INPUT -n --line-numbers | head -3                           # NICEPHOS-HOTE en tête
    sysctl net.bridge.bridge-nf-call-iptables                                    # doit valoir 1
    ```
    Sur la machine de test, la configuration de rsyslog va dans `/etc/rsyslog.d/` (relancé par `systemctl`) ; vérifiez que
@@ -148,6 +153,9 @@ docker exec nicephos node -e "fetch('https://example.com').then(r=>console.log(r
 docker exec nicephos node -e "require('net').connect(443,'1.1.1.1').on('connect',()=>console.log('SORTI : règles absentes')).on('error',e=>console.log(e.code))"
 # Le site vers la console (mouvement latéral) : rejeté → NICEPHOS-FLUX → reseau_flux_hors_liste (haut)
 docker exec nicephos node -e "require('net').connect(4200,'172.29.42.20').on('connect',()=>console.log('JOINT : règles absentes')).on('error',e=>console.log(e.code))"
+# Le site vers l'hôte : sur l'instance de test, liez d'abord un service factice au port 18080 de la passerelle du pont.
+# La connexion doit être rejetée même si ce service écoute, puis apparaître comme NICEPHOS-FLUX.
+docker exec nicephos node -e "require('net').connect(18080,'172.29.42.1').on('connect',()=>console.log('HÔTE JOINT : règle INPUT absente')).on('error',e=>console.log(e.code))"
 ```
 
 Puis `docker exec nicephos-vigie node vigie/cli.js reseau --lire` (lecture immédiate), `… alertes`, et la carte « Réseau »
@@ -173,7 +181,7 @@ Les adresses fixes du site et du traducteur peuvent rester.
 - **IPv6** : les réseaux de la pile sont en IPv4 seul ; si IPv6 y était activé, il faudrait les mêmes règles en `ip6tables`.
 - **Journal du noyau limité en débit** : au-delà de 20 lignes par minute, des rejets ne sont pas écrits (ils sont toujours
   rejetés) ; la Vigie voit la tentative, pas son volume exact.
-- **Redémarrage de Docker** : s'il retirait l'appel en tête de `DOCKER-USER`, le battement horaire dit `etat=absentes` et la
+- **Redémarrage de Docker** : s'il retirait l'appel en tête de `DOCKER-USER` ou d'`INPUT`, le battement horaire dit `etat=absentes` et la
   Vigie ouvre « Journal réseau illisible ou muet, ou règles de l'hôte absentes » ; relancez `nicephos-reseau`.
 - **Découpage du réseau `nicephos` par flux (BV-11, « empêcher ») : étape suivante.** Aujourd'hui seul le mandataire a son
   réseau (`nicephos-sortie`, interne) ; le site reste sur `nicephos`, routé, et c'est la règle de l'hôte qui l'empêche de

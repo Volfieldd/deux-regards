@@ -26,6 +26,9 @@ import { cleReseau } from '../server/securite/adresses-ip.js';
 
 const DECAY = ms => 0.5 ** (ms / (HALF_LIFE_MIN * 60e3));
 const IGNORED = new Set(['vigie_alerte', 'vigie_decision', 'vigie_interrupteur', 'vigie_signal', 'vigie_dossier']);
+// Gestes de la console et de la ligne de commande qui ouvrent directement une alerte. Ils restent hors des sources du
+// quorum (un geste humain ne confirme pas le site), mais un afflux du site ne doit pas les faire sauter sans analyse.
+const SIGNAUX_HORS_SOURCE = new Set(['vigie_console_refus', 'vigie_console_arrivee', 'vigie_console_droits', 'vigie_urgence']);
 const parse = s => { try { return s ? JSON.parse(s) : {}; } catch { return {}; } };
 const RULES_DIR = fileURLToPath(new URL('./regles/', import.meta.url));
 const QUIET = 24 * 3600e3;                       // alerte sans nouvel événement depuis 24 h : la suivante en ouvre une autre
@@ -377,11 +380,42 @@ export function createEngine({ store, decisions, switches, threats = null, now =
   // enregistré) et relit les événements dans la base par lots de 200, en rendant la main entre deux lots : mémoire
   // constante quel que soit le retard (100 000 événements en mémoire prendraient 120 Mo, la moitié de la limite du
   // conteneur), et un redémarrage reprend où l'analyse s'était arrêtée. Retard de plus de 100 000 événements (afflux
-  // massif) : le moteur saute en avant (les événements restent dans la base et la chaîne) et le note.
+  // massif) : avant de sauter le bruit ancien, le moteur analyse atomiquement les sources indépendantes du site et les
+  // événements locaux qui ouvrent directement une alerte. Les autres événements restent dans la base et la chaîne, et
+  // le délestage est noté.
   const q2 = {
     max: db.prepare('SELECT MAX(seq) FROM events').pluck(),
     after: db.prepare('SELECT * FROM events WHERE seq > ? ORDER BY seq LIMIT 200'),
+    // Le site compromis ne peut écrire que des composants « site · … » (ingest.js). La sélection SQL reste étroite ;
+    // sourceOf garde l'autorité pour les sources du quorum et les quatre types locaux restent explicitement hors quorum.
+    between: db.prepare(`SELECT * FROM events WHERE seq > ? AND seq <= ? AND (
+      composant IN ('zitadel', 'bordure', 'cloudflare', 'réseau', 'vigie · contrôle')
+      OR type IN ('vigie_console_refus', 'vigie_console_arrivee', 'vigie_console_droits', 'vigie_urgence')
+    ) ORDER BY seq LIMIT 200`),
+    countBetween: db.prepare('SELECT COUNT(*) FROM events WHERE seq > ? AND seq <= ?').pluck(),
   };
+  // Même transaction que la progression du curseur : après un arrêt brutal, une source indépendante est analysée une
+  // fois, ou la tranche entière est reprise. La pagination garde la mémoire bornée même si le journal est très en retard.
+  const preserveIndependent = db.transaction((from, to) => {
+    const avant = dossiers.preparerContexteVeille();
+    let proteges = 0, scan = from;
+    try {
+      const on = switches.isOn('detection');
+      for (;;) {
+        const rows = q2.between.all(scan, to);
+        if (!rows.length) break;
+        for (const row of rows) {
+          const source = sourceOf(row);
+          const protege = on ? (source != null && source !== 'site') || SIGNAUX_HORS_SOURCE.has(row.type) : row.type === 'vigie_surveillance_reduite';
+          if (!protege) continue;
+          try { processOne(row); proteges += 1; } catch (err) { log?.error({ err: err.message, type: row.type }, 'Vigie : moteur'); }
+        }
+        scan = rows.at(-1).seq;
+      }
+      setting.set('moteur_curseur', to);
+    } finally { dossiers.restaurerContexteVeille(avant); }
+    return proteges;
+  });
   let cursor = setting.get('moteur_curseur', null);
   if (cursor == null) { cursor = q2.max.get() ?? 0; setting.set('moteur_curseur', cursor); }   // premier démarrage : pas l'historique
   let scheduled = false;
@@ -392,10 +426,11 @@ export function createEngine({ store, decisions, switches, threats = null, now =
     try {
       const last = q2.max.get() ?? 0;
       if (last - cursor > LAG_MAX) {
-        const skipped = last - LAG_MAX - cursor;
-        cursor = last - LAG_MAX;
-        setting.set('moteur_curseur', cursor);
-        store.own('vigie_moteur_sature', { severity: 'haut', emetteur: 'vigie/moteur.js', detail: { ignores: skipped } });
+        const skipTo = last - LAG_MAX;
+        const total = q2.countBetween.get(cursor, skipTo);
+        const proteges = preserveIndependent.immediate(cursor, skipTo);
+        cursor = skipTo;
+        store.own('vigie_moteur_sature', { severity: 'haut', emetteur: 'vigie/moteur.js', detail: { ignores: total - proteges, proteges } });
       }
       const rows = q2.after.all(cursor);
       if (rows.length) {

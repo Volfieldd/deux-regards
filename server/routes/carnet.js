@@ -268,11 +268,14 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
   // Ce que le formulaire change, et qui en a le droit : textes (carnet.textes ou carnet.ecrire), le reste (carnet.ecrire) ;
   // un billet en ligne ne se modifie qu'avec carnet.publies.modifier.
   const TEXT_KEYS = new Set(c.TEXT_FIELDS);
-  function allowed(post, input, r) {
+  function allowed(post, input, r, revised = false) {
     const keys = Object.keys(input).filter(k => String(k === 'authors' ? input.authors.join(',') : input[k] ?? '') !== String(k === 'authors' ? post.authors.join(',') : post[k] ?? ''));
+    // La case « mise à jour signalée » modifie seule la date publique, la version et l'autosauvegarde : elle compte donc
+    // comme une écriture, même si aucun champ du formulaire n'a changé (revue de sécurité des Carnets).
+    const mutation = keys.length || (revised && post.state === 'publie');
     if (keys.some(k => !TEXT_KEYS.has(k)) && !r.write) return 'write';
-    if (keys.length && !r.text) return 'write';
-    if (keys.length && post.state === 'publie' && !r.live) return 'live';
+    if (mutation && !r.text) return 'write';
+    if (mutation && post.state === 'publie' && !r.live) return 'live';
     return null;
   }
 
@@ -282,7 +285,8 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     const body = request.body || {}, t = request.t, lang = langOf(body.langue), r = rights(request, post);
     const faire = ['enregistrer', 'proposer', 'publier', 'programmer'].includes(body.faire) ? body.faire : 'enregistrer';
     const input = inputOf(request, post, body, lang, r);
-    const refused = allowed(post, input, r);
+    const revised = body.revised === 'on';
+    const refused = allowed(post, input, r, revised);
     // « Retirer du billet » change le billet : mêmes droits qu'un réglage (revue de sécurité des Carnets).
     if (body.retirer && !r.write) return app.forbid(request, reply);
     if (body.retirer && post.state === 'publie' && !r.live) return failed(reply, back(post.id, lang), t('Ce billet est en ligne : il ne se modifie qu’avec le droit de modifier les billets publiés. Demandez-le à un administrateur.'));
@@ -291,7 +295,7 @@ export function registerCarnet(app, { repo, render: renderAdmin, P, W, done, fai
     let saved = post;
     try {
       // Modifié par qui ne publie pas lui-même : une programmation repasse en proposition (server/carnet.js, edited).
-      const res = c.update(post.id, input, by(request), { version: body.version, revised: body.revised === 'on', publisher: r.publish });
+      const res = c.update(post.id, input, by(request), { version: body.version, revised, publisher: r.publish });
       // Un enregistrement identique vaut acceptation du brouillon automatique seulement pour qui aurait pu l'écrire.
       if (!res.changed.length && r.text && (post.state !== 'publie' || r.live)) c.dropDraft(post.id);
       note(request, res.changed);

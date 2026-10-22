@@ -384,13 +384,24 @@ test('actions : droit de l’action, plafond relu à l’instant, ré-authentifi
   assert.equal(ok.statusCode, 302);
   assert.equal(ok.headers.location, '/alertes/7');
   assert.equal((await post()).body, 'fait');
-  // Plafond abaissé dans Zitadel à Lecteur : l'action est refusée dès la requête suivante.
-  v.ceilings['sub-seb'] = 'viewer';
-  assert.equal((await post()).statusCode, 403);
   // Zitadel injoignable : rien n'est fait.
-  v.ceilings['sub-seb'] = 'admin';
   v.zitadel.fail = true;
   assert.equal((await post()).statusCode, 503);
+  // Plafond abaissé dans Zitadel à Lecteur : l'action est refusée dès la requête suivante.
+  v.zitadel.fail = false;
+  v.clock.t += 61e3;
+  v.ceilings['sub-seb'] = 'viewer';
+  assert.equal((await post()).statusCode, 403);
+});
+
+test('action interdite localement : refus sans déclencher de relecture Zitadel propre à l’action', async t => {
+  const v = setup(t);
+  v.ceilings['sub-camille'] = 'viewer';
+  const { cookie, headers } = await v.login({ sub: 'sub-camille', nom: 'Camille', roles: ['vigie.viewer'], email: 'camille@exemple.org' });
+  const calls = v.zitadel.calls;
+  const r = await v.app.inject({ url: '/evenements.csv', headers: { ...headers, 'sec-fetch-site': 'same-origin' }, cookies: { '__Host-vigie': cookie } });
+  assert.equal(r.statusCode, 403);
+  assert.equal(v.zitadel.calls, calls);
 });
 
 test('droits : actions par rôle (annexe § 5.4), plafond tiré des rôles, relecture par l’API de gestion de Zitadel', async () => {

@@ -13,11 +13,12 @@
 #   regles.sh --rsyslog [--env FICHIER]    installe la configuration de rsyslog qui range ces lignes dans
 #                                          NICEPHOS_DIR/reseau/hote/hote.log (monté en lecture seule dans la Vigie)
 #
-# Ce qui est posé (table filter, chaînes à soi, appelées en tête de DOCKER-USER) :
+# Ce qui est posé (table filter, chaînes à soi, appelées en tête de DOCKER-USER et d'INPUT) :
 #   - réponses des connexions déjà acceptées : laissées passer ;
 #   - flux voulus entre conteneurs (BV-11) : tunnel → site:3000 et console de la Vigie:4200 ; site → réception de la
 #     Vigie:4100 et traducteur:5000 ; site → mandataire de sortie:3128 ;
 #   - tout autre paquet entre deux adresses des réseaux de Nicephos : rejeté et journalisé (« NICEPHOS-FLUX ») ;
+#   - toute nouvelle connexion d'un de ces réseaux vers l'hôte : rejetée et journalisée (« NICEPHOS-FLUX ») ;
 #   - sorties hors de ces réseaux : permises au tunnel, à la Vigie et au traducteur (modèles au premier lancement) ;
 #     pour tout autre conteneur de la pile (le site, la sauvegarde), rejetées et journalisées (« NICEPHOS-SORTIE ») :
 #     le site ne sort que par le mandataire, qui est sur un réseau à part ;
@@ -32,7 +33,7 @@ LOGGER=${LOGGER:-logger}
 RSYSLOG_CONF=${RSYSLOG_CONF:-/etc/rsyslog.d/nicephos-reseau.conf}
 ROTATION=${ROTATION:-/usr/local/sbin/nicephos-reseau-rotation}
 ENV_DEFAUT=/boot/config/plugins/compose.manager/projects/nicephos/.env
-VERSION=1
+VERSION=2
 
 mode=appliquer
 env_file=
@@ -86,6 +87,7 @@ if [ -n "$RESEAU_DIR" ] && ! [[ "$RESEAU_DIR" =~ ^/[A-Za-z0-9._/-]+$ ]]; then ec
 
 NETS="$NET_SUBNET $VIGIE_NET_SUBNET $SORTIE_NET_SUBNET"
 LIMITE="-m limit --limit 20/min --limit-burst 40"
+CHAINES="NICEPHOS NICEPHOS-HOTE NICEPHOS-VERS NICEPHOS-FLUX NICEPHOS-SORTIE"
 
 # Les règles, au format d'iptables-restore : les chaînes déclarées sont remises à zéro puis remplies d'un seul coup
 # (--noflush : rien d'autre de la table n'est touché ; jamais d'instant où la moitié des règles manque).
@@ -93,6 +95,7 @@ regles() {
   cat <<EOF
 *filter
 :NICEPHOS - [0:0]
+:NICEPHOS-HOTE - [0:0]
 :NICEPHOS-VERS - [0:0]
 :NICEPHOS-FLUX - [0:0]
 :NICEPHOS-SORTIE - [0:0]
@@ -103,6 +106,8 @@ regles() {
 -A NICEPHOS -s $SITE_IP/32 -d $TRADUCTION_IP/32 -p tcp -m tcp --dport 5000 -j RETURN
 -A NICEPHOS -s $SORTIE_NET_SUBNET -d $SORTIE_IP/32 -p tcp -m tcp --dport 3128 -j RETURN
 EOF
+  echo "-A NICEPHOS-HOTE -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN"
+  for s in $NETS; do echo "-A NICEPHOS-HOTE -s $s -j NICEPHOS-FLUX"; done
   for d in $NETS; do echo "-A NICEPHOS -d $d -j NICEPHOS-VERS"; done
   for s in $TUNNEL_IP $VIGIE_CONSOLE_IP $TRADUCTION_IP; do echo "-A NICEPHOS -s $s/32 -j RETURN"; done
   for s in $NETS; do echo "-A NICEPHOS -s $s -j NICEPHOS-SORTIE"; done
@@ -115,7 +120,31 @@ EOF
 COMMIT
 EOF
 }
-attendues() { regles | grep -c '^-A NICEPHOS '; }
+attendues() { regles | grep -c '^-A NICEPHOS'; }
+compter() {
+  local c n=0 x
+  for c in $CHAINES; do
+    x=$($IPT -S "$c" 2>/dev/null | grep -c "^-A $c " || true)
+    n=$((n + x))
+  done
+  echo "$n"
+}
+en_tete() {
+  local premiere
+  premiere=$($IPT -S "$1" 2>/dev/null | grep "^-A $1 " | head -n 1 || true)
+  [ "$premiere" = "-A $1 -j $2" ]
+}
+poser_en_tete() {
+  local transition="nicephos-$2-transition"
+  # Le crochet de transition garde la frontière fermée pendant le remplacement. Si la pose définitive échoue, il reste
+  # en tête et l'application suivante le remplacera ; aucun échec intermédiaire n'ouvre donc le chemin filtré.
+  $IPT -I "$1" 1 -m comment --comment "$transition" -j "$2"
+  while $IPT -C "$1" -j "$2" 2>/dev/null; do $IPT -D "$1" -j "$2"; done
+  $IPT -I "$1" 1 -j "$2"
+  while $IPT -C "$1" -m comment --comment "$transition" -j "$2" 2>/dev/null; do
+    $IPT -D "$1" -m comment --comment "$transition" -j "$2"
+  done
+}
 
 rsyslog_conf() {
   cat <<EOF
@@ -137,25 +166,31 @@ case "$mode" in
     echo "# $IPT_RESTORE --noflush <<'FIN'"
     regles
     echo "# FIN"
-    echo "# puis, s'il n'y est pas déjà : $IPT -I DOCKER-USER 1 -j NICEPHOS"
+    echo "# puis, en tête : $IPT -I DOCKER-USER 1 -j NICEPHOS"
+    echo "# et, en tête : $IPT -I INPUT 1 -j NICEPHOS-HOTE"
     if [ -n "$RESEAU_DIR" ]; then echo "# Configuration de rsyslog (--rsyslog) : $RSYSLOG_CONF"; rsyslog_conf | sed 's/^/# | /'; fi
     ;;
   appliquer)
     $IPT -S DOCKER-USER >/dev/null 2>&1 || { echo "regles.sh : chaîne DOCKER-USER absente (Docker est-il démarré ?)" >&2; exit 1; }
+    $IPT -S INPUT >/dev/null 2>&1 || { echo "regles.sh : chaîne INPUT absente" >&2; exit 1; }
     regles | $IPT_RESTORE --noflush
-    $IPT -C DOCKER-USER -j NICEPHOS 2>/dev/null || $IPT -I DOCKER-USER 1 -j NICEPHOS
-    echo "Règles de Nicephos posées ($(attendues) dans la chaîne NICEPHOS), appelées en tête de DOCKER-USER."
+    poser_en_tete DOCKER-USER NICEPHOS
+    poser_en_tete INPUT NICEPHOS-HOTE
+    echo "Règles de Nicephos posées ($(attendues) dans leurs chaînes), appelées en tête de DOCKER-USER et d'INPUT."
     ;;
   retirer)
     while $IPT -C DOCKER-USER -j NICEPHOS 2>/dev/null; do $IPT -D DOCKER-USER -j NICEPHOS; done
-    for c in NICEPHOS NICEPHOS-VERS NICEPHOS-FLUX NICEPHOS-SORTIE; do $IPT -F "$c" 2>/dev/null || true; done
-    for c in NICEPHOS NICEPHOS-VERS NICEPHOS-FLUX NICEPHOS-SORTIE; do $IPT -X "$c" 2>/dev/null || true; done
+    while $IPT -C DOCKER-USER -m comment --comment nicephos-NICEPHOS-transition -j NICEPHOS 2>/dev/null; do $IPT -D DOCKER-USER -m comment --comment nicephos-NICEPHOS-transition -j NICEPHOS; done
+    while $IPT -C INPUT -j NICEPHOS-HOTE 2>/dev/null; do $IPT -D INPUT -j NICEPHOS-HOTE; done
+    while $IPT -C INPUT -m comment --comment nicephos-NICEPHOS-HOTE-transition -j NICEPHOS-HOTE 2>/dev/null; do $IPT -D INPUT -m comment --comment nicephos-NICEPHOS-HOTE-transition -j NICEPHOS-HOTE; done
+    for c in $CHAINES; do $IPT -F "$c" 2>/dev/null || true; done
+    for c in $CHAINES; do $IPT -X "$c" 2>/dev/null || true; done
     echo "Règles de Nicephos retirées."
     ;;
   battement)
-    # « ok » : appel en tête de DOCKER-USER présent et autant de règles que prévu ; sinon « absentes » ou « incompletes ».
-    n=$($IPT -S NICEPHOS 2>/dev/null | grep -c '^-A NICEPHOS ' || true)
-    if ! $IPT -C DOCKER-USER -j NICEPHOS 2>/dev/null; then etat=absentes
+    # « ok » : les deux appels en tête et toutes les règles sont présents ; sinon « absentes » ou « incompletes ».
+    n=$(compter)
+    if ! en_tete DOCKER-USER NICEPHOS || ! en_tete INPUT NICEPHOS-HOTE; then etat=absentes
     elif [ "$n" != "$(attendues)" ]; then etat=incompletes
     else etat=ok; fi
     $LOGGER -t nicephos-reseau "NICEPHOS-BATTEMENT etat=$etat regles=$n attendues=$(attendues) version=$VERSION"

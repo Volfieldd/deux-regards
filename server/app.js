@@ -17,7 +17,7 @@ import { LANGS, NAMES, LOCALES, localize, splitLang } from './i18n.js';
 import { vueSite } from './vue-site.js';
 import { Eta } from 'eta';
 import publicRoutes from './routes/public.js';
-import privateRoutes from './routes/prive.js';
+import privateRoutes, { createRenderGate } from './routes/prive.js';
 import { createSpaces } from './spaces.js';
 import adminRoutes from './routes/admin.js';
 import mediaRoutes from './routes/media.js';
@@ -316,6 +316,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // Galeries privées (server/spaces.js) : galeries, photos, accès, autorisations des invités ; purges chaque heure.
   app.decorate('spaces', createSpaces({ db, vault: createVault(config.dataKey), readiness: app.readiness, encounters: app.encounters, storageDir: config.storageDir,
     securite: () => app.securite, variants: () => app.variants, trustCountry: Boolean(config.trustProxy) }));
+  app.decorate('privateRenderGate', createRenderGate());
   let spacesTimer = null;
   const purgeSpaces = () => { try { app.spaces.purge(); app.purgeVisitors?.(); } catch (err) { app.log.error({ err }, 'galeries privées : purge'); } };
   app.addHook('onReady', async () => { purgeSpaces(); spacesTimer = setInterval(purgeSpaces, 3600 * 1000); spacesTimer.unref(); });

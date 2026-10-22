@@ -383,6 +383,64 @@ test('téléchargements : refusés sans le droit ou hors liste (signalés) ; JPE
   assert.deepEqual(v.of('input_validation_fail').map(e => e.detail.raison).sort(), ['photo hors galerie', 'taille hors liste', 'taille non permise', 'taille non permise']);
 });
 
+test('rendus privés : deux calculs distincts au plus, cache et déduplication disponibles, refus sans compteur ni archive partielle (BV-19)', async t => {
+  const c = await site(t, { vigie: true });
+  const g = await gallery(c, { n: 2, rights: { telecharger: '1' } });
+  const { cookie } = await enter(c, g);
+  const base = `/prive/${g.s.public_id}/telecharger`;
+  const downloadEvents = () => c.db.prepare("SELECT COUNT(*) FROM space_events WHERE invite_id = ? AND kind = 'telechargement'").pluck().get(g.invite);
+  assert.equal((await c.app.inject({ url: `${base}/1/web`, headers: { cookie } })).statusCode, 200);
+  assert.equal(c.db.prepare('SELECT downloads FROM space_invites WHERE id = ?').pluck().get(g.invite), 1);
+
+  const gate = c.app.privateRenderGate;
+  const fakeA = path.join(c.config.storageDir, 'private', 'rendu-bloque-a.jpg');
+  const fakeB = path.join(c.config.storageDir, 'private', 'rendu-bloque-b.jpg');
+  let releaseA = () => {}, releaseB = () => {}, joinedRan = false;
+  const heldA = gate.run(fakeA, () => new Promise(resolve => { releaseA = resolve; }));
+  const heldB = gate.run(fakeB, () => new Promise(resolve => { releaseB = resolve; }));
+  const joined = gate.run(fakeA, async () => { joinedRan = true; });
+  t.after(async () => { releaseA(fakeA); releaseB(fakeB); await Promise.allSettled([heldA, heldB]); });
+  await Promise.resolve();
+  assert.strictEqual(joined, heldA, 'le même rendu rejoint le calcul en cours');
+  assert.equal(joinedRan, false);
+  assert.deepEqual(gate.stats(), { running: 2, distinct: 2 });
+
+  // Le JPEG déjà rendu reste servi pendant la saturation ; une autre photo n'engage aucun nouveau calcul.
+  assert.equal((await c.app.inject({ url: `${base}/1/web`, headers: { cookie } })).statusCode, 200);
+  const renders = path.join(c.config.storageDir, 'private', 'telechargements');
+  assert.equal(fs.readdirSync(renders).length, 1);
+  const busy = await c.app.inject({ url: `${base}/2/web`, headers: { cookie } });
+  assert.equal(busy.statusCode, 503);
+  assert.equal(busy.headers['retry-after'], '5');
+  assert.equal(busy.headers['cache-control'], 'no-store');
+  assert.equal(fs.readdirSync(renders).length, 1);
+  assert.equal(c.db.prepare('SELECT downloads FROM space_invites WHERE id = ?').pluck().get(g.invite), 2, 'le refus 503 n’est pas compté');
+  assert.equal(downloadEvents(), 2, 'le refus 503 n’est pas journalisé comme un téléchargement réussi');
+
+  const page = await c.app.inject({ url: `/prive/${g.s.public_id}`, headers: { cookie } });
+  const archive = await c.app.inject({ method: 'POST', url: `/prive/${g.s.public_id}/archive`, headers: { ...FORM, cookie }, payload: enc({ csrf: csrfOf(page.body) }) });
+  assert.equal(archive.statusCode, 503);
+  assert.equal(archive.headers['retry-after'], '5');
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM space_archives').pluck().get(), 0, 'réservation abandonnée');
+  assert.equal(downloadEvents(), 2, 'l’archive refusée ne journalise aucun téléchargement unitaire');
+  const archives = path.join(c.config.storageDir, 'private', 'archives');
+  assert.equal(fs.existsSync(archives) ? fs.readdirSync(archives).length : 0, 0);
+
+  releaseA(fakeA); await heldA;
+  assert.equal((await c.app.inject({ url: `${base}/2/web`, headers: { cookie } })).statusCode, 200, 'une place libérée suffit');
+  assert.equal(c.db.prepare('SELECT downloads FROM space_invites WHERE id = ?').pluck().get(g.invite), 3);
+  assert.equal(downloadEvents(), 3);
+  releaseB(fakeB); await heldB;
+  assert.deepEqual(gate.stats(), { running: 0, distinct: 0 });
+  await assert.rejects(gate.run(path.join(c.config.storageDir, 'private', 'rendu-en-erreur.jpg'), async () => { throw new Error('panne de rendu simulée'); }), /panne de rendu simulée/);
+  assert.deepEqual(gate.stats(), { running: 0, distinct: 0 }, 'une erreur rend sa place');
+
+  const v = await c.flush();
+  const limited = v.of('excess_rate_limit_exceeded').filter(e => e.detail.limite === 'rendus_telechargements_global');
+  assert.equal(limited.length, 1, 'les refus rapprochés sont regroupés');
+  assert.equal(limited[0].detail.simultanes, 2);
+});
+
 test('archive : ZIP de la galerie, 3 par jour et par accès au plus, export signalé à la Vigie, effacée après 24 h (T22, G46, BV-19)', async t => {
   const c = await site(t, { vigie: true });
   const g = await gallery(c, { n: 2, rights: { telecharger: '1' } });

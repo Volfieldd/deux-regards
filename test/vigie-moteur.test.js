@@ -237,7 +237,7 @@ test('alertes ouvertes 7 jours sans événement : closes sans suite (une alerte 
   assert.ok(v.decisions.active().some(d => d.cible === '192.0.2.99/32'));
 });
 
-test('file du moteur : curseur dans la base, reprise après redémarrage, saut en avant au-delà de 100 000 de retard', async t => {
+test('file du moteur : curseur dans la base, reprise et sources indépendantes préservées lors d’un délestage', async t => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vigie-file-'));
   const db = openVigieDb(path.join(dir, 'vigie.db'));
   t.after(() => { db.close(); fs.rmSync(dir, { recursive: true, force: true }); });
@@ -264,14 +264,38 @@ test('file du moteur : curseur dans la base, reprise après redémarrage, saut e
   assert.equal(db.prepare("SELECT COUNT(*) FROM alerts WHERE regle = 'sigma.restauration'").pluck().get(), 1);
   e2.enqueue(); await e2.drain();
   assert.equal(db.prepare("SELECT compteur FROM alerts WHERE regle = 'sigma.restauration'").pluck().get(), 1, 'jamais deux fois');
-  // Retard de plus de 100 000 : saut en avant, noté.
-  store.setting.set('moteur_curseur', 0);
+  // Retard de plus de 100 000 provoqué par le site : son bruit ancien est délesté. Plus de 200 faits indépendants
+  // imposent deux pages de lecture ; les gestes locaux qui ouvrent une alerte restent protégés sans devenir des sources
+  // du quorum.
+  store.add([
+    ...Array.from({ length: 201 }, () => ev('zitadel_connexion', 'info', { composant: 'zitadel', canal: 'API Zitadel', confiance: 'constaté' })),
+    ev('vigie_console_refus', 'moyen', { composant: 'vigie · console', canal: 'console de la Vigie' }),
+    ev('vigie_console_arrivee', 'moyen', { composant: 'vigie · console', canal: 'console de la Vigie', sub: 'compte-arrivee' }),
+    ev('vigie_console_droits', 'haut', { composant: 'vigie · console', canal: 'console de la Vigie', sub: 'compte-droits' }),
+    ev('vigie_urgence', 'haut', { composant: 'vigie · ligne de commande', canal: 'ligne de commande', detail: { action: 'activé' } }),
+    ev('zitadel_droits', 'critique', { composant: 'zitadel', canal: 'API Zitadel', confiance: 'constaté' }),
+  ]);
   db.prepare("UPDATE sqlite_sequence SET seq = seq + 200000 WHERE name = 'events'").run();
   store.add([ev('sys_heartbeat', 'info')]);
   const e3 = createEngine({ store, decisions, switches, now });
   e3.enqueue(); await e3.drain();
-  assert.ok(db.prepare("SELECT COUNT(*) FROM events WHERE type = 'vigie_moteur_sature'").pluck().get() >= 1);
+  const saturation = db.prepare("SELECT detail FROM events WHERE type = 'vigie_moteur_sature' ORDER BY seq DESC LIMIT 1").pluck().get();
+  assert.equal(JSON.parse(saturation).proteges, 206);
+  const preservees = ['sigma.console_refus', 'sigma.console_arrivee', 'sigma.console_droits', 'sigma.mode_urgence', 'sigma.zitadel_critique'];
+  for (const regle of preservees) assert.equal(db.prepare('SELECT COUNT(*) FROM alerts WHERE regle = ?').pluck().get(regle), 1, regle);
   assert.equal(e3.lag(), 0);
+  e3.enqueue(); await e3.drain();
+  for (const regle of preservees) assert.equal(db.prepare('SELECT compteur FROM alerts WHERE regle = ?').pluck().get(regle), 1, `${regle} jamais deux fois`);
+  // Détection arrêtée : le signal qui annonce cette réduction reste l'exception analysée par le chemin ordinaire ; un
+  // délestage ne doit pas le perdre non plus.
+  switches.set('detection', 'arret', { duree: '1h', par: 'test', motif: 'maintenance' });
+  assert.equal(db.prepare("SELECT COUNT(*) FROM alerts WHERE regle = 'sigma.surveillance_reduite' AND entite_key = 'interrupteur:detection'").pluck().get(), 0);
+  db.prepare("UPDATE sqlite_sequence SET seq = seq + 200000 WHERE name = 'events'").run();
+  store.add([ev('sys_heartbeat', 'info')]);
+  const e4 = createEngine({ store, decisions, switches, now });
+  e4.enqueue(); await e4.drain();
+  assert.equal(db.prepare("SELECT COUNT(*) FROM alerts WHERE regle = 'sigma.surveillance_reduite' AND entite_key = 'interrupteur:detection'").pluck().get(), 1);
+  assert.equal(e4.lag(), 0);
 });
 
 test('signal noté une fois par 10 minutes pour la même règle et la même entité ; clé d’entité sans caractères de contrôle', async t => {

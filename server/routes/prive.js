@@ -37,13 +37,39 @@ import { insecables } from '../typographie.js';
 const EMETTEUR = 'server/routes/prive.js';
 const PORTAIL = 'galerie_privee';
 const HOUR = 3600e3;
-const ARCHIVE_MAX_PHOTOS = 100, ARCHIVE_MAX_BYTES = 1024 ** 3, ARCHIVES_PER_DAY = 3, ARCHIVES_AT_ONCE = 2, DOWNLOADS_PER_HOUR = 50;
+const ARCHIVE_MAX_PHOTOS = 100, ARCHIVE_MAX_BYTES = 1024 ** 3, ARCHIVES_PER_DAY = 3, ARCHIVES_AT_ONCE = 2, DOWNLOADS_PER_HOUR = 50, RENDERS_AT_ONCE = 2;
+const RENDER_BUSY = 'ERR_PRIVATE_RENDER_BUSY';
+
+// Admission commune aux téléchargements unitaires et aux archives. Un fichier déjà prêt et les demandes du même rendu
+// passent toujours ; les autres échouent sans file d'attente une fois la borne atteinte, pour ne pas retenir de requêtes.
+export function createRenderGate({ maximum = RENDERS_AT_ONCE, exists = fs.existsSync } = {}) {
+  const jobs = new Map();
+  let running = 0;
+  return {
+    run(file, render) {
+      if (exists(file)) return Promise.resolve(file);
+      const same = jobs.get(file);
+      if (same) return same;
+      if (running >= maximum) {
+        const err = new Error('trop de rendus privés simultanés');
+        err.code = RENDER_BUSY;
+        throw err;
+      }
+      running += 1;
+      const job = Promise.resolve().then(render).finally(() => { jobs.delete(file); running -= 1; });
+      jobs.set(file, job);
+      return job;
+    },
+    stats: () => ({ running, distinct: jobs.size }),
+  };
+}
 
 export default async function privateRoutes(app) {
   const { spaces } = app;
   const { config } = app;
   const sessions = createVisitorSessions({ db: app.db });
   app.decorate('visitorSessions', sessions);
+  const renderGate = app.privateRenderGate;
   const gate = app.passwordGate || createPasswordGate();
   const verify = app.passwordVerify || verifyPassword;
   const prefix = config.secureCookies ? '__Host-' : '';
@@ -345,7 +371,6 @@ export default async function privateRoutes(app) {
 
   // ---------- téléchargements (G44, G46 ; BV-19) ----------
   const ascii = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7e]/g, '').slice(0, 100);
-  const rendering = new Map();
   // JPEG rendu une fois depuis l'original, gardé dans storage/private (hors sauvegarde) : auteur et « usage personnel »,
   // jamais de GPS (withExif remplace tout l'EXIF), jamais l'original. Grande taille : 4 000 px au plus (Tranché 7).
   // Le filigrane est celui des variantes (mêmes réglages, server/variants.js specFor) ; le rendu gardé est nommé d'après
@@ -354,10 +379,8 @@ export default async function privateRoutes(app) {
     const spec = app.variants.specOf(p.id) || { key: '', mark: null };
     const stem = path.parse(p.file).name;
     const file = path.join(spaces.dirs.downloads, `${stem}-${spec.key || 'brut'}-${taille}.jpg`);
-    if (fs.existsSync(file)) return Promise.resolve(file);
-    if (rendering.has(file)) return rendering.get(file);
     const width = SIZES[taille];
-    const job = (async () => {
+    return renderGate.run(file, async () => {
       fs.mkdirSync(spaces.dirs.downloads, { recursive: true, mode: 0o700 });
       const tmp = `${file}.${crypto.randomBytes(4).toString('hex')}.tmp`;
       try {
@@ -377,9 +400,7 @@ export default async function privateRoutes(app) {
         for (const f of fs.readdirSync(spaces.dirs.downloads)) if (f.startsWith(`${stem}-`) && f.endsWith(`-${taille}.jpg`) && path.join(spaces.dirs.downloads, f) !== file) fs.rmSync(path.join(spaces.dirs.downloads, f), { force: true });
       } finally { fs.rmSync(tmp, { force: true }); }
       return file;
-    })().finally(() => rendering.delete(file));
-    rendering.set(file, job);
-    return job;
+    });
   }
   const allowed = (rights, taille) => (taille === 'web' ? ['web', 'grande'].includes(rights.telechargement) : taille === 'grande' && rights.telechargement === 'grande');
   const fileName = (p, taille) => `${ascii(app.siteName()).replace(/\W+/g, '-').toLowerCase() || 'photo'}-${ascii(p.slug || 'photo').slice(0, 60)}-${taille}.jpg`;
@@ -388,6 +409,13 @@ export default async function privateRoutes(app) {
     if (!e || t - e.start > HOUR) { dlCounts.set(inv.id, { start: t, n: 1, told: false }); if (dlCounts.size > 5000) dlCounts.delete(dlCounts.keys().next().value); return false; }
     e.n += 1;
     return e.n > DOWNLOADS_PER_HOUR ? e : false;
+  };
+  const renderBusy = (request, reply, a, taille) => {
+    app.securite.emitThrottled('galerie:rendus_telechargements_global', 'excess_rate_limit_exceeded', {
+      request, reference: ref(request), composant: 'site · public', emetteur: `${EMETTEUR} · calculs`,
+      detail: { limite: 'rendus_telechargements_global', simultanes: RENDERS_AT_ONCE, portail: PORTAIL, espace: a.space.id, taille, ...(a.invite ? { acces: a.invite.id } : {}) },
+    });
+    return message(reply.header('retry-after', '5'), langOf(request, a), 'occupe', { who: whoOf(a.space) }, 503);
   };
 
   app.get('/prive/:pid/telecharger/:n/:taille', async (request, reply) => {
@@ -410,12 +438,19 @@ export default async function privateRoutes(app) {
         if (!over.told) { over.told = true; sec('excess_rate_limit_exceeded', { request, reference: ref(request), emetteur: `${EMETTEUR} · téléchargements`, detail: { limite: 'telechargements', par_heure: DOWNLOADS_PER_HOUR, portail: PORTAIL, acces: a.invite.id, espace: a.space.id, taille } }); }
         return pageHeaders(reply).redirect(`/prive/${a.space.public_id}?etat=telechargements-limite`, 303);
       }
+    }
+    let file;
+    try { file = await rendered(p, taille); } catch (err) {
+      if (err?.code === RENDER_BUSY) return renderBusy(request, reply, a, taille);
+      throw err;
+    }
+    if (!a.team) {
       spaces.countDownload(a.invite);
       spaces.logEvent(a.space.id, a.invite.id, 'telechargement', { request, item: p.item_id, detail: taille });
+    } else {
+      // Téléchargement par l'équipe (vue équipe) : un export de photos privées, signalé comme tel.
+      app.securite.emit('sensitive_export', { request, emetteur: `${EMETTEUR} · téléchargement (équipe)`, detail: { portail: PORTAIL, nature: 'telechargement', espace: a.space.id, taille, photo: p.n } });
     }
-    // Téléchargement par l'équipe (vue équipe) : un export de photos privées, signalé comme tel.
-    if (a.team && request.method === 'GET') app.securite.emit('sensitive_export', { request, emetteur: `${EMETTEUR} · téléchargement (équipe)`, detail: { portail: PORTAIL, nature: 'telechargement', espace: a.space.id, taille, photo: p.n } });
-    const file = await rendered(p, taille);
     return fileHeaders(reply, 'private, no-store').header('content-disposition', `attachment; filename="${fileName(p, taille)}"`).type('image/jpeg').send(fs.createReadStream(file));
   });
 
@@ -450,6 +485,7 @@ export default async function privateRoutes(app) {
     } catch (err) {
       spaces.archives.drop(id);
       fs.rmSync(path.join(spaces.dirs.archives, file), { force: true });
+      if (err?.code === RENDER_BUSY) return renderBusy(request, reply, a, taille);
       throw err;
     } finally { const next = waiting.shift(); if (next) next(); else building -= 1; }
     spaces.logEvent(a.space.id, a.invite.id, 'archive', { request, detail: `${made.count} photos` });
