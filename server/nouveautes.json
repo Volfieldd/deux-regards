@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.215.0",
+    "date": "2026-10-22",
+    "pr": 215,
+    "title": {
+      "fr": "Correction des bibliothèques signalées par la veille",
+      "en": "Fix for libraries flagged by vulnerability watch",
+      "de": "Korrektur der von der Schwachstellenbeobachtung gemeldeten Bibliotheken"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Les bibliothèques d’installation à l’origine des neuf avis détectés sont corrigées ou retirées. Les résultats des modèles photo sont préservés. Le site et la Vigie doivent être mis à jour ensemble pour que le prochain contrôle de veille utilise le nouvel inventaire.",
+        "en": "The installation libraries responsible for the nine detected advisories have been updated or removed. Photo model results are preserved. Update the website and Vigie together so that the next vulnerability check uses the new inventory.",
+        "de": "Die Installationsbibliotheken, auf die sich die neun erkannten Meldungen beziehen, wurden aktualisiert oder entfernt. Die Ergebnisse der Fotomodelle bleiben erhalten. Website und Vigie müssen gemeinsam aktualisiert werden, damit die nächste Schwachstellenprüfung das neue Inventar verwendet."
+      }
+    ]
+  },
+  {
     "version": "1.214.0",
     "date": "2026-10-22",
     "pr": 214,

@@ -1,6 +1,6 @@
 {
   "name": "site-photo",
-  "version": "1.214.0",
+  "version": "1.215.0",
   "private": true,
   "license": "UNLICENSED",
   "author": "Sébastien Wojcicki",
@@ -47,6 +47,8 @@
     "@huggingface/transformers": {
       "onnxruntime-node": "$onnxruntime-node",
       "sharp": "$sharp"
-    }
+    },
+    "adm-zip": "0.6.1",
+    "global-agent": "4.1.3"
   }
 }

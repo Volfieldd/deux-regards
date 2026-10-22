@@ -16,6 +16,7 @@ Ils utilisent `node:test`, sans dépendance supplémentaire, et prennent environ
 
 | Fichier | Couvre |
 |---|---|
+| `test/dependances-installation.test.js` | Bibliothèque ZIP de l’installateur ONNX : archive ordinaire lue et extraite, refus des noms dupliqués et des liens symboliques de destination qui écriraient hors du dossier ; les deux refus échouent avec adm-zip 0.5.18 |
 | `test/vigie-console.test.js` | Authentification de la console, Access, droits et sessions ; ancien retour OIDC sans effacer une tentative plus récente, page de reprise sans rejeu au rechargement, transaction expirée jamais échangée, rejets directs répétés toujours détectés (DS30), expiration de session sans alerte puis reconnexion avec une session neuve |
 | `test/vigie-console-attack.test.js` | ATT&CK D3 : couverture et observations historiques, exceptions de projection, index rattrapé et purgé sans réécriture du journal, atomicité et idempotence, pagination et CSV filtrés, droits, XSS et masquage, calques Navigator sans donnée personnelle, bornes et erreurs |
 | `test/vigie-console-dossiers-dessins.test.js` | Dessins D2 : géométrie déterministe, échappement SVG, masquage des adresses, compte des techniques par tactique, filtres et pagination, bornes, voisins et objets regroupés, phases et marqueurs simultanés |
