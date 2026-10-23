@@ -51,7 +51,7 @@ Exemptions des blocages automatiques vérifiées sur le réseau réel, /64 IPv6 
 
 Demande de description sans rechargement de la fiche, confirmation avant de remplacer un texte déjà saisi, Défaire des langues ajoutées dans l’admin v2. Aperçu du filigrane actualisable sur place sans enregistrer, respect de sa case d’activation. Bandeau de prévisualisation étendu aux neuf compositions, toujours réservé au droit `site.apparence` ; visionneuse publique inchangée. Tests ciblés du serveur et parcours navigateur dans les deux admins.
 
-## Préparation — Atelier des saisons, S1a (23 octobre 2026)
+## Préparation — Atelier des saisons, S1a, PR #219, version 1.219.0 (23 octobre 2026)
 
 La branche `feat/saisons-atelier` prépare l’atelier indépendamment des décisions encore ouvertes : compteur de version, enregistrement transactionnel des textes et de l’ordre, contrat de formulaire, calendrier à fuseau explicitement fourni et quatre gabarits communs aux administrations v1/v2. La sélection de photos est bornée et paginée ; une modification concurrente n’est pas écrasée. Les gabarits sont traduits et conçus sans script obligatoire.
 

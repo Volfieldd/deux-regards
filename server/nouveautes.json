@@ -1,5 +1,22 @@
 [
   {
+    "version": "1.219.0",
+    "date": "2026-10-23",
+    "pr": 219,
+    "title": {
+      "fr": "Préparation de l’atelier des saisons",
+      "en": "Preparing the seasons workshop",
+      "de": "Vorbereitung der Saisonverwaltung"
+    },
+    "items": [
+      {
+        "fr": "Le futur atelier dispose de formulaires en trois langues et d’une protection contre les modifications concurrentes. L’ordre des photos et les textes s’enregistrent ensemble. Les écrans restent à raccorder après le choix des droits et du fuseau horaire ; ils ne sont pas encore accessibles dans l’administration.",
+        "en": "The future workshop has forms in three languages and protection against concurrent changes. Photograph order and texts are saved together. The screens will be connected after permissions and the time zone are agreed; they are not yet accessible in the administration.",
+        "de": "Die künftige Verwaltung verfügt über Formulare in drei Sprachen und Schutz vor gleichzeitigen Änderungen. Bildreihenfolge und Texte werden gemeinsam gespeichert. Die Ansichten werden nach Festlegung der Rechte und Zeitzone angebunden; sie sind in der Administration noch nicht zugänglich."
+      }
+    ]
+  },
+  {
     "version": "1.218.0",
     "date": "2026-10-23",
     "pr": 218,
