@@ -9,6 +9,14 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Étude et démarrage — Les saisons de Nicephos (23 octobre 2026)
+
+La [spécification fonctionnelle et le plan détaillé](docs/etudes/saisons-apres-image.md) cadrent les expositions temporaires, leur visite, les archives et le passage éditorial vers les collections permanentes. **Les saisons** portent la programmation du site ; **Après-image** est une participation facultative en fin de visite. Les séries existantes sont conservées et une photo peut figurer dans plusieurs accrochages sans changer de série. Créer une suite, la mettre en avant et retenir un accrochage dans les collections sont trois décisions distinctes.
+
+**S0 implémenté dans cette branche, en attente de revue** : socle métier et migration `065_saisons.sql`, avec tests sur bases jetables ; saisons préparées, accrochages ordonnés, calendrier, programmation, ouverture, clôture, retrait et publication explicite d’un bilan avec ou sans sélection. Le modèle reste interne : aucun écran, route, cookie, droit ou événement nouveau n’est branché au serveur ; le site publié ne présente pas encore de saison. Les méthodes de lecture destinées au public écartent à chaque lecture une photo qui n’est plus publiée, y compris dans la sélection du bilan.
+
+**À suivre, une PR par jalon** : S1, atelier des saisons après arbitrage des droits et de la portée ; S2, visite publique, accueil et archives ; S3, bilans et collections ; A1, participation Après-image après décisions sur les données, la conservation, la reprise et les abus ; A2, mise en avant et filiation des chemins. Les invités et le vote attribuant une place au public constituent des extensions séparées. Les autorisations, le fuseau de présentation des dates et la politique de visibilité des contributions restent explicitement à trancher dans la note ; aucun rôle ni durée de conservation ne sont décidés par ce premier socle.
+
 ## Correction — Inventaire Fastify autonome de la Vigie, PR #217, version 1.217.0 (23 octobre 2026)
 
 Le manifeste et le verrou autonomes de la Vigie passent de Fastify 5.12.5 à 5.12.7. `Dockerfile.vigie` installe bien cet inventaire avant de le copier dans l’image publiée : sa construction l’audite désormais séparément et s’arrête avant l’image finale si npm signale une vulnérabilité de production. Le test d’infrastructure maintient l’alignement avec le site et l’ordre installation, audit, image finale. Les routes actuelles n’emploient pas la forme `headers.propertyNames` concernée par GHSA-389g-gv7q-r4x8 ; le comportement du moteur et de la console reste inchangé.
