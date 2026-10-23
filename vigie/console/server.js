@@ -215,6 +215,9 @@ export function createConsole({ config, store, engine, switches, decisions, zita
   // n'est fait), ré-authentification de moins de 5 minutes quand l'action l'exige (actions forcées, interrupteurs).
   async function guard(req, reply, action, { reauth = false, libelle = '' } = {}) {
     if (!Object.hasOwn(ACTIONS, action)) throw new Error(`action inconnue : ${action}`);
+    // Un rôle déjà insuffisant n'obtient rien d'une relecture externe et ne doit pas consommer le quota partagé avec la
+    // collecte. Une action admise localement relit toujours son plafond, puis le droit est contrôlé une seconde fois.
+    if (!can(req.moi.role, action)) { page(reply, 'interdit', { raison: 'droit', requis: LABELS[ACTIONS[action]] }, 403); return false; }
     const s = sessions.byId(req.moi.sid);
     let ceiling;
     try {

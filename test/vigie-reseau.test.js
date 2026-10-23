@@ -201,7 +201,7 @@ test('pile Unraid : mandataire facultatif (profil « sortie »), site inchangé 
 
 const script = (args, { env = {}, input } = {}) => spawnSync('bash', [SCRIPT, ...args], { env: { PATH: process.env.PATH, ...env }, encoding: 'utf8', input });
 
-test('règles de l’hôte : --afficher imprime la matrice BV-11 et les sorties BV-10, identique d’une fois sur l’autre', t => {
+test('règles de l’hôte : --afficher couvre la matrice, les sorties et INPUT, identique d’une fois sur l’autre', t => {
   const dir = tmp(t);
   const envFile = path.join(dir, '.env');
   // Le .env n'est jamais exécuté : une ligne piégée ne fait rien, seules les clés attendues sont lues.
@@ -223,6 +223,10 @@ test('règles de l’hôte : --afficher imprime la matrice BV-11 et les sorties 
     '-A NICEPHOS-FLUX -m limit --limit 20/min --limit-burst 40 -j LOG --log-prefix "NICEPHOS-FLUX " --log-level 4',
     '-A NICEPHOS-SORTIE -m limit --limit 20/min --limit-burst 40 -j LOG --log-prefix "NICEPHOS-SORTIE " --log-level 4',
     '-A NICEPHOS-SORTIE -j REJECT --reject-with icmp-port-unreachable',
+    '-A NICEPHOS-HOTE -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN',
+    '-A NICEPHOS-HOTE -s 172.29.42.0/24 -j NICEPHOS-FLUX',
+    '-A NICEPHOS-HOTE -s 172.29.43.0/24 -j NICEPHOS-FLUX',
+    '-A NICEPHOS-HOTE -s 172.29.44.0/24 -j NICEPHOS-FLUX',
   ]) assert.ok(regles.includes(attendue), attendue);
   // Ordre : réponses d'abord, flux voulus avant les rejets entre conteneurs, rejets entre conteneurs avant les sorties.
   const i = s => regles.findIndex(l => l.startsWith(s));
@@ -235,6 +239,7 @@ test('règles de l’hôte : --afficher imprime la matrice BV-11 et les sorties 
   assert.match(a.stdout, /^\*filter\n:NICEPHOS - \[0:0\]\n/m);
   assert.match(a.stdout, /^COMMIT$/m);
   assert.match(a.stdout, /iptables -I DOCKER-USER 1 -j NICEPHOS/);
+  assert.match(a.stdout, /iptables -I INPUT 1 -j NICEPHOS-HOTE/);
   assert.match(a.stdout, /file="\/mnt\/cache\/appdata\/nicephos\/reseau\/hote\/hote\.log"/);
   assert.match(a.stdout, /\$inputname == "imklog" and \$msg contains "NICEPHOS-"/, 'rsyslog : seulement le noyau et le script de cette machine');
   // Idempotence logique : relancé, il imprime exactement la même chose (chaînes remises à zéro puis remplies d'un coup).
@@ -251,21 +256,22 @@ test('règles de l’hôte : --afficher imprime la matrice BV-11 et les sorties 
   assert.equal(script(['--inconnue']).status, 2);
 });
 
-test('règles de l’hôte : appliquer deux fois ne double rien ; battement ; retirer (iptables simulé)', t => {
+test('règles de l’hôte : appliquer deux fois garde les appels en tête de DOCKER-USER et INPUT ; battement ; retirer', t => {
   const dir = tmp(t);
   const etat = path.join(dir, 'etat');
   fs.mkdirSync(etat);
-  // Faux iptables : DOCKER-USER et les chaînes de Nicephos dans des fichiers ; iptables-restore remplace les chaînes
+  // Faux iptables : DOCKER-USER, INPUT et les chaînes de Nicephos dans des fichiers ; iptables-restore remplace les chaînes
   // déclarées ; logger écrit dans un fichier.
   const bin = path.join(dir, 'bin');
   fs.mkdirSync(bin);
   fs.writeFileSync(path.join(etat, 'DOCKER-USER'), '-A DOCKER-USER -j RETURN\n');
+  fs.writeFileSync(path.join(etat, 'INPUT'), '-A INPUT -j ACCEPT\n');
   fs.writeFileSync(path.join(bin, 'iptables'), `#!/bin/bash
 E=${etat}
 case "$1" in
   -S) [ -f "$E/$2" ] && cat "$E/$2" || exit 1 ;;
   -C) grep -qxF -- "-A $2 \${*:3}" "$E/$2" ;;
-  -I) { echo "-A $2 \${*:4}"; cat "$E/$2"; } > "$E/t" && mv "$E/t" "$E/$2" ;;
+  -I) [ "\${IPTABLES_FAIL_FINAL:-}" = "$2" ] && [ "$4" = '-j' ] && exit 8; { echo "-A $2 \${*:4}"; cat "$E/$2"; } > "$E/t" && mv "$E/t" "$E/$2" ;;
   -D) n=$(grep -nxF -- "-A $2 \${*:3}" "$E/$2" | head -1 | cut -d: -f1); [ -n "$n" ] && sed -i "\${n}d" "$E/$2" ;;
   -F) [ -f "$E/$2" ] && : > "$E/$2" || exit 1 ;;
   -X) [ -f "$E/$2" ] && rm "$E/$2" || exit 1 ;;
@@ -284,18 +290,34 @@ done
   const envFile = path.join(dir, '.env');
   fs.writeFileSync(envFile, '');
   const docker = () => fs.readFileSync(path.join(etat, 'DOCKER-USER'), 'utf8');
+  const input = () => fs.readFileSync(path.join(etat, 'INPUT'), 'utf8');
   for (let k = 0; k < 2; k++) assert.equal(script(['--env', envFile], { env }).status, 0);
   assert.equal(docker(), '-A DOCKER-USER -j NICEPHOS\n-A DOCKER-USER -j RETURN\n', 'un seul appel, en tête');
+  assert.equal(input(), '-A INPUT -j NICEPHOS-HOTE\n-A INPUT -j ACCEPT\n', 'frontière vers l’hôte appelée une fois, en tête');
   assert.equal(fs.readFileSync(path.join(etat, 'NICEPHOS'), 'utf8').split('\n').filter(Boolean).length, 15, 'chaîne remplie une fois');
+  assert.equal(fs.readFileSync(path.join(etat, 'NICEPHOS-HOTE'), 'utf8').split('\n').filter(Boolean).length, 4, 'trois réseaux rejetés vers l’hôte');
   assert.equal(script(['--battement', '--env', envFile], { env }).status, 0);
-  assert.match(fs.readFileSync(path.join(dir, 'syslog'), 'utf8'), /-t nicephos-reseau NICEPHOS-BATTEMENT etat=ok regles=15 attendues=15 version=1/);
-  // Une règle retirée à la main : « incompletes » ; l'appel retiré : « absentes ».
+  assert.match(fs.readFileSync(path.join(dir, 'syslog'), 'utf8'), /-t nicephos-reseau NICEPHOS-BATTEMENT etat=ok regles=26 attendues=26 version=2/);
+  // Un appel déplacé n'est plus « en tête » : le battement le voit, puis l'application rétablit sa place.
+  fs.writeFileSync(path.join(etat, 'INPUT'), '-A INPUT -j ACCEPT\n-A INPUT -j NICEPHOS-HOTE\n');
+  script(['--battement', '--env', envFile], { env });
+  assert.match(fs.readFileSync(path.join(dir, 'syslog'), 'utf8'), /etat=absentes/);
+  assert.equal(script(['--env', envFile], { env }).status, 0);
+  assert.equal(input(), '-A INPUT -j NICEPHOS-HOTE\n-A INPUT -j ACCEPT\n');
+  // Si la pose définitive échoue après le repositionnement, le crochet de transition reste en tête et ferme le chemin.
+  const panne = script(['--env', envFile], { env: { ...env, IPTABLES_FAIL_FINAL: 'INPUT' } });
+  assert.equal(panne.status, 8);
+  assert.equal(input(), '-A INPUT -m comment --comment nicephos-NICEPHOS-HOTE-transition -j NICEPHOS-HOTE\n-A INPUT -j ACCEPT\n');
+  assert.equal(script(['--env', envFile], { env }).status, 0);
+  assert.equal(input(), '-A INPUT -j NICEPHOS-HOTE\n-A INPUT -j ACCEPT\n');
+  // Une règle retirée à la main : « incompletes » ; un appel retiré : « absentes ».
   execFileSync('sed', ['-i', '$d', path.join(etat, 'NICEPHOS')]);
   script(['--battement', '--env', envFile], { env });
-  assert.match(fs.readFileSync(path.join(dir, 'syslog'), 'utf8'), /etat=incompletes regles=14/);
+  assert.match(fs.readFileSync(path.join(dir, 'syslog'), 'utf8'), /etat=incompletes regles=25/);
   assert.equal(script(['--retirer', '--env', envFile], { env }).status, 0);
   assert.equal(docker(), '-A DOCKER-USER -j RETURN\n', 'retiré ; le reste de DOCKER-USER intact');
-  assert.ok(!fs.existsSync(path.join(etat, 'NICEPHOS')) && !fs.existsSync(path.join(etat, 'NICEPHOS-FLUX')));
+  assert.equal(input(), '-A INPUT -j ACCEPT\n', 'retiré ; le reste d’INPUT intact');
+  assert.ok(!fs.existsSync(path.join(etat, 'NICEPHOS')) && !fs.existsSync(path.join(etat, 'NICEPHOS-HOTE')) && !fs.existsSync(path.join(etat, 'NICEPHOS-FLUX')));
   script(['--battement', '--env', envFile], { env });
   assert.match(fs.readFileSync(path.join(dir, 'syslog'), 'utf8'), /etat=absentes/);
   // Sans DOCKER-USER (Docker arrêté) : refus clair.

@@ -1,6 +1,6 @@
 {
   "name": "site-photo",
-  "version": "1.215.0",
+  "version": "1.216.0",
   "private": true,
   "license": "UNLICENSED",
   "author": "Sébastien Wojcicki",
@@ -33,7 +33,7 @@
     "better-sqlite3": "13.0.3",
     "eta": "4.6.0",
     "exif-reader": "2.0.3",
-    "fastify": "5.12.5",
+    "fastify": "5.12.7",
     "marked": "18.1.0",
     "nodemailer": "10.0.10",
     "onnxruntime-node": "1.22.0",

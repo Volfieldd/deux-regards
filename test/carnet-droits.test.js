@@ -86,10 +86,27 @@ test('droits refusés : photographe sans « publier » (403), relecteur qui corr
   assert.equal(r.statusCode, 303);
   assert.notEqual(c.app.carnet.get(q.id).body, 'Changé en ligne.');
   assert.match(decodeURIComponent(String(r.headers['set-cookie'])), /modifier les billets publiés/);
+  // « Mise à jour signalée » est aussi une mutation : un formulaire forgé ne change ni date, ni version, ni révisions,
+  // ni l'autosauvegarde d'un billet publié sans les droits d'édition correspondants.
+  c.app.carnet.saveDraft(q.id, { body: 'Travail en cours sur le billet publié.' }, { sub: 'z-seb', name: 'Sébastien' });
+  const avant = c.app.carnet.get(q.id), revisions = c.app.carnet.revisions(q.id).length;
+  assert.equal((await mod.post(`/admin/carnet/${q.id}`, { langue: 'fr', revised: 'on' })).statusCode, 403);
+  const apresMod = c.app.carnet.get(q.id);
+  assert.deepEqual([apresMod.revised_at, apresMod.updated_at, apresMod.version], [avant.revised_at, avant.updated_at, avant.version]);
+  assert.equal(c.app.carnet.revisions(q.id).length, revisions);
+  assert.equal(c.app.carnet.draftOf(q.id).data.body, 'Travail en cours sur le billet publié.');
+  const revisedSans = await sebSans.post(`/admin/carnet/${q.id}`, { langue: 'fr', revised: 'on' });
+  assert.equal(revisedSans.statusCode, 303);
+  assert.match(decodeURIComponent(String(revisedSans.headers['set-cookie'])), /modifier les billets publiés/);
+  assert.equal(c.app.carnet.get(q.id).version, avant.version);
+  assert.equal(c.app.carnet.draftOf(q.id).data.body, 'Travail en cours sur le billet publié.');
   // Avec le droit (rôle de départ), si.
   c.db.prepare("UPDATE accounts SET adjust = '{}' WHERE sub = 'z-seb'").run();
-  await seb.post(`/admin/carnet/${q.id}`, { langue: 'fr', body: 'Changé en ligne.' });
-  assert.equal(c.app.carnet.get(q.id).body, 'Changé en ligne.');
+  assert.equal((await seb.post(`/admin/carnet/${q.id}`, { langue: 'fr', revised: 'on' })).statusCode, 303);
+  const signale = c.app.carnet.get(q.id);
+  assert.ok(signale.revised_at > 0);
+  assert.equal(signale.version, avant.version + 1);
+  assert.equal(c.app.carnet.draftOf(q.id), null);
 });
 
 test('chaque route des Carnets déclare sa permission ; chaque écriture exige le jeton CSRF ; un compte sans rôle n’ouvre rien', async t => {
