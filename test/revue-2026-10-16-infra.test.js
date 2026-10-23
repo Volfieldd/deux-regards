@@ -16,7 +16,8 @@ import { createSessionStore } from '../server/sessions.js';
 // qui n'efface pas les vrais instantanés, dossiers distincts, copies inachevées d'un autre passage, intervalle borné,
 // lancement par un lien ou un chemin accentué, santé), restauration (refus site en marche, sessions fermées, aucun
 // original effacé ramené, actions à refaire), index des clés étrangères, clé des cartes scellée, pays compté derrière
-// le proxy seulement, fichiers de déploiement (jeton du tunnel, réseau, modèles Unraid, image, archive d'export).
+// le proxy seulement, fichiers de déploiement (jeton du tunnel, réseau, modèles Unraid, dépendances des images,
+// archive d'export).
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
@@ -360,6 +361,17 @@ test('A007, A045, A046, A047, A049, A210 : fichiers de déploiement', () => {
   const uses = [...wf.matchAll(/uses: (\S+)/g)].map(m => m[1]);
   assert.equal(uses.length, 10);                                          // deux images : le site et la Vigie (phase B)
   assert.match(wf, /file: Dockerfile\.vigie/);
+  const dockerVigie = read('Dockerfile.vigie');
+  const installationVigie = dockerVigie.indexOf('npm ci --omit=dev');
+  const auditVigie = dockerVigie.indexOf('npm audit --omit=dev');
+  const imageFinaleVigie = dockerVigie.indexOf('# 2. Image finale');
+  assert.ok(installationVigie >= 0 && installationVigie < auditVigie && auditVigie < imageFinaleVigie);
+  const manifeste = JSON.parse(read('package.json'));
+  const manifesteVigie = JSON.parse(read('vigie/package.json'));
+  const verrouVigie = JSON.parse(read('vigie/package-lock.json'));
+  assert.equal(manifesteVigie.dependencies.fastify, manifeste.dependencies.fastify);
+  assert.equal(verrouVigie.packages[''].dependencies.fastify, manifeste.dependencies.fastify);
+  assert.equal(verrouVigie.packages['node_modules/fastify'].version, manifeste.dependencies.fastify);
   // Vigie (facultative) : seulement avec le profil « vigie », durcie comme le reste, sauvegarde sans réseau.
   for (const name of ['vigie', 'vigie-backup']) {
     const svc = service(unraid, name);
