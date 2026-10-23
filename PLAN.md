@@ -57,6 +57,8 @@ La branche `feat/saisons-atelier` prépare l’atelier indépendamment des déci
 
 **Aucune route ni permission de saison n’est encore activée** : S1b raccordera l’atelier après les réponses du propriétaire sur les droits et le fuseau. La [section 10.1 du plan](docs/etudes/saisons-apres-image.md#101-besoins-de-la-vigie-et-preuves-attendues-par-lot) donne les raccordements Vigie de chaque lot ; S1a ne déclare aucune émission HTTP livrée. La note de version de cette PR décrit cette limite. Le socle #218 n’est pas fusionné ; le lot suivant reste dépendant de sa revue.
 
+Vérifications de S1a : 1 350 tests réussis sans Vigie et 1 350 avec, dont 27 tests du modèle, du calendrier et du formulaire ; 9 tests ciblés de notes, liens et langues. Aperçu isolé : 72 états de rendu et 12 HTML valides, sans défaut relevé ; sélection et ordre transmis sans JavaScript. Le parcours authentifié dans l’admin réel et la persistance HTTP restent à vérifier en S1b.
+
 ## Livraison — Vigie en dossiers, PR E #202, version 1.202.0 (21 octobre 2026)
 
 Après D1 #198, D2 #199, D3 #200 et la mise à jour documentaire #201 : extension des lectures personnelles livrée dans la PR #202 après accord du propriétaire. Catégories fermées et volumes par requête/session (BV-33), listes couvertes, enjeu par catégorie, indice des trois réseaux en 24 h, huit fiches comptées par session. Documentation : [étude, section 14.4](docs/etudes/vigie-dossiers.md#144-pr-e--catégories-et-volumes-des-lectures-bv-33), [Vigie](docs/wiki/Vigie.md), [RGPD](docs/wiki/RGPD.md). Les seuils 8/3 et les durées existantes restent inchangés ; pas de recalage sans le mois d’observation prévu.
