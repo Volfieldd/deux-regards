@@ -1,5 +1,22 @@
 [
   {
+    "version": "1.218.0",
+    "date": "2026-10-23",
+    "pr": 218,
+    "title": {
+      "fr": "Les saisons : le socle des expositions",
+      "en": "Seasons: the exhibition foundation",
+      "de": "Saisons: die Grundlage für Ausstellungen"
+    },
+    "items": [
+      {
+        "fr": "Le plan des expositions temporaires et de l’Après-image est défini. Le premier socle prépare les saisons, leurs dates, leurs accrochages et leurs bilans. Les écrans de gestion et de visite arrivent dans les étapes suivantes : aucune saison n’est encore affichée sur le site.",
+        "en": "The plan for temporary exhibitions and Après-image is defined. The first foundation supports seasons, dates, ordered photographs and reports. Management and visitor screens will follow in later stages; no season is displayed on the website yet.",
+        "de": "Der Plan für temporäre Ausstellungen und Après-image steht. Die erste Grundlage unterstützt Saisons, Termine, geordnete Fotografien und Rückblicke. Verwaltungs- und Besuchsansichten folgen in späteren Schritten; auf der Website wird noch keine Saison angezeigt."
+      }
+    ]
+  },
+  {
     "version": "1.217.0",
     "date": "2026-10-23",
     "pr": 217,
