@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Plan fonctionnel rédigé ; **S0 implémenté dans la branche de travail, en attente de revue**. Aucune interface de saison ni participation publique n’est annoncée comme livrée. L’avancement effectif et les PR figurent dans [`PLAN.md`](../../PLAN.md). |
+| Statut | Plan fonctionnel rédigé ; **S0 en PR #218 et préparation indépendante de S1 en cours, en attente de revue**. Aucune interface de saison ni participation publique n’est annoncée comme livrée. L’avancement effectif et les PR figurent dans [`PLAN.md`](../../PLAN.md). |
 | Date | 23 octobre 2026. |
 | Base de départ | `origin/main` à `f44cdf3`, branche de travail `feat/saisons-socle`. |
 | Objet | Une programmation d’expositions photographiques datées, des collections accessibles directement et une participation facultative qui peut prolonger une exposition. |
@@ -236,7 +236,7 @@ Un raccordement à BV-20/BV-21 complète leur couverture existante ; il n’exig
 | Lot | Livrable et dépendances | Acceptation nominale | Acceptation des erreurs |
 |---|---|---|---|
 | **S0 — Modèle métier, implémenté dans la branche** | Migration additive, accès aux objets et règles pures d’état/composition. Pas de route publique, d’interface, de minuterie branchée ni de nouveau droit. Aucune collecte de contribution. | Créer/lire un brouillon synthétique ; ordre et références persistés ; phases calculées aux bornes ; photos et séries existantes intactes. | Transitions hors cycle, dates invalides, doublons et composition invalide refusés ; écritures atomiques ; retrait prioritaire ; migration sur une base jetable. |
-| **S1 — Atelier des saisons** | Après S0 et SA-Q1/SA-Q2 : administration de préparation, aperçu, calendrier, accrochage et décisions de publication/retrait. | Un membre habilité prépare une saison, traduit ses textes, ordonne les images et programme ; persistance vérifiée après relecture. | Refus hors portée, photo non autorisée, conflit concurrent et calendrier invalide ; aperçu inaccessible sans droit ; aucun brouillon public. |
+| **S1 — Atelier des saisons** | Préparation indépendante S1a décrite ci-dessous ; activation S1b après S0 et SA-Q1/SA-Q2 : administration de préparation, aperçu, calendrier, accrochage et décisions de publication/retrait. | Un membre habilité prépare une saison, traduit ses textes, ordonne les images et programme ; persistance vérifiée après relecture. | Refus hors portée, photo non autorisée, conflit concurrent et calendrier invalide ; aperçu inaccessible sans droit ; aucun brouillon public. |
 | **S2 — Visite publique, accueil et archives** | Après S1 : E1 à E4 et E7, index des saisons, liens et adaptations des thèmes ; aucune participation tant que A1 manque. | Visite libre complète, accès existants aux séries conservés, ouverture et clôture à l’heure, archive lisible ; trois langues et sans script. L’accès « Collections » rejoint S3 dès sa livraison, sans lien mort avant. | Saison retirée/brouillon absents ; photo retirée cachée partout ; état changé pendant la visite expliqué ; aucun bouton d’atelier inactif présenté comme disponible. |
 | **S3 — Bilans et collections** | Après S1/S2 : bilan éditorial, E8/E9, sélection éventuellement vide, filiation saison/collection ; l’index reste accessible directement. | Publier un bilan vide et un bilan avec choix sur **deux saisons distinctes**, chacun unique et non réécrivable dans S0 ; consulter l’accrochage permanent et son origine ; série des photos inchangée. | Refus de publier une référence interdite, conflit de version et filiation privée ; retrait répercuté sans restaurer une photo. |
 | **A1 — Après-image** | Après S2 et SA-Q3/SA-Q4/SA-Q5/SA-Q7 : E5/E6, collecte minimale, confirmation, retrait et purge conformes aux décisions. | Créer un triptyque persisté avec deux images conservées, une remplacée et une relation Écho/Contraste/Déplacement ; parent intact ; retour à la conclusion sans compte imposé à la visite. Aucun commentaire libre. | Clôture, parent modifié, remplacement incorrect, doublon, relation inconnue, rejeu, dépassement et photo retirée ; aucune confirmation avant écriture ; purge et droits vérifiés. |
@@ -244,6 +244,21 @@ Un raccordement à BV-20/BV-21 complète leur couverture existante ; il n’exig
 | **Plus tard — Invités et vote** | Études et PR séparées après les arbitrages correspondants. | Critères à établir avec un besoin précis. | Aucun dépôt externe, classement, promotion automatique ou collecte supplémentaire ajouté aux lots précédents. |
 
 S3 peut être livré sans A1 : la première saison peut donc être une exposition complète et son bilan une décision des photographes. A1 n’oblige pas à livrer immédiatement A2 ; le visiteur est informé du devenir réel de sa contribution.
+
+### Préparation de l’atelier avant les arbitrages (S1a)
+
+Le lot suivant avance sur les éléments indépendants des droits et du fuseau :
+
+- Compteur de version persistant (`066_saisons_versions.sql`) et validation atomique des textes, de l’ordre et d’une décision ; un écran périmé reçoit un conflit sans écrasement, même si les deux sauvegardes ont lieu à la même milliseconde.
+- Contrat des formulaires trilingues : conservation du calendrier inchangé, ordre numérique sans glisser, ajout de seules photos déjà publiées, retrait d’une photo de l’accrochage et recherche paginée de 24 résultats. La série et la publication des photos restent intactes.
+- Conversion d’heure locale avec fuseau **obligatoirement fourni par le futur branchement**, sans valeur par défaut. Une heure nouvelle inexistante ou ambiguë est refusée ; aucun des fuseaux proposés n’est adopté par ce code.
+- Gabarits communs aux administrations v1/v2 : liste, éditeur, aperçu privé et récapitulatif de décision, traduits, sans script obligatoire. Ils restent **non raccordés** : aucun menu, route, droit, cookie ou écriture d’audit supplémentaire n’est activé dans l’application.
+
+**S1a ne livre pas encore l’atelier utilisable depuis l’admin.** Les formulaires et la persistance sont contrôlés séparément ; le rendu navigateur isolé ne prouve pas les gardes de session, les permissions, le CSRF ni un parcours HTTP complet. Les décisions SA-Q1/SA-Q2 restent ouvertes. Le choix d’un motif de retrait dans une liste est préparé dans la vue, sans collecte ni conservation nouvelle.
+
+**S1b** raccordera ces éléments après les réponses du propriétaire : permissions exactes et portées, menu dans les deux administrations, routes et gardes, erreurs restituées, fuseau affiché, aide, journal et signaux S1 de la matrice §10.1. Son acceptation exige alors un parcours navigateur complet avec persistance et refus, ainsi que les vérifications de la Vigie. S1 n’est terminé qu’après ce raccordement.
+
+La PR de S1a dépend de #218 et reste en brouillon ; sa base temporaire est la branche du socle tant que celui-ci n’est pas fusionné par le propriétaire. Sa note de version distingue la préparation des écrans de leur activation.
 
 ### Définition de « terminé » pour chaque lot
 
@@ -268,4 +283,4 @@ Le modèle distingue une **décision persistée** (`brouillon`, `programme`, `pu
 - Les plafonds techniques de `server/saisons.js` sont : `title` 120 signes, `intro` 4 000, `report` 12 000, `slug` 160 et `photos` 500. Ils bornent le stockage ; les conseils de rédaction plus courts du § 7 ne changent pas ces constantes. La borne de 500 ne contraint pas la saison à un multiple de trois : le triptyque Après-image est un objet distinct, à livrer en A1.
 - Les invariants relationnels protègent l’unicité des références et l’ordre ; les écritures qui doivent réussir ensemble sont atomiques. Les choix de calendrier visibles et la matrice de droits restent réservés aux jalons correspondants.
 
-**État courant** : note rédigée ; S0 implémenté dans la branche de travail et soumis à vérification avant revue ; S1, S2, S3, A1 et A2 à réaliser. Le socle se trouve dans [`server/saisons.js`](../../server/saisons.js), la [migration 065](../../server/db/migrations/065_saisons.sql) et ses [tests métier](../../test/saisons-modele.test.js). Aucun parcours public ou administratif nouveau n’est déclaré disponible par cette annexe.
+**État courant** : S0 en revue dans la PR #218 ; S1a préparé dans la branche de l’atelier ; S1b attend les décisions de droits et de calendrier ; S2, S3, A1 et A2 à réaliser. Le socle se trouve dans [`server/saisons.js`](../../server/saisons.js), la [migration 065](../../server/db/migrations/065_saisons.sql) et ses [tests métier](../../test/saisons-modele.test.js). Aucun parcours public ou administratif nouveau n’est déclaré disponible par cette annexe.

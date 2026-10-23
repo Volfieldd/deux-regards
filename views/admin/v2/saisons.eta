@@ -1,0 +1,3 @@
+<% layout('./layout') %>
+<% /* Saisons : mêmes formulaires rendus sur le serveur dans les deux administrations. */ %>
+<%~ include('../saisons', { ...it, corps: true }) %>

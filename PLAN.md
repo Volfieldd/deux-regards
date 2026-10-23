@@ -51,6 +51,12 @@ Exemptions des blocages automatiques vérifiées sur le réseau réel, /64 IPv6 
 
 Demande de description sans rechargement de la fiche, confirmation avant de remplacer un texte déjà saisi, Défaire des langues ajoutées dans l’admin v2. Aperçu du filigrane actualisable sur place sans enregistrer, respect de sa case d’activation. Bandeau de prévisualisation étendu aux neuf compositions, toujours réservé au droit `site.apparence` ; visionneuse publique inchangée. Tests ciblés du serveur et parcours navigateur dans les deux admins.
 
+## Préparation — Atelier des saisons, S1a (23 octobre 2026)
+
+La branche `feat/saisons-atelier` prépare l’atelier indépendamment des décisions encore ouvertes : compteur de version, enregistrement transactionnel des textes et de l’ordre, contrat de formulaire, calendrier à fuseau explicitement fourni et quatre gabarits communs aux administrations v1/v2. La sélection de photos est bornée et paginée ; une modification concurrente n’est pas écrasée. Les gabarits sont traduits et conçus sans script obligatoire.
+
+**Aucune route ni permission de saison n’est encore activée** : S1b raccordera l’atelier après les réponses du propriétaire sur les droits et le fuseau. La [section 10.1 du plan](docs/etudes/saisons-apres-image.md#101-besoins-de-la-vigie-et-preuves-attendues-par-lot) donne les raccordements Vigie de chaque lot ; S1a ne déclare aucune émission HTTP livrée. La note de version de cette PR décrit cette limite. Le socle #218 n’est pas fusionné ; le lot suivant reste dépendant de sa revue.
+
 ## Livraison — Vigie en dossiers, PR E #202, version 1.202.0 (21 octobre 2026)
 
 Après D1 #198, D2 #199, D3 #200 et la mise à jour documentaire #201 : extension des lectures personnelles livrée dans la PR #202 après accord du propriétaire. Catégories fermées et volumes par requête/session (BV-33), listes couvertes, enjeu par catégorie, indice des trois réseaux en 24 h, huit fiches comptées par session. Documentation : [étude, section 14.4](docs/etudes/vigie-dossiers.md#144-pr-e--catégories-et-volumes-des-lectures-bv-33), [Vigie](docs/wiki/Vigie.md), [RGPD](docs/wiki/RGPD.md). Les seuils 8/3 et les durées existantes restent inchangés ; pas de recalage sans le mois d’observation prévu.

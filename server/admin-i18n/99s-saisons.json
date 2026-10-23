@@ -1,0 +1,394 @@
+{
+  "Les saisons": {
+    "en": "Seasons",
+    "de": "Die Saisons"
+  },
+  "Saisons": {
+    "en": "Seasons",
+    "de": "Saisons"
+  },
+  "Voir l’aperçu privé": {
+    "en": "View the private preview",
+    "de": "Private Vorschau ansehen"
+  },
+  "Les décisions prises ici préparent la saison. Ses pages publiques seront disponibles dans une étape suivante.": {
+    "en": "Decisions made here prepare the season. Its public pages will be available in a later stage.",
+    "de": "Die hier getroffenen Entscheidungen bereiten die Saison vor. Ihre öffentlichen Seiten werden in einem späteren Schritt verfügbar sein."
+  },
+  "Les modifications n’ont pas été enregistrées.": {
+    "en": "The changes were not saved.",
+    "de": "Die Änderungen wurden nicht gespeichert."
+  },
+  "Vérifiez les champs ci-dessous avant de réessayer.": {
+    "en": "Check the fields below before trying again.",
+    "de": "Prüfen Sie die folgenden Felder, bevor Sie es erneut versuchen."
+  },
+  "Les textes, le calendrier et l’accrochage sont figés après validation. Une programmation peut être annulée avant son ouverture pour reprendre le brouillon.": {
+    "en": "Texts, dates and the exhibition display are locked after approval. Cancel a scheduled opening before it begins to return to the draft.",
+    "de": "Texte, Zeitplan und Hängung sind nach der Freigabe gesperrt. Eine geplante Eröffnung kann vor ihrem Beginn abgesagt werden, um den Entwurf weiterzubearbeiten."
+  },
+  "Intention de la saison": {
+    "en": "Season’s artistic intention",
+    "de": "Künstlerische Absicht der Saison"
+  },
+  "Le français est la langue d’origine. Une traduction laissée vide reprend le français.": {
+    "en": "French is the original language. An empty translation falls back to French.",
+    "de": "Französisch ist die Originalsprache. Bei einer leeren Übersetzung wird der französische Text verwendet."
+  },
+  "Intention": {
+    "en": "Artistic intention",
+    "de": "Künstlerische Absicht"
+  },
+  "Calendrier": {
+    "en": "Schedule",
+    "de": "Zeitplan"
+  },
+  "Fuseau : {zone}. L’ouverture est incluse ; à l’heure de clôture, la saison est close.": {
+    "en": "Time zone: {zone}. The opening time is included; the season is closed at the closing time.",
+    "de": "Zeitzone: {zone}. Die Öffnungszeit ist eingeschlossen; zur Schließzeit ist die Saison geschlossen."
+  },
+  "Accrochage · {n} photos": {
+    "en": "Exhibition display · {n} photos",
+    "de": "Hängung · {n} Fotos"
+  },
+  "Les photos gardent leur série. Pour changer l’ordre, attribuez des positions distinctes puis enregistrez. Les numéros sont remis à la suite après enregistrement.": {
+    "en": "Photos keep their series. To reorder them, assign distinct positions, then save. Numbers become consecutive after saving.",
+    "de": "Die Fotos behalten ihre Serie. Vergeben Sie zum Umordnen unterschiedliche Positionen und speichern Sie. Danach werden die Nummern fortlaufend vergeben."
+  },
+  "Aucune photo dans cet accrochage. Ajoutez-en depuis le choix ci-dessous.": {
+    "en": "No photos in this display. Add some from the selection below.",
+    "de": "Diese Hängung enthält keine Fotos. Fügen Sie welche aus der Auswahl unten hinzu."
+  },
+  "Photos de la saison, dans l’ordre": {
+    "en": "Season’s photos, in order",
+    "de": "Fotos der Saison, in ihrer Reihenfolge"
+  },
+  "Photo indisponible : retirez-la avant de valider la saison.": {
+    "en": "Photo unavailable: remove it before approving the season.",
+    "de": "Foto nicht verfügbar: Entfernen Sie es vor der Freigabe der Saison."
+  },
+  "Position de « {title} »": {
+    "en": "Position of “{title}”",
+    "de": "Position von „{title}“"
+  },
+  "Retirer « {title} » de la saison": {
+    "en": "Remove “{title}” from the season",
+    "de": "„{title}“ aus der Saison entfernen"
+  },
+  "Enregistrez vos modifications avant de changer de recherche ou de page. Les photos cochées sont ajoutées à la fin de l’accrochage.": {
+    "en": "Save your changes before changing the search or page. Selected photos are added at the end of the display.",
+    "de": "Speichern Sie Ihre Änderungen, bevor Sie die Suche oder Seite wechseln. Ausgewählte Fotos werden am Ende der Hängung hinzugefügt."
+  },
+  "Rechercher des photos publiées": {
+    "en": "Search published photos",
+    "de": "Veröffentlichte Fotos suchen"
+  },
+  "Titre de la photo": {
+    "en": "Photo title",
+    "de": "Titel des Fotos"
+  },
+  "Aucune photo publiée disponible dans cette recherche.": {
+    "en": "No published photos available for this search.",
+    "de": "Keine veröffentlichten Fotos für diese Suche verfügbar."
+  },
+  "Ajouter les photos cochées et enregistrer": {
+    "en": "Add selected photos and save",
+    "de": "Ausgewählte Fotos hinzufügen und speichern"
+  },
+  "Pages du choix de photos": {
+    "en": "Photo selection pages",
+    "de": "Seiten der Fotoauswahl"
+  },
+  "Décisions éditoriales": {
+    "en": "Editorial decisions",
+    "de": "Redaktionelle Entscheidungen"
+  },
+  "Non renseignée": {
+    "en": "Not specified",
+    "de": "Nicht angegeben"
+  },
+  "Clôture": {
+    "en": "Closing",
+    "de": "Schließung"
+  },
+  "Fuseau": {
+    "en": "Time zone",
+    "de": "Zeitzone"
+  },
+  "Enregistrez d’abord vos modifications. Chaque décision présente un récapitulatif avant confirmation.": {
+    "en": "Save your changes first. Each decision shows a summary before confirmation.",
+    "de": "Speichern Sie zuerst Ihre Änderungen. Vor der Bestätigung jeder Entscheidung wird eine Zusammenfassung angezeigt."
+  },
+  "Préparer une exposition, choisir son accrochage et fixer son calendrier.": {
+    "en": "Prepare an exhibition, choose its display and set its dates.",
+    "de": "Eine Ausstellung vorbereiten, ihre Hängung auswählen und ihren Zeitplan festlegen."
+  },
+  "L’atelier prépare les décisions éditoriales. Les pages publiques des saisons seront livrées dans une étape suivante.": {
+    "en": "The workshop prepares editorial decisions. Public season pages will be delivered in a later stage.",
+    "de": "Die Werkstatt bereitet redaktionelle Entscheidungen vor. Die öffentlichen Seiten der Saisons werden in einem späteren Schritt bereitgestellt."
+  },
+  "Nouvelle saison": {
+    "en": "New season",
+    "de": "Neue Saison"
+  },
+  "Titre en français": {
+    "en": "Title in French",
+    "de": "Titel auf Französisch"
+  },
+  "Créer le brouillon": {
+    "en": "Create draft",
+    "de": "Entwurf erstellen"
+  },
+  "Filtrer les saisons": {
+    "en": "Filter seasons",
+    "de": "Saisons filtern"
+  },
+  "Tous les états": {
+    "en": "All states",
+    "de": "Alle Zustände"
+  },
+  "Aucune saison dans cette vue.": {
+    "en": "No seasons in this view.",
+    "de": "Keine Saisons in dieser Ansicht."
+  },
+  "Saisons, les plus récentes d’abord": {
+    "en": "Seasons, newest first",
+    "de": "Saisons, neueste zuerst"
+  },
+  "Calendrier à compléter": {
+    "en": "Dates to complete",
+    "de": "Zeitplan zu vervollständigen"
+  },
+  "Close": {
+    "en": "Closed",
+    "de": "Geschlossen"
+  },
+  "Bilan publié": {
+    "en": "Retrospective published",
+    "de": "Rückblick veröffentlicht"
+  },
+  "Retirée": {
+    "en": "Withdrawn",
+    "de": "Zurückgezogen"
+  },
+  "Programmer…": {
+    "en": "Schedule…",
+    "de": "Planen…"
+  },
+  "Valider l’ouverture…": {
+    "en": "Approve opening…",
+    "de": "Eröffnung freigeben…"
+  },
+  "Annuler la programmation…": {
+    "en": "Cancel scheduled opening…",
+    "de": "Geplante Eröffnung absagen…"
+  },
+  "Retirer la saison…": {
+    "en": "Withdraw the season…",
+    "de": "Saison zurückziehen…"
+  },
+  "Horloge invalide.": {
+    "en": "Invalid clock.",
+    "de": "Ungültige Uhrzeitquelle."
+  },
+  "Saison introuvable.": {
+    "en": "Season not found.",
+    "de": "Saison nicht gefunden."
+  },
+  "Seul un brouillon peut être modifié.": {
+    "en": "Only a draft can be edited.",
+    "de": "Nur ein Entwurf kann bearbeitet werden."
+  },
+  "Donnez une ouverture et une fermeture postérieure.": {
+    "en": "Provide an opening time and a later closing time.",
+    "de": "Geben Sie eine Öffnungszeit und eine spätere Schließzeit an."
+  },
+  "Texte attendu.": {
+    "en": "Text expected.",
+    "de": "Text erwartet."
+  },
+  "{n} signes au plus.": {
+    "en": "At most {n} characters.",
+    "de": "Höchstens {n} Zeichen."
+  },
+  "Champs de la saison attendus.": {
+    "en": "Season fields expected.",
+    "de": "Felder der Saison erwartet."
+  },
+  "Donnez un titre en français.": {
+    "en": "Provide a title in French.",
+    "de": "Geben Sie einen Titel auf Französisch an."
+  },
+  "Instant entier en millisecondes attendu.": {
+    "en": "An integer timestamp in milliseconds is expected.",
+    "de": "Ein ganzzahliger Zeitstempel in Millisekunden wird erwartet."
+  },
+  "Liste ordonnée de {n} identifiants distincts au plus.": {
+    "en": "An ordered list of at most {n} distinct identifiers is expected.",
+    "de": "Eine geordnete Liste mit höchstens {n} unterschiedlichen Kennungen wird erwartet."
+  },
+  "Le titre et l’intention en français sont nécessaires.": {
+    "en": "The title and artistic intention in French are required.",
+    "de": "Titel und künstlerische Absicht auf Französisch sind erforderlich."
+  },
+  "L’accrochage doit contenir uniquement des photos déjà publiées.": {
+    "en": "The exhibition display must only contain photos that are already published.",
+    "de": "Die Hängung darf nur bereits veröffentlichte Fotos enthalten."
+  },
+  "Photo inconnue.": {
+    "en": "Unknown photo.",
+    "de": "Unbekanntes Foto."
+  },
+  "L’ouverture programmée doit être future.": {
+    "en": "The scheduled opening must be in the future.",
+    "de": "Die geplante Eröffnung muss in der Zukunft liegen."
+  },
+  "La saison doit être dans sa période d’ouverture.": {
+    "en": "The season must be within its opening period.",
+    "de": "Die Saison muss sich innerhalb ihres Öffnungszeitraums befinden."
+  },
+  "Seule une programmation avant son ouverture peut être annulée.": {
+    "en": "A scheduled opening can only be cancelled before it begins.",
+    "de": "Eine geplante Eröffnung kann nur vor ihrem Beginn abgesagt werden."
+  },
+  "Seule une saison publiée ou programmée peut être retirée.": {
+    "en": "Only a published or scheduled season can be withdrawn.",
+    "de": "Nur eine veröffentlichte oder geplante Saison kann zurückgezogen werden."
+  },
+  "Le bilan se publie une fois, après la fermeture de la saison.": {
+    "en": "The retrospective is published once, after the season closes.",
+    "de": "Der Rückblick wird einmalig nach der Schließung der Saison veröffentlicht."
+  },
+  "Seuls le bilan et sa sélection sont attendus.": {
+    "en": "Only the retrospective and its selection are expected.",
+    "de": "Nur der Rückblick und seine Auswahl werden erwartet."
+  },
+  "Écrivez le bilan en français.": {
+    "en": "Write the retrospective in French.",
+    "de": "Schreiben Sie den Rückblick auf Französisch."
+  },
+  "La sélection doit appartenir à l’accrochage et être encore publiée.": {
+    "en": "The selection must come from the exhibition display and still be published.",
+    "de": "Die Auswahl muss zur Hängung gehören und noch veröffentlicht sein."
+  },
+  "Version entière positive attendue.": {
+    "en": "A positive integer version is expected.",
+    "de": "Eine positive ganzzahlige Version wird erwartet."
+  },
+  "Action de saison inconnue.": {
+    "en": "Unknown season action.",
+    "de": "Unbekannte Aktion für die Saison."
+  },
+  "Revenir à la saison": {
+    "en": "Return to the season",
+    "de": "Zurück zur Saison"
+  },
+  "Aperçu privé": {
+    "en": "Private preview",
+    "de": "Private Vorschau"
+  },
+  "Visible de l’équipe autorisée uniquement. Cet aperçu vérifie les textes et l’ordre des photographies ; il ne représente pas encore la future page publique.": {
+    "en": "Visible only to authorised team members. This preview checks the texts and photo order; it does not yet represent the future public page.",
+    "de": "Nur für berechtigte Teammitglieder sichtbar. Diese Vorschau prüft die Texte und die Reihenfolge der Fotos; sie stellt noch nicht die künftige öffentliche Seite dar."
+  },
+  "Langue de l’aperçu": {
+    "en": "Preview language",
+    "de": "Sprache der Vorschau"
+  },
+  "Ouverture à définir": {
+    "en": "Opening to be set",
+    "de": "Eröffnung noch festzulegen"
+  },
+  "Clôture à définir": {
+    "en": "Closing to be set",
+    "de": "Schließung noch festzulegen"
+  },
+  "Aucune photo dans cet accrochage.": {
+    "en": "No photos in this display.",
+    "de": "Diese Hängung enthält keine Fotos."
+  },
+  "Accrochage de la saison, dans l’ordre": {
+    "en": "Season’s exhibition display, in order",
+    "de": "Hängung der Saison, in ihrer Reihenfolge"
+  },
+  "Photo indisponible": {
+    "en": "Photo unavailable",
+    "de": "Foto nicht verfügbar"
+  },
+  "Récapitulatif de la saison": {
+    "en": "Season summary",
+    "de": "Zusammenfassung der Saison"
+  },
+  "État actuel": {
+    "en": "Current state",
+    "de": "Aktueller Zustand"
+  },
+  "Accrochage": {
+    "en": "Exhibition display",
+    "de": "Hängung"
+  },
+  "Accrochage à confirmer, dans l’ordre": {
+    "en": "Exhibition display to confirm, in order",
+    "de": "Zu bestätigende Hängung, in ihrer Reihenfolge"
+  },
+  "Cette décision prépare la saison. Les pages publiques seront livrées dans une étape suivante.": {
+    "en": "This decision prepares the season. Public pages will be delivered in a later stage.",
+    "de": "Diese Entscheidung bereitet die Saison vor. Die öffentlichen Seiten werden in einem späteren Schritt bereitgestellt."
+  },
+  "Motif du retrait": {
+    "en": "Reason for withdrawal",
+    "de": "Grund für die Rücknahme"
+  },
+  "Choisissez le motif correspondant à cette décision.": {
+    "en": "Choose the reason that matches this decision.",
+    "de": "Wählen Sie den passenden Grund für diese Entscheidung."
+  },
+  "Choisir un motif": {
+    "en": "Choose a reason",
+    "de": "Grund auswählen"
+  },
+  "Identifiant entier positif attendu.": {
+    "en": "A positive integer identifier is expected.",
+    "de": "Eine positive ganzzahlige Kennung wird erwartet."
+  },
+  "Accrochage trop long.": {
+    "en": "The exhibition display contains too many photos.",
+    "de": "Die Hängung enthält zu viele Fotos."
+  },
+  "Une photographie ne peut figurer qu’une fois.": {
+    "en": "A photograph can only appear once.",
+    "de": "Ein Foto darf nur einmal vorkommen."
+  },
+  "Fuseau des saisons attendu.": {
+    "en": "The seasons’ time zone is required.",
+    "de": "Die Zeitzone der Saisons ist erforderlich."
+  },
+  "Formulaire de saison attendu.": {
+    "en": "A season form is expected.",
+    "de": "Ein Formular für die Saison wird erwartet."
+  },
+  "Date invalide ou heure ambiguë : choisissez une autre heure.": {
+    "en": "Invalid date or ambiguous time: choose another time.",
+    "de": "Ungültiges Datum oder mehrdeutige Uhrzeit: Wählen Sie eine andere Uhrzeit."
+  },
+  "L’accrochage a changé : rechargez la page.": {
+    "en": "The exhibition display has changed: reload the page.",
+    "de": "Die Hängung hat sich geändert: Laden Sie die Seite neu."
+  },
+  "Choisissez uniquement des photographies publiées et absentes de l’accrochage.": {
+    "en": "Choose only published photographs that are not already in the display.",
+    "de": "Wählen Sie nur veröffentlichte Fotos, die noch nicht in der Hängung enthalten sind."
+  },
+  "Photographie absente de l’accrochage.": {
+    "en": "The photograph is not in the exhibition display.",
+    "de": "Das Foto ist nicht in der Hängung enthalten."
+  },
+  "Donnez des positions distinctes entre 1 et 500.": {
+    "en": "Assign distinct positions between 1 and 500.",
+    "de": "Vergeben Sie unterschiedliche Positionen zwischen 1 und 500."
+  },
+  "Recherche ou page invalide.": {
+    "en": "Invalid search or page.",
+    "de": "Ungültige Suche oder Seite."
+  }
+}

@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { openDb, migrate } from '../server/db/index.js';
 import { createSaisons, SaisonError, LIMITS } from '../server/saisons.js';
 
@@ -262,4 +263,89 @@ test('Identifiants stricts et adresses stables : inconnus sans effet, collisions
   const x = s.create({ title: long }), y = s.create({ title: long });
   assert.ok(s.get(x).slug.length <= LIMITS.slug);
   assert.ok(s.get(y).slug.length <= LIMITS.slug);
+});
+
+test('Atelier : migration de version sur une saison existante, sans perte de son accrochage', t => {
+  const db = openDb(':memory:');
+  t.after(() => db.close());
+  db.exec('CREATE TABLE photos (id INTEGER PRIMARY KEY)');
+  const sql = name => fs.readFileSync(new URL(`../server/db/migrations/${name}`, import.meta.url), 'utf8');
+  db.exec(sql('065_saisons.sql'));
+  db.prepare('INSERT INTO saisons (id, slug, title, created_at, updated_at) VALUES (1, ?, ?, ?, ?)').run('deja-preparee', 'Déjà préparée', START, START);
+  db.exec('INSERT INTO photos (id) VALUES (1), (2); INSERT INTO saison_photos (saison_id, photo_id, position) VALUES (1, 2, 0), (1, 1, 1)');
+  db.exec(sql('066_saisons_versions.sql'));
+  const s = db.prepare('SELECT * FROM saisons').get();
+  assert.equal(s.version, 1);
+  assert.equal(s.title, 'Déjà préparée');
+  assert.equal(s.updated_at, START);
+  assert.deepEqual(db.prepare('SELECT photo_id FROM saison_photos ORDER BY position').pluck().all(), [2, 1]);
+  assert.throws(() => db.prepare('UPDATE saisons SET version = 0').run(), /CHECK constraint/);
+});
+
+test('Atelier : deux validations dans la même milliseconde ne s’écrasent pas', t => {
+  const c = setup(t), s = c.saisons, id = draft(c), before = s.get(id);
+  const other = createSaisons({ db: c.db, now: c.now });
+  const saved = s.revise(id, { version: before.version, input: { title: 'Premier regard' }, photo_ids: [3, 1] });
+  assert.equal(saved.title, 'Premier regard');
+  assert.deepEqual(saved.photo_ids, [3, 1]);
+  assert.equal(saved.updated_at, before.updated_at, 'l’horloge demeure volontairement figée');
+  assert.ok(saved.version > before.version);
+  assert.throws(() => other.revise(id, { version: before.version, input: { title: 'Écrasement' }, photo_ids: [2] }), domain(409, 'version'));
+  assert.deepEqual(s.get(id), saved);
+  for (const version of [undefined, null, 0, -1, 1.5, String(saved.version), NaN, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.throws(() => s.revise(id, { version, input: { title: 'Sans précondition' } }), domain(422, 'version'));
+    assert.deepEqual(s.get(id), saved);
+  }
+});
+
+test('Atelier : textes, ordre et programmation réussissent ou sont annulés ensemble', t => {
+  const c = setup(t), s = c.saisons, id = draft(c), before = s.get(id);
+  for (const extra of [
+    { photo_ids: [1, 1] }, { photo_ids: [1, 999] }, { input: { title: 'Ne pas garder', closes_at: START } },
+    { action: 'open' }, { photo_ids: [4, 1], action: 'schedule' }, { action: 'inconnue' }, { action: ['schedule'] },
+  ]) {
+    assert.throws(() => s.revise(id, { version: before.version, input: { title: 'Ne pas garder' }, photo_ids: [2, 1], ...extra }), domain());
+    assert.deepEqual(s.get(id), before, 'aucun texte, ordre ni compteur conservé après refus');
+  }
+  const saved = s.revise(id, { version: before.version, input: { title: 'Saison validée', intro_en: 'A shared intention.' }, photo_ids: [3, 2], action: 'schedule' });
+  assert.equal(saved.state, 'programme');
+  assert.equal(saved.title, 'Saison validée');
+  assert.equal(saved.intro_en, 'A shared intention.');
+  assert.deepEqual(saved.photo_ids, [3, 2]);
+  assert.ok(saved.version > before.version);
+  c.at(START);
+  assert.equal(s.publicList()[0].title, 'Saison validée');
+  assert.ok(!Object.hasOwn(s.publicList()[0], 'version'), 'la précondition de l’atelier reste privée');
+});
+
+test('Atelier : une panne SQL annule aussi les textes déjà écrits et le compteur', t => {
+  const c = setup(t), s = c.saisons, id = draft(c), before = s.get(id);
+  c.db.exec("CREATE TRIGGER panne_revision BEFORE INSERT ON saison_photos WHEN NEW.photo_id = 2 BEGIN SELECT RAISE(ABORT, 'panne simulée'); END");
+  assert.throws(() => s.revise(id, { version: before.version, input: { intro: 'Ne doit pas rester.' }, photo_ids: [3, 2], action: 'schedule' }), /panne simulée/);
+  assert.deepEqual(s.get(id), before);
+});
+
+test('Atelier : les décisions seules vérifient leur version et avancent le compteur', t => {
+  const c = setup(t), s = c.saisons, id = draft(c);
+  let current = s.get(id);
+  const transition = action => {
+    const next = s.revise(id, { version: current.version, action });
+    assert.ok(next.version > current.version);
+    assert.throws(() => s.revise(id, { version: current.version, action }), domain(409, 'version'));
+    assert.deepEqual(s.get(id), next);
+    current = next;
+  };
+  transition('schedule');
+  transition('cancelSchedule');
+  assert.equal(current.state, 'brouillon');
+  c.at(START);
+  transition('open');
+  transition('withdraw');
+  assert.equal(current.state, 'retire');
+  const other = draft(c);
+  c.at(START - 1000);
+  s.schedule(other); c.at(END);
+  const beforeReport = s.get(other).version;
+  s.publishReport(other, { report: 'Bilan unique.' });
+  assert.ok(s.get(other).version > beforeReport, 'le bilan interne ne contourne pas le compteur');
 });
