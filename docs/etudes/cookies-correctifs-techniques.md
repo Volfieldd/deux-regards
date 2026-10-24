@@ -15,7 +15,7 @@ Le diagnostic du 24 octobre 2026, ancré sur la version 1.217.0 (`f44cdf3`), a r
 
 | Constat | Comportement obtenu | Régression couverte |
 |---|---|---|
-| Production acceptant une URL publique HTTP | Démarrage refusé ; HTTP de développement et connexion locale de test conservés hors production | Configuration HTTP/HTTPS et normalisation de PUBLIC_URL |
+| Production acceptant une URL publique HTTP | Démarrage refusé pour l’adresse des visiteurs ; HTTP interne derrière Cloudflare Tunnel sans certificat local et HTTP de développement conservés | Configuration HTTP/HTTPS et normalisation de PUBLIC_URL ; listener HTTP réel avec URL publique HTTPS et cookie OIDC sécurisé |
 | Absence de contrôle local de l’âge de transaction OIDC | Date signée vérifiée avant l’échange du code ; refus à dix minutes, date absente/invalide/future refusée | Connexion et vérification d’identité, transaction encore valide, aucun appel fournisseur ni session créée au refus |
 | Sessions expirées conservées sans nouvelle connexion | Purge au démarrage puis chaque heure, sous les bornes de validité existantes | Session active intacte, borne absolue, déclencheur Vigie et arrêt des minuteries |
 | Récapitulatif seulement purgé lors d’un autre usage | Une seule échéance sur le plus ancien, replanifiée après dépôt/consommation, annulée et mémoire vidée à l’arrêt | Suppression réelle de deux récapitulatifs à leurs échéances propres, sans requête intermédiaire |

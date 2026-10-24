@@ -105,6 +105,12 @@ Le serveur refuse aussi de démarrer, en ligne ou non, si `COOKIE_SECRET` fait m
 
 En ligne, il fait aussi confiance par défaut aux proxys locaux (`TRUST_PROXY`). Quand `PUBLIC_URL` est en HTTPS, les cookies sont `Secure` ; ceux de session d’équipe, de transaction OIDC et de session visiteur sont aussi préfixés `__Host-`. Les en-têtes HSTS et COOP sont envoyés. En développement hors production, HTTP et la connexion locale de test restent disponibles.
 
+### HTTPS public et transport interne
+
+`PUBLIC_URL` décrit l’adresse des visiteurs, pas le protocole d’écoute du serveur Node. Avec Cloudflare Tunnel, Cloudflare fournit le HTTPS public et `cloudflared` peut rejoindre Nicephos en HTTP sur le réseau interne : `http://site:3000` (ou `http://nicephos:3000` sur Unraid). Aucun certificat HTTPS local n’est alors nécessaire ; `PUBLIC_URL` reste en `https://…` pour les cookies sécurisés, les liens et les retours OIDC. Le contrôle de production accepte cette architecture.
+
+Sans Cloudflare, une terminaison HTTPS doit assurer l’accès public, par exemple un autre reverse proxy devant le serveur HTTP. Indiquer `https://…` ne configure pas ce certificat ni le réseau : vérifier le [déploiement](Déploiement). La présence d’un en-tête Cloudflare dans une requête ne constitue pas une preuve permettant de relâcher la configuration.
+
 ## Données personnelles, e-mails, traduction
 
 | Variable | Défaut | Rôle |

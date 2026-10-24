@@ -228,6 +228,25 @@ test('en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé', a
   assert.equal(res.headers['strict-transport-security'], 'max-age=31536000');
 });
 
+test('Cloudflare Tunnel : origine HTTP sans certificat, adresse publique HTTPS et cookies sécurisés', async t => {
+  const { app } = await setup(t, { env: { ...HTTPS, NODE_ENV: 'production', TRUST_PROXY: '127.0.0.1' }, oidc: fakeOidc });
+  // Un vrai listener HTTP, comme le service http://site:3000 configuré dans le tunnel ; aucun accès à Cloudflare réel.
+  const origin = await app.listen({ host: '127.0.0.1', port: 0 });
+  assert.match(origin, /^http:\/\//);
+  const health = await fetch(`${origin}/healthz`);
+  assert.equal(health.status, 200);
+  assert.deepEqual(await health.json(), { status: 'ok' });
+  const res = await fetch(`${origin}/auth/login`, { redirect: 'manual', headers: { 'x-forwarded-proto': 'https' } });
+  await res.text();
+  assert.equal(res.status, 302);
+  const tx = res.headers.getSetCookie().find(c => c.startsWith('__Host-oidc-'));
+  assert.ok(tx, 'la transaction est liée à l’hôte public, même sur la liaison interne HTTP');
+  for (const attribute of ['Secure', 'HttpOnly', 'SameSite=Lax', 'Path=/']) assert.ok(tx.split('; ').includes(attribute), attribute);
+  assert.doesNotMatch(tx, /;\s*Domain=/i);
+  assert.equal(res.headers.get('strict-transport-security'), 'max-age=31536000');
+  assert.equal(app.config.publicUrl, 'https://photos.example');
+});
+
 test('transaction OIDC : dix minutes vérifiées au serveur, même avec une copie du cookie signé', async t => {
   let clock = Date.now(), calls = 0;
   t.mock.method(Date, 'now', () => clock);

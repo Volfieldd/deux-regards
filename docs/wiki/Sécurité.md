@@ -88,7 +88,7 @@ Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur refu
 - avec un émetteur OIDC en HTTP ;
 - avec la connexion locale de test (`LOCAL_AUTH_TOKEN`) ;
 - avec une autorité d'horodatage en HTTP (`TSA_URL`) ;
-- en production (`NODE_ENV=production`) sans `PUBLIC_URL`, ou avec une URL publique en HTTP.
+- en production (`NODE_ENV=production`) sans `PUBLIC_URL`, ou avec une URL publique en HTTP. Ce contrôle porte sur l’adresse des visiteurs : derrière Cloudflare Tunnel, le service interne peut rester en HTTP sans certificat local, avec `PUBLIC_URL=https://…`.
 
 En conteneur (`REQUIRE_PERSISTENT_STORAGE=1`), il refuse aussi une base (`DATABASE_PATH`) hors du dossier des données. Avec `TRUST_PROXY` laissé par défaut sur un serveur joignable du réseau, il l'écrit dans ses journaux au démarrage.
 
