@@ -130,6 +130,27 @@ puis un second diff à l’heure courante distingue le calendrier. Ouverture, cl
 n’émet rien. Les GET et les fichiers statiques ne déclenchent pas ce scan. Aucune règle ni réponse automatique nouvelle
 n’est ajoutée au moteur : les BV-20/21 existants consomment les textes ; le signal de phase reste un contexte.
 
+**Bilans et collections S3 (24 octobre 2026, BV-20 et BV-21 ; DS9).** Le même fournisseur ajoute les lignes
+`saison_bilans#id`, `saison_collections#id` et `saison_collection_photos#id`. Les seules lignes retenues sont les
+bilans publiés d’une exposition visible et close, les collections publiées et les cartels de leurs photos encore
+publiées, autorisées et dotées d’une variante disponible. La rubrique Expositions doit être réellement publique ;
+un aperçu privé de l’administrateur ne suffit pas. Brouillons, retraits et références à une origine retirée restent
+exclus. Après douze mois, les bilans et les collections permanentes restent visibles, sans restituer les photos de
+l’exposition ; les cartels des collections suivent leur propre visite et les droits actuels de chaque photo.
+
+La clé numérique d’un cartel reste stable lorsqu’il change de position dans sa collection. BV-20 ne transmet que
+source/champ, identifiant, nature du contact gagné et domaine ; BV-21 dénombre les champs changés lors d’une
+publication ou d’un retrait. Ni récit, ni cartel, ni nom de boîte e-mail, ni chemin de lien, ni téléphone ne sortent
+dans ces événements. Les routes journalisent les noms des champs sans leurs valeurs ; leurs contrôles de session,
+CSRF, permission et portée sont ceux de l’atelier des expositions.
+
+S3 n’introduit aucun début de publication différé : publier un bilan, un rectificatif ou une collection reste un
+geste explicite de l’administrateur. Sa projection utilise l’heure courante, y compris lorsque le capteur rejoue
+l’ancien instantané pour séparer le calendrier S2. Un `published_at` postérieur au précédent relevé doit ainsi rester
+attribué au compte qui vient de publier, et ne pas réapparaître ensuite comme publication programmée sans sujet.
+Le test HTTP `saisons-bilans-vigie` vérifie publication, retrait, absence de brouillon et de texte brut, filtrage du
+cartel indisponible et absence de double émission. Aucune nouvelle règle ni réponse automatique n’est ajoutée.
+
 ---
 
 ## Par brique

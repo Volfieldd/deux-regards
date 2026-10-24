@@ -374,7 +374,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   if (config.vigie) {
     const { installVigie } = await import('./securite/site.js');
     installVigie(app, { config, db,
-      externalSources: ({ now }) => usesV2(app.publicVersion.versionForSection('expositions')) ? app.expositions.textRows({ now }) : [],
+      externalSources: ({ now }) => usesV2(app.publicVersion.versionForSection('expositions'))
+        // S2 rejoue le calendrier ; les publications S3 sont des gestes explicites, lus à l’heure courante pour
+        // qu’un published_at postérieur au précédent instantané reste attribué au compte qui vient de publier.
+        ? [...app.expositions.textRows({ now }), ...app.saisonsBilans.textRows()] : [],
       ...vigieOptions });
   } else {
     const { retireVigie } = await import('./securite/retrait.js');
