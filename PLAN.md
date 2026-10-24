@@ -9,7 +9,7 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
-## Correction — Relecture des expositions et attribution Vigie (24 octobre 2026)
+## Correction — Relecture des expositions et attribution Vigie, PR #228, version 1.228.0 (24 octobre 2026)
 
 Les quatre constats de la relecture de `994a899` sont corrigés ensemble. Photos et Carnets observent leurs changements persistés avant toute attente de notification, sous le compte de la requête ; la publication programmée impose un contexte sans sujet. Un POST concurrent ne prive plus DS23 de son acteur. Audit, DS9, déduplication et chaîne restent vérifiés par les lots signés jusqu’au moteur ; aucun type ni règle de détection nouveau.
 
