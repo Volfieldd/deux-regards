@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.221.0",
+    "date": "2026-10-24",
+    "pr": 221,
+    "title": {
+      "fr": "Les saisons ouvrent leurs portes",
+      "en": "The seasons open their doors",
+      "de": "Die Saisons öffnen ihre Türen"
+    },
+    "items": [
+      {
+        "perm": "saisons.voir",
+        "fr": "Les visiteurs découvrent les expositions depuis l’accueil choisi par l’administration : couverture avant ouverture, visite ordonnée avec cartels et conclusion, puis archive complète pendant douze mois après la clôture. Le parcours fonctionne sur ordinateur et téléphone, sans compte. Les bilans rectificatifs, collections et votes suivent dans les prochains lots.",
+        "en": "Visitors discover exhibitions from the homepage selected by the administrator: a cover before opening, an ordered visit with captions and a conclusion, then a full archive for twelve months after closing. The journey works on desktop and mobile without an account. Corrective reports, collections and voting follow in the next stages.",
+        "de": "Besucher entdecken Ausstellungen über die von der Administration gewählte Startseite: Titelbild vor der Eröffnung, geordneter Rundgang mit Bildtexten und Schlusswort, danach zwölf Monate vollständiges Archiv ab Ausstellungsende. Der Rundgang funktioniert am Computer und am Telefon ohne Konto. Berichtigte Rückblicke, Sammlungen und Abstimmungen folgen in den nächsten Schritten."
+      }
+    ]
+  },
+  {
     "version": "1.220.0",
     "date": "2026-10-24",
     "pr": 220,

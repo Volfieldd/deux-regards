@@ -80,8 +80,9 @@ export function createSaisonsPubliques({ saisons, repo, readiness = null, storag
 
   // BV-20/BV-21 : colonnes textuelles effectivement visibles, à toutes les langues. La source peut changer à
   // l’heure d’ouverture ou d’échéance sans écriture SQL. Le titre d’annonce est public, ses autres textes non.
-  function textRows() {
-    const at = time(), rows = [];
+  function textRows({ now: at = time() } = {}) {
+    if (!validInstant(at)) throw new TypeError('Horloge des textes publics invalide.');
+    const rows = [];
     for (const s of saisons.list()) {
       if (!eligible(s)) continue;
       const full = at >= s.opens_at && at < archiveEndsAt(s.closes_at);
@@ -90,7 +91,8 @@ export function createSaisonsPubliques({ saisons, repo, readiness = null, storag
         const name = col(field, lang), shown = field === 'title' || (field === 'report' ? hasReport : full);
         return [name, shown ? s[name] || '' : ''];
       })));
-      rows.push({ key: `saisons#${s.id}`, source: 'saisons', id: s.id, champs: fields });
+      const phase = at < s.opens_at ? 'annonce' : at < s.closes_at ? 'ouverte' : full ? 'archive' : 'bilan';
+      rows.push({ key: `saisons#${s.id}`, source: 'saisons', id: s.id, phase, champs: fields });
       if (full) {
         const allowed = new Set(visiblePhotos(s, 'fr').map(p => p.id));
         for (const c of s.cartels || []) if (allowed.has(c.photo_id)) rows.push({ key: `saison_cartels#${s.id}:${c.photo_id}`, source: 'saison_cartels', id: s.id, photo_id: c.photo_id,
