@@ -47,7 +47,7 @@ Administration et visite FR/EN/DE raccordées ; migration 068 reprend les bilans
 
 Depuis l’accueil choisi explicitement par l’administration, le visiteur rejoint l’exposition, parcourt ses photos avec leurs cartels, puis sa conclusion. La rubrique Expositions et les pages FR/EN/DE suivent les présentations publiques v2/v3. Avant l’ouverture, seuls le titre, les dates et la couverture annoncent l’exposition. Après la clôture, l’accrochage reste accessible douze mois calendaires UTC ; son adresse garde ensuite le bilan sans restituer les photos. Une couverture ou une photo retirée disparaît à la lecture ; aucune exposition de remplacement n’est choisie automatiquement.
 
-PR en brouillon, dépendante de #220, sans fusion ni déploiement. La surveillance Vigie des textes réellement publics et de leurs bornes temporelles, les vérifications finales et les preuves sont complétées avant remise. Bilans rectificatifs, collections et vote restent dans leurs lots séparés.
+PR en brouillon, dépendante de #220, sans fusion ni déploiement. La Vigie reçoit les textes effectivement publics et distingue les transitions de calendrier des gestes administratifs. Le lot ciblé passe 25/25 tests. Cinq parcours réels sans JavaScript passent dans Chromium et WebKit, sur ordinateur et formats mobiles ; huit contrôles Axe ne trouvent aucune violation. Les suites complètes passent : **1 376/1 376 sans Vigie et 1 376/1 376 avec Vigie**. Bilans rectificatifs, collections et vote restent dans leurs lots séparés.
 
 ## Mise en œuvre — Atelier des expositions, S1b, PR #220, version 1.220.0 (24 octobre 2026)
 
