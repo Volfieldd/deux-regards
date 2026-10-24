@@ -1,7 +1,7 @@
 // V1 : information identique dans le formulaire de consentement et dans le parcours de gestion des votes.
 export const VOTE_UI = {
   fr: {
-    title: 'Voter pour cette photographie', manage: 'Mes votes dans cette exposition',
+    title: 'Voter pour cette photographie', manage: 'Mes votes dans cette exposition', manageAll: 'Mes votes',
     proposals: 'Photos proposées au vote', seeProposals: 'Découvrir les photos proposées au vote', seePhoto: 'Voir la photographie',
     lead: 'Votre avis aide l’équipe à préparer la collection permanente. Le vote est consultatif : l’équipe décide des œuvres retenues.',
     choice: 'Vous pouvez voter une fois pour chaque photographie proposée dans cette exposition, avec ce navigateur.',
@@ -22,7 +22,7 @@ export const VOTE_UI = {
     errors: { consent: 'Cochez la case pour accepter le cookie et le traitement de vos votes.', confirm: 'Confirmez l’annulation de vos votes avant de poursuivre.', refused: 'Cet envoi n’a pas été accepté. Rechargez cette page et réessayez.', stale: 'Cette photographie n’est plus proposée au vote, ou le vote est clos.', unavailable: 'Le vote est temporairement indisponible. Vous pouvez poursuivre la visite.', limit: 'Trop de demandes. Attendez une minute avant de réessayer.' },
   },
   en: {
-    title: 'Vote for this photograph', manage: 'My votes in this exhibition',
+    title: 'Vote for this photograph', manage: 'My votes in this exhibition', manageAll: 'My votes',
     proposals: 'Photographs offered for voting', seeProposals: 'Discover the photographs offered for voting', seePhoto: 'View the photograph',
     lead: 'Your opinion helps the team prepare the permanent collection. Voting is advisory: the team decides which works are retained.',
     choice: 'You can vote once for each photograph offered in this exhibition, using this browser.',
@@ -43,7 +43,7 @@ export const VOTE_UI = {
     errors: { consent: 'Tick the box to agree to the cookie and processing of your votes.', confirm: 'Confirm cancellation of your votes to continue.', refused: 'This submission was not accepted. Reload this page and try again.', stale: 'This photograph is no longer offered for voting, or voting has closed.', unavailable: 'Voting is temporarily unavailable. You can continue your visit.', limit: 'Too many requests. Wait a minute before trying again.' },
   },
   de: {
-    title: 'Für diese Fotografie stimmen', manage: 'Meine Stimmen in dieser Ausstellung',
+    title: 'Für diese Fotografie stimmen', manage: 'Meine Stimmen in dieser Ausstellung', manageAll: 'Meine Stimmen',
     proposals: 'Fotografien zur Abstimmung', seeProposals: 'Fotografien zur Abstimmung entdecken', seePhoto: 'Fotografie ansehen',
     lead: 'Ihre Meinung hilft dem Team bei der Vorbereitung der ständigen Sammlung. Die Abstimmung ist beratend: Das Team entscheidet über die aufgenommenen Werke.',
     choice: 'Sie können mit diesem Browser einmal für jede vorgeschlagene Fotografie dieser Ausstellung stimmen.',

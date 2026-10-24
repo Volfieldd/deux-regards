@@ -6,6 +6,11 @@
 <%~ include('./_entete', it) %>
 <main id="contenu">
   <div class="wrap tete-page"><h1 class="titre-page"><%= it.P.title %></h1><p class="lecture-maj"><%= v.typo(it.updated) %></p></div>
+<% if (it.voteLinks.length) { %>
+  <section class="wrap" aria-labelledby="mes-votes-t"><h2 class="titre-3" id="mes-votes-t"><%= it.voteUi.manageAll %></h2>
+    <ul><% it.voteLinks.forEach(link => { %><li><a class="lien" href="<%= link.href %>"><%= link.title %></a></li><% }) %></ul>
+  </section>
+<% } %>
 <%~ include('./_lecture', { ...it, fin: it.contactHref ? `    <p class="lecture-contact"><a class="lien" href="${v.esc(it.contactHref)}">${v.esc(it.contact)}</a></p>\n` : '' }) %>
 </main>
 <%~ include('./_pied', it) %>

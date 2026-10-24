@@ -5,6 +5,7 @@ import { createDecisionsClient } from './decisions.js';
 import { createPublicTexts } from './textes-publics.js';
 import { scanObject, isAttackTool } from './detection.js';
 import { onDecryptFail, compterDechiffrements } from '../vault.js';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { clientKey } from '../ratelimit.js';
 import { TRAP_PATH } from './piege.js';
 import { settingsOf, SESSION_TRIGGER } from './retrait.js';
@@ -83,6 +84,13 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   const settings = settingsOf(db);
   const sec = createSecurite({ url: config.vigie.url, key: config.vigie.ingestKey, storageDir: config.storageDir, log: app.log, send, timers });
   app.decorate('securite', sec);
+  // BV-20/21 : fermer le geste sous son auteur avant une attente externe, même si un autre compte répond entre-temps.
+  // Une instance par application ; la référence reçoit la session après le crochet d’authentification.
+  const publications = new AsyncLocalStorage();
+  app.addHook('onRequest', (request, reply, done) => {
+    if (['GET', 'HEAD'].includes(request.method)) return done();
+    publications.run(request, done);
+  });
   app.decorateRequest('vigieLecture', null);
   app.addHook('onRequest', (request, reply, done) => {
     const route = request.routeOptions?.url || '';
@@ -403,6 +411,15 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
     if (more > 0 || exifAll) {
       sec.emit('privacy_exposure_changed', { request, severity: exifAll ? 'moyen' : undefined, emetteur: 'server/securite · données exposées', detail: { heure_visible_ajoutees: Math.max(more, 0), heure_visible_total: now.heure, exif_complet: exifAll || undefined } });
     }
+  };
+  // Les services de publication appellent ce point après persistance et avant leur première suspension. Le calendrier
+  // impose le contexte système, y compris si une tâche programmée est appelée depuis un contexte asynchrone hérité.
+  sec.observePublication = ({ scheduled = false } = {}) => {
+    const request = scheduled ? null : publications.getStore();
+    try {
+      if (request?.session) watchWrites(request);
+      else watchTexts(null, 'publication programmée');
+    } catch (err) { app.log.error({ err: err.message }, 'Vigie : observation de publication'); }
   };
   app.addHook('onReady', async () => { step('réglages publics', () => { lastSnapshot = snapshot(); lastTextsAt = textesNow(); lastTexts = textes.snapshot({ now: lastTextsAt }); lastChanges = totalChanges.get(); }); });
 

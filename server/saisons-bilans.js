@@ -11,6 +11,7 @@ const fieldsOf = fields => fields.flatMap(field => BILAN_LANGS.map(lang => col(f
 const positive = value => Number.isSafeInteger(value) && value > 0;
 const instant = value => Number.isSafeInteger(value) && value >= 0 && value <= 8640000000000000;
 const languageOf = lang => BILAN_LANGS.includes(lang) ? lang : 'fr';
+const PUBLIC_COLLECTION_SQL = "state = 'publie' AND typeof(published_at) = 'integer' AND published_at BETWEEN 0 AND 8640000000000000 AND published_at <= ?";
 
 export class SaisonBilanError extends Error {
   constructor(message, { field = null, status = 422 } = {}) { super(message); this.field = field; this.status = status; }
@@ -27,6 +28,10 @@ export function createSaisonsBilans({ db, readiness = null, now = Date.now, arch
     collection: db.prepare('SELECT * FROM saison_collections WHERE id = ?'),
     collectionSlug: db.prepare('SELECT * FROM saison_collections WHERE slug = ?'),
     collections: db.prepare('SELECT c.*, b.saison_id FROM saison_collections c JOIN saison_bilans b ON b.id = c.bilan_id ORDER BY c.created_at DESC, c.id DESC'),
+    publicCollections: db.prepare(`SELECT * FROM saison_collections WHERE ${PUBLIC_COLLECTION_SQL} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`),
+    publicCollectionCount: db.prepare(`SELECT COUNT(*) FROM saison_collections WHERE ${PUBLIC_COLLECTION_SQL}`).pluck(),
+    publicCollectionExists: db.prepare(`SELECT EXISTS (SELECT 1 FROM saison_collections WHERE ${PUBLIC_COLLECTION_SQL})`).pluck(),
+    publicCollectionsForReport: db.prepare(`SELECT id, slug, title, title_en, title_de FROM saison_collections WHERE bilan_id = ? AND ${PUBLIC_COLLECTION_SQL} ORDER BY created_at DESC, id DESC`),
     collectionPhotos: db.prepare('SELECT * FROM saison_collection_photos WHERE collection_id = ? ORDER BY position'),
     photo: db.prepare('SELECT status FROM photos WHERE id = ?').pluck(),
     publicPhoto: db.prepare('SELECT * FROM photos WHERE id = ?'),
@@ -111,7 +116,8 @@ export function createSaisonsBilans({ db, readiness = null, now = Date.now, arch
   const corrected = (rectifies_id, saison_id) => {
     if (rectifies_id == null) return null;
     const parent = positive(rectifies_id) ? q.report.get(rectifies_id) : null;
-    if (!parent || parent.saison_id !== saison_id || parent.state !== 'publie' || parent.published_at == null || parent.published_at > time())
+    // Un retrait masque le bilan sans effacer son histoire : il peut recevoir une relève distincte.
+    if (!parent || parent.saison_id !== saison_id || !['publie', 'retire'].includes(parent.state) || !instant(parent.published_at) || parent.published_at > time())
       throw new SaisonBilanError('Le rectificatif doit viser un bilan publié de cette saison.', { field: 'rectifies_id' });
     return parent;
   };
@@ -261,9 +267,9 @@ export function createSaisonsBilans({ db, readiness = null, now = Date.now, arch
     if (!publicSaison(s, t)) return [];
     return q.reports.all(s.id).filter(r => publicReport(r, s, t)).map(r => ({ id: r.id, title: r[col('title', language)], body: r[col('body', language)], rectificatif: r.rectifies_id != null, rectifies_id: r.rectifies_id != null && q.reports.all(s.id).some(parent => parent.id === r.rectifies_id && publicReport(parent, s, t)) ? r.rectifies_id : null,
       published_at: r.published_at, photo_ids: archived(s, t) ? publicAllowed(q.reportPhotos.all(r.id)) : [],
-      collections: q.collections.all().filter(c => c.bilan_id === r.id).map(c => publicCollection(c, language, t)).filter(Boolean).map(c => ({ id: c.id, slug: c.slug, title: c.title })) }));
+      collections: q.publicCollectionsForReport.all(r.id, t).map(c => ({ id: c.id, slug: c.slug, title: c[col('title', language)] })) }));
   }
-  const publicCollections = ({ lang = 'fr' } = {}) => { const t = time(); return q.collections.all().map(c => publicCollection(c, lang, t)).filter(Boolean); };
+  const publicCollections = ({ lang = 'fr', limit = -1, offset = 0 } = {}) => { const t = time(); return q.publicCollections.all(t, limit, offset).map(c => publicCollection(c, lang, t)); };
   const publicCollectionBySlug = (slug, { lang = 'fr' } = {}) => typeof slug === 'string' && slug.length <= BILAN_LIMITS.slug ? publicCollection(q.collectionSlug.get(slug), lang, time()) : null;
   function textRows() {
     const t = time(), rows = [];
@@ -282,5 +288,5 @@ export function createSaisonsBilans({ db, readiness = null, now = Date.now, arch
   }
   return { createReport, saveReport, publishReport, withdrawReport, getReport, listReports: saisonId => positive(saisonId) ? q.reports.all(saisonId).map(reportData) : [],
     createCollection, saveCollection, publishCollection, withdrawCollection, getCollection, listCollections: saisonId => q.collections.all().filter(c => saisonId == null || c.saison_id === saisonId).map(collectionData),
-    publicForSaison, publicCollections, publicCollectionBySlug, textRows };
+    publicForSaison, publicCollections, publicCollectionsCount: () => q.publicCollectionCount.get(time()), publicCollectionsExist: () => Boolean(q.publicCollectionExists.get(time())), publicCollectionBySlug, textRows };
 }

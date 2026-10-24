@@ -49,7 +49,7 @@
           </form>
         <% } else if (!it.removed) { %><p><%= v.empty %></p><% } %>
       <% } %>
-      <p><a class="lien" href="<%= it.exhibitionHref %>"><%= v.exhibition %></a></p>
+      <% if (it.exhibitionHref) { %><p><a class="lien" href="<%= it.exhibitionHref %>"><%= v.exhibition %></a></p><% } %>
     </div>
   </div>
 </main>

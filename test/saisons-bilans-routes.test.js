@@ -56,6 +56,26 @@ test('bilans raccordés : préparer, publier et rectifier crée deux objets immu
   assert.deepEqual(c.app.saisonsBilans.getReport(id), frozen);
 });
 
+test('bilans raccordés : les deux administrations permettent un rectificatif après le retrait du bilan initial', async t => {
+  const c = await setup(t, { seeded: true }), admin = as(c, { sub: 'bilans-admin-retrait', roles: ['admin'] }), sid = season(c);
+  const id = publishedReport(c, sid), base = `/admin/saisons/${sid}/bilans`, url = `${base}/${id}`;
+  const before = c.app.saisonsBilans.getReport(id);
+  assert.equal((await admin.post(`${url}/retirer`, { version: String(before.version) })).statusCode, 303);
+  const retired = c.app.saisonsBilans.getReport(id);
+  for (const version of ['v1', 'v2']) {
+    await admin.post('/admin/version', { version, back: base });
+    const page = await admin.get(base);
+    assert.equal(page.statusCode, 200); assert.match(page.body, new RegExp(`<option value="${id}">`));
+    assert.match(page.body, /Bilan &lt;em&gt;neutre&lt;\/em&gt;\s· Retiré/);
+  }
+  const created = await admin.post(base, { title: 'Relève rectificative', rectifies_id: String(id) });
+  assert.equal(created.statusCode, 303, created.body); const correction = Number(created.headers.location.split('/').at(-1));
+  assert.equal((await admin.post(created.headers.location, reportForm(c, correction, { title: 'Relève rectificative' }))).statusCode, 303);
+  assert.equal((await admin.post(`${created.headers.location}/publier`, { version: String(c.app.saisonsBilans.getReport(correction).version) })).statusCode, 303);
+  assert.deepEqual(c.app.saisonsBilans.getReport(id), retired);
+  assert.deepEqual(c.app.saisonsBilans.publicForSaison(sid).map(r => ({ id: r.id, rectificatif: r.rectificatif, rectifies_id: r.rectifies_id })), [{ id: correction, rectificatif: true, rectifies_id: null }]);
+});
+
 test('collections raccordées : accrochage, couverture et cartels propres persistent puis se figent à la publication', async t => {
   const c = await setup(t, { seeded: true }), admin = as(c, { sub: 'bilans-admin-collection', roles: ['admin'] }), sid = season(c), ids = c.app.saisons.get(sid).photo_ids;
   const rid = publishedReport(c, sid), created = await admin.post(`/admin/saisons/${sid}/bilans/${rid}/collections`, { title: 'Un prolongement' });

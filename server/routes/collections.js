@@ -46,10 +46,10 @@ export function registerCollectionPages(app, { lang, repo, base, service = null 
     if (!open(request)) return reply.callNotFound();
     const raw = request.query.page;
     if (raw != null && (typeof raw !== 'string' || !/^[1-9]\d{0,5}$/.test(raw))) return reply.callNotFound();
-    const page = raw == null ? 1 : Number(raw), all = c.list({ lang }), pages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+    const page = raw == null ? 1 : Number(raw), pages = Math.max(1, Math.ceil(c.count() / PAGE_SIZE));
     if (page > pages) return reply.callNotFound();
     app.stats.hit(request, { page: 'collections' });
-    return render(request, reply, 'collections', null, { list: all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), page, pages,
+    return render(request, reply, 'collections', null, { list: c.list({ lang, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }), page, pages,
       canonical: page === 1 ? '/collections' : `/collections?page=${page}`,
       prevHref: page > 1 ? u(page === 2 ? '/collections' : `/collections?page=${page - 1}`) : null,
       nextHref: page < pages ? u(`/collections?page=${page + 1}`) : null });

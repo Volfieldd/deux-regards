@@ -14,9 +14,9 @@ export function createCollectionsPubliques({ bilans, repo, storageDir, expositio
     const photos = c.photo_ids.map(id => rows.get(id)).filter(p => collectionPhotoVisible(p, storageDir))
       .map(p => ({ ...p, cartel: cartels.get(p.id) || '' }));
     return { ...c, photo_ids: photos.map(p => p.id), photos, cover: photos.find(p => p.id === c.cover_id) || null,
-      origin: c.origin && (!expositions || expositions.byId(c.origin.saison_id, { lang })) ? c.origin : null };
+      origin: c.origin && (!expositions || expositions.has(c.origin.saison_id)) ? c.origin : null };
   };
-  const list = ({ lang = 'fr' } = {}) => bilans.publicCollections({ lang }).map(c => project(c, lang));
+  const list = ({ lang = 'fr', limit = -1, offset = 0 } = {}) => bilans.publicCollections({ lang, limit, offset }).map(c => project(c, lang));
   const bySlug = (slug, { lang = 'fr' } = {}) => project(bilans.publicCollectionBySlug(slug, { lang }), lang);
   function photo(slug, photoSlug, { lang = 'fr' } = {}) {
     if (typeof photoSlug !== 'string' || photoSlug.length > 200) return null;
@@ -27,5 +27,5 @@ export function createCollectionsPubliques({ bilans, repo, storageDir, expositio
     return { collection, photo: collection.photos[index], index, count: collection.photos.length,
       prev: index > 0 ? collection.photos[index - 1] : null, next: index + 1 < collection.photos.length ? collection.photos[index + 1] : null };
   }
-  return { list, bySlug, photo };
+  return { list, count: bilans.publicCollectionsCount, bySlug, photo };
 }

@@ -49,3 +49,9 @@ Références techniques : [directives robots et nécessité de laisser lire `noi
 ## Complément — simulation de mise en ligne
 
 La [simulation sur image de production](simulation-mise-en-ligne.md) vérifie les optimisations ajoutées après le socle ci-dessus. Le [parcours Search Console et contenu](search-console-et-contenu.md) précise les contrôles réels du propriétaire, les fonctions IA documentées en 2026 et une croissance éditoriale fondée sur les œuvres. Les nombres des suites globales ci-dessus appartiennent au premier socle ; les tests ciblés et preuves du complément sont rapportés séparément.
+
+## Intégration avec la PR #228 avant fusion
+
+Le propriétaire a autorisé la fusion le 24 octobre 2026. La branche reprend `main` à `8bb342d`, qui contient déjà les corrections des expositions et de l’attribution Vigie de la PR #228. Les conflits portaient uniquement sur le plan, les nouveautés et les versions des manifestes. Les deux entrées de nouveautés sont conservées dans leur ordre numérique et la version installée reste **1.228.0**.
+
+La sélection de dix-neuf fichiers couvre les tests SEO du complément, les langues, statistiques, Carnets, textes publics, versions publiques, nouveautés, collections, expositions, votes HTTP, publications concurrentes Vigie, bilans, liens internes, aide et traductions. Avec `AVIF_EFFORT=0` et `--test-concurrency=4` : **160/160 sans Vigie**, puis **160/160 avec `TEST_AVEC_VIGIE=1`**, sans échec, ignoré ni annulé. Aucun changement supplémentaire de parcours ou de présentation ; les essais navigateur et la simulation ci-dessus restent ceux effectués avant cette intégration.

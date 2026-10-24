@@ -30,6 +30,7 @@ import { safeNext } from '../auth.js';
 import { registerCarnetPages, registerCarnetFeeds, carnetContext, carnetSitemap } from './carnet-public.js';
 import { registerExpositionPages } from './expositions.js';
 import { registerExpositionVotes } from './expositions-votes.js';
+import { VOTE_UI } from '../saisons-votes-textes.js';
 import { registerCollectionPages } from './collections.js';
 import { registerContactPages } from './contact-public.js';
 import { createCollectionsPubliques } from '../collections-publiques.js';
@@ -843,6 +844,8 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const siteName = app.siteName();
     const settings = repo.settings();
     const P = PRIVACY[lang];
+    const voteLinks = app.expositionVoteForms.managementLinks(request, lang);
+    if (voteLinks.length) reply.header('cache-control', 'private, no-store').header('referrer-policy', 'no-referrer').header('x-robots-tag', 'noindex');
     const contact = String(settings.privacy_contact || settings.rights_contact || '').trim();
     const host = app.config.publicUrl.replace(/^https?:\/\/(www\.)?/, '');
     const sections = P.sections({ site: siteName, authors: repo.authors().map(a => a.name), contact: contact || `${host}${localize('/bonjour', lang)}`, host,
@@ -850,7 +853,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const date = new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(app.securite.enabled && UPDATED_SECURITY_LOG > PRIVACY_UPDATED ? UPDATED_SECURITY_LOG : PRIVACY_UPDATED));
     app.stats.hit(request, { page: 'confidentialite' });
     return reply.render('privacy', {
-      ...base, siteName, P, sections, updated: P.updated(date), contact, contactHref: contactLink(contact),
+      ...base, siteName, P, sections, voteLinks, voteUi: VOTE_UI[lang], updated: P.updated(date), contact, contactHref: contactLink(contact),
       pageTitle: `${P.title} · ${siteName}`, canonical: '/confidentialite', description: P.description(siteName),
     });
   });
