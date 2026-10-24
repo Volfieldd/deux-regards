@@ -9,6 +9,7 @@ import { loadConfig } from '../server/config.js';
 import { openDb, migrate } from '../server/db/index.js';
 import { buildApp } from '../server/app.js';
 import { createVault } from '../server/vault.js';
+import { IDLE_TTL } from '../server/sessions.js';
 import { createSecurite } from '../server/securite/index.js';
 import { scanValue, uaFamily } from '../server/securite/detection.js';
 import { networkOf } from '../server/securite/reseau.js';
@@ -75,7 +76,11 @@ test('Vigie retirée : déclencheur, sessions fermées, contexte et événements
   db.prepare("INSERT INTO sessions (id, sub, csrf, created_at, expires_at, ctx_ip, ctx_ua) VALUES ('h', 's', 'c', 1, 9e15, '1.2.3.4', 'Safari · macOS')").run();
   db.prepare("DELETE FROM sessions WHERE id = 'h'").run();
   assert.equal(db.prepare('SELECT COUNT(*) FROM sessions_revoked').pluck().get(), 1);
-  db.prepare("INSERT INTO sessions (id, sub, csrf, created_at, expires_at, ctx_ip, ctx_ua) VALUES ('k', 's', 'c', 1, 9e15, '1.2.3.4', 'Safari · macOS')").run();
+  // Une session encore valide garde sa ligne sans contexte ; une session échue est retirée par la purge au démarrage.
+  const at = Date.now();
+  const session = db.prepare("INSERT INTO sessions (id, sub, csrf, created_at, expires_at, ctx_ip, ctx_ua) VALUES (?, 's', 'c', ?, ?, '1.2.3.4', 'Safari · macOS')");
+  session.run('k', at, at + IDLE_TTL);
+  session.run('echue', at - IDLE_TTL, at - 1);
   app.securite.emit('sys_error', {});
   await app.securite.flush();
   assert.ok(fs.readdirSync(path.join(dir, 'securite-attente')).length >= 1, 'lot gardé en attente');
@@ -88,6 +93,7 @@ test('Vigie retirée : déclencheur, sessions fermées, contexte et événements
   assert.equal(db.prepare('SELECT COUNT(*) FROM sessions_revoked').pluck().get(), 0);
   assert.equal(db.prepare("SELECT COUNT(*) FROM sqlite_master WHERE name = 'vigie_sessions_revoked'").pluck().get(), 0);
   assert.deepEqual(db.prepare("SELECT ctx_ip, ctx_ua FROM sessions WHERE id = 'k'").get(), { ctx_ip: null, ctx_ua: null });
+  assert.equal(db.prepare("SELECT COUNT(*) FROM sessions WHERE id = 'echue'").pluck().get(), 0);
   assert.equal(fs.existsSync(path.join(dir, 'securite-attente')), false);
   // Repères sans donnée personnelle gardés : une Vigie remise en route reprend où elle en était.
   assert.equal(db.prepare("SELECT value FROM settings WHERE key = 'vigie_comptes_vus'").pluck().get(), '7');

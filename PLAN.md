@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Échéances, purges et stockages refusés, PR #225, version 1.225.0 (24 octobre 2026)
+
+Premier lot du diagnostic des cookies sur la version 1.217.0 : URL publique HTTPS obligatoire en production, dix minutes OIDC vérifiées au serveur avant échange du code, suppression des sessions expirées au démarrage puis chaque heure, effacement autonome des récapitulatifs Bonjour à quinze minutes et accès facultatifs au stockage navigateur protégés dans les deux admins. Derrière Cloudflare Tunnel, le service interne reste autorisé en HTTP sans certificat local : un test sur un listener HTTP réel vérifie la santé et les attributs du cookie destiné au visiteur HTTPS. Les fonctions, droits, durées et empreintes révoquées de la Vigie sont préservés. Chaque défaut a son test de régression ; les parcours navigateur utilisent une base jetable avec stockage autorisé et refusé. La [note du lot](docs/etudes/cookies-correctifs-techniques.md) sépare les périmètres et les dépendances CNIL. Le [chiffrement intégral](docs/etudes/chiffrement-etats-cookies.md), déjà demandé, est conçu mais non appliqué : NC2, l’historique Vigie, les index et le déverrouillage entièrement hors ligne restent à arbitrer avant migration.
+
 ## Correction — Inventaire Fastify autonome de la Vigie, PR #217, version 1.217.0 (23 octobre 2026)
 
 Le manifeste et le verrou autonomes de la Vigie passent de Fastify 5.12.5 à 5.12.7. `Dockerfile.vigie` installe bien cet inventaire avant de le copier dans l’image publiée : sa construction l’audite désormais séparément et s’arrête avant l’image finale si npm signale une vulnérabilité de production. Le test d’infrastructure maintient l’alignement avec le site et l’ordre installation, audit, image finale. Les routes actuelles n’emploient pas la forme `headers.propertyNames` concernée par GHSA-389g-gv7q-r4x8 ; le comportement du moteur et de la console reste inchangé.

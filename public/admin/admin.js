@@ -297,10 +297,10 @@ const toast = (() => {
     }, 50);
   }
   // Après rechargement : message (et annulation d'action groupée) mis de côté avant.
-  const saved = sessionStorage.getItem('toast');
-  if (saved) {
-    sessionStorage.removeItem('toast');
-    try {
+  try {
+    const saved = sessionStorage.getItem('toast');
+    if (saved) {
+      sessionStorage.removeItem('toast');
       const t = JSON.parse(saved);
       if (Date.now() - t.at < 15000) {
         show(t.text, {
@@ -308,9 +308,11 @@ const toast = (() => {
           undo: t.undo && (async () => { const r = await postJson('/admin/photos/actions', t.undo); keep(r.text); location.reload(); }),
         });
       }
-    } catch { /* ignoré */ }
+    }
+  } catch { /* stockage refusé ou message illisible : les messages de cette page restent utilisables */ }
+  function keep(text, undo = null, error = false) {
+    try { sessionStorage.setItem('toast', JSON.stringify({ text, undo, error, at: Date.now() })); } catch { /* rechargement sans message mémorisé */ }
   }
-  function keep(text, undo = null, error = false) { sessionStorage.setItem('toast', JSON.stringify({ text, undo, error, at: Date.now() })); }
   return { show, keep };
 })();
 
@@ -1321,8 +1323,7 @@ $$('[data-hero]').forEach(box => {
   // Taille des vignettes (mémorisée).
   const density = $('[data-density]');
   if (density && contact) {
-    const saved = Number(localStorage.getItem('planche-taille'));
-    if (saved) density.value = saved;
+    try { const saved = Number(localStorage.getItem('planche-taille')); if (saved) density.value = saved; } catch { /* taille par défaut */ }
     // Sur téléphone, la taille reste celle de la feuille de style (le curseur y est masqué).
     const wide = matchMedia('(min-width: 721px)');
     // sizes des tuiles à la hauteur choisie (même formule que server/picture.js, tileSizes) : sans eux, le navigateur
@@ -1335,7 +1336,10 @@ $$('[data-hero]').forEach(box => {
     const apply = () => { if (wide.matches) contact.style.setProperty('--rowh', `${density.value}px`); else contact.style.removeProperty('--rowh'); resize(Number(density.value) || 190); };
     wide.addEventListener('change', apply);
     apply();
-    density.addEventListener('input', () => { apply(); localStorage.setItem('planche-taille', density.value); });
+    density.addEventListener('input', () => {
+      apply();
+      try { localStorage.setItem('planche-taille', density.value); } catch { /* taille conservée seulement sur cette page */ }
+    });
   }
 
   // ---------- sélection ----------
