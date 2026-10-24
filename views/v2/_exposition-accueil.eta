@@ -1,0 +1,24 @@
+<% /* S2 : ouverture choisie par l’administrateur, partagée par les accueils v2/v3 et les chambres noires. Une annonce
+      ne révèle aucun texte de visite ; la photographie de couverture reste entière sur ordinateur et téléphone. */ %>
+<% const e = it.homeExposition, x = it.expositionUi;
+   const action = e.phase === 'annonce' ? x.preview : e.phase === 'archive' ? x.visitArchive : x.enter; %>
+<section class="wrap expo expo-accueil" aria-labelledby="acc-exposition-t">
+  <div class="expo-ouverture<%= e.cover ? '' : ' expo-ouverture--texte' %>">
+    <div class="expo-ouverture-texte">
+      <p class="etiquette"><%= x.signature %> · <%= x.states[e.phase] %></p>
+      <h1 class="titre-page" id="acc-exposition-t"><%= e.title %></h1>
+<% if (e.subtitle) { %>      <p class="chapo"><%= e.subtitle %></p>
+<% } %>
+      <dl class="expo-calendrier" aria-label="<%= x.dates %>">
+        <dt><%= x.opens %></dt><dd><time datetime="<%= new Date(e.opens_at).toISOString() %>"><%= it.expositionDate(e.opens_at) %></time></dd>
+        <dt><%= x.closes %></dt><dd><time datetime="<%= new Date(e.closes_at).toISOString() %>"><%= it.expositionDate(e.closes_at) %></time></dd>
+<% if (e.phase === 'archive') { %>        <dt><%= x.archiveUntil %></dt><dd><time datetime="<%= new Date(e.archive_ends_at).toISOString() %>"><%= it.expositionDate(e.archive_ends_at) %></time></dd>
+<% } %>      </dl>
+<% if (e.phase === 'annonce' || e.phase === 'archive') { %>      <p class="expo-prose"><%= e.phase === 'annonce' ? x.announcement : x.completed %></p>
+<% } %>
+      <div class="expo-actions"><a class="btn" href="<%= it.u(`/exposition/${e.slug}`) %>"><%= action %></a><a class="lien" href="<%= it.u('/expositions') %>"><%= x.back %></a></div>
+    </div>
+<% if (e.cover) { %>    <figure class="expo-couverture"><a href="<%= it.u(`/exposition/${e.slug}`) %>" aria-label="<%= action %>"><%~ it.picture(e.cover, { sizes: '(min-width: 900px) calc((100vw - 192px) / 2), calc(100vw - 48px)', eager: true, alt: e.cover.alt || e.cover.title }) %></a></figure>
+<% } %>
+  </div>
+</section>

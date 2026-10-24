@@ -51,6 +51,8 @@ import { createPublicVersion, usesV2 } from './version-publique.js';
 import { createCarnet } from './carnet.js';
 import { createSaisons } from './saisons.js';
 import { createSaisonsBilans } from './saisons-bilans.js';
+import { createSaisonsPubliques } from './saisons-publiques.js';
+import { EXPOSITION_UI } from './routes/expositions.js';
 import { createRepo } from './repo.js';
 
 export { truncateIp };
@@ -145,6 +147,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   const mapSetting = db.prepare("SELECT value FROM settings WHERE key = 'map_page'").pluck();
   // Recherche (activée par défaut : lien « Rechercher » dans le menu) ; mots-clés affichés sur la page photo (non par défaut).
   const searchSetting = db.prepare("SELECT value FROM settings WHERE key = 'search_page'").pluck();
+  // L’accueil suit le choix explicite de l’administrateur ; aucune exposition ne prend sa place automatiquement.
+  const expositionSetting = db.prepare("SELECT value FROM settings WHERE key = 'saison_accueil'").pluck();
   // Lien « Voyages » du menu : au moins un voyage publié qui a une photo publiée.
   const tripsOpen = db.prepare(`SELECT EXISTS (SELECT 1 FROM trips t JOIN trip_days d ON d.trip_id = t.id JOIN photos p ON p.author_id = d.author_id AND p.taken_on = d.day
     WHERE t.public = 1 AND p.status = 'published')`).pluck();
@@ -176,7 +180,23 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const galerieLinks = { galeriePage, galerieHref: galeriePage ? localize('/galerie', lang) : `${localize('/', lang)}#galerie`,
       seriesHref: galeriePage ? localize('/series', lang) : `${localize('/', lang)}#series`,
       ...(galeriePage && typeof data?.galerieUrl === 'function' ? { galleryUrl: data.galerieUrl } : {}) };
+    // S2 : un aperçu privé ne rend pas publique la rubrique. Le menu exige sa publication et sa disponibilité dans
+    // la vue courante ; les galeries privées ne reprennent jamais les contenus éditoriaux de l’accueil.
+    const expositionsPage = Boolean(pv) && usesV2(app.publicVersion.versionForSection('expositions'))
+      && usesV2(app.publicVersion.forRequest(this.request, 'expositions').version) && app.expositions.list({ lang }).length > 0;
+    let homeExposition = null;
+    if (v2 && expositionsPage && template === 'home' && data?.page === 'accueil') {
+      let featured = null;
+      try { featured = JSON.parse(expositionSetting.get() || 'null'); } catch { /* ancien réglage invalide : ouverture habituelle */ }
+      if (Number.isSafeInteger(featured) && featured > 0) {
+        const e = app.expositions.byId(featured, { lang });
+        if (e && ['annonce', 'ouverte', 'archive'].includes(e.phase)) homeExposition = e;
+      }
+      if (homeExposition) this.header('cache-control', 'no-store');
+    }
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
+      expositionsPage, expositionUi: EXPOSITION_UI[lang], homeExposition, expositionsCss: Boolean(homeExposition),
+      expositionDate: at => `${new Intl.DateTimeFormat(LOCALES[lang].replace('_', '-'), { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(at)} UTC`,
       // Disponibilité des Carnets selon leur rubrique, y compris depuis un accueil V1 dans le système de thèmes.
       carnetPage: usesV2(app.publicVersion.forRequest(this.request, 'carnets').version) && app.carnet.publishedCount() > 0, v3, darkroom, designRowSizes, sectionThemes: Boolean(pv?.configured || pv?.darkroom), designSection: pv?.section,
       // Langues du site : page courante sans préfixe (sélecteur de langue), noms et adresses localisées.
@@ -299,6 +319,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('carnet', createCarnet({ db, repo: app.publicRepo, readiness: app.readiness, accounts: app.accounts, mailer: app.mailer, audit: app.audit, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
   app.decorate('saisons', createSaisons({ db, readiness: app.readiness }));
   app.decorate('saisonsBilans', createSaisonsBilans({ db, readiness: app.readiness }));
+  app.decorate('expositions', createSaisonsPubliques({ saisons: app.saisons, repo: app.publicRepo, readiness: app.readiness, storageDir: config.storageDir }));
   // Publications programmées : vérifiées chaque minute, photos d'abord (un billet programmé attend ses photos programmées
   // à la même heure), puis billets (app.carnet.runDue, seule à publier un billet programmé).
   let reviewTimer = null;

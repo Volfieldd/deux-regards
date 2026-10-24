@@ -1,0 +1,67 @@
+/*! © 2026 Sébastien Wojcicki. Tous droits réservés : reproduction, modification et fouille de données interdites sans autorisation. */
+/* Les saisons : photographies entières, parcours libre et mêmes contenus sur ordinateur et téléphone. */
+.expo { padding-bottom: var(--esp-10); }
+.expo-accueil { padding-top: var(--esp-6); padding-bottom: var(--esp-6); }
+.expo-accueil .expo-ouverture { align-items: center; padding-bottom: 0; }
+.expo-accueil .expo-couverture a { display: block; min-height: var(--cible); }
+.expo h1, .expo h2, .expo h3, .expo p, .expo dd, .expo a { overflow-wrap: anywhere; }
+.expo-index-entete { max-width: 78ch; }
+.expo-index-entete .etiquette { margin-bottom: var(--esp-2); }
+.expo-index { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--esp-8) var(--esp-6); padding: 0; margin: var(--esp-6) 0 0; list-style: none; }
+.expo-carte { display: flex; flex-direction: column; gap: var(--esp-3); min-width: 0; height: 100%; border-top: 1px solid var(--rule); padding-top: var(--esp-3); }
+.expo-carte-texte { display: grid; gap: var(--esp-2); }
+.expo-carte .titre-2 { margin: 0; }
+.expo-carte .titre-2 a { display: inline-block; min-height: var(--cible); }
+.expo-carte .titre-2 a:hover, .expo-carte .titre-2 a:focus-visible { text-decoration: underline; text-underline-offset: .15em; }
+.expo-carte-intention { color: var(--prose); }
+.expo-dates { color: var(--mute); font-size: var(--t-meta); line-height: var(--i-texte); }
+.expo-carte-couverture { margin: auto 0 0; }
+.expo-carte-couverture img { width: auto; height: auto; max-width: 100%; max-height: 420px; display: block; object-fit: contain; }
+.expo-retour { margin: var(--esp-3) 0 var(--esp-4); }
+.expo-retour .lien { display: inline-flex; min-height: var(--cible); align-items: center; }
+.expo-ouverture { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--esp-6); align-items: start; padding-bottom: var(--esp-6); }
+.expo-ouverture--texte { grid-template-columns: minmax(0, 1fr); max-width: 78ch; }
+.expo-ouverture-texte { display: grid; gap: var(--esp-3); }
+.expo-ouverture .titre-page { margin: 0; }
+.expo-ouverture .chapo { margin: 0; }
+.expo-couverture { margin: 0; }
+.expo-couverture img { display: block; width: auto; height: auto; max-width: 100%; max-height: 76vh; object-fit: contain; margin: 0 auto; }
+.expo-calendrier { display: grid; grid-template-columns: minmax(80px, .4fr) minmax(0, 1fr); gap: var(--esp-1) var(--esp-2); margin: 0; font-size: var(--t-meta); color: var(--mute); }
+.expo-calendrier dt { font-weight: 500; }
+.expo-calendrier dd { margin: 0; min-width: 0; }
+.expo-prose { max-width: 70ch; white-space: pre-line; font-size: var(--t-prose); line-height: var(--i-texte); color: var(--prose); margin: 0; }
+.expo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-2) var(--esp-3); }
+.expo-actions .lien { display: inline-flex; align-items: center; min-height: var(--cible); }
+.expo-note { margin: var(--esp-4) 0; padding: var(--esp-3); border-left: 3px solid var(--safelight); background: var(--frame); color: var(--prose); max-width: 78ch; }
+.expo-prologue { padding: var(--esp-5) 0 var(--esp-6); }
+.expo-accrochage { border-top: 1px solid var(--rule); padding-top: var(--esp-4); scroll-margin-top: var(--esp-4); }
+.expo-section-titre { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--esp-2); margin-bottom: var(--esp-4); }
+.expo-photos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--esp-6) var(--esp-5); list-style: none; padding: 0; margin: 0; }
+.expo-photos figure { margin: 0; }
+.expo-oeuvre { display: block; position: relative; min-height: var(--cible); }
+.expo-oeuvre img { display: block; max-width: 100%; width: auto; height: auto; max-height: 72vh; object-fit: contain; margin: 0 auto; }
+.expo-photo-numero { display: block; margin-top: var(--esp-2); color: var(--mute); }
+.expo-photos figcaption { display: grid; gap: var(--esp-1); margin-top: var(--esp-1); }
+.expo-photos .titre-3 { margin: 0; font-size: var(--t-titre-3); }
+.expo-photo-auteur { margin: 0; color: var(--mute); font-size: var(--t-meta); }
+.expo-conclusion, .expo-bilan { display: grid; gap: var(--esp-3); margin-top: var(--esp-8); padding-top: var(--esp-4); border-top: 1px solid var(--rule); scroll-margin-top: var(--esp-4); }
+.expo-photo-entete { display: grid; gap: var(--esp-2); margin-bottom: var(--esp-4); }
+.expo-photo-entete .titre-page { margin: 0; }
+.expo-photo-grand { margin: 0; }
+.expo-photo-grand img { display: block; max-width: 100%; width: auto; height: auto; max-height: 82vh; object-fit: contain; margin: 0 auto; }
+.expo-photo-grand figcaption { display: grid; gap: var(--esp-2); margin-top: var(--esp-3); }
+.expo-photo-nav, .expo-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--esp-2) var(--esp-3); padding-top: var(--esp-4); margin-top: var(--esp-4); border-top: 1px solid var(--rule); }
+.expo-photo-nav .lien, .expo-pagination .lien { display: inline-flex; align-items: center; min-height: var(--cible); }
+@media (max-width: 899px) {
+  .expo-index, .expo-ouverture, .expo-photos { grid-template-columns: minmax(0, 1fr); }
+  .expo-index { gap: var(--esp-6); }
+  .expo-ouverture { gap: var(--esp-4); }
+  .expo-carte-couverture img { max-height: 70vh; margin: 0 auto; }
+  .expo-photos { gap: var(--esp-6); }
+  .expo-photos .expo-prose { font-size: var(--t-texte); }
+}
+@media (max-width: 359px) {
+  .expo-calendrier { grid-template-columns: minmax(0, 1fr); gap: var(--esp-demi); }
+  .expo-calendrier dd { margin-bottom: var(--esp-1); }
+  .expo-photo-nav { align-items: stretch; flex-direction: column; }
+}

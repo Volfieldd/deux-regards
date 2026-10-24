@@ -1,0 +1,60 @@
+<% layout('./layout') %>
+<% const e = it.exposition, x = it.x; %>
+<%~ include('./_entete', { ...it, courant: 'expositions', courantSous: true }) %>
+<main id="contenu" class="wrap expo">
+  <p class="expo-retour"><a class="lien" href="<%= it.u('/expositions') %>">← <%= x.back %></a></p>
+  <header class="expo-ouverture<%= e.cover ? '' : ' expo-ouverture--texte' %>">
+    <div class="expo-ouverture-texte">
+      <p class="etiquette"><%= x.signature %> · <%= x.states[e.phase] %></p>
+      <h1 class="titre-page"><%= e.title %></h1>
+<% if (e.subtitle) { %>      <p class="chapo"><%= e.subtitle %></p>
+<% } %>
+      <dl class="expo-calendrier" aria-label="<%= x.dates %>">
+        <dt><%= x.opens %></dt><dd><time datetime="<%= new Date(e.opens_at).toISOString() %>"><%= it.date(e.opens_at) %></time></dd>
+        <dt><%= x.closes %></dt><dd><time datetime="<%= new Date(e.closes_at).toISOString() %>"><%= it.date(e.closes_at) %></time></dd>
+<% if (e.phase === 'archive') { %>        <dt><%= x.archiveUntil %></dt><dd><time datetime="<%= new Date(e.archive_ends_at).toISOString() %>"><%= it.date(e.archive_ends_at) %></time></dd>
+<% } %>      </dl>
+<% if (e.full && e.intro) { %>      <p class="expo-prose"><%= e.intro %></p>
+<% } %><% if (e.author) { %>      <p class="expo-auteur"><a class="lien" href="<%= it.u(`/auteur/${e.author.slug}`) %>"><%= e.author.name %></a></p>
+<% } %><% if (e.full && e.photos.length) { %>
+      <div class="expo-actions"><a class="btn" href="<%= it.u(`/exposition/${e.slug}/photo/${e.photos[0].slug}`) %>"><%= x.start %></a><a class="lien" href="#accrochage"><%= x.images %></a></div>
+<% } %>
+    </div>
+<% if (e.cover) { %>    <figure class="expo-couverture"><%~ it.picture(e.cover, { sizes: '(min-width: 900px) calc((100vw - 192px) / 2), calc(100vw - 48px)', eager: true, alt: e.cover.alt || e.cover.title }) %></figure>
+<% } %>
+  </header>
+<% if (e.phase === 'annonce') { %>
+  <p class="expo-note" role="note"><%= x.announcement %></p>
+<% } else if (e.full) { %>
+<% if (e.phase === 'archive') { %>  <p class="expo-note" role="note"><%= x.completed %></p>
+<% } %><% if (e.prologue) { %>  <section class="expo-prologue" aria-labelledby="prologue-t"><h2 class="sr-only" id="prologue-t"><%= e.title %></h2><p class="expo-prose"><%= e.prologue %></p></section>
+<% } %>
+  <section class="expo-accrochage" id="accrochage" aria-labelledby="accrochage-t">
+    <div class="expo-section-titre"><h2 class="titre-2" id="accrochage-t"><%= x.images %></h2><p class="donnee"><%= x.photographs(e.photos.length) %></p></div>
+<% if (!e.photos.length) { %>    <p class="expo-note"><%= x.noPhotos %></p>
+<% } else { %>
+    <ol class="expo-photos">
+<% e.photos.forEach((p, i) => { %>
+      <li><figure><a class="expo-oeuvre" href="<%= it.u(`/exposition/${e.slug}/photo/${p.slug}`) %>" aria-labelledby="photo-t-<%= p.id %>"><%~ it.picture(p, { sizes: '(min-width: 900px) calc((100vw - 192px) / 2), calc(100vw - 48px)', alt: p.alt || '' }) %><span class="expo-photo-numero donnee"><%= i + 1 %> / <%= e.photos.length %></span></a><figcaption><h3 class="titre-3" id="photo-t-<%= p.id %>"><%= p.title %></h3><p class="expo-photo-auteur"><%= p.author %></p><% if (p.cartel) { %><p class="expo-prose"><%= p.cartel %></p><% } %></figcaption></figure></li>
+<% }) %>
+    </ol>
+<% } %>
+  </section>
+  <section class="expo-conclusion" id="conclusion" aria-labelledby="conclusion-t">
+    <h2 class="titre-2" id="conclusion-t"><%= x.conclusion %></h2>
+<% if (e.conclusion) { %>    <p class="expo-prose"><%= e.conclusion %></p>
+<% } %>
+    <div class="expo-actions"><a class="lien" href="#accrochage"><%= x.returnToPhotos %></a><a class="lien" href="<%= it.u('/expositions') %>"><%= x.back %></a></div>
+  </section>
+<% } else { %>
+  <p class="expo-note" role="note"><%= x.archiveEnded %></p>
+<% } %>
+<% if (e.phase === 'archive' || e.phase === 'bilan') { %>
+  <section class="expo-bilan" id="bilan" aria-labelledby="bilan-t">
+    <h2 class="titre-2" id="bilan-t"><%= x.report %></h2>
+<% if (e.report) { %>    <p class="expo-prose"><%= e.report %></p>
+<% } else { %>    <p><%= x.pending %></p>
+<% } %>  </section>
+<% } %>
+</main>
+<%~ include('./_pied', it) %>

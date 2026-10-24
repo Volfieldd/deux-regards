@@ -6,7 +6,9 @@
    const series = it.seriesAll.filter(c => c.count && c.cover);
    // Aperçu de la galerie (quand la page /galerie existe) : douze photos, trois rangées environ au bureau.
    const APERCU = 12; %>
-<% if (it.hero.length && it.darkroom) { %>
+<% if (it.homeExposition) { %>
+<%~ include('./_exposition-accueil', it) %>
+<% } else if (it.hero.length && it.darkroom) { %>
 <%~ include('../themes/_ouverture', it) %>
 <% } else if (it.hero.length && it.v3) { /* v3 : plein cadre, puis la promesse (views/v3/_ouverture.eta) */ %>
 <%~ include('../v3/_ouverture', it) %>
