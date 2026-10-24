@@ -269,6 +269,12 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     purgeTimer.unref();
   });
   app.addHook('onClose', async () => clearInterval(purgeTimer));
+  // Les sessions expirent après 8 h d'inactivité ou 24 h au plus ; leurs données partent au prochain passage horaire,
+  // même si personne ne revient se connecter. Le DELETE conserve le déclencheur des empreintes révoquées de la Vigie.
+  let sessionsTimer = null;
+  const purgeSessions = () => { try { app.purgeSessions(); } catch (err) { app.log.error({ err }, 'sessions : purge'); } };
+  app.addHook('onReady', async () => { purgeSessions(); sessionsTimer = setInterval(purgeSessions, 3600 * 1000); sessionsTimer.unref(); });
+  app.addHook('onClose', async () => clearInterval(sessionsTimer));
   app.decorate('translator', createTranslator({ ...config.translate, log: app.log }));
   app.decorate('stats', createStats({ db, publicUrl: config.publicUrl, log: app.log, trustCountry: Boolean(config.trustProxy) }));
   // Partage Instagram : file de publication et envoi aux créneaux (voir server/instagram.js).

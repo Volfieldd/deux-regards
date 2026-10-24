@@ -11,7 +11,7 @@ Le serveur lit presque tout dans [`server/config.js`](https://github.com/Volfiel
 | `SITE_NAME` | `Nicephos` | Nom affiché, si l'admin n'en définit pas (**Site public → Nom du site**). |
 | `HOST` | `127.0.0.1` | Adresse d'écoute. |
 | `PORT` | `3000` | Port d'écoute. |
-| `PUBLIC_URL` | `http://localhost:PORT` | URL publique : liens absolus (Open Graph, URL canonique), redirections OIDC. **En HTTPS, le site est considéré « en ligne »** (voir plus bas). Analysée au démarrage (`HTTPS://Exemple.fr/` devient `https://exemple.fr`) ; une adresse invalide, ou autre que `http(s)://`, est refusée. **Obligatoire avec `NODE_ENV=production`.** |
+| `PUBLIC_URL` | `http://localhost:PORT` | URL publique : liens absolus (Open Graph, URL canonique), redirections OIDC. **En HTTPS, le site est considéré « en ligne »** (voir plus bas). Analysée au démarrage (`HTTPS://Exemple.fr/` devient `https://exemple.fr`) ; une adresse invalide, ou autre que `http(s)://`, est refusée. **Obligatoire et en HTTPS avec `NODE_ENV=production`.** |
 | `NODE_ENV` | — (`production` dans l'image Docker) | `production` : cache des gabarits, CSS/JS en cache long, et site considéré « en ligne ». |
 | `TRUST_PROXY` | en ligne : `loopback,uniquelocal` ; sinon aucun | Proxys dont on accepte `X-Forwarded-*` : liste d'IP, de CIDR ou de mots-clés (`loopback`, `uniquelocal`), ou nombre de proxys (`1`). `false` : aucun. `true` est **refusé** (n'importe quel client pourrait se faire passer pour un autre et contourner la limite de connexions). Indiquez l'adresse exacte du proxy : sur Unraid, la pile et les modèles la fixent à l'adresse du conteneur `cloudflared` (`TUNNEL_IP`, `172.29.42.10` par défaut). Laissée par défaut sur un serveur qui écoute sur le réseau (`HOST` autre qu'une adresse locale), le serveur l'écrit dans ses journaux au démarrage. |
 | `COOKIE_SECRET` | secret de développement | Signature des cookies, 32 caractères au moins. **Obligatoire en ligne, et dès que `HOST` n'est pas une adresse locale** (`127.0.0.1`, `::1`, `localhost`). |
@@ -99,11 +99,17 @@ Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur **re
 - `OIDC_ISSUER` est en HTTP ;
 - `LOCAL_AUTH_TOKEN` est défini ;
 - `TSA_URL` est en HTTP ;
-- `PUBLIC_URL` est absente alors que `NODE_ENV=production`.
+- `PUBLIC_URL` est absente ou en HTTP alors que `NODE_ENV=production`.
 
 Le serveur refuse aussi de démarrer, en ligne ou non, si `COOKIE_SECRET` fait moins de 32 caractères, si `LOCAL_AUTH_TOKEN` en fait moins de 16, si `INSTAGRAM_TOKEN_KEY` en fait moins de 32, si `TRUST_PROXY=true`, si `COOKIE_SECRET` manque alors que `HOST` n'est pas une adresse locale, ou si `PUBLIC_URL` n'est pas une adresse `http(s)://` valide.
 
-En ligne, il fait aussi confiance par défaut aux proxys locaux (`TRUST_PROXY`). Quand `PUBLIC_URL` est en HTTPS, les cookies sont `Secure` et préfixés `__Host-`, et les en-têtes HSTS et COOP sont envoyés. Ces protections ne dépendent donc pas d'une seule variable qu'on pourrait oublier.
+En ligne, il fait aussi confiance par défaut aux proxys locaux (`TRUST_PROXY`). Quand `PUBLIC_URL` est en HTTPS, les cookies sont `Secure` ; ceux de session d’équipe, de transaction OIDC et de session visiteur sont aussi préfixés `__Host-`. Les en-têtes HSTS et COOP sont envoyés. En développement hors production, HTTP et la connexion locale de test restent disponibles.
+
+### HTTPS public et transport interne
+
+`PUBLIC_URL` décrit l’adresse des visiteurs, pas le protocole d’écoute du serveur Node. Avec Cloudflare Tunnel, Cloudflare fournit le HTTPS public et `cloudflared` peut rejoindre Nicephos en HTTP sur le réseau interne : `http://site:3000` (ou `http://nicephos:3000` sur Unraid). Aucun certificat HTTPS local n’est alors nécessaire ; `PUBLIC_URL` reste en `https://…` pour les cookies sécurisés, les liens et les retours OIDC. Le contrôle de production accepte cette architecture.
+
+Sans Cloudflare, une terminaison HTTPS doit assurer l’accès public, par exemple un autre reverse proxy devant le serveur HTTP. Indiquer `https://…` ne configure pas ce certificat ni le réseau : vérifier le [déploiement](Déploiement). La présence d’un en-tête Cloudflare dans une requête ne constitue pas une preuve permettant de relâcher la configuration.
 
 ## Données personnelles, e-mails, traduction
 
