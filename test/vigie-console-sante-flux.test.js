@@ -14,7 +14,7 @@ import { createEngine } from '../vigie/moteur.js';
 import { createConsole } from '../vigie/console/server.js';
 import { overview } from '../vigie/console/vue-ensemble.js';
 import * as F from '../vigie/console/flux.js';
-import { lireFlux, vueFlux, vueSante, barreAlertes, provenanceAlertes, origineDe, cheminDe, phraseFlux, ROUTINE } from '../vigie/console/ecrans/sante-flux.js';
+import { lireFlux, vueFlux, vueSante, barreAlertes, provenanceAlertes, lireProvenances, origineDe, cheminDe, phraseFlux, ROUTINE, PROV_MAX } from '../vigie/console/ecrans/sante-flux.js';
 
 // Console de la Vigie, phase D3b : santé (MV-07), flux et provenance des alertes (MV-11) et la barre de provenance de la vue
 // d'ensemble (MV-01). Lecture seule ; base de la Vigie dans un dossier temporaire ; faux Cloudflare Access et faux Zitadel.
@@ -443,6 +443,107 @@ test('vueSante : chaîne rompue en tête, bordure non réglée, Zitadel jamais l
 });
 
 // ---------- Coût (audit D3-C6, D3-D3, D3-D4, D3-D15) ----------
+
+test('provenances : agrégats fidèles, exclusion des administrateurs et de leurs opérateurs, nom le plus récent et réseaux du Lecteur', t => {
+  const v = setup(t);
+  v.store.setting.set('controle_roles_admins', { administrateurs: ['admin-essai'] });
+  const bordure = (at, ip, country, asn, operateur) => ev(at, 'bordure_rafale', 'moyen', 'bordure', { ip, country, detail: { asn, operateur } });
+  v.store.add([
+    ev(T0 - 50, 'authn_login_success', 'info', 'site · connexion', { sub: 'admin-essai', ip: '192.0.2.10', country: 'FR' }),
+    bordure(T0 - 40, '192.0.2.10', 'FR', '64500', 'Opérateur administrateur'),
+    bordure(T0 - 30, '192.0.2.11', 'FR', '64500', 'Opérateur administrateur'),
+    bordure(T0 - 20, '203.0.113.20', 'DE', '64501', 'Ancien nom'),
+    bordure(T0 - 19, '203.0.113.20', 'DE', '64501', 'Ancien nom'),
+    bordure(T0 - 10, '203.0.113.20', 'DE', '64501', 'Nom récent'),
+    bordure(T0 - 15, '203.0.113.21', 'NL', '64501', 'Autre nom'),
+    ev(T0 - 9, 'malicious_excess_404', 'bas', 'site · public', { ip: '203.0.113.22', country: 'DE', detail: { asn: '64500' } }),
+    bordure(T0 - 8, '203.0.113.23', 'US', null, null),
+    ev(T0 - 7, 'malicious_excess_404', 'bas', 'site · public', { country: 'FR' }),
+    ev(T0 - 6, 'malicious_excess_404', 'bas', 'site · public', { ip: '2001:db8:abcd:1::1', country: 'FR' }),
+    ev(T0 - 5, 'malicious_excess_404', 'bas', 'site · public', { ip: '2001:db8:abcd:2::1', country: 'FR' }),
+    ev(T0 - 200, 'malicious_excess_404', 'bas', 'site · public', { ip: '192.0.2.100' }),
+    ev(T0 - 4, 'sys_heartbeat', 'info', 'site · système', { ip: '192.0.2.101' }),
+  ]);
+  const p = lireProvenances({ db: v.db, debut: T0 - 100, role: 'admin' });
+  assert.deepEqual([p.lus, p.nExclus, p.coupe, p.bordure, p.bordureAsn], ['12', 3, false, '5', '4']);
+  assert.deepEqual(p.operateurs.map(x => [x.texte, x.n]), [['AS64501 · Nom récent', '4']]);
+  assert.deepEqual(p.pays.map(x => [x.texte, x.n]), [['Allemagne', '4'], ['France', '3'], ['Pays-Bas', '1'], ['États-Unis', '1']]);
+  assert.equal(p.adresses[0].texte, '203.0.113.20');
+  assert.equal(p.adresses[0].n, '3');
+  assert.equal(p.nResteAdresses, 1, 'six adresses admises : les cinq premières et un événement restant');
+  assert.ok(!p.adresses.some(x => x.texte.startsWith('192.0.2.')));
+  const lecteur = lireProvenances({ db: v.db, debut: T0 - 100, role: 'viewer' });
+  assert.deepEqual(lecteur.adresses.map(x => [x.texte, x.n]), [['203.0.113.0/24', '6'], ['2001:db8:abcd::/48', '2']]);
+  assert.ok(lecteur.adresses.every(x => x.tronquee));
+  assert.equal(lecteur.nResteAdresses, 0);
+  assert.deepEqual(lecteur.operateurs, p.operateurs);
+});
+
+test('provenances : événements répétés regroupés avant leur matérialisation, borne exacte et événement excédentaire', t => {
+  const v = setup(t);
+  const debut = T0 - PROV_MAX - 10;
+  // La vraie chaîne et les compteurs sont tenus ; petits lots pour que le jeu d’essai ne crée pas lui-même un gros tableau.
+  for (let i = 0; i < PROV_MAX; i += 1000) v.store.add(Array.from({ length: Math.min(1000, PROV_MAX - i) }, (_, j) =>
+    ev(T0 - 1, 'malicious_excess_404', 'bas', 'site · public', { ip: '203.0.113.20', country: 'DE' })));
+  const lectures = [];
+  const db = { prepare(sql) {
+    const stmt = v.db.prepare(sql);
+    return new Proxy(stmt, { get(cible, cle) {
+      if (cle === 'all') return (...args) => {
+        const rows = cible.all(...args);
+        lectures.push({ sql, n: rows.length });
+        return rows;
+      };
+      return typeof cible[cle] === 'function' ? cible[cle].bind(cible) : cible[cle];
+    } });
+  } };
+  const p = lireProvenances({ db, debut, role: 'admin' });
+  assert.ok(lectures.every(x => x.n <= 1), `une provenance répétée ne doit pas allouer un objet par événement : ${lectures.map(x => x.n)}`);
+  const plan = v.db.prepare(`EXPLAIN QUERY PLAN ${lectures[0].sql}`).all(debut).map(x => x.detail).join(' | ');
+  assert.match(plan, /SEARCH events USING INDEX events_recu/, 'la période reste lue par son index');
+  assert.equal(p.coupe, false, 'la limite exacte ne coupe pas la période');
+  assert.equal(p.lus, '50\u00a0000');
+  assert.equal(p.adresses[0].n, '50\u00a0000');
+  v.store.add([ev(T0, 'sys_heartbeat', 'info', 'site · système')]);
+  assert.equal(lireProvenances({ db, debut, role: 'admin' }).coupe, false, 'la routine ne consomme pas la borne');
+  v.store.add([ev(T0 - 1, 'malicious_excess_404', 'bas', 'site · public', { ip: '203.0.113.21', country: 'FR' })]);
+  const coupe = lireProvenances({ db, debut, role: 'admin' });
+  assert.equal(coupe.coupe, true);
+  assert.equal(coupe.lus, '50\u00a0000');
+  assert.deepEqual(coupe.adresses.map(x => [x.texte, x.n]), [['203.0.113.20', '49\u00a0999'], ['203.0.113.21', '1']]);
+});
+
+test('provenances : la date et le numéro départagent le nom d’opérateur dans un groupe et entre groupes', t => {
+  const v = setup(t);
+  const bordure = (at, ip, operateur) => ev(at, 'bordure_rafale', 'moyen', 'bordure', { ip, country: 'FR', detail: { asn: '64501', operateur } });
+  const nom = () => lireProvenances({ db: v.db, debut: T0 - 100, role: 'admin' }).operateurs[0].texte;
+  v.store.add([bordure(T0, '198.51.100.1', 'Ancien nom'), bordure(T0, '203.0.113.9', 'Dernier nom reçu')]);
+  assert.equal(nom(), 'AS64501 · Dernier nom reçu', 'même date, deux groupes : le numéro le plus élevé');
+  v.store.add([bordure(T0, '198.51.100.1', 'Nom du troisième événement')]);
+  assert.equal(nom(), 'AS64501 · Nom du troisième événement', 'même date et même groupe : le numéro départage encore');
+  v.store.add([bordure(T0 - 20, '198.51.100.1', 'Nom ancien arrivé ensuite'), bordure(T0 - 30, '203.0.113.9', 'Autre nom ancien')]);
+  assert.equal(nom(), 'AS64501 · Nom du troisième événement', 'une date antérieure ne gagne pas par son numéro plus élevé');
+});
+
+test('provenances : cinq premières adresses exactes sans tri de toutes les adresses distinctes', t => {
+  const v = setup(t);
+  const n = 4096;
+  // Une permutation déterministe empêche un tri global de profiter d’un jeu déjà ordonné.
+  const ips = Array.from({ length: n }, (_, i) => { const x = (i * 4051) % n; return `198.18.${x >> 8}.${x & 255}`; });
+  v.store.add(ips.map((ip, i) => ev(T0 - i, 'malicious_excess_404', 'bas', 'site · public', { ip })));
+  const attendues = [...ips].sort((a, b) => a.localeCompare(b)).slice(0, 5);
+  const comparer = String.prototype.localeCompare;
+  let comparaisons = 0;
+  const suivi = t.mock.method(String.prototype, 'localeCompare', function (...args) {
+    comparaisons += 1;
+    return Reflect.apply(comparer, this, args);
+  });
+  let p;
+  try { p = lireProvenances({ db: v.db, debut: T0 - n, role: 'admin' }); } finally { suivi.mock.restore(); }
+  assert.deepEqual(p.adresses.map(x => x.texte), attendues);
+  assert.equal(p.nResteAdresses, n - 5);
+  assert.ok(comparaisons <= 5 * n, `${comparaisons} comparaisons : les cinq premières se choisissent en une passe`);
+});
 
 test('flux : provenances gardées une minute par période et par rôle (audit D3-D4) ; réponses par la colonne alerte_id', async t => {
   const { provenancesEnCache, PROV_CACHE_MS } = await import('../vigie/console/ecrans/sante-flux.js');

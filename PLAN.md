@@ -9,6 +9,12 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Calcul des provenances de la Vigie, PR #230, version 1.230.0 (24 octobre 2026)
+
+Le correctif local de `/flux` est porté sur le code courant : SQLite regroupe les 50 000 événements les plus récents avant leur matérialisation en JavaScript, et les cinq provenances les plus actives sont sélectionnées sans tri global. Les effectifs, exclusions des administrateurs et opérateurs, masques par rôle, périodes et signalement de la limite sont conservés. Les noms d’opérateurs suivent la date de réception puis le numéro de ligne, y compris lors d’un lot simultané ou d’arrivées désordonnées. Les tests de régression comptent le travail et vérifient les résultats, sans seuil absolu de durée. Aucun changement du moteur, des dossiers, des règles ou des droits.
+
+Vérifications sur `7ce8c95` : **1 525/1 525 tests dans chaque mode**, nominal et Vigie (1 493 cas de premier niveau et 32 sous-tests), aucun échec, ignoré ou annulé. Commandes équivalentes aux scripts npm avec `--test-concurrency=4` avant les fichiers, deux modes exécutés simultanément. Les 19 tests ciblés passent ; deux régressions de charge échouent sur l’ancien code. Quatre parcours Chromium sans JavaScript sur le vrai serveur HTTPS local, administratrice et lectrice à 1 440/390 px, vérifient comptages, périodes, masques, erreur de période et absence d’écriture du journal, sans débordement ni erreur observée ; Access et OIDC simulés. La campagne initiale avait révélé une attente « Galerie » obsolète depuis #227, reproduite sur main puis corrigée en vérifiant aussi la portée exacte des photos de Julien ; les deux suites complètes ont ensuite été relancées. Notes FR/EN/DE réservées à `securite.voir`, version 1.230.0. Preuves locales dans `work/preuves-flux/`, données jetables uniquement.
+
 ## Étude — Suivi CNIL et application des exigences cookies (24 octobre 2026)
 
 Précision du propriétaire : **l’ensemble est déployé en zone euro**. Localisation enregistrée par déclaration dans les fiches prestataires ; les flux et garanties des services tiers, l’exemption par finalité et la réalisation du chiffrement restent des vérifications distinctes.
