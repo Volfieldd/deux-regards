@@ -46,6 +46,8 @@
   <link rel="stylesheet" href="<%= it.asset('css/v2/tokens.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/public.css') %>">
   <link rel="stylesheet" href="<%= it.asset('css/v2/pages.css') %>">
+<% if (it.expositionsCss) { %>  <link rel="stylesheet" href="<%= it.asset('css/expositions.css') %>">
+<% } %>
 <% if (it.carnetCss) { %>  <link rel="stylesheet" href="<%= it.asset('css/v2/carnet.css') %>">
 <% } %><% if (it.feed) { /* Flux des Carnets (B58), déclaré sur leurs pages. */ %>  <link rel="alternate" type="application/atom+xml" title="<%= it.feed.title %>" href="<%= it.feed.href %>">
 <% } %><% if (it.jsonLd) { /* Bloc de données, non exécuté (CSP : rien à autoriser) ; « < » échappé (B68). */ %>  <script type="application/ld+json"><%~ it.jsonLd %></script>
