@@ -1,294 +1,75 @@
 {
-  "Accrochage du prolongement": {
-    "en": "Permanent exhibition display",
-    "de": "Hängung der dauerhaften Ausstellung"
-  },
-  "Aucun : bilan initial": {
-    "en": "None: initial retrospective",
-    "de": "Keiner: erster Rückblick"
-  },
-  "Aucun bilan pour cette exposition.": {
-    "en": "No retrospective for this exhibition.",
-    "de": "Kein Rückblick für diese Ausstellung."
-  },
-  "Aucune collection issue de ce bilan.": {
-    "en": "No collection from this retrospective.",
-    "de": "Keine Sammlung aus diesem Rückblick."
-  },
-  "Bilan enregistré.": {
-    "en": "Retrospective saved.",
-    "de": "Rückblick gespeichert."
-  },
-  "Bilan initial": {
-    "en": "Initial retrospective",
-    "de": "Erster Rückblick"
-  },
-  "Bilan introuvable.": {
-    "en": "Retrospective not found.",
-    "de": "Rückblick nicht gefunden."
-  },
-  "Bilan rectifié": {
-    "en": "Retrospective being corrected",
-    "de": "Berichtigter Rückblick"
-  },
-  "Bilans de l’exposition": {
-    "en": "Exhibition retrospectives",
-    "de": "Rückblicke zur Ausstellung"
-  },
-  "Bilans et prolongements": {
-    "en": "Retrospectives and permanent exhibitions",
-    "de": "Rückblicke und dauerhafte Ausstellungen"
-  },
-  "Brouillon de bilan créé.": {
-    "en": "Retrospective draft created.",
-    "de": "Rückblickentwurf erstellt."
-  },
-  "Brouillon de collection créé.": {
-    "en": "Collection draft created.",
-    "de": "Sammlungsentwurf erstellt."
-  },
-  "Cartel": {
-    "en": "Exhibition caption",
-    "de": "Ausstellungsbeschriftung"
-  },
-  "Ce bilan a été publié. Ses textes et sa sélection sont immuables ; préparez un rectificatif pour le compléter ou le corriger.": {
-    "en": "This retrospective has been published. Its texts and selection cannot change; prepare a correction to add to or correct it.",
-    "de": "Dieser Rückblick wurde veröffentlicht. Seine Texte und Auswahl bleiben unverändert; erstellen Sie eine Berichtigung, um ihn zu ergänzen oder zu korrigieren."
-  },
-  "Ce prolongement a sa propre présentation et son propre accrochage, comme une nouvelle exposition.": {
-    "en": "This permanent exhibition has its own presentation and display, like a new exhibition.",
-    "de": "Diese dauerhafte Ausstellung hat ihre eigene Präsentation und Hängung, wie eine neue Ausstellung."
-  },
-  "Cette collection a été publiée. Sa présentation et son accrochage sont figés.": {
-    "en": "This collection has been published. Its presentation and display are locked.",
-    "de": "Diese Sammlung wurde veröffentlicht. Ihre Präsentation und Hängung sind gesperrt."
-  },
-  "Champs éditoriaux attendus.": {
-    "en": "Editorial fields expected.",
-    "de": "Redaktionelle Felder erwartet."
-  },
-  "Chaque cartel doit concerner une photo distincte de l’accrochage.": {
-    "en": "Each caption must refer to a different photo in the display.",
-    "de": "Jede Beschriftung muss sich auf ein anderes Foto der Hängung beziehen."
-  },
-  "Choisir une couverture": {
-    "en": "Choose a cover",
-    "de": "Titelbild auswählen"
-  },
-  "Choisissez des photos encore publiées et autorisées dans la sélection d’origine.": {
-    "en": "Choose photos that are still published and authorised in the original selection.",
-    "de": "Wählen Sie weiterhin veröffentlichte und freigegebene Fotos aus der ursprünglichen Auswahl."
-  },
-  "Choisissez une couverture dans l’accrochage.": {
-    "en": "Choose a cover from the display.",
-    "de": "Wählen Sie ein Titelbild aus der Hängung."
-  },
-  "Choisissez une couverture publiée dans l’accrochage.": {
-    "en": "Choose a published cover from the display.",
-    "de": "Wählen Sie ein veröffentlichtes Titelbild aus der Hängung."
-  },
-  "Cochez les photographies retenues, puis donnez-leur des positions distinctes. Elles gardent leur série d’origine.": {
-    "en": "Select the chosen photographs, then assign distinct positions. They keep their original series.",
-    "de": "Markieren Sie die ausgewählten Fotos und vergeben Sie unterschiedliche Positionen. Ihre ursprüngliche Serie bleibt erhalten."
-  },
-  "Collection enregistrée.": {
-    "en": "Collection saved.",
-    "de": "Sammlung gespeichert."
-  },
-  "Collection introuvable.": {
-    "en": "Collection not found.",
-    "de": "Sammlung nicht gefunden."
-  },
-  "Complétez ce contenu en français, anglais et allemand.": {
-    "en": "Complete this content in French, English and German.",
-    "de": "Vervollständigen Sie diesen Inhalt auf Französisch, Englisch und Deutsch."
-  },
-  "Créer le rectificatif": {
-    "en": "Create the correction",
-    "de": "Berichtigung erstellen"
-  },
-  "Enregistrer la collection": {
-    "en": "Save the collection",
-    "de": "Sammlung speichern"
-  },
-  "Enregistrer le bilan": {
-    "en": "Save the retrospective",
-    "de": "Rückblick speichern"
-  },
-  "Formulaire éditorial invalide.": {
-    "en": "Invalid editorial form.",
-    "de": "Ungültiges redaktionelles Formular."
-  },
-  "Le bilan initial existe déjà : préparez un rectificatif.": {
-    "en": "The initial retrospective already exists: prepare a correction.",
-    "de": "Der erste Rückblick ist bereits vorhanden: Erstellen Sie eine Berichtigung."
-  },
-  "Le bilan se publie après la clôture d’une saison visible.": {
-    "en": "The retrospective can be published after a visible season closes.",
-    "de": "Der Rückblick kann nach dem Ende einer sichtbaren Saison veröffentlicht werden."
-  },
-  "Le brouillon peut être préparé avant la clôture. Sa publication exige les trois langues et une saison close.": {
-    "en": "Prepare the draft before closing if needed. Publishing requires all three languages and a closed season.",
-    "de": "Der Entwurf kann vor dem Ende vorbereitet werden. Die Veröffentlichung erfordert alle drei Sprachen und eine abgeschlossene Saison."
-  },
-  "Le contenu sera publié dans ses trois langues. Ses textes et son accrochage seront ensuite figés.": {
-    "en": "The content will be published in all three languages. Its texts and display will then be locked.",
-    "de": "Der Inhalt wird in allen drei Sprachen veröffentlicht. Seine Texte und Hängung sind danach gesperrt."
-  },
-  "Le contenu sera retiré de son accès public. Les photographies conservent leurs règles de publication.": {
-    "en": "The content will be removed from public access. The photographs keep their publication rules.",
-    "de": "Der Inhalt wird aus dem öffentlichen Zugang entfernt. Die Veröffentlichungsregeln der Fotos bleiben bestehen."
-  },
-  "Le français, l’anglais et l’allemand sont nécessaires à la publication. Le brouillon peut rester incomplet.": {
-    "en": "French, English and German are required for publishing. The draft can remain incomplete.",
-    "de": "Französisch, Englisch und Deutsch sind zur Veröffentlichung erforderlich. Der Entwurf darf unvollständig bleiben."
-  },
-  "Le rectificatif doit viser un bilan publié de cette saison.": {
-    "en": "The correction must refer to a published retrospective from this season.",
-    "de": "Die Berichtigung muss sich auf einen veröffentlichten Rückblick dieser Saison beziehen."
-  },
-  "Liste de cartels attendue.": {
-    "en": "A list of exhibition captions is expected.",
-    "de": "Eine Liste von Ausstellungsbeschriftungen wird erwartet."
-  },
-  "L’origine de la collection ne se change pas.": {
-    "en": "The collection’s origin cannot change.",
-    "de": "Die Herkunft der Sammlung kann nicht geändert werden."
-  },
-  "L’origine du rectificatif ne se change pas.": {
-    "en": "The correction’s origin cannot change.",
-    "de": "Der Ursprung der Berichtigung kann nicht geändert werden."
-  },
-  "Modifié entre-temps : rechargez la dernière version.": {
-    "en": "Changed in the meantime: reload the latest version.",
-    "de": "Inzwischen geändert: Laden Sie die neueste Version."
-  },
-  "Photo de couverture inconnue.": {
-    "en": "Unknown cover photo.",
-    "de": "Unbekanntes Titelbild."
-  },
-  "Photo indisponible : décochez-la avant d’enregistrer.": {
-    "en": "Photo unavailable: deselect it before saving.",
-    "de": "Foto nicht verfügbar: Heben Sie die Auswahl vor dem Speichern auf."
-  },
-  "Photographie de couverture": {
-    "en": "Cover photograph",
-    "de": "Titelbild"
-  },
-  "Photographies retenues": {
-    "en": "Selected photographs",
-    "de": "Ausgewählte Fotos"
-  },
-  "Prolongements dans les collections": {
-    "en": "Permanent collection exhibitions",
-    "de": "Dauerhafte Ausstellungen in den Sammlungen"
-  },
-  "Préparer un bilan": {
-    "en": "Prepare a retrospective",
-    "de": "Rückblick vorbereiten"
-  },
-  "Préparer un rectificatif": {
-    "en": "Prepare a correction",
-    "de": "Berichtigung vorbereiten"
-  },
-  "Préparer une collection": {
-    "en": "Prepare a collection",
-    "de": "Sammlung vorbereiten"
-  },
-  "Présentation du prolongement": {
-    "en": "Permanent exhibition presentation",
-    "de": "Präsentation der dauerhaften Ausstellung"
-  },
-  "Publiez le bilan d’origine avant sa collection.": {
-    "en": "Publish the original retrospective before its collection.",
-    "de": "Veröffentlichen Sie den ursprünglichen Rückblick vor seiner Sammlung."
-  },
-  "Recharger la dernière version": {
-    "en": "Reload the latest version",
-    "de": "Neueste Version laden"
-  },
-  "Rectificatif du bilan n° {id}": {
-    "en": "Correction to retrospective no. {id}",
-    "de": "Berichtigung zum Rückblick Nr. {id}"
-  },
-  "Retenir « {title} »": {
-    "en": "Select “{title}”",
-    "de": "„{title}“ auswählen"
-  },
-  "Retiré": {
-    "en": "Withdrawn",
-    "de": "Zurückgezogen"
-  },
-  "Récit": {
-    "en": "Account",
-    "de": "Bericht"
-  },
-  "Récit du bilan": {
-    "en": "Retrospective account",
-    "de": "Bericht des Rückblicks"
-  },
-  "Seul un bilan publié peut être retiré.": {
-    "en": "Only a published retrospective can be withdrawn.",
-    "de": "Nur ein veröffentlichter Rückblick kann zurückgezogen werden."
-  },
-  "Seule une collection publiée peut être retirée.": {
-    "en": "Only a published collection can be withdrawn.",
-    "de": "Nur eine veröffentlichte Sammlung kann zurückgezogen werden."
-  },
-  "Sélection de photographies distinctes attendue.": {
-    "en": "A selection of distinct photographs is expected.",
-    "de": "Eine Auswahl unterschiedlicher Fotos wird erwartet."
-  },
-  "Titre du prolongement en français": {
-    "en": "Permanent exhibition title in French",
-    "de": "Titel der dauerhaften Ausstellung auf Französisch"
-  },
-  "Un bilan publié reste intact. Une correction prend la forme d’un nouveau bilan rectificatif.": {
-    "en": "A published retrospective remains intact. A correction takes the form of a new corrective retrospective.",
-    "de": "Ein veröffentlichter Rückblick bleibt unverändert. Eine Korrektur wird als neuer berichtigender Rückblick veröffentlicht."
-  },
-  "Un contenu publié ne se modifie pas : préparez un nouvel objet rectificatif.": {
-    "en": "Published content cannot be edited: prepare a new corrective item.",
-    "de": "Veröffentlichter Inhalt kann nicht bearbeitet werden: Erstellen Sie eine neue Berichtigung."
-  },
-  "Une saison retirée ne reçoit pas de nouveau bilan.": {
-    "en": "A withdrawn season cannot receive a new retrospective.",
-    "de": "Für eine zurückgezogene Saison kann kein neuer Rückblick erstellt werden."
-  },
-  "Vous pouvez ne retenir aucune photo. Cochez les œuvres choisies et attribuez des positions distinctes pour leur ordre.": {
-    "en": "You may select no photos. Select the chosen works and assign distinct positions to order them.",
-    "de": "Sie dürfen keine Fotos auswählen. Markieren Sie die gewählten Werke und vergeben Sie unterschiedliche Positionen für ihre Reihenfolge."
-  },
-  "Bilan créé": {
-    "en": "Retrospective created",
-    "de": "Rückblick erstellt"
-  },
-  "Bilan enregistré": {
-    "en": "Retrospective saved",
-    "de": "Rückblick gespeichert"
-  },
-  "Collection permanente créée": {
-    "en": "Permanent collection created",
-    "de": "Dauerhafte Sammlung erstellt"
-  },
-  "Collection permanente enregistrée": {
-    "en": "Permanent collection saved",
-    "de": "Dauerhafte Sammlung gespeichert"
-  },
-  "Bilan publié": {
-    "en": "Retrospective published",
-    "de": "Rückblick veröffentlicht"
-  },
-  "Bilan retiré": {
-    "en": "Retrospective withdrawn",
-    "de": "Rückblick zurückgezogen"
-  },
-  "Collection permanente publiée": {
-    "en": "Permanent collection published",
-    "de": "Dauerhafte Sammlung veröffentlicht"
-  },
-  "Collection permanente retirée": {
-    "en": "Permanent collection withdrawn",
-    "de": "Dauerhafte Sammlung zurückgezogen"
-  }
+  "Accrochage du prolongement": { "en": "Permanent exhibition display", "de": "Hängung der dauerhaften Ausstellung" },
+  "Aucun : bilan initial": { "en": "None: initial retrospective", "de": "Keiner: erster Rückblick" },
+  "Aucun bilan pour cette exposition.": { "en": "No retrospective for this exhibition.", "de": "Kein Rückblick für diese Ausstellung." },
+  "Aucune collection issue de ce bilan.": { "en": "No collection from this retrospective.", "de": "Keine Sammlung aus diesem Rückblick." },
+  "Bilan enregistré.": { "en": "Retrospective saved.", "de": "Rückblick gespeichert." },
+  "Bilan initial": { "en": "Initial retrospective", "de": "Erster Rückblick" },
+  "Bilan introuvable.": { "en": "Retrospective not found.", "de": "Rückblick nicht gefunden." },
+  "Bilan rectifié": { "en": "Retrospective being corrected", "de": "Berichtigter Rückblick" },
+  "Bilans de l’exposition": { "en": "Exhibition retrospectives", "de": "Rückblicke zur Ausstellung" },
+  "Bilans et prolongements": { "en": "Retrospectives and permanent exhibitions", "de": "Rückblicke und dauerhafte Ausstellungen" },
+  "Brouillon de bilan créé.": { "en": "Retrospective draft created.", "de": "Rückblickentwurf erstellt." },
+  "Brouillon de collection créé.": { "en": "Collection draft created.", "de": "Sammlungsentwurf erstellt." },
+  "Cartel": { "en": "Exhibition caption", "de": "Ausstellungsbeschriftung" },
+  "Ce bilan a été publié. Ses textes et sa sélection sont immuables ; préparez un rectificatif pour le compléter ou le corriger.": { "en": "This retrospective has been published. Its texts and selection cannot change; prepare a correction to add to or correct it.", "de": "Dieser Rückblick wurde veröffentlicht. Seine Texte und Auswahl bleiben unverändert; erstellen Sie eine Berichtigung, um ihn zu ergänzen oder zu korrigieren." },
+  "Ce prolongement a sa propre présentation et son propre accrochage, comme une nouvelle exposition.": { "en": "This permanent exhibition has its own presentation and display, like a new exhibition.", "de": "Diese dauerhafte Ausstellung hat ihre eigene Präsentation und Hängung, wie eine neue Ausstellung." },
+  "Cette collection a été publiée. Sa présentation et son accrochage sont figés.": { "en": "This collection has been published. Its presentation and display are locked.", "de": "Diese Sammlung wurde veröffentlicht. Ihre Präsentation und Hängung sind gesperrt." },
+  "Champs éditoriaux attendus.": { "en": "Editorial fields expected.", "de": "Redaktionelle Felder erwartet." },
+  "Chaque cartel doit concerner une photo distincte de l’accrochage.": { "en": "Each caption must refer to a different photo in the display.", "de": "Jede Beschriftung muss sich auf ein anderes Foto der Hängung beziehen." },
+  "Choisir une couverture": { "en": "Choose a cover", "de": "Titelbild auswählen" },
+  "Choisissez des photos encore publiées et autorisées dans la sélection d’origine.": { "en": "Choose photos that are still published and authorised in the original selection.", "de": "Wählen Sie weiterhin veröffentlichte und freigegebene Fotos aus der ursprünglichen Auswahl." },
+  "Choisissez une couverture dans l’accrochage.": { "en": "Choose a cover from the display.", "de": "Wählen Sie ein Titelbild aus der Hängung." },
+  "Choisissez une couverture publiée dans l’accrochage.": { "en": "Choose a published cover from the display.", "de": "Wählen Sie ein veröffentlichtes Titelbild aus der Hängung." },
+  "Cochez les photographies retenues, puis donnez-leur des positions distinctes. Elles gardent leur série d’origine.": { "en": "Select the chosen photographs, then assign distinct positions. They keep their original series.", "de": "Markieren Sie die ausgewählten Fotos und vergeben Sie unterschiedliche Positionen. Ihre ursprüngliche Serie bleibt erhalten." },
+  "Collection enregistrée.": { "en": "Collection saved.", "de": "Sammlung gespeichert." },
+  "Collection introuvable.": { "en": "Collection not found.", "de": "Sammlung nicht gefunden." },
+  "Complétez ce contenu en français, anglais et allemand.": { "en": "Complete this content in French, English and German.", "de": "Vervollständigen Sie diesen Inhalt auf Französisch, Englisch und Deutsch." },
+  "Créer le rectificatif": { "en": "Create the correction", "de": "Berichtigung erstellen" },
+  "Enregistrer la collection": { "en": "Save the collection", "de": "Sammlung speichern" },
+  "Enregistrer le bilan": { "en": "Save the retrospective", "de": "Rückblick speichern" },
+  "Formulaire éditorial invalide.": { "en": "Invalid editorial form.", "de": "Ungültiges redaktionelles Formular." },
+  "Le bilan initial existe déjà : préparez un rectificatif.": { "en": "The initial retrospective already exists: prepare a correction.", "de": "Der erste Rückblick ist bereits vorhanden: Erstellen Sie eine Berichtigung." },
+  "Le bilan se publie après la clôture d’une saison visible.": { "en": "The retrospective can be published after a visible season closes.", "de": "Der Rückblick kann nach dem Ende einer sichtbaren Saison veröffentlicht werden." },
+  "Le brouillon peut être préparé avant la clôture. Sa publication exige les trois langues et une saison close.": { "en": "Prepare the draft before closing if needed. Publishing requires all three languages and a closed season.", "de": "Der Entwurf kann vor dem Ende vorbereitet werden. Die Veröffentlichung erfordert alle drei Sprachen und eine abgeschlossene Saison." },
+  "Le contenu sera publié dans ses trois langues. Ses textes et son accrochage seront ensuite figés.": { "en": "The content will be published in all three languages. Its texts and display will then be locked.", "de": "Der Inhalt wird in allen drei Sprachen veröffentlicht. Seine Texte und Hängung sind danach gesperrt." },
+  "Le contenu sera retiré de son accès public. Les photographies conservent leurs règles de publication.": { "en": "The content will be removed from public access. The photographs keep their publication rules.", "de": "Der Inhalt wird aus dem öffentlichen Zugang entfernt. Die Veröffentlichungsregeln der Fotos bleiben bestehen." },
+  "Le français, l’anglais et l’allemand sont nécessaires à la publication. Le brouillon peut rester incomplet.": { "en": "French, English and German are required for publishing. The draft can remain incomplete.", "de": "Französisch, Englisch und Deutsch sind zur Veröffentlichung erforderlich. Der Entwurf darf unvollständig bleiben." },
+  "Le rectificatif doit viser un bilan publié de cette saison.": { "en": "The correction must refer to a published retrospective from this season.", "de": "Die Berichtigung muss sich auf einen veröffentlichten Rückblick dieser Saison beziehen." },
+  "Liste de cartels attendue.": { "en": "A list of exhibition captions is expected.", "de": "Eine Liste von Ausstellungsbeschriftungen wird erwartet." },
+  "L’origine de la collection ne se change pas.": { "en": "The collection’s origin cannot change.", "de": "Die Herkunft der Sammlung kann nicht geändert werden." },
+  "L’origine du rectificatif ne se change pas.": { "en": "The correction’s origin cannot change.", "de": "Der Ursprung der Berichtigung kann nicht geändert werden." },
+  "Modifié entre-temps : rechargez la dernière version.": { "en": "Changed in the meantime: reload the latest version.", "de": "Inzwischen geändert: Laden Sie die neueste Version." },
+  "Photo de couverture inconnue.": { "en": "Unknown cover photo.", "de": "Unbekanntes Titelbild." },
+  "Photo indisponible : décochez-la avant d’enregistrer.": { "en": "Photo unavailable: deselect it before saving.", "de": "Foto nicht verfügbar: Heben Sie die Auswahl vor dem Speichern auf." },
+  "Photographie de couverture": { "en": "Cover photograph", "de": "Titelbild" },
+  "Photographies retenues": { "en": "Selected photographs", "de": "Ausgewählte Fotos" },
+  "Prolongements dans les collections": { "en": "Permanent collection exhibitions", "de": "Dauerhafte Ausstellungen in den Sammlungen" },
+  "Préparer un bilan": { "en": "Prepare a retrospective", "de": "Rückblick vorbereiten" },
+  "Préparer un rectificatif": { "en": "Prepare a correction", "de": "Berichtigung vorbereiten" },
+  "Préparer une collection": { "en": "Prepare a collection", "de": "Sammlung vorbereiten" },
+  "Présentation du prolongement": { "en": "Permanent exhibition presentation", "de": "Präsentation der dauerhaften Ausstellung" },
+  "Publiez le bilan d’origine avant sa collection.": { "en": "Publish the original retrospective before its collection.", "de": "Veröffentlichen Sie den ursprünglichen Rückblick vor seiner Sammlung." },
+  "Recharger la dernière version": { "en": "Reload the latest version", "de": "Neueste Version laden" },
+  "Rectificatif du bilan n° {id}": { "en": "Correction to retrospective no. {id}", "de": "Berichtigung zum Rückblick Nr. {id}" },
+  "Retenir « {title} »": { "en": "Select “{title}”", "de": "„{title}“ auswählen" },
+  "Retiré": { "en": "Withdrawn", "de": "Zurückgezogen" },
+  "Récit": { "en": "Account", "de": "Bericht" },
+  "Récit du bilan": { "en": "Retrospective account", "de": "Bericht des Rückblicks" },
+  "Seul un bilan publié peut être retiré.": { "en": "Only a published retrospective can be withdrawn.", "de": "Nur ein veröffentlichter Rückblick kann zurückgezogen werden." },
+  "Seule une collection publiée peut être retirée.": { "en": "Only a published collection can be withdrawn.", "de": "Nur eine veröffentlichte Sammlung kann zurückgezogen werden." },
+  "Sélection de photographies distinctes attendue.": { "en": "A selection of distinct photographs is expected.", "de": "Eine Auswahl unterschiedlicher Fotos wird erwartet." },
+  "Titre du prolongement en français": { "en": "Permanent exhibition title in French", "de": "Titel der dauerhaften Ausstellung auf Französisch" },
+  "Un bilan publié reste intact. Une correction prend la forme d’un nouveau bilan rectificatif.": { "en": "A published retrospective remains intact. A correction takes the form of a new corrective retrospective.", "de": "Ein veröffentlichter Rückblick bleibt unverändert. Eine Korrektur wird als neuer berichtigender Rückblick veröffentlicht." },
+  "Un contenu publié ne se modifie pas : préparez un nouvel objet rectificatif.": { "en": "Published content cannot be edited: prepare a new corrective item.", "de": "Veröffentlichter Inhalt kann nicht bearbeitet werden: Erstellen Sie eine neue Berichtigung." },
+  "Une saison retirée ne reçoit pas de nouveau bilan.": { "en": "A withdrawn season cannot receive a new retrospective.", "de": "Für eine zurückgezogene Saison kann kein neuer Rückblick erstellt werden." },
+  "Vous pouvez ne retenir aucune photo. Cochez les œuvres choisies et attribuez des positions distinctes pour leur ordre.": { "en": "You may select no photos. Select the chosen works and assign distinct positions to order them.", "de": "Sie dürfen keine Fotos auswählen. Markieren Sie die gewählten Werke und vergeben Sie unterschiedliche Positionen für ihre Reihenfolge." },
+  "Bilan créé": { "en": "Retrospective created", "de": "Rückblick erstellt" },
+  "Bilan enregistré": { "en": "Retrospective saved", "de": "Rückblick gespeichert" },
+  "Collection permanente créée": { "en": "Permanent collection created", "de": "Dauerhafte Sammlung erstellt" },
+  "Collection permanente enregistrée": { "en": "Permanent collection saved", "de": "Dauerhafte Sammlung gespeichert" },
+  "Bilan publié": { "en": "Retrospective published", "de": "Rückblick veröffentlicht" },
+  "Bilan retiré": { "en": "Retrospective withdrawn", "de": "Rückblick zurückgezogen" },
+  "Collection permanente publiée": { "en": "Permanent collection published", "de": "Dauerhafte Sammlung veröffentlicht" },
+  "Collection permanente retirée": { "en": "Permanent collection withdrawn", "de": "Dauerhafte Sammlung zurückgezogen" }
 }
