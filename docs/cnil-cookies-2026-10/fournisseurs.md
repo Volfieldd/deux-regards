@@ -1,6 +1,8 @@
 # Prestataires et configuration réelle à qualifier
 
-État du 24 octobre 2026, complété après la réponse du propriétaire : **Cloudflare en offre gratuite et Zitadel en offre gratuite**. Ces deux informations sont acquises ; elles ne prouvent ni les fonctions activées, ni le lieu d’hébergement, ni les cookies réellement reçus. Aucune donnée de production consultée.
+État du 24 octobre 2026, complété après les réponses du propriétaire : **Cloudflare en offre gratuite, Zitadel en offre gratuite et ensemble déclaré déployé en zone euro**. Ces informations sont acquises par déclaration ; elles ne prouvent ni les fonctions activées ni les cookies réellement reçus. Aucune donnée de production consultée.
+
+La précision « J’ai tout déployé en zone euro » renseigne la localisation déclarée de l’ensemble ; elle n’est plus marquée inconnue. Conserver les références de région/configuration correspondantes avec les pièces des prestataires. Cette déclaration ne vaut pas inspection des flux de transit, des accès de support ou des sous-traitants ; leur couverture contractuelle reste à qualifier. Elle ne permet pas non plus de déduire une version de code déployée.
 
 **La gratuité ne signifie ni absence de DPA, ni suivi publicitaire, ni obligation de payer pour être conforme.** Les contrats publiés couvrent des usages gratuits ; leur application au compte et aux services concernés doit être rattachée aux pièces réelles. Le maintien des fonctions reste la cible. Aucun réglage de fournisseur n’a été modifié.
 
@@ -24,6 +26,8 @@ Le [contrat self-service](https://www.cloudflare.com/terms/), §§ 2.6 et 6.1, t
 
 Les clauses de transfert et la [liste des sous-traitants](https://www.cloudflare.com/gdpr/subprocessors/) ne prouvent pas une résidence exclusivement européenne. Vérifier services, entité contractante et garanties couvrant les flux réellement utilisés ; ne pas transformer une référence au Data Privacy Framework ou aux clauses contractuelles types en validation automatique du dossier.
 
+La localisation déclarée de l’installation ne suffit pas à attester une régionalisation de toute la bordure Cloudflare. La [Data Localization Suite](https://developers.cloudflare.com/data-localization/) propose des contrôles dédiés des lieux de traitement, clés et métadonnées, présentés comme un complément payant Enterprise. Ces garanties ne sont donc pas attribuées à l’offre gratuite par défaut. Cela ne signifie ni qu’un transfert particulier est établi sur Nicephos, ni qu’une telle option est nécessaire à sa conformité : examiner les services et garanties effectivement applicables.
+
 | Fonction ou réglage à relever | Fait documenté et conséquence pour Nicephos |
 |---|---|
 | Bot Fight Mode | Produit gratuit, activable/désactivable ; il peut imposer des calculs au navigateur. Il porte sur le domaine et ses exceptions ne se règlent pas comme des règles WAF ordinaires. Relever l’état et les parcours touchés ; ne pas déduire son activation du tier. [Documentation](https://developers.cloudflare.com/bots/get-started/bot-fight-mode/) |
@@ -43,7 +47,7 @@ Pour Cloud, les [TOS publiées](https://zitadel.com/docs/legal/terms-of-service)
 
 L’[aide officielle du 25 juin 2026](https://help.zitadel.com/corporate-structure-contracting-entities) désigne **CAOS AG, Suisse**, pour les clients Cloud self-service. C’est une indication contractuelle à vérifier pour le compte, pas la preuve d’une région de données suisse. La version applicable, l’entité et les [sous-traitants effectifs](https://zitadel.com/docs/legal/subprocessors) restent à documenter.
 
-Le [Customer Portal, état du 7 mai 2026](https://help.zitadel.com/customer-portal-instances) affiche la région de l’instance et présente le choix d’une région spécifique comme une fonction Pro. Une description générale plus ancienne annonce un choix de localisation à la création : ne pas en déduire que ce choix est disponible sur ce compte Free. **Relever la région réellement affichée suffit pour commencer ; aucune migration ni dépense n’est décidée.** Une région principale ne garantit pas, seule, que transit, assistance et sous-traitance restent intégralement dans cette région.
+Le [Customer Portal, état du 7 mai 2026](https://help.zitadel.com/customer-portal-instances) affiche la région de l’instance et présente le choix d’une région spécifique comme une fonction Pro. Une description générale plus ancienne annonce un choix de localisation à la création : ne pas en déduire que ce choix est disponible sur ce compte Free. **Le propriétaire déclare maintenant l’ensemble déployé en zone euro : cette localisation est retenue et la référence de région est à archiver ; aucune migration ni dépense n’est décidée.** La [description du service](https://zitadel.com/docs/legal/service-description/cloud-service-description#data-location) distingue la région d’hébergement du transit, qu’elle ne garantit pas entièrement régionalisé. Assistance et sous-traitance restent à rapprocher des engagements applicables.
 
 Pour l’authentification, relever MFA/passkeys, durées et renouvellement, domaines de connexion, cookies d’IdP et données de profil transmises. Ces réglages ne se déduisent pas du tier. Il n’est pas demandé d’exporter les utilisateurs, leurs événements ou les secrets du client OIDC.
 
@@ -66,7 +70,7 @@ L’hébergement HTTPS ne prouve pas l’absence d’outils additionnels. Une CS
 Un bref relevé textuel suffit, sans export du compte :
 
 1. **Cloudflare :** par périmètre public/admin/console, indiquer si le trafic est proxifié et si Access protège une application ; préciser Bot Fight Mode, challenges/widgets, RUM/Web Analytics et Zaraz : actif, inactif ou inconnu. Pour RUM, ajouter le mode d’exclusion géographique et l’injection éventuelle.
-2. **Zitadel :** Cloud Free ou auto-hébergé ; pour Cloud, recopier seulement le nom de région affiché. Dans les deux cas, donner les durées de connexion et méthodes MFA activées, sans identité d’utilisateur.
+2. **Zitadel :** préciser seulement Cloud Free ou auto-hébergé et les durées de connexion/MFA, sans identité d’utilisateur. La localisation en zone euro est déjà déclarée ; archiver sa référence fournisseur avec les autres pièces.
 3. **Contrats :** indiquer service, entité, date/version des TOS/DPA applicables et référence de la liste de sous-traitants. Une confirmation d’acceptation suffit au dossier partagé ; garder les pièces nominatives au bon endroit.
 4. **Profil de test personnel autorisé :** fournir les seuls noms/attributs/durées des cookies sur accueil, connexion et challenge s’il se présente. Aucun jeton, JWT, code, URL privée ou HAR brut.
 
@@ -87,13 +91,14 @@ Cadre : [FAQ CNIL, questions 16–18](https://www.cnil.fr/fr/cookies-et-autres-t
 |---|---|---|
 | Offre Cloudflare | **Gratuite**, déclaration du propriétaire reçue dans cette discussion | Confirmé par déclaration ; produits et réglages non déduits |
 | Offre Zitadel | **Gratuite**, déclaration du propriétaire reçue dans cette discussion | Confirmé par déclaration ; Cloud ou auto-hébergement à préciser |
+| Localisation de l’ensemble | **Tout déployé en zone euro**, précision du propriétaire reçue dans cette discussion | Acquis par déclaration ; références à conserver, sans inspection des flux prestataires |
 | Fonctions Cloudflare publiques | Non fournies dans les preuves disponibles | En attente d’observation du propriétaire |
 | Access sur l’administration | Non fourni ; conception Access de la console seulement établie | En attente |
-| Mode/région/entité Zitadel réels | Aucun relevé du compte utilisé | En attente ; aucune résidence supposée |
+| Mode/région/entité Zitadel réels | Localisation en zone euro déclarée pour l’ensemble ; mode et entité du compte non précisés | Localisation déclarée ; rattachement de la référence région et du contrat à compléter |
 | Inventaire réel des cookies et domaines | Aucun relevé réel utilisé | En attente |
 | Conditions prestataires applicables | Textes publics officiels consultés ; rattachement au compte/service réel non vérifié | Documentation réunie, validation contractuelle du compte en attente |
 | Finalité des provenances/partages dans l’équipe | Code et libellés étudiés ; confirmation d’usage non reçue | À arrêter par les responsables |
 
 Une réponse absente n’est pas un accord ni une preuve d’activation. Le dossier avance sur le code sans transformer ces inconnues en certification de l’installation.
 
-**Suite possible sans changer d’offre :** qualifier les services réellement utilisés, rattacher les contrats, justifier les protections et traiter les écarts constatés. Si une propriété nécessaire manque effectivement à l’offre actuelle, comparer alors les alternatives qui conservent le service. Le seul mot « gratuit » ne tranche aucune de ces décisions. Les références nouvelles R13–R25 sont consignées dans [sources.md](sources.md).
+**Suite possible sans changer d’offre :** qualifier les services réellement utilisés, rattacher les contrats, justifier les protections et traiter les écarts constatés. Si une propriété nécessaire manque effectivement à l’offre actuelle, comparer alors les alternatives qui conservent le service. Le seul mot « gratuit » ne tranche aucune de ces décisions. Les références nouvelles R13–R26 sont consignées dans [sources.md](sources.md).

@@ -29,8 +29,11 @@ Sources officielles consultées le **24 octobre 2026**. Les conclusions du dossi
 | R23 | [Zitadel Customer Portal, Instances](https://help.zitadel.com/customer-portal-instances), 7 mai 2026 | Région affichée, limites Free et choix spécifique décrit comme fonction Pro |
 | R24 | [Zitadel Cloud et auto-hébergement](https://zitadel.com/docs/legal/service-description/cloud-service-description), état du 5 avril 2024 | Responsabilités distinctes, localisation et limites de transit ; description générale à rapprocher du tier réel |
 | R25 | [Zitadel, sous-traitants](https://zitadel.com/docs/legal/subprocessors), état du 5 décembre 2025 | Accès à la liste du Trust Center et services à rapprocher de l’instance réelle |
+| R26 | [Cloudflare, Data Localization Suite](https://developers.cloudflare.com/data-localization/), état du 5 mai 2026 | Contrôles de régionalisation distincts du lieu de l’origine ; complément payant Enterprise, non attribué par défaut à l’offre gratuite |
 
 R13–R25 ont été ajoutées après la déclaration du propriétaire « Cloudflare gratuit, Zitadel gratuit ». Les pages commerciales, contractuelles et d’aide ont des dates différentes : aucune fonctionnalité ou garantie n’est attribuée au compte sans vérifier sa configuration et les conditions applicables. Ces sources ne démontrent ni publicité imposée par la gratuité, ni nécessité générale d’un abonnement payant pour être conforme.
+
+R26 complète la précision ultérieure « J’ai tout déployé en zone euro », enregistrée comme déclaration de localisation de l’ensemble. La régionalisation des traitements de bordure et la localisation de l’hébergement sont documentées séparément ; aucun transfert particulier ni besoin de changer d’offre n’est déduit de cette seule distinction.
 
 ## Statut des conclusions
 

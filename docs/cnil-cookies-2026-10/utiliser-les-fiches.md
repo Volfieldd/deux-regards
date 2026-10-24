@@ -23,7 +23,7 @@ Le [registre existant](../wiki/RGPD.md) et la [fiche Vigie](../wiki/RGPD-Vigie.m
 | Chiffrer les données privées en base et dans les cookies | L’objectif de sécurité est acquis. Les frontières NC2, l’historique Vigie, les index et le déverrouillage hors ligne restent à concevoir ; voir [étude technique](../etudes/chiffrement-etats-cookies.md) |
 | Éviter les caches lorsqu’une alternative existe | Distinguer un rendu recalculable d’un état nécessaire de session, de droit ou de reprise. Vérifier la fonction et le coût de l’alternative avant remplacement |
 | Éviter un consentement global imposé à l’entrée | Qualifier chaque usage. Un consentement nécessaire peut être demandé au moment de la fonction concernée ; il ne conditionne pas la visite générale |
-| Cloudflare gratuit et Zitadel gratuit | Information reçue du propriétaire ; ne prouve ni les options actives, ni la résidence, ni le déploiement des corrections |
+| Cloudflare gratuit, Zitadel gratuit et tout déployé en zone euro | Informations reçues du propriétaire ; localisation déclarée acquise. Archiver ses références ; les options actives, flux prestataires et version des corrections restent à vérifier |
 | Vote d’exposition | Le plan produit a déjà retenu un consentement explicite au premier vote, sans exemption revendiquée ; ne pas rouvrir cet arbitrage dans une correction |
 
 ## 3. Compléments à apporter aux fiches
@@ -37,7 +37,7 @@ Les formulations proposées ci-dessous sont à confirmer par les responsables ; 
 | D-C03 | Décrire ce que le visiteur ou l’opérateur demande durablement : retrouver ses J’aime, récupérer un brouillon après fermeture, sur appareil partagé ou personnel. Choisir ensuite la justification d’exemption ou le consentement contextuel à réaliser | P04 et A07 |
 | D-C04 | Faire démontrer minimisation IP/UA, isolement site/jour et anonymat de toutes les sorties, en maintenant l’indicateur journalier. Décider le choix d’opposition et son périmètre | P08, audience, T09–T12 |
 | D-C05 | Arrêter la base légale du traitement personnel et, lorsqu’il s’agit d’intérêt légitime, sa nécessité et sa mise en balance. L’exemption d’un cookie ne suffit pas | Fiches personnelles, registre site/Vigie |
-| D-C06 | Relever les fonctions Cloudflare actives, Access par périmètre, Cloud ou auto-hébergement Zitadel, sa région et les documents contractuels applicables | F01–F05 ; checklist fournisseurs |
+| D-C06 | Relever les fonctions Cloudflare actives, Access par périmètre et Cloud ou auto-hébergement Zitadel ; rattacher les références de localisation en zone euro déjà déclarée et les documents contractuels applicables | F01–F05 ; checklist fournisseurs |
 | D-C07 | Faire réaliser les protections et tester migration/restauration ; la politique de chiffrement ne demande pas d’être acceptée une seconde fois | T02, T07, T08, T13, T14 |
 | D-C08 | Finaliser la conservation de sécurité/incidents selon D38, les habilitations et la gestion des anciennes copies | V03 et registre Vigie |
 

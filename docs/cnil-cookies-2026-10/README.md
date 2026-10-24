@@ -4,6 +4,8 @@
 
 **Les cinq correctifs du premier lot technique sont intégrés et vérifiés ; le chiffrement intégral reste à livrer.** Commencer par [le contrôle des exigences](suivi-exigences.md) et [le mode d’emploi des fiches](utiliser-les-fiches.md). Les textes initiaux conservent leur date et leurs preuves ; le suivi précise les constats devenus historiques.
 
+**Précision du propriétaire : l’ensemble est déployé en zone euro.** Cette localisation est enregistrée comme acquise par déclaration dans les [prestataires](fournisseurs.md). Elle complète le dossier géographique sans clôturer les garanties contractuelles des flux tiers, l’exemption par finalité ou les exigences techniques encore ouvertes.
+
 **Position proposée : conserver les fonctions, justifier leurs mémoires et corriger les garanties manquantes.** Les usages d’authentification et certaines préférences disposent d’un fondement d’exemption solide dans leur principe. Le J’aime durable, la copie de secours hors ligne et certaines mémoires de parcours demandent encore une démonstration précise. La mesure d’audience a des garanties favorables, mais son auto-évaluation n’est pas close. Aucun de ces constats ne justifie d’imposer un consentement global pour entrer sur le site.
 
 Le dossier contient **19 fiches de finalités** : les 18 initiales et le nouveau vote d’exposition. Il comprend une grille d’audience renseignée, les preuves/limites, les exigences et leur contrôle d’application, des propositions d’information FR/EN/DE et les pièces prestataires. Il n’atteste ni la conformité globale du site ni une validation de la CNIL. Les conditions de l’installation réelle et les décisions des responsables restent identifiées comme telles.
@@ -97,7 +99,7 @@ Ce sont des critères à fermer, pas une décision de supprimer les visiteurs un
 | D-C03 | Justification du service de J’aime durable et du secours local ; décision de qualification ou choix contextuel si nécessaire | Non close |
 | D-C04 | Garanties de minimisation, isolement et anonymat des sorties d’audience | Analyse/code complémentaires nécessaires |
 | D-C05 | Bases légales proposées et mises en balance des phases personnelles, notamment sécurité/Vigie | Propositions documentées, non validées par signature des responsables |
-| D-C06 | Fonctions Cloudflare, protections Access, domaines/cookies et contrats réels | Offres gratuites confirmées par le propriétaire ; documents publics réunis ; relevés/configuration et rattachement contractuel encore à compléter |
+| D-C06 | Fonctions Cloudflare, protections Access, domaines/cookies et contrats réels | Offres gratuites et déploiement de l’ensemble en zone euro déclarés par le propriétaire ; documents publics réunis ; relevés des fonctions et rattachement contractuel encore à compléter |
 | D-C07 | Couverture de chiffrement, clés, anciennes copies et restauration | Politique confirmée ; étude disponible, couverture générale non livrée selon le contrôle courant |
 | D-C08 | Durée des dossiers/incidents, habilitations et copies de sécurité selon les décisions existantes | D38 et éléments du registre restent ouverts |
 
@@ -107,7 +109,7 @@ Les responsables peuvent arrêter une décision motivée, datée et rattachée �
 
 - **Historiques sur f44cdf3 :** [135 tests initiaux](../audit-cookies-2026-10/preuves/tests-cibles.txt), [13 contrôles complémentaires](../audit-cookies-2026-10/preuves/controles.json), dont Chromium ; puis [11 tests statistiques/partage](preuves/tests-audience-partage.txt), [4 liens applicatifs](preuves/liens-internes.txt) et [liens du dossier initial](preuves/liens-documents.txt). Ne pas les attribuer à la version actuelle.
 - **Rejouées sur 994a899 :** [101 tests ciblés](preuves/tests-suivi-technique.txt), [66 avec Vigie simulée](preuves/tests-suivi-vigie.txt), tous réussis sans échec, ignoré ou annulé ; **sept cas Chromium réussis**, sans erreur de script/console relevée, dans le [contrôle navigateur](preuves/controle-navigateur.json). Les deux sélections de tests se recouvrent.
-- **Clôture documentaire :** [liens applicatifs](preuves/liens-internes-suivi.txt) et [références du dossier](preuves/liens-documents-suivi.txt).
+- **Clôture documentaire :** [liens applicatifs](preuves/liens-internes-suivi.txt), [nouveau passage après la précision de localisation](preuves/liens-precision-localisation.txt) et [références du dossier](preuves/liens-documents-suivi.txt).
 - **Non exécuté :** observation de production, analyse des contrats du compte réel, instrumentation de visiteurs, restauration réelle, nouveau parcours complet de secours hors ligne/plein écran, preuve juridique d’anonymat ou examen indépendant des cas gris.
 
 Les tests présents mais non rejoués sont identifiés dans les fiches et le suivi. Les mesures proposées ne sont pas présentées comme livrées. Aucune suite complète n’a été relancée pour ce travail documentaire ; les contrôles ciblés sont proportionnés et ne prouvent pas l’exemption.
