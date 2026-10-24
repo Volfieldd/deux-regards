@@ -14,9 +14,9 @@ test('catalogue : chaque route d’admin déclare une permission connue ; rôles
   assert.ok(routes.length > 100);
   const bad = routes.filter(r => !Object.hasOwn(PERMISSIONS, r.perm || '')).map(r => `${r.method} ${r.url} → ${r.perm}`);
   assert.deepEqual(bad, []);
-  // L'administrateur a tout ; les autres rôles ne citent que des permissions du catalogue, et « les miennes »
+  // SA-D19/20 : l’administrateur n’assure pas seul la relecture ni la direction de publication ; les autres rôles ne citent que des permissions du catalogue, et « les miennes »
   // seulement pour celles qui ont une portée.
-  assert.deepEqual(Object.keys(ROLES.admin.perms).sort(), Object.keys(PERMISSIONS).sort());
+  assert.deepEqual(Object.keys(ROLES.admin.perms).sort(), Object.keys(PERMISSIONS).filter(p => !['saisons.vote_relecture', 'saisons.vote_ordonner'].includes(p)).sort());
   for (const [name, role] of Object.entries(ROLES)) {
     for (const [perm, scope] of Object.entries(role.perms)) {
       assert.ok(Object.hasOwn(PERMISSIONS, perm), `${name} : ${perm}`);

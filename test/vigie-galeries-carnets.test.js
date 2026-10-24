@@ -357,6 +357,9 @@ test('rôles surveillés par la Vigie : d’accord avec le catalogue du site dè
   }
   for (const perm of REGLABLES_SURVEILLES.filter(p => Object.hasOwn(PERMISSIONS, p))) assert.ok(Object.hasOwn(ADJUSTABLE, perm), perm);
   assert.deepEqual(Object.keys(ROLES_SURVEILLES).sort(), Object.keys(ROLES).sort(), 'mêmes rôles de départ');
+  assert.deepEqual(droitsSurveilles(['directeur_publication']), new Map(), 'le nouveau rôle ne donne aucun droit galerie, Carnet ou message');
+  for (const role of ['admin', 'photographe', 'relecteur'])
+    assert.deepEqual(droitsSurveilles([role, 'directeur_publication']), droitsSurveilles([role]), `le cumul ${role} reste surveillé sans élargissement`);
 });
 
 test('contrôle des rôles : rôles des comptes gardés pour le détecteur ; accès ouvert apparu sans événement du site → critique (BV-23, second temps)', async t => {

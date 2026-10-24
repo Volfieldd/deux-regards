@@ -1,6 +1,6 @@
 # Connexion et comptes
 
-L'administration est réservée aux comptes qui ont un rôle (Administrateur, Photographe, Modérateur, Relecteur). L'application **ne stocke et ne gère aucun mot de passe** : la connexion passe par OpenID Connect, avec Zitadel Cloud comme fournisseur. Google peut y être branché comme fournisseur externe.
+L'administration est réservée aux comptes qui ont un rôle (Administrateur, Photographe, Modérateur, Relecteur, Direction de publication). L'application **ne stocke et ne gère aucun mot de passe** : la connexion passe par OpenID Connect, avec Zitadel Cloud comme fournisseur. Google peut y être branché comme fournisseur externe.
 
 ## Parcours de connexion
 
@@ -32,6 +32,14 @@ Pas à pas détaillé, avec les écrans de la console : [`deploy/unraid/README.m
 **Retirer l'accès** à quelqu'un : dans l'admin, **Comptes et rôles**, retirer ses rôles, le désactiver ou supprimer son compte. L'effet est immédiat. Retirer son rôle dans Zitadel ne suffit plus (le rôle Zitadel ne sert qu'à la première connexion) ; le bloquer dans Zitadel l'empêche en revanche de se connecter. Un compte supprimé qui se reconnecte revient « en attente », sans rôle ; « Désactivé » garde le compte et refuse la connexion.
 
 **Garde-fou :** les identités listées dans `ADMIN_SUBS` (variable d'environnement, `sub` séparés par des virgules) sont toujours administratrices, même si leur compte a été modifié dans l'admin : une identité ajoutée à la liste après coup (compte désactivé, rôles retirés) redevient administrateur actif à sa connexion, noté au Journal (« Compte rétabli par ADMIN_SUBS »). Il reste aussi toujours au moins un administrateur actif.
+
+## Droits des propositions au vote
+
+Le photographe propose ses propres photos publiées dans ses expositions (`saisons.ecrire`, portée « les miennes »). Le relecteur assure la relecture (`saisons.vote_relecture`, tout), puis l’administrateur valide la même version (`saisons.vote_valider`, tout). L’administrateur peut aussi préparer les listes, y compris celles d’expositions communes.
+
+**Direction de publication** (`directeur_publication`) est un rôle distinct : accès à l’administration, lecture des expositions (`saisons.voir`, tout) et réordonnancement des propositions (`saisons.vote_ordonner`, tout). Il n’est attribué automatiquement à aucun compte. Administrateur seul ne donne ni le réordonnancement ni la relecture. Un administrateur habilité peut cumuler explicitement les rôles sur un compte dans **Comptes et rôles** ; les permissions de chaque rôle s’ajoutent. Modérateur ne reçoit aucun nouveau droit sur ce circuit.
+
+Toute modification de la liste ou de son ordre avance sa version et annule les deux validations, même pendant l’ouverture. Après clôture ou retrait, le circuit est figé. Ces droits ne modifient pas les droits de programmation, de publication des bilans ou de mise en avant sur l’accueil. Voir [l’aide des expositions](https://github.com/Volfieldd/deux-regards/blob/main/docs/aide/18-saisons.md#proposer-des-photos-au-vote).
 
 ## Lier un compte à un photographe
 

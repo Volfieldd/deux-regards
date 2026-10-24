@@ -2,9 +2,9 @@
 
 **Expositions** est l’atelier des saisons photographiques de Nicephos. Une exposition réunit un texte d’intention, un calendrier et un accrochage ordonné. Les photos gardent leur série et leur statut dans la photothèque.
 
-Ce chapitre décrit l’atelier et le parcours public. La rubrique **Expositions** doit être publiée en v2 ou v3 pour que les visiteurs y accèdent. La gestion des bilans et de leurs prolongements est séparée de cet atelier ; le vote consultatif suivra dans une étape dédiée.
+Ce chapitre décrit la préparation des expositions, les propositions au vote et leurs validations, les bilans et leurs prolongements dans des collections permanentes. Les présentations publiques v2 et v3 reprennent ces contenus selon leur calendrier et leurs décisions de publication. La rubrique **Expositions** doit être publiée en v2 ou v3 pour que les visiteurs y accèdent.
 
-La liste affiche les expositions auxquelles vous avez accès, de la plus récente à la plus ancienne. Le filtre **État** distingue les brouillons, les expositions programmées, ouvertes, closes et retirées. Un photographe prépare ses propres expositions ; le relecteur peut les consulter. L’administrateur prépare, programme, valide l’ouverture et retire les expositions. Le choix de la mise en avant sur l’accueil lui est réservé. Les validations des propositions de vote seront ajoutées avec ce format.
+La liste affiche les expositions auxquelles vous avez accès, de la plus récente à la plus ancienne. Le filtre **État** distingue les brouillons, les expositions programmées, ouvertes, closes et retirées. Un photographe prépare ses propres expositions ; le relecteur peut les consulter. L’administrateur prépare, programme, valide l’ouverture et retire les expositions. Le choix de la mise en avant sur l’accueil lui est réservé.
 
 ## Préparer une exposition
 
@@ -56,6 +56,27 @@ La clôture termine l’exposition. L’accrochage complet reste accessible pend
 
 L’administrateur choisit explicitement l’exposition mise en avant sur l’accueil. Son annonce, sa visite ouverte ou son archive remplace alors l’ouverture habituelle ; les regards, les séries et la galerie restent accessibles dessous. Aucune exposition n’est choisie automatiquement. Un choix retiré, invalide ou arrivé à échéance rend la place à l’ouverture habituelle. La mise en avant ne s’applique ni aux vues filtrées ni aux galeries privées.
 
+## Proposer des photos au vote
+
+Depuis la fiche, **Photos proposées au vote** ouvre le choix consultatif. Ce choix reste distinct de l’accrochage de l’exposition et ne publie aucune photo dans une collection permanente.
+
+| Responsabilité | Action autorisée |
+|---|---|
+| Photographe d’origine | Choisir ses photos déjà publiées et autorisées dans l’accrochage de ses expositions. L’administrateur peut aussi préparer une liste, notamment pour une exposition commune. |
+| Relecteur | Valider la relecture des photos et de leur ordre dans la version affichée. |
+| Administrateur | Valider la même version après sa relecture. |
+| Direction de publication | Réordonner exactement les photos déjà proposées, sans ajouter ou retirer une photo par ce formulaire. |
+
+Cochez les photos, puis **Enregistrer les propositions**. Les photos conservées gardent leur ordre ; les nouvelles arrivent à la fin. Pour changer l’ordre, un compte ayant la responsabilité **Direction de publication** attribue une position distincte à chaque photo et enregistre.
+
+**Direction de publication** est un rôle distinct, attribué explicitement dans **Comptes et rôles**. Il permet de lire les expositions et d’ordonner leurs propositions. Le rôle Administrateur ne donne ni cette responsabilité ni la relecture. Des rôles peuvent être cumulés explicitement sur un compte ; aucune attribution automatique n’est faite.
+
+La liste affiche son numéro de version et ses deux validations. Le relecteur utilise **Valider la relecture**, puis l’administrateur **Ouvrir cette liste au vote**. Chaque validation porte sur les photos et leur ordre affichés. Ce dernier geste valide le choix ; le calendrier de l’exposition reste applicable.
+
+Tout changement de liste ou d’ordre annule les deux validations, y compris pendant une exposition ouverte. Les propositions restent indisponibles au vote jusqu’à la nouvelle relecture et la nouvelle validation. Une page ancienne est refusée sans écraser la liste actuelle : rechargez-la avant de poursuivre. À la clôture ou au retrait de l’exposition, ce circuit est figé.
+
+Une photo dépubliée, retirée de l’accrochage ou devenue non autorisée disparaît du choix public. Sa présence dans une liste autrefois validée ne la rétablit pas.
+
 ## Aperçu privé
 
 **Voir l’aperçu privé** montre les textes enregistrés et les photos dans leur ordre. Le sélecteur de langue permet de vérifier les trois versions. L’aperçu est réservé à l’équipe autorisée ; son adresse ne constitue pas un lien de partage public.
@@ -68,7 +89,7 @@ Un message en tête et, lorsque c’est possible, auprès du champ explique un r
 
 Si quelqu’un a enregistré une autre version entre-temps, la modification est refusée sans écraser son travail. Rechargez la fiche, comparez avec votre saisie et reprenez les changements voulus.
 
-Une photo non autorisée, une traduction manquante, une couverture absente de l’accrochage, des positions répétées ou un calendrier invalide empêchent la validation. Un refus ne publie pas partiellement l’exposition. Le vote consultatif n’est pas géré par cet écran.
+Une photo non autorisée, une traduction manquante, une couverture absente de l’accrochage, des positions répétées ou un calendrier invalide empêchent la validation. Un refus ne publie pas partiellement l’exposition. Les propositions au vote et les bilans se gèrent dans leurs espaces dédiés, accessibles depuis la fiche.
 
 ## Bilans et rectificatifs
 

@@ -58,11 +58,14 @@ export const PERMISSIONS = {
   'carnet.publier': { scoped: true },   // publier, programmer, renvoyer, retirer et republier (droit à part, comme les photos)
   'carnet.publies.modifier': { scoped: true }, // modifier un billet déjà publié (réglable par photographe)
   // Saisons (SA-Q1, matrice validée le 24 octobre) : préparation propre au photographe, publication réservée
-  // à l’administration. La direction de publication et les validations du vote viendront dans leur lot distinct.
+  // à l’administration. La direction de publication est un rôle distinct, sans cumul automatique.
   'saisons.voir': { scoped: true },
   'saisons.ecrire': { scoped: true },
   'saisons.publier': { scoped: true },
   'saisons.accueil': {},
+  'saisons.vote_relecture': { scoped: true },
+  'saisons.vote_valider': { scoped: true },
+  'saisons.vote_ordonner': { scoped: true },
   'site.textes': {},
   'site.apparence': {},
   'site.filigrane': {},
@@ -77,9 +80,10 @@ export const PERMISSIONS = {
 
 const ALL = 'tout', OWN = 'les miennes';
 const all = list => Object.fromEntries(list.map(p => [p, ALL]));
-// Les quatre rôles de départ (d'autres pourront être créés plus tard en cochant des permissions).
+// Les rôles de départ (d'autres pourront être créés plus tard en cochant des permissions).
 export const ROLES = {
-  admin: { label: 'Administrateur', perms: all(Object.keys(PERMISSIONS)) },
+  admin: { label: 'Administrateur', perms: all(Object.keys(PERMISSIONS).filter(p => !['saisons.vote_relecture', 'saisons.vote_ordonner'].includes(p))) },
+  directeur_publication: { label: 'Direction de publication', perms: all(['admin.acceder', 'saisons.voir', 'saisons.vote_ordonner']) },
   photographe: {
     label: 'Photographe',
     perms: {
@@ -105,7 +109,7 @@ export const ROLES = {
   },
   // Le relecteur corrige les textes, y compris ceux des photos déjà en ligne (photos.textes reste sa seule écriture).
   relecteur: { label: 'Relecteur', perms: all(['admin.acceder', 'photos.voir', 'photos.textes', 'photos.publiees.modifier', 'site.textes',
-    'carnet.voir', 'carnet.textes', 'carnet.publies.modifier', 'saisons.voir']) },
+    'carnet.voir', 'carnet.textes', 'carnet.publies.modifier', 'saisons.voir', 'saisons.vote_relecture']) },
 };
 export const SCOPES = { ALL, OWN };
 
@@ -127,7 +131,7 @@ export function grantsOf(roles = [], adjust = {}) {
   for (const r of roles) {
     for (const [perm, scope] of Object.entries(ROLES[r]?.perms || {})) if (out.get(perm) !== ALL) out.set(perm, scope);
   }
-  if (roles.includes('admin') || !roles.includes('photographe')) return out;   // l'administrateur n'est jamais restreint
+  if (roles.includes('admin') || !roles.includes('photographe')) return out;   // aucun réglage propre au photographe ne restreint les autres rôles
   const fromOthers = perm => roles.some(r => r !== 'photographe' && ROLES[r]?.perms?.[perm]);
   for (const perm of adjust.remove || []) if (Object.hasOwn(ADJUSTABLE, perm) && !fromOthers(perm)) out.delete(perm);
   for (const perm of adjust.add || []) if (Object.hasOwn(ADJUSTABLE, perm) && !out.has(perm)) out.set(perm, PERMISSIONS[perm].scoped ? OWN : ALL);

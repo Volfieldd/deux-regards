@@ -2,9 +2,9 @@
 
 **Exhibitions** is the workspace for Nicephos photographic seasons. An exhibition combines an artistic intention, dates and an ordered display. Photographs keep their series and publication status in the photo library.
 
-This chapter covers the workspace and public visit. The **Exhibitions** section must be published in v2 or v3 for visitors to access it. Managing retrospectives and their continuations is separate from this workspace; advisory voting will follow in a dedicated stage.
+This chapter covers exhibition preparation, voting proposals and their approvals, retrospectives and permanent collections. Public presentations v2 and v3 show these contents according to their dates and publication decisions. The **Exhibitions** section must be published in v2 or v3 for visitors to access it.
 
-The list shows the exhibitions you can access, newest first. The **State** filter distinguishes drafts, scheduled, open, closed and withdrawn exhibitions. A photographer prepares their own exhibitions; the reviewer can read them. The administrator prepares, schedules, approves opening and withdraws exhibitions. Choosing what is featured on the home page is reserved for the administrator. Approval of voting proposals will be added with that format.
+The list shows the exhibitions you can access, newest first. The **State** filter distinguishes drafts, scheduled, open, closed and withdrawn exhibitions. A photographer prepares their own exhibitions; the reviewer can read them. The administrator prepares, schedules, approves opening and withdraws exhibitions. Choosing what is featured on the home page is reserved for the administrator.
 
 ## Prepare an exhibition
 
@@ -56,6 +56,27 @@ Closing ends the exhibition. The full display remains available for **twelve UTC
 
 The administrator explicitly chooses the exhibition featured on the home page. Its announcement, open visit or archive then replaces the usual opening; the photographers, series and gallery remain available below. No exhibition is selected automatically. A withdrawn, invalid or expired choice restores the usual opening. The feature does not appear in filtered views or private galleries.
 
+## Propose photographs for voting
+
+From the exhibition record, **Photos proposed for voting** opens the advisory selection. This selection is separate from the exhibition display and does not publish photographs in a permanent collection.
+
+| Responsibility | Allowed action |
+|---|---|
+| Original photographer | Choose their own published and authorised photographs from the display of their exhibitions. The administrator can also prepare a list, including for a shared exhibition. |
+| Reviewer | Approve the review of the photographs and their order in the displayed version. |
+| Administrator | Approve that same version after review. |
+| Publishing direction | Reorder exactly the photographs already proposed, without adding or removing photographs through this form. |
+
+Select photographs, then **Save proposals**. Retained photographs keep their order; new ones are appended. To change the order, an account with **Publishing direction** assigns a distinct position to each photograph and saves.
+
+**Publishing direction** is a separate role, explicitly assigned in **Accounts and roles**. It grants reading access to exhibitions and permission to order their proposals. The Administrator role grants neither this responsibility nor proposal review. Roles can be explicitly combined on an account; no assignment happens automatically.
+
+The list shows its version number and both approvals. The reviewer uses **Approve review**, then the administrator **Approve this voting list**. Each approval concerns the photographs and their displayed order. The latter action approves the selection; the exhibition dates still apply.
+
+Any change to the list or its order cancels both approvals, including during an open exhibition. Proposals remain unavailable for voting until a new review and administrator approval. An outdated page is refused without overwriting the current list: reload it before continuing. This workflow is frozen when the exhibition closes or is withdrawn.
+
+A photograph that is unpublished, removed from the display or no longer authorised disappears from the public selection. Its presence in a previously approved list does not restore it.
+
 ## Private preview
 
 **View the private preview** shows saved texts and photographs in their order. The language selector lets you check all three versions. The preview is reserved for authorised team members; its address is not a public sharing link.
@@ -68,7 +89,7 @@ A message at the top and, where possible, next to the field explains a refusal. 
 
 If someone saved another version in the meantime, the change is refused without overwriting their work. Reload the record, compare it with your input and apply the changes you want again.
 
-An unauthorised photograph, a missing translation, a cover outside the display, repeated positions or invalid dates prevent approval. A refusal does not partially publish an exhibition. Advisory voting is not managed by this screen.
+An unauthorised photograph, a missing translation, a cover outside the display, repeated positions or invalid dates prevent approval. A refusal does not partially publish an exhibition. Voting proposals and retrospectives are managed in their dedicated spaces, reached from the exhibition record.
 
 ## Retrospectives and corrections
 

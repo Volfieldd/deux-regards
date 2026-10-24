@@ -50,6 +50,7 @@ import { TRAP_PATH } from './securite/piege.js';
 import { createPublicVersion, usesV2 } from './version-publique.js';
 import { createCarnet } from './carnet.js';
 import { createSaisons } from './saisons.js';
+import { createSaisonsPropositions } from './saisons-propositions.js';
 import { createSaisonsBilans } from './saisons-bilans.js';
 import { archiveEndsAt, createSaisonsPubliques } from './saisons-publiques.js';
 import { EXPOSITION_UI } from './routes/expositions.js';
@@ -326,6 +327,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('publicRepo', createRepo(db));
   app.decorate('carnet', createCarnet({ db, repo: app.publicRepo, readiness: app.readiness, accounts: app.accounts, mailer: app.mailer, audit: app.audit, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
   app.decorate('saisons', createSaisons({ db, readiness: app.readiness }));
+  app.decorate('saisonsPropositions', createSaisonsPropositions({ db, saisons: app.saisons, readiness: app.readiness }));
   app.decorate('saisonsBilans', createSaisonsBilans({ db, readiness: app.readiness, storageDir: config.storageDir,
     archiveVisible: (s, at) => at >= s.opens_at && at < archiveEndsAt(s.closes_at) }));
   app.decorate('expositions', createSaisonsPubliques({ saisons: app.saisons, repo: app.publicRepo, readiness: app.readiness, storageDir: config.storageDir }));

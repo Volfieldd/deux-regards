@@ -2,9 +2,9 @@
 
 **Ausstellungen** ist die Werkstatt für fotografische Saisons von Nicephos. Eine Ausstellung verbindet eine künstlerische Absicht, einen Zeitplan und eine geordnete Hängung. Die Fotos behalten ihre Serie und ihren Veröffentlichungsstatus in der Fotothek.
 
-Dieses Kapitel beschreibt die Werkstatt und den öffentlichen Besuch. Die Rubrik **Ausstellungen** muss in v2 oder v3 veröffentlicht sein, damit Besucher darauf zugreifen können. Die Verwaltung von Rückblicken und ihren Fortsetzungen ist von dieser Werkstatt getrennt; beratende Abstimmungen folgen in einem eigenen Schritt.
+Dieses Kapitel beschreibt die Vorbereitung von Ausstellungen, Abstimmungsvorschläge und ihre Bestätigungen, Rückblicke und dauerhafte Sammlungen. Die öffentlichen Darstellungen v2 und v3 zeigen diese Inhalte entsprechend dem Kalender und den Veröffentlichungsentscheidungen. Der Bereich **Ausstellungen** muss in v2 oder v3 veröffentlicht sein, damit Besucher ihn öffnen können.
 
-Die Liste zeigt die Ausstellungen, auf die Sie zugreifen können, mit der neuesten zuerst. Der Filter **Zustand** unterscheidet Entwürfe, geplante, geöffnete, geschlossene und zurückgezogene Ausstellungen. Fotografen bereiten ihre eigenen Ausstellungen vor; der Lektor kann sie lesen. Der Administrator bereitet Ausstellungen vor, plant sie, gibt ihre Eröffnung frei und zieht sie zurück. Die Auswahl für die Startseite ist dem Administrator vorbehalten. Die Freigabe der Abstimmungsvorschläge wird mit diesem Format ergänzt.
+Die Liste zeigt die Ausstellungen, auf die Sie Zugriff haben, von der neuesten zur ältesten. Der Filter **Status** unterscheidet Entwürfe, geplante, offene, abgeschlossene und zurückgezogene Ausstellungen. Fotografen bereiten ihre eigenen Ausstellungen vor; der Lektor kann sie lesen. Der Administrator bereitet vor, plant, bestätigt die Eröffnung und zieht Ausstellungen zurück. Nur er wählt die hervorgehobene Ausstellung auf der Startseite.
 
 ## Eine Ausstellung vorbereiten
 
@@ -56,6 +56,27 @@ Mit dem Ende schließt die Ausstellung. Die vollständige Hängung bleibt für *
 
 Der Administrator wählt ausdrücklich die Ausstellung für die Startseite aus. Ihre Ankündigung, ihr geöffneter Besuch oder ihr Archiv ersetzt dann die übliche Eröffnung; Fotografen, Serien und Galerie bleiben darunter erreichbar. Keine Ausstellung wird automatisch ausgewählt. Eine zurückgezogene, ungültige oder abgelaufene Auswahl stellt die übliche Eröffnung wieder her. Die Hervorhebung erscheint weder in gefilterten Ansichten noch in privaten Galerien.
 
+## Fotos zur Abstimmung vorschlagen
+
+In der Ausstellung öffnet **Zum Abstimmen vorgeschlagene Fotos** die beratende Auswahl. Diese Auswahl ist von der Hängung getrennt und veröffentlicht keine Fotos in einer dauerhaften Sammlung.
+
+| Verantwortung | Erlaubte Aktion |
+|---|---|
+| Ursprünglicher Fotograf | Eigene veröffentlichte und freigegebene Fotos aus der Hängung der eigenen Ausstellungen auswählen. Der Administrator kann ebenfalls eine Liste vorbereiten, auch für eine gemeinsame Ausstellung. |
+| Lektor | Die Prüfung der Fotos und ihrer Reihenfolge in der angezeigten Version bestätigen. |
+| Administrator | Dieselbe Version nach der Prüfung bestätigen. |
+| Publikationsleitung | Genau die bereits vorgeschlagenen Fotos neu ordnen, ohne mit diesem Formular Fotos hinzuzufügen oder zu entfernen. |
+
+Markieren Sie Fotos und wählen Sie **Vorschläge speichern**. Beibehaltene Fotos behalten ihre Reihenfolge; neue werden am Ende ergänzt. Ein Konto mit **Publikationsleitung** kann jedem Foto eine eindeutige Position zuweisen und die neue Reihenfolge speichern.
+
+**Publikationsleitung** ist eine eigenständige Rolle, die ausdrücklich unter **Konten und Rollen** zugewiesen wird. Sie erlaubt das Lesen von Ausstellungen und das Ordnen ihrer Vorschläge. Die Rolle Administrator erhält weder diese Verantwortung noch die Prüfung der Vorschläge. Rollen können auf einem Konto ausdrücklich kombiniert werden; es gibt keine automatische Zuweisung.
+
+Die Liste zeigt ihre Versionsnummer und beide Bestätigungen. Der Lektor wählt **Prüfung bestätigen**, danach der Administrator **Diese Abstimmungsliste bestätigen**. Jede Bestätigung betrifft die Fotos und ihre angezeigte Reihenfolge. Die letzte Aktion bestätigt die Auswahl; der Ausstellungskalender gilt weiterhin.
+
+Jede Änderung der Liste oder Reihenfolge hebt beide Bestätigungen auf, auch während einer offenen Ausstellung. Die Vorschläge bleiben bis zur erneuten Prüfung und Bestätigung für die Abstimmung gesperrt. Eine veraltete Seite wird abgelehnt, ohne die aktuelle Liste zu überschreiben: Laden Sie sie vor dem Fortfahren neu. Nach Abschluss oder Rücknahme der Ausstellung ist dieser Ablauf gesperrt.
+
+Ein Foto, das nicht mehr veröffentlicht ist, aus der Hängung entfernt wurde oder nicht mehr freigegeben ist, verschwindet aus der öffentlichen Auswahl. Eine frühere Bestätigung stellt es nicht wieder her.
+
 ## Private Vorschau
 
 **Private Vorschau ansehen** zeigt die gespeicherten Texte und Fotos in ihrer Reihenfolge. Mit der Sprachauswahl können Sie alle drei Fassungen prüfen. Die Vorschau ist berechtigten Teammitgliedern vorbehalten; ihre Adresse ist kein öffentlicher Freigabelink.
@@ -68,7 +89,7 @@ Eine Meldung am Anfang und, soweit möglich, am Feld erläutert eine Ablehnung. 
 
 Hat inzwischen jemand eine andere Fassung gespeichert, wird die Änderung abgelehnt, ohne dessen Arbeit zu überschreiben. Laden Sie die Seite neu, vergleichen Sie sie mit Ihrer Eingabe und übernehmen Sie die gewünschten Änderungen erneut.
 
-Ein nicht zugelassenes Foto, eine fehlende Übersetzung, ein Titelbild außerhalb der Hängung, wiederholte Positionen oder ungültige Termine verhindern die Freigabe. Eine Ablehnung veröffentlicht keine Teile der Ausstellung. Beratende Abstimmungen werden auf dieser Seite nicht verwaltet.
+Ein nicht zugelassenes Foto, eine fehlende Übersetzung, ein Titelbild außerhalb der Hängung, wiederholte Positionen oder ungültige Termine verhindern die Freigabe. Eine Ablehnung veröffentlicht keine Teile der Ausstellung. Abstimmungsvorschläge und Rückblicke werden in eigenen Bereichen verwaltet, die Sie über die Ausstellung erreichen.
 
 ## Rückblicke und Berichtigungen
 
