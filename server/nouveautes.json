@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.224.0",
+    "date": "2026-10-24",
+    "pr": 224,
+    "title": {
+      "fr": "Les visiteurs peuvent soutenir les photos d’une exposition",
+      "en": "Visitors can support exhibition photographs",
+      "de": "Besucher können Ausstellungsfotos unterstützen"
+    },
+    "items": [
+      {
+        "perm": "saisons.voir",
+        "fr": "Les photos doublement validées sont proposées au vote dans leur ordre éditorial. Le visiteur peut soutenir chacune une fois par navigateur, après consentement dans le premier formulaire, sans compte ni bandeau global. Mes votes permet l’export et le retrait ; à la clôture, les identifiants disparaissent de la base active et seuls les totaux demeurent dans l’atelier. Le vote reste consultatif, sans publication automatique dans les collections.",
+        "en": "Photographs with both approvals are offered for voting in their editorial order. Visitors can support each once per browser after consenting in the first form, without an account or a global banner. My votes provides export and withdrawal; at closing, identifiers are removed from the active database and only totals remain in the workspace. Voting stays advisory and never automatically publishes works in collections.",
+        "de": "Doppelt freigegebene Fotos werden in ihrer redaktionellen Reihenfolge zur Abstimmung angeboten. Besucher können jedes Foto einmal pro Browser unterstützen, nach Einwilligung im ersten Formular, ohne Konto und ohne globales Banner. Meine Stimmen ermöglicht Export und Widerruf; am Ausstellungsende werden Kennungen aus der aktiven Datenbank entfernt, nur Gesamtzahlen bleiben in der Verwaltung. Die Abstimmung bleibt beratend und veröffentlicht niemals automatisch Werke in Sammlungen."
+      }
+    ]
+  },
+  {
     "version": "1.223.0",
     "date": "2026-10-24",
     "pr": 223,
