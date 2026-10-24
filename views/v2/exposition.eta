@@ -50,11 +50,7 @@
   <p class="expo-note" role="note"><%= x.archiveEnded %></p>
 <% } %>
 <% if (e.phase === 'archive' || e.phase === 'bilan') { %>
-  <section class="expo-bilan" id="bilan" aria-labelledby="bilan-t">
-    <h2 class="titre-2" id="bilan-t"><%= x.report %></h2>
-<% if (e.report) { %>    <p class="expo-prose"><%= e.report %></p>
-<% } else { %>    <p><%= x.pending %></p>
-<% } %>  </section>
+<%~ include('./_exposition-bilans', it) %>
 <% } %>
 </main>
 <%~ include('./_pied', it) %>

@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { setup } from './helpers.js';
+import { setup, VIGIE_KEYS } from './helpers.js';
 import { as } from './carnet-helpers.js';
 import { ROLES, grantsOf, SCOPES } from '../server/permissions.js';
+import { libelle, cible } from '../server/journal-libelles.js';
+import { dictionary, translator } from '../server/admin-i18n.js';
 
 const owner = (c, slug) => c.db.prepare('SELECT id FROM authors WHERE slug = ?').pluck().get(slug);
 const photos = (c, author) => c.db.prepare("SELECT id FROM photos WHERE author_id = ? AND status = 'published' ORDER BY id LIMIT 3").pluck().all(author);
@@ -85,4 +87,46 @@ test('propositions HTTP : portée exposition et photo, identifiants forgés, CSR
   c.db.prepare("UPDATE photos SET status = 'draft', title = 'Titre privé qui doit disparaître' WHERE id = ?").run(ids[0]);
   assert.equal((await author.post(`${base}/proposer`, form(c, mine, [ids[0]]))).statusCode, 422);
   assert.doesNotMatch((await author.get(base)).body, /Titre privé qui doit disparaître/);
+});
+
+test('propositions : les libellés dynamiques du rôle et du journal sont traduits', () => {
+  const d = dictionary();
+  const actions = ['proposer', 'relire', 'valider', 'ordonner'].map(action => `POST /admin/saisons/:id/vote/${action}`);
+  for (const langue of ['en', 'de']) {
+    const t = translator(langue), label = ROLES.directeur_publication.label;
+    assert.ok(d[label]?.[langue]); assert.notEqual(t(label), label);
+    for (const action of actions) {
+      const label = libelle(action), target = cible(action, '12');
+      assert.ok(label); assert.ok(d[label]?.[langue]); assert.notEqual(t(label), label);
+      assert.equal(target.kind, 'Exposition n° {id}'); assert.equal(target.href, '/admin/saisons/12');
+      assert.ok(d[target.kind]?.[langue]); assert.notEqual(t(target.kind, { id: '12' }), 'Exposition n° 12');
+    }
+  }
+});
+
+test('propositions Vigie : refus signalés sans contenu, conflit courant sans faux signal de validation', async t => {
+  const events = [], c = await setup(t, { seeded: true,
+    env: { VIGIE_URL: 'http://vigie:4100', VIGIE_INGEST_KEY: 'cle-factice-propositions-0123456789abcdef', VIGIE_DECISIONS_PUBKEY: VIGIE_KEYS.pub64 },
+    vigieOptions: { send: async body => { events.push(...JSON.parse(body).lot); }, timers: false, pollDecisions: false },
+  });
+  const a = owner(c, 'sebastien'), b = owner(c, 'julien'), ownIds = photos(c, a), foreign = photos(c, b)[0], id = season(c, a, [...ownIds, foreign]), other = season(c, b, [foreign]);
+  const author = as(c, { sub: 'propositions-vigie-auteur', roles: ['photographe'], author: 'sebastien' });
+  const admin = as(c, { sub: 'propositions-vigie-admin', roles: ['admin'] }), rel = as(c, { sub: 'propositions-vigie-relecture', roles: ['relecteur'] });
+  const base = `/admin/saisons/${id}/vote`;
+  assert.equal((await author.get(`/admin/saisons/${other}/vote`)).statusCode, 404);
+  assert.equal((await author.post(`${base}/proposer`, form(c, id, [foreign]))).statusCode, 403);
+  assert.equal((await admin.post(`${base}/ordonner`, form(c, id, []))).statusCode, 403);
+  assert.equal((await author.post(`${base}/proposer`, { ...form(c, id, ownIds), _csrf: '' })).statusCode, 403);
+  assert.equal((await author.post(`${base}/proposer`, { ...form(c, id, ownIds), version: [] })).statusCode, 422);
+  assert.equal((await author.post(`${base}/proposer`, form(c, id, ownIds))).statusCode, 303);
+  assert.equal((await rel.post(`${base}/relire`, { version: '1' })).statusCode, 409);
+  c.app.securite.retryNow?.(); await c.app.securite.flush?.();
+  assert.ok(events.some(e => e.type === 'authz_fail' && e.detail.objet === 'saison'));
+  assert.ok(events.some(e => e.type === 'authz_fail' && e.detail.objet === 'photo'));
+  assert.ok(events.some(e => e.type === 'authz_fail' && e.detail.permission === 'saisons.vote_ordonner'));
+  assert.ok(events.some(e => e.type === 'authz_csrf_fail'));
+  const malformed = events.filter(e => e.type === 'input_validation_fail' && e.detail.objet === 'saison_propositions');
+  assert.equal(malformed.length, 1); assert.equal(malformed[0].detail.champ, 'formulaire');
+  assert.equal(malformed[0].origine.composant, 'site · admin');
+  assert.doesNotMatch(JSON.stringify(events), /Une exposition|Brume sur|"photo_ids"|"_csrf"/);
 });

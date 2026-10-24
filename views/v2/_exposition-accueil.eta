@@ -16,7 +16,7 @@
 <% } %>      </dl>
 <% if (e.phase === 'annonce' || e.phase === 'archive') { %>      <p class="expo-prose"><%= e.phase === 'annonce' ? x.announcement : x.completed %></p>
 <% } %>
-      <div class="expo-actions"><a class="btn" href="<%= it.u(`/exposition/${e.slug}`) %>"><%= action %></a><a class="lien" href="<%= it.u('/expositions') %>"><%= x.back %></a></div>
+      <div class="expo-actions"><a class="btn" href="<%= it.u(`/exposition/${e.slug}`) %>"><%= action %></a><a class="lien" href="<%= it.u('/expositions') %>"><%= x.back %></a><a class="lien" href="<%= it.u('/collections') %>"><%= x.collections %></a></div>
     </div>
 <% if (e.cover) { %>    <figure class="expo-couverture"><a href="<%= it.u(`/exposition/${e.slug}`) %>" aria-label="<%= action %>"><%~ it.picture(e.cover, { sizes: '(min-width: 900px) calc((100vw - 192px) / 2), calc(100vw - 48px)', eager: true, alt: e.cover.alt || e.cover.title }) %></a></figure>
 <% } %>

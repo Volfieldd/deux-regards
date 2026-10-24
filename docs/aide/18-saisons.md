@@ -2,9 +2,9 @@
 
 **Expositions** est l’atelier des saisons photographiques de Nicephos. Une exposition réunit un texte d’intention, un calendrier et un accrochage ordonné. Les photos gardent leur série et leur statut dans la photothèque.
 
-Ce chapitre décrit la gestion dans l’administration. Les pages publiques, l’annonce avant ouverture, les archives, les bilans et le vote consultatif viennent dans les étapes suivantes. Une décision prise dans cet atelier prépare l’exposition ; elle ne signifie pas encore qu’une nouvelle page est accessible aux visiteurs du site.
+Ce chapitre décrit la préparation des expositions, les propositions au vote et leurs validations, les bilans et leurs prolongements dans des collections permanentes. Les présentations publiques v2 et v3 reprennent ces contenus selon leur calendrier et leurs décisions de publication.
 
-La liste affiche les expositions auxquelles vous avez accès, de la plus récente à la plus ancienne. Le filtre **État** distingue les brouillons, les expositions programmées, ouvertes, closes et retirées. Un photographe prépare ses propres expositions ; le relecteur peut les consulter. L’administrateur prépare, programme, valide l’ouverture et retire les expositions. Le choix de la mise en avant sur l’accueil lui est réservé. Les validations des propositions de vote seront ajoutées avec ce format.
+La liste affiche les expositions auxquelles vous avez accès, de la plus récente à la plus ancienne. Le filtre **État** distingue les brouillons, les expositions programmées, ouvertes, closes et retirées. Un photographe prépare ses propres expositions ; le relecteur peut les consulter. L’administrateur prépare, programme, valide l’ouverture et retire les expositions. Le choix de la mise en avant sur l’accueil lui est réservé.
 
 ## Préparer une exposition
 
@@ -46,6 +46,27 @@ Enregistrez d’abord vos modifications. Une décision ouvre un récapitulatif :
 
 Les décisions de programmation, d’ouverture et de retrait sont distinctes de l’enregistrement du brouillon. Une exposition déjà validée ne se modifie pas silencieusement ; une programmation peut être annulée avant l’ouverture pour reprendre le brouillon. Cet atelier ne propose pas de réouverture après retrait.
 
+## Proposer des photos au vote
+
+Depuis la fiche, **Photos proposées au vote** ouvre le choix consultatif. Ce choix reste distinct de l’accrochage de l’exposition et ne publie aucune photo dans une collection permanente.
+
+| Responsabilité | Action autorisée |
+|---|---|
+| Photographe d’origine | Choisir ses photos déjà publiées et autorisées dans l’accrochage de ses expositions. L’administrateur peut aussi préparer une liste, notamment pour une exposition commune. |
+| Relecteur | Valider la relecture des photos et de leur ordre dans la version affichée. |
+| Administrateur | Valider la même version après sa relecture. |
+| Direction de publication | Réordonner exactement les photos déjà proposées, sans ajouter ou retirer une photo par ce formulaire. |
+
+Cochez les photos, puis **Enregistrer les propositions**. Les photos conservées gardent leur ordre ; les nouvelles arrivent à la fin. Pour changer l’ordre, un compte ayant la responsabilité **Direction de publication** attribue une position distincte à chaque photo et enregistre.
+
+**Direction de publication** est un rôle distinct, attribué explicitement dans **Comptes et rôles**. Il permet de lire les expositions et d’ordonner leurs propositions. Le rôle Administrateur ne donne ni cette responsabilité ni la relecture. Des rôles peuvent être cumulés explicitement sur un compte ; aucune attribution automatique n’est faite.
+
+La liste affiche son numéro de version et ses deux validations. Le relecteur utilise **Valider la relecture**, puis l’administrateur **Ouvrir cette liste au vote**. Chaque validation porte sur les photos et leur ordre affichés. Ce dernier geste valide le choix ; le calendrier de l’exposition reste applicable.
+
+Tout changement de liste ou d’ordre annule les deux validations, y compris pendant une exposition ouverte. Les propositions restent indisponibles au vote jusqu’à la nouvelle relecture et la nouvelle validation. Une page ancienne est refusée sans écraser la liste actuelle : rechargez-la avant de poursuivre. À la clôture ou au retrait de l’exposition, ce circuit est figé.
+
+Une photo dépubliée, retirée de l’accrochage ou devenue non autorisée disparaît du choix public. Sa présence dans une liste autrefois validée ne la rétablit pas.
+
 ## Aperçu privé
 
 **Voir l’aperçu privé** montre les textes enregistrés et les photos dans leur ordre. Le sélecteur de langue permet de vérifier les trois versions. L’aperçu est réservé à l’équipe autorisée ; son adresse ne constitue pas un lien de partage public.
@@ -58,4 +79,26 @@ Un message en tête et, lorsque c’est possible, auprès du champ explique un r
 
 Si quelqu’un a enregistré une autre version entre-temps, la modification est refusée sans écraser son travail. Rechargez la fiche, comparez avec votre saisie et reprenez les changements voulus.
 
-Une photo non autorisée, une traduction manquante, une couverture absente de l’accrochage, des positions répétées ou un calendrier invalide empêchent la validation. Un refus ne publie pas partiellement l’exposition. Le vote, les bilans et leurs rectificatifs ne sont pas gérés par cet écran à cette étape.
+Une photo non autorisée, une traduction manquante, une couverture absente de l’accrochage, des positions répétées ou un calendrier invalide empêchent la validation. Un refus ne publie pas partiellement l’exposition. Les propositions au vote et les bilans se gèrent dans leurs espaces dédiés, accessibles depuis la fiche.
+
+## Bilans et rectificatifs
+
+Dans la fiche de l’exposition, **Bilans et prolongements** ouvre un espace distinct. Le photographe prépare les bilans de ses propres expositions ; le relecteur peut les consulter. L’administrateur décide de leur publication et de leur retrait.
+
+Créez le brouillon avec un titre en français. Renseignez ensuite le **Titre** et le **Récit** en français, anglais et allemand. Vous pouvez préparer le brouillon avant la clôture, y compris lorsque l’exposition est encore en préparation. La publication exige une exposition validée, visible et close, ainsi que les trois langues complètes.
+
+La sélection du bilan peut contenir **zéro, une ou plusieurs photos** de l’accrochage d’origine. Cochez les photos retenues et attribuez-leur des positions distinctes avant d’enregistrer. Une photo doit toujours être publiée et autorisée ; sa sélection ne la republie pas.
+
+**Publier…** présente une confirmation. Après publication, le titre, le récit et la sélection sont immuables. Pour ajouter une précision ou corriger une erreur, utilisez **Préparer un rectificatif** : il s’agit d’un nouveau bilan, lié au précédent et soumis à la même validation. La page publique conserve les deux textes et les liens entre eux. Un nouveau rectificatif peut à son tour préciser un bilan rectificatif publié.
+
+**Retirer…** masque un bilan sans réécrire son contenu. Les liens vers un bilan retiré ne restent pas visibles dans les rectificatifs. Un bilan retiré ne peut pas servir de nouvelle origine à une collection.
+
+## Collections permanentes
+
+Depuis un bilan publié, **Préparer une collection** crée un prolongement autonome, présenté comme une nouvelle exposition. Son **Titre**, son **Intention**, ses textes facultatifs, sa **Couverture**, ses **Cartels** et son ordre sont propres à la collection. Les photos gardent leur série d’origine.
+
+Choisissez les photos parmi la sélection de ce bilan. Une collection publiée exige au moins une photo, une couverture explicitement choisie dans son accrochage, le titre et l’intention dans les trois langues. Chaque texte facultatif utilisé, y compris un cartel, doit être complété dans les trois langues. **Enregistrer la collection** garde ensemble les textes, la couverture, les cartels et l’ordre ; enregistrez avant de quitter la page.
+
+Après confirmation de **Publier…**, la présentation et l’accrochage sont figés. **Retirer…** enlève la collection du site public. Les droits courants de chaque photo continuent de s’appliquer : une dépublication ou un accord manquant retire la photo de la visite, même si elle faisait partie de la collection publiée. Une couverture devenue indisponible n’est pas remplacée automatiquement.
+
+Sur le site en présentation v2 ou v3, **Collections permanentes** se rejoint depuis les expositions, leur invitation sur l’accueil et le pied de page du site lorsqu’une collection est publiée. Chaque collection possède son entrée, sa visite photographique, sa conclusion et un lien vers son exposition et son bilan d’origine. Après les douze mois d’archive de l’exposition, ses bilans et ces liens demeurent, sans réafficher ses anciennes photos. La collection conserve sa propre visite sans date de clôture. Si l’origine est retirée, sa filiation cesse d’être affichée ; la collection reste accessible jusqu’à son propre retrait.
