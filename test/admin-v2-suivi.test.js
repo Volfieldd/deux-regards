@@ -239,6 +239,7 @@ test('journal v2 : un libellé pour chaque action notée, traduit ; cible nommé
   assert.equal(J.famille('GET /admin/personnes/:id/export.zip'), 'lectures');
   assert.equal(J.famille('POST /admin/signalements/:id/traite'), 'personnes');
   assert.equal(J.famille('POST /admin/apparence'), 'reglages');
+  assert.equal(J.famille('POST /admin/referencement'), 'reglages');
   assert.equal(J.famille('connexion (test)'), 'connexions');
   assert.equal(J.famille('POST /admin/photos/:id/champs'), 'publication');
 

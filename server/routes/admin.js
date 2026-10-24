@@ -47,6 +47,7 @@ import { registerMessages } from './messages.js';
 import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
 import { legalMissing } from '../legal.js';
+import { SEO_LIMITS, SEO_KEYS, seoSettings, homepageSeo, validateSeo, SeoError } from '../seo.js';
 import { createAdminVersion, ADMIN_VERSIONS } from '../admin-version.js';
 import { typoHtml } from '../typo-html.js';
 import * as JOURNAL from '../journal-libelles.js';
@@ -329,6 +330,7 @@ export default async function adminRoutes(app) {
   // confidentialité » compte les rubriques légales qui manquent.
   const SETTINGS_TABS = [
     ['appearance', '/admin/apparence', 'Identité et apparence', 'site.apparence'],
+    ['referencement', '/admin/referencement', 'Référencement', 'site.apparence'],
     ['images', '/admin/images', 'Filigrane et EXIF', 'site.filigrane'],
     ['droits', '/admin/droits', 'Mentions et confidentialité', 'reglages.droits'],
     ['authors', '/admin/auteurs', 'Photographes', 'photographes.gerer'],
@@ -2511,6 +2513,36 @@ export default async function adminRoutes(app) {
   });
 
   // ---------- réglages ----------
+  // Les réglages techniques restent réservés à site.apparence : site.textes permet aussi la relecture du site.
+  // Écriture séparée de /admin/reglages, dont le formulaire remet à vide les champs absents de sa propre page.
+  const seoPage = (request, reply, values = null, errors = {}) => {
+    const settings = repo.settings();
+    const seo = seoSettings(settings);
+    const fields = values || Object.fromEntries(SEO_KEYS.map(k => [k, k === 'seo_visibility' ? seo.visibility : k === 'seo_images' ? (seo.images ? 'oui' : 'non') : seo[k.startsWith('seo_title') ? 'title' : 'description'][k.endsWith('_en') ? 'en' : k.endsWith('_de') ? 'de' : 'fr']]));
+    const published = repo.photos({ status: 'published' });
+    const authors = repo.authors().filter(a => published.some(p => p.author_id === a.id));
+    const previews = LANGS.map(lang => ({ lang, url: `${app.config.publicUrl}${lang === 'fr' ? '/' : `/${lang}/`}`, ...homepageSeo(settings, app.siteName(), lang, authors) }));
+    return render(request, reply, 'referencement', { title: request.t('Référencement'), values: fields, errors, limits: SEO_LIMITS, seo, previews });
+  };
+  app.get('/admin/referencement', P('site.apparence'), async (request, reply) => seoPage(request, reply));
+  app.post('/admin/referencement', W('site.apparence'), async (request, reply) => {
+    let values;
+    try {
+      values = validateSeo(request.body || {});
+    } catch (err) {
+      if (!(err instanceof SeoError)) throw err;
+      request.refused = true;
+      app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/admin.js · référencement',
+        detail: { raison: 'réglage invalide', champs: Object.keys(err.errors) } });
+      const fields = Object.fromEntries(SEO_KEYS.map(k => [k, typeof request.body?.[k] === 'string' ? request.body[k].slice(0, (k.startsWith('seo_description') ? SEO_LIMITS.description : SEO_LIMITS.title) + 1) : '']));
+      return seoPage(request, reply.code(422), fields, err.errors);
+    }
+    const before = repo.settings();
+    app.db.transaction(() => { for (const [key, value] of Object.entries(values)) repo.saveSetting(key, value); })();
+    noteChanges(request, before, values);
+    return done(reply, '/admin/referencement', request.t('Référencement enregistré.'));
+  });
+
   const mapCounts = app.db.prepare("SELECT COUNT(*) AS mapCount, COUNT(DISTINCT city_id) AS mapCities FROM photos WHERE status = 'published' AND on_map = 1 AND city_id IS NOT NULL");
   const defaultsNow = () => rightsDefaults(repo.authors().map(a => a.name), app.siteName());
   // Deux pages, un seul enregistrement : « Site public » (textes, ouverture, carte du monde) et « Droits &

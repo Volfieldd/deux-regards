@@ -56,6 +56,7 @@ import { archiveEndsAt, createSaisonsPubliques } from './saisons-publiques.js';
 import { EXPOSITION_UI } from './routes/expositions.js';
 import { installExpositionVotes } from './routes/expositions-votes.js';
 import { createRepo } from './repo.js';
+import { SEO_KEYS, seoSettings, seoRobots, homepageSeo } from './seo.js';
 
 export { truncateIp };
 
@@ -139,6 +140,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const v = siteNameSetting.get();
     return (v && JSON.parse(v)) || config.siteName;
   });
+  const seoRows = db.prepare(`SELECT key, value FROM settings WHERE key IN (${SEO_KEYS.map(() => '?').join(',')})`);
+  app.decorate('seo', () => seoSettings(Object.fromEntries(seoRows.all(...SEO_KEYS).map(row => {
+    try { return [row.key, JSON.parse(row.value)]; } catch { return [row.key, null]; }
+  }))));
 
   await app.register(cookie, { secret: config.cookieSecret });
   await app.register(formbody);
@@ -198,7 +203,13 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
       }
       if (homeExposition) this.header('cache-control', 'no-store');
     }
-    const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
+    const seo = app.seo();
+    const homeSeo = template === 'home' && data?.page === 'accueil' ? homepageSeo(data.settings, data.siteName, lang, data.regards.filter(a => a.slug && a.count)) : null;
+    const robotsHeader = String(this.getHeader('x-robots-tag') || '');
+    const indexable = Boolean(pv) && !data?.neutral && this.statusCode === 200
+      && !/\b(?:noindex|noimageindex|none)\b|max-image-preview\s*:/i.test(robotsHeader);
+    const common = { seoTitle: homeSeo?.title, seoDescription: homeSeo?.description, seoRobots: seoRobots(data?.robots, seo, { indexable }),
+      trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
       expositionsPage, collectionsPage, expositionUi: EXPOSITION_UI[lang], homeExposition, expositionsCss: Boolean(homeExposition),
       expositionDate: at => `${new Intl.DateTimeFormat(LOCALES[lang].replace('_', '-'), { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(at)} UTC`,
       // Disponibilité des Carnets selon leur rubrique, y compris depuis un accueil V1 dans le système de thèmes.
@@ -405,6 +416,20 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     const noReferrer = reply.getHeader('referrer-policy') === 'no-referrer' || redactUrl(request.url).includes('[masqué]');
     reply.headers(headers);
     if (noReferrer) reply.header('referrer-policy', 'no-referrer');
+    // Le robot doit pouvoir lire le refus d’indexation : jamais de Disallow global. Les protections locales
+    // (galeries privées, formulaires et aperçus) ne sont pas remplacées par les réglages du référencement.
+    if (!/^\/(?:admin|auth|static|fonts)(?:[/?#]|$)/.test(request.url)) {
+      const seo = app.seo();
+      // Une réponse 304 de sendFile ne porte plus de Content-Type ; la route conserve la nature de l’image.
+      const image = /^image\//.test(String(reply.getHeader('content-type') || ''))
+        || (reply.statusCode === 304 && ['/media/:name', '/brand/:file'].includes(request.routeOptions?.url));
+      if (seo.visibility === 'off' || (image && !seo.images)) {
+        const current = reply.getHeader('x-robots-tag');
+        reply.header('x-robots-tag', [...new Set(`${current || ''}, noindex`.split(',').map(s => s.trim()).filter(Boolean))].join(', '));
+      } else if (!seo.images && /^text\/html/.test(String(reply.getHeader('content-type') || ''))) {
+        reply.header('x-robots-tag', seoRobots(reply.getHeader('x-robots-tag'), seo));
+      }
+    }
     // Rien de l'admin ne se garde en cache, quel que soit le gestionnaire (fichier envoyé par sendFile compris).
     if (/^\/admin(?:[/?#]|$)/.test(request.url)) reply.header('cache-control', 'no-store');
     // Session ouverte (administrateur, photographe…) : rien de ce qu'elle voit ne peut entrer dans un cache partagé

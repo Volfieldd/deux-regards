@@ -53,6 +53,18 @@ With the public site in **v3** (see [Appearance](apparence)), the opening photo 
 - **In v1 and v2**, this list is not used: the opening is the same everywhere.
 - Each opening photo keeps its **focal point** (photo record): in v3, the opening crops by 10 % at most around it.
 
+## Search visibility
+
+**Settings → Search visibility** is reserved for administrators and applies to all three public designs. Installing the update preserves current visibility. Choose whether search engines may index the public website and whether image search may index its public photos, then **Save search settings**. Asking engines not to index the website leaves it accessible by its address; use a private gallery to restrict access. The sitemap becomes empty while public pages request no indexing. Disabling image indexing leaves photos visible on the website.
+
+Titles, descriptions, canonical addresses, language links, sharing previews, structured data and the sitemap follow published content automatically. Drafts, private galleries and temporary links remain excluded. Notebooks only declare published languages. Originals are never served.
+
+Optional home-page titles (100 characters) and descriptions (320 characters) are available in French, English and German. Empty fields use the website name, photographers and tagline automatically. Missing translations follow the usual language fallback, including a customised French text. The preview is indicative: search engines choose the result they display.
+
+Settings affect future server responses. Removal from results waits for another crawl; existing cached images are not recalled. For urgent removal, also use the engine’s removal tools and purge Cloudflare’s cache. The owner still needs to verify the domain and submit its sitemap in Search Console. No Google account or tracker is added to the website.
+
+When the website and its images may be indexed, public pages allow large search previews; exclusions and page-specific limits keep priority. The sitemap splits automatically above 50,000 addresses or 50 MB. Photographer pages and links to notebooks only use existing published introductions and posts.
+
 ## Rights and privacy
 
 ### Legal notice (Impressum)

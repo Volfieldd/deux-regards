@@ -44,6 +44,7 @@
     [t('Journal'), '/admin/journal', 'journal.voir', t('historique, audit, qui a fait quoi')],
     [t('Statistiques'), '/admin/statistiques', 'statistiques.voir', t('visiteurs, audience, vues')],
     [t('Identité et apparence'), '/admin/apparence', 'site.apparence', t('thème, logo, marque, emblème, version du site')],
+    [t('Référencement'), '/admin/referencement', 'site.apparence', t('SEO, moteurs de recherche, Google Images, indexation, titres et descriptions')],
     [t('Filigrane et EXIF'), '/admin/images', 'site.filigrane', t('watermark, métadonnées, signature des images')],
     [t('Mentions légales'), '/admin/droits#mentions', 'reglages.droits', t('impressum, éditeur, directeur de la publication, hébergeur')],
     [t('Droits et licences'), '/admin/droits#droits', 'reglages.droits', t('droits d’utilisation, licence, reproduction')],

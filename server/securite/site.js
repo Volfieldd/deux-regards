@@ -327,9 +327,9 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   //     privacy_exposure_changed.
   // Quelle que soit la route (aucun emit à ajouter route par route) ; ce qui change hors de l'admin (ligne de commande)
   // est vu à l'écriture suivante.
-  const WATCHED = /^(public_design|public_version|site_name|tagline(_en|_de)?|hero(_tel)?|saison_accueil|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
+  const WATCHED = /^(public_design|public_version|site_name|tagline(_en|_de)?|seo_(visibility|images|title(_en|_de)?|description(_en|_de)?)|hero(_tel)?|saison_accueil|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
   const CONTACT = new Set(['rights_contact', 'privacy_contact', 'carnet_contact', 'legal_email', 'legal_phone', 'legal_address', 'legal_names', 'legal_director']);
-  const PLAIN = new Set(['public_design', 'public_version', 'saison_accueil', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host']);
+  const PLAIN = new Set(['public_design', 'public_version', 'saison_accueil', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host', 'seo_visibility', 'seo_images']);
   const settingsRows = db.prepare('SELECT key, value FROM settings');
   const shownTimes = db.prepare('SELECT COUNT(*) FROM photos WHERE show_time = 1').pluck();
   const parseJson = v => { try { return JSON.parse(v); } catch { return v; } };
@@ -339,6 +339,8 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   const publicValue = (key, raw) => {
     if (key === 'exif') return exifMode(raw);
     const value = parseJson(raw) ?? null;
+    if (key === 'seo_visibility') return value === null || ['public', 'off'].includes(value) ? value : 'invalide';
+    if (key === 'seo_images') return value === null || typeof value === 'boolean' ? value : 'invalide';
     if (key !== 'public_design' || value === null) return value;
     return validDesignSettings(value) ? { default: value.default, ...value.sections } : 'invalide';
   };

@@ -17,7 +17,9 @@
 <% if (page === 'serie' && S) { %>
 <%~ include('./_serie', it) %>
 <% } else if (page === 'galerie') { %>
-  <div class="wrap tete-page"><h1 class="titre-page"><%= t.nav.gallery %></h1><p class="chapo"><%= t.v2.galleryLead(it.total, names) %></p></div>
+  <div class="wrap tete-page"><h1 class="titre-page"><%= A && !S ? A.name : t.nav.gallery %></h1><p class="chapo"><%= A && !S ? it.v2.typo(A.short_bio || A.bio || t.v2.galleryLead(it.photos.length, A.name)) : t.v2.galleryLead(it.total, names) %></p>
+<% if (A && !S && (A.short_bio || A.bio)) { %>    <p><%= t.photos(it.photos.length) %></p>
+<% } %>  </div>
 <%~ include('./_galerie', { ...it, gridId: 'galerie' }) %>
 <% } else { %>
 <%~ include('./_accueil', { ...it, names, promise: it.tagline || site, promiseSub: t.v2.promiseSub(names) }) %>

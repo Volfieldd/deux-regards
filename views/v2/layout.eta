@@ -3,19 +3,20 @@
       (views/layout.eta), feuilles et script de la v2 seulement. */ %>
 <% const theme = it.theme || {}; const brand = it.brand || {};
    const ogImage = it.ogImage ? it.publicUrl + it.ogImage : (brand.share ? `${it.publicUrl}/brand/${brand.share}` : null);
-   const lang = it.lang || 'fr'; const t = it.t; %>
+   const lang = it.lang || 'fr'; const t = it.t;
+   const title = it.seoTitle || it.pageTitle, description = it.seoDescription ?? it.description; %>
 <html lang="<%= lang %>"<% if (theme.classes) { %> class="<%= theme.classes %>"<% } %>>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="<%= it.bodyClass === 'dark' ? 'dark' : theme.scheme || 'light' %>">
-  <title><%= it.pageTitle %></title>
+  <title><%= title %></title>
 <% if (it.neutral) { /* Galeries privées (G33) : ni description, ni Open Graph, ni canonical, ni hreflang ; jamais indexées. */ %>
   <meta name="robots" content="noindex">
   <meta name="referrer" content="no-referrer">
 <% } else { %>
-<% if (it.description) { %>
-  <meta name="description" content="<%= it.description %>">
+<% if (description) { %>
+  <meta name="description" content="<%= description %>">
 <% } %>
 <% if (it.canonical) { %>
   <link rel="canonical" href="<%= it.publicUrl + it.localize(it.canonical, lang) %>">
@@ -26,17 +27,17 @@
   <link rel="alternate" hreflang="x-default" href="<%= it.publicUrl + it.canonical %>">
 <% } %>
   <meta property="og:locale" content="<%= it.locales[lang] %>">
-<% if (it.robots) { %>  <meta name="robots" content="<%= it.robots %>">
+<% if (it.seoRobots || it.robots) { %>  <meta name="robots" content="<%= it.seoRobots || it.robots %>">
 <% } %>  <meta property="og:type" content="<%= it.ogType || 'website' %>">
 <% if (it.article) { /* Billet des Carnets (B66) : dates, auteurs, rubrique. */ %>  <meta property="article:published_time" content="<%= it.article.published %>">
   <meta property="article:modified_time" content="<%= it.article.modified %>">
 <% it.article.authors.forEach(a => { %>  <meta property="article:author" content="<%= a %>">
 <% }) %>  <meta property="article:tag" content="<%= it.article.tag %>">
 <% } %>
-  <meta property="og:title" content="<%= it.pageTitle %>">
+  <meta property="og:title" content="<%= title %>">
   <meta property="og:site_name" content="<%= it.siteName %>">
-<% if (it.description) { %>
-  <meta property="og:description" content="<%= it.description %>">
+<% if (description) { %>
+  <meta property="og:description" content="<%= description %>">
 <% } %>
 <% if (ogImage) { %>
   <meta property="og:image" content="<%= ogImage %>">

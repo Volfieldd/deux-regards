@@ -1,0 +1,9 @@
+<% /* B64 : seuls les billets et citations réellement publics dans la langue de la page sont fournis par le serveur. */ %>
+<% if (it.relatedPosts && it.relatedPosts.length) { %>
+<section class="<%= it.relatedWrap ? 'wrap partie' : 'partie' %>" aria-labelledby="carnets-lies-t">
+  <div class="partie-tete"><h2 class="titre-2" id="carnets-lies-t"><%= it.t.carnet.related %></h2></div>
+  <ul class="liste-liens">
+<% it.relatedPosts.forEach(post => { %>    <li><a href="<%= post.href %>"><span class="liste-liens-n"><%= it.v2.typo(post.title) %></span><% if (post.dek) { %><span class="liste-liens-d"><%= it.v2.typo(post.dek) %></span><% } %><%~ it.v2.ic('fleche', { size: 18 }) %></a></li>
+<% }) %>  </ul>
+</section>
+<% } %>

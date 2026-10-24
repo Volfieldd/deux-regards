@@ -24,7 +24,7 @@ export const SOURCES = [
 // ligne (« reglages#1 »), un champ par réglage. Valeurs en JSON dans la table settings ; la marque est un objet (son
 // sous-titre seul est un texte).
 export const REGLAGES = [
-  ...['site_name', 'tagline', 'tagline_en', 'tagline_de', 'intro', 'intro_en', 'intro_de', 'about', 'about_en', 'about_de', 'rights_text', 'rights_text_en', 'rights_text_de'].map(k => ({ champ: k, cle: k, chemin: '$' })),
+  ...['site_name', 'tagline', 'tagline_en', 'tagline_de', 'seo_title', 'seo_title_en', 'seo_title_de', 'seo_description', 'seo_description_en', 'seo_description_de', 'intro', 'intro_en', 'intro_de', 'about', 'about_en', 'about_de', 'rights_text', 'rights_text_en', 'rights_text_de'].map(k => ({ champ: k, cle: k, chemin: '$' })),
   { champ: 'brand_subtitle', cle: 'brand', chemin: '$.subtitle' },
 ];
 

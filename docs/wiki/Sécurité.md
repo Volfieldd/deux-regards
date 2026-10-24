@@ -53,6 +53,16 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
   - les brouillons ne sont pas servis publiquement (l'admin les voit via `/admin/media/`, sous session, sans cache) ;
   - aucune métadonnée par défaut.
 
+## Référencement
+
+`GET` et `POST /admin/referencement` utilisent la permission existante `site.apparence`, réservée à l’administrateur ; aucune capacité supplémentaire pour les Modérateurs ou Relecteurs. Écriture atomique, CSRF et garde-fous communs de l’admin. Valeurs fermées pour la visibilité et l’indexation des photos ; textes typés et bornés, échappés dans le HTML. Les blocs JSON-LD sont sérialisés par le serveur avec les caractères de fermeture de balise neutralisés. Aucun HTML ni script fourni par un compte n’est exécuté.
+
+La demande de non-indexation ne contrôle pas l’accès. Les exclusions et en-têtes des espaces privés, liens temporaires et aperçus restent prioritaires. Les moteurs doivent pouvoir lire les demandes `noindex` ; le fichier `robots.txt` ne bloque donc pas tout le site. Les prochaines réponses des variantes publiques portent la directive choisie ; les anciennes réponses en cache ne sont pas rappelables. Le domaine canonique reste celui de `PUBLIC_URL`, sans nouvelle adresse extérieure configurable.
+
+La Vigie observe les changements SEO avec `config_public_changed` (BV-1/DS23), les textes avec BV-20/BV-21 et les refus forgés avec DS12. Journal et événements ne recopient jamais les textes saisis ; seuls les noms de champs et les valeurs techniques fermées sont conservés. Aucun nouveau vocabulaire, règle, traceur ni service tiers.
+
+Le découpage `/sitemaps/:page.xml` reprend les mêmes projections publiques ; son numéro est un entier borné et une partie indisponible répond 404. Les documents sont recalculés sans cache différant les retraits. Le maillage B64 ne transmet que les titres et résumés des billets publics, dans une langue publiée qui porte réellement la citation, avec une borne de six liens. Un aperçu ou un brouillon ne crée pas de lien public. Les types de robots n’accordent aucune permission supplémentaire.
+
 ## Thèmes et aperçus publics
 
 Le choix par rubrique passe par `POST /admin/apparence/compositions`, avec permission `site.apparence` et jeton CSRF. Le catalogue des thèmes et des rubriques est fermé ; toute configuration invalide est refusée avant l’écriture atomique. Le retour historique ne se combine pas avec des sélections dans la même requête. Les aperçus reposent sur la session serveur ; les réponses de session restent `private, no-store`. Changer de thème ne publie aucun contenu et ne change pas les droits des galeries privées.

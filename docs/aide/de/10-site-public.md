@@ -153,3 +153,9 @@ Wenn die **v2** angewendet ist, erhalten die übrigen Seiten der Website dieselb
   - Rechtsklick und Ziehen der Bilder sind deaktiviert;
   - die Originale sind nie zugänglich;
   - Fotos im Entwurf sind nur in der Verwaltung sichtbar.
+
+## Automatische Suchmetadaten
+
+[Einstellungen → Suchmaschinen](reglages#référencement) steuert die Indexierungswünsche. Titel, Beschreibungen, Fotoinformationen, Vorschauen und Sitemap folgen veröffentlichten Inhalten. Nichtindexierung beschränkt den Zugriff nicht; private Galerien behalten ihre Schutzmaßnahmen. Über Indexierung, Zeitpunkt und Darstellung entscheiden die Suchmaschinen.
+
+In v2/v3 zeigt eine Fotografenseite den Namen als Überschrift und die öffentliche Vorstellung vor den Fotos. Foto- und Reiseseiten verlinken auf öffentliche Notizbücher, die sie in veröffentlichten Sprachen erwähnen, auch ohne JavaScript.

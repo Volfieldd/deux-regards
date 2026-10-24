@@ -60,6 +60,7 @@
 <%~ include('./_rangees', { ...it, list: d.photos, filter: {}, labelledby: `${d.id}-t`, meta: p => [p.author, p.place].filter(Boolean).join(' · ') }) %>
     </section>
 <% }) %>  </section>
+<%~ include('./_carnets-lies', { ...it, relatedWrap: true }) %>
   <p class="wrap voyage-retour"><a class="lien" href="<%= it.u('/voyages') %>"><%~ ic('retour', { size: 18 }) %><%= tv.back %></a></p>
 </main>
 <%~ include('./_pied', it) %>

@@ -105,6 +105,7 @@ export const LIBELLES = {
   'POST /admin/photos/order': 'Ordre des photos changé',
   'POST /admin/preuves/reessayer': 'Preuves d’antériorité relancées',
   'POST /admin/reglages': 'Réglages enregistrés',
+  'POST /admin/referencement': 'Référencement enregistré',
   'POST /admin/remarques/:id/fait': 'Remarque faite',
   'POST /admin/rencontre': 'Rencontre saisie sur le terrain',
   'POST /admin/rencontre/:id/envoyer': 'Récapitulatif d’une rencontre envoyé',
@@ -181,7 +182,7 @@ export function famille(action) {
   if (a.startsWith('GET ') || a === 'message lu') return 'lectures';
   if (a.startsWith('galerie privée') || /^POST \/admin\/(rencontres?|personnes|signalements|messages|galeries)\b/.test(a)) return 'personnes';
   if (/^(compte (modifié|supprimé|rétabli)|circuit réglé)/.test(a) || /^POST \/admin\/(comptes|circuit|auteurs|compte\/)/.test(a)) return 'equipe';
-  if (/^POST \/admin\/(apparence|reglages|images|traduction|langue|theme|version|carnet\/reglages|instagram\/reglages|series\/(propositions|descriptions))\b/.test(a)) return 'reglages';
+  if (/^POST \/admin\/(apparence|reglages|referencement|images|traduction|langue|theme|version|carnet\/reglages|instagram\/reglages|series\/(propositions|descriptions))\b/.test(a)) return 'reglages';
   return 'publication';
 }
 

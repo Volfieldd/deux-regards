@@ -54,3 +54,5 @@ As for photos: the photographer **proposes**, the moderator **publishes** (now o
 ## On the site
 
 In v2, **Notebooks** appears in the menu as soon as a post is published. The list filters by **section** and by **photographer** (each choice gives its number of posts), 12 posts per page. A post opens on its cover, its authors, its dates and its table of contents; then the text, “Write to …” (a message to the address set on the Notebooks page, by default the legal notice one; nothing is kept), **Share this post**, the post's photos and the neighbouring posts. Readers subscribe to the **notebooks RSS feed**, one per language. The sitemap and search engines only see published posts, in their published languages.
+
+On a public photo or trip, **In the notebooks** links to up to six public posts that cite it, newest first. A link requires a published language and a citation in that language, or a shared cover or linked trip. Drafts, private or withdrawn posts and unpublished translations stay excluded; a team preview does not open the section to visitors.

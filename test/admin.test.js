@@ -348,7 +348,7 @@ test('réglages : nom du site, textes et ouverture (photos publiées seulement)'
   const hero = JSON.parse(ctx.db.prepare("SELECT value FROM settings WHERE key = 'hero'").pluck().get());
   assert.deepEqual(hero, ['deux-minuit', 'sous-bois']);
   const home = (await ctx.app.inject('/')).body;
-  assert.match(home, /<title>Heures Creuses<\/title>/);
+  assert.match(home, /<title>Heures Creuses — photographies de Sébastien et Julien<\/title>/);
   assert.match(home, /Heures <i>Creuses<\/i>/);
   assert.match(home, /Nouvelle accroche/);
   assert.match((await ctx.app.inject('/a-propos')).body, /<p>Un\.<\/p>\s*<p>Deux\.<\/p>/);
@@ -384,5 +384,5 @@ test('réglages : textes des droits par défaut affichés, gardés « par défau
   assert.match((await ctx.app.inject('/droits')).body, /<p>Licence sur demande\.<\/p>/);
 
   await ctx.post('/admin/reglages', { site_name: '', tagline: 'x' });
-  assert.match((await ctx.app.inject('/')).body, /<title>Test<\/title>/);   // vide : retour à SITE_NAME
+  assert.match((await ctx.app.inject('/')).body, /<title>Test — photographies de Sébastien et Julien<\/title>/);   // vide : retour à SITE_NAME, puis titre SEO automatique
 });

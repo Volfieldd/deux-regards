@@ -53,6 +53,18 @@ Mit der öffentlichen Website in **v3** (siehe [Erscheinungsbild](apparence)) f�
 - **In v1 und v2** dient diese Liste nicht: Der Einstieg ist überall derselbe.
 - Jedes Foto der Diashow behält seinen **Schwerpunkt** (Datenblatt des Fotos): In v3 beschneidet der Einstieg höchstens 10 % um ihn herum.
 
+## Suchmaschinen
+
+**Einstellungen → Suchmaschinen** steht nur der Administration zur Verfügung und gilt für alle drei öffentlichen Gestaltungen. Die Installation behält die bisherige Sichtbarkeit bei. Wählen Sie, ob Suchmaschinen öffentliche Seiten und die Bildersuche öffentliche Fotos indexieren dürfen, und speichern Sie die Einstellungen. Die Bitte, die Website nicht zu indexieren, verhindert keinen Zugriff über die Adresse; dafür eine private Galerie verwenden. Die Sitemap wird leer, die öffentlichen Seiten bitten um Nichtindexierung. Ohne Bildindexierung bleiben Fotos auf der Website sichtbar.
+
+Titel, Beschreibungen, kanonische Adressen, Sprachverweise, Vorschauen beim Teilen, strukturierte Daten und Sitemap folgen automatisch den veröffentlichten Inhalten. Entwürfe, private Galerien und zeitlich begrenzte Links bleiben ausgeschlossen. Notizbücher nennen nur veröffentlichte Sprachen. Originaldateien werden nie ausgeliefert.
+
+Für die Startseite können Titel (100 Zeichen) und Beschreibung (320 Zeichen) auf Französisch, Englisch und Deutsch angepasst werden. Leere Felder nutzen automatisch den Namen, die Fotografen und den Leitsatz der Website. Fehlende Übersetzungen folgen dem üblichen Sprachrückgriff, auch auf einen angepassten französischen Text. Die Vorschau ist unverbindlich: Suchmaschinen wählen ihre Darstellung selbst.
+
+Änderungen gelten für künftige Serverantworten. Das Entfernen aus Suchergebnissen braucht einen weiteren Abruf; bereits zwischengespeicherte Bilder werden nicht zurückgerufen. Bei dringendem Bedarf auch die Löschwerkzeuge der Suchmaschine nutzen und den Cloudflare-Cache leeren. Domainbestätigung und Einreichen der Sitemap in Search Console bleiben Aufgabe des Eigentümers. Die Website erhält weder ein Google-Konto noch Tracker.
+
+Wenn Website und Bilder indexiert werden dürfen, erlauben öffentliche Seiten große Suchvorschauen; Ausschlüsse und seitenspezifische Grenzen haben Vorrang. Über 50.000 Adressen oder 50 MB wird die Sitemap automatisch aufgeteilt. Fotografenseiten und Verweise auf Notizbücher nutzen nur vorhandene öffentliche Vorstellungen und Beiträge.
+
 ## Rechte und Datenschutz
 
 ### Impressum (Mentions légales)

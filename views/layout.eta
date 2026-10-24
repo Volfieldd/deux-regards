@@ -1,15 +1,19 @@
 <!doctype html>
 <% const theme = it.theme || {}; const brand = it.brand || {};
    const masks = [brand.emblem, brand.icon, brand.logotype].filter(Boolean).join('.');
-   const ogImage = it.ogImage ? it.publicUrl + it.ogImage : (brand.share ? `${it.publicUrl}/brand/${brand.share}` : null); %>
+   const ogImage = it.ogImage ? it.publicUrl + it.ogImage : (brand.share ? `${it.publicUrl}/brand/${brand.share}` : null);
+   const title = it.seoTitle || it.pageTitle, description = it.seoDescription ?? it.description; %>
 <html lang="<%= it.lang || 'fr' %>"<% if (theme.classes) { %> class="<%= theme.classes %>"<% } %>>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="<%= theme.scheme || 'light' %>">
-  <title><%= it.pageTitle %></title>
-<% if (it.description) { %>
-  <meta name="description" content="<%= it.description %>">
+  <title><%= title %></title>
+<% if (it.seoRobots || it.robots) { %>
+  <meta name="robots" content="<%= it.seoRobots || it.robots %>">
+<% } %>
+<% if (description) { %>
+  <meta name="description" content="<%= description %>">
 <% } %>
 <% const lang = it.lang || 'fr'; %>
 <% if (it.canonical) { %>
@@ -22,14 +26,17 @@
 <% } %>
   <meta property="og:locale" content="<%= it.locales[lang] %>">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="<%= it.pageTitle %>">
+  <meta property="og:title" content="<%= title %>">
   <meta property="og:site_name" content="<%= it.siteName %>">
-<% if (it.description) { %>
-  <meta property="og:description" content="<%= it.description %>">
+<% if (description) { %>
+  <meta property="og:description" content="<%= description %>">
 <% } %>
 <% if (ogImage) { %>
   <meta property="og:image" content="<%= ogImage %>">
   <meta name="twitter:card" content="summary_large_image">
+<% } %>
+<% if (it.jsonLd) { /* Données sérialisées par le serveur ; aucun script exécutable ni valeur HTML brute. */ %>
+  <script type="application/ld+json"><%~ it.jsonLd %></script>
 <% } %>
 <% if (theme.preload) { %>
   <link rel="preload" href="<%= theme.preload %>" as="font" type="font/woff2" crossorigin>
