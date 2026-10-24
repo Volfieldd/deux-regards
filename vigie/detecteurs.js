@@ -73,6 +73,8 @@ export const ROLES_SURVEILLES = {
   photographe: { 'galeries.voir': MIENNES, 'galeries.gerer': MIENNES, 'galeries.partager': MIENNES, 'carnet.voir': MIENNES, 'carnet.ecrire': MIENNES, 'carnet.publies.modifier': MIENNES, 'messages.traiter': MIENNES },
   moderateur: { 'carnet.voir': TOUT, 'carnet.publier': TOUT },
   relecteur: { 'carnet.voir': TOUT, 'carnet.textes': TOUT, 'carnet.publies.modifier': TOUT },
+  // V0 : le rôle distinct ne donne aucun de ces droits ; ses cumuls restent des rôles connus à surveiller.
+  directeur_publication: {},
 };
 // Réglables photographe par photographe (ADJUSTABLE du site, page « Circuit de publication »), sur ses billets seulement.
 export const REGLABLES_SURVEILLES = ['carnet.publier', 'carnet.publies.modifier'];
