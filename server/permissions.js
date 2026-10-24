@@ -57,6 +57,12 @@ export const PERMISSIONS = {
   'carnet.textes': {},                  // corriger les textes de tous les billets (relecture), sans les régler
   'carnet.publier': { scoped: true },   // publier, programmer, renvoyer, retirer et republier (droit à part, comme les photos)
   'carnet.publies.modifier': { scoped: true }, // modifier un billet déjà publié (réglable par photographe)
+  // Saisons (SA-Q1, matrice validée le 24 octobre) : préparation propre au photographe, publication réservée
+  // à l’administration. La direction de publication et les validations du vote viendront dans leur lot distinct.
+  'saisons.voir': { scoped: true },
+  'saisons.ecrire': { scoped: true },
+  'saisons.publier': { scoped: true },
+  'saisons.accueil': {},
   'site.textes': {},
   'site.apparence': {},
   'site.filigrane': {},
@@ -86,6 +92,7 @@ export const ROLES = {
       'statistiques.voir': OWN, 'messages.traiter': OWN,
       'galeries.voir': OWN, 'galeries.gerer': OWN, 'galeries.partager': OWN,
       'carnet.voir': OWN, 'carnet.ecrire': OWN, 'carnet.publies.modifier': OWN,
+      'saisons.voir': OWN, 'saisons.ecrire': OWN,
     },
   },
   moderateur: {
@@ -98,7 +105,7 @@ export const ROLES = {
   },
   // Le relecteur corrige les textes, y compris ceux des photos déjà en ligne (photos.textes reste sa seule écriture).
   relecteur: { label: 'Relecteur', perms: all(['admin.acceder', 'photos.voir', 'photos.textes', 'photos.publiees.modifier', 'site.textes',
-    'carnet.voir', 'carnet.textes', 'carnet.publies.modifier']) },
+    'carnet.voir', 'carnet.textes', 'carnet.publies.modifier', 'saisons.voir']) },
 };
 export const SCOPES = { ALL, OWN };
 

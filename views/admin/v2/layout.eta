@@ -23,6 +23,8 @@
   <link rel="stylesheet" href="/brand.css?v=<%= masks %>">
 <% } %>
   <script src="<%= it.asset('admin/v2/admin-v2.js') %>" defer></script>
+<% if (it.saisonsAssets) { %>  <link rel="stylesheet" href="<%= it.asset('admin/saisons.css') %>">
+<% } %>
 </head>
 <body class="admin" data-csrf="<%= it.csrf %>" data-can="<%= (it.grants || []).join(' ') %>">
 <% const t = it.t; %>
@@ -110,6 +112,7 @@
   if (can('site.textes')) publish.push(link('/admin/site', 'globe', t('Site public'), cur(['site'])));
   // Carnets (billets du site, MQ-20) : « Carnets », jamais « Journal » (pris par le journal d'audit).
   if (can('carnet.voir')) publish.push(link('/admin/carnet', 'carnet', t('Carnets'), S.startsWith('carnet') ? ' aria-current="page"' : '', badge(it.carnetsPending, it.carnetsPending > 1 ? t('{n} billets proposés', { n: it.carnetsPending }) : t('1 billet proposé'))));
+  if (can('saisons.voir')) publish.push(link('/admin/saisons', 'carnet', t('Expositions'), /^saisons?$|^saison-/.test(S) ? ' aria-current="page"' : ''));
   if (can('galeries.voir')) publish.push(link('/admin/galeries', 'lock', t('Galeries privées'), /^galerie/.test(S) ? ' aria-current="page"' : ''));
   if (can('instagram.voir')) publish.push(link('/admin/instagram', 'instagram', 'Instagram', cur(['instagram'])));
   const team = [];
@@ -166,7 +169,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { home: 'tableau-de-bord', batch: 'photos-3-compléter-et-publier', appearance: 'apparence', images: 'filigrane-exif', droits: 'reglages-droits-et-confidentialité', authors: 'auteurs', assistants: 'series', compte: 'premiers-pas-ladmin-v2' }; %>
+<% const HELP = { saisons: 'saisons', saison: 'saisons-préparer-une-exposition', 'saison-apercu': 'saisons-aperçu-privé', 'saison-confirmer': 'saisons-calendrier-et-validation', home: 'tableau-de-bord', batch: 'photos-3-compléter-et-publier', appearance: 'apparence', images: 'filigrane-exif', droits: 'reglages-droits-et-confidentialité', authors: 'auteurs', assistants: 'series', compte: 'premiers-pas-ladmin-v2' }; %>
 <% if (HELP[S]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[S] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>

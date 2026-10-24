@@ -4,7 +4,7 @@
 <header class="saisons-entete"><a class="saisons-retour" href="/admin/saisons/<%= s.id %>">← <%= s.title %></a><h1><%= it.actionLabel %></h1></header>
 <% if (it.error) { %><div class="saisons-erreur" role="alert"><p><%= it.error %></p></div><% } %>
 <form class="panel form" method="post" action="/admin/saisons/<%= s.id %>/<%= it.action %>" aria-labelledby="recap-t">
-  <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="version" value="<%= s.version %>">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="version" value="<%= it.formVersion %>">
   <h2 id="recap-t"><%= t('Récapitulatif de la saison') %></h2>
   <p><%= it.confirmText %></p>
   <dl class="saisons-recap"><dt><%= t('Titre') %></dt><dd><%= s.title %></dd><dt><%= t('État actuel') %></dt><dd><%= t(it.phaseLabels[s.phase]) %></dd><dt><%= t('Ouverture') %></dt><dd><%= it.datesLabel.opens_at || t('Non renseignée') %></dd><dt><%= t('Clôture') %></dt><dd><%= it.datesLabel.closes_at || t('Non renseignée') %></dd><dt><%= t('Fuseau') %></dt><dd><%= it.zoneLabel %></dd><dt><%= t('Accrochage') %></dt><dd><%= t('{n} photos', { n: it.photos.length }) %></dd></dl>

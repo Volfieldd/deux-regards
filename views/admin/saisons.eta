@@ -2,7 +2,7 @@
 <% const t = it.t, labels = it.phaseLabels, f = it.fields || {}; %>
 <div class="saisons">
 <header class="saisons-entete">
-  <h1><%= t('Les saisons') %></h1>
+  <h1><%= t('Expositions') %></h1>
   <p class="sub"><%= t('Préparer une exposition, choisir son accrochage et fixer son calendrier.') %></p>
 </header>
 <p class="saisons-note"><%= t('L’atelier prépare les décisions éditoriales. Les pages publiques des saisons seront livrées dans une étape suivante.') %></p>
@@ -14,7 +14,21 @@
   <div class="saisons-champ"><label for="nouveau-titre"><%= t('Titre en français') %></label><input id="nouveau-titre" name="title" type="text" maxlength="120" value="<%= f.title || '' %>" required<%~ it.errorField === 'title' ? ' aria-invalid="true" aria-describedby="nouveau-titre-erreur"' : '' %>>
 <% if (it.errorField === 'title') { %>    <p class="err" id="nouveau-titre-erreur"><%= it.error %></p>
 <% } %>  </div>
+<% if (it.canAssign) { %>
+  <div class="saisons-champ"><label for="nouveau-photographe"><%= t('Photographe d’origine') %></label><select id="nouveau-photographe" name="author_id"<%~ it.errorField === 'author_id' ? ' aria-invalid="true" aria-describedby="nouveau-photographe-erreur"' : '' %>><option value=""><%= t('Exposition commune') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ String(f.author_id) === String(a.id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select><% if (it.errorField === 'author_id') { %><p class="err" id="nouveau-photographe-erreur"><%= it.error %></p><% } %></div>
+<% } %>
   <div class="actions"><button class="btn" type="submit"><%= t('Créer le brouillon') %></button></div>
+</form>
+<% } %>
+<% if (it.canFeature) { %>
+<form class="panel form" method="post" action="/admin/saisons/accueil" aria-labelledby="accueil-saison-t">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <h2 id="accueil-saison-t"><%= t('Exposition mise en avant à l’accueil') %></h2>
+  <p class="hint" id="accueil-saison-aide"><%= t('Ce choix est réservé à l’administration. Il sera utilisé par les pages publiques des expositions.') %></p>
+  <div class="saisons-champ"><label for="saison_id"><%= t('Exposition à mettre en avant') %></label><select id="saison_id" name="saison_id" aria-describedby="accueil-saison-aide<%= it.errorField === 'saison_id' ? ' saison_id-erreur' : '' %>"<%~ it.errorField === 'saison_id' ? ' aria-invalid="true"' : '' %>><option value=""><%= t('Aucune mise en avant') %></option><% it.featureCandidates.forEach(s => { %><option value="<%= s.id %>"<%~ it.featured_id === s.id ? ' selected' : '' %>><%= s.title %></option><% }) %></select>
+<% if (it.errorField === 'saison_id') { %>    <p class="err" id="saison_id-erreur"><%= it.error %></p>
+<% } %>  </div>
+  <div class="actions"><button class="btn" type="submit"><%= t('Enregistrer le choix de l’accueil') %></button></div>
 </form>
 <% } %>
 <form class="saisons-filtres" method="get" action="/admin/saisons" aria-label="<%= t('Filtrer les saisons') %>">

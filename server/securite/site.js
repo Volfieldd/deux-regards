@@ -319,9 +319,9 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   //     privacy_exposure_changed.
   // Quelle que soit la route (aucun emit à ajouter route par route) ; ce qui change hors de l'admin (ligne de commande)
   // est vu à l'écriture suivante.
-  const WATCHED = /^(public_design|public_version|site_name|tagline(_en|_de)?|hero(_tel)?|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
+  const WATCHED = /^(public_design|public_version|site_name|tagline(_en|_de)?|hero(_tel)?|saison_accueil|theme|exif|rights_contact|privacy_contact|carnet_contact|privacy_mfa|privacy_encrypted|legal_[a-z_]+)$/;
   const CONTACT = new Set(['rights_contact', 'privacy_contact', 'carnet_contact', 'legal_email', 'legal_phone', 'legal_address', 'legal_names', 'legal_director']);
-  const PLAIN = new Set(['public_design', 'public_version', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host']);
+  const PLAIN = new Set(['public_design', 'public_version', 'saison_accueil', 'theme', 'exif', 'privacy_mfa', 'privacy_encrypted', 'legal_host']);
   const settingsRows = db.prepare('SELECT key, value FROM settings');
   const shownTimes = db.prepare('SELECT COUNT(*) FROM photos WHERE show_time = 1').pluck();
   const parseJson = v => { try { return JSON.parse(v); } catch { return v; } };

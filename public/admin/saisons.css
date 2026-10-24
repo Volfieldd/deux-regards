@@ -43,6 +43,9 @@
 .saisons-accrochage > li { display: grid; grid-template-columns: 80px minmax(0, 1fr) 100px auto; gap: 12px 16px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
 .saisons-vignette { display: block; width: 80px; max-height: 100px; height: auto; object-fit: contain; background: var(--s2); border-radius: 5px; }
 .saisons-vide { min-height: 64px; border: 1px dashed var(--line2); }
+.saisons-cartels { grid-column: 2 / -1; min-width: 0; }
+.saisons-cartels summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--ink2); }
+.saisons-cartels[open] { display: grid; gap: 12px; }
 .saisons-photo-texte { min-width: 0; display: grid; gap: 4px; }
 .saisons-position { display: grid; gap: 6px; }
 .saisons-position label { font-size: 12px; color: var(--ink2); }

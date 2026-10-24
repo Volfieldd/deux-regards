@@ -17,6 +17,8 @@
   <script src="<%= it.asset('admin/admin.js') %>" defer></script>
 <% if (it.carnetAssets) { %>  <script src="<%= it.asset('admin/carnet.js') %>" defer></script>
 <% } %>
+<% if (it.saisonsAssets) { %>  <link rel="stylesheet" href="<%= it.asset('admin/saisons.css') %>">
+<% } %>
 </head>
 <body class="admin" data-csrf="<%= it.csrf %>" data-can="<%= (it.grants || []).join(' ') %>">
 <% const t = it.t; %>
@@ -97,7 +99,8 @@
   <nav class="nav" aria-labelledby="nav-publish">
 <% if (it.canAll && it.canAll('photos.publier')) { %>    <a href="/admin/a-valider"<%~ it.section === 'review' ? ' aria-current="page"' : '' %>><%~ ic('photos') %><%= t('À valider') %><% if (it.toValidate) { %><span class="nav-badge"><%= it.toValidate %></span><% } %></a>
 <% } %><% if (can('carnet.voir')) { /* Carnets (billets du site, MQ-20) : « Carnets », jamais « Journal » (pris par le journal d'audit). */ %>    <a href="/admin/carnet"<%~ String(it.section).startsWith('carnet') ? ' aria-current="page"' : '' %>><%~ ic('carnet') %><%= t('Carnets') %><% if (it.carnetsPending) { %><span class="nav-badge"><span aria-hidden="true"><%= it.carnetsPending %></span><span class="sr-only"><%= it.carnetsPending > 1 ? t('{n} billets proposés', { n: it.carnetsPending }) : t('1 billet proposé') %></span></span><% } %></a>
-<% } %>    <%~ item(['site', '/admin/site', 'Site public', 'globe', null, 'site.textes']) %>
+<% } %>    <%~ item(['saisons', '/admin/saisons', 'Expositions', 'carnet', /^saisons?$|^saison-/.test(it.section || ''), 'saisons.voir']) %>
+    <%~ item(['site', '/admin/site', 'Site public', 'globe', null, 'site.textes']) %>
     <%~ item(['series', '/admin/series', 'Séries', 'series', null, 'series.gerer']) %>
     <%~ item(['galeries', '/admin/galeries', 'Galeries privées', 'key', /^galerie/.test(it.section || ''), 'galeries.voir']) %>
   </nav>
@@ -162,7 +165,7 @@
 </aside>
 
 <main class="main<%= it.wide ? ' wide' : '' %>" id="contenu" tabindex="-1">
-<% const HELP = { review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', releases: 'tableau-de-bord', carnets: 'carnets', carnet: 'carnets-écrire-un-billet', 'carnet-photo': 'carnets-écrire-un-billet', 'carnet-photo-reglages': 'carnets-les-photos-dun-billet', 'carnet-confirmer': 'carnets-le-circuit-de-publication', 'carnet-versions': 'carnets-écrire-un-billet', reports: 'site-public-visionneuse-page-dune-photo', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
+<% const HELP = { saisons: 'saisons', saison: 'saisons-préparer-une-exposition', 'saison-apercu': 'saisons-aperçu-privé', 'saison-confirmer': 'saisons-calendrier-et-validation', review: 'photos-le-circuit-de-publication', circuit: 'photos-le-circuit-de-publication', accounts: 'reglages-comptes-et-rôles', journal: 'reglages-journal', people: 'rencontres-les-personnes', person: 'rencontres-les-personnes', outings: 'rencontres-les-sorties', outing: 'rencontres-les-sorties', trips: 'rencontres-les-voyages', trip: 'rencontres-les-voyages', releases: 'tableau-de-bord', carnets: 'carnets', carnet: 'carnets-écrire-un-billet', 'carnet-photo': 'carnets-écrire-un-billet', 'carnet-photo-reglages': 'carnets-les-photos-dun-billet', 'carnet-confirmer': 'carnets-le-circuit-de-publication', 'carnet-versions': 'carnets-écrire-un-billet', reports: 'site-public-visionneuse-page-dune-photo', site: 'reglages-site-public', droits: 'reglages-droits-et-confidentialité', terrain: 'rencontres-sur-le-terrain', instagram: 'instagram', stats: 'statistiques', home: 'tableau-de-bord', photos: 'photos', photo: 'photos-la-fiche-dune-photo', encounters: 'rencontres', encounter: 'rencontres', cards: 'rencontres-les-cartes', batch: 'photos-3-compléter-et-publier', series: 'series', authors: 'auteurs', images: 'filigrane-exif', appearance: 'apparence', settings: 'reglages' }; %>
 <% if (HELP[it.section]) { %>
   <p class="help-link"><a href="/admin/aide#<%= HELP[it.section] %>"><%= t('Aide sur cette page') %></a></p>
 <% } %>
