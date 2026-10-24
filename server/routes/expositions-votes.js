@@ -20,11 +20,26 @@ const noCache = reply => reply.header('cache-control', 'private, no-store').head
 // lié au cookie HttpOnly : un formulaire obtenu sur un autre navigateur ne peut pas annuler les votes de celui-ci.
 export function installExpositionVotes(app, { now = Date.now, approvedIds = id => app.saisonsPropositions.approvedIds(id), timers = true } = {}) {
   const vault = createVault(app.config.dataKey);
+  const management = app.db.prepare('SELECT id, slug, title, title_en, title_de, opens_at, closes_at FROM saisons WHERE id = ?');
   const key = Buffer.from(crypto.hkdfSync('sha256', app.config.cookieSecret, 'nicephos', 'expositions-formulaire-v1', 32));
   const firstKey = Buffer.from(crypto.hkdfSync('sha256', app.config.cookieSecret, 'nicephos', 'expositions-premier-vote-v1', 32));
   const sign = (scope, raw, stamp) => crypto.createHmac('sha256', key).update(`${scope}\0${raw || ''}\0${stamp}`).digest('base64url');
   const forms = {
     now, enabled: vault.enabled, approvedIds,
+    managementLinks(request, lang) {
+      app.saisonsVotes.purgeDue();
+      const prefix = `${app.config.secureCookies ? '__Host-' : ''}exposition_vote_`, links = [];
+      // Seulement les cookies reçus, bornés par la taille des en-têtes : aucun parcours du catalogue ni bulletin.
+      for (const name of Object.keys(request.cookies || {})) {
+        if (!name.startsWith(prefix)) continue;
+        const value = name.slice(prefix.length), id = Number(value);
+        if (!/^[1-9]\d{0,15}$/.test(value) || !Number.isSafeInteger(id)) continue;
+        const raw = rawToken(app, request, id), s = management.get(id), t = now();
+        if (!raw || !s || s.opens_at > t || t >= s.closes_at || !app.expositions.has(id) || !app.saisonsVotes.hasBrowser(id, raw)) continue;
+        links.push({ title: s[lang === 'fr' ? 'title' : `title_${lang}`], href: localize(`/exposition/${s.slug}/participation`, lang) });
+      }
+      return links;
+    },
     limit: createRateLimiter({ limit: 60, windowMs: 60 * 1000, now }),
     csrf(scope, raw) { const stamp = `${now()}.${crypto.randomBytes(12).toString('base64url')}`; return `${stamp}.${sign(scope, raw, stamp)}`; },
     // Après validation du défi et consentement, deux envois du même formulaire initial retrouvent le même jeton.
@@ -75,9 +90,10 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
   const root = s => `/exposition/${s.slug}`, manage = s => `${root(s)}/participation`;
   const open = s => ['programme', 'publie'].includes(s.state) && s.opens_at <= forms.now() && forms.now() < s.closes_at;
   const clear = (reply, s) => reply.clearCookie(voteCookieName(app, s.id), cookieOptions(app));
-  const season = (request, reply) => {
+  const season = (request, reply, { collect = false } = {}) => {
     noCache(reply); votes.purgeDue();
-    if (!publicView(request) || typeof request.params.slug !== 'string' || request.params.slug.length > 160) return null;
+    // Changer la présentation peut fermer la collecte, jamais l’accès aux droits sur des votes déjà reçus.
+    if ((collect && !publicView(request)) || typeof request.params.slug !== 'string' || request.params.slug.length > 160) return null;
     const row = bySlug.get(request.params.slug), s = row ? app.saisons.get(row.id) : null;
     if (!s) return null;
     if (!open(s) && request.cookies?.[voteCookieName(app, s.id)] !== undefined) clear(reply, s);
@@ -94,7 +110,7 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
       date: new Intl.DateTimeFormat({ fr: 'fr-FR', en: 'en-GB', de: 'de-DE' }[lang], { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(s.closes_at),
       siteName: app.siteName(), pageTitle: `${data.mode === 'manage' ? v.manage : v.title} · ${app.siteName()}`, description: '', robots: 'noindex',
       canonical: null, mode: 'vote', state: null, photo: null, error: null, csrf: '', withdrawCsrf: '', exportCsrf: '', available: forms.enabled,
-      exhibitionHref: u(root(s)), manageHref: u(manage(s)), ...data });
+      exhibitionHref: publicView(request) ? u(root(s)) : null, manageHref: u(manage(s)), ...data });
   };
   const refused = (request, reply, s, data, status = 403, error = 'refused') => render(request, reply, s, { ...data, error }, status);
   const emit = (request, type, detail) => app.securite.emit(type, { request, emetteur: 'server/routes/expositions-votes.js', detail: { formulaire: 'vote_exposition', ...detail } });
@@ -141,7 +157,7 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
     const shown = new Map((app.expositions.bySlug(s.slug, { lang })?.photos || []).map(p => [p.id, p]));
     return { mode: 'manage', state, recoverable, ...(recoverable ? { error: 'unavailable' } : {}), items: state.photo_ids.map(id => {
       const p = shown.get(id);
-      return { title: p ? p.title : v.unavailablePhoto, href: p ? u(`${root(s)}/photo/${p.slug}`) : null };
+      return { title: p ? p.title : v.unavailablePhoto, href: p && publicView(request) ? u(`${root(s)}/photo/${p.slug}`) : null };
     }), withdrawHref: u(`${manage(s)}/retirer`), exportHref: u(`${manage(s)}/export`),
     withdrawCsrf: forms.csrf(`retirer:${s.id}`, raw), exportCsrf: forms.csrf(`export:${s.id}`, raw) };
   };
@@ -151,7 +167,7 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
   };
 
   app.get('/exposition/:slug/photo/:photoSlug/voter', async (request, reply) => {
-    const s = season(request, reply); if (!s) return reply.callNotFound();
+    const s = season(request, reply, { collect: true }); if (!s) return reply.callNotFound();
     if (!open(s)) return render(request, reply, s, { mode: 'manage', state: { closed: true } }, 410);
     const p = photo(s, request.params.photoSlug);
     if (!p || !forms.approvedIds(s.id).includes(p.id)) return reply.callNotFound();
@@ -159,7 +175,7 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
     catch (err) { return businessError(request, reply, s, {}, err); }
   });
   app.post('/exposition/:slug/photo/:photoSlug/voter', { bodyLimit: 4096 }, async (request, reply) => {
-    const s = season(request, reply); if (!s) return reply.callNotFound();
+    const s = season(request, reply, { collect: true }); if (!s) return reply.callNotFound();
     const p = photo(s, request.params.photoSlug);
     if (!p) return reply.callNotFound();
     let data;

@@ -112,6 +112,10 @@ export function createSaisonsVotes({ db, vault, saisons, approvedIds, readiness 
     cast: (...args) => cast.immediate(...args),
     forBrowser: (sid, raw) => browser(sid, raw, false),
     exportForBrowser: (sid, raw) => browser(sid, raw, true),
+    hasBrowser(sid, raw) {
+      purgeDue();
+      return identifier(sid) && token(raw) && Boolean(vault?.enabled) && Boolean(q.voter.get(sid, index(sid, raw)));
+    },
     withdraw(sid, raw) { purgeDue(); return withdraw.immediate(sid, raw); },
     counts(sid) { purgeDue(); requireSaison(sid); return q.counts.all(sid); },
     purgeDue,

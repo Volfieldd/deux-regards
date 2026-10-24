@@ -14,7 +14,7 @@ export const STATES = ['proposee', 'programmee', 'a_reprendre'];
 
 export class ReviewError extends Error {}
 
-export function createReview({ db, readiness, notes, accounts, mailer, siteName = () => '', publicUrl = '', publish, log, now = Date.now }) {
+export function createReview({ db, readiness, notes, accounts, mailer, siteName = () => '', publicUrl = '', publish, log, now = Date.now, onWrite = () => {} }) {
   const photo = id => db.prepare('SELECT id, title, status, author_id, review, publish_at FROM photos WHERE id = ?').get(id);
   const setReview = db.prepare('UPDATE photos SET review = ?, publish_at = ? WHERE id = ?');
   const history = db.prepare('INSERT INTO photo_reviews (photo_id, action, by_sub, by_name, at, message, publish_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
@@ -54,6 +54,8 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
         if (confirm) { readiness.confirm(v.id, 'site', by.name, v.reasons); ok.push(v.id); } else verify.push(v);
       }
       db.transaction(() => { for (const id of ok) { setReview.run('proposee', null, id); log_(id, 'proposee', by, message); } })();
+      // BV-20/21 : le lot peut avoir retouché des textes publics, même sans photo à proposer ni e-mail configuré.
+      onWrite();
       if (ok.length) {
         const title = photo(ok[0]).title;
         await mail(moderatorMail(), t => ({ subject: ok.length > 1 ? t('{n} photos proposées à la publication', { n: ok.length }) : t('Une photo proposée à la publication'),
@@ -78,6 +80,7 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
         db.transaction(() => { for (const id of g.ok) { setReview.run(null, null, id); log_(id, 'publiee', by); } })();
         publish(g.ok);
       }
+      onWrite();
       for (const authorId of new Set(g.ok.map(id => photo(id).author_id))) {
         const mine = g.ok.filter(id => photo(id).author_id === authorId);
         const title = photo(mine[0]).title;
@@ -97,6 +100,7 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
       if (!String(message || '').trim()) throw new ReviewError('Écrivez la remarque.');
       notes.add(id, message, by);
       setReview.run('a_reprendre', null, id); log_(id, 'renvoyee', by, message);
+      onWrite();
       await mail(photographerMail(p.author_id), t => ({ subject: t('Photo à reprendre'), lines: [t('« {title} » vous est renvoyée par {name} :', { title: p.title, name: by.name || t('le modérateur') }), String(message).trim()] }));
       return true;
     },
@@ -108,6 +112,7 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
       notes.add(id, `Dépubliée : ${String(reason).trim()}`, by);
       setReview.run(null, null, id); log_(id, 'depubliee', by, reason);
       publish([], [id]);
+      onWrite();
       await mail(photographerMail(p.author_id), t => ({ subject: t('Photo dépubliée'), lines: [t('« {title} » a été dépubliée par {name} :', { title: p.title, name: by.name || t('le modérateur') }), String(reason).trim()] }));
       return true;
     },
@@ -141,6 +146,7 @@ export function createReview({ db, readiness, notes, accounts, mailer, siteName 
         notes.add(b.id, `Publication programmée annulée : ${b.reasons.join(' ; ')}. Vérifiez les accords puis reproposez la photo.`, sys);
         setReview.run('a_reprendre', null, b.id); log_(b.id, 'renvoyee', sys, b.reasons.join(' ; '));
       }
+      onWrite({ scheduled: true });
       for (const authorId of new Set(g.ok.map(id => photo(id).author_id))) {
         const mine = g.ok.filter(id => photo(id).author_id === authorId);
         const title = photo(mine[0]).title;

@@ -78,11 +78,10 @@ export function registerExpositionPages(app, { lang, repo, base, service = app.e
     if (!expositionOpen(app, request)) return reply.callNotFound();
     const raw = request.query.page;
     if (raw != null && (typeof raw !== 'string' || !/^[1-9]\d{0,5}$/.test(raw))) return reply.callNotFound();
-    const page = raw == null ? 1 : Number(raw), all = e.list({ lang });
-    const pages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+    const page = raw == null ? 1 : Number(raw), pages = Math.max(1, Math.ceil(e.count() / PAGE_SIZE));
     if (page > pages) return reply.callNotFound();
     app.stats.hit(request, { page: 'expositions' });
-    return render(request, reply, 'expositions', null, { list: all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), page, pages,
+    return render(request, reply, 'expositions', null, { list: e.list({ lang, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }), page, pages,
       canonical: page === 1 ? '/expositions' : `/expositions?page=${page}`,
       prevHref: page > 1 ? u(page === 2 ? '/expositions' : `/expositions?page=${page - 1}`) : null,
       nextHref: page < pages ? u(`/expositions?page=${page + 1}`) : null });

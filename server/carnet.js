@@ -103,7 +103,7 @@ export class CarnetError extends Error {
   constructor(message, { field = null, status = 422, details = null } = {}) { super(message); this.field = field; this.status = status; this.details = details; }
 }
 
-export function createCarnet({ db, repo, readiness, accounts, mailer, audit, siteName = () => '', publicUrl = '', log, now = Date.now }) {
+export function createCarnet({ db, repo, readiness, accounts, mailer, audit, siteName = () => '', publicUrl = '', log, now = Date.now, onWrite = () => {} }) {
   const q = {
     get: db.prepare('SELECT * FROM posts WHERE id = ?'),
     bySlug: db.prepare('SELECT * FROM posts WHERE slug = ?'),
@@ -487,6 +487,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       if (c.blocking.length) throw new CarnetError('Pas encore proposé : des points sont à corriger.', { details: c });
       setState(id, 'propose');
       review(id, 'propose', by, message);
+      onWrite();
       await mail(moderatorMail(), t => ({ subject: t('Un billet proposé à la publication'), lines: [t('{name} propose le billet « {title} ».', { name: by.name || t('Un photographe'), title: post.title }), message ? t('Son mot : {message}', { message }) : ''] }));
       return get(id);
     },
@@ -507,6 +508,8 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       if (c.blocking.length) throw new CarnetError('Pas encore publié : des points sont à corriger.', { details: c });
       if (at != null) { setState(id, 'programme', { publish_at: at }); review(id, 'programme', by, '', at); }
       else putOnline(post, by);
+      // BV-20/21 : le compte reste attaché à la publication avant l’attente de sa notification.
+      onWrite();
       await mail(authorMail(post), t => ({ subject: at != null ? t('Billet programmé') : t('Billet publié'),
         lines: [at != null ? t('« {title} » sera publié le {date} (validé par {name}).', { title: post.title, name: by.name || t('le modérateur'), date: new Intl.DateTimeFormat(t.locale, { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(at) })
           : t('« {title} » est publié (validé par {name}).', { title: post.title, name: by.name || t('le modérateur') })] }));
@@ -526,6 +529,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       if (!String(message || '').trim()) throw new CarnetError('Écrivez la remarque.', { field: 'message' });
       setState(id, 'a_reprendre', { publish_at: null });
       review(id, 'renvoye', by, message);
+      onWrite();
       await mail(authorMail(post), t => ({ subject: t('Billet à reprendre'), lines: [t('« {title} » vous est renvoyé par {name} :', { title: post.title, name: by.name || t('le modérateur') }), String(message).trim()] }));
       return get(id);
     },
@@ -535,6 +539,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       if (!String(reason || '').trim()) throw new CarnetError('Dites pourquoi le billet est retiré.', { field: 'reason' });
       setState(id, 'retire', { retired_at: now(), retired_reason: String(reason).trim().slice(0, LIMITS.message) });
       review(id, 'retire', by, reason);
+      onWrite();
       return get(id);
     },
     republish(id, by) {
@@ -543,6 +548,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
       const c = checks(post, { forPublish: true });
       if (c.blocking.length) throw new CarnetError('Pas encore republié : des points sont à corriger.', { details: c });
       putOnline(post, by, 'republie');
+      onWrite();
       return get(id);
     },
     // Supprimer : seulement un billet jamais publié (B49) ; un billet publié se retire.
@@ -587,6 +593,7 @@ export function createCarnet({ db, repo, readiness, accounts, mailer, audit, sit
         n += 1;
         mails.push([authorMail(post), tr => ({ subject: tr('Billet publié'), lines: [tr('« {title} », programmé, est publié.', { title: post.title })] })]);
       }
+      onWrite({ scheduled: true });
       for (const [to, compose] of mails) await mail(to, compose);
       return n;
     },

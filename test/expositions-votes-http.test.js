@@ -226,13 +226,79 @@ test('V1 HTTP : piège et limite réutilisent la Vigie, le doublon ordinaire ne 
   assert.deepEqual(count(c), []);
 });
 
-test('V1 HTTP : liens S2 limités aux propositions approuvées et pages refusées en v1', async t => {
+test('V1 HTTP : liens S2 limités aux propositions approuvées et collecte refusée en v1', async t => {
   const c = await context(t), request = { cookies: {}, url: c.root }, reply = { clearCookie: () => {} }, exposition = { ...c.app.saisons.get(c.sid), phase: 'ouverte' };
   assert.ok(expositionVoteLinks(c.app, { request, reply, lang: 'fr', exposition, photo: { id: 1, slug: 'photo-1' } }).voteHref);
   assert.equal(expositionVoteLinks(c.app, { request, reply, lang: 'fr', exposition, photo: { id: 3, slug: 'photo-3' } }).voteHref, null);
   c.app.publicVersion.save('v1');
   assert.equal((await c.get(`${c.root}/photo/photo-1/voter`)).statusCode, 404);
-  assert.equal((await c.get(`${c.root}/participation`)).statusCode, 404);
+  const empty = await c.get(`${c.root}/participation`);
+  assert.equal(empty.statusCode, 200); assert.ok(empty.body.includes('Aucun vote n’est associé'));
+  assert.equal(empty.cookies.length, 0);
+});
+
+test('V1 HTTP : passer le site en v1 garde gestion, export et retrait sans rouvrir la collecte', async t => {
+  const c = await context(t), cookies = await voted(c), voteUrl = `${c.root}/photo/photo-2/voter`;
+  const votePage = await c.get(voteUrl, cookies), other = await voted(c), manage = `${c.root}/participation`;
+  c.app.publicVersion.save('v1');
+  assert.equal((await c.get(voteUrl, cookies)).statusCode, 404);
+  assert.equal((await c.post(voteUrl, { _csrf: proof(votePage.body), notice_version: NOTICE_VERSION }, cookies)).statusCode, 404);
+  assert.deepEqual(count(c), [{ photo_id: 1, total: 2 }]);
+  for (const [prefix, label] of [['', 'Mes votes dans cette exposition'], ['/en', 'My votes in this exhibition'], ['/de', 'Meine Stimmen in dieser Ausstellung']]) {
+    const privacy = await c.get(`${prefix}/confidentialite`, cookies);
+    assert.equal(privacy.statusCode, 200); assert.ok(privacy.body.includes(`href="${prefix}${manage}"`));
+    assert.match(privacy.headers['cache-control'], /private, no-store/); assert.equal(privacy.headers['referrer-policy'], 'no-referrer');
+    assert.ok(!privacy.body.includes(cookies[c.name])); assert.ok(!privacy.body.includes('Photo 1 FR'));
+    const page = await c.get(`${prefix}${manage}`, cookies);
+    assert.equal(page.statusCode, 200, page.body.slice(-600)); assert.ok(page.body.includes(label));
+    assert.match(page.headers['cache-control'], /private, no-store/); assert.equal(page.headers['referrer-policy'], 'no-referrer');
+    assert.equal(page.headers['x-robots-tag'], 'noindex'); assert.equal(page.cookies.length, 0);
+    const exportUrl = `${prefix}${manage}/export`, withdrawUrl = `${prefix}${manage}/retirer`;
+    const exportCsrf = formProof(page.body, exportUrl), withdrawCsrf = formProof(page.body, withdrawUrl);
+    assert.equal((await c.post(exportUrl, { _csrf: exportCsrf }, other)).statusCode, 403);
+    assert.equal((await c.post(withdrawUrl, { _csrf: withdrawCsrf, confirm: 'retirer' }, other)).statusCode, 403);
+    assert.equal((await c.post(exportUrl, { _csrf: exportCsrf }, cookies, { origin: 'https://autre.test' })).statusCode, 403);
+    const exported = await c.post(exportUrl, { _csrf: exportCsrf }, cookies);
+    assert.equal(exported.statusCode, 200); assert.deepEqual(exported.json().photo_ids, [1]);
+    assert.deepEqual(exported.json().consent, { at: START, version: NOTICE_VERSION });
+  }
+  const page = await c.get(manage, cookies), withdrawUrl = `${manage}/retirer`;
+  const withdrawn = await c.post(withdrawUrl, { _csrf: formProof(page.body, withdrawUrl), confirm: 'retirer' }, cookies);
+  assert.equal(withdrawn.statusCode, 303); assert.equal(withdrawn.cookies.find(cookie => cookie.name === c.name).value, '');
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM saison_vote_votants').pluck().get(), 1);
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM saison_votes').pluck().get(), 1);
+  assert.deepEqual(c.app.saisonsVotes.forBrowser(c.sid, other[c.name]).photo_ids, [1]);
+  assert.deepEqual(count(c), [{ photo_id: 1, total: 1 }]);
+  const done = await c.get(withdrawn.headers.location);
+  assert.equal(done.statusCode, 200); assert.ok(done.body.includes('Vos votes et votre preuve d’accord ont été effacés.'));
+  assert.equal(done.cookies.length, 0);
+  assert.ok(!(await c.get('/confidentialite', cookies)).body.includes(`href="${manage}"`));
+});
+
+test('V1 HTTP : Confidentialité ne retrouve que les cookies de vote reconnus, sans parcourir les photos', async t => {
+  const c = await context(t), cookies = await voted(c), manage = `${c.root}/participation`;
+  for (const version of ['v1', 'v2', 'v3']) {
+    c.app.publicVersion.save(version);
+    for (const absent of [{}, { [c.name]: createVoteToken() }, { [c.name]: 'invalide' }, { exposition_vote_999999: createVoteToken() }]) {
+      const privacy = await c.get('/confidentialite', absent);
+      assert.equal(privacy.statusCode, 200); assert.ok(!privacy.body.includes(`href="${manage}"`));
+      assert.equal(privacy.cookies.length, 0);
+    }
+    const projection = c.app.expositions.bySlug, ids = c.app.publicRepo.photosByIds;
+    c.app.expositions.bySlug = () => { throw new Error('projection complète interdite'); };
+    c.app.publicRepo.photosByIds = () => { throw new Error('chargement des photos interdit'); };
+    try {
+      const privacy = await c.get('/confidentialite', cookies);
+      assert.equal(privacy.statusCode, 200); assert.ok(privacy.body.includes(`href="${manage}"`));
+    } finally { c.app.expositions.bySlug = projection; c.app.publicRepo.photosByIds = ids; }
+  }
+  // Une preuve illisible garde le lien vers le retrait, sans être déchiffrée pour afficher ce lien.
+  c.db.prepare("UPDATE saison_vote_votants SET consentement = 'enc1:altéré'").run();
+  assert.ok((await c.get('/confidentialite', cookies)).body.includes(`href="${manage}"`));
+  c.db.prepare("UPDATE saisons SET state = 'retire' WHERE id = ?").run(c.sid);
+  const privatePage = await c.get('/confidentialite', cookies);
+  assert.equal(privatePage.statusCode, 200); assert.ok(!privatePage.body.includes(`href="${manage}"`));
+  assert.equal(c.db.prepare('SELECT COUNT(*) FROM saison_vote_votants').pluck().get(), 0);
 });
 
 test('V1 HTTP : circuit V0 réel, invalidation des validations et compteurs privés dans l’atelier', async t => {

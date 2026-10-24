@@ -99,7 +99,7 @@ From an eligible photograph in an open exhibition, **Vote for this photograph** 
 
 Visitors can vote once on each proposed photograph using this browser in this exhibition. Further photographs reuse that agreement. A duplicate shows the recorded vote without adding another. The cookie expires when the exhibition closes; changing browser or device or deleting the cookie may allow another vote. There is no account or identity check.
 
-**My votes in this exhibition** shows this browser’s votes. Before closing, **Export my votes (JSON)** downloads a copy with the agreement date and information version. After confirmation, **Withdraw consent and cancel my votes** deletes these votes and their proof, removes the cookie and reduces the corresponding totals. Other browsers’ votes remain unchanged. Without the cookie, individual votes cannot be retrieved.
+**My votes in this exhibition** shows this browser’s votes. Visitors can also reach it through **Privacy → My votes** for exhibitions with a recognised voting cookie in this browser, until they close. This route remains available if the site or Exhibitions section returns to v1, even though no new votes can then be cast. These personal pages are not cached. Before closing, **Export my votes (JSON)** downloads a copy with the agreement date and information version. After confirmation, **Withdraw consent and cancel my votes** deletes these votes and their proof, removes the cookie and reduces the corresponding totals. Other browsers’ votes remain unchanged. Without the cookie, individual votes cannot be retrieved.
 
 In **Photos proposed for voting**, authorised team members see **Advisory votes** per photograph. These totals are private; no score automatically publishes a photograph in the permanent collection. Proposals and their order remain subject to the approval process.
 
@@ -115,7 +115,7 @@ The retrospective may select **zero, one or several photographs** from the origi
 
 **Publish…** opens a confirmation. Once published, the title, account and selection cannot change. Use **Prepare a correction** to add a clarification or correct a mistake: this creates a new retrospective linked to the previous one and subject to the same approval. The public page retains both accounts and their links. A further correction may clarify a published corrective retrospective.
 
-**Withdraw…** hides a retrospective without rewriting it. Corrections no longer display links to a withdrawn retrospective. A withdrawn retrospective cannot become the new origin of a collection.
+**Withdraw…** hides a retrospective without rewriting it. To prepare its successor, return to the **Retrospectives and permanent exhibitions** list, enter the new retrospective’s title, select the parent marked **Withdrawn** under **Retrospective being corrected**, then choose **Create draft**. The new retrospective remains subject to the same publication requirements, without changing or displaying the withdrawn text again. Another initial retrospective remains forbidden if one has already been published. Corrections no longer display links to a withdrawn retrospective. A withdrawn retrospective cannot become the new origin of a collection.
 
 ## Permanent collections
 

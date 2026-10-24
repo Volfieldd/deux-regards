@@ -186,8 +186,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     // la vue courante ; les galeries privées ne reprennent jamais les contenus éditoriaux de l’accueil.
     const expositionsOpen = Boolean(pv) && usesV2(app.publicVersion.versionForSection('expositions'))
       && usesV2(app.publicVersion.forRequest(this.request, 'expositions').version);
-    const collectionsPage = expositionsOpen && app.saisonsBilans.publicCollections({ lang }).length > 0;
-    const expositionsPage = expositionsOpen && (app.expositions.list({ lang }).length > 0 || collectionsPage);
+    const collectionsPage = expositionsOpen && app.saisonsBilans.publicCollectionsExist();
+    const expositionsPage = expositionsOpen && (app.expositions.exists() || collectionsPage);
     let homeExposition = null;
     if (v2 && expositionsPage && template === 'home' && data?.page === 'accueil') {
       let featured = null;
@@ -323,10 +323,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     if (down.length) app.instagram.onUnpublished(down);
     app.variants.schedule();
   };
-  app.decorate('review', createReview({ db, readiness: app.readiness, notes: app.notes, accounts: app.accounts, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, publish: publishNow, log: app.log }));
+  const observePublication = options => app.securite?.observePublication?.(options);
+  app.decorate('review', createReview({ db, readiness: app.readiness, notes: app.notes, accounts: app.accounts, mailer: app.mailer, siteName: app.siteName, publicUrl: config.publicUrl, publish: publishNow, log: app.log, onWrite: observePublication }));
   // Carnets (server/carnet.js) : billets, circuit de publication, publication programmée.
   app.decorate('publicRepo', createRepo(db));
-  app.decorate('carnet', createCarnet({ db, repo: app.publicRepo, readiness: app.readiness, accounts: app.accounts, mailer: app.mailer, audit: app.audit, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
+  app.decorate('carnet', createCarnet({ db, repo: app.publicRepo, readiness: app.readiness, accounts: app.accounts, mailer: app.mailer, audit: app.audit, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log, onWrite: observePublication }));
   app.decorate('saisons', createSaisons({ db, readiness: app.readiness }));
   app.decorate('saisonsPropositions', createSaisonsPropositions({ db, saisons: app.saisons, readiness: app.readiness }));
   installExpositionVotes(app, votesOptions);

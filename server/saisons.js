@@ -13,6 +13,20 @@ const col = (field, lang) => lang === 'fr' ? field : `${field}_${lang}`;
 const DATES = ['opens_at', 'closes_at'];
 const instant = value => Number.isSafeInteger(value) && value >= 0 && value <= 8640000000000000;
 const identifier = value => Number.isSafeInteger(value) && value > 0;
+// Même contrôle des textes que la projection publique, avant LIMIT : compter une rubrique ou remplir son menu
+// ne doit pas charger les accrochages. Les blancs correspondent à String.trim(), y compris les espaces insécables.
+const BLANKS_SQL = "'\u0009\u000a\u000b\u000c\u000d\u0020\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff'";
+const completeSql = (alias, field, required = false) => {
+  const names = LANGS.map(lang => `${alias}.${col(field, lang)}`);
+  const present = names.map(name => `(typeof(${name}) = 'text' AND length(trim(${name}, ${BLANKS_SQL})) > 0)`).join(' AND ');
+  return required ? `(${present})` : `((${names.map(name => `COALESCE(${name}, '') = ''`).join(' AND ')}) OR (${present}))`;
+};
+const PUBLIC_SQL = `s.state IN ('programme', 'publie')
+  AND typeof(s.opens_at) = 'integer' AND s.opens_at BETWEEN 0 AND 8640000000000000
+  AND typeof(s.closes_at) = 'integer' AND s.closes_at BETWEEN 0 AND 8640000000000000 AND s.closes_at > s.opens_at
+  AND ${['title', 'intro'].map(field => completeSql('s', field, true)).join(' AND ')}
+  AND ${['subtitle', 'prologue', 'conclusion'].map(field => completeSql('s', field)).join(' AND ')}
+  AND NOT EXISTS (SELECT 1 FROM saison_photos p WHERE p.saison_id = s.id AND NOT ${completeSql('p', 'cartel')})`;
 
 export class SaisonError extends Error {
   constructor(message, { field = null, status = 422 } = {}) { super(message); this.field = field; this.status = status; }
@@ -23,6 +37,10 @@ export function createSaisons({ db, now = Date.now, readiness = null }) {
     get: db.prepare('SELECT * FROM saisons WHERE id = ?'),
     bySlug: db.prepare('SELECT * FROM saisons WHERE slug = ?'),
     all: db.prepare('SELECT * FROM saisons ORDER BY created_at DESC, id DESC'),
+    catalogue: db.prepare(`SELECT s.* FROM saisons s WHERE ${PUBLIC_SQL} ORDER BY s.opens_at DESC, s.id DESC LIMIT ? OFFSET ?`),
+    catalogueCount: db.prepare(`SELECT COUNT(*) FROM saisons s WHERE ${PUBLIC_SQL}`).pluck(),
+    catalogueExists: db.prepare(`SELECT EXISTS (SELECT 1 FROM saisons s WHERE ${PUBLIC_SQL})`).pluck(),
+    catalogueHas: db.prepare(`SELECT EXISTS (SELECT 1 FROM saisons s WHERE s.id = ? AND ${PUBLIC_SQL})`).pluck(),
     public: db.prepare("SELECT * FROM saisons WHERE state IN ('programme', 'publie') AND opens_at <= ? ORDER BY opens_at DESC, id DESC"),
     photos: db.prepare('SELECT photo_id FROM saison_photos WHERE saison_id = ? ORDER BY position').pluck(),
     cartels: db.prepare('SELECT photo_id, cartel, cartel_en, cartel_de FROM saison_photos WHERE saison_id = ? ORDER BY position'),
@@ -268,6 +286,9 @@ export function createSaisons({ db, now = Date.now, readiness = null }) {
   const publicBySlug = (slug, { lang = 'fr' } = {}) => typeof slug === 'string' && slug.length <= LIMITS.slug ? publicData(q.bySlug.get(slug), lang, time()) : null;
   const publicList = ({ lang = 'fr' } = {}) => { const t = time(); return q.public.all(t).map(s => publicData(s, lang, t)).filter(Boolean); };
   const list = () => { const t = time(); return q.all.all().map(s => internal(s, t)); };
+  const catalogue = ({ limit = -1, offset = 0 } = {}) => { const t = time(); return q.catalogue.all(limit, offset).map(s => internal(s, t)); };
+  const bySlug = slug => typeof slug === 'string' && slug.length <= LIMITS.slug ? internal(q.bySlug.get(slug), time()) : null;
   return { create, update, setPhotos, setCartels, schedule: id => decide(id, 'programme'), open: id => decide(id, 'publie'), cancelSchedule,
-    withdraw, publishReport, revise, get, list, publicBySlug, publicList };
+    withdraw, publishReport, revise, get, bySlug, list, catalogue, catalogueCount: () => q.catalogueCount.get(), catalogueExists: () => Boolean(q.catalogueExists.get()),
+    catalogueHas: id => identifier(id) && Boolean(q.catalogueHas.get(id)), publicBySlug, publicList };
 }
