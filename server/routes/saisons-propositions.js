@@ -85,7 +85,17 @@ export function registerSaisonsPropositions(app, { repo, render, P, W, done, wit
       }
       const before = c.get(s.id), after = c[config.method](s.id, input);
       const fields = ['version', 'reviewed_version', 'validated_version', 'photo_ids'].filter(f => JSON.stringify(before[f]) !== JSON.stringify(after[f]));
-      if (fields.length) (request.auditChanges ||= []).push(fields.join(', '));
+      if (fields.length) {
+        (request.auditChanges ||= []).push(fields.join(', '));
+        // BV-35 : le geste persisté rejoint la corrélation DS23 existante, sans œuvres ni bulletins dans le signal.
+        // Une relecture ou validation déjà courante peut écrire son horodatage ; elle ne change pas le circuit.
+        app.securite.emit('config_public_changed', { request, emetteur: 'server/routes/saisons-propositions.js · propositions au vote', detail: {
+          objet: 'propositions_vote', id: s.id, action, version_avant: before.version, version: after.version,
+          photos_avant: before.photo_ids.length, photos: after.photo_ids.length,
+          relecture_avant: before.reviewed_version === before.version, relecture: after.reviewed_version === after.version,
+          validation_avant: before.validated_version === before.version, validation: after.validated_version === after.version,
+        } });
+      }
       return done(reply, base(s.id), request.t(config.message));
     } catch (err) {
       if (!(err instanceof SaisonError)) throw err;
