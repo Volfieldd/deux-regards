@@ -43,6 +43,7 @@ export function sameToken(a, b) {
 export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
   const { config } = app;
   const sessions = createSessionStore(app.db);
+  app.decorate('purgeSessions', () => sessions.purge());
   // Préfixe __Host- : cookie lié à l'hôte exact, Secure, Path=/ (impossible à poser depuis un sous-domaine).
   const prefix = config.secureCookies ? '__Host-' : '';
   const SESSION_COOKIE = `${prefix}session`;
@@ -287,7 +288,7 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     }
     const pending = Object.keys(request.cookies).filter(n => n.startsWith(`${prefix}oidc-`));
     if (pending.length >= TX_MAX) for (const n of pending) reply.clearCookie(n, cookieBase);
-    reply.setCookie(txCookie(start.tx.state), JSON.stringify({ ...start.tx, next }), { ...cookieBase, signed: true, maxAge: TX_TTL });
+    reply.setCookie(txCookie(start.tx.state), JSON.stringify({ ...start.tx, next, at: Date.now() }), { ...cookieBase, signed: true, maxAge: TX_TTL });
     return reply.header('cache-control', 'no-store').redirect(start.url);
   });
 
@@ -331,9 +332,12 @@ export async function setupAuth(app, { oidc = createOidc(app.config) } = {}) {
     const unsigned = raw ? request.unsignCookie(raw) : null;
     let tx = null;
     try { tx = unsigned?.valid ? JSON.parse(unsigned.value) : null; } catch { tx = null; }
-    // Vérification explicite du state avant tout appel réseau (openid-client la refait).
-    if (!tx || !sameToken(state, tx.state)) {
-      securite.emit('authn_login_fail', { request, emetteur: 'server/auth.js · retour OIDC', detail: { raison: raw ? 'state différent ou cookie de transaction altéré' : 'state sans transaction' } });
+    // Le navigateur n'est pas la borne de confiance : une copie du cookie signé ne doit pas survivre à ses dix minutes.
+    // Le state et la date sont contrôlés avant tout appel réseau (openid-client revérifie le state).
+    const now = Date.now();
+    const expired = tx && (!Number.isSafeInteger(tx.at) || tx.at > now || now - tx.at >= TX_TTL * 1000);
+    if (!tx || !sameToken(state, tx.state) || expired) {
+      securite.emit('authn_login_fail', { request, emetteur: 'server/auth.js · retour OIDC', detail: { raison: expired ? 'transaction OIDC expirée ou date invalide' : raw ? 'state différent ou cookie de transaction altéré' : 'state sans transaction' } });
       return renderError(reply, 400, { title: 'Connexion expirée', message: 'Le lien de connexion a expiré ou n’est pas valide.', retry: true });
     }
 
