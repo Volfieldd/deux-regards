@@ -37,6 +37,19 @@ test('en ligne (HTTPS ou production), la config refuse les réglages de dévelop
   assert.equal(loadConfig({ TRUST_PROXY: '10.0.0.2' }).trustProxy, '10.0.0.2');
 });
 
+test('production : PUBLIC_URL doit être en HTTPS, le HTTP reste disponible pour les tests locaux', () => {
+  const secret = { COOKIE_SECRET: 'x'.repeat(32) };
+  for (const publicUrl of ['http://photos.example', 'HTTP://localhost:3000/']) {
+    assert.throws(() => loadConfig({ ...secret, NODE_ENV: 'production', PUBLIC_URL: publicUrl }), /PUBLIC_URL doit être en HTTPS en production/);
+  }
+  const online = loadConfig({ ...secret, NODE_ENV: 'production', PUBLIC_URL: 'HTTPS://Photos.Example/' });
+  assert.equal(online.secureCookies, true);
+  assert.equal(online.publicUrl, 'https://photos.example');
+  const local = loadConfig({ PUBLIC_URL: 'http://localhost:3311', LOCAL_AUTH_TOKEN: 'connexion-locale-de-test' });
+  assert.equal(local.secureCookies, false);
+  assert.equal(local.localAuthToken, 'connexion-locale-de-test');
+});
+
 test('pas de HSTS hors HTTPS', async t => {
   const { app } = await setup(t);
   assert.equal((await app.inject('/')).headers['strict-transport-security'], undefined);

@@ -45,6 +45,10 @@ Le limiteur commun aux trois langues utilise des clés de réseau temporaires en
 
 Une restauration purge au démarrage les identifiants d’expositions déjà closes. Un retrait individuel postérieur à l’instantané ne peut pas être reconstruit depuis cet instantané : avant une restauration en service, les responsables doivent aussi réappliquer ces retraits à partir de leurs pièces de restauration, ou supprimer les détails des votes concernés. La copie d’origine expire avec la sauvegarde sous 14 jours. Le vote ne crée pas de registre parallèle d’identités pour contourner cette limite.
 
+### Effacement des sessions de l’administration
+
+La validité d’une session reste limitée à huit heures d’inactivité et vingt-quatre heures absolues. Les lignes expirées sont supprimées au démarrage puis chaque heure, même sans nouvelle connexion : leurs données sont donc retirées au passage horaire suivant la fin d’accès. Quand la Vigie est activée, le déclencheur conserve seulement l’empreinte révoquée, le compte, le contexte et les dates prévus pour la détection des rejeux, pendant ses quarante-huit heures propres ; il ne recopie ni nom, ni e-mail ni jeton d’identité dans cette trace. Le récapitulatif de `/bonjour` a une échéance autonome : son effacement mémoire ne dépend plus d’une nouvelle lecture ou d’un nouvel envoi.
+
 ## 2. Accord entre responsables conjoints (article 26)
 
 À imprimer, signer et garder par chacun.
