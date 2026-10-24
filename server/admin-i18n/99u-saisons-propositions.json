@@ -107,9 +107,9 @@
     "en": "Approval saved.",
     "de": "Bestätigung gespeichert."
   },
-  "Ordre enregistré. Une nouvelle double validation est nécessaire.": {
-    "en": "Order saved. Both approvals are required again.",
-    "de": "Reihenfolge gespeichert. Beide Bestätigungen sind erneut erforderlich."
+  "Ordre enregistré.": {
+    "en": "Order saved.",
+    "de": "Reihenfolge gespeichert."
   },
   "Formulaire de propositions attendu.": {
     "en": "A proposal form is required.",

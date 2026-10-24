@@ -7,7 +7,7 @@ const ACTIONS = {
   proposer: { permission: 'saisons.ecrire', method: 'propose', message: 'Propositions enregistrées.' },
   relire: { permission: 'saisons.vote_relecture', method: 'review', message: 'Relecture enregistrée.' },
   valider: { permission: 'saisons.vote_valider', method: 'validate', message: 'Validation enregistrée.' },
-  ordonner: { permission: 'saisons.vote_ordonner', method: 'reorder', message: 'Ordre enregistré. Une nouvelle double validation est nécessaire.' },
+  ordonner: { permission: 'saisons.vote_ordonner', method: 'reorder', message: 'Ordre enregistré.' },
 };
 
 export function registerSaisonsPropositions(app, { repo, render, P, W, done, withReady }) {
