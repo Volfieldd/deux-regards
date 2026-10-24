@@ -116,6 +116,24 @@ test('V1 HTTP : doublon rejoué idempotent, sans nouveau suivi ni compteur suppl
   assert.equal(c.db.prepare('SELECT consentement FROM saison_vote_votants').pluck().get(), stored);
 });
 
+test('V1 HTTP : premier vote concurrent depuis le même formulaire sans cookie reste unique', async t => {
+  const c = await context(t), url = `${c.root}/photo/photo-1/voter`, page = await c.get(url);
+  const body = { _csrf: proof(page.body), notice_version: NOTICE_VERSION, consent: 'oui' };
+  const responses = await Promise.all([c.post(url, body), c.post(url, body)]);
+  assert.deepEqual(responses.map(response => response.statusCode), [303, 303]);
+  const tokens = responses.map(response => response.cookies.find(cookie => cookie.name === c.name).value);
+  assert.deepEqual({ jetons_distincts: new Set(tokens).size, totaux: count(c) }, { jetons_distincts: 1, totaux: [{ photo_id: 1, total: 1 }] });
+  assert.equal(body._csrf.includes(tokens[0]), false, 'le jeton de vote ne figure jamais dans le défi public');
+  assert.equal(body._csrf.split('.').at(-1) === tokens[0], false, 'le MAC du défi n’est jamais le jeton de vote');
+  const cookies = { [c.name]: tokens[0] };
+  const replay = await c.post(url, body, cookies);
+  assert.equal(replay.statusCode, 303);
+  assert.equal(replay.cookies.find(cookie => cookie.name === c.name).value === tokens[0], true);
+  assert.deepEqual(count(c), [{ photo_id: 1, total: 1 }]);
+  const other = { [c.name]: createVoteToken() };
+  assert.equal((await c.post(url, body, other)).statusCode, 403);
+});
+
 test('V1 HTTP : provenance et CSRF refusés sans vote, cookie ni secret dans les événements', async t => {
   const c = await context(t), events = [];
   c.app.securite = { ...c.app.securite, emit: (type, event) => events.push({ type, detail: event.detail }) };

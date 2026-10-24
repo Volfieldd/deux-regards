@@ -3,7 +3,7 @@ import { createVault } from '../vault.js';
 import { createRateLimiter } from '../ratelimit.js';
 import { usesV2 } from '../version-publique.js';
 import { localize } from '../i18n.js';
-import { createSaisonsVotes, createVoteToken, SaisonVoteError, NOTICE_VERSION } from '../saisons-votes.js';
+import { createSaisonsVotes, SaisonVoteError, NOTICE_VERSION } from '../saisons-votes.js';
 import { VOTE_UI } from '../saisons-votes-textes.js';
 
 const TTL = 30 * 60 * 1000;
@@ -21,11 +21,18 @@ const noCache = reply => reply.header('cache-control', 'private, no-store').head
 export function installExpositionVotes(app, { now = Date.now, approvedIds = id => app.saisonsPropositions.approvedIds(id), timers = true } = {}) {
   const vault = createVault(app.config.dataKey);
   const key = Buffer.from(crypto.hkdfSync('sha256', app.config.cookieSecret, 'nicephos', 'expositions-formulaire-v1', 32));
+  const firstKey = Buffer.from(crypto.hkdfSync('sha256', app.config.cookieSecret, 'nicephos', 'expositions-premier-vote-v1', 32));
   const sign = (scope, raw, stamp) => crypto.createHmac('sha256', key).update(`${scope}\0${raw || ''}\0${stamp}`).digest('base64url');
   const forms = {
     now, enabled: vault.enabled, approvedIds,
     limit: createRateLimiter({ limit: 60, windowMs: 60 * 1000, now }),
     csrf(scope, raw) { const stamp = `${now()}.${crypto.randomBytes(12).toString('base64url')}`; return `${stamp}.${sign(scope, raw, stamp)}`; },
+    // Après validation du défi et consentement, deux envois du même formulaire initial retrouvent le même jeton.
+    // Clé et usage distincts du MAC CSRF : aucun identifiant de vote n’est exposé dans le formulaire.
+    firstToken(sid, csrf) {
+      const [issued, nonce] = csrf.split('.');
+      return crypto.createHmac('sha256', firstKey).update(`vote:${sid}\0${issued}\0${nonce}`).digest('base64url');
+    },
     accepts(scope, raw, value) {
       if (typeof value !== 'string' || value.length > 100 || !/^\d{1,16}\.[A-Za-z0-9_-]{16}\.[A-Za-z0-9_-]{43}$/.test(value)) return false;
       const [issued, nonce, mac] = value.split('.'), at = Number(issued), t = now();
@@ -91,12 +98,18 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
   };
   const refused = (request, reply, s, data, status = 403, error = 'refused') => render(request, reply, s, { ...data, error }, status);
   const emit = (request, type, detail) => app.securite.emit(type, { request, emetteur: 'server/routes/expositions-votes.js', detail: { formulaire: 'vote_exposition', ...detail } });
-  const guard = (request, reply, s, scope, data) => {
+  const guard = (request, reply, s, scope, data, { initialVote = false } = {}) => {
     const origin = request.headers.origin, fetch = request.headers['sec-fetch-site'];
     if (fetch === 'cross-site' || fetch === 'same-site' || (origin ? origin !== new URL(app.config.publicUrl).origin : fetch !== 'same-origin')) {
       emit(request, 'input_validation_fail', { raison: 'provenance refusée' }); refused(request, reply, s, data); return false;
     }
-    if (!forms.accepts(scope, rawToken(app, request, s.id), request.body?._csrf)) {
+    const raw = rawToken(app, request, s.id), csrf = request.body?._csrf;
+    const accepted = forms.accepts(scope, raw, csrf)
+      // Le formulaire initial peut revenir après réception du cookie, seulement pour le vote et si ce cookie
+      // est exactement celui dérivé de son nonce signé. Export et retrait gardent leur liaison ordinaire.
+      || (initialVote && raw && forms.accepts(scope, null, csrf)
+        && crypto.timingSafeEqual(Buffer.from(raw), Buffer.from(forms.firstToken(s.id, csrf))));
+    if (!accepted) {
       emit(request, 'input_validation_fail', { raison: 'défi de formulaire invalide' }); refused(request, reply, s, data); return false;
     }
     if (!forms.limit(request.ip)) {
@@ -148,9 +161,12 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
     if (!p) return reply.callNotFound();
     let data;
     try { data = voteData(request, s, p); } catch (err) { return businessError(request, reply, s, {}, err); }
-    if (!guard(request, reply, s, `vote:${s.id}:${p.id}`, data)) return reply;
+    if (!guard(request, reply, s, `vote:${s.id}:${p.id}`, data, { initialVote: true })) return reply;
     if (!forms.approvedIds(s.id).includes(p.id)) return refused(request, reply, s, data, 409, 'stale');
-    const raw = rawToken(app, request, s.id) || createVoteToken();
+    const previous = rawToken(app, request, s.id);
+    if (!previous && (request.body?.consent !== 'oui' || request.body?.notice_version !== NOTICE_VERSION))
+      return refused(request, reply, s, data, 422, 'consent');
+    const raw = previous || forms.firstToken(s.id, request.body._csrf);
     try {
       const result = votes.cast(s.id, p.id, raw, { consent: request.body?.consent === 'oui', noticeVersion: request.body?.notice_version });
       // Aucun Set-Cookie sur un refus ; la date est celle de l’exposition, jamais une durée glissante.
