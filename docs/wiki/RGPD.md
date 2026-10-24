@@ -36,6 +36,10 @@ Responsables conjoints : **Sébastien et Julien**, photographes de Nicephos. Con
 
 **Périmètre Vigie** : la [fiche dédiée](RGPD-Vigie) détaille les sources, destinataires, durées, droits, mise en balance et préexamen AIPD. Elle recense aussi les écarts à corriger ; ni la purge du journal ni le coffre des fiches du site ne couvrent automatiquement toutes les données de la Vigie. Vérifier les prestataires, contrats et garanties de transfert sur l’installation réelle.
 
+### Effacement des sessions de l’administration
+
+La validité d’une session reste limitée à huit heures d’inactivité et vingt-quatre heures absolues. Les lignes expirées sont supprimées au démarrage puis chaque heure, même sans nouvelle connexion : leurs données sont donc retirées au passage horaire suivant la fin d’accès. Quand la Vigie est activée, le déclencheur conserve seulement l’empreinte révoquée, le compte, le contexte et les dates prévus pour la détection des rejeux, pendant ses quarante-huit heures propres ; il ne recopie ni nom, ni e-mail ni jeton d’identité dans cette trace. Le récapitulatif de `/bonjour` a une échéance autonome : son effacement mémoire ne dépend plus d’une nouvelle lecture ou d’un nouvel envoi.
+
 ## 2. Accord entre responsables conjoints (article 26)
 
 À imprimer, signer et garder par chacun.

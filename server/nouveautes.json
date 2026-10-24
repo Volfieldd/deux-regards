@@ -1,5 +1,27 @@
 [
   {
+    "version": "1.225.0",
+    "date": "2026-10-24",
+    "pr": 225,
+    "title": {
+      "fr": "Connexions et préférences plus robustes",
+      "en": "More robust sign-in and preferences",
+      "de": "Robustere Anmeldung und Einstellungen"
+    },
+    "items": [
+      {
+        "fr": "Une connexion ou une vérification d’identité commencée depuis dix minutes ou plus doit être relancée. Une session déjà ouverte conserve sa durée habituelle.",
+        "en": "Sign-ins and identity checks must be restarted once they reach ten minutes. Existing sessions keep their usual lifetime.",
+        "de": "Anmeldungen und Identitätsprüfungen müssen nach zehn Minuten neu begonnen werden. Bereits geöffnete Sitzungen behalten ihre übliche Gültigkeitsdauer."
+      },
+      {
+        "fr": "La taille des vignettes et les actions de la photothèque continuent de fonctionner si le navigateur bloque la mémorisation. La taille choisie et les messages sont repris après rechargement uniquement si ce stockage est autorisé.",
+        "en": "Thumbnail sizing and photo library actions keep working when the browser blocks storage. The chosen size and messages are restored after reloading only when this storage is allowed.",
+        "de": "Die Vorschaubildgröße und die Aktionen der Fotothek funktionieren auch dann, wenn der Browser das Speichern blockiert. Die gewählte Größe und Meldungen werden nach dem Neuladen nur bei erlaubter Speicherung wiederhergestellt."
+      }
+    ]
+  },
+  {
     "version": "1.221.0",
     "date": "2026-10-24",
     "pr": 221,
