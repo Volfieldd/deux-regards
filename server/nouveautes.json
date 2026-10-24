@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.227.0",
+    "date": "2026-10-24",
+    "pr": 227,
+    "title": {
+      "fr": "Le référencement se règle dans l’admin",
+      "en": "Manage search visibility from the admin",
+      "de": "Suchmaschinen in der Verwaltung einstellen"
+    },
+    "items": [
+      {
+        "perm": "site.apparence",
+        "fr": "Dans Réglages → Référencement, choisissez la visibilité du site et des photos dans les moteurs. Le titre et la description de l’accueil sont facultatifs, dans les trois langues, avec un aperçu. Les balises et le plan du site suivent automatiquement les contenus publiés ; les espaces privés restent exclus.",
+        "en": "In Settings → Search visibility, choose whether search engines may index the site and its photos. Optional home-page titles and descriptions are available in all three languages, with a preview. Metadata and the sitemap automatically follow published content; private spaces remain excluded.",
+        "de": "Unter Einstellungen → Suchmaschinen wählen Sie die Sichtbarkeit der Website und ihrer Fotos. Titel und Beschreibung der Startseite sind in allen drei Sprachen optional, mit Vorschau. Metadaten und Sitemap folgen automatisch veröffentlichten Inhalten; private Bereiche bleiben ausgeschlossen."
+      }
+    ]
+  },
+  {
     "version": "1.226.0",
     "date": "2026-10-24",
     "pr": 226,

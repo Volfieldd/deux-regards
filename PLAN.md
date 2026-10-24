@@ -9,7 +9,7 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
-## Mise en œuvre — Référencement administrable (24 octobre 2026)
+## Mise en œuvre — Référencement administrable, PR #227, version 1.227.0 (24 octobre 2026)
 
 Réouverture du chapitre SEO à la demande du propriétaire : écran dédié dans les Réglages, réservé à l’administrateur par `site.apparence`. Deux choix (référencement du site et des photos), titre/description d’accueil facultatifs FR/EN/DE et aperçu. Automatisation des métadonnées, données structurées des photos et plan du site enrichi depuis les contenus publiés, avec maintien des exclusions privées et des décisions des Carnets. Aucun changement de visibilité à l’installation, aucune migration ni dépendance nouvelle. Surveillance rattachée à BV-1/DS23, BV-20/BV-21 et DS12. Vérifications et limites réelles consignées dans la PR ; déclaration du domaine auprès des moteurs et contrôle en production restent au propriétaire.
 
