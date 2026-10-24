@@ -228,6 +228,76 @@ test('en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé', a
   assert.equal(res.headers['strict-transport-security'], 'max-age=31536000');
 });
 
+test('Cloudflare Tunnel : origine HTTP sans certificat, adresse publique HTTPS et cookies sécurisés', async t => {
+  const { app } = await setup(t, { env: { ...HTTPS, NODE_ENV: 'production', TRUST_PROXY: '127.0.0.1' }, oidc: fakeOidc });
+  // Un vrai listener HTTP, comme le service http://site:3000 configuré dans le tunnel ; aucun accès à Cloudflare réel.
+  const origin = await app.listen({ host: '127.0.0.1', port: 0 });
+  assert.match(origin, /^http:\/\//);
+  const health = await fetch(`${origin}/healthz`);
+  assert.equal(health.status, 200);
+  assert.deepEqual(await health.json(), { status: 'ok' });
+  const res = await fetch(`${origin}/auth/login`, { redirect: 'manual', headers: { 'x-forwarded-proto': 'https' } });
+  await res.text();
+  assert.equal(res.status, 302);
+  const tx = res.headers.getSetCookie().find(c => c.startsWith('__Host-oidc-'));
+  assert.ok(tx, 'la transaction est liée à l’hôte public, même sur la liaison interne HTTP');
+  for (const attribute of ['Secure', 'HttpOnly', 'SameSite=Lax', 'Path=/']) assert.ok(tx.split('; ').includes(attribute), attribute);
+  assert.doesNotMatch(tx, /;\s*Domain=/i);
+  assert.equal(res.headers.get('strict-transport-security'), 'max-age=31536000');
+  assert.equal(app.config.publicUrl, 'https://photos.example');
+});
+
+test('transaction OIDC : dix minutes vérifiées au serveur, même avec une copie du cookie signé', async t => {
+  let clock = Date.now(), calls = 0;
+  t.mock.method(Date, 'now', () => clock);
+  const oidc = { ...fakeOidc, finish: async () => {
+    calls++;
+    return { claims: { sub: 'expiration-oidc', name: 'Compte de test' }, roles: ['admin'], admin: true, listed: true };
+  } };
+  const { app, db } = await setup(t, { oidc });
+  const state = 's'.repeat(43), name = `oidc-${state}`;
+  const callback = cookies => app.inject({ url: `/auth/callback?code=test&state=${state}`, cookies });
+  const start = await app.inject('/auth/login');
+  clock += 600_000;
+  const late = await callback(cookiesOf(start));
+  assert.equal(late.statusCode, 400);
+  assert.equal(calls, 0, 'aucun échange du code pour une transaction expirée');
+  assert.equal(late.cookies.find(c => c.name === name)?.value, '', 'cookie expiré retiré');
+  assert.equal(db.prepare('SELECT count(*) FROM sessions').pluck().get(), 0);
+
+  const fresh = await app.inject('/auth/login');
+  clock += 599_999;
+  const accepted = await callback(cookiesOf(fresh));
+  assert.equal(accepted.statusCode, 302);
+  assert.equal(calls, 1, 'une transaction encore valide est échangée');
+  assert.equal(db.prepare('SELECT count(*) FROM sessions').pluck().get(), 1);
+
+  const session = cookiesOf(accepted);
+  const verification = await app.inject({ url: '/auth/verifier', cookies: session });
+  clock += 600_000;
+  const stale = await callback({ ...session, ...cookiesOf(verification) });
+  assert.equal(stale.statusCode, 400);
+  assert.equal(calls, 1, 'la vérification d’identité expirée ne contacte pas non plus le fournisseur');
+  assert.equal(db.prepare('SELECT count(*) FROM sessions').pluck().get(), 1, 'la session existante n’est pas détruite par un retour expiré');
+});
+
+test('transaction OIDC : date absente, invalide ou future refusée avant tout appel au fournisseur', async t => {
+  const clock = Date.now();
+  t.mock.method(Date, 'now', () => clock);
+  let calls = 0;
+  const oidc = { ...fakeOidc, finish: async () => { calls++; throw new Error('appel inattendu'); } };
+  const { app } = await setup(t, { oidc });
+  const start = await app.inject('/auth/login');
+  const state = 's'.repeat(43), name = `oidc-${state}`;
+  const tx = JSON.parse(app.unsignCookie(cookiesOf(start)[name]).value);
+  for (const at of [undefined, null, 'demain', {}, [], { toString: 0, valueOf: 0 }, clock + 0.5, clock + 1, clock - 600_001]) {
+    const cookies = { [name]: app.signCookie(JSON.stringify({ ...tx, at })) };
+    const res = await app.inject({ url: `/auth/callback?code=test&state=${state}`, cookies });
+    assert.equal(res.statusCode, 400, `date ${JSON.stringify(at)}`);
+  }
+  assert.equal(calls, 0);
+});
+
 test('safeNext refuse les redirections hors du site, y compris par caractères de contrôle', () => {
   assert.equal(safeNext('/admin/photos?q=1#x'), '/admin/photos?q=1#x');
   for (const bad of ['//evil.example', '/\\evil.example', '/\t/evil.example', '/\n/evil.example', '/\r\n/evil.example',
