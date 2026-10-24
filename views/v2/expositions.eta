@@ -1,0 +1,37 @@
+<% layout('./layout') %>
+<% const x = it.x; %>
+<%~ include('./_entete', { ...it, courant: 'expositions' }) %>
+<main id="contenu" class="wrap expo">
+  <header class="tete-page expo-index-entete">
+    <p class="etiquette"><%= x.signature %></p>
+    <h1 class="titre-page"><%= x.title %></h1>
+    <p class="chapo"><%= x.lead %></p>
+  </header>
+<% if (!it.list.length) { %>
+  <p class="expo-note"><%= x.empty %></p>
+<% } else { %>
+  <ol class="expo-index">
+<% it.list.forEach((e, i) => { %>
+    <li><article class="expo-carte" aria-labelledby="expo-<%= e.id %>">
+      <div class="expo-carte-texte">
+        <p class="etiquette"><%= x.states[e.phase] %></p>
+        <h2 class="titre-2" id="expo-<%= e.id %>"><a href="<%= it.u(`/exposition/${e.slug}`) %>"><%= e.title %></a></h2>
+        <p class="expo-dates"><time datetime="<%= new Date(e.opens_at).toISOString() %>"><%= it.date(e.opens_at) %></time> → <time datetime="<%= new Date(e.closes_at).toISOString() %>"><%= it.date(e.closes_at) %></time></p>
+<% if (e.full && e.subtitle) { %>        <p class="expo-carte-intention"><%= e.subtitle %></p>
+<% } %>      </div>
+<% if (e.cover) { %>
+      <figure class="expo-carte-couverture"><%~ it.picture(e.cover, { sizes: '(min-width: 900px) calc((100vw - 192px) / 2), calc(100vw - 48px)', eager: i === 0, alt: '' }) %></figure>
+<% } %>
+    </article></li>
+<% }) %>
+  </ol>
+<% } %>
+<% if (it.pages > 1) { %>
+  <nav class="expo-pagination" aria-label="<%= x.pageLabel %>">
+    <p><%= x.pages(it.page, it.pages) %></p>
+<% if (it.prevHref) { %>    <a class="lien" href="<%= it.prevHref %>" rel="prev"><%= x.pagePrevious %></a>
+<% } %><% if (it.nextHref) { %>    <a class="lien" href="<%= it.nextHref %>" rel="next"><%= x.pageNext %></a>
+<% } %>  </nav>
+<% } %>
+</main>
+<%~ include('./_pied', it) %>

@@ -1,0 +1,2 @@
+<% layout('./layout') %>
+<%~ include('../saison-collection', { ...it, corps: true }) %>

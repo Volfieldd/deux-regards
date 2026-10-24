@@ -42,6 +42,7 @@ import { registerGaleries } from './galeries.js';
 import { registerCarnet } from './carnet.js';
 import { registerSaisons } from './saisons.js';
 import { registerSaisonsPropositions } from './saisons-propositions.js';
+import { registerSaisonsBilans } from './saisons-bilans.js';
 import { registerMessages } from './messages.js';
 import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
@@ -2494,6 +2495,7 @@ export default async function adminRoutes(app) {
   registerCarnet(app, { repo, render, P, W, done, failed, withReady });
   registerSaisons(app, { repo, render, P, W, done, failed, withReady, zone: 'UTC' });
   registerSaisonsPropositions(app, { repo, render, P, W, done, withReady });
+  registerSaisonsBilans(app, { repo, render, P, W, done, withReady });
   registerMessages(app, { render, P, W, done, withReady });
 
   // ---------- traductions ----------

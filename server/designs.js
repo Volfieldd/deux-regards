@@ -18,6 +18,7 @@ export const SECTIONS = {
   carte: { label: 'Carte', url: '/carte' },
   voyages: { label: 'Voyages et leurs étapes', url: '/voyages' },
   carnets: { label: 'Carnets et billets', url: '/carnet' },
+  expositions: { label: 'Expositions', url: '/expositions' },
   regards: { label: 'À propos des regards', url: '/a-propos' },
   contact: { label: 'Contact', url: '/contact' },
   informations: { label: 'Droits et autres informations', url: '/droits' },
@@ -30,6 +31,7 @@ export function sectionOf(request) {
   if (/^\/(galerie|auteur|serie|series|recherche)(\/|$)/.test(p)) return 'galerie';
   if (/^\/photo(\/|$)/.test(p)) return 'photos';
   if (/^\/carnet(\/|$)/.test(p)) return 'carnets';
+  if (/^\/expositions?(\/|$)/.test(p)) return 'expositions';
   if (/^\/voyages?(\/|$)/.test(p)) return 'voyages';
   if (p === '/carte') return 'carte';
   if (p === '/a-propos') return 'regards';

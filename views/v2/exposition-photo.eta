@@ -1,0 +1,19 @@
+<% layout('./layout') %>
+<% const e = it.exposition, p = it.photo, x = it.x; %>
+<%~ include('./_entete', { ...it, courant: 'expositions', courantSous: true }) %>
+<main id="contenu" class="wrap expo expo-visionneuse">
+  <p class="expo-retour"><a class="lien" href="<%= it.u(`/exposition/${e.slug}#accrochage`) %>">← <%= e.title %></a></p>
+  <header class="expo-photo-entete"><p class="etiquette"><%= x.position(it.index + 1, it.count) %></p><h1 class="titre-page"><%= p.title %></h1></header>
+  <figure class="expo-photo-grand">
+    <%~ it.picture(p, { sizes: 'calc(100vw - 48px)', eager: true, alt: p.alt || p.title }) %>
+    <figcaption><p class="expo-photo-auteur"><%= p.author %></p><% if (p.cartel) { %><p class="expo-prose"><%= p.cartel %></p><% } %></figcaption>
+  </figure>
+  <nav class="expo-photo-nav" aria-label="<%= x.images %>">
+<% if (it.prev) { %>    <a class="lien" href="<%= it.photoHref(it.prev) %>" rel="prev">← <%= x.previous %><span class="sr-only"> · <%= it.prev.title %></span></a>
+<% } %>    <a class="lien" href="<%= it.u(`/exposition/${e.slug}#accrochage`) %>"><%= x.returnToExposition %></a>
+<% if (it.next) { %>    <a class="lien" href="<%= it.photoHref(it.next) %>" rel="next"><%= x.next %> →<span class="sr-only"> · <%= it.next.title %></span></a>
+<% } else { %>    <a class="lien" href="<%= it.u(`/exposition/${e.slug}#conclusion`) %>"><%= x.finish %> →</a>
+<% } %>
+  </nav>
+</main>
+<%~ include('./_pied', it) %>
