@@ -182,7 +182,7 @@ export function famille(action) {
   if (a.startsWith('GET ') || a === 'message lu') return 'lectures';
   if (a.startsWith('galerie privée') || /^POST \/admin\/(rencontres?|personnes|signalements|messages|galeries)\b/.test(a)) return 'personnes';
   if (/^(compte (modifié|supprimé|rétabli)|circuit réglé)/.test(a) || /^POST \/admin\/(comptes|circuit|auteurs|compte\/)/.test(a)) return 'equipe';
-  if (/^POST \/admin\/(apparence|reglages|images|traduction|langue|theme|version|carnet\/reglages|instagram\/reglages|series\/(propositions|descriptions))\b/.test(a)) return 'reglages';
+  if (/^POST \/admin\/(apparence|reglages|referencement|images|traduction|langue|theme|version|carnet\/reglages|instagram\/reglages|series\/(propositions|descriptions))\b/.test(a)) return 'reglages';
   return 'publication';
 }
 

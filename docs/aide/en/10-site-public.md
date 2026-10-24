@@ -157,4 +157,4 @@ When **v2** is applied, the other pages of the site take the same design (header
 
 ## Automatic search metadata
 
-[Settings → Search visibility](reglages#search-visibility) controls indexing requests. Titles, descriptions, photo information, sharing previews and the sitemap follow published content. Asking engines not to index the website does not restrict access; private galleries keep their existing protections. Search engines decide indexing, timing and result appearance.
+[Settings → Search visibility](reglages#référencement) controls indexing requests. Titles, descriptions, photo information, sharing previews and the sitemap follow published content. Asking engines not to index the website does not restrict access; private galleries keep their existing protections. Search engines decide indexing, timing and result appearance.

@@ -23,9 +23,18 @@ Les journaux du parcours navigateur ne contiennent aucune erreur JavaScript ou C
 - Même commande avec `TEST_AVEC_VIGIE=1` : **14/14**, aucun échec, ignoré ou annulé.
 - `AVIF_EFFORT=0 node --test test/admin.test.js` : **20/20**. Deux assertions anciennes attendaient uniquement le nom du site ; elles vérifient désormais le titre automatique complet, avec les noms des photographes.
 - `AVIF_EFFORT=0 node --test test/textes-inventaire.test.js test/version-publique.test.js` : **28/28**. Les comparaisons intégrales du corps v1 restent en place ; les nouvelles descriptions sont vérifiées à part. Le bloc JSON-LD est parsé et les scripts exécutables en ligne restent interdits.
+- `AVIF_EFFORT=0 node --test test/admin-v2-suivi.test.js` : **7/7**, dont le classement des changements SEO dans « Réglages du site ».
+- `AVIF_EFFORT=0 node --test test/nouveautes.test.js` : **2/2** après passage en 1.227.0.
 - `node --test test/liens-internes.test.js test/aide.test.js test/traduction.test.js` : **11/11** ; liens internes relancés après ajout du présent rapport : **4/4**.
 
 La première suite globale sans Vigie a terminé avec **1 485/1 489** : quatre assertions anciennes attendaient les titres, descriptions ou l’absence de données structurées d’avant le SEO. Les deux fichiers de compatibilité et les deux assertions de réglages ont été actualisés avec les preuves explicites du nouveau comportement, puis repassés dans les commandes ciblées ci-dessus.
+
+Passages globaux finaux (même sélection que les scripts npm, concurrence bornée à quatre fichiers) :
+
+- `AVIF_EFFORT=0 node --test --test-concurrency=4 "test/**/*.test.js"` : **1 489/1 489**, zéro échec, ignoré ou annulé.
+- Même commande avec `TEST_AVEC_VIGIE=1` : **1 489/1 489**, zéro échec, ignoré ou annulé.
+
+Le classement du Journal, ajouté à la dernière passe de relecture, est vérifié par les sept tests ciblés ci-dessus. Les renvois SEO de l’aide ont aussi été vérifiés dans le HTML produit en français, anglais et allemand ; leurs ancres restent celles du français, conformément au fonctionnement commun de l’aide.
 
 Les tests SEO vérifient les formulaires réellement rendus, droits, CSRF, champs invalides sans écriture partielle, persistance indépendante, textes/replis/échappement, les trois présentations, les données structurées, les images et les projections publiques du plan du site. Les cas privés et les langues non publiées des Carnets gardent leurs exclusions. La régression découverte sur les réponses d’images **304** est couverte en GET et HEAD : la directive courante est bien reprise quand le réglage change. La Vigie reçoit les changements et leurs clés, jamais les textes libres ; un refus ou un réenregistrement identique ne simule pas un changement.
 

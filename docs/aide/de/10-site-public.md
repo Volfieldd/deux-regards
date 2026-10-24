@@ -156,4 +156,4 @@ Wenn die **v2** angewendet ist, erhalten die übrigen Seiten der Website dieselb
 
 ## Automatische Suchmetadaten
 
-[Einstellungen → Suchmaschinen](reglages#suchmaschinen) steuert die Indexierungswünsche. Titel, Beschreibungen, Fotoinformationen, Vorschauen und Sitemap folgen veröffentlichten Inhalten. Nichtindexierung beschränkt den Zugriff nicht; private Galerien behalten ihre Schutzmaßnahmen. Über Indexierung, Zeitpunkt und Darstellung entscheiden die Suchmaschinen.
+[Einstellungen → Suchmaschinen](reglages#référencement) steuert die Indexierungswünsche. Titel, Beschreibungen, Fotoinformationen, Vorschauen und Sitemap folgen veröffentlichten Inhalten. Nichtindexierung beschränkt den Zugriff nicht; private Galerien behalten ihre Schutzmaßnahmen. Über Indexierung, Zeitpunkt und Darstellung entscheiden die Suchmaschinen.
