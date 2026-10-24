@@ -35,7 +35,7 @@ Accord pour instruire d’abord un identifiant aléatoire minimal dans un cookie
 
 L’exposition close peut publier un bilan en trois langues, avec une sélection éditoriale. Sa publication fige textes et sélection ; un rectificatif est un nouveau bilan lié. Les œuvres choisies peuvent former une collection permanente avec sa présentation, sa couverture, son ordre et ses cartels propres. La collection garde son parcours sans date de clôture ; les droits de chaque photo sont vérifiés à la lecture. L’exposition conserve ses bilans et les liens vers les collections après les douze mois d’archive, sans réafficher ses anciennes photos. Une origine retirée cesse d’être affichée sans retirer automatiquement sa collection.
 
-Administration et visite FR/EN/DE raccordées ; migration 068 reprend les bilans déjà publiés du socle. PR en brouillon, dépendante de #221, sans fusion ni déploiement. Les vérifications navigateur et Vigie finales sont complétées avant remise.
+Administration et visite FR/EN/DE raccordées ; migration 068 reprend les bilans déjà publiés du socle. PR en brouillon, dépendante de #221, sans fusion ni déploiement. Sept cas navigateur réussis couvrent les publications dans l’administration et la visite jusqu’à la collection dans Chromium/WebKit sur ordinateur et mobile. Dix-huit mesures de débordement des écrans administratifs et six contrôles Axe sont sans défaut relevé. Les publications/retraits des bilans et collections sont attribués à l’administration dans la Vigie, sans brouillon ni texte brut. Les suites complètes passent : **1 397/1 397 dans chaque mode**, avec et sans Vigie, exécutées séquentiellement à quatre processus de test.
 
 ## Mise en œuvre — Visite des expositions, S2, PR #221, version 1.221.0 (24 octobre 2026)
 
