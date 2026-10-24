@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Statut | Cadrage actualisé après les arbitrages du propriétaire. S0 est en PR #218 et la préparation S1a en PR #219, en brouillon. Aucun parcours de saison ni vote n’est activé. |
-| Date | 23 octobre 2026. |
+| Date | 23 octobre 2026 ; précision du mécanisme de vote le 24 octobre 2026. |
 | Objet | Expositions photographiques datées, couverture publique avant ouverture, archive complète pendant 12 mois et prolongements éditoriaux vers les collections. Le pilote participatif est un vote consultatif sur des photos proposées à l’avance. |
 | Références | [Développer](../wiki/Développer.md), [Spécifications](../wiki/Spécifications.md), [Tests](../wiki/Tests.md), [Sécurité](../wiki/Sécurité.md), [RGPD](../wiki/RGPD.md), [besoins de la Vigie](vigie-besoins-des-briques.md). |
 | Lecture | **Décidé** : réponse explicite du propriétaire. **Proposé** : détail fonctionnel à confirmer. **Ouvert** : arbitrage encore nécessaire. **Différé** : hors du pilote, sans collecte ni activation implicite. |
@@ -32,6 +32,7 @@ Les anciennes SA-D5 (triptyque composé par le visiteur) et SA-D10 (Écho/Contra
 | SA-D22 | 20 et réponses complémentaires — Unicité | **Un vote possible sur chaque photo** ; limitation par navigateur acceptée, avec **cookie**, sans compte. Le contrat retenu est une voix par couple **photo/exposition pour ce navigateur**. Un même navigateur peut donc voter sur plusieurs photos de l’exposition, une fois sur chacune. |
 | SA-D23 | 18/19/21/22 — Reports | Mettre en attente visibilité/conservation des anciennes contributions, publication/attribution de ces contributions, branches successives et photographes invités. Ces points ne sont pas des dépendances du vote simple. |
 | SA-D24 | 23 — Portée du vote | **Consultatif**. Aucun classement ne publie automatiquement une photo dans les collections et aucun engagement de permanence n’est promis. Les autres formats se décideront plus tard. |
+| SA-D25 | 24 octobre — Limitation et traceurs | Accord pour **instruire un identifiant aléatoire minimal dans un cookie créé au premier vote**, sans fingerprinting. La possibilité d’éviter un bandeau global reste soumise à la justification d’une exemption applicable ; aucune exemption ni activation n’est acquise. |
 
 La réponse initiale « un seul vote par visiteur » est précisée par la réponse complémentaire « un vote possible sur chaque photo ». Le cookie accepté repère le navigateur dans le périmètre de l’exposition ; il ne représente pas une personne vérifiée. Effacer ses cookies ou changer d’appareil peut permettre un nouveau vote : cette limite est acceptée pour le pilote et doit être annoncée fidèlement.
 
@@ -120,6 +121,18 @@ L’absence de compte ne supprime pas le stockage nécessaire au vote et au cook
 
 Les points 18/19 mis en attente par le propriétaire concernent les **anciennes contributions photographiques**, pas une autorisation de conserver indéfiniment les données du vote. Les décisions minimales de V1 restent explicites et ne provoquent aucune collecte dans S1a.
 
+### 5.4 Piste retenue pour l’étude : identifiant minimal au premier vote
+
+Le 24 octobre, après examen de Glassbox et des règles de la CNIL, le propriétaire a accepté d’examiner d’abord un identifiant aléatoire minimal dans un cookie créé au premier vote. **L’accord porte sur cette piste d’étude ; il n’autorise ni une activation immédiate ni une déclaration de dispense de consentement.** L’objectif est un parcours de vote simple, avec la collecte minimale utile.
+
+Contrat à instruire avant V1 : aucun cookie de vote à la simple visite ; identifiant aléatoire sans empreinte Canvas, audio, polices ou matériel ; usage limité à la reconnaissance des votes dans l’exposition, sans profil de navigation ni rapprochement entre expositions. La visite libre reste indépendante du vote. Durée du cookie, durée des données serveur, purge et information restent à décider ; les 12 mois de l’archive ne les déterminent pas.
+
+La [CNIL inclut le fingerprinting parmi les traceurs](https://www.cnil.fr/fr/cookies-et-autres-traceurs/que-dit-la-loi). Remplacer le cookie par une empreinte, du stockage local ou un identifiant haché ne crée donc pas, à lui seul, une exemption. Glassbox est un [banc de diagnostic du navigateur](https://github.com/HotStartLabs/glassbox), pas un mécanisme d’unicité de vote prêt à intégrer ; il n’est pas retenu dans la piste du pilote.
+
+Un traceur strictement nécessaire peut bénéficier d’une exemption, mais [la CNIL précise que la lutte contre la fraude n’en bénéficie pas en général](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ), hors cas particuliers. **L’application de l’exemption à notre anti-doublon est à justifier pour son usage réel**. La documentation doit distinguer les règles d’accès au terminal et les obligations applicables aux données traitées. L’information requise ne disparaît pas au seul motif d’une éventuelle exemption de consentement.
+
+Le lot V1 inclut donc la qualification documentée du traceur et le dispositif d’information ou de consentement qui en découle, avant toute collecte. Si l’exemption ne peut pas être justifiée, la décision doit revenir au propriétaire : recueil adapté du consentement ou mécanisme sans identifiant persistant avec une garantie d’unicité réduite. Aucune de ces solutions de repli n’est sélectionnée silencieusement. Aucun cookie ou fingerprinting n’est mis en œuvre dans S1a.
+
 ## 6. Textes, bilans et prolongements
 
 | Objet | Cible fonctionnelle | Limites et état actuel |
@@ -173,7 +186,7 @@ Cette section documente la seconde approche demandée par le propriétaire, **sa
 | SA-Q9 | Annonce : couverture publique décidée, début d’affichage et autres informations à préciser. Accueil choisi par admin, contenu entre saisons à préciser. | S2. |
 | SA-Q10 | Archive complète de 12 mois : point de départ et effet à échéance. | S2. |
 | SA-Q11 | Direction de publication : responsabilités, rattachement technique, cumuls et effet d’une modification sur les validations. | V0. |
-| SA-Q12 | Vote : durée/contenu du cookie, données minimales/durée/purge, annulation éventuelle, restitution des résultats et calendrier exact. Un vote par photo et navigateur dans l’exposition, sans compte, est décidé. | V1. |
+| SA-Q12 | Vote : qualification de l’exemption éventuelle et dispositif d’information/consentement, durée/contenu du cookie, données minimales/durée/purge, annulation éventuelle, restitution des résultats et calendrier exact. Un vote par photo et navigateur dans l’exposition, sans compte, est décidé. | V1. |
 | SA-Q13 | Présentation des rectificatifs et structure des prolongements/collections, sans modification d’un bilan déjà publié. | S3. |
 | SA-Q3/SA-Q4/SA-Q6/SA-Q7 | Trace, identité et données des anciennes contributions, publication/attribution et branches. Désormais différés au § 8 ; ils ne bloquent pas le vote simple. | Futur Après-image. |
 | SA-Q5 | Abus : volet vote traité au contrat V1 ; volet dépôts et contributions différé. | V1, puis évolution future. |
@@ -191,7 +204,7 @@ Les réponses sur les points 8 à 23 ne valent pas réponse aux points 1 à 7. U
 | **S2 — Visite, annonce et archive** | Après S1b et SA-Q9/SA-Q10 : E1 à E4/E7, rubrique Expositions, couverture publique avant ouverture, archive complète 12 mois et accueil sous contrôle admin. | Ouverture/clôture/échéance, aperçu/annonce distincts, trois langues sans repli public manquant ; couverture/photo retirée cachée partout. Aucun faux bouton de vote avant V1. |
 | **S3 — Bilans et prolongements** | Après S1/S2 et SA-Q13 : bilans immuables, rectificatif comme nouveau bilan lié, E8/E9 et présentation du prolongement comme nouvelle exposition. | Bilan vide ou avec choix ; modification en place refusée ; rectificatif distinct sans écrasement ; filiation lisible et photos encore autorisées. |
 | **V0 — Propositions validées** | Après SA-Q1/SA-Q11 : proposition par photographe d’origine, validations du relecteur et de l’admin, ordre par direction de publication distincte. | Liste et version approuvées ; refus d’auto-attribution de droits ou d’ordre modifié sans validation du circuit retenu. |
-| **V1 — Vote consultatif** | Après S2/V0 et SA-Q12 : E5/E6, cookie accepté, une voix par photo/exposition/navigateur, confirmation, information et purge. | Vote sur plusieurs photos possible, doublon sur la même refusé, concurrence/rejeu/redémarrage, clôture et photo retirée ; résultat consultatif sans publication automatique. |
+| **V1 — Vote consultatif** | Après S2/V0 et SA-Q12 : E5/E6, identifiant minimal au premier vote après qualification des traceurs (§ 5.4), une voix par photo/exposition/navigateur, confirmation, information et purge. | Vote sur plusieurs photos possible, doublon sur la même refusé, concurrence/rejeu/redémarrage, clôture et photo retirée ; aucun cookie de vote à la simple visite, information/consentement conforme à la qualification retenue ; résultat consultatif sans publication automatique. |
 | **Différé — Après-image, invités et autres formats** | Études et PR séparées après nouvelle demande et décisions du § 8. | Aucune collecte ou interface de dépôt, de commentaire, de composition ou de branche dans les lots précédents. |
 
 S3 peut être livré sans vote : une première exposition et son bilan restent complets sans participation. V0/V1 remplacent A1/A2 dans la séquence prioritaire ; le statut de collections permanentes n’est jamais obtenu automatiquement par un score.
@@ -227,4 +240,4 @@ Chaque PR reste en brouillon, avec contexte, résultats réels, « Sécurité »
 - **PR #218 / S0** : [`server/saisons.js`](../../server/saisons.js), [migration 065](../../server/db/migrations/065_saisons.sql) et [tests modèle](../../test/saisons-modele.test.js). Phases dérivées de l’horloge, photos refiltrées à la lecture, bilan unique actuel. Aucun branchement serveur.
 - **PR #219 / S1a** : [migration 066](../../server/db/migrations/066_saisons_versions.sql), versions concurrentes, [contrat de formulaire](../../server/saisons-atelier.js), [calendrier](../../server/saisons-calendrier.js), quatre gabarits et leurs enveloppes v2. Le fuseau doit être fourni explicitement. Les formulaires et les vues restent inactifs.
 - **Écarts connus avec les nouvelles décisions** : S0 autorise encore les replis FR pour traductions manquantes ; le modèle ne porte pas encore les nouveaux textes/couverture, les annonces, les 12 mois d’archive, les bilans rectificatifs, la direction de publication, la double validation ou les votes. Ils doivent être livrés dans les lots prévus, pas annoncés comme déjà implémentés par cette révision du plan.
-- S1b attend les droits complets et le calendrier. V0 attend la définition de la direction de publication. V1 attend les paramètres minimaux du cookie, des votes et de leur restitution. Ces arbitrages ne sont pas remplacés par une hypothèse technique.
+- S1b attend les droits complets et le calendrier. V0 attend la définition de la direction de publication. V1 attend la qualification des traceurs et les paramètres minimaux du cookie, des votes et de leur restitution. Ces arbitrages ne sont pas remplacés par une hypothèse technique.
