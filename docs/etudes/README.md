@@ -4,6 +4,7 @@
 
 | Document | Contenu |
 |---|---|
+| [Dossier CNIL des cookies et mémoires](../cnil-cookies-2026-10/README.md) | Fiches public/admin/Vigie et vote, auto-évaluation d’audience, prestataires gratuits, décisions à compléter et contrôle T01–T15 sur 1.226.0 ; preuves et limites, sans certification ni suppression de fonction. |
 | [`cookies-correctifs-techniques.md`](cookies-correctifs-techniques.md) | Premier lot issu du diagnostic des cookies du 24 octobre 2026 : HTTPS en production, échéance OIDC au serveur, purges autonomes et stockage navigateur refusé ; comportements, régressions, impact sur la Vigie et dépendances du stream CNIL. |
 | [`chiffrement-etats-cookies.md`](chiffrement-etats-cookies.md) | Conception non appliquée du chiffrement des données et cookies : formats versionnés et AAD, séparation des clés, migration et rotation, maintien de NC2 et de la chaîne historique Vigie, sauvegardes et retour arrière ; options à arbitrer avant application. |
 | [`saisons-apres-image.md`](saisons-apres-image.md) | Spécification et arbitrages du 23 octobre 2026 : rubrique Expositions, saisons datées, couverture publique, archive complète de 12 mois, trois langues, bilans immuables et rectificatifs ; vote consultatif sur photos prévalidées, sans compte, limité par navigateur. Plan S0/S1/S2/S3 puis V0/V1 et besoins Vigie par lot ; Après-image composé, dépôts et invités différés. S0/S1a seulement préparés, aucun parcours activé. |

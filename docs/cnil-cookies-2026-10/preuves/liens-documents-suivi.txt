@@ -1,0 +1,15 @@
+Contrôle documentaire, 24 octobre 2026 ; complété après la déclaration de déploiement en zone euro.
+README.md : 29 références locales
+audience.md : 14 références locales
+exigences-techniques.md : 5 références locales
+fiches-admin-vigie.md : 23 références locales
+fiches-public.md : 31 références locales
+fiches-votes.md : 17 références locales
+fournisseurs.md : 7 références locales
+information-fr-en-de.md : 5 références locales
+preuves/controle-auth-vigie.md : 48 références locales
+preuves/controle-public-audience.md : 38 références locales
+sources.md : 0 références locales
+suivi-exigences.md : 19 références locales
+utiliser-les-fiches.md : 13 références locales
+Total : 249 références locales ; 0 absentes.

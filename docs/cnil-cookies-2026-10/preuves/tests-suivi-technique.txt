@@ -1,0 +1,622 @@
+TAP version 13
+# Subtest: GET /healthz répond ok
+ok 1 - GET /healthz répond ok
+  ---
+  duration_ms: 755.071251
+  type: 'test'
+  ...
+# Subtest: les en-têtes de sécurité sont posés
+ok 2 - les en-têtes de sécurité sont posés
+  ---
+  duration_ms: 371.519803
+  type: 'test'
+  ...
+# Subtest: la CSP interdit toute ressource tierce
+ok 3 - la CSP interdit toute ressource tierce
+  ---
+  duration_ms: 344.911689
+  type: 'test'
+  ...
+# Subtest: en ligne (HTTPS ou production), la config refuse les réglages de développement
+ok 4 - en ligne (HTTPS ou production), la config refuse les réglages de développement
+  ---
+  duration_ms: 1.980176
+  type: 'test'
+  ...
+# Subtest: production : PUBLIC_URL doit être en HTTPS, le HTTP reste disponible pour les tests locaux
+ok 5 - production : PUBLIC_URL doit être en HTTPS, le HTTP reste disponible pour les tests locaux
+  ---
+  duration_ms: 1.086198
+  type: 'test'
+  ...
+# Subtest: pas de HSTS hors HTTPS
+ok 6 - pas de HSTS hors HTTPS
+  ---
+  duration_ms: 357.430381
+  type: 'test'
+  ...
+# Subtest: CSS et JS sont versionnés par empreinte
+ok 7 - CSS et JS sont versionnés par empreinte
+  ---
+  duration_ms: 444.324194
+  type: 'test'
+  ...
+# Subtest: la connexion envoie vers l’IdP avec PKCE, state, nonce et les scopes Zitadel
+ok 8 - la connexion envoie vers l’IdP avec PKCE, state, nonce et les scopes Zitadel
+  ---
+  duration_ms: 866.04882
+  type: 'test'
+  ...
+# Subtest: un admin se connecte, accède à /admin et revient à la page demandée
+ok 9 - un admin se connecte, accède à /admin et revient à la page demandée
+  ---
+  duration_ms: 567.12659
+  type: 'test'
+  ...
+# Subtest: les rôles absents de l’ID token sont lus dans userinfo
+ok 10 - les rôles absents de l’ID token sont lus dans userinfo
+  ---
+  duration_ms: 574.098974
+  type: 'test'
+  ...
+# Subtest: sans le rôle admin : 403 et aucune session
+ok 11 - sans le rôle admin : 403 et aucune session
+  ---
+  duration_ms: 466.408147
+  type: 'test'
+  ...
+# Subtest: repli sans Zitadel : sub en liste blanche avec e-mail vérifié
+ok 12 - repli sans Zitadel : sub en liste blanche avec e-mail vérifié
+  ---
+  duration_ms: 715.383709
+  type: 'test'
+  ...
+# Subtest: un state invalide ou un cookie de transaction absent est refusé sans appel à l’IdP
+ok 13 - un state invalide ou un cookie de transaction absent est refusé sans appel à l’IdP
+  ---
+  duration_ms: 527.545287
+  type: 'test'
+  ...
+# Subtest: un code déjà utilisé est refusé
+ok 14 - un code déjà utilisé est refusé
+  ---
+  duration_ms: 542.186015
+  type: 'test'
+  ...
+# Subtest: l’IdP renvoie une erreur (connexion annulée)
+ok 15 - l’IdP renvoie une erreur (connexion annulée)
+  ---
+  duration_ms: 315.724247
+  type: 'test'
+  ...
+# Subtest: sans session : redirection vers la connexion, en gardant la page demandée
+ok 16 - sans session : redirection vers la connexion, en gardant la page demandée
+  ---
+  duration_ms: 439.321299
+  type: 'test'
+  ...
+# Subtest: session expirée : supprimée, cookie effacé, redirection
+ok 17 - session expirée : supprimée, cookie effacé, redirection
+  ---
+  duration_ms: 453.480987
+  type: 'test'
+  ...
+# Subtest: session trop ancienne : expiration absolue même si active
+ok 18 - session trop ancienne : expiration absolue même si active
+  ---
+  duration_ms: 461.57114
+  type: 'test'
+  ...
+# Subtest: déjà connecté, /auth/login renvoie directement à la page demandée
+ok 19 - déjà connecté, /auth/login renvoie directement à la page demandée
+  ---
+  duration_ms: 395.243076
+  type: 'test'
+  ...
+# Subtest: une nouvelle connexion régénère la session et détruit l’ancienne
+ok 20 - une nouvelle connexion régénère la session et détruit l’ancienne
+  ---
+  duration_ms: 463.936734
+  type: 'test'
+  ...
+# Subtest: déconnexion : POST avec CSRF, session détruite, retour par l’IdP
+ok 21 - déconnexion : POST avec CSRF, session détruite, retour par l’IdP
+  ---
+  duration_ms: 527.28734
+  type: 'test'
+  ...
+# Subtest: la CSP autorise l’IdP comme cible de formulaire, et rien d’autre
+ok 22 - la CSP autorise l’IdP comme cible de formulaire, et rien d’autre
+  ---
+  duration_ms: 324.65229
+  type: 'test'
+  ...
+# Subtest: sans configuration OIDC : 503 sur la connexion, le site reste servi
+ok 23 - sans configuration OIDC : 503 sur la connexion, le site reste servi
+  ---
+  duration_ms: 264.350178
+  type: 'test'
+  ...
+# Subtest: en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé
+ok 24 - en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé
+  ---
+  duration_ms: 281.922753
+  type: 'test'
+  ...
+# Subtest: Cloudflare Tunnel : origine HTTP sans certificat, adresse publique HTTPS et cookies sécurisés
+ok 25 - Cloudflare Tunnel : origine HTTP sans certificat, adresse publique HTTPS et cookies sécurisés
+  ---
+  duration_ms: 307.628786
+  type: 'test'
+  ...
+# Subtest: transaction OIDC : dix minutes vérifiées au serveur, même avec une copie du cookie signé
+ok 26 - transaction OIDC : dix minutes vérifiées au serveur, même avec une copie du cookie signé
+  ---
+  duration_ms: 406.9778
+  type: 'test'
+  ...
+# Subtest: transaction OIDC : date absente, invalide ou future refusée avant tout appel au fournisseur
+ok 27 - transaction OIDC : date absente, invalide ou future refusée avant tout appel au fournisseur
+  ---
+  duration_ms: 456.866773
+  type: 'test'
+  ...
+# Subtest: safeNext refuse les redirections hors du site, y compris par caractères de contrôle
+ok 28 - safeNext refuse les redirections hors du site, y compris par caractères de contrôle
+  ---
+  duration_ms: 0.537057
+  type: 'test'
+  ...
+# Subtest: redirection ouverte : un admin connecté n’est jamais renvoyé hors du site
+ok 29 - redirection ouverte : un admin connecté n’est jamais renvoyé hors du site
+  ---
+  duration_ms: 779.920884
+  type: 'test'
+  ...
+# Subtest: rolesFrom préfère le claim du projet et filtre par organisation
+ok 30 - rolesFrom préfère le claim du projet et filtre par organisation
+  ---
+  duration_ms: 0.566323
+  type: 'test'
+  ...
+# Subtest: un rôle admin donné dans une autre organisation est refusé
+ok 31 - un rôle admin donné dans une autre organisation est refusé
+  ---
+  duration_ms: 771.824095
+  type: 'test'
+  ...
+# Subtest: deux connexions lancées dans deux onglets aboutissent toutes les deux
+ok 32 - deux connexions lancées dans deux onglets aboutissent toutes les deux
+  ---
+  duration_ms: 676.350778
+  type: 'test'
+  ...
+# Subtest: déconnexion avec un jeton périmé : page d’erreur lisible, session conservée
+ok 33 - déconnexion avec un jeton périmé : page d’erreur lisible, session conservée
+  ---
+  duration_ms: 587.210182
+  type: 'test'
+  ...
+# Subtest: limite de débit sur les tentatives de connexion : 429 au-delà de 30
+ok 34 - limite de débit sur les tentatives de connexion : 429 au-delà de 30
+  ---
+  duration_ms: 319.529607
+  type: 'test'
+  ...
+# Subtest: limiteur : IPv6 regroupé par /64, mémoire bornée
+ok 35 - limiteur : IPv6 regroupé par /64, mémoire bornée
+  ---
+  duration_ms: 0.936794
+  type: 'test'
+  ...
+# Subtest: le code et le state OIDC sont masqués dans les journaux
+ok 36 - le code et le state OIDC sont masqués dans les journaux
+  ---
+  duration_ms: 319.708348
+  type: 'test'
+  ...
+# Subtest: redactUrl ne touche qu’aux paramètres code et state
+ok 37 - redactUrl ne touche qu’aux paramètres code et state
+  ---
+  duration_ms: 0.459806
+  type: 'test'
+  ...
+# Subtest: comptes : inconnu en attente sans session, rôle donné dans l’admin, désactivé refusé, garde-fou ADMIN_SUBS
+ok 38 - comptes : inconnu en attente sans session, rôle donné dans l’admin, désactivé refusé, garde-fou ADMIN_SUBS
+  ---
+  duration_ms: 1136.269187
+  type: 'test'
+  ...
+# (node:1921961) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: récapitulatifs : effacement réel à leur échéance, sans nouvelle lecture ni nouvel envoi
+ok 39 - récapitulatifs : effacement réel à leur échéance, sans nouvelle lecture ni nouvel envoi
+  ---
+  duration_ms: 1127.942671
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : information FR/EN/DE, case initiale non cochée et aucun cookie à la consultation
+ok 40 - V1 HTTP : information FR/EN/DE, case initiale non cochée et aucun cookie à la consultation
+  ---
+  duration_ms: 725.189386
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : refus sans consentement puis premier vote, cookie borné et résultat réellement persisté
+ok 41 - V1 HTTP : refus sans consentement puis premier vote, cookie borné et résultat réellement persisté
+  ---
+  duration_ms: 456.011142
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : cookie HTTPS HttpOnly SameSite, réutilisé entre langues et plusieurs photos
+ok 42 - V1 HTTP : cookie HTTPS HttpOnly SameSite, réutilisé entre langues et plusieurs photos
+  ---
+  duration_ms: 355.224807
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : doublon rejoué idempotent, sans nouveau suivi ni compteur supplémentaire
+ok 43 - V1 HTTP : doublon rejoué idempotent, sans nouveau suivi ni compteur supplémentaire
+  ---
+  duration_ms: 361.527563
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : premier vote concurrent depuis le même formulaire sans cookie reste unique
+ok 44 - V1 HTTP : premier vote concurrent depuis le même formulaire sans cookie reste unique
+  ---
+  duration_ms: 433.598626
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : provenance et CSRF refusés sans vote, cookie ni secret dans les événements
+ok 45 - V1 HTTP : provenance et CSRF refusés sans vote, cookie ni secret dans les événements
+  ---
+  duration_ms: 364.648488
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : défi lié à la photo, à l’action et au cookie, avec expiration sans cookie préalable
+ok 46 - V1 HTTP : défi lié à la photo, à l’action et au cookie, avec expiration sans cookie préalable
+  ---
+  duration_ms: 323.478085
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : retrait confirmé et export limités aux votes du navigateur courant
+ok 47 - V1 HTTP : retrait confirmé et export limités aux votes du navigateur courant
+  ---
+  duration_ms: 372.800596
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : aucune collecte sans DATA_KEY, exposition ou photo indisponible et clôture purgée
+ok 48 - V1 HTTP : aucune collecte sans DATA_KEY, exposition ou photo indisponible et clôture purgée
+  ---
+  duration_ms: 680.170527
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : piège et limite réutilisent la Vigie, le doublon ordinaire ne signale pas une attaque
+ok 49 - V1 HTTP : piège et limite réutilisent la Vigie, le doublon ordinaire ne signale pas une attaque
+  ---
+  duration_ms: 398.849021
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : liens S2 limités aux propositions approuvées et pages refusées en v1
+ok 50 - V1 HTTP : liens S2 limités aux propositions approuvées et pages refusées en v1
+  ---
+  duration_ms: 365.379581
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : circuit V0 réel, invalidation des validations et compteurs privés dans l’atelier
+ok 51 - V1 HTTP : circuit V0 réel, invalidation des validations et compteurs privés dans l’atelier
+  ---
+  duration_ms: 434.990127
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : propositions publiques filtrées, traduites et retirées sans consentement ni cookie
+ok 52 - V1 HTTP : propositions publiques filtrées, traduites et retirées sans consentement ni cookie
+  ---
+  duration_ms: 345.049707
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : après clôture, aucun export ne restitue les anciens votes ou leur preuve
+ok 53 - V1 HTTP : après clôture, aucun export ne restitue les anciens votes ou leur preuve
+  ---
+  duration_ms: 272.505079
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : une preuve illisible n’empêche pas de retirer son accord et ses votes
+ok 54 - V1 HTTP : une preuve illisible n’empêche pas de retirer son accord et ses votes
+  ---
+  duration_ms: 281.199901
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : une photo devenue invisible dans S2 ne révèle ni titre ni formulaire de vote
+ok 55 - V1 HTTP : une photo devenue invisible dans S2 ne révèle ni titre ni formulaire de vote
+  ---
+  duration_ms: 250.781608
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : journaux techniques et événements ne copient ni cookie, ni CSRF, ni bulletin
+ok 56 - V1 HTTP : journaux techniques et événements ne copient ni cookie, ni CSRF, ni bulletin
+  ---
+  duration_ms: 300.360529
+  type: 'test'
+  ...
+# (node:1924217) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: V1 : purge au démarrage et à la minute, sans visite ni perte des totaux anonymes
+ok 57 - V1 : purge au démarrage et à la minute, sans visite ni perte des totaux anonymes
+  ---
+  duration_ms: 250.531275
+  type: 'test'
+  ...
+# Subtest: V1 HTTP : la politique de confidentialité décrit le vote et sa conservation dans les trois langues
+ok 58 - V1 HTTP : la politique de confidentialité décrit le vote et sa conservation dans les trois langues
+  ---
+  duration_ms: 295.507456
+  type: 'test'
+  ...
+# Subtest: partager : fenêtre et liens, page sans JavaScript, Instagram si posté, aperçus
+ok 59 - partager : fenêtre et liens, page sans JavaScript, Instagram si posté, aperçus
+  ---
+  duration_ms: 2886.383772
+  type: 'test'
+  ...
+# Subtest: partager : comptés anonymement, refusés depuis un autre site, visibles dans les Statistiques
+ok 60 - partager : comptés anonymement, refusés depuis un autre site, visibles dans les Statistiques
+  ---
+  duration_ms: 544.910555
+  type: 'test'
+  ...
+# Subtest: Votes : migration additive et rejouable, clés étrangères indexées et unicité en base
+ok 61 - Votes : migration additive et rejouable, clés étrangères indexées et unicité en base
+  ---
+  duration_ms: 190.902002
+  type: 'test'
+  ...
+# Subtest: Chaque navigateur peut voter une fois sur chaque photo, sans changer sa preuve au doublon
+ok 62 - Chaque navigateur peut voter une fois sur chaque photo, sans changer sa preuve au doublon
+  ---
+  duration_ms: 177.482418
+  type: 'test'
+  ...
+# Subtest: Une photo partagée par deux expositions reçoit deux votes indépendants et des index distincts
+ok 63 - Une photo partagée par deux expositions reçoit deux votes indépendants et des index distincts
+  ---
+  duration_ms: 164.991105
+  type: 'test'
+  ...
+# Subtest: Consentement explicite et version courante obligatoires avant le premier bulletin
+ok 64 - Consentement explicite et version courante obligatoires avant le premier bulletin
+  ---
+  duration_ms: 189.866374
+  type: 'test'
+  ...
+# Subtest: Une nouvelle version d’information requiert un nouvel accord sans renouveler le suivi à chaque vote
+ok 65 - Une nouvelle version d’information requiert un nouvel accord sans renouveler le suivi à chaque vote
+  ---
+  duration_ms: 190.32618
+  type: 'test'
+  ...
+# Subtest: Sans clé de données, aucun vote ni preuve en clair ne peut être écrit
+ok 66 - Sans clé de données, aucun vote ni preuve en clair ne peut être écrit
+  ---
+  duration_ms: 175.025393
+  type: 'test'
+  ...
+# Subtest: Jetons et identifiants invalides : refus avant toute écriture
+ok 67 - Jetons et identifiants invalides : refus avant toute écriture
+  ---
+  duration_ms: 176.385043
+  type: 'test'
+  ...
+# Subtest: Proposition validée, présence et publication sont contrôlées à nouveau même après un vote
+ok 68 - Proposition validée, présence et publication sont contrôlées à nouveau même après un vote
+  ---
+  duration_ms: 182.388433
+  type: 'test'
+  ...
+# Subtest: Un média bloqué par le contrôle de publication ne reçoit aucun bulletin
+ok 69 - Un média bloqué par le contrôle de publication ne reçoit aucun bulletin
+  ---
+  duration_ms: 195.954698
+  type: 'test'
+  ...
+# Subtest: Fenêtre UTC : ouverture incluse, clôture exclue, retrait et brouillon refusés sans bulletin
+ok 70 - Fenêtre UTC : ouverture incluse, clôture exclue, retrait et brouillon refusés sans bulletin
+  ---
+  duration_ms: 173.898334
+  type: 'test'
+  ...
+# Subtest: Clôture : toute lecture purge les identifiants et bulletins et conserve seulement les totaux
+ok 71 - Clôture : toute lecture purge les identifiants et bulletins et conserve seulement les totaux
+  ---
+  duration_ms: 182.326968
+  type: 'test'
+  ...
+# Subtest: Une validation commencée avant la clôture ne peut inscrire un bulletin une fois la fenêtre fermée
+ok 72 - Une validation commencée avant la clôture ne peut inscrire un bulletin une fois la fenêtre fermée
+  ---
+  duration_ms: 185.932075
+  type: 'test'
+  ...
+# Subtest: Purge périodique et lecture des totaux couvrent le retrait, sans toucher une exposition ouverte
+ok 73 - Purge périodique et lecture des totaux couvrent le retrait, sans toucher une exposition ouverte
+  ---
+  duration_ms: 171.398982
+  type: 'test'
+  ...
+# Subtest: Retirer son consentement annule ses votes et sa preuve, en conservant ceux des autres navigateurs
+ok 74 - Retirer son consentement annule ses votes et sa preuve, en conservant ceux des autres navigateurs
+  ---
+  duration_ms: 166.700063
+  type: 'test'
+  ...
+# Subtest: Export cloisonné : preuve minimale chiffrée en base, jamais de jeton ni d’index dans les résultats
+ok 75 - Export cloisonné : preuve minimale chiffrée en base, jamais de jeton ni d’index dans les résultats
+  ---
+  duration_ms: 178.30529
+  type: 'test'
+  ...
+# Subtest: Preuve altérée : refus fermé, sans consentement implicite ni vote supplémentaire
+ok 76 - Preuve altérée : refus fermé, sans consentement implicite ni vote supplémentaire
+  ---
+  duration_ms: 173.229405
+  type: 'test'
+  ...
+# Subtest: Bulletin et total sont atomiques, même si le stockage du compteur échoue
+ok 77 - Bulletin et total sont atomiques, même si le stockage du compteur échoue
+  ---
+  duration_ms: 143.048035
+  type: 'test'
+  ...
+# Subtest: Annulation atomique : un échec de décrémentation conserve bulletins et preuve
+ok 78 - Annulation atomique : un échec de décrémentation conserve bulletins et preuve
+  ---
+  duration_ms: 169.2474
+  type: 'test'
+  ...
+# Subtest: Redémarrage : le même navigateur reste reconnu et les doublons ne gonflent pas le total
+ok 79 - Redémarrage : le même navigateur reste reconnu et les doublons ne gonflent pas le total
+  ---
+  duration_ms: 193.615297
+  type: 'test'
+  ...
+# Subtest: Deux connexions simultanées ne peuvent compter deux fois le même bulletin
+ok 80 - Deux connexions simultanées ne peuvent compter deux fois le même bulletin
+  ---
+  duration_ms: 291.141501
+  type: 'test'
+  ...
+# Subtest: purge des sessions : échéances glissante et absolue, session active intacte, passage idempotent
+ok 81 - purge des sessions : échéances glissante et absolue, session active intacte, passage idempotent
+  ---
+  duration_ms: 597.174622
+  type: 'test'
+  ...
+# (node:1929146) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: au démarrage : sessions échues effacées sans connexion, empreintes conservées par le déclencheur Vigie
+ok 82 - au démarrage : sessions échues effacées sans connexion, empreintes conservées par le déclencheur Vigie
+  ---
+  duration_ms: 362.832663
+  type: 'test'
+  ...
+# Subtest: sans nouvelle requête : passage horaire, session active préservée, minuteries libérées et annulées à l’arrêt
+ok 83 - sans nouvelle requête : passage horaire, session active préservée, minuteries libérées et annulées à l’arrêt
+  ---
+  duration_ms: 346.905834
+  type: 'test'
+  ...
+# Subtest: jour à l’heure de Paris, provenance réduite au nom du site
+ok 84 - jour à l’heure de Paris, provenance réduite au nom du site
+  ---
+  duration_ms: 2.369296
+  type: 'test'
+  ...
+# Subtest: pages et photos comptées ; visiteur unique par jour, sans IP stockée
+ok 85 - pages et photos comptées ; visiteur unique par jour, sans IP stockée
+  ---
+  duration_ms: 2217.104211
+  type: 'test'
+  ...
+# Subtest: non comptés : robots, refus de suivi, préchargement, admins connectés, 404, HEAD
+ok 86 - non comptés : robots, refus de suivi, préchargement, admins connectés, 404, HEAD
+  ---
+  duration_ms: 261.37733
+  type: 'test'
+  ...
+# Subtest: nouveau jour : visiteurs reconnus à nouveau (clé changée) ; purge au-delà de 25 mois ; photo supprimée
+ok 87 - nouveau jour : visiteurs reconnus à nouveau (clé changée) ; purge au-delà de 25 mois ; photo supprimée
+  ---
+  duration_ms: 138.588763
+  type: 'test'
+  ...
+# Subtest: admin : page Statistiques, audience d’une photo, accueil ; réservé aux admins
+ok 88 - admin : page Statistiques, audience d’une photo, accueil ; réservé aux admins
+  ---
+  duration_ms: 322.759284
+  type: 'test'
+  ...
+# Subtest: bornes : un client qui change de navigateur ne gonfle ni les visiteurs ni les provenances
+ok 89 - bornes : un client qui change de navigateur ne gonfle ni les visiteurs ni les provenances
+  ---
+  duration_ms: 350.846907
+  type: 'test'
+  ...
+# Subtest: pays : code de Cloudflare, derrière le proxy de confiance seulement, par visiteur unique
+ok 90 - pays : code de Cloudflare, derrière le proxy de confiance seulement, par visiteur unique
+  ---
+  duration_ms: 169.47231
+  type: 'test'
+  ...
+# Subtest: sans proxy de confiance, le pays envoyé par le client est ignoré
+ok 91 - sans proxy de confiance, le pays envoyé par le client est ignoré
+  ---
+  duration_ms: 161.294917
+  type: 'test'
+  ...
+# Subtest: admin : carte des visiteurs par pays (bulles) et liste ; mention publique dans les trois langues
+ok 92 - admin : carte des visiteurs par pays (bulles) et liste ; mention publique dans les trois langues
+  ---
+  duration_ms: 217.73691
+  type: 'test'
+  ...
+# Subtest: toast : un refus de lecture ou de suppression ne bloque pas les messages de la page
+ok 93 - toast : un refus de lecture ou de suppression ne bloque pas les messages de la page
+  ---
+  duration_ms: 12.491941
+  type: 'test'
+  ...
+# Subtest: toast : un refus d’écriture n’interrompt pas la suite d’une action
+ok 94 - toast : un refus d’écriture n’interrompt pas la suite d’une action
+  ---
+  duration_ms: 3.248955
+  type: 'test'
+  ...
+# Subtest: toast : la reprise, l’annulation et la mémorisation fonctionnent quand le stockage est disponible
+ok 95 - toast : la reprise, l’annulation et la mémorisation fonctionnent quand le stockage est disponible
+  ---
+  duration_ms: 3.093335
+  type: 'test'
+  ...
+# Subtest: admin.js : le curseur et les images restent utilisables quand l’accès au stockage est refusé
+ok 96 - admin.js : le curseur et les images restent utilisables quand l’accès au stockage est refusé
+  ---
+  duration_ms: 6.662261
+  type: 'test'
+  ...
+# Subtest: admin.js : une écriture refusée ne bloque pas l’application de la taille
+ok 97 - admin.js : une écriture refusée ne bloque pas l’application de la taille
+  ---
+  duration_ms: 2.979413
+  type: 'test'
+  ...
+# Subtest: admin.js : la taille mémorisée est reprise puis actualisée quand le stockage est disponible
+ok 98 - admin.js : la taille mémorisée est reprise puis actualisée quand le stockage est disponible
+  ---
+  duration_ms: 2.747171
+  type: 'test'
+  ...
+# Subtest: v2/photos-v2.js : le curseur et les images restent utilisables quand l’accès au stockage est refusé
+ok 99 - v2/photos-v2.js : le curseur et les images restent utilisables quand l’accès au stockage est refusé
+  ---
+  duration_ms: 2.78433
+  type: 'test'
+  ...
+# Subtest: v2/photos-v2.js : une écriture refusée ne bloque pas l’application de la taille
+ok 100 - v2/photos-v2.js : une écriture refusée ne bloque pas l’application de la taille
+  ---
+  duration_ms: 1.596923
+  type: 'test'
+  ...
+# Subtest: v2/photos-v2.js : la taille mémorisée est reprise puis actualisée quand le stockage est disponible
+ok 101 - v2/photos-v2.js : la taille mémorisée est reprise puis actualisée quand le stockage est disponible
+  ---
+  duration_ms: 2.044924
+  type: 'test'
+  ...
+1..101
+# tests 101
+# suites 0
+# pass 101
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 23931.300996

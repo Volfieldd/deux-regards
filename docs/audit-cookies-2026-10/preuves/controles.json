@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-24T03:06:20.945Z",
+  "commit": "f44cdf31f8c8c8893071e9350962cdf1370202ee",
+  "cas": [
+    {
+      "nom": "Configuration production en HTTP",
+      "observation": "Acceptée ; secureCookies=false. Risque conditionnel confirmé, aucune configuration réelle lue."
+    },
+    {
+      "nom": "Cookie OIDC HTTPS",
+      "observation": {
+        "nom": "__Host-oidc-<state>",
+        "chemin": "/",
+        "httpOnly": true,
+        "secure": true,
+        "sameSite": "Lax",
+        "maxAge": 600
+      }
+    },
+    {
+      "nom": "Transaction OIDC copiée après 11 minutes",
+      "observation": "Client OIDC factice appelé ; aucune expiration locale avant échange. Ne démontre pas une acceptation par Zitadel."
+    },
+    {
+      "nom": "Transaction Instagram HTTPS",
+      "observation": {
+        "nom": "ig_state",
+        "chemin": "/admin/instagram",
+        "httpOnly": true,
+        "secure": true,
+        "sameSite": "Lax",
+        "maxAge": 600
+      }
+    },
+    {
+      "nom": "Message flash signé",
+      "observation": "La valeur applicative est lisible après vérification de signature : intégrité, sans chiffrement. Exemple uniquement fictif."
+    },
+    {
+      "nom": "Conservation de session admin expirée",
+      "observation": "La ligne expirée reste en base après navigation anonyme ; le magasin ne fournit pas de purge périodique."
+    },
+    {
+      "nom": "Navigateur neuf : accueil",
+      "observation": {
+        "cookies": 0,
+        "originesExternes": [],
+        "langue": "fr"
+      }
+    },
+    {
+      "nom": "Navigateur : sélection langue",
+      "observation": {
+        "nom": "langue",
+        "httpOnly": true,
+        "sameSite": "Lax",
+        "langueVisible": "de",
+        "inaccessibleDepuisDocumentCookie": true
+      }
+    },
+    {
+      "nom": "Navigateur : J’aime et rechargement",
+      "observation": "État visible conservé par localStorage aime:deux-minuit ; aucun cookie supplémentaire."
+    },
+    {
+      "nom": "Navigateur : secours du brouillon Carnets",
+      "observation": "Échec 503 simulé de l’enregistrement ; copie locale créée par le vrai script Carnets."
+    },
+    {
+      "nom": "Navigateur : déconnexion",
+      "observation": {
+        "sessionSupprimee": true,
+        "cookiesRestants": [
+          "admin_theme",
+          "langue"
+        ],
+        "brouillonLocalConserve": true
+      }
+    },
+    {
+      "nom": "Navigateur partagé : second compte autorisé",
+      "observation": "Le vrai éditeur propose au second compte de reprendre la copie locale du premier. Aucun accès serveur sans droit démontré."
+    },
+    {
+      "nom": "Navigateur sans JavaScript : langue",
+      "observation": "Page anglaise et cookie langue=en : parcours fonctionnel sans script."
+    }
+  ],
+  "erreursNavigateur": [
+    {
+      "type": "console",
+      "attendu": true,
+      "texte": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    }
+  ]
+}

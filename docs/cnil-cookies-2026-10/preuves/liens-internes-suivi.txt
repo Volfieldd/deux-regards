@@ -1,0 +1,37 @@
+TAP version 13
+# Subtest: v1 : aucun lien interne vers une 404 ni une erreur (fr, en, de, depuis l'accueil)
+ok 1 - v1 : aucun lien interne vers une 404 ni une erreur (fr, en, de, depuis l'accueil)
+  ---
+  duration_ms: 7963.362902
+  type: 'test'
+  ...
+# v1 : 500 pages, 1064 adresses
+# Subtest: v2 : aucun lien interne vers une 404 ni une erreur (fr, en, de, depuis l'accueil)
+ok 2 - v2 : aucun lien interne vers une 404 ni une erreur (fr, en, de, depuis l'accueil)
+  ---
+  duration_ms: 4766.416845
+  type: 'test'
+  ...
+# v2 : 599 pages, 1299 adresses
+# Subtest: v3 : aucun lien interne vers une 404 ni une erreur (fr, en, de, depuis l'accueil)
+ok 3 - v3 : aucun lien interne vers une 404 ni une erreur (fr, en, de, depuis l'accueil)
+  ---
+  duration_ms: 4706.371561
+  type: 'test'
+  ...
+# v3 : 599 pages, 1300 adresses
+# Subtest: galerie privée : avec la session d’un invité, aucun lien de ses pages vers une 404 (BV-5 étendu)
+ok 4 - galerie privée : avec la session d’un invité, aucun lien de ses pages vers une 404 (BV-5 étendu)
+  ---
+  duration_ms: 1290.398653
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19551.903263
