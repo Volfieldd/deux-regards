@@ -2,6 +2,8 @@
 
 **Actualisation du 24 octobre 2026 — version vérifiée 1.226.0, commit `994a899c8fe1ac663f90671894e5d843d847eb48`.** Le dossier initial examinait 1.217.0/`f44cdf3`. Le présent suivi repart du main récupéré, intègre les offres gratuites Cloudflare/Zitadel déclarées et vérifie les exigences sur le code courant. Le travail se déroule dans un worktree séparé ; aucune donnée réelle consultée ni fonctionnalité modifiée. La version déployée reste non vérifiée.
 
+**Intégration documentaire du 24 octobre 2026 sur `7072864`/1.228.0.** Les observations et journaux ci-dessous conservent leurs révisions d’origine ; leur intégration ne vaut pas nouvelle vérification des exigences sur cette version. Les quatre tests de liens applicatifs ont été rejoués avec succès sur le candidat intégré, et les 397 références locales des deux dossiers ont une cible présente. Les captures utilisent le jeu de démonstration synthétique. Les suites techniques et parcours navigateur historiques n’ont pas été rejoués pour cette seule intégration.
+
 **Les cinq correctifs du premier lot technique sont intégrés et vérifiés ; le chiffrement intégral reste à livrer.** Commencer par [le contrôle des exigences](suivi-exigences.md) et [le mode d’emploi des fiches](utiliser-les-fiches.md). Les textes initiaux conservent leur date et leurs preuves ; le suivi précise les constats devenus historiques.
 
 **Précision du propriétaire : l’ensemble est déployé en zone euro.** Cette localisation est enregistrée comme acquise par déclaration dans les [prestataires](fournisseurs.md). Elle complète le dossier géographique sans clôturer les garanties contractuelles des flux tiers, l’exemption par finalité ou les exigences techniques encore ouvertes.
