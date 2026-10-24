@@ -6,6 +6,7 @@
     <p class="etiquette"><%= x.signature %></p>
     <h1 class="titre-page"><%= x.title %></h1>
     <p class="chapo"><%= x.lead %></p>
+    <div class="expo-actions"><a class="lien" href="<%= it.u('/collections') %>"><%= x.collections %></a></div>
   </header>
 <% if (!it.list.length) { %>
   <p class="expo-note"><%= x.empty %></p>

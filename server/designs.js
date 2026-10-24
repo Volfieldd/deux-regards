@@ -31,7 +31,7 @@ export function sectionOf(request) {
   if (/^\/(galerie|auteur|serie|series|recherche)(\/|$)/.test(p)) return 'galerie';
   if (/^\/photo(\/|$)/.test(p)) return 'photos';
   if (/^\/carnet(\/|$)/.test(p)) return 'carnets';
-  if (/^\/expositions?(\/|$)/.test(p)) return 'expositions';
+  if (/^\/(?:expositions?|collections?)(\/|$)/.test(p)) return 'expositions';
   if (/^\/voyages?(\/|$)/.test(p)) return 'voyages';
   if (p === '/carte') return 'carte';
   if (p === '/a-propos') return 'regards';

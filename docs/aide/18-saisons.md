@@ -59,3 +59,25 @@ Un message en tête et, lorsque c’est possible, auprès du champ explique un r
 Si quelqu’un a enregistré une autre version entre-temps, la modification est refusée sans écraser son travail. Rechargez la fiche, comparez avec votre saisie et reprenez les changements voulus.
 
 Une photo non autorisée, une traduction manquante, une couverture absente de l’accrochage, des positions répétées ou un calendrier invalide empêchent la validation. Un refus ne publie pas partiellement l’exposition. Le vote, les bilans et leurs rectificatifs ne sont pas gérés par cet écran à cette étape.
+
+## Bilans et rectificatifs
+
+Dans la fiche de l’exposition, **Bilans et prolongements** ouvre un espace distinct. Le photographe prépare les bilans de ses propres expositions ; le relecteur peut les consulter. L’administrateur décide de leur publication et de leur retrait.
+
+Créez le brouillon avec un titre en français. Renseignez ensuite le **Titre** et le **Récit** en français, anglais et allemand. Vous pouvez préparer le brouillon avant la clôture, y compris lorsque l’exposition est encore en préparation. La publication exige une exposition validée, visible et close, ainsi que les trois langues complètes.
+
+La sélection du bilan peut contenir **zéro, une ou plusieurs photos** de l’accrochage d’origine. Cochez les photos retenues et attribuez-leur des positions distinctes avant d’enregistrer. Une photo doit toujours être publiée et autorisée ; sa sélection ne la republie pas.
+
+**Publier…** présente une confirmation. Après publication, le titre, le récit et la sélection sont immuables. Pour ajouter une précision ou corriger une erreur, utilisez **Préparer un rectificatif** : il s’agit d’un nouveau bilan, lié au précédent et soumis à la même validation. La page publique conserve les deux textes et les liens entre eux. Un nouveau rectificatif peut à son tour préciser un bilan rectificatif publié.
+
+**Retirer…** masque un bilan sans réécrire son contenu. Les liens vers un bilan retiré ne restent pas visibles dans les rectificatifs. Un bilan retiré ne peut pas servir de nouvelle origine à une collection.
+
+## Collections permanentes
+
+Depuis un bilan publié, **Préparer une collection** crée un prolongement autonome, présenté comme une nouvelle exposition. Son **Titre**, son **Intention**, ses textes facultatifs, sa **Couverture**, ses **Cartels** et son ordre sont propres à la collection. Les photos gardent leur série d’origine.
+
+Choisissez les photos parmi la sélection de ce bilan. Une collection publiée exige au moins une photo, une couverture explicitement choisie dans son accrochage, le titre et l’intention dans les trois langues. Chaque texte facultatif utilisé, y compris un cartel, doit être complété dans les trois langues. **Enregistrer la collection** garde ensemble les textes, la couverture, les cartels et l’ordre ; enregistrez avant de quitter la page.
+
+Après confirmation de **Publier…**, la présentation et l’accrochage sont figés. **Retirer…** enlève la collection du site public. Les droits courants de chaque photo continuent de s’appliquer : une dépublication ou un accord manquant retire la photo de la visite, même si elle faisait partie de la collection publiée. Une couverture devenue indisponible n’est pas remplacée automatiquement.
+
+Sur le site en présentation v2 ou v3, **Collections permanentes** se rejoint depuis les expositions, leur invitation sur l’accueil et le pied de page du site lorsqu’une collection est publiée. Chaque collection possède son entrée, sa visite photographique, sa conclusion et un lien vers son exposition et son bilan d’origine. Après les douze mois d’archive de l’exposition, ses bilans et ces liens demeurent, sans réafficher ses anciennes photos. La collection conserve sa propre visite sans date de clôture. Si l’origine est retirée, sa filiation cesse d’être affichée ; la collection reste accessible jusqu’à son propre retrait.
