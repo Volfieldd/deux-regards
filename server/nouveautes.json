@@ -1,5 +1,33 @@
 [
   {
+    "version": "1.228.0",
+    "date": "2026-10-24",
+    "pr": 228,
+    "title": {
+      "fr": "Des expositions plus fiables",
+      "en": "More reliable exhibitions",
+      "de": "Zuverlässigere Ausstellungen"
+    },
+    "items": [
+      {
+        "fr": "Les visiteurs retrouvent leurs votes depuis Confidentialité et peuvent encore les exporter ou les retirer après un retour du site en v1, jusqu’à la clôture. Aucun nouveau vote n’est collecté en v1.",
+        "en": "Visitors can find their votes from Privacy and still export or withdraw them after the site returns to v1, until the exhibition closes. No new votes are collected in v1.",
+        "de": "Besucher finden ihre Stimmen über Datenschutz und können sie auch nach einer Rückkehr der Website zu v1 bis zum Ausstellungsende exportieren oder zurückziehen. In v1 werden keine neuen Stimmen erfasst."
+      },
+      {
+        "fr": "Un bilan retiré peut recevoir un rectificatif distinct. Choisissez le bilan marqué Retiré dans la liste des bilans : son texte reste masqué et immuable. Les index et menus chargent uniquement les accrochages utiles à la page.",
+        "en": "A withdrawn retrospective can receive a separate correction. Select the retrospective marked Withdrawn in the list: its text remains hidden and immutable. Indexes and menus load only the displays needed for the page.",
+        "de": "Ein zurückgezogener Rückblick kann eine gesonderte Berichtigung erhalten. Wählen Sie den als Zurückgezogen markierten Rückblick in der Liste: Sein Text bleibt verborgen und unveränderlich. Übersichten und Menüs laden nur die für die Seite benötigten Hängungen."
+      },
+      {
+        "perm": "securite.voir",
+        "fr": "La Vigie conserve l’auteur d’une publication de photo ou de Carnet même lorsqu’un autre compte intervient pendant l’attente d’un e-mail. Les publications programmées restent sans auteur ; les corrélations de sécurité existantes sont préservées.",
+        "en": "The Vigie preserves the author of a photo or journal publication even when another account acts while an email is pending. Scheduled publications remain without an actor; existing security correlations are preserved.",
+        "de": "Die Vigie bewahrt den Urheber einer Foto- oder Journalveröffentlichung, auch wenn während des E-Mail-Versands ein anderes Konto handelt. Zeitgesteuerte Veröffentlichungen bleiben ohne Akteur; bestehende Sicherheitskorrelationen bleiben erhalten."
+      }
+    ]
+  },
+  {
     "version": "1.226.0",
     "date": "2026-10-24",
     "pr": 226,

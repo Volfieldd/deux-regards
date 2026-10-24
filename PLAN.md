@@ -9,6 +9,14 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Relecture des expositions et attribution Vigie, PR #228, version 1.228.0 (24 octobre 2026)
+
+Les quatre constats de la relecture de `994a899` sont corrigés ensemble. Photos et Carnets observent leurs changements persistés avant toute attente de notification, sous le compte de la requête ; la publication programmée impose un contexte sans sujet. Un POST concurrent ne prive plus DS23 de son acteur. Audit, DS9, déduplication et chaîne restent vérifiés par les lots signés jusqu’au moteur ; aucun type ni règle de détection nouveau.
+
+Consultation, export et retrait des votes restent accessibles avant clôture après un retour du site ou de la rubrique en v1, depuis Confidentialité pour les cookies reconnus ; la collecte reste fermée en v1. Le retrait d’un bilan permet un nouveau rectificatif sans modifier ni réafficher son parent retiré, avec le même circuit de droits et de publication. Menus, index et adresses inconnues utilisent des recherches SQL dédiées, avant chargement des accrochages : sur 1 000 expositions ou collections de 12 photos, l’index charge 144 références, une fiche 12 et les menus/adresses inconnues aucune. Le décompte parcourt encore les métadonnées en SQL ; aucun coût CPU constant n’est revendiqué.
+
+Chaque bogue conserve son test. Les six scénarios de concurrence Vigie échouaient avant correction et passent après ; une relecture indépendante ne relève aucun contournement étayé. Campagnes complètes : **1 488/1 488 dans chaque mode**, sans échec, ignoré ni annulé, à quatre processus. Huit parcours Chromium/WebKit sans JavaScript passent sur ordinateur et mobile, avec huit mesures sans débordement ; les deux administrations sont couvertes. Vingt-quatre avertissements CSP WebKit sont conservés séparément : leur famille est aussi reproduite sur `994a899` dans Apparence. Contrôles d’aide/liens : 8/8 ; notes trilingues : 2/2. Notes FR/EN/DE en version 1.228.0, entrée Vigie réservée au droit de sécurité. PR #228 en brouillon, sans fusion ni déploiement.
+
 ## Étude et démarrage — Les saisons de Nicephos (23 octobre 2026)
 
 La [spécification fonctionnelle et le plan détaillé](docs/etudes/saisons-apres-image.md) cadrent les expositions temporaires, leur visite, les archives et le passage éditorial vers les collections permanentes. **Les saisons** portent la programmation et la rubrique publique s’appelle **Expositions**. Après arbitrage du propriétaire, le pilote participatif est un **vote consultatif sur des photos proposées à l’avance**, sans compte ni dépôt. Les séries sont conservées ; l’Après-image avec compositions, suggestions ou uploads est documenté comme évolution différée.

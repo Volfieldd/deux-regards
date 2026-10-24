@@ -462,11 +462,11 @@ après décodage des entités, HTML brut affiché comme texte, image externe ret
 
 ### BV-20 et BV-21 appliqués aux billets
 
+**Correction de l’attribution concurrente (24 octobre 2026)** : photos et Carnets appellent l’observateur commun après persistance, avant toute suspension pour une notification. Le contexte asynchrone de la requête garde le compte du geste ; `runDue()` force un contexte système sans sujet. Un POST d’un autre compte ou la minuterie ne peut plus absorber cette publication avant sa réponse. Les événements existants `config_public_changed` restent consommables par DS9 et DS23 ; aucun besoin ni type nouveau. Les tests `publications-concurrentes-vigie.test.js` vérifient l’attribution, les lots signés jusqu’au moteur, les alertes et la chaîne, ainsi que la déduplication.
+
 Un billet est un texte publié : BV-20 et BV-21 (définis plus haut, pris par la Vigie) s'y appliquent.
 
-- **Point d'émission** : celui de BV-1 (`watchWrites`, `server/securite/site.js:296`), appelé aussi par
-  `carnet.runDue()` pour une publication programmée : sans requête, avec le `sub` de qui l'a programmée (lu dans
-  `post_reviews`).
+- **Point d’émission livré** : celui de BV-1 (`watchWrites`, `server/securite/site.js`), via l’observateur commun avant notification et en fin de réponse. `carnet.runDue()` impose une publication programmée sans requête ni sujet ; le compte qui a programmé reste dans l’historique éditorial, sans devenir l’acteur de la minuterie.
 - **Quand** : à chaque changement de la version **en ligne** : publication, republication, modification d'un billet
   publié (`carnet.publies.modifier`), révision proposée acceptée (B47), publication programmée. Le rendu donne déjà les
   liens (B18) : on compare liens externes, adresses e-mail (`mailto:` compris) et numéros de téléphone (`tel:` compris)

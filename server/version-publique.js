@@ -17,9 +17,10 @@ const KEY = 'public_version';
 const PERM = 'site.apparence';
 const MAX_VIEWS = 64;                      // borne de la mémoire : au-delà, les plus anciennes vues sont oubliées
 // Pages qui n'existent qu'en v2 (galeries privées, MQ-16 et MQ-17) : de nouvelles pages, hors menu, sans gabarit v1 ;
-// servies en v2 quel que soit le réglage (un invité s'en sert même si le site est en v1).
+// servies en v2 quel que soit le réglage (un invité s'en sert même si le site est en v1). La gestion des votes
+// reste elle aussi accessible après un retour en v1 ; les routes de collecte conservent leur garde v2/v3.
 // Le préfixe « prive- » ne choisit jamais une composition publique.
-export const ONLY_V2 = /^prive-[a-z]+$/;
+export const ONLY_V2 = /^(?:prive-[a-z]+|exposition-vote)$/;
 
 export function createPublicVersion({ db, viewsDir, cache = false }) {
   const read = db.prepare('SELECT value FROM settings WHERE key = ?').pluck();

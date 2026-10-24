@@ -24,7 +24,7 @@ function projection(t) {
   for (const p of photos.values()) fs.writeFileSync(path.join(storageDir, 'variants', variantName(p.file, widthsFor(p.width).at(-1), 'webp', p.variant_key)), 'variante factice pour la projection');
   const refused = new Set();
   let clock = OPEN - 1;
-  const e = createSaisonsPubliques({ saisons: { list: () => [saison], get: id => id === saison.id ? saison : null }, storageDir, now: () => clock,
+  const e = createSaisonsPubliques({ saisons: { list: () => [saison], catalogue: () => [saison], bySlug: slug => slug === saison.slug ? saison : null, get: id => id === saison.id ? saison : null }, storageDir, now: () => clock,
     repo: { photosByIds: ids => new Map(ids.filter(id => photos.has(id)).map(id => [id, photos.get(id)])), authors: () => [{ id: 1, name: 'Atelier fictif', slug: 'atelier' }] },
     readiness: { gate: ids => ({ ok: ids.filter(id => !refused.has(id)) }) } });
   return { e, saison, photos, refused, storageDir, at: value => { clock = value; } };
@@ -119,6 +119,73 @@ function seedSaison(c, { title = 'Une exposition', opens = Date.now() - 3600000,
   if (state === 'programme') s.schedule(id); else if (state === 'publie') s.open(id);
   return { id, slug: s.get(id).slug, photos, s };
 }
+
+test('S2 catalogue : existence, décompte et pagination gardent les mêmes gardes que la projection', async t => {
+  const c = await setup(t, { seeded: true, env: { VIGIE_URL: '' } }), e = seedSaison(c), original = c.app.saisons.get(e.id);
+  const check = expected => {
+    assert.equal(Boolean(c.app.expositions.byId(e.id)), expected);
+    assert.equal(c.app.expositions.count(), expected ? 1 : 0);
+    assert.equal(c.app.expositions.exists(), expected);
+    assert.equal(c.app.expositions.has(e.id), expected);
+    assert.deepEqual(c.app.expositions.list({ limit: 12 }).map(row => row.id), expected ? [e.id] : []);
+  };
+  check(true);
+  for (const [field, value] of [['state', 'brouillon'], ['state', 'retire'], ['opens_at', null], ['opens_at', 1.5], ['closes_at', original.opens_at],
+    ['closes_at', 8640000000000001], ['title_en', ''], ['intro_de', '\u202f\t\n'], ['prologue_de', ''], ['subtitle', 'Titre incomplet']]) {
+    c.db.prepare(`UPDATE saisons SET ${field} = ? WHERE id = ?`).run(value, e.id); check(false);
+    c.db.prepare(`UPDATE saisons SET ${field} = ? WHERE id = ?`).run(original[field], e.id); check(true);
+  }
+  c.db.prepare('UPDATE saison_photos SET cartel_de = ? WHERE saison_id = ? AND photo_id = ?').run('\ufeff\u00a0', e.id, e.photos[0].id); check(false);
+  c.db.prepare('UPDATE saison_photos SET cartel_de = ? WHERE saison_id = ? AND photo_id = ?').run('Ausstellungstext', e.id, e.photos[0].id); check(true);
+  assert.equal(c.app.expositions.has(999999), false);
+  assert.equal(c.app.expositions.has('1'), false);
+});
+
+test('S2 HTTP : index borné avant projection, menus et adresses inconnues sans lecture des accrochages', async t => {
+  const c = await setup(t, { seeded: true, env: { VIGIE_URL: '' } }); setV2(c);
+  const photo_ids = c.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY id LIMIT 12").pluck().all();
+  assert.equal(photo_ids.length, 12);
+  const at = Date.now(), insert = c.db.prepare(`INSERT INTO saisons (slug, state, title, title_en, title_de, intro, intro_en, intro_de, opens_at, closes_at, cover_id, created_at, updated_at)
+    VALUES (?, 'publie', ?, ?, ?, 'Intention', 'Intention EN', 'Absicht', ?, ?, ?, ?, ?)`);
+  const photo = c.db.prepare('INSERT INTO saison_photos (saison_id, photo_id, position) VALUES (?, ?, ?)');
+  const add = c.db.transaction((from, to) => {
+    for (let n = from; n <= to; n++) {
+      const name = `Exposition de stock ${n}`, id = Number(insert.run(`stock-${n}`, name, `${name} EN`, `${name} DE`, at - 3600000, at + 86400000, photo_ids[0], at, at).lastInsertRowid);
+      photo_ids.forEach((pid, position) => photo.run(id, pid, position));
+    }
+  });
+  let loaded = 0;
+  for (const name of ['list', 'catalogue', 'bySlug', 'get']) {
+    const read = c.app.saisons[name];
+    c.app.saisons[name] = (...args) => {
+      const result = read(...args);
+      loaded += (Array.isArray(result) ? result : [result]).reduce((sum, row) => sum + (row?.photo_ids.length || 0), 0);
+      return result;
+    };
+  }
+  const see = visitor(c), measures = [];
+  const check = async (url, status, references) => {
+    loaded = 0; const response = await see(url);
+    assert.equal(response.statusCode, status, url); assert.equal(loaded, references, `${url} : références photo chargées`);
+    return response;
+  };
+  for (const stock of [10, 1000]) {
+    add(stock === 10 ? 1 : 11, stock);
+    const first = await check('/expositions', 200, Math.min(stock, 12) * 12);
+    assert.match(first.body, new RegExp(`href="/exposition/stock-${stock}"`));
+    measures.push({ stock, index: loaded });
+    assert.match(first.body, /href="\/expositions"/);
+    await check('/exposition/inconnue', 404, 0);
+    await check('/a-propos', 200, 0);
+    await check('/expositions?page=999999', 404, 0);
+    await check(`/exposition/stock-${stock}`, 200, 12);
+  }
+  const second = await check('/de/expositions?page=2', 200, 144);
+  assert.match(second.body, /href="\/de\/exposition\/stock-988"/); assert.doesNotMatch(second.body, /href="\/de\/exposition\/stock-1000"/);
+  const last = await check('/en/expositions?page=84', 200, 48); assert.match(last.body, /href="\/en\/exposition\/stock-1"/);
+  c.app.publicVersion.save('v1'); await check('/expositions', 404, 0); await check('/exposition/stock-1', 404, 0);
+  t.diagnostic(JSON.stringify({ mesures: measures, menus: 0, adresseInconnue: 0, pageHorsStock: 0 }));
+});
 
 test('S2 HTTP : v1 sans nouvelles pages ; v2 visite, cartels et navigation dans le contexte en trois langues', async t => {
   const c = await setup(t, { seeded: true }), e = seedSaison(c), see = visitor(c);

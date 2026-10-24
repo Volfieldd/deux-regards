@@ -6,6 +6,10 @@
 <main class="about wrap privacy">
   <h1><%= it.P.title %></h1>
   <div class="prose">
+<% if (it.voteLinks.length) { %>
+    <h2><%= it.voteUi.manageAll %></h2>
+    <ul><% it.voteLinks.forEach(link => { %><li><a class="more" href="<%= link.href %>"><%= link.title %></a></li><% }) %></ul>
+<% } %>
 <% it.sections.forEach(([h, ps]) => { %>
     <h2><%= h %></h2>
 <% ps.forEach(p => { %>    <p><%= p %></p>

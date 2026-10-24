@@ -25,6 +25,56 @@ function exhibition(c, { expired = false, title = 'Origine de la collection' } =
   return { id, slug: s.get(id).slug, rid, rectificatif, cid, collection: b.getCollection(cid), photos, ordered };
 }
 
+test('S3 HTTP : seuls les accrochages de la page demandée sont projetés, jamais ceux des menus', async t => {
+  const c = await setup(t, { seeded: true, env: { VIGIE_URL: '' } }); setV2(c);
+  const e = exhibition(c), b = c.app.saisonsBilans, see = visitor(c);
+  b.withdrawCollection(e.cid, { version: b.getCollection(e.cid).version });
+  const photo_ids = c.db.prepare("SELECT id FROM photos WHERE status = 'published' ORDER BY id LIMIT 12").pluck().all();
+  assert.equal(photo_ids.length, 12);
+  const at = Date.now(), insert = c.db.prepare(`INSERT INTO saison_collections (bilan_id, slug, state, title, title_en, title_de, intro, intro_en, intro_de, cover_id, created_at, updated_at, published_at)
+    VALUES (?, ?, 'publie', ?, ?, ?, 'Intention', 'Intention EN', 'Absicht', ?, ?, ?, ?)`);
+  const photo = c.db.prepare('INSERT INTO saison_collection_photos (collection_id, photo_id, position) VALUES (?, ?, ?)');
+  const add = c.db.transaction((from, to) => {
+    for (let n = from; n <= to; n++) {
+      const name = `Collection de stock ${n}`, id = Number(insert.run(e.rid, `stock-${n}`, name, `${name} EN`, `${name} DE`, photo_ids[0], at, at, at).lastInsertRowid);
+      photo_ids.forEach((pid, position) => photo.run(id, pid, position));
+    }
+  });
+  let loaded = 0;
+  for (const name of ['publicCollections', 'publicCollectionBySlug']) {
+    const read = b[name];
+    b[name] = (...args) => {
+      const result = read(...args);
+      loaded += (Array.isArray(result) ? result : [result]).reduce((sum, row) => sum + (row?.photo_ids.length || 0), 0);
+      return result;
+    };
+  }
+  const origin = c.app.expositions.byId;
+  c.app.expositions.byId = (...args) => { const row = origin(...args); loaded += row?.photo_ids.length || 0; return row; };
+  const measures = [], check = async (url, status, references) => {
+    loaded = 0; const response = await see(url);
+    assert.equal(response.statusCode, status, url); assert.equal(loaded, references, `${url} : références photo chargées`);
+    return response;
+  };
+  for (const stock of [10, 1000]) {
+    add(stock === 10 ? 1 : 11, stock);
+    const first = await check('/collections', 200, Math.min(stock, 12) * 12);
+    assert.equal(b.publicCollectionsCount(), stock); assert.equal(b.publicCollectionsExist(), true);
+    assert.match(first.body, new RegExp(`href="/collection/stock-${stock}"`));
+    measures.push({ stock, index: loaded });
+    await check('/collection/inconnue', 404, 0); await check('/a-propos', 200, 0); await check('/collections?page=999999', 404, 0);
+    await check(`/collection/stock-${stock}`, 200, 12);
+  }
+  const second = await check('/de/collections?page=2', 200, 144);
+  assert.match(second.body, /href="\/de\/collection\/stock-988"/); assert.doesNotMatch(second.body, /href="\/de\/collection\/stock-1000"/);
+  const last = await check('/en/collections?page=84', 200, 48); assert.match(last.body, /href="\/en\/collection\/stock-1"/);
+  c.db.prepare("UPDATE saison_collections SET state = 'retire'").run();
+  assert.equal(b.publicCollectionsCount(), 0); assert.equal(b.publicCollectionsExist(), false);
+  assert.match((await check('/collections', 200, 0)).body, /Aucune collection permanente/);
+  c.app.publicVersion.save('v1'); await check('/collections', 404, 0); await check('/collection/stock-1', 404, 0);
+  t.diagnostic(JSON.stringify({ mesures: measures, menus: 0, adresseInconnue: 0, pageHorsStock: 0 }));
+});
+
 test('S3 HTTP : de l’accueil à l’exposition, ses bilans et une collection visitable dans les trois langues', async t => {
   const c = await setup(t, { seeded: true }); setV2(c);
   const e = exhibition(c), see = visitor(c), b = c.app.saisonsBilans, initial = b.getReport(e.rid);

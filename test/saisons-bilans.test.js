@@ -78,6 +78,33 @@ test('bilans : texte publié immuable et rectificatif distinct lié à la même 
   assert.throws(() => b.createReport(c.sid, { ...fullReport(), rectifies_id: duplicate }), refused(422, 'rectifies_id'));
 });
 
+test('bilans : le retrait garde une relève rectificative sans republier le parent ni ouvrir un nouvel initial', t => {
+  const c = setup(t), b = c.bilans, initial = report(c);
+  const prepared = b.createReport(c.sid, { ...fullReport('Préparé avant retrait'), rectifies_id: initial.id });
+  b.withdrawReport(initial.id, { version: initial.version });
+  const retired = b.getReport(initial.id);
+  assert.deepEqual(b.publicForSaison(c.sid), []);
+  assert.throws(() => b.saveReport(initial.id, { version: retired.version, input: { body: 'Réécriture interdite' } }), refused(409));
+  assert.throws(() => b.publishReport(initial.id, { version: retired.version }), refused(409));
+  const duplicate = b.createReport(c.sid, fullReport('Second initial interdit'));
+  assert.throws(() => b.publishReport(duplicate, { version: 1 }), refused(409));
+  const after = b.createReport(c.sid, { ...fullReport('Préparé après retrait'), rectifies_id: initial.id });
+  for (const id of [prepared, after]) b.publishReport(id, { version: b.getReport(id).version });
+  assert.deepEqual(b.getReport(initial.id), retired);
+  const visible = b.publicForSaison(c.sid);
+  assert.deepEqual(visible.map(r => ({ id: r.id, rectificatif: r.rectificatif, rectifies_id: r.rectifies_id })),
+    [prepared, after].map(id => ({ id, rectificatif: true, rectifies_id: null })));
+  assert.ok(!JSON.stringify(visible).includes(initial.title));
+  assert.ok(!b.textRows().some(r => r.source === 'saison_bilans' && r.id === initial.id));
+  const correction = b.getReport(after); b.withdrawReport(after, { version: correction.version });
+  const next = b.createReport(c.sid, { ...fullReport('Rectificatif suivant'), rectifies_id: after });
+  b.publishReport(next, { version: 1 });
+  assert.equal(b.publicForSaison(c.sid).at(-1).rectifies_id, null);
+  const other = c.saisons.create({ title: 'Autre exposition' });
+  assert.throws(() => b.createReport(other, { ...fullReport(), rectifies_id: initial.id }), refused(422, 'rectifies_id'));
+  assert.throws(() => b.createReport(c.sid, { ...fullReport(), rectifies_id: duplicate }), refused(422, 'rectifies_id'));
+});
+
 test('bilans : sélections hors exposition, privées ou bloquées refusées sans écriture partielle', t => {
   const c = setup(t), b = c.bilans, id = b.createReport(c.sid, fullReport()), before = b.getReport(id);
   for (const photo_ids of [[1, 4], [1, 5], [1, 999], [1, 1], [1, '2']]) {

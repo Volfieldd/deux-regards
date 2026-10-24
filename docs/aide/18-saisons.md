@@ -99,7 +99,7 @@ Depuis une photographie proposée au vote dans une exposition ouverte, **Voter p
 
 Le visiteur peut voter sur chaque photographie proposée, une fois sur chacune avec ce navigateur dans cette exposition. Les photos suivantes réutilisent cet accord. Un doublon affiche le vote déjà enregistré sans ajouter de voix. Le cookie expire à la clôture ; changer de navigateur, d’appareil ou effacer ce cookie peut permettre de revoter. Il n’y a ni compte ni vérification d’identité.
 
-**Mes votes dans cette exposition** présente les votes de ce navigateur. Avant la clôture, **Exporter mes votes (JSON)** télécharge leur copie et la date/version de l’accord. **Retirer mon accord et annuler mes votes**, après confirmation, efface ces votes et leur preuve, retire le cookie et décrémente les totaux correspondants. Les votes des autres navigateurs restent inchangés. Sans cookie, les votes individuels ne peuvent plus être retrouvés.
+**Mes votes dans cette exposition** présente les votes de ce navigateur. On y accède aussi depuis **Confidentialité → Mes votes**, pour les expositions dont ce navigateur conserve un cookie de vote reconnu, jusqu’à leur clôture. Ce chemin reste accessible si le site ou la rubrique Expositions repasse en v1, même si aucun nouveau vote n’y est alors possible. Ces pages personnelles ne sont pas conservées en cache. Avant la clôture, **Exporter mes votes (JSON)** télécharge leur copie et la date/version de l’accord. **Retirer mon accord et annuler mes votes**, après confirmation, efface ces votes et leur preuve, retire le cookie et décrémente les totaux correspondants. Les votes des autres navigateurs restent inchangés. Sans cookie, les votes individuels ne peuvent plus être retrouvés.
 
 Dans **Photos proposées au vote**, l’équipe autorisée voit les **Votes consultatifs** par photographie. Ces totaux sont privés ; aucun score ne publie automatiquement une photo dans la collection permanente. Les propositions et leur ordre restent soumis au circuit de validation.
 
@@ -115,7 +115,7 @@ La sélection du bilan peut contenir **zéro, une ou plusieurs photos** de l’a
 
 **Publier…** présente une confirmation. Après publication, le titre, le récit et la sélection sont immuables. Pour ajouter une précision ou corriger une erreur, utilisez **Préparer un rectificatif** : il s’agit d’un nouveau bilan, lié au précédent et soumis à la même validation. La page publique conserve les deux textes et les liens entre eux. Un nouveau rectificatif peut à son tour préciser un bilan rectificatif publié.
 
-**Retirer…** masque un bilan sans réécrire son contenu. Les liens vers un bilan retiré ne restent pas visibles dans les rectificatifs. Un bilan retiré ne peut pas servir de nouvelle origine à une collection.
+**Retirer…** masque un bilan sans réécrire son contenu. Pour préparer sa relève, revenez à la liste **Bilans et prolongements**, saisissez le titre du nouveau bilan, choisissez le parent marqué **Retiré** dans **Bilan rectifié**, puis utilisez **Créer le brouillon**. Ce nouveau bilan reste soumis aux mêmes conditions de publication, sans modifier ni réafficher le texte retiré. Un nouveau bilan initial reste interdit si un initial a déjà été publié. Les liens vers un bilan retiré ne restent pas visibles dans les rectificatifs. Un bilan retiré ne peut pas servir de nouvelle origine à une collection.
 
 ## Collections permanentes
 

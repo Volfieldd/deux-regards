@@ -61,12 +61,12 @@ export function createSaisonsPubliques({ saisons, repo, readiness = null, storag
     if (!validInstant(at)) throw new TypeError('Horloge des expositions invalide.');
     return at;
   };
-  const list = ({ lang = 'fr' } = {}) => {
+  const list = ({ lang = 'fr', limit = -1, offset = 0 } = {}) => {
     const at = time();
-    return saisons.list().map(s => project(s, lang, at)).filter(Boolean).sort((a, b) => b.opens_at - a.opens_at || b.id - a.id);
+    return saisons.catalogue({ limit, offset }).map(s => project(s, lang, at)).filter(Boolean);
   };
   const bySlug = (slug, { lang = 'fr' } = {}) => typeof slug === 'string' && slug.length <= 160
-    ? project(saisons.list().find(s => s.slug === slug), lang, time()) : null;
+    ? project(saisons.bySlug(slug), lang, time()) : null;
   const byId = (saisonId, { lang = 'fr' } = {}) => id(saisonId) ? project(saisons.get(saisonId), lang, time()) : null;
   function photo(slug, photoSlug, { lang = 'fr' } = {}) {
     if (typeof photoSlug !== 'string' || photoSlug.length > 200) return null;
@@ -101,5 +101,5 @@ export function createSaisonsPubliques({ saisons, repo, readiness = null, storag
     }
     return rows;
   }
-  return { list, bySlug, byId, photo, textRows, archiveEndsAt };
+  return { list, count: saisons.catalogueCount, exists: saisons.catalogueExists, has: saisons.catalogueHas, bySlug, byId, photo, textRows, archiveEndsAt };
 }
