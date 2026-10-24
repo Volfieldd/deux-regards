@@ -12,7 +12,10 @@
       <% if (s?.closed) { %><p role="status"><%= v.closed %></p>
       <% } else if (!it.available) { %><p role="status"><%= v.errors.unavailable %></p>
       <% } else if (it.mode === 'vote' && p) { %>
-        <h2 class="titre-2"><%= p.title %></h2>
+        <div class="photo-ref">
+          <%~ it.picture(p, { sizes: '(max-width: 420px) 120px, 160px', eager: true, alt: p.alt || p.title }) %>
+          <div><h2 class="titre-2"><%= p.title %></h2><p class="cartel-m"><%= p.author %></p><% if (p.cartel) { %><p><%= p.cartel %></p><% } %></div>
+        </div>
         <% if (it.recorded) { %><div class="msg msg--ok" role="status"><p><%= v.recorded %></p></div>
         <% } else { %>
         <form class="form" method="post" action="<%= it.action %>">

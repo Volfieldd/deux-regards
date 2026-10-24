@@ -138,7 +138,9 @@ test('V1 HTTP : provenance et CSRF refusés sans vote, cookie ni secret dans les
   const c = await context(t), events = [];
   c.app.securite = { ...c.app.securite, emit: (type, event) => events.push({ type, detail: event.detail }) };
   const url = `${c.root}/photo/photo-1/voter`, page = await c.get(url), body = { _csrf: proof(page.body), notice_version: NOTICE_VERSION, consent: 'oui' };
-  for (const headers of [{ origin: 'https://autre.test' }, { origin: 'null' }, { origin: '' }, { 'sec-fetch-site': 'cross-site' }, { 'sec-fetch-site': 'same-site' }]) {
+  for (const headers of [{ origin: 'https://autre.test' }, { origin: 'https://autre.test', 'sec-fetch-site': 'same-origin' },
+    { origin: 'null' }, { origin: 'null', 'sec-fetch-site': 'cross-site' }, { origin: 'null', 'sec-fetch-site': 'same-site' }, { origin: 'null', 'sec-fetch-site': 'none' },
+    { origin: '' }, { 'sec-fetch-site': 'cross-site' }, { 'sec-fetch-site': 'same-site' }]) {
     const response = await c.post(url, body, {}, headers);
     assert.equal(response.statusCode, 403);
     assert.equal(response.cookies.length, 0);
@@ -148,6 +150,10 @@ test('V1 HTTP : provenance et CSRF refusés sans vote, cookie ni secret dans les
   assert.ok(events.length >= 8);
   assert.ok(events.every(event => event.type === 'input_validation_fail'));
   assert.ok(!JSON.stringify(events).includes(body._csrf));
+  // Un POST natif sous no-referrer peut masquer Origin ; Fetch Metadata doit alors attester même origine.
+  const native = await c.post(url, body, {}, { origin: 'null', 'sec-fetch-site': 'same-origin' });
+  assert.equal(native.statusCode, 303);
+  assert.deepEqual(count(c), [{ photo_id: 1, total: 1 }]);
 });
 
 test('V1 HTTP : défi lié à la photo, à l’action et au cookie, avec expiration sans cookie préalable', async t => {

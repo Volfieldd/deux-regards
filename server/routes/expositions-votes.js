@@ -100,7 +100,10 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
   const emit = (request, type, detail) => app.securite.emit(type, { request, emetteur: 'server/routes/expositions-votes.js', detail: { formulaire: 'vote_exposition', ...detail } });
   const guard = (request, reply, s, scope, data, { initialVote = false } = {}) => {
     const origin = request.headers.origin, fetch = request.headers['sec-fetch-site'];
-    if (fetch === 'cross-site' || fetch === 'same-site' || (origin ? origin !== new URL(app.config.publicUrl).origin : fetch !== 'same-origin')) {
+    // no-referrer peut rendre Origin opaque sur un POST natif. Dans ce seul cas, Fetch Metadata doit attester
+    // même origine ; une origine étrangère ne bénéficie jamais de ce repli, et le défi signé reste obligatoire.
+    const originAllowed = origin && origin !== 'null' ? origin === new URL(app.config.publicUrl).origin : fetch === 'same-origin';
+    if (!originAllowed || fetch === 'cross-site' || fetch === 'same-site') {
       emit(request, 'input_validation_fail', { raison: 'provenance refusée' }); refused(request, reply, s, data); return false;
     }
     const raw = rawToken(app, request, s.id), csrf = request.body?._csrf;

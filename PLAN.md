@@ -37,7 +37,7 @@ La page de l’exposition ouverte présente les photos proposées dans leur ordr
 
 « Mes votes » permet l’export et le retrait des voix du navigateur. La clôture ou le retrait de l’exposition purgent les identifiants et bulletins de la base active, au démarrage, à la minute et aux lectures ; seuls les totaux restent dans l’atelier. Les sauvegardes gardent leur rotation existante de 14 jours. Les résultats sont consultatifs, sans classement public ni promotion automatique. Confidentialité FR/EN/DE, registre RGPD, aide, sécurité et besoins de la Vigie sont actualisés ; aucun secret ni bulletin n’est envoyé dans les signaux de sécurité.
 
-Migration 070 et parcours sans JavaScript, PR en brouillon dépendante de #223. Tests ciblés : 20 modèle et 18 HTTP, A206/traductions 2 et liens 4 réussis. Vérification navigateur et suites complètes en cours ; aucune fusion ni mise en ligne.
+Migration 070 et parcours sans JavaScript, PR en brouillon dépendante de #223. Tests ciblés : 20 modèle et 19 HTTP, A206/traductions 2 et liens 4 réussis. Vérification navigateur et suites complètes en cours ; aucune fusion ni mise en ligne.
 
 ## Mise en œuvre — Propositions consultatives, V0, PR #223, version 1.223.0 (24 octobre 2026)
 
