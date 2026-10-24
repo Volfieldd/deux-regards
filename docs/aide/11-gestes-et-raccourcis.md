@@ -32,6 +32,10 @@ Les touches d'une seule lettre (**P**, **I**, **L**, **Espace**) n'agissent que 
 
 Tout fonctionne au clavier : chaque glisser-déposer a son équivalent en boutons ou en touches fléchées. Sur téléphone, la barre d’onglets du bas remplace la barre latérale (**Menu** l’ouvre).
 
+## Si le navigateur refuse la mémorisation
+
+Le curseur de taille des vignettes et les messages de l’administration restent utilisables sur la page. La taille choisie et les messages après rechargement ne sont mémorisés que si le navigateur autorise ce stockage.
+
 ## Sur le site public
 
 | Geste | Effet |
