@@ -32,6 +32,10 @@ Single-letter keys (**P**, **I**, **L**, **Space**) only act when the focus is i
 
 Everything works from the keyboard: every drag and drop has an equivalent in buttons or arrow keys. On a phone, the tab bar at the bottom replaces the sidebar (**Menu** opens it).
 
+## If the browser blocks storage
+
+The thumbnail size control and administration messages remain usable on the current page. The chosen size and messages after reloading are remembered only when the browser allows storage.
+
 ## On the public site
 
 | Gesture | Effect |

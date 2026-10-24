@@ -32,6 +32,10 @@ Tasten mit einem einzigen Buchstaben (**P**, **I**, **L**, **Leertaste**) wirken
 
 Alles funktioniert mit der Tastatur: Für jedes Ziehen und Ablegen gibt es eine Entsprechung mit Schaltflächen oder Pfeiltasten. Auf dem Smartphone ersetzt die Tab-Leiste unten die Seitenleiste (**Menü** öffnet sie).
 
+## Wenn der Browser das Speichern verweigert
+
+Der Regler für die Vorschaubildgröße und die Meldungen der Verwaltung bleiben auf der aktuellen Seite nutzbar. Die gewählte Größe und Meldungen nach dem Neuladen werden nur gespeichert, wenn der Browser dies zulässt.
+
 ## Auf der öffentlichen Website
 
 | Geste | Wirkung |

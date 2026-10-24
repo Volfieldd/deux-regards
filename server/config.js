@@ -59,9 +59,10 @@ export function loadConfig(env = process.env) {
   const localAuthToken = env.LOCAL_AUTH_TOKEN || null;
   if (localAuthToken && deployed) throw new Error('LOCAL_AUTH_TOKEN est réservé aux tests : interdit en HTTPS ou en production');
   if (localAuthToken && localAuthToken.length < 16) throw new Error('LOCAL_AUTH_TOKEN doit faire au moins 16 caractères');
-  // En production, l'adresse publique est obligatoire : sans elle, le site se croirait en HTTP sur localhost (cookies
-  // sans Secure, URL canoniques, liens des e-mails et retour OIDC faux).
+  // Adresse vue par les visiteurs, distincte du service HTTP derrière cloudflared : aucun certificat local n'est imposé.
+  // Sans cette adresse HTTPS en production : cookies sans Secure, URL canoniques, liens des e-mails et retour OIDC faux.
   if (production && !env.PUBLIC_URL) throw new Error('PUBLIC_URL est obligatoire en production (ex. https://www.nicephos.art)');
+  if (production && !https) throw new Error('PUBLIC_URL doit être en HTTPS en production (adresse publique ; HTTP interne autorisé derrière un tunnel ou proxy HTTPS)');
 
   // Horodatage RFC 3161 des originaux : FreeTSA par défaut, « off » pour désactiver.
   const tsaUrl = env.TSA_URL === 'off' ? null : (env.TSA_URL || DEFAULT_TSA);
