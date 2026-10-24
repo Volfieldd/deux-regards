@@ -54,3 +54,5 @@ Comme pour les photos : le photographe **propose**, le modérateur **publie** (t
 ## Sur le site
 
 En v2, **Carnets** apparaît dans le menu dès qu'un billet est publié. La liste filtre par **rubrique** et par **regard** (chaque choix dit son nombre de billets), 12 billets par page. Un billet s'ouvre sur sa couverture, ses auteurs, ses dates et son sommaire ; puis le texte, « Écrire à … » (un message vers l'adresse réglée sur la page Carnets, par défaut celle des mentions légales ; rien n'est gardé), **Partager ce billet**, les photos du billet et les billets voisins. Les lecteurs s'abonnent au **flux RSS des carnets**, un par langue. Le plan du site et les moteurs de recherche ne voient que les billets publiés, dans leurs langues publiées.
+
+Sur une photo et un voyage publics, **Dans les Carnets** propose jusqu’à six billets publics qui les citent, les plus récents d’abord. Le lien exige une langue publiée et une citation dans cette langue, ou une couverture ou un voyage lié commun. Les brouillons, billets privés ou retirés et traductions en travail restent exclus ; un aperçu de l’équipe n’ouvre pas la rubrique aux visiteurs.

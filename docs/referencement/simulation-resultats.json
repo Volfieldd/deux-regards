@@ -1,0 +1,377 @@
+{
+  "source": "démonstration synthétique uniquement",
+  "sitemapUrls": 123,
+  "totalInspected": 126,
+  "images": 12,
+  "reachable": 126,
+  "problems": [],
+  "robots": {
+    "status": 200,
+    "declaresSitemap": true,
+    "disallowsWholeSite": false
+  },
+  "excluded": [
+    {
+      "path": "/carte",
+      "status": 404,
+      "robots": ""
+    },
+    {
+      "path": "/carnet/brouillon-de-controle",
+      "status": 404,
+      "robots": ""
+    },
+    {
+      "path": "/carnet/billet-prive-de-controle",
+      "status": 404,
+      "robots": ""
+    },
+    {
+      "path": "/page-inexistante-de-controle",
+      "status": 404,
+      "robots": ""
+    },
+    {
+      "path": "/bonjour",
+      "status": 200,
+      "robots": "noindex"
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "robots": "noindex"
+    },
+    {
+      "path": "/recherche?q=brume",
+      "status": 200,
+      "robots": "noindex"
+    }
+  ],
+  "googleData": {
+    "indexation": "inconnue — simulation locale",
+    "canonicalChosenByGoogle": null,
+    "clicks": null,
+    "impressions": null,
+    "fieldCoreWebVitals": null
+  },
+  "origine_documentaire": "https://simulation.example",
+  "comparaison": {
+    "avant": {
+      "status": 302,
+      "location": "/de/",
+      "samples": [
+        {
+          "path": "/",
+          "h1": [
+            "Deux photographes, un même goût pour les heures creuses."
+          ],
+          "related": false,
+          "robots": "",
+          "lastmod": "2026-10-24"
+        },
+        {
+          "path": "/auteur/sebastien",
+          "h1": [
+            "Galerie"
+          ],
+          "related": false,
+          "robots": "",
+          "lastmod": null
+        },
+        {
+          "path": "/photo/brume-sur-la-loire",
+          "h1": [
+            "Brume sur la Loire"
+          ],
+          "related": false,
+          "robots": "",
+          "lastmod": "2026-10-24"
+        },
+        {
+          "path": "/voyage/voyage-de-demonstration-seo",
+          "h1": [
+            "Voyage de démonstration SEO"
+          ],
+          "related": false,
+          "robots": "",
+          "lastmod": null
+        }
+      ]
+    },
+    "apres": {
+      "status": 200,
+      "location": null,
+      "samples": [
+        {
+          "path": "/",
+          "h1": [
+            "Deux photographes, un même goût pour les heures creuses."
+          ],
+          "related": false,
+          "robots": "max-image-preview:large",
+          "lastmod": null
+        },
+        {
+          "path": "/auteur/sebastien",
+          "h1": [
+            "Sébastien"
+          ],
+          "related": false,
+          "robots": "max-image-preview:large",
+          "lastmod": null
+        },
+        {
+          "path": "/photo/brume-sur-la-loire",
+          "h1": [
+            "Brume sur la Loire"
+          ],
+          "related": true,
+          "robots": "max-image-preview:large",
+          "lastmod": "2026-10-24"
+        },
+        {
+          "path": "/voyage/voyage-de-demonstration-seo",
+          "h1": [
+            "Voyage de démonstration SEO"
+          ],
+          "related": true,
+          "robots": "max-image-preview:large",
+          "lastmod": null
+        }
+      ]
+    }
+  },
+  "navigateur": {
+    "source": "production locale HTTPS, corpus synthétique",
+    "journeys": [
+      "Page auteur nommée ; photo et voyage ouvrent leurs Carnets publics au clavier.",
+      "Seconde page des Carnets : accessible, canonique propre.",
+      "Pages auteur/photo/voyage en allemand sur téléphone, sans JavaScript : maillage présent et aucun débordement.",
+      "Admin sous cookies Secure, sans connexion locale : images exclues, site exclu puis choix initiaux rétablis ; persistance et effets HTTP vérifiés."
+    ],
+    "errors": [],
+    "layout": [
+      {
+        "path": "/de/auteur/sebastien",
+        "width": 412,
+        "scroll": 412
+      },
+      {
+        "path": "/de/photo/brume-sur-la-loire",
+        "width": 412,
+        "scroll": 412
+      },
+      {
+        "path": "/de/voyage/voyage-de-demonstration-seo",
+        "width": 412,
+        "scroll": 412
+      }
+    ],
+    "accessibility": [
+      {
+        "path": "/auteur/sebastien",
+        "violations": []
+      },
+      {
+        "path": "/photo/brume-sur-la-loire",
+        "violations": []
+      },
+      {
+        "path": "/voyage/voyage-de-demonstration-seo",
+        "violations": []
+      }
+    ],
+    "lab": [
+      {
+        "profile": "bureau",
+        "path": "/",
+        "run": 1,
+        "lcp": 160,
+        "cls": 0.001355065525902642,
+        "navigation": {
+          "ttfb": 6.300000190734863,
+          "domReady": 134.7000002861023,
+          "bytes": 42616
+        },
+        "transferred": 266793,
+        "requests": 22
+      },
+      {
+        "profile": "bureau",
+        "path": "/",
+        "run": 2,
+        "lcp": 144,
+        "cls": 0.001398858939276801,
+        "navigation": {
+          "ttfb": 5.199999809265137,
+          "domReady": 129.30000019073486,
+          "bytes": 42616
+        },
+        "transferred": 266793,
+        "requests": 22
+      },
+      {
+        "profile": "bureau",
+        "path": "/",
+        "run": 3,
+        "lcp": 164,
+        "cls": 0.001398858939276801,
+        "navigation": {
+          "ttfb": 5.400000095367432,
+          "domReady": 94.7999997138977,
+          "bytes": 42616
+        },
+        "transferred": 266793,
+        "requests": 22
+      },
+      {
+        "profile": "bureau",
+        "path": "/photo/brume-sur-la-loire",
+        "run": 1,
+        "lcp": 188,
+        "cls": 0.0004564142227172852,
+        "navigation": {
+          "ttfb": 6.200000286102295,
+          "domReady": 111.5,
+          "bytes": 25248
+        },
+        "transferred": 249275,
+        "requests": 11
+      },
+      {
+        "profile": "bureau",
+        "path": "/photo/brume-sur-la-loire",
+        "run": 2,
+        "lcp": 208,
+        "cls": 0.00054246244430542,
+        "navigation": {
+          "ttfb": 6.899999618530273,
+          "domReady": 194.40000009536743,
+          "bytes": 25248
+        },
+        "transferred": 249275,
+        "requests": 11
+      },
+      {
+        "profile": "bureau",
+        "path": "/photo/brume-sur-la-loire",
+        "run": 3,
+        "lcp": 316,
+        "cls": 0.00054246244430542,
+        "navigation": {
+          "ttfb": 7.799999713897705,
+          "domReady": 292.80000019073486,
+          "bytes": 25248
+        },
+        "transferred": 249275,
+        "requests": 11
+      },
+      {
+        "profile": "mobile simulé",
+        "path": "/",
+        "run": 1,
+        "lcp": 1432,
+        "cls": 0,
+        "navigation": {
+          "ttfb": 6.699999809265137,
+          "domReady": 1439.2999997138977,
+          "bytes": 42616
+        },
+        "transferred": 273671,
+        "requests": 15
+      },
+      {
+        "profile": "mobile simulé",
+        "path": "/",
+        "run": 2,
+        "lcp": 1488,
+        "cls": 0,
+        "navigation": {
+          "ttfb": 8.599999904632568,
+          "domReady": 1490.5999999046326,
+          "bytes": 42616
+        },
+        "transferred": 273671,
+        "requests": 15
+      },
+      {
+        "profile": "mobile simulé",
+        "path": "/",
+        "run": 3,
+        "lcp": 1492,
+        "cls": 0,
+        "navigation": {
+          "ttfb": 9.599999904632568,
+          "domReady": 1504.0999999046326,
+          "bytes": 42616
+        },
+        "transferred": 273671,
+        "requests": 15
+      },
+      {
+        "profile": "mobile simulé",
+        "path": "/photo/brume-sur-la-loire",
+        "run": 1,
+        "lcp": 1484,
+        "cls": 0,
+        "navigation": {
+          "ttfb": 10.300000190734863,
+          "domReady": 1483.6999998092651,
+          "bytes": 25248
+        },
+        "transferred": 249275,
+        "requests": 11
+      },
+      {
+        "profile": "mobile simulé",
+        "path": "/photo/brume-sur-la-loire",
+        "run": 2,
+        "lcp": 1520,
+        "cls": 0,
+        "navigation": {
+          "ttfb": 9.400000095367432,
+          "domReady": 1370.9000000953674,
+          "bytes": 25248
+        },
+        "transferred": 249275,
+        "requests": 11
+      },
+      {
+        "profile": "mobile simulé",
+        "path": "/photo/brume-sur-la-loire",
+        "run": 3,
+        "lcp": 1460,
+        "cls": 0,
+        "navigation": {
+          "ttfb": 6,
+          "domReady": 1462.5,
+          "bytes": 25248
+        },
+        "transferred": 249275,
+        "requests": 11
+      }
+    ]
+  },
+  "controle_final": {
+    "sitemap_urls_apres_retablissement": 123,
+    "photo_publique_statut": 200,
+    "originaux_synthetiques_existants": {
+      "/originals/[image]": 404,
+      "/storage/originals/[image]": 404
+    },
+    "tests_sans_vigie": {
+      "pass": 88,
+      "fail": 0,
+      "skipped": 0
+    },
+    "tests_avec_vigie": {
+      "pass": 88,
+      "fail": 0,
+      "skipped": 0
+    },
+    "documentation": {
+      "pass": 11,
+      "fail": 0
+    }
+  }
+}

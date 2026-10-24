@@ -54,11 +54,15 @@ export function homepageSeo(raw, siteName, lang = 'fr', authors = []) {
     description: pick(columns('description'), 'seo_description', lang) || pick(raw, 'tagline', lang) };
 }
 
-// Un « noindex » posé par une route sensible reste prioritaire ; le réglage ne peut qu’ajouter des restrictions.
-export function seoRobots(existing, settings) {
+// Les exclusions posées par une route restent prioritaires ; les réglages globaux complètent ses directives.
+export function seoRobots(existing, settings, { indexable = false } = {}) {
   const directives = String(existing || '').split(',').map(s => s.trim()).filter(Boolean);
   if (settings.visibility === 'off') directives.push('noindex');
   if (!settings.images) directives.push('noimageindex');
+  // Autoriser une grande vignette seulement sur une page publique indexable ; une limite explicite de la
+  // route (none, standard ou large), un aperçu et une exclusion gardent toujours la priorité.
+  if (indexable && settings.visibility === 'public' && settings.images
+    && !directives.some(s => /^(?:noindex|noimageindex|none)$|^max-image-preview\s*:/i.test(s))) directives.push('max-image-preview:large');
   return [...new Set(directives)].join(', ');
 }
 

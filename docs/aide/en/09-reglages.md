@@ -63,6 +63,8 @@ Optional home-page titles (100 characters) and descriptions (320 characters) are
 
 Settings affect future server responses. Removal from results waits for another crawl; existing cached images are not recalled. For urgent removal, also use the engine’s removal tools and purge Cloudflare’s cache. The owner still needs to verify the domain and submit its sitemap in Search Console. No Google account or tracker is added to the website.
 
+When the website and its images may be indexed, public pages allow large search previews; exclusions and page-specific limits keep priority. The sitemap splits automatically above 50,000 addresses or 50 MB. Photographer pages and links to notebooks only use existing published introductions and posts.
+
 ## Rights and privacy
 
 ### Legal notice (Impressum)

@@ -1,6 +1,7 @@
 import { createRepo } from '../repo.js';
 import { galleryUrl, galerieUrl, photoUrl, ORDRES } from '../urls.js';
 import { usesV2 } from '../version-publique.js';
+import { refsOf } from '../carnet-markdown.js';
 import { widthsFor, variantName } from '../images.js';
 import { pad, shortDate } from '../format.js';
 import * as v2 from '../v2-vues.js';
@@ -33,6 +34,7 @@ import { registerCollectionPages } from './collections.js';
 import { registerContactPages } from './contact-public.js';
 import { createCollectionsPubliques } from '../collections-publiques.js';
 import { homepageSeo, seoJson } from '../seo.js';
+import { partitionSitemaps, createSitemapIndex, SITEMAP_LIMITS } from '../sitemap.js';
 
 const HERO_COUNT = 5;
 const RECAP_COOKIE = 'bonjour_recap';
@@ -207,19 +209,20 @@ export default async function publicRoutes(app) {
   app.get('/robots.txt', async (request, reply) => reply.type('text/plain; charset=utf-8')
     .send(`User-agent: *\nDisallow: /admin\nDisallow: /auth/\nDisallow: /partage/\nDisallow: /langue/\nDisallow: /pour-vous/\nDisallow: /prive/\n${app.securite.enabled ? `Disallow: ${TRAP_PATH}\n` : ''}Allow: /\n\nSitemap: ${app.config.publicUrl}/sitemap.xml\n`));
 
-  // Chaque page dans ses trois langues, avec les liens hreflang entre elles.
-  app.get('/sitemap.xml', async (request, reply) => {
+  // Chaque page dans ses trois langues, avec les liens hreflang entre elles. Recalcul à la demande : un retrait
+  // ne reste pas dans une partie en cache. Un petit corpus garde exactement son document unique.
+  const publicSitemaps = () => {
     const base = app.config.publicUrl;
     const seo = app.seo();
-    if (seo.visibility === 'off') return reply.type('application/xml; charset=utf-8')
-      .send('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n');
+    if (seo.visibility === 'off') return null;
     const photos = repo.publishedPhotos();
-    const latest = photos.map(p => p.updated_at).sort().at(-1);
     const day = d => (d ? d.slice(0, 10) : undefined);
     const pagesList = [
-      { loc: '/', lastmod: day(latest) },
+      // Aucun horodatage ne suit ensemble textes, ouverture, classement et retraits : ne pas inventer celui
+      // des pages agrégées à partir de la seule dernière photo (Google exige un lastmod vérifiable).
+      { loc: '/' },
       // Galerie et Séries : pages de la v2 et de la v3 seulement (en v1, introuvables, comme les Carnets).
-      ...(usesV2(app.publicVersion.versionForSection('galerie')) ? [{ loc: '/galerie', lastmod: day(latest) }, { loc: '/series', lastmod: day(latest) }] : []),
+      ...(usesV2(app.publicVersion.versionForSection('galerie')) ? [{ loc: '/galerie' }, { loc: '/series' }] : []),
       ...repo.categories().filter(c => photos.some(p => p.category_slug === c.slug)).map(c => ({ loc: galleryUrl({ serie: c.slug }) })),
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
       ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at), image: seo.images ? publicImage(p) : null })),
@@ -240,10 +243,23 @@ export default async function publicRoutes(app) {
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
     const links = (loc, langs = LANGS) => langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${xml(base + localize(loc, l))}"/>`).join('');
-    const body = pagesList.flatMap(u => (u.langs || LANGS).map(l =>
-      `  <url><loc>${xml(base + localize(u.loc, l))}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}${links(u.loc, u.langs)}${u.image ? `<image:image><image:loc>${xml(base + u.image)}</image:loc></image:image>` : ''}</url>`)).join('\n');
-    return reply.type('application/xml; charset=utf-8')
-      .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${body}\n</urlset>\n`);
+    const entries = pagesList.flatMap(u => (u.langs || LANGS).map(l =>
+      `  <url><loc>${xml(base + localize(u.loc, l))}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}${links(u.loc, u.langs)}${u.image ? `<image:image><image:loc>${xml(base + u.image)}</image:loc></image:image>` : ''}</url>`));
+    return partitionSitemaps(entries);
+  };
+  app.get('/sitemap.xml', async (request, reply) => {
+    const documents = publicSitemaps();
+    return reply.header('cache-control', 'no-store').type('application/xml; charset=utf-8').send(documents
+      ? documents.length === 1 ? documents[0] : createSitemapIndex(app.config.publicUrl, documents.length)
+      : '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n');
+  });
+  app.get('/sitemaps/:page.xml', async (request, reply) => {
+    reply.header('cache-control', 'no-store');
+    const raw = request.params.page;
+    if (typeof raw !== 'string' || !/^[1-9]\d{0,4}$/.test(raw) || Number(raw) > SITEMAP_LIMITS.urls) return reply.callNotFound();
+    const documents = publicSitemaps(), page = Number(raw);
+    if (!documents || documents.length === 1 || page > documents.length) return reply.callNotFound();
+    return reply.type('application/xml; charset=utf-8').send(documents[page - 1]);
   });
 
   app.setNotFoundHandler(async (request, reply) => {
@@ -280,6 +296,20 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
   const galerieOpen = request => usesV2(app.publicVersion.forRequest(request, 'galerie').version);
   // Adresse d'une vue de la galerie pour cette requête : sur /galerie quand la page existe.
   const galleryFor = request => (galerieOpen(request) ? base.galerieUrl : base.galleryUrl);
+  // B64 : relier une œuvre à ses récits déjà publics. L’index des références couvre aussi les traductions encore
+  // en travail ; seule une citation dans la langue publiée de la page (ou sa couverture/le voyage lié) compte ici.
+  // Six récits au plus, dans l’ordre du modèle : le maillage ne doit pas transformer une œuvre souvent citée en index.
+  const relatedPosts = (request, kind, id) => {
+    const version = app.publicVersion.forRequest(request, 'carnets');
+    if (!usesV2(version.applied) || !usesV2(version.version)) return [];
+    const field = name => lang === 'fr' ? name : `${name}_${lang}`;
+    return app.carnet.citing(kind, id)
+      .filter(p => p.state === 'publie' && p.visibility === 'public' && p.langs.includes(lang) && p[field('title')].trim() && p[field('body')].trim())
+      .filter(p => (kind === 'photo' && app.carnet.coverId(p) === id) || (kind === 'voyage' && p.trip_id === id)
+        || refsOf(p[field('body')]).some(r => r.kind === kind && r.id === id))
+      .slice(0, 6)
+      .map(p => ({ title: p[field('title')], dek: p[field('dek')], href: base.u(`/carnet/${p.slug}`) }));
+  };
   const trusted = Boolean(app.config.trustProxy);
 
   // Arrivée sur une page française : la langue choisie avec le sélecteur, sinon celle du pays et du navigateur
@@ -461,6 +491,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       ...base, siteName, filter, photo, prev, next, position: i + 1, count: list.length,
       backUrl: fromPost ? `${base.u(`/carnet/${fromPost.post.slug}`)}#photo-${i + 1}` : `${galleryFor(request)(filter)}#galerie`,
       carnet: fromPost ? { title: fromPost.title, lang: fromPost.lang, href: base.u(`/carnet/${fromPost.post.slug}`) } : null,
+      relatedPosts: relatedPosts(request, 'photo', photo.id),
       pageTitle: `${photo.title} · ${siteName}`,
       canonical: photoUrl(photo.slug),
       // Légende coupée à 160 caractères (au mot près) : l'auteur, le lieu et la date restent dans les aperçus de liens.
@@ -527,6 +558,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const story = tripStory({ trip: tr, photos: tr.photos, lang, locale: LOC });
     return reply.render('trip', {
       ...base, siteName, tr: { ...tr, span: span(tr) }, story, preview: !open, map: MAP,
+      relatedPosts: open ? relatedPosts(request, 'voyage', raw.id) : [],
       pageTitle: `${tr.name} · ${siteName}`, canonical: `/voyage/${raw.slug}`,
       description: tr.intro ? tr.intro.slice(0, 200) : t.trips.descriptionOne(tr.name, span(tr)),
       ogImage: tr.cover && `/media/${variantName(tr.cover.file, widthsFor(tr.cover.width).at(-1), 'webp', tr.cover.variant_key)}`,

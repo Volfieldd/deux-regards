@@ -61,6 +61,8 @@ La demande de non-indexation ne contrôle pas l’accès. Les exclusions et en-t
 
 La Vigie observe les changements SEO avec `config_public_changed` (BV-1/DS23), les textes avec BV-20/BV-21 et les refus forgés avec DS12. Journal et événements ne recopient jamais les textes saisis ; seuls les noms de champs et les valeurs techniques fermées sont conservés. Aucun nouveau vocabulaire, règle, traceur ni service tiers.
 
+Le découpage `/sitemaps/:page.xml` reprend les mêmes projections publiques ; son numéro est un entier borné et une partie indisponible répond 404. Les documents sont recalculés sans cache différant les retraits. Le maillage B64 ne transmet que les titres et résumés des billets publics, dans une langue publiée qui porte réellement la citation, avec une borne de six liens. Un aperçu ou un brouillon ne crée pas de lien public. Les types de robots n’accordent aucune permission supplémentaire.
+
 ## Thèmes et aperçus publics
 
 Le choix par rubrique passe par `POST /admin/apparence/compositions`, avec permission `site.apparence` et jeton CSRF. Le catalogue des thèmes et des rubriques est fermé ; toute configuration invalide est refusée avant l’écriture atomique. Le retour historique ne se combine pas avec des sélections dans la même requête. Les aperçus reposent sur la session serveur ; les réponses de session restent `private, no-store`. Changer de thème ne publie aucun contenu et ne change pas les droits des galeries privées.

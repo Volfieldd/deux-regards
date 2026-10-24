@@ -14,6 +14,12 @@
         "fr": "Dans Réglages → Référencement, choisissez la visibilité du site et des photos dans les moteurs. Le titre et la description de l’accueil sont facultatifs, dans les trois langues, avec un aperçu. Les balises et le plan du site suivent automatiquement les contenus publiés ; les espaces privés restent exclus.",
         "en": "In Settings → Search visibility, choose whether search engines may index the site and its photos. Optional home-page titles and descriptions are available in all three languages, with a preview. Metadata and the sitemap automatically follow published content; private spaces remain excluded.",
         "de": "Unter Einstellungen → Suchmaschinen wählen Sie die Sichtbarkeit der Website und ihrer Fotos. Titel und Beschreibung der Startseite sind in allen drei Sprachen optional, mit Vorschau. Metadaten und Sitemap folgen automatisch veröffentlichten Inhalten; private Bereiche bleiben ausgeschlossen."
+      },
+      {
+        "perm": "photos.voir",
+        "fr": "Les pages des photographes mettent leur nom et leur présentation en avant. Les photos et les voyages mènent aux Carnets publics qui les citent, dans leurs langues publiées. Les aperçus d’images autorisés et le découpage du plan du site se règlent automatiquement.",
+        "en": "Photographer pages highlight their name and introduction. Photos and trips link to public notebooks that cite them, in their published languages. Allowed image previews and sitemap splitting are handled automatically.",
+        "de": "Fotografenseiten zeigen Namen und Vorstellung deutlicher. Fotos und Reisen verlinken auf öffentliche Notizbücher, die sie in der veröffentlichten Sprache erwähnen. Erlaubte Bildvorschauen und die Aufteilung der Sitemap erfolgen automatisch."
       }
     ]
   },

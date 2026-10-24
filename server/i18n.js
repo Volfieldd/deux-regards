@@ -257,7 +257,7 @@ export const UI = {
     },
     // Carnets (v2 seulement ; maquettes MQ-11 et MQ-12, lexique des maquettes § 1 : « Carnets », « un billet »).
     carnet: {
-      title: 'Carnets', lead: 'Nos voyages et nos notes d’atelier, à deux voix, datés et signés.', who: 'Qui sommes-nous ?',
+      title: 'Carnets', lead: 'Nos voyages et nos notes d’atelier, à deux voix, datés et signés.', who: 'Qui sommes-nous ?', related: 'Dans les Carnets',
       filters: 'Filtrer les billets', rubrique: 'Rubrique', all: 'Toutes', regard: 'Regard',
       count: n => `${n} ${n >= 2 ? 'billets' : 'billet'}, du plus récent au plus ancien.`,
       countBy: (n, name, two) => `${n} ${n >= 2 ? 'billets signés' : 'billet signé'} par ${name}${two ? `, dont ${two === 1 ? 'un' : two} à deux voix` : ''}.`,
@@ -534,7 +534,7 @@ export const UI = {
       preview: 'Team-only preview: this trip is not published (or has no published photo yet). Visitors cannot see it.', settings: 'Trip settings',
     },
     carnet: {
-      title: 'Notebooks', lead: 'Our travels and workshop notes, in two voices, dated and signed.', who: 'Who are we?',
+      title: 'Notebooks', lead: 'Our travels and workshop notes, in two voices, dated and signed.', who: 'Who are we?', related: 'In the notebooks',
       filters: 'Filter the posts', rubrique: 'Section', all: 'All', regard: 'Photographer',
       count: n => `${n} ${n === 1 ? 'post' : 'posts'}, newest first.`,
       countBy: (n, name, two) => `${n} ${n === 1 ? 'post' : 'posts'} signed by ${name}${two ? `, ${two === 1 ? 'one' : two} of them in two voices` : ''}.`,
@@ -806,7 +806,7 @@ export const UI = {
       preview: 'Vorschau nur für das Team: Diese Reise ist nicht veröffentlicht (oder hat noch kein veröffentlichtes Foto). Besucher sehen sie nicht.', settings: 'Reise einstellen',
     },
     carnet: {
-      title: 'Reisetagebücher', lead: 'Unsere Reisen und Werkstattnotizen, mit zwei Stimmen, datiert und signiert.', who: 'Wer sind wir?',
+      title: 'Reisetagebücher', lead: 'Unsere Reisen und Werkstattnotizen, mit zwei Stimmen, datiert und signiert.', who: 'Wer sind wir?', related: 'In den Reisetagebüchern',
       filters: 'Beiträge filtern', rubrique: 'Rubrik', all: 'Alle', regard: 'Blick',
       count: n => `${n} ${n === 1 ? 'Beitrag' : 'Beiträge'}, die neuesten zuerst.`,
       countBy: (n, name, two) => `${n} ${n === 1 ? 'Beitrag' : 'Beiträge'} von ${name}${two ? `, davon ${two === 1 ? 'einer' : two} mit zwei Stimmen` : ''}.`,

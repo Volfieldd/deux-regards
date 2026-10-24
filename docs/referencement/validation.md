@@ -45,3 +45,7 @@ Aucun essai sur Unraid, Cloudflare ou Zitadel réels ; aucune mesure de classeme
 Le moteur de la Vigie et ses règles sont inchangés : les signaux rejoignent BV-1/DS23, BV-20/BV-21 et DS12. Aucun banc du moteur n’est nécessaire pour ce branchement.
 
 Références techniques : [directives robots et nécessité de laisser lire `noindex`](https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag), [plan de site des images](https://developers.google.com/search/docs/crawling-indexing/sitemaps/image-sitemaps), [informations de créateur et de droits des images](https://developers.google.com/search/docs/appearance/structured-data/image-license-metadata).
+
+## Complément — simulation de mise en ligne
+
+La [simulation sur image de production](simulation-mise-en-ligne.md) vérifie les optimisations ajoutées après le socle ci-dessus. Le [parcours Search Console et contenu](search-console-et-contenu.md) précise les contrôles réels du propriétaire, les fonctions IA documentées en 2026 et une croissance éditoriale fondée sur les œuvres. Les nombres des suites globales ci-dessus appartiennent au premier socle ; les tests ciblés et preuves du complément sont rapportés séparément.

@@ -63,6 +63,8 @@ Für die Startseite können Titel (100 Zeichen) und Beschreibung (320 Zeichen) a
 
 Änderungen gelten für künftige Serverantworten. Das Entfernen aus Suchergebnissen braucht einen weiteren Abruf; bereits zwischengespeicherte Bilder werden nicht zurückgerufen. Bei dringendem Bedarf auch die Löschwerkzeuge der Suchmaschine nutzen und den Cloudflare-Cache leeren. Domainbestätigung und Einreichen der Sitemap in Search Console bleiben Aufgabe des Eigentümers. Die Website erhält weder ein Google-Konto noch Tracker.
 
+Wenn Website und Bilder indexiert werden dürfen, erlauben öffentliche Seiten große Suchvorschauen; Ausschlüsse und seitenspezifische Grenzen haben Vorrang. Über 50.000 Adressen oder 50 MB wird die Sitemap automatisch aufgeteilt. Fotografenseiten und Verweise auf Notizbücher nutzen nur vorhandene öffentliche Vorstellungen und Beiträge.
+
 ## Rechte und Datenschutz
 
 ### Impressum (Mentions légales)

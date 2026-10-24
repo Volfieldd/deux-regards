@@ -161,3 +161,5 @@ Quand la **v2** est appliquée, les autres pages du site prennent la même prés
 ## Référencement automatique
 
 Le référencement se règle dans [Réglages → Référencement](reglages#référencement). Le site construit ses titres, descriptions, informations des photos, aperçus et plan du site depuis les contenus publiés. Le choix de ne pas apparaître dans les moteurs ne ferme pas l’accès au site ; les galeries privées conservent leurs propres protections. Les moteurs décident de l’indexation, du délai et de l’apparence des résultats.
+
+Une page de photographe en v2/v3 porte son nom en titre et sa présentation publique, avant ses photos. Les pages des photos et voyages proposent les Carnets publics qui les citent, dans les langues publiées, sans JavaScript.

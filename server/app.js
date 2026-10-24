@@ -205,7 +205,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     }
     const seo = app.seo();
     const homeSeo = template === 'home' && data?.page === 'accueil' ? homepageSeo(data.settings, data.siteName, lang, data.regards.filter(a => a.slug && a.count)) : null;
-    const common = { seoTitle: homeSeo?.title, seoDescription: homeSeo?.description, seoRobots: seoRobots(data?.robots, seo),
+    const robotsHeader = String(this.getHeader('x-robots-tag') || '');
+    const indexable = Boolean(pv) && !data?.neutral && this.statusCode === 200
+      && !/\b(?:noindex|noimageindex|none)\b|max-image-preview\s*:/i.test(robotsHeader);
+    const common = { seoTitle: homeSeo?.title, seoDescription: homeSeo?.description, seoRobots: seoRobots(data?.robots, seo, { indexable }),
       trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
       expositionsPage, collectionsPage, expositionUi: EXPOSITION_UI[lang], homeExposition, expositionsCss: Boolean(homeExposition),
       expositionDate: at => `${new Intl.DateTimeFormat(LOCALES[lang].replace('_', '-'), { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(at)} UTC`,

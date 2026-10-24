@@ -66,6 +66,8 @@ Pour l’accueil, un **titre** (100 signes au plus) et une **description** (320 
 
 Le changement agit sur les prochaines réponses du serveur. Le retrait des résultats dépend du prochain passage des moteurs ; les images déjà en cache ne sont pas rappelées. Pour un retrait urgent, utiliser aussi les outils du moteur et purger le cache Cloudflare. Déclarer le domaine et son plan du site dans Search Console reste une opération du propriétaire, hors de l’admin ; aucun compte Google ni traceur n’est ajouté.
 
+Quand le site et ses images sont référencés, les pages publiques autorisent les grandes vignettes des moteurs ; une exclusion ou une limite propre à une page reste prioritaire. Le plan du site se découpe automatiquement si le corpus dépasse 50 000 adresses ou 50 Mo. Les pages des photographes et les liens vers les Carnets reprennent les seuls textes et billets déjà publiés.
+
 ## Droits et confidentialité
 
 ### Mentions légales (Impressum)

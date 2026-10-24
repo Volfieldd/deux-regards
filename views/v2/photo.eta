@@ -81,6 +81,7 @@
         </div>
       </div>
     </div>
+<%~ include('./_carnets-lies', it) %>
 <% if (pl) { const vw = pl.view; const px = x => ((x - vw.x) / vw.w * 100).toFixed(2), py = y => ((y - vw.y) / vw.h * 100).toFixed(2);
      const fine = it.asset('carte-terre-fine.svg'); const mx = Number(px(pl.me.x)); %>
     <section class="vis-pres" aria-labelledby="pres-t">
