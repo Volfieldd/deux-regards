@@ -1,5 +1,7 @@
 # Ce qu'un compte fait une fois entré dans l'admin (registre des briques, docs/etudes/vigie-besoins-des-briques.md,
 # BV-1 et BV-2). Le site compare les réglages publics et les données exposées avant et après chaque écriture.
+# BV-35 : les changements effectifs du circuit des propositions au vote rejoignent config_public_changed ; la même
+# corrélation avec une session reprise s’applique, sans règle ni réponse supplémentaire pour ce circuit éditorial.
 title: Réglage public changé (version du site, mentions, accroche, ouverture, thème, EXIF)
 name: reglage_public
 id: adf4caa2-a8c7-4c30-853c-f78eece6c8fa

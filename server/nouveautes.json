@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.226.0",
+    "date": "2026-10-24",
+    "pr": 226,
+    "title": {
+      "fr": "La Vigie surveille le circuit des propositions au vote",
+      "en": "The Vigie monitors voting proposal changes",
+      "de": "Die Vigie überwacht Änderungen an Abstimmungsvorschlägen"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "Les changements des propositions, de leur ordre et de leurs validations alimentent la surveillance existante des sessions reprises. La Vigie peut demander une confirmation d’identité avant les écritures suivantes, sans recevoir les photos proposées ni les votes individuels des visiteurs.",
+        "en": "Changes to proposals, their order and their approvals feed the existing monitoring of resumed sessions. The Vigie may require identity confirmation before further edits, without receiving the proposed photographs or visitors’ individual votes.",
+        "de": "Änderungen an Vorschlägen, ihrer Reihenfolge und ihren Freigaben fließen in die bestehende Überwachung übernommener Sitzungen ein. Die Vigie kann vor weiteren Änderungen eine Identitätsbestätigung verlangen, ohne vorgeschlagene Fotos oder einzelne Besucherstimmen zu erhalten."
+      }
+    ]
+  },
+  {
     "version": "1.225.0",
     "date": "2026-10-24",
     "pr": 225,
