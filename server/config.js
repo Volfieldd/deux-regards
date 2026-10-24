@@ -62,6 +62,7 @@ export function loadConfig(env = process.env) {
   // En production, l'adresse publique est obligatoire : sans elle, le site se croirait en HTTP sur localhost (cookies
   // sans Secure, URL canoniques, liens des e-mails et retour OIDC faux).
   if (production && !env.PUBLIC_URL) throw new Error('PUBLIC_URL est obligatoire en production (ex. https://www.nicephos.art)');
+  if (production && !https) throw new Error('PUBLIC_URL doit être en HTTPS en production');
 
   // Horodatage RFC 3161 des originaux : FreeTSA par défaut, « off » pour désactiver.
   const tsaUrl = env.TSA_URL === 'off' ? null : (env.TSA_URL || DEFAULT_TSA);

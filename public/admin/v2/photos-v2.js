@@ -38,8 +38,7 @@
   // Taille des vignettes (mémorisée) ; au téléphone, celle de la feuille de style.
   const density = $('[data-density]');
   if (density && contact) {
-    const saved = Number(localStorage.getItem('planche-taille'));
-    if (saved) density.value = saved;
+    try { const saved = Number(localStorage.getItem('planche-taille')); if (saved) density.value = saved; } catch { /* taille par défaut */ }
     const wide = matchMedia('(min-width: 721px)');
     // sizes des tuiles à la hauteur choisie (même formule que server/picture.js, tileSizes) : sans eux, le navigateur
     // garderait les fichiers choisis pour 190 px, flous à 320 px, trop lourds à 110 px.
@@ -51,7 +50,10 @@
     const apply = () => { if (wide.matches) contact.style.setProperty('--rowh', `${density.value}px`); else contact.style.removeProperty('--rowh'); resize(Number(density.value) || 190); };
     wide.addEventListener('change', apply);
     apply();
-    density.addEventListener('input', () => { apply(); localStorage.setItem('planche-taille', density.value); });
+    density.addEventListener('input', () => {
+      apply();
+      try { localStorage.setItem('planche-taille', density.value); } catch { /* taille conservée seulement sur cette page */ }
+    });
   }
 
   // ---------- sélection ----------
