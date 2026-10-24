@@ -91,6 +91,20 @@ Hat inzwischen jemand eine andere Fassung gespeichert, wird die Änderung abgele
 
 Ein nicht zugelassenes Foto, eine fehlende Übersetzung, ein Titelbild außerhalb der Hängung, wiederholte Positionen oder ungültige Termine verhindern die Freigabe. Eine Ablehnung veröffentlicht keine Teile der Ausstellung. Abstimmungsvorschläge und Rückblicke werden in eigenen Bereichen verwaltet, die Sie über die Ausstellung erreichen.
 
+## Beratende Abstimmung und Rechte der Besucher
+
+In einer offenen Ausstellung führt **Fotografien zur Abstimmung entdecken** zu einem eigenen Abschnitt. Er zeigt die Vorschläge in der bestätigten, von der Publikationsleitung gewählten Reihenfolge mit Links zu jedem Foto und seinem Abstimmungsformular. Die Reihenfolge der Hängung bleibt unverändert. Ohne aktuelle Bestätigungen oder verfügbare Fotos sowie nach dem Ende verschwindet diese Einladung.
+
+Bei einer vorgeschlagenen Fotografie einer geöffneten Ausstellung öffnet **Für diese Fotografie stimmen** ein Formular. Bei der ersten Stimme liest der Besucher die Information und kreuzt selbst die Zustimmung zum Cookie und zur Verarbeitung der Stimmen an. Das Feld ist zunächst leer. Ohne Zustimmung bleibt der Besuch möglich und es wird kein Abstimmungs-Cookie gesetzt.
+
+Besucher können mit diesem Browser einmal für jede vorgeschlagene Fotografie dieser Ausstellung stimmen. Weitere Fotografien nutzen die bestehende Einwilligung. Eine Wiederholung zeigt die gespeicherte Stimme, ohne eine weitere hinzuzufügen. Das Cookie endet mit der Ausstellung; ein Wechsel von Browser oder Gerät oder das Löschen des Cookies kann erneutes Abstimmen ermöglichen. Es gibt weder Konto noch Identitätsprüfung.
+
+**Meine Stimmen in dieser Ausstellung** zeigt die Stimmen dieses Browsers. Vor dem Ende lädt **Meine Stimmen exportieren (JSON)** eine Kopie mit Datum und Informationsversion der Einwilligung herunter. Nach Bestätigung löscht **Einwilligung widerrufen und Stimmen zurücknehmen** diese Stimmen und ihren Nachweis, entfernt das Cookie und verringert die entsprechenden Gesamtzahlen. Stimmen anderer Browser bleiben unverändert. Ohne Cookie können einzelne Stimmen nicht wiedergefunden werden.
+
+Unter **Zum Abstimmen vorgeschlagene Fotos** sehen berechtigte Teammitglieder **Beratende Stimmen** pro Fotografie. Diese Gesamtzahlen bleiben intern; kein Ergebnis veröffentlicht automatisch ein Foto in der ständigen Sammlung. Vorschläge und Reihenfolge bleiben dem Freigabeverfahren unterworfen.
+
+Am Ausstellungsende in UTC oder bei ihrem Rückzug werden Kennungen und einzelne Stimmen bei der nächsten Bereinigung aus der aktiven Datenbank entfernt (jede Minute, beim Start und bei Aufrufen). Nur Gesamtzahlen bleiben erhalten und Exporte enthalten keine einzelnen Stimmen mehr. Bestehende Sicherungen folgen ihrer üblichen Rotation von 14 Tagen. Ein zurückgezogenes, unzulässiges oder aus den Vorschlägen entferntes Foto erhält keine weiteren Stimmen. Ist die Abstimmung vorübergehend nicht verfügbar, kann der Besuch fortgesetzt werden.
+
 ## Rückblicke und Berichtigungen
 
 In der Ausstellung öffnet **Rückblicke und dauerhafte Ausstellungen** einen eigenen Bereich. Fotografen bereiten Rückblicke für ihre eigenen Ausstellungen vor; der Reviewer kann sie lesen. Der Administrator entscheidet über Veröffentlichung und Rücknahme.

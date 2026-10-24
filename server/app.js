@@ -54,6 +54,7 @@ import { createSaisonsPropositions } from './saisons-propositions.js';
 import { createSaisonsBilans } from './saisons-bilans.js';
 import { archiveEndsAt, createSaisonsPubliques } from './saisons-publiques.js';
 import { EXPOSITION_UI } from './routes/expositions.js';
+import { installExpositionVotes } from './routes/expositions-votes.js';
 import { createRepo } from './repo.js';
 
 export { truncateIp };
@@ -118,7 +119,7 @@ function assetUrls(root, cache) {
 // Sans Vigie : aucun événement n'est construit ni gardé.
 const SECURITE_OFF = Object.freeze({ enabled: false, emit: () => null, emitThrottled: () => null });
 
-export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, seriesOptions = {}, describeOptions = {}, mailTransport = null, vigieOptions = {} }) {
+export async function buildApp({ config, db, logger = true, oidc, proofOptions = {}, instagramOptions = {}, faceOptions = {}, seriesOptions = {}, describeOptions = {}, mailTransport = null, vigieOptions = {}, votesOptions = {} }) {
   const app = Fastify({ logger: loggerOptions(logger), trustProxy: config.trustProxy });
 
   app.decorate('config', config);
@@ -328,6 +329,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('carnet', createCarnet({ db, repo: app.publicRepo, readiness: app.readiness, accounts: app.accounts, mailer: app.mailer, audit: app.audit, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
   app.decorate('saisons', createSaisons({ db, readiness: app.readiness }));
   app.decorate('saisonsPropositions', createSaisonsPropositions({ db, saisons: app.saisons, readiness: app.readiness }));
+  installExpositionVotes(app, votesOptions);
   app.decorate('saisonsBilans', createSaisonsBilans({ db, readiness: app.readiness, storageDir: config.storageDir,
     archiveVisible: (s, at) => at >= s.opens_at && at < archiveEndsAt(s.closes_at) }));
   app.decorate('expositions', createSaisonsPubliques({ saisons: app.saisons, repo: app.publicRepo, readiness: app.readiness, storageDir: config.storageDir }));

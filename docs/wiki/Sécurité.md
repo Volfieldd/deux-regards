@@ -96,6 +96,16 @@ Détail et autres refus de démarrage : [Configuration](Configuration), section 
 
 ## Base et sauvegardes
 
+### Vote des expositions
+
+La consultation libre ne crée aucun cookie de vote. Le premier bulletin exige une case de consentement non cochée et la version exacte de l’information. Le cookie de 256 bits est posé uniquement après la transaction réussie, `HttpOnly`, `SameSite=Lax`, `Secure` et préfixé `__Host-` en HTTPS, avec une échéance fixe à la clôture. Le serveur ne garde que son index HMAC propre à l’exposition et une preuve minimale chiffrée par le coffre ; sans `DATA_KEY`, le vote répond 503 sans collecte.
+
+Les formulaires sans script vérifient la provenance (`Origin` du site ou `Sec-Fetch-Site: same-origin`) et un défi signé de 30 minutes, lié à l’exposition, à l’action, à la photo et au cookie déjà présent. Le défi initial n’a besoin ni de cookie ni de persistance. Export et retrait ont leurs propres défis. Les champs sont bornés ; pages et exports portent `private, no-store`, `noindex` et `no-referrer`.
+
+La liste V0 doublement validée, la publication, l’accrochage, le contrôle des droits à l’image et la fenêtre UTC sont relus avant chaque vote. L’unicité SQLite et une transaction `IMMEDIATE` réunissent bulletin et compteur ; un doublon normal est idempotent. Le retrait individuel décrémente seulement les votes du navigateur dans la même transaction. La clôture ou le retrait de l’exposition effacent les identifiants, preuves et détails au démarrage, toutes les minutes et lors des lectures ; les totaux seuls restent. Les limites de restauration figurent dans le [registre RGPD](RGPD#application-des-droits-aux-votes-sans-compte).
+
+Le limiteur en mémoire est commun aux trois langues (60 envois par minute et réseau) ; il ne produit aucune empreinte d’appareil et ne lie pas le réseau au bulletin. La Vigie reçoit seulement les refus de provenance/défi (`input_validation_fail`), champs pièges (`malicious_honeypot`) et limites (`excess_rate_limit_exceeded`), sans cookie, index, consentement ni bulletin ; aucun événement n’est émis pour un vote ou un doublon ordinaire.
+
 - **Effacement effectif :** la base est ouverte avec `secure_delete` : une donnée effacée (droit à l'effacement, purges, sessions) est mise à zéro dans le fichier au lieu de rester lisible dans l'espace libre. Les restes d'avant ce réglage ont été retirés une fois, au démarrage, par un `VACUUM`.
 - **Instantanés :** copie compacte en une seule lecture (`VACUUM INTO`), sans pages libres ; contrôle d'intégrité ; 14 gardés. Les fichiers supprimés des données quittent `files/` pour `supprimes/` (effacés à 90 jours) : une restauration ne peut pas faire revenir un original effacé.
 - **Restauration** (`server/db/restore.js`) : refusée si le site tourne ; ferme toutes les sessions ; ne recopie que les originaux que cite l'instantané ; liste les actions faites depuis (effacements, comptes et rôles à refaire).

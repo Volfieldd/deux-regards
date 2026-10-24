@@ -2,8 +2,9 @@
 // pourquoi, combien de temps, qui le reçoit, et les droits des personnes (RGPD, articles 13 et 14). Elle décrit ce que
 // le code fait réellement : toute évolution d'un traitement ou d'une durée se reporte ici dans la même modification.
 // Responsables conjoints : les auteurs du site ; contact réglable dans l'admin (privacy_contact).
+import { VOTE_UI } from './saisons-votes-textes.js';
 
-export const UPDATED = '2026-10-20';
+export const UPDATED = '2026-10-24';
 // Date du paragraphe « Journal de sécurité », affiché seulement avec la Vigie (facultative).
 export const UPDATED_SECURITY_LOG = '2026-10-21';
 
@@ -45,6 +46,13 @@ export const PRIVACY = {
         'Ils servent seulement à vous répondre et, pour une licence, à vous proposer des conditions. Base légale : votre demande, à laquelle nous répondons (mesures précontractuelles pour une licence) et notre intérêt légitime à répondre à qui nous écrit (RGPD, articles 6-1-b et 6-1-f).',
         'Seul le photographe à qui vous écrivez (celui de la photo, pour une licence ; les deux si vous écrivez aux deux) et l’administrateur du site les lisent ; chaque lecture est notée. Nous ne vous envoyons aucun e-mail automatique : seulement notre réponse. Le photographe est prévenu par un e-mail qui ne contient rien de votre message.',
         `Votre message, votre nom et votre adresse sont ${fields ? 'chiffrés dans notre base et ' : ''}effacés 12 mois après l’envoi ; vous pouvez nous demander de les effacer plus tôt.`,
+      ]],
+      ['Vote consultatif des expositions', [
+        'Une exposition peut proposer de voter sur des photographies choisies et validées par l’équipe. Chaque navigateur peut voter une fois sur chacune. Aucun résultat ne publie automatiquement une œuvre dans la collection permanente ; l’atelier affiche seulement des totaux, qui ne sont pas présentés aux visiteurs.',
+        VOTE_UI.fr.notice, VOTE_UI.fr.free, VOTE_UI.fr.retention, VOTE_UI.fr.rights, VOTE_UI.fr.limit,
+        'Base légale : votre consentement (RGPD, article 6.1.a), recueilli par une case non cochée au premier vote et retirable depuis « Mes votes ». Le cookie de vote est facultatif et distinct des cookies fonctionnels ci-dessous ; aucune exemption de consentement n’est invoquée pour lui. Sans ce cookie, nous ne pouvons plus retrouver vos votes individuels et nous ne demandons pas d’identité supplémentaire pour le faire.',
+        'Le vote ne conserve ni adresse IP ni caractéristiques techniques du navigateur. Le limiteur technique des formulaires utilise temporairement le réseau en mémoire, comme les autres formulaires du site.',
+        ...(securityLog ? ['Les refus de provenance, les défis de formulaire invalides, les pièges et les rafales peuvent être signalés au journal de sécurité décrit ci-dessous. Ni cookie, ni index, ni bulletin individuel n’y est copié.'] : []),
       ]],
       ['Galeries privées', [
         'Nous pouvons montrer des photos à des personnes choisies, dans une galerie privée : chacune reçoit de nous un lien personnel et, par un autre moyen, un mot de passe. Pour cela, nous gardons le nom de la personne invitée (chiffré, visible de nous seuls), la langue et la durée de son accès, et une empreinte du lien et du mot de passe (jamais le lien ni le mot de passe eux-mêmes).',
@@ -120,6 +128,13 @@ export const PRIVACY = {
         'Only the photographer you write to (the photographer of the photograph, for a licence; both of us if you write to both) and the site administrator read them; each reading is logged. We send you no automatic email: only our reply. The photographer is notified by an email that contains nothing of your message.',
         `Your message, your name and your address are ${fields ? 'encrypted in our database and ' : ''}deleted 12 months after sending; you can ask us to delete them earlier.`,
       ]],
+      ['Advisory voting in exhibitions', [
+        'An exhibition may offer voting on photographs selected and approved by the team. Each browser can vote once on each photograph. No result automatically publishes a work in the permanent collection; the workspace shows totals only, which are not displayed to visitors.',
+        VOTE_UI.en.notice, VOTE_UI.en.free, VOTE_UI.en.retention, VOTE_UI.en.rights, VOTE_UI.en.limit,
+        'Legal basis: your consent (GDPR, Article 6.1.a), collected through an unchecked box at the first vote and withdrawable from “My votes”. The voting cookie is optional and separate from the functional cookies below; no consent exemption is claimed for it. Without this cookie we cannot retrieve your individual votes and do not request additional identity information to do so.',
+        'Voting stores neither your IP address nor your browser’s technical characteristics. The technical form limiter temporarily uses the network in memory, like the other forms on the site.',
+        ...(securityLog ? ['Rejected origins, invalid form challenges, traps and bursts may be reported to the security log described below. No cookie, index or individual ballot is copied there.'] : []),
+      ]],
       ['Private galleries', [
         'We may show photographs to chosen people, in a private gallery: each receives from us a personal link and, by another channel, a password. For this, we keep the name of the invited person (encrypted, visible to us only), the language and the duration of their access, and a fingerprint of the link and of the password (never the link or the password themselves).',
         'When you open a private gallery, we record the dates of your visits, refused passwords, your favourites, the selection you send us and your downloads, with the network you come from (your truncated IP address) and the country estimated by Cloudflare; never your browser. This tells us whether the photographs reached you, and protects the gallery against a link passed on to others.',
@@ -193,6 +208,13 @@ export const PRIVACY = {
         'Sie dienen nur dazu, Ihnen zu antworten und Ihnen für eine Lizenz Bedingungen anzubieten. Rechtsgrundlage: Ihre Anfrage, die wir beantworten (vorvertragliche Maßnahmen für eine Lizenz), und unser berechtigtes Interesse, denen zu antworten, die uns schreiben (DSGVO, Art. 6 Abs. 1 lit. b und f).',
         'Nur der Fotograf, an den Sie schreiben (der Fotograf des Fotos bei einer Lizenz; wir beide, wenn Sie an beide schreiben), und der Administrator der Website lesen sie; jedes Lesen wird protokolliert. Wir senden Ihnen keine automatische E-Mail: nur unsere Antwort. Der Fotograf wird per E-Mail benachrichtigt, die nichts aus Ihrer Nachricht enthält.',
         `Ihre Nachricht, Ihr Name und Ihre Adresse werden ${fields ? 'in unserer Datenbank verschlüsselt und ' : ''}12 Monate nach dem Senden gelöscht; Sie können uns bitten, sie früher zu löschen.`,
+      ]],
+      ['Beratende Abstimmung in Ausstellungen', [
+        'Eine Ausstellung kann eine Abstimmung über vom Team ausgewählte und bestätigte Fotografien anbieten. Jeder Browser kann einmal für jede Fotografie stimmen. Kein Ergebnis veröffentlicht automatisch ein Werk in der ständigen Sammlung; die Werkstatt zeigt nur Gesamtzahlen, die den Besuchern nicht angezeigt werden.',
+        VOTE_UI.de.notice, VOTE_UI.de.free, VOTE_UI.de.retention, VOTE_UI.de.rights, VOTE_UI.de.limit,
+        'Rechtsgrundlage: Ihre Einwilligung (DSGVO, Art. 6 Abs. 1 lit. a), die bei der ersten Stimme über ein nicht angekreuztes Feld eingeholt und unter „Meine Stimmen“ widerrufen werden kann. Das Abstimmungs-Cookie ist freiwillig und von den unten genannten funktionalen Cookies getrennt; hierfür wird keine Einwilligungsbefreiung beansprucht. Ohne dieses Cookie können wir Ihre einzelnen Stimmen nicht wiederfinden und verlangen dafür keine zusätzlichen Identitätsangaben.',
+        'Die Abstimmung speichert weder Ihre IP-Adresse noch technische Merkmale Ihres Browsers. Die technische Begrenzung der Formulare nutzt das Netz vorübergehend im Arbeitsspeicher, wie bei anderen Formularen der Website.',
+        ...(securityLog ? ['Abgelehnte Herkunft, ungültige Formularnachweise, Fallen und Anfragenserien können dem unten beschriebenen Sicherheitsprotokoll gemeldet werden. Weder Cookie, Index noch einzelne Stimmzettel werden dorthin kopiert.'] : []),
       ]],
       ['Private Galerien', [
         'Wir können ausgewählten Personen Fotos in einer privaten Galerie zeigen: Jede erhält von uns einen persönlichen Link und auf anderem Weg ein Passwort. Dazu speichern wir den Namen der eingeladenen Person (verschlüsselt, nur für uns sichtbar), die Sprache und die Dauer ihres Zugangs sowie einen Fingerabdruck des Links und des Passworts (nie den Link oder das Passwort selbst).',

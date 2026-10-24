@@ -91,6 +91,20 @@ If someone saved another version in the meantime, the change is refused without 
 
 An unauthorised photograph, a missing translation, a cover outside the display, repeated positions or invalid dates prevent approval. A refusal does not partially publish an exhibition. Voting proposals and retrospectives are managed in their dedicated spaces, reached from the exhibition record.
 
+## Advisory voting and visitor rights
+
+In an open exhibition, **Discover the photographs offered for voting** leads to a dedicated section. It presents proposals in their approved order, chosen by publishing direction, with a link to each photograph and its voting form. It does not change the display order. Without current approvals or an available photograph, or after closing, this invitation disappears.
+
+From an eligible photograph in an open exhibition, **Vote for this photograph** opens a form. At the first vote, the visitor reads the information and ticks their agreement to the cookie and processing of votes. The box starts unchecked. Without agreement, visitors remain free to browse and no voting cookie is set.
+
+Visitors can vote once on each proposed photograph using this browser in this exhibition. Further photographs reuse that agreement. A duplicate shows the recorded vote without adding another. The cookie expires when the exhibition closes; changing browser or device or deleting the cookie may allow another vote. There is no account or identity check.
+
+**My votes in this exhibition** shows this browser’s votes. Before closing, **Export my votes (JSON)** downloads a copy with the agreement date and information version. After confirmation, **Withdraw consent and cancel my votes** deletes these votes and their proof, removes the cookie and reduces the corresponding totals. Other browsers’ votes remain unchanged. Without the cookie, individual votes cannot be retrieved.
+
+In **Photos proposed for voting**, authorised team members see **Advisory votes** per photograph. These totals are private; no score automatically publishes a photograph in the permanent collection. Proposals and their order remain subject to the approval process.
+
+At closing in UTC or when the exhibition is withdrawn, identifiers and detailed votes are removed from the active database at the next cleanup (every minute, at startup and on visits). Only totals remain and exports no longer return individual votes. Existing backups follow their normal 14-day rotation. A photograph that is unpublished, unauthorised or removed from the proposals cannot receive further votes. Visitors can continue viewing the exhibition when voting is temporarily unavailable.
+
 ## Retrospectives and corrections
 
 In the exhibition record, **Retrospectives and permanent exhibitions** opens a separate space. A photographer prepares retrospectives for their own exhibitions; the reviewer can read them. The administrator decides when to publish or withdraw them.

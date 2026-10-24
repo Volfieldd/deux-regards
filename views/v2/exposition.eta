@@ -17,7 +17,7 @@
 <% if (e.full && e.intro) { %>      <p class="expo-prose"><%= e.intro %></p>
 <% } %><% if (e.author) { %>      <p class="expo-auteur"><a class="lien" href="<%= it.u(`/auteur/${e.author.slug}`) %>"><%= e.author.name %></a></p>
 <% } %><% if (e.full && e.photos.length) { %>
-      <div class="expo-actions"><a class="btn" href="<%= it.u(`/exposition/${e.slug}/photo/${e.photos[0].slug}`) %>"><%= x.start %></a><a class="lien" href="#accrochage"><%= x.images %></a></div>
+      <div class="expo-actions"><a class="btn" href="<%= it.u(`/exposition/${e.slug}/photo/${e.photos[0].slug}`) %>"><%= x.start %></a><a class="lien" href="#accrochage"><%= x.images %></a><% if (it.voteLinks?.entryHref) { %><a class="lien" href="<%= it.voteLinks.entryHref %>"><%= it.voteLinks.v.seeProposals %></a><% } %></div>
 <% } %>
     </div>
 <% if (e.cover) { %>    <figure class="expo-couverture"><%~ it.picture(e.cover, { sizes: '(min-width: 900px) calc((100vw - 192px) / 2), calc(100vw - 48px)', eager: true, alt: e.cover.alt || e.cover.title }) %></figure>
@@ -40,8 +40,10 @@
     </ol>
 <% } %>
   </section>
+  <%~ include('./_exposition-vote-propositions', it) %>
   <section class="expo-conclusion" id="conclusion" aria-labelledby="conclusion-t">
     <h2 class="titre-2" id="conclusion-t"><%= x.conclusion %></h2>
+    <%~ include('./_exposition-vote-liens', it) %>
 <% if (e.conclusion) { %>    <p class="expo-prose"><%= e.conclusion %></p>
 <% } %>
     <div class="expo-actions"><a class="lien" href="#accrochage"><%= x.returnToPhotos %></a><a class="lien" href="<%= it.u('/expositions') %>"><%= x.back %></a></div>

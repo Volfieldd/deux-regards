@@ -2,6 +2,7 @@ import { usesV2 } from '../version-publique.js';
 import { localize } from '../i18n.js';
 import { variantName, widthsFor } from '../images.js';
 import { createSaisonsPubliques } from '../saisons-publiques.js';
+import { expositionVoteLinks } from './expositions-votes.js';
 
 // Saisons S2 : visite libre, annonce par couverture et archive de douze mois. Les nouveaux parcours restent dans
 // les présentations v2/v3 ; les liens d’une photographie conservent toujours leur exposition d’origine.
@@ -92,7 +93,8 @@ export function registerExpositionPages(app, { lang, repo, base, service = app.e
     const exposition = e.bySlug(request.params.slug, { lang });
     if (!exposition) return reply.callNotFound();
     app.stats.hit(request, { page: `exposition:${exposition.slug}` });
-    return render(request, reply, 'exposition', exposition, { bilans: app.saisonsBilans?.publicForSaison(exposition.id, { lang }) || [] });
+    return render(request, reply, 'exposition', exposition, { voteLinks: expositionVoteLinks(app, { request, reply, lang, exposition }),
+      bilans: app.saisonsBilans?.publicForSaison(exposition.id, { lang }) || [] });
   });
 
   app.get('/exposition/:slug/photo/:photoSlug', async (request, reply) => {
@@ -101,6 +103,7 @@ export function registerExpositionPages(app, { lang, repo, base, service = app.e
     if (!found) return reply.callNotFound();
     app.stats.hit(request, { page: `exposition:${found.exposition.slug}`, photo: found.photo.id });
     return render(request, reply, 'exposition-photo', found.exposition, { ...found,
+      voteLinks: expositionVoteLinks(app, { request, reply, lang, exposition: found.exposition, photo: found.photo }),
       pageTitle: `${found.photo.title} · ${found.exposition.title} · ${app.siteName()}`,
       canonical: `/exposition/${found.exposition.slug}/photo/${found.photo.slug}`, description: found.photo.cartel || found.photo.legend || found.exposition.intro,
       ogImage: og(found.photo), photoHref: p => u(`/exposition/${found.exposition.slug}/photo/${p.slug}`) });

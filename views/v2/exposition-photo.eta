@@ -8,6 +8,7 @@
     <%~ it.picture(p, { sizes: 'calc(100vw - 48px)', eager: true, alt: p.alt || p.title }) %>
     <figcaption><p class="expo-photo-auteur"><%= p.author %></p><% if (p.cartel) { %><p class="expo-prose"><%= p.cartel %></p><% } %></figcaption>
   </figure>
+  <%~ include('./_exposition-vote-liens', it) %>
   <nav class="expo-photo-nav" aria-label="<%= x.images %>">
 <% if (it.prev) { %>    <a class="lien" href="<%= it.photoHref(it.prev) %>" rel="prev">← <%= x.previous %><span class="sr-only"> · <%= it.prev.title %></span></a>
 <% } %>    <a class="lien" href="<%= it.u(`/exposition/${e.slug}#accrochage`) %>"><%= x.returnToExposition %></a>

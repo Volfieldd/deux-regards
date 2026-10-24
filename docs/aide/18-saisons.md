@@ -91,6 +91,20 @@ Si quelqu’un a enregistré une autre version entre-temps, la modification est 
 
 Une photo non autorisée, une traduction manquante, une couverture absente de l’accrochage, des positions répétées ou un calendrier invalide empêchent la validation. Un refus ne publie pas partiellement l’exposition. Les propositions au vote et les bilans se gèrent dans leurs espaces dédiés, accessibles depuis la fiche.
 
+## Vote consultatif et droits des visiteurs
+
+Sur une exposition ouverte, **Découvrir les photos proposées au vote** mène à une section dédiée. Elle présente les propositions dans l’ordre doublement validé, choisi par la direction de publication, avec un lien vers chaque photographie et son formulaire de vote. Elle ne change pas l’ordre de l’accrochage. Sans validations courantes, sans photo disponible ou après la clôture, cette invitation disparaît.
+
+Depuis une photographie proposée au vote dans une exposition ouverte, **Voter pour cette photographie** ouvre un formulaire. Au premier vote, le visiteur lit l’information et coche lui-même son accord au cookie et au traitement des votes. La case est vide à l’arrivée. Sans accord, la visite continue librement et aucun cookie de vote n’est posé.
+
+Le visiteur peut voter sur chaque photographie proposée, une fois sur chacune avec ce navigateur dans cette exposition. Les photos suivantes réutilisent cet accord. Un doublon affiche le vote déjà enregistré sans ajouter de voix. Le cookie expire à la clôture ; changer de navigateur, d’appareil ou effacer ce cookie peut permettre de revoter. Il n’y a ni compte ni vérification d’identité.
+
+**Mes votes dans cette exposition** présente les votes de ce navigateur. Avant la clôture, **Exporter mes votes (JSON)** télécharge leur copie et la date/version de l’accord. **Retirer mon accord et annuler mes votes**, après confirmation, efface ces votes et leur preuve, retire le cookie et décrémente les totaux correspondants. Les votes des autres navigateurs restent inchangés. Sans cookie, les votes individuels ne peuvent plus être retrouvés.
+
+Dans **Photos proposées au vote**, l’équipe autorisée voit les **Votes consultatifs** par photographie. Ces totaux sont privés ; aucun score ne publie automatiquement une photo dans la collection permanente. Les propositions et leur ordre restent soumis au circuit de validation.
+
+À la clôture UTC ou au retrait de l’exposition, la base active perd les identifiants et votes détaillés au prochain nettoyage (chaque minute, au démarrage et lors des consultations). Les totaux seuls restent et un export ne restitue plus de vote individuel. Les sauvegardes déjà réalisées suivent leur rotation normale de 14 jours. Une photo dépubliée, non autorisée ou retirée des propositions ne reçoit plus de vote. Si le vote est temporairement indisponible, le visiteur peut continuer à regarder l’exposition.
+
 ## Bilans et rectificatifs
 
 Dans la fiche de l’exposition, **Bilans et prolongements** ouvre un espace distinct. Le photographe prépare les bilans de ses propres expositions ; le relecteur peut les consulter. L’administrateur décide de leur publication et de leur retrait.

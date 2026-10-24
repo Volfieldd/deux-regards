@@ -7,7 +7,7 @@ const ACTIONS = {
   proposer: { permission: 'saisons.ecrire', method: 'propose', message: 'Propositions enregistrées.' },
   relire: { permission: 'saisons.vote_relecture', method: 'review', message: 'Relecture enregistrée.' },
   valider: { permission: 'saisons.vote_valider', method: 'validate', message: 'Validation enregistrée.' },
-  ordonner: { permission: 'saisons.vote_ordonner', method: 'reorder', message: 'Ordre enregistré. Une nouvelle double validation est nécessaire.' },
+  ordonner: { permission: 'saisons.vote_ordonner', method: 'reorder', message: 'Ordre enregistré.' },
 };
 
 export function registerSaisonsPropositions(app, { repo, render, P, W, done, withReady }) {
@@ -34,11 +34,14 @@ export function registerSaisonsPropositions(app, { repo, render, P, W, done, wit
   });
   const page = (request, reply, s, { error = null, status = 200 } = {}) => {
     const p = c.get(s.id), allowed = available(s), active = !['close', 'bilan', 'retire'].includes(s.phase);
+    const totals = app.saisonsVotes.counts(s.id);
+    const countedPhotos = photoData(request, totals.map(row => row.photo_id), allowed);
     const can = permission => active && owns(request, permission, s);
     const scope = request.scope('saisons.ecrire');
     reply.code(status).header('cache-control', 'private, no-store').header('x-robots-tag', 'noindex').header('referrer-policy', 'no-referrer');
     return render(request, reply, 'saison-propositions', { title: request.t('Photos proposées au vote'), saisonsAssets: true, saison: s, propositions: p,
       photos: photoData(request, p.photo_ids, allowed), candidates: photoData(request, s.photo_ids, allowed).filter(ph => ph.available && (scope?.all || ph.author_id === scope?.authorId)),
+      voteCounts: totals.map((row, i) => ({ ...countedPhotos[i], total: row.total })),
       canPropose: can('saisons.ecrire'), canReview: can('saisons.vote_relecture'), canValidate: can('saisons.vote_valider'), canReorder: can('saisons.vote_ordonner'), active,
       error: error ? request.t.msg(error.message) : null, errorField: error?.field || null });
   };
