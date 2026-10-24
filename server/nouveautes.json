@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.222.0",
+    "date": "2026-10-24",
+    "pr": 222,
+    "title": {
+      "fr": "Le regard continue dans les collections",
+      "en": "The perspective continues in collections",
+      "de": "Die Sichtweise setzt sich in Sammlungen fort"
+    },
+    "items": [
+      {
+        "perm": "saisons.voir",
+        "fr": "Préparez un bilan dans les trois langues, puis publiez-le après la clôture. Un bilan publié reste intact : sa correction prend la forme d’un nouveau rectificatif lié. Les œuvres retenues peuvent rejoindre une collection permanente, présentée comme une nouvelle exposition avec ses textes, sa couverture, ses cartels et son ordre propres. Bilans et liens demeurent après les douze mois d’archive.",
+        "en": "Prepare a retrospective in three languages and publish it after the exhibition closes. A published retrospective stays unchanged; a correction becomes a new linked report. Selected works can join a permanent collection, presented as a new exhibition with its own texts, cover, captions and order. Retrospectives and links remain after the twelve-month archive.",
+        "de": "Bereiten Sie einen Rückblick in drei Sprachen vor und veröffentlichen Sie ihn nach Ausstellungsende. Ein veröffentlichter Rückblick bleibt unverändert; eine Berichtigung wird als neuer verknüpfter Bericht veröffentlicht. Ausgewählte Werke können in eine dauerhafte Sammlung mit eigenen Texten, Titelbild, Bildbeschriftungen und eigener Reihenfolge übergehen. Rückblicke und Links bleiben nach den zwölf Archivmonaten erhalten."
+      }
+    ]
+  },
+  {
     "version": "1.221.0",
     "date": "2026-10-24",
     "pr": 221,

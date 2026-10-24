@@ -31,6 +31,12 @@ La conception des compositions Après-image, suggestions, uploads, identités de
 
 Accord pour instruire d’abord un identifiant aléatoire minimal dans un cookie créé au premier vote, sans fingerprinting. L’objectif est de simplifier le parcours ; **le propriétaire retient ensuite un consentement explicite dans le formulaire du premier vote**, sans bandeau global ni exemption revendiquée. Le [plan, § 5.4](docs/etudes/saisons-apres-image.md#54-piste-retenue-pour-létude--identifiant-minimal-au-premier-vote) documente les sources CNIL, la qualification et l’information/consentement à prévoir dans V1, la durée limitée à la clôture et les données nécessaires au consentement. Aucun cookie de vote ni fingerprinting activé par cette précision documentaire.
 
+## Mise en œuvre — Bilans et collections, S3, PR #222, version 1.222.0 (24 octobre 2026)
+
+L’exposition close peut publier un bilan en trois langues, avec une sélection éditoriale. Sa publication fige textes et sélection ; un rectificatif est un nouveau bilan lié. Les œuvres choisies peuvent former une collection permanente avec sa présentation, sa couverture, son ordre et ses cartels propres. La collection garde son parcours sans date de clôture ; les droits de chaque photo sont vérifiés à la lecture. L’exposition conserve ses bilans et les liens vers les collections après les douze mois d’archive, sans réafficher ses anciennes photos. Une origine retirée cesse d’être affichée sans retirer automatiquement sa collection.
+
+Administration et visite FR/EN/DE raccordées ; migration 068 reprend les bilans déjà publiés du socle. PR en brouillon, dépendante de #221, sans fusion ni déploiement. Les vérifications navigateur et Vigie finales sont complétées avant remise.
+
 ## Mise en œuvre — Visite des expositions, S2, PR #221, version 1.221.0 (24 octobre 2026)
 
 Depuis l’accueil choisi explicitement par l’administration, le visiteur rejoint l’exposition, parcourt ses photos avec leurs cartels, puis sa conclusion. La rubrique Expositions et les pages FR/EN/DE suivent les présentations publiques v2/v3. Avant l’ouverture, seuls le titre, les dates et la couverture annoncent l’exposition. Après la clôture, l’accrochage reste accessible douze mois calendaires UTC ; son adresse garde ensuite le bilan sans restituer les photos. Une couverture ou une photo retirée disparaît à la lecture ; aucune exposition de remplacement n’est choisie automatiquement.
