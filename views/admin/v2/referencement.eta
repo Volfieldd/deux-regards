@@ -1,0 +1,7 @@
+<% layout('./layout') %>
+<link rel="stylesheet" href="<%= it.asset('admin/v2/reglages-v2.css') %>">
+<%~ include('./_reglages', { ...it, courant: 'referencement' }) %>
+<div class="rg">
+<h2 class="rub-titre"><%= it.t('Référencement') %></h2>
+<%~ include('../_referencement', it) %>
+</div>

@@ -31,6 +31,8 @@ import { registerExpositionPages } from './expositions.js';
 import { registerExpositionVotes } from './expositions-votes.js';
 import { registerCollectionPages } from './collections.js';
 import { registerContactPages } from './contact-public.js';
+import { createCollectionsPubliques } from '../collections-publiques.js';
+import { homepageSeo, seoJson } from '../seo.js';
 
 const HERO_COUNT = 5;
 const RECAP_COOKIE = 'bonjour_recap';
@@ -208,6 +210,9 @@ export default async function publicRoutes(app) {
   // Chaque page dans ses trois langues, avec les liens hreflang entre elles.
   app.get('/sitemap.xml', async (request, reply) => {
     const base = app.config.publicUrl;
+    const seo = app.seo();
+    if (seo.visibility === 'off') return reply.type('application/xml; charset=utf-8')
+      .send('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n');
     const photos = repo.publishedPhotos();
     const latest = photos.map(p => p.updated_at).sort().at(-1);
     const day = d => (d ? d.slice(0, 10) : undefined);
@@ -217,20 +222,28 @@ export default async function publicRoutes(app) {
       ...(usesV2(app.publicVersion.versionForSection('galerie')) ? [{ loc: '/galerie', lastmod: day(latest) }, { loc: '/series', lastmod: day(latest) }] : []),
       ...repo.categories().filter(c => photos.some(p => p.category_slug === c.slug)).map(c => ({ loc: galleryUrl({ serie: c.slug }) })),
       ...repo.authors().filter(a => photos.some(p => p.author_slug === a.slug)).map(a => ({ loc: galleryUrl({ regard: a.slug }) })),
-      ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at) })),
+      ...photos.map(p => ({ loc: photoUrl(p.slug), lastmod: day(p.updated_at), image: seo.images ? publicImage(p) : null })),
       ...(mapEnabled() ? [{ loc: '/carte' }] : []),
       // Voyages publiés (avec au moins une photo publiée).
       ...(() => { const ids = new Set(photos.map(p => p.id)); const open = app.trips.listPublic().filter(tr => app.trips.photos(tr.id).some(p => ids.has(p.id))); return open.length ? [{ loc: '/voyages' }, ...open.map(tr => ({ loc: `/voyage/${tr.slug}` }))] : []; })(),
       { loc: '/a-propos' }, { loc: '/droits' }, { loc: '/confidentialite' }, { loc: '/mentions-legales' },
       // Carnets (v2 appliquée seulement) : la liste et les billets publiés, dans leurs langues publiées (B69).
       ...carnetSitemap(app),
+      // Les projections publiques conservent les règles de calendrier, de retrait et de disponibilité des photos.
+      ...(usesV2(app.publicVersion.versionForSection('expositions')) ? (() => {
+        const expositions = app.expositions.list();
+        const collections = createCollectionsPubliques({ bilans: app.saisonsBilans, repo, storageDir: app.config.storageDir, expositions: app.expositions }).list();
+        return [...(expositions.length || collections.length ? [{ loc: '/expositions' }] : []),
+          ...expositions.map(e => ({ loc: `/exposition/${e.slug}` })),
+          ...(collections.length ? [{ loc: '/collections' }, ...collections.map(c => ({ loc: `/collection/${c.slug}` }))] : [])];
+      })() : []),
     ];
     const xml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
     const links = (loc, langs = LANGS) => langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${xml(base + localize(loc, l))}"/>`).join('');
     const body = pagesList.flatMap(u => (u.langs || LANGS).map(l =>
-      `  <url><loc>${xml(base + localize(u.loc, l))}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}${links(u.loc, u.langs)}</url>`)).join('\n');
+      `  <url><loc>${xml(base + localize(u.loc, l))}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}${links(u.loc, u.langs)}${u.image ? `<image:image><image:loc>${xml(base + u.image)}</image:loc></image:image>` : ''}</url>`)).join('\n');
     return reply.type('application/xml; charset=utf-8')
-      .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${body}\n</urlset>\n`);
+      .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${body}\n</urlset>\n`);
   });
 
   app.setNotFoundHandler(async (request, reply) => {
@@ -246,6 +259,7 @@ const contactLink = c => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c) ? `mailto:${c}` :
 
 // Texte coupé à max caractères au plus, à la fin d'un mot, avec « … ».
 const clip = (text, max) => { const s = String(text || '').trim(); return s.length > max ? `${s.slice(0, max - 1).replace(/\s+\S*$/, '')}…` : s; };
+const publicImage = p => `/media/${variantName(p.file, widthsFor(p.width).at(-1), 'webp', p.variant_key)}`;
 
 // Aides des gabarits pour une langue : textes, adresses préfixées, photos et vignettes.
 function helpers(lang) {
@@ -363,14 +377,20 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
     const title = [activeSerie?.name, activeAuthor && t.by(activeAuthor.name)].filter(Boolean).join(', ');
     const tagline = pick(settings, 'tagline', lang);
     const open = galerieOpen(reply.request);
+    const homeSeo = homepageSeo(settings, siteName, lang, regards.filter(a => a.slug && a.count));
+    const description = activeSerie ? clip(activeSerie.intent || `${activeSerie.name} · ${tagline}`, 320)
+      : activeAuthor ? clip(activeAuthor.short_bio || activeAuthor.bio || `${activeAuthor.name} · ${tagline}`, 320) : tagline;
+    const sharePhoto = activeSerie || activeAuthor ? photos[0] : hero[0];
     return reply.render(template, {
       ...base, filter, settings, tagline, intro: pick(settings, 'intro', lang), hero, heroTel, series, regards, photos, total: all.length,
       categoriesCount: categories.length, activeAuthor, activeSerie, page, seriesAll, photosAll: all,
       pageTitle: title ? `${title} · ${siteName}` : siteName, siteName,
       // Même contenu, quel que soit l'ordre ; sur /galerie quand la page existe (la galerie entière, deux filtres ensemble).
       canonical: template === 'series' ? '/series' : page === 'accueil' ? '/' : (open ? galerieUrl : galleryUrl)({ regard: filter.regard, serie: filter.serie }),
-      description: tagline,
-      ogImage: hero[0] && `/media/${variantName(hero[0].file, widthsFor(hero[0].width).at(-1), 'webp', hero[0].variant_key)}`,
+      description,
+      ogImage: sharePhoto && publicImage(sharePhoto),
+      jsonLd: page === 'accueil' ? seoJson({ '@context': 'https://schema.org', '@type': 'WebSite', name: siteName,
+        url: `${app.config.publicUrl}/`, description: homeSeo.description, inLanguage: ['fr-FR', 'en-GB', 'de-DE'] }) : null,
     });
   }
 
@@ -446,6 +466,12 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
       // Légende coupée à 160 caractères (au mot près) : l'auteur, le lieu et la date restent dans les aperçus de liens.
       description: [clip(photo.legend, 160), [photo.author, [photo.place, photo.when].filter(Boolean).join(', ')].filter(Boolean).join(', ')].filter(Boolean).join(' '),
       ogImage: `/media/${variantName(photo.file, widthsFor(photo.width).at(-1), 'webp', photo.variant_key)}`,
+      // Métadonnées de la photographie visible : jamais les EXIF, le GPS, l’heure ni une donnée de l’original.
+      jsonLd: app.seo().images ? seoJson({ '@context': 'https://schema.org', '@type': 'ImageObject', name: photo.title,
+        description: clip(photo.legend || photo.alt || photo.title, 320), contentUrl: app.config.publicUrl + publicImage(photo),
+        url: app.config.publicUrl + base.u(photoUrl(photo.slug)), creator: { '@type': 'Person', name: photo.author },
+        creditText: photo.author, copyrightNotice: `© ${photo.author}`, license: app.config.publicUrl + base.u('/droits'),
+        acquireLicensePage: app.config.publicUrl + base.u(`/droits/demande?photo=${encodeURIComponent(photo.slug)}`) }) : null,
       bodyClass: 'dark', share: await shareOf(photo, siteName),
       // Mots-clés sous la légende, si le réglage le demande (Site public) ; chacun mène à la recherche.
       showKeywords: repo.settings().keywords_shown === true,

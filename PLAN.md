@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Mise en œuvre — Référencement administrable (24 octobre 2026)
+
+Réouverture du chapitre SEO à la demande du propriétaire : écran dédié dans les Réglages, réservé à l’administrateur par `site.apparence`. Deux choix (référencement du site et des photos), titre/description d’accueil facultatifs FR/EN/DE et aperçu. Automatisation des métadonnées, données structurées des photos et plan du site enrichi depuis les contenus publiés, avec maintien des exclusions privées et des décisions des Carnets. Aucun changement de visibilité à l’installation, aucune migration ni dépendance nouvelle. Surveillance rattachée à BV-1/DS23, BV-20/BV-21 et DS12. Vérifications et limites réelles consignées dans la PR ; déclaration du domaine auprès des moteurs et contrôle en production restent au propriétaire.
+
 ## Étude et démarrage — Les saisons de Nicephos (23 octobre 2026)
 
 La [spécification fonctionnelle et le plan détaillé](docs/etudes/saisons-apres-image.md) cadrent les expositions temporaires, leur visite, les archives et le passage éditorial vers les collections permanentes. **Les saisons** portent la programmation et la rubrique publique s’appelle **Expositions**. Après arbitrage du propriétaire, le pilote participatif est un **vote consultatif sur des photos proposées à l’avance**, sans compte ni dépôt. Les séries sont conservées ; l’Après-image avec compositions, suggestions ou uploads est documenté comme évolution différée.

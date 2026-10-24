@@ -130,6 +130,7 @@
     <%~ item(['journal', '/admin/journal', 'Journal', 'journal', null, 'journal.voir']) %>
 <% if (sec) { /* La console de la Vigie (comptes securite.voir, Vigie réglée) : autre origine, nouvel onglet ; badge du résumé. */ %>    <a class="nav-sec" href="<%= sec.href %>" target="_blank" rel="noopener noreferrer"><%~ ic('vigie') %><%= t('Sécurité') %><span class="sr-only"> <%= t('(nouvel onglet)') %></span><%~ ext() %><% if (sec.badge) { %><span class="nav-badge<%= sec.badge.attention ? ' attention' : '' %>"><span aria-hidden="true"><%= sec.badge.text %></span><span class="sr-only">, <%= sec.badge.sr %></span></span><% } %></a>
 <% } %>    <%~ item(['appearance', '/admin/apparence', 'Apparence', 'appearance', null, 'site.apparence']) %>
+    <%~ item(['referencement', '/admin/referencement', 'Référencement', 'search', null, 'site.apparence']) %>
     <%~ item(['images', '/admin/images', 'Filigrane & EXIF', 'images', null, 'site.filigrane']) %>
     <%~ item(['droits', '/admin/droits', 'Droits & confidentialité', 'shield', null, 'reglages.droits']) %>
     <%~ item(['help', '/admin/aide', 'Aide', 'help']) %>

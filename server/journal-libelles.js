@@ -105,6 +105,7 @@ export const LIBELLES = {
   'POST /admin/photos/order': 'Ordre des photos changé',
   'POST /admin/preuves/reessayer': 'Preuves d’antériorité relancées',
   'POST /admin/reglages': 'Réglages enregistrés',
+  'POST /admin/referencement': 'Référencement enregistré',
   'POST /admin/remarques/:id/fait': 'Remarque faite',
   'POST /admin/rencontre': 'Rencontre saisie sur le terrain',
   'POST /admin/rencontre/:id/envoyer': 'Récapitulatif d’une rencontre envoyé',

@@ -10,8 +10,8 @@ import { intentParts } from '../server/v2-vues.js';
 
 // Données du site public v2 créées par la migration 053 (PLAN.md, point 8) : texte d'intention d'une série (MQ-03),
 // description courte d'un photographe (MQ-01), texte de remplacement d'une photo (UX-F-44) et numéro d'inventaire
-// (UX-T-05, MQ-04). Écrits dans l'admin avec les droits de leurs voisins, notés au journal, échappés et bornés ; la v1
-// ne change que par l'attribut alt de la photo de la visionneuse.
+// (UX-T-05, MQ-04). Écrits dans l'admin avec les droits de leurs voisins, notés au journal, échappés et bornés ; le corps
+// des pages v1 ne change que par l'attribut alt de la photo de la visionneuse. Leur référencement reprend les textes publics.
 // Année du numéro : celle de Paris (migration 054), soit l'UTC plus une heure au passage d'année ; la migration 053
 // seule comptait en UTC.
 const YY = String(new Date(Date.now() + 3600e3).getUTCFullYear()).slice(2);
@@ -524,9 +524,9 @@ test('coupe du texte d’intention : à la fin d’une phrase, jamais dans un no
   assert.deepEqual(intentParts(null), { head: '', rest: '' });
 });
 
-// ---------- la v1 ne change pas ----------
+// ---------- le corps de la v1 ne change pas ----------
 
-test('v1 : le même HTML avant et après ces données, sauf l’attribut alt de la photo de la visionneuse', async t => {
+test('v1 : le même corps HTML sauf alt ; métadonnées de série et de photographe adaptées à leurs textes', async t => {
   const c = await site(t);
   const admin = c.as('admin'), modo = c.as('moderateur'), p = c.first(c.seb);
   const serie = c.db.prepare('SELECT * FROM categories WHERE id = ?').get(p.category_id);
@@ -539,12 +539,30 @@ test('v1 : le même HTML avant et après ces données, sauf l’attribut alt de 
   await modo.post(`/admin/series/${serie.id}`, { name: serie.name, intent: 'Une. Deux. Trois.', intent_en: 'One. Two. Three.' });
   await admin.post(`/admin/auteurs/${c.seb}`, { name: 'Sébastien', short_bio: 'le matin, les quais, les fleuves', short_bio_en: 'mornings' });
   const after = await snap();
+  const split = html => { const at = html.indexOf('</head>') + '</head>'.length; return { head: html.slice(0, at), body: html.slice(at) }; };
+  const descriptions = { [`/serie/${serie.slug}`]: 'Une. Deux. Trois.', [`/en/serie/${serie.slug}`]: 'One. Two. Three.', '/auteur/sebastien': 'le matin, les quais, les fleuves' };
   for (const u of urls) {
-    const expected = u === `/photo/${p.slug}` ? before[u].replace(`alt="${esc(p.title)}"`, `alt="${esc('Brume « bleue » & quai.')}"`)
-      : u === `/de/photo/${p.slug}` ? before[u].replace(`alt="${esc(p.title)}"`, 'alt="Nebel."') : before[u];
-    assert.equal(after[u], expected, u);
+    const a = split(before[u]), b = split(after[u]);
+    const expectedBody = u === `/photo/${p.slug}` ? a.body.replace(`alt="${esc(p.title)}"`, `alt="${esc('Brume « bleue » & quai.')}"`)
+      : u === `/de/photo/${p.slug}` ? a.body.replace(`alt="${esc(p.title)}"`, 'alt="Nebel."') : a.body;
+    assert.equal(b.body, expectedBody, `${u} : corps complet`);
+    // Le référencement automatique reprend l’intention et la biographie courte, sans les ajouter au dessin de la v1.
+    // Toutes les autres métadonnées, ressources, canoniques et alternances de langue restent comparées intégralement.
+    const expectedHead = descriptions[u] ? a.head.replace(/<meta (name="description"|property="og:description") content="[^"]*">/g,
+      (m, attr) => `<meta ${attr} content="${esc(descriptions[u])}">`) : a.head;
+    assert.equal(b.head, expectedHead, `${u} : en-tête complet`);
+    if (descriptions[u]) {
+      assert.ok(b.head.includes(`<meta name="description" content="${esc(descriptions[u])}">`), u);
+      assert.ok(b.head.includes(`<meta property="og:description" content="${esc(descriptions[u])}">`), u);
+    }
+    // Une légende déjà écrite reste prioritaire sur le nouveau texte de remplacement dans les données de la photo.
+    if (u === `/photo/${p.slug}`) {
+      const image = JSON.parse(/<script type="application\/ld\+json">([^]*?)<\/script>/.exec(b.head)[1]);
+      assert.equal(image['@type'], 'ImageObject');
+      assert.equal(image.description, p.legend);
+    }
   }
   assert.notEqual(after[`/photo/${p.slug}`], before[`/photo/${p.slug}`]);
   // Rien de la v2 ne passe en v1 : ni l'inventaire, ni l'intention, ni la description courte.
-  for (const u of urls) assert.doesNotMatch(after[u], new RegExp(`${p.inventory}|Une\\. Deux|le matin, les quais`), u);
+  for (const u of urls) assert.doesNotMatch(split(after[u]).body, new RegExp(`${p.inventory}|Une\\. Deux|le matin, les quais`), u);
 });

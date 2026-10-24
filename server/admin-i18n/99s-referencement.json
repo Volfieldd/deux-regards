@@ -1,0 +1,130 @@
+{
+  "Référencement": {
+    "en": "Search visibility",
+    "de": "Suchmaschinen"
+  },
+  "SEO, moteurs de recherche, Google Images, indexation, titres et descriptions": {
+    "en": "SEO, search engines, Google Images, indexing, titles and descriptions",
+    "de": "SEO, Suchmaschinen, Google Bilder, Indexierung, Titel und Beschreibungen"
+  },
+  "Choisissez la visibilité du site et des photos. Les titres, descriptions, adresses canoniques, langues et plans du site suivent automatiquement les contenus publiés.": {
+    "en": "Choose how the site and photos appear in search. Titles, descriptions, canonical URLs, languages and sitemaps automatically follow published content.",
+    "de": "Wählen Sie die Sichtbarkeit der Website und ihrer Fotos. Titel, Beschreibungen, kanonische Adressen, Sprachen und Sitemaps folgen automatisch den veröffentlichten Inhalten."
+  },
+  "Le référencement n’a pas été enregistré. Corrigez les champs indiqués.": {
+    "en": "Search settings were not saved. Correct the highlighted fields.",
+    "de": "Die Einstellungen wurden nicht gespeichert. Korrigieren Sie die angegebenen Felder."
+  },
+  "Visibilité dans les moteurs de recherche": {
+    "en": "Visibility in search engines",
+    "de": "Sichtbarkeit in Suchmaschinen"
+  },
+  "Le site reste accessible à toute personne qui possède son adresse. Demander de ne pas l’indexer ne protège pas son accès ; les moteurs appliquent ce choix lors de leur prochain passage.": {
+    "en": "The site remains accessible to anyone with its address. Asking search engines not to index it does not restrict access; they apply this choice the next time they visit.",
+    "de": "Die Website bleibt für alle erreichbar, die ihre Adresse kennen. Die Bitte, sie nicht zu indexieren, schützt nicht den Zugriff; Suchmaschinen berücksichtigen sie bei ihrem nächsten Besuch."
+  },
+  "Référencer le site public": {
+    "en": "Allow the public site in search results",
+    "de": "Die öffentliche Website indexieren lassen"
+  },
+  "Demander de ne pas référencer le site": {
+    "en": "Ask search engines not to index the site",
+    "de": "Suchmaschinen bitten, die Website nicht zu indexieren"
+  },
+  "Photos dans Google Images et les autres moteurs": {
+    "en": "Photos in Google Images and other search engines",
+    "de": "Fotos in Google Bilder und anderen Suchmaschinen"
+  },
+  "Seules les photos déjà publiées sont concernées. Les originaux, brouillons et galeries privées restent exclus. Si le site n’est pas référencé, ses photos ne le sont pas non plus.": {
+    "en": "This only concerns photos already published. Originals, drafts and private galleries remain excluded. If the site is excluded from search, its photos are too.",
+    "de": "Dies betrifft nur bereits veröffentlichte Fotos. Originale, Entwürfe und private Galerien bleiben ausgeschlossen. Wird die Website nicht indexiert, gilt dies auch für ihre Fotos."
+  },
+  "Oui, référencer les photos publiées": {
+    "en": "Yes, allow published photos in image search",
+    "de": "Ja, veröffentlichte Fotos indexieren lassen"
+  },
+  "Non, demander de ne pas référencer les photos": {
+    "en": "No, ask search engines not to index photos",
+    "de": "Nein, Suchmaschinen bitten, die Fotos nicht zu indexieren"
+  },
+  "Présentation de l’accueil": {
+    "en": "Home page presentation",
+    "de": "Darstellung der Startseite"
+  },
+  "Facultatif : une traduction vide reprend un texte renseigné dans une autre langue. Si les trois titres ou les trois descriptions sont vides, le site utilise son nom ou son accroche automatiquement.": {
+    "en": "Optional: an empty translation uses text entered in another language. If all three titles or all three descriptions are empty, the site automatically uses its name or tagline.",
+    "de": "Optional: Eine leere Übersetzung übernimmt einen Text aus einer anderen Sprache. Sind alle drei Titel oder alle drei Beschreibungen leer, verwendet die Website automatisch ihren Namen oder ihren Leitsatz."
+  },
+  "Titre de l’accueil": {
+    "en": "Home page title",
+    "de": "Titel der Startseite"
+  },
+  "Description de l’accueil": {
+    "en": "Home page description",
+    "de": "Beschreibung der Startseite"
+  },
+  "Enregistrer le référencement": {
+    "en": "Save search settings",
+    "de": "Suchmaschineneinstellungen speichern"
+  },
+  "Référencement enregistré.": {
+    "en": "Search settings saved.",
+    "de": "Suchmaschineneinstellungen gespeichert."
+  },
+  "Référencement enregistré": {
+    "en": "Search settings saved",
+    "de": "Suchmaschineneinstellungen gespeichert"
+  },
+  "Aperçu des réglages enregistrés": {
+    "en": "Preview of saved settings",
+    "de": "Vorschau der gespeicherten Einstellungen"
+  },
+  "Les moteurs peuvent adapter le titre et la description. Cet aperçu montre les informations envoyées par le site ; une place dans les résultats n’est pas garantie.": {
+    "en": "Search engines may adapt the title and description. This preview shows the information sent by the site; inclusion in results is not guaranteed.",
+    "de": "Suchmaschinen können Titel und Beschreibung anpassen. Diese Vorschau zeigt die von der Website übermittelten Angaben; eine Aufnahme in die Suchergebnisse ist nicht garantiert."
+  },
+  "Le site demande aux moteurs de ne pas l’indexer.": {
+    "en": "The site asks search engines not to index it.",
+    "de": "Die Website bittet Suchmaschinen, sie nicht zu indexieren."
+  },
+  "Les pages publiques peuvent être référencées.": {
+    "en": "Public pages may appear in search results.",
+    "de": "Öffentliche Seiten können in Suchergebnissen erscheinen."
+  },
+  "Les photos sont exclues du référencement demandé.": {
+    "en": "The site asks search engines not to index its photos.",
+    "de": "Die Website bittet Suchmaschinen, ihre Fotos nicht zu indexieren."
+  },
+  "Les photos publiées peuvent apparaître dans les recherches d’images.": {
+    "en": "Published photos may appear in image search results.",
+    "de": "Veröffentlichte Fotos können in Bildsuchergebnissen erscheinen."
+  },
+  "Voir le plan du site pour les moteurs": {
+    "en": "View the sitemap for search engines",
+    "de": "Sitemap für Suchmaschinen ansehen"
+  },
+  "Voir les consignes aux robots": {
+    "en": "View instructions for crawlers",
+    "de": "Anweisungen für Suchroboter ansehen"
+  },
+  "Choisissez une valeur ou renseignez ce champ.": {
+    "en": "Choose a value or fill in this field.",
+    "de": "Wählen Sie einen Wert oder füllen Sie dieses Feld aus."
+  },
+  "Choisissez la visibilité du site.": {
+    "en": "Choose the visibility of the site.",
+    "de": "Wählen Sie die Sichtbarkeit der Website."
+  },
+  "Choisissez si les photographies peuvent être référencées.": {
+    "en": "Choose whether photos may appear in search results.",
+    "de": "Wählen Sie, ob Fotos indexiert werden dürfen."
+  },
+  "Ce texte est limité à {n} caractères.": {
+    "en": "This text is limited to {n} characters.",
+    "de": "Dieser Text ist auf {n} Zeichen begrenzt."
+  },
+  "Retirez les caractères invisibles de ce texte.": {
+    "en": "Remove invisible characters from this text.",
+    "de": "Entfernen Sie unsichtbare Zeichen aus diesem Text."
+  }
+}

@@ -1,0 +1,60 @@
+<% const t = it.t, v = it.values, e = it.errors || {}; %>
+<p class="prose"><%= t('Choisissez la visibilité du site et des photos. Les titres, descriptions, adresses canoniques, langues et plans du site suivent automatiquement les contenus publiés.') %></p>
+<p class="help-link"><a href="/admin/aide#reglages-référencement"><%= t('Aide sur cette page') %></a></p>
+<% if (Object.keys(e).length) { %>
+<div class="flash error" role="alert"><p><%= t('Le référencement n’a pas été enregistré. Corrigez les champs indiqués.') %></p></div>
+<% } %>
+<form class="form rg-form" method="post" action="/admin/referencement" novalidate>
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <fieldset class="panel form" aria-describedby="seo-visibility-help<%= e.seo_visibility ? ' seo_visibility-err' : '' %>">
+    <legend><%= t('Visibilité dans les moteurs de recherche') %></legend>
+    <p class="hint" id="seo-visibility-help"><%= t('Le site reste accessible à toute personne qui possède son adresse. Demander de ne pas l’indexer ne protège pas son accès ; les moteurs appliquent ce choix lors de leur prochain passage.') %></p>
+    <label class="inline"><input type="radio" name="seo_visibility" value="public"<%~ v.seo_visibility === 'public' ? ' checked' : '' %><%~ e.seo_visibility ? ' aria-invalid="true" aria-describedby="seo_visibility-err"' : '' %>><%= t('Référencer le site public') %></label>
+    <label class="inline"><input type="radio" name="seo_visibility" value="off"<%~ v.seo_visibility === 'off' ? ' checked' : '' %><%~ e.seo_visibility ? ' aria-invalid="true" aria-describedby="seo_visibility-err"' : '' %>><%= t('Demander de ne pas référencer le site') %></label>
+<% if (e.seo_visibility) { %>    <p class="err" id="seo_visibility-err"><%= e.seo_visibility %></p>
+<% } %>
+  </fieldset>
+  <fieldset class="panel form" aria-describedby="seo-images-help<%= e.seo_images ? ' seo_images-err' : '' %>">
+    <legend><%= t('Photos dans Google Images et les autres moteurs') %></legend>
+    <p class="hint" id="seo-images-help"><%= t('Seules les photos déjà publiées sont concernées. Les originaux, brouillons et galeries privées restent exclus. Si le site n’est pas référencé, ses photos ne le sont pas non plus.') %></p>
+    <label class="inline"><input type="radio" name="seo_images" value="oui"<%~ v.seo_images === 'oui' ? ' checked' : '' %><%~ e.seo_images ? ' aria-invalid="true" aria-describedby="seo_images-err"' : '' %>><%= t('Oui, référencer les photos publiées') %></label>
+    <label class="inline"><input type="radio" name="seo_images" value="non"<%~ v.seo_images === 'non' ? ' checked' : '' %><%~ e.seo_images ? ' aria-invalid="true" aria-describedby="seo_images-err"' : '' %>><%= t('Non, demander de ne pas référencer les photos') %></label>
+<% if (e.seo_images) { %>    <p class="err" id="seo_images-err"><%= e.seo_images %></p>
+<% } %>
+  </fieldset>
+  <section class="panel form" aria-labelledby="seo-home-title">
+    <h2 id="seo-home-title"><%= t('Présentation de l’accueil') %></h2>
+    <p class="hint"><%= t('Facultatif : une traduction vide reprend un texte renseigné dans une autre langue. Si les trois titres ou les trois descriptions sont vides, le site utilise son nom ou son accroche automatiquement.') %></p>
+<% ['fr', 'en', 'de'].forEach(lang => { const suffix = lang === 'fr' ? '' : '_' + lang; const title = 'seo_title' + suffix, description = 'seo_description' + suffix; %>
+    <fieldset class="form">
+      <legend><%= it.langNames[lang] %></legend>
+      <div class="champ-a">
+        <label for="<%= title %>"><%= t('Titre de l’accueil') %> <span class="facultatif"><%= t('(facultatif)') %></span></label>
+        <input type="text" id="<%= title %>" name="<%= title %>" value="<%= v[title] || '' %>" lang="<%= lang %>" maxlength="<%= it.limits.title %>"<%~ e[title] ? ' aria-invalid="true" aria-describedby="' + title + '-err"' : '' %>>
+<% if (e[title]) { %>        <p class="err" id="<%= title %>-err"><%= e[title] %></p>
+<% } %>
+      </div>
+      <div class="champ-a">
+        <label for="<%= description %>"><%= t('Description de l’accueil') %> <span class="facultatif"><%= t('(facultatif)') %></span></label>
+        <textarea id="<%= description %>" name="<%= description %>" lang="<%= lang %>" rows="3" maxlength="<%= it.limits.description %>"<%~ e[description] ? ' aria-invalid="true" aria-describedby="' + description + '-err"' : '' %>><%= v[description] || '' %></textarea>
+<% if (e[description]) { %>        <p class="err" id="<%= description %>-err"><%= e[description] %></p>
+<% } %>
+      </div>
+    </fieldset>
+<% }) %>
+  </section>
+  <p class="form-pied"><button class="btn" type="submit"><%= t('Enregistrer le référencement') %></button></p>
+</form>
+<section class="panel form" aria-labelledby="seo-preview-title">
+  <h2 id="seo-preview-title"><%= t('Aperçu des réglages enregistrés') %></h2>
+  <p><%= it.seo.visibility === 'off' ? t('Le site demande aux moteurs de ne pas l’indexer.') : t('Les pages publiques peuvent être référencées.') %> <%= it.seo.visibility === 'off' || !it.seo.images ? t('Les photos sont exclues du référencement demandé.') : t('Les photos publiées peuvent apparaître dans les recherches d’images.') %></p>
+  <p class="hint"><%= t('Les moteurs peuvent adapter le titre et la description. Cet aperçu montre les informations envoyées par le site ; une place dans les résultats n’est pas garantie.') %></p>
+<% it.previews.forEach(preview => { %>
+  <article lang="<%= preview.lang %>">
+    <h3><%= it.langNames[preview.lang] %></h3>
+    <p><a href="<%= preview.url %>"><%= preview.title %></a></p>
+    <p><%= preview.description %></p>
+  </article>
+<% }) %>
+  <p><a href="/sitemap.xml"><%= t('Voir le plan du site pour les moteurs') %></a> · <a href="/robots.txt"><%= t('Voir les consignes aux robots') %></a></p>
+</section>

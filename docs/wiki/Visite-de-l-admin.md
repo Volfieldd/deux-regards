@@ -110,6 +110,10 @@ Nom du site, accroche, textes (et leur version anglaise et allemande, repliée s
 
 ![Réglages](captures/admin/07-reglages-bureau.webp)
 
+## Référencement
+
+Écran **Référencement** dans les Réglages, réservé à l’administrateur en v1 et en v2 : deux choix (visibilité du site et des photos dans les moteurs), textes d’accueil facultatifs dans les trois langues, aperçu du résultat et liens de contrôle. Le bouton d’enregistrement applique l’ensemble sans JavaScript. Les métadonnées et le plan du site suivent ensuite les publications. Voir l’[aide](Aide#référencement) pour les délais des moteurs et la différence avec un accès privé.
+
 ## Personnes et Sur le terrain
 
 Les personnes photographiées : demandes reçues sur `/bonjour` (nouvelles en tête, compteur dans la barre latérale, badge rouge pour une demande RGPD avec son échéance), fiche d'une rencontre (personne, historique, photos liées, carte signée, photo offerte par lien privé, droits : export et effacement), **Nouvelle rencontre** (l'app de l'iPhone : position, photo de repère, consentement en trois langues, signature au doigt, écran « Merci » avec QR). **Sur le terrain** réunit l'app, les cartes d'accord à imprimer et le QR des vêtements (une composition, avec le logo), avec une liste de contrôle avant de partir. Pas encore de capture : voir [Aide → Rencontres](Aide-Rencontres).

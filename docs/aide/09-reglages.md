@@ -53,6 +53,19 @@ Avec le site public en **v3** (voir [Apparence](apparence)), la photo d'ouvertur
 - **En v1 et en v2**, cette liste ne sert pas : l'ouverture est la même partout.
 - Chaque photo de l'ouverture garde son **point fort** (fiche de la photo) : en v3, l'ouverture recadre de 10 % au plus autour de lui.
 
+## Référencement
+
+**Réglages → Référencement**, réservé à l’administrateur, règle les trois présentations du site. L’installation conserve la visibilité actuelle. Deux choix suffisent, puis **Enregistrer le référencement** applique les réglages ensemble :
+
+- **Visibilité du site** : autoriser les moteurs à référencer les pages publiques, ou leur demander de ne plus les référencer. Ce second choix laisse le site accessible à toute personne qui connaît son adresse ; il ne remplace pas une galerie privée. Le plan du site devient vide et les pages portent la demande de non-indexation.
+- **Photos dans les moteurs d’images** : autoriser leur référencement, ou demander leur exclusion. Les photos restent visibles sur le site. Ce choix agit sur les pages et les variantes publiques servies ; les originaux ne sont jamais exposés.
+
+Les titres, descriptions, adresses canoniques, liens entre langues, aperçus de partage, données structurées et `sitemap.xml` sont calculés à partir du contenu publié. Séries et photographes reprennent leur présentation ; chaque photo garde ses informations publiques et ses droits. Brouillons, galeries privées et liens temporaires restent exclus. Les billets des Carnets ne déclarent que leurs langues publiées.
+
+Pour l’accueil, un **titre** (100 signes au plus) et une **description** (320 signes au plus) peuvent être personnalisés en français, anglais et allemand. Champs vides : génération automatique avec le nom, les photographes et l’accroche du site. Une traduction absente suit le repli de langue habituel, en reprenant notamment le texte français personnalisé. L’aperçu est indicatif : les moteurs choisissent le résultat qu’ils affichent.
+
+Le changement agit sur les prochaines réponses du serveur. Le retrait des résultats dépend du prochain passage des moteurs ; les images déjà en cache ne sont pas rappelées. Pour un retrait urgent, utiliser aussi les outils du moteur et purger le cache Cloudflare. Déclarer le domaine et son plan du site dans Search Console reste une opération du propriétaire, hors de l’admin ; aucun compte Google ni traceur n’est ajouté.
+
 ## Droits et confidentialité
 
 ### Mentions légales (Impressum)

@@ -1,0 +1,3 @@
+<% layout('./layout') %>
+<h1><%= it.t('Référencement') %></h1>
+<%~ include('./_referencement', it) %>

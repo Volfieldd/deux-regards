@@ -172,14 +172,25 @@ test('réglage v2 : tout le monde voit la v2 (sans no-store ni bouton) ; noté a
   assert.equal(c.app.appearance.themeId(), 'atelier');
 });
 
-test('visionneuse v2 : la photo d’abord, sizes à la hauteur de l’écran, cartel, gestes, sans style ni script en ligne', async t => {
+test('visionneuse v2 : la photo d’abord, sizes à la hauteur de l’écran, cartel, gestes, sans style ni script exécutable en ligne', async t => {
   const c = await site(t);
   c.app.publicVersion.save('v2');
   const res = await c.visit(PHOTO);
   const b = res.body;
-  // CSP stricte : aucun attribut style, aucun script en ligne, aucune ressource tierce.
+  // CSP stricte : aucun attribut style, aucun script exécutable en ligne, aucune ressource tierce.
+  // Le seul bloc sans src admis est une donnée JSON-LD de référencement, effectivement parsée et vérifiée ci-dessous.
   assert.doesNotMatch(b, /\sstyle="/);
-  assert.doesNotMatch(b, /<script(?![^>]*\ssrc=)/);
+  assert.doesNotMatch(b, /<script(?![^>]*(?:\ssrc=|\stype="application\/ld\+json"))/);
+  const blocks = [...b.matchAll(/<script(?![^>]*\ssrc=)([^>]*)>([^]*?)<\/script>/g)];
+  assert.equal(blocks.length, 1);
+  assert.equal(blocks[0][1], ' type="application/ld+json"');
+  const image = JSON.parse(blocks[0][2]);
+  assert.equal(image['@context'], 'https://schema.org');
+  assert.equal(image['@type'], 'ImageObject');
+  assert.equal(image.name, 'Brume sur la Loire');
+  assert.equal(image.creator.name, 'Sébastien');
+  assert.equal(image.url, 'http://localhost:3000/photo/brume-sur-la-loire');
+  assert.match(image.contentUrl, /^http:\/\/localhost:3000\/media\/[^/]+\.webp$/);
   assert.doesNotMatch(b, /\ssrcset="[^"]*https?:|\ssrc="https?:|<link[^>]+href="https?:\/\/(?!localhost)(?![^>]*rel="(?:canonical|alternate)")/);
   assert.match(b, /<link rel="stylesheet" href="\/static\/css\/v2\/tokens\.css\?v=[0-9a-f]{10}">/);
   assert.match(b, /<script src="\/static\/js\/v2\/site\.js\?v=[0-9a-f]{10}" defer><\/script>/);
