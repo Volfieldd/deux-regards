@@ -87,9 +87,14 @@ test('aides v2 : sizes des rangées, de l’ouverture, mots composés insécable
 
 test('filtre par photographe : une adresse par choix, état actif, comptes qui suivent le regard', async t => {
   const c = await v2(t);
-  const b = (await c.visit('/auteur/julien')).body;
+  const res = await c.visit('/auteur/julien');
+  assert.equal(res.statusCode, 200);
+  const b = res.body;
   assert.match(b, /<title>Galerie, par Julien \(\d+ photos\) · Test<\/title>/);
-  assert.match(b, /<h1 class="titre-page">Galerie<\/h1>/);
+  // Depuis le référencement (#227), la page auteur porte son nom ; les filtres et leur portée restent les mêmes.
+  assert.equal(b.match(/<h1\b/g)?.length, 1);
+  assert.match(b, /<h1 class="titre-page">Julien<\/h1>/);
+  assert.deepEqual(tiles(b, 'g-h'), order(c, "a.slug = 'julien'"));
   assert.match(b, /<a class="filtre" href="\/auteur\/julien#filtres" aria-current="page"><span class="filtre-nom">Julien<\/span>/);
   assert.match(b, /<a class="filtre" href="\/galerie#filtres"><span class="filtre-nom">Les deux<\/span> <span class="filtre-n">12<\/span>/);
   assert.match(b, /<h2 class="titre-2" id="g-h" tabindex="-1">Les photos de Julien<\/h2><p>6 sur 12&nbsp;· ordre choisi par nous<\/p>/);
