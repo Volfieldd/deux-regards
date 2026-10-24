@@ -1,0 +1,166 @@
+{
+  "Direction de publication": {
+    "en": "Publishing direction",
+    "de": "Publikationsleitung"
+  },
+  "Photos proposées au vote": {
+    "en": "Photos proposed for voting",
+    "de": "Zum Abstimmen vorgeschlagene Fotos"
+  },
+  "Le vote est consultatif. Le photographe propose, le relecteur relit, puis l’administrateur valide. Seule la direction de publication peut réordonner les propositions.": {
+    "en": "Voting is advisory. The photographer proposes, the reviewer reviews, then the administrator approves. Only the publishing director can reorder the proposals.",
+    "de": "Die Abstimmung ist beratend. Der Fotograf schlägt vor, der Lektor prüft, dann bestätigt der Administrator. Nur die Publikationsleitung kann die Vorschläge neu ordnen."
+  },
+  "L’action n’a pas été enregistrée.": {
+    "en": "The action was not saved.",
+    "de": "Die Aktion wurde nicht gespeichert."
+  },
+  "Liste actuelle": {
+    "en": "Current list",
+    "de": "Aktuelle Liste"
+  },
+  "Version {n}": {
+    "en": "Version {n}",
+    "de": "Version {n}"
+  },
+  "Relecture": {
+    "en": "Review",
+    "de": "Lektorat"
+  },
+  "Validée pour cette version": {
+    "en": "Approved for this version",
+    "de": "Für diese Version bestätigt"
+  },
+  "En attente": {
+    "en": "Pending",
+    "de": "Ausstehend"
+  },
+  "Validation de l’administration": {
+    "en": "Administrator approval",
+    "de": "Bestätigung durch die Administration"
+  },
+  "Les propositions ne sont pas ouvertes au vote tant que les deux validations de cette version ne sont pas enregistrées.": {
+    "en": "The proposals are unavailable for voting until both approvals for this version have been saved.",
+    "de": "Die Vorschläge stehen erst zur Abstimmung, wenn beide Bestätigungen dieser Version gespeichert sind."
+  },
+  "Aucune photographie proposée.": {
+    "en": "No photos proposed.",
+    "de": "Keine Fotos vorgeschlagen."
+  },
+  "Le choix au vote est figé après la clôture ou le retrait.": {
+    "en": "The voting selection is frozen after closing or withdrawal.",
+    "de": "Die Auswahl zur Abstimmung ist nach Abschluss oder Rücknahme gesperrt."
+  },
+  "Choisir les photographies proposées": {
+    "en": "Choose the proposed photos",
+    "de": "Vorgeschlagene Fotos auswählen"
+  },
+  "L’ordre des photographies conservées reste identique. Les nouvelles propositions sont ajoutées à la fin.": {
+    "en": "Retained photos keep their order. New proposals are appended at the end.",
+    "de": "Beibehaltene Fotos behalten ihre Reihenfolge. Neue Vorschläge werden am Ende hinzugefügt."
+  },
+  "Photos publiées de l’accrochage": {
+    "en": "Published photos in the exhibition",
+    "de": "Veröffentlichte Fotos der Ausstellung"
+  },
+  "Enregistrer les propositions": {
+    "en": "Save proposals",
+    "de": "Vorschläge speichern"
+  },
+  "Réordonner les propositions": {
+    "en": "Reorder proposals",
+    "de": "Vorschläge neu ordnen"
+  },
+  "Tout changement de liste ou d’ordre annule les deux validations, y compris pendant l’exposition.": {
+    "en": "Any change to the list or order cancels both approvals, including during the exhibition.",
+    "de": "Jede Änderung der Liste oder Reihenfolge hebt beide Bestätigungen auf, auch während der Ausstellung."
+  },
+  "Enregistrer l’ordre": {
+    "en": "Save order",
+    "de": "Reihenfolge speichern"
+  },
+  "Relecture de la liste": {
+    "en": "List review",
+    "de": "Prüfung der Liste"
+  },
+  "Je valide les photographies et leur ordre dans la version affichée.": {
+    "en": "I approve the photos and their order in the displayed version.",
+    "de": "Ich bestätige die Fotos und ihre Reihenfolge in der angezeigten Version."
+  },
+  "Valider la relecture": {
+    "en": "Approve review",
+    "de": "Prüfung bestätigen"
+  },
+  "Ouvrir cette liste au vote": {
+    "en": "Approve this voting list",
+    "de": "Diese Abstimmungsliste bestätigen"
+  },
+  "Propositions enregistrées.": {
+    "en": "Proposals saved.",
+    "de": "Vorschläge gespeichert."
+  },
+  "Relecture enregistrée.": {
+    "en": "Review saved.",
+    "de": "Prüfung gespeichert."
+  },
+  "Validation enregistrée.": {
+    "en": "Approval saved.",
+    "de": "Bestätigung gespeichert."
+  },
+  "Ordre enregistré. Une nouvelle double validation est nécessaire.": {
+    "en": "Order saved. Both approvals are required again.",
+    "de": "Reihenfolge gespeichert. Beide Bestätigungen sind erneut erforderlich."
+  },
+  "Formulaire de propositions attendu.": {
+    "en": "A proposal form is required.",
+    "de": "Ein Vorschlagsformular ist erforderlich."
+  },
+  "Formulaire de propositions invalide.": {
+    "en": "Invalid proposal form.",
+    "de": "Ungültiges Vorschlagsformular."
+  },
+  "Champ de propositions inconnu.": {
+    "en": "Unknown proposal field.",
+    "de": "Unbekanntes Vorschlagsfeld."
+  },
+  "Donnez une position distincte à chaque photographie.": {
+    "en": "Give each photo a distinct position.",
+    "de": "Geben Sie jedem Foto eine eindeutige Position."
+  },
+  "Exposition introuvable.": {
+    "en": "Exhibition not found.",
+    "de": "Ausstellung nicht gefunden."
+  },
+  "Les propositions doivent être des photos publiées et autorisées de l’accrochage.": {
+    "en": "Proposals must be published and authorized photos from the exhibition.",
+    "de": "Vorschläge müssen veröffentlichte und freigegebene Fotos der Ausstellung sein."
+  },
+  "L’ordre doit reprendre exactement les photos proposées.": {
+    "en": "The order must contain exactly the proposed photos.",
+    "de": "Die Reihenfolge muss genau die vorgeschlagenen Fotos enthalten."
+  },
+  "Proposez au moins une photographie avant validation.": {
+    "en": "Propose at least one photo before approval.",
+    "de": "Schlagen Sie vor der Bestätigung mindestens ein Foto vor."
+  },
+  "La relecture de cette version est nécessaire avant la validation.": {
+    "en": "This version must be reviewed before approval.",
+    "de": "Diese Version muss vor der Bestätigung geprüft werden."
+  },
+  "Photos proposées au vote enregistrées": {
+    "en": "Proposed voting photos saved",
+    "de": "Vorgeschlagene Abstimmungsfotos gespeichert"
+  },
+  "Photos proposées au vote relues": {
+    "en": "Proposed voting photos reviewed",
+    "de": "Vorgeschlagene Abstimmungsfotos geprüft"
+  },
+  "Photos proposées au vote validées": {
+    "en": "Proposed voting photos approved",
+    "de": "Vorgeschlagene Abstimmungsfotos bestätigt"
+  },
+  "Photos proposées au vote réordonnées": {
+    "en": "Proposed voting photos reordered",
+    "de": "Vorgeschlagene Abstimmungsfotos neu geordnet"
+  }
+}

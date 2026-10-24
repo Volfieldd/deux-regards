@@ -9,7 +9,7 @@
 <header class="saisons-entete">
   <a class="saisons-retour" href="/admin/saisons">← <%= t('Expositions') %></a>
   <div class="saisons-titre"><h1><%= s.title %></h1><span class="saisons-etat saisons-etat--<%= s.phase %>"><%= t(it.phaseLabels[s.phase]) %></span></div>
-  <div class="actions"><a class="btn ghost" href="/admin/saisons/<%= s.id %>/apercu"><%= t('Voir l’aperçu privé') %></a></div>
+  <div class="actions"><a class="btn ghost" href="/admin/saisons/<%= s.id %>/vote"><%= t('Photos proposées au vote') %></a><a class="btn ghost" href="/admin/saisons/<%= s.id %>/apercu"><%= t('Voir l’aperçu privé') %></a></div>
 </header>
 <p class="saisons-note"><%= t('Les décisions prises ici préparent la saison. Ses pages publiques seront disponibles dans une étape suivante.') %></p>
 <% if (it.error) { %><section class="saisons-erreur" role="alert" aria-labelledby="saison-erreur-t"><h2 id="saison-erreur-t"><%= t('Les modifications n’ont pas été enregistrées.') %></h2><p><%= it.error %></p><p><%= t('Vérifiez les champs ci-dessous avant de réessayer.') %></p><% if (it.errorField === 'version') { %><a class="btn ghost" href="/admin/saisons/<%= s.id %>"><%= t('Recharger la dernière version') %></a><% } %></section><% } %>

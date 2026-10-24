@@ -50,6 +50,7 @@ import { TRAP_PATH } from './securite/piege.js';
 import { createPublicVersion, usesV2 } from './version-publique.js';
 import { createCarnet } from './carnet.js';
 import { createSaisons } from './saisons.js';
+import { createSaisonsPropositions } from './saisons-propositions.js';
 import { createRepo } from './repo.js';
 
 export { truncateIp };
@@ -297,6 +298,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('publicRepo', createRepo(db));
   app.decorate('carnet', createCarnet({ db, repo: app.publicRepo, readiness: app.readiness, accounts: app.accounts, mailer: app.mailer, audit: app.audit, siteName: app.siteName, publicUrl: config.publicUrl, log: app.log }));
   app.decorate('saisons', createSaisons({ db, readiness: app.readiness }));
+  app.decorate('saisonsPropositions', createSaisonsPropositions({ db, saisons: app.saisons, readiness: app.readiness }));
   // Publications programmées : vérifiées chaque minute, photos d'abord (un billet programmé attend ses photos programmées
   // à la même heure), puis billets (app.carnet.runDue, seule à publier un billet programmé).
   let reviewTimer = null;
