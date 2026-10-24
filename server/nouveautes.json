@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.223.0",
+    "date": "2026-10-24",
+    "pr": 223,
+    "title": {
+      "fr": "Les photos proposées passent par une double validation",
+      "en": "Proposed photographs receive two approvals",
+      "de": "Vorgeschlagene Fotos durchlaufen eine doppelte Freigabe"
+    },
+    "items": [
+      {
+        "perm": "saisons.voir",
+        "fr": "Le photographe prépare les photos proposées au vote, le relecteur les relit et l’administration les valide. La direction de publication peut réordonner les propositions avec un rôle distinct, attribué explicitement. Tout changement de liste ou d’ordre demande une nouvelle double validation. Le vote des visiteurs est raccordé au lot suivant.",
+        "en": "The photographer prepares photographs for voting, a reviewer checks them and the administrator approves them. Publication direction may reorder the proposals through a distinct, explicitly assigned role. Every change to the list or its order requires both approvals again. Visitor voting is connected in the next stage.",
+        "de": "Der Fotograf bereitet die Fotos für die Abstimmung vor, der Reviewer prüft sie und die Administration gibt sie frei. Die Publikationsleitung darf die Vorschläge mit einer eigenen, ausdrücklich zugewiesenen Rolle umordnen. Jede Änderung der Liste oder Reihenfolge erfordert beide Freigaben erneut. Die Besucherabstimmung wird im nächsten Schritt angebunden."
+      }
+    ]
+  },
+  {
     "version": "1.222.0",
     "date": "2026-10-24",
     "pr": 222,
