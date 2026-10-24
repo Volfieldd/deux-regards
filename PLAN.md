@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Correction — Calcul des provenances de la Vigie (24 octobre 2026)
+
+Le correctif local de `/flux` est porté sur le code courant : SQLite regroupe les 50 000 événements les plus récents avant leur matérialisation en JavaScript, et les cinq provenances les plus actives sont sélectionnées sans tri global. Les effectifs, exclusions des administrateurs et opérateurs, masques par rôle, périodes et signalement de la limite sont conservés. Les noms d’opérateurs suivent la date de réception puis le numéro de ligne, y compris lors d’un lot simultané ou d’arrivées désordonnées. Les tests de régression comptent le travail et vérifient les résultats, sans seuil absolu de durée. Aucun changement du moteur, des dossiers, des règles ou des droits.
+
 ## Étude — Suivi CNIL et application des exigences cookies (24 octobre 2026)
 
 Précision du propriétaire : **l’ensemble est déployé en zone euro**. Localisation enregistrée par déclaration dans les fiches prestataires ; les flux et garanties des services tiers, l’exemption par finalité et la réalisation du chiffrement restent des vérifications distinctes.

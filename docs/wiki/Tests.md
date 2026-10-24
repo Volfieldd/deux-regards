@@ -170,6 +170,8 @@ Vérification ciblée : `node --test test/vigie-veille*.test.js test/vigie-notif
 
 ### Tests de durée
 
+Les régressions des provenances de `/flux` dans `test/vigie-console-sante-flux.test.js` mesurent le nombre de lignes matérialisées et les comparaisons du classement, sans seuil absolu de durée. Elles vérifient aussi la borne de 50 000 événements, les effectifs, l’exclusion des administrateurs, les masques par rôle et le choix du nom d’opérateur lors d’événements simultanés ou reçus dans le désordre.
+
 La machine de développement est souvent chargée (plusieurs agents en parallèle : charge de 60 à 95 sur 16 cœurs). Un seuil en millisecondes y échoue au hasard, puis passe relancé seul. Règle : **mesurer le travail ou comparer des durées relatives ; jamais un seuil absolu seul.** Dans l'ordre de préférence :
 
 1. **Durées relatives** : une saisie hostile contre une saisie ordinaire, 8 000 signes contre 1 000, une requête piégée contre la même requête sans piège. Un défaut (retour arrière d'une expression régulière, boucle quadratique) change le rapport d'un ordre de grandeur ; la charge, qui touche les deux mesures, ne le change pas.

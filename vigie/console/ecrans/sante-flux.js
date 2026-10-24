@@ -103,9 +103,18 @@ function qFlux(db) {
     reponses: db.prepare('SELECT id, kind, alerte_id, cree_a FROM decisions WHERE alerte_id IN (SELECT value FROM json_each(?)) AND auto = 1 AND cree_a >= ? ORDER BY id LIMIT 2000'),
     admins: db.prepare(`SELECT DISTINCT ip FROM events WHERE type = 'authn_login_success' AND recu_a >= ? AND ip IS NOT NULL
       AND sub IN (SELECT value FROM json_each(?)) LIMIT 500`).pluck(),
-    prov: db.prepare(`SELECT ip, country, composant, CASE WHEN composant = 'bordure' THEN json_extract(detail, '$.asn') END asn,
-      CASE WHEN composant = 'bordure' THEN json_extract(detail, '$.operateur') END op
-      FROM events WHERE recu_a >= ? AND type NOT IN (${ROUTINE_SQL}) ORDER BY recu_a DESC LIMIT ${PROV_MAX + 1}`),
+    // Provenances comptées par SQLite (audit du plantage de /flux, 19 oct. 2026) : les PROV_MAX événements les plus récents,
+    // regroupés par (adresse, pays, composant, opérateur) : une ligne par groupe, pas par événement dans le tas JS.
+    // op : celui de l'événement le plus récent du groupe (colonne nue avec MAX, propre à SQLite). La clé de largeur
+    // fixe ordonne les entiers positifs (date de la période active, numéro) sans perte : les lots partagent souvent
+    // la même date, départagée par seq comme le parcours inverse d'events_recu. Elle reste une chaîne en JS.
+    prov: db.prepare(`SELECT ip, country, composant, asn, op, COUNT(*) n, MAX(printf('%020d:%020d', recu_a, seq)) dernier FROM (
+        SELECT seq, recu_a, ip, country, composant, CASE WHEN composant = 'bordure' THEN json_extract(detail, '$.asn') END asn,
+          CASE WHEN composant = 'bordure' THEN json_extract(detail, '$.operateur') END op
+        FROM events WHERE recu_a >= ? AND type NOT IN (${ROUTINE_SQL}) ORDER BY recu_a DESC, seq DESC LIMIT ${PROV_MAX})
+      GROUP BY ip, country, composant, asn`),
+    // La période a-t-elle plus de PROV_MAX événements ?
+    provPlus: db.prepare(`SELECT 1 FROM events WHERE recu_a >= ? AND type NOT IN (${ROUTINE_SQL}) ORDER BY recu_a DESC LIMIT 1 OFFSET ${PROV_MAX}`).pluck(),
     reglage: db.prepare('SELECT value FROM settings WHERE key = ?').pluck(),
   };
   requetesFlux.set(db, q);
@@ -235,25 +244,45 @@ export function lireProvenances({ db, debut, role }) {
   const admins = Array.isArray(ctrl?.administrateurs) ? ctrl.administrateurs.map(String) : [];
   const ipsAdmins = new Set(admins.length ? q.admins.all(debut, JSON.stringify(admins)) : []);
   const rows = q.prov.all(debut);
-  const coupe = rows.length > PROV_MAX;
-  if (coupe) rows.length = PROV_MAX;
+  const coupe = q.provPlus.get(debut) != null;
   const asnAdmins = new Set(rows.filter(r => r.asn && ipsAdmins.has(r.ip)).map(r => String(r.asn)));
   const adr = new Map(), ops = new Map(), pays = new Map();
-  let exclus = 0, bordure = 0, bordureAsn = 0;
-  const plus = (m, k, extra) => { const x = m.get(k) || { n: 0, ...extra }; x.n += 1; m.set(k, x); };
+  let lus = 0, exclus = 0, bordure = 0, bordureAsn = 0;
+  const plus = (m, k, n, extra) => { const x = m.get(k) || { n: 0, ...extra }; x.n += n; m.set(k, x); return x; };
   for (const r of rows) {
-    if (r.ip && (ipsAdmins.has(r.ip) || (r.asn && asnAdmins.has(String(r.asn))))) { exclus += 1; continue; }
-    if (r.ip) { const a = adresseDetail(r.ip, role); plus(adr, a.texte, { v6: a.v6, tronquee: a.tronquee }); }
-    if (r.composant === 'bordure') { bordure += 1; if (r.asn) { bordureAsn += 1; plus(ops, String(r.asn), { op: r.op }); } }
-    if (r.country) plus(pays, String(r.country), {});
+    lus += r.n;
+    if (r.ip && (ipsAdmins.has(r.ip) || (r.asn && asnAdmins.has(String(r.asn))))) { exclus += r.n; continue; }
+    if (r.ip) { const a = adresseDetail(r.ip, role); plus(adr, a.texte, r.n, { v6: a.v6, tronquee: a.tronquee }); }
+    if (r.composant === 'bordure') {
+      bordure += r.n;
+      if (r.asn) {
+        bordureAsn += r.n;
+        // Le nom de l'opérateur : celui de son événement le plus récent.
+        const x = plus(ops, String(r.asn), r.n, { op: r.op, dernier: r.dernier });
+        if (r.dernier > x.dernier) { x.op = r.op; x.dernier = r.dernier; }
+      }
+    }
+    if (r.country) plus(pays, String(r.country), r.n, {});
   }
-  const top = (m, k = 5) => [...m.entries()].sort((a, b) => b[1].n - a[1].n || String(a[0]).localeCompare(String(b[0]))).slice(0, k);
+  // Les k premiers en une passe, sans trier toute la liste : des dizaines de milliers d'adresses vues une fois chacune
+  // (un balayage) donnaient autant de comparaisons localeCompare, une demi-seconde de boucle bloquée.
+  const avant = (a, b) => b[1].n - a[1].n || String(a[0]).localeCompare(String(b[0]));
+  const top = (m, k = 5) => {
+    const t = [];
+    for (const e of m) {
+      if (t.length === k && avant(e, t[k - 1]) >= 0) continue;
+      let i = t.length === k ? k - 1 : t.length;
+      while (i > 0 && avant(e, t[i - 1]) < 0) { t[i] = t[i - 1]; i -= 1; }
+      t[i] = e;
+    }
+    return t;
+  };
   const tAdr = top(adr), tOps = top(ops), tPays = top(pays);
   const reste = (m, tp) => [...m.values()].reduce((s, x) => s + x.n, 0) - tp.reduce((s, [, x]) => s + x.n, 0);
   const max = l => Math.max(1, ...l.map(([, x]) => x.n));
   const barre = (n, m) => Math.max(1, Math.round((100 * n) / m));
   return {
-    exclus: nombre(exclus), nExclus: exclus, coupe, lus: nombre(rows.length),
+    exclus: nombre(exclus), nExclus: exclus, coupe, lus: nombre(lus),
     adresses: tAdr.map(([texte, x]) => ({ texte, v6: x.v6, tronquee: x.tronquee, n: nombre(x.n), barre: barre(x.n, max(tAdr)) })), resteAdresses: nombre(reste(adr, tAdr)), nResteAdresses: reste(adr, tAdr),
     operateurs: tOps.map(([asn, x]) => ({ texte: `AS${asn}${x.op ? ` · ${String(x.op).slice(0, 60)}` : ''}`, n: nombre(x.n), barre: barre(x.n, max(tOps)) })), bordure: nombre(bordure), bordureAsn: nombre(bordureAsn),
     pays: tPays.map(([c, x]) => ({ texte: majuscule(nomPays(c)), n: nombre(x.n), barre: barre(x.n, max(tPays)) })),
