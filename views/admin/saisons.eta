@@ -1,0 +1,33 @@
+<% if (!it.corps) layout('./layout') %>
+<% const t = it.t, labels = it.phaseLabels, f = it.fields || {}; %>
+<div class="saisons">
+<header class="saisons-entete">
+  <h1><%= t('Les saisons') %></h1>
+  <p class="sub"><%= t('Préparer une exposition, choisir son accrochage et fixer son calendrier.') %></p>
+</header>
+<p class="saisons-note"><%= t('L’atelier prépare les décisions éditoriales. Les pages publiques des saisons seront livrées dans une étape suivante.') %></p>
+<% if (it.error) { %><div class="saisons-erreur" role="alert"><p><%= it.error %></p></div><% } %>
+<% if (it.canWrite) { %>
+<form class="panel form" method="post" action="/admin/saisons" aria-labelledby="nouvelle-saison-t">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <h2 id="nouvelle-saison-t"><%= t('Nouvelle saison') %></h2>
+  <div class="saisons-champ"><label for="nouveau-titre"><%= t('Titre en français') %></label><input id="nouveau-titre" name="title" type="text" maxlength="120" value="<%= f.title || '' %>" required<%~ it.errorField === 'title' ? ' aria-invalid="true" aria-describedby="nouveau-titre-erreur"' : '' %>>
+<% if (it.errorField === 'title') { %>    <p class="err" id="nouveau-titre-erreur"><%= it.error %></p>
+<% } %>  </div>
+  <div class="actions"><button class="btn" type="submit"><%= t('Créer le brouillon') %></button></div>
+</form>
+<% } %>
+<form class="saisons-filtres" method="get" action="/admin/saisons" aria-label="<%= t('Filtrer les saisons') %>">
+  <div class="saisons-champ"><label for="filtre-etat"><%= t('État') %></label><select id="filtre-etat" name="etat"><option value=""><%= t('Tous les états') %></option><% Object.entries(labels).forEach(([key, label]) => { %><option value="<%= key %>"<%~ it.filter === key ? ' selected' : '' %>><%= t(label) %></option><% }) %></select></div>
+  <button class="btn ghost" type="submit"><%= t('Filtrer') %></button>
+</form>
+<% if (!it.list.length) { %>
+<p class="empty"><%= t('Aucune saison dans cette vue.') %></p>
+<% } else { %>
+<ul class="saisons-liste" aria-label="<%= t('Saisons, les plus récentes d’abord') %>">
+<% it.list.forEach(s => { %>
+  <li class="panel"><div><h2><a href="/admin/saisons/<%= s.id %>"><%= s.title %></a></h2><p class="sub"><%= t('{n} photos', { n: s.photo_ids.length }) %></p><p class="saisons-dates"><%= s.datesLabel || t('Calendrier à compléter') %></p></div><span class="saisons-etat saisons-etat--<%= s.phase %>"><%= t(labels[s.phase]) %></span></li>
+<% }) %>
+</ul>
+<% } %>
+</div>

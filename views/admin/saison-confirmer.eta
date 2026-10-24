@@ -1,0 +1,25 @@
+<% if (!it.corps) layout('./layout') %>
+<% const t = it.t, s = it.saison; %>
+<div class="saisons">
+<header class="saisons-entete"><a class="saisons-retour" href="/admin/saisons/<%= s.id %>">← <%= s.title %></a><h1><%= it.actionLabel %></h1></header>
+<% if (it.error) { %><div class="saisons-erreur" role="alert"><p><%= it.error %></p></div><% } %>
+<form class="panel form" method="post" action="/admin/saisons/<%= s.id %>/<%= it.action %>" aria-labelledby="recap-t">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="version" value="<%= s.version %>">
+  <h2 id="recap-t"><%= t('Récapitulatif de la saison') %></h2>
+  <p><%= it.confirmText %></p>
+  <dl class="saisons-recap"><dt><%= t('Titre') %></dt><dd><%= s.title %></dd><dt><%= t('État actuel') %></dt><dd><%= t(it.phaseLabels[s.phase]) %></dd><dt><%= t('Ouverture') %></dt><dd><%= it.datesLabel.opens_at || t('Non renseignée') %></dd><dt><%= t('Clôture') %></dt><dd><%= it.datesLabel.closes_at || t('Non renseignée') %></dd><dt><%= t('Fuseau') %></dt><dd><%= it.zoneLabel %></dd><dt><%= t('Accrochage') %></dt><dd><%= t('{n} photos', { n: it.photos.length }) %></dd></dl>
+  <p class="saisons-intention"><%= s.intro %></p>
+<% if (it.photos.length) { %>
+  <ol class="saisons-miniatures" aria-label="<%= t('Accrochage à confirmer, dans l’ordre') %>">
+<% it.photos.forEach(ph => { %>    <li><% if (ph.ready && ph.thumb && ph.available) { %><img class="saisons-vignette" src="<%= ph.thumb %>" width="80" height="<%= Math.round(80 * ph.height / ph.width) %>" alt="" loading="lazy" decoding="async"><% } %><span><%= ph.title %><% if (!ph.available) { %><span class="err"><%= t('Photo indisponible') %></span><% } %></span></li>
+<% }) %>  </ol>
+<% } %>
+  <p class="hint"><%= t('Cette décision prépare la saison. Les pages publiques seront livrées dans une étape suivante.') %></p>
+<% if (it.action === 'retirer') { %>
+  <div class="saisons-champ"><label for="reason"><%= t('Motif du retrait') %></label><p class="hint" id="motif-aide"><%= t('Choisissez le motif correspondant à cette décision.') %></p><select id="reason" name="reason" required aria-describedby="motif-aide<%= it.errorField === 'reason' ? ' motif-erreur' : '' %>"<%~ it.errorField === 'reason' ? ' aria-invalid="true"' : '' %>><option value=""><%= t('Choisir un motif') %></option><% (it.withdrawReasons || []).forEach(reason => { %><option value="<%= reason.value %>"<%~ it.reason === reason.value ? ' selected' : '' %>><%= t(reason.label) %></option><% }) %></select>
+<% if (it.errorField === 'reason') { %>    <p class="err" id="motif-erreur"><%= it.error %></p>
+<% } %>  </div>
+<% } %>
+  <div class="actions"><a class="btn ghost" href="/admin/saisons/<%= s.id %>#decisions"><%= t('Annuler') %></a><button class="btn<%= it.action === 'retirer' ? ' danger' : '' %>" type="submit"><%= it.actionLabel %></button></div>
+</form>
+</div>

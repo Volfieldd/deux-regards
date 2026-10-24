@@ -1,271 +1,243 @@
-# Les saisons et l’Après-image : conception et plan de réalisation
+# Les saisons : expositions et vote consultatif
 
 | | |
 |---|---|
-| Statut | Plan fonctionnel rédigé ; **S0 implémenté dans la branche de travail, en attente de revue**. Aucune interface de saison ni participation publique n’est annoncée comme livrée. L’avancement effectif et les PR figurent dans [`PLAN.md`](../../PLAN.md). |
-| Date | 23 octobre 2026. |
-| Base de départ | `origin/main` à `f44cdf3`, branche de travail `feat/saisons-socle`. |
-| Objet | Une programmation d’expositions photographiques datées, des collections accessibles directement et une participation facultative qui peut prolonger une exposition. |
+| Statut | Cadrage actualisé après les arbitrages du propriétaire. S0 est en PR #218 et la préparation S1a en PR #219, en brouillon. Aucun parcours de saison ni vote n’est activé. |
+| Date | 23 octobre 2026 ; précision du mécanisme de vote le 24 octobre 2026. |
+| Objet | Expositions photographiques datées, couverture publique avant ouverture, archive complète pendant 12 mois et prolongements éditoriaux vers les collections. Le pilote participatif est un vote consultatif sur des photos proposées à l’avance. |
 | Références | [Développer](../wiki/Développer.md), [Spécifications](../wiki/Spécifications.md), [Tests](../wiki/Tests.md), [Sécurité](../wiki/Sécurité.md), [RGPD](../wiki/RGPD.md), [besoins de la Vigie](vigie-besoins-des-briques.md). |
-| Lecture | **Retenu** : orientation issue de la conversation. **Proposé** : contrat détaillé à confirmer par la réalisation ou un arbitrage explicite. **À arbitrer** : décision encore ouverte, notamment en matière de droits, de sécurité ou de données personnelles. |
+| Lecture | **Décidé** : réponse explicite du propriétaire. **Proposé** : détail fonctionnel à confirmer. **Ouvert** : arbitrage encore nécessaire. **Différé** : hors du pilote, sans collecte ni activation implicite. |
 
-Cette note décrit la cible et ses conditions de livraison. Une règle proposée ici n’est pas une permission accordée à un rôle existant. Une maquette illustre un parcours ; elle ne prouve ni la persistance des données ni la mise en production.
+Cette révision remplace le pilote Après-image fondé sur une composition créée par le visiteur. Le visiteur vote désormais sur des photographies déjà proposées et validées. Il ne dépose ni image, ni composition, ni commentaire. La conception antérieure reste documentée au § 8 pour une évolution future.
 
-## 1. Intentions et décisions retenues
+## 1. Décisions et périmètre retenu
 
-| Id | Orientation retenue |
+Les orientations SA-D1 à SA-D4 et SA-D7/SA-D8 restent la base : priorité aux **Saisons**, exposition datée avec accrochage ordonné, séries conservées, visite libre et accès direct aux collections ; les photographes gardent la décision artistique et peuvent ne rien retenir. L’évolution participative demeure facultative.
+
+Les anciennes SA-D5 (triptyque composé par le visiteur) et SA-D10 (Écho/Contraste/Déplacement) sont **différées**. SA-D6 conserve son sens uniquement pour cette future contribution ; un vote du pilote n’est pas une composition à publier. L’ancienne SA-D9 est remplacée concernant le vote : le **vote consultatif entre dans le pilote**, les invités et dépôts externes restent différés.
+
+| Id | Point de la liste soumis au propriétaire | Décision retenue |
+|---|---|---|
+| SA-D11 | 8 — Navigation | Le nom public de la rubrique est **Expositions**. « Les saisons » reste le concept éditorial. |
+| SA-D12 | 9 — Accueil | **L’administrateur seul choisit ce que l’accueil met en avant**. Le photographe et le relecteur ne décident pas de cette mise en avant. Le contenu exact entre deux saisons reste à préciser. |
+| SA-D13 | 10 — Avant ouverture | **Couverture publique** avant l’ouverture. Cela n’autorise pas la visite anticipée de l’accrochage ; les autres informations de l’annonce restent à préciser. |
+| SA-D14 | 11 — Archive | **Conserver l’exposition complète pendant 12 mois**. Point de départ exact et comportement à échéance à préciser ; la durée ne vaut pas décision d’effacer les photos de leur série. |
+| SA-D15 | 12 — Contenus | Ajouter **sous-titre, prologue, conclusion, couverture et cartels propres à l’exposition**. Les champs et les longueurs proposés au § 6 restent à aligner avec leur réalisation. |
+| SA-D16 | 13 — Langues | **Français, anglais et allemand requis pour publier**. Une traduction manquante n’est plus silencieusement remplacée par le français dans ces nouveaux contenus. |
+| SA-D17 | 14 — Bilans | **Un bilan publié est immuable**. Une correction se publie dans un **second bilan rectificatif**, relié au précédent ; le premier n’est pas réécrit. |
+| SA-D18 | 14 — Prolongement | Un prolongement se **présente comme une nouvelle exposition**, avec son intention et son accrochage propres. Cette présentation ne transforme pas implicitement une collection permanente en exposition limitée dans le temps. |
+| SA-D19 | 15 — Proposition et validation | Le **photographe d’origine propose** ; **le relecteur et l’administrateur valident**. Dans le pilote, ce circuit porte sur les photos proposées au vote. Il ne décide pas à lui seul de tous les droits de gestion des saisons. |
+| SA-D20 | 15 et réponse complémentaire — Ordre | La **direction de publication peut réordonner les propositions**. C’est une **responsabilité distincte de l’administration**, à définir ; aucun rôle technique ou cumul automatique n’est créé par cette note. |
+| SA-D21 | 16/17 — Participation | **Vote sur des photos proposées à l’avance, sans compte ni identité déclarée**. Aucun dépôt ou mécanisme de suggestion de photo par un visiteur dans le pilote. Documenter cette seconde approche pour plus tard. |
+| SA-D22 | 20 et réponses complémentaires — Unicité | **Un vote possible sur chaque photo** ; limitation par navigateur acceptée, avec **cookie**, sans compte. Le contrat retenu est une voix par couple **photo/exposition pour ce navigateur**. Un même navigateur peut donc voter sur plusieurs photos de l’exposition, une fois sur chacune. |
+| SA-D23 | 18/19/21/22 — Reports | Mettre en attente visibilité/conservation des anciennes contributions, publication/attribution de ces contributions, branches successives et photographes invités. Ces points ne sont pas des dépendances du vote simple. |
+| SA-D24 | 23 — Portée du vote | **Consultatif**. Aucun classement ne publie automatiquement une photo dans les collections et aucun engagement de permanence n’est promis. Les autres formats se décideront plus tard. |
+| SA-D25 | 24 octobre — Limitation et traceurs | Accord pour **instruire un identifiant aléatoire minimal dans un cookie créé au premier vote**, sans fingerprinting. La possibilité d’éviter un bandeau global reste soumise à la justification d’une exemption applicable ; aucune exemption ni activation n’est acquise. |
+
+La réponse initiale « un seul vote par visiteur » est précisée par la réponse complémentaire « un vote possible sur chaque photo ». Le cookie accepté repère le navigateur dans le périmètre de l’exposition ; il ne représente pas une personne vérifiée. Effacer ses cookies ou changer d’appareil peut permettre un nouveau vote : cette limite est acceptée pour le pilote et doit être annoncée fidèlement.
+
+Les points **1 à 7** de la liste restent ouverts, sauf les responsabilités expressément décidées ci-dessus.
+
+## 2. Objets et règles communes
+
+| Objet | Rôle fonctionnel |
 |---|---|
-| SA-D1 | Préférence forte pour **Les saisons** : le site devient un lieu de rendez-vous autour d’un propos photographique commun. |
-| SA-D2 | Une saison est une **exposition datée**, avec un début, une fin, un texte d’intention et un accrochage ordonné. |
-| SA-D3 | Les **séries sont conservées**. La rubrique publique **Collections** propose une autre entrée éditoriale ; elle ne renomme ni ne remplace silencieusement les séries existantes. |
-| SA-D4 | Le visiteur peut parcourir toute l’exposition librement. L’**Après-image est facultative et proposée en fin de visite**. Ni compte ni vote ne conditionnent la visite. |
-| SA-D5 | Dans le pilote, l’Après-image porte sur **un triptyque de trois photographies**, distinct de l’accrochage complet de la saison : le visiteur en conserve deux et en remplace exactement une, sans doublon ni écrasement du parent. |
-| SA-D6 | **Contribution créée**, **contribution mise en avant** et **accrochage permanent** sont trois décisions distinctes. Aucune promotion automatique n’est promise. |
-| SA-D7 | Le bilan peut ne retenir aucune contribution et aucune photographie pour les collections. Les photographes gardent la décision artistique. |
-| SA-D8 | L’accueil évolue pour montrer la saison et conserve un accès direct aux collections. Les neuf écrans ont une déclinaison ordinateur et téléphone. |
-| SA-D9 | Les invités, le dépôt de photographies externes et les mécanismes de vote sont des évolutions séparées, après le socle et les arbitrages nécessaires. |
-| SA-D10 | Le pilote qualifie la réponse par une relation prédéfinie : **Écho**, **Contraste** ou **Déplacement**. Un commentaire libre est une possibilité future à arbitrer, pas un champ du pilote. |
+| Série | Classement photographique existant, conservé. Une photo ne change pas de série quand elle rejoint une exposition ou un prolongement. |
+| Saison / exposition | Exposition datée, avec textes, couverture et ordre propres. La rubrique publique se nomme Expositions. |
+| Accrochage | Ordre éditorial des photos ; aucun nombre multiple de trois n’est exigé. |
+| Annonce | Présence avant ouverture, avec couverture publique. Son contenu additionnel est distinct de la visite de l’exposition. |
+| Proposition au vote | Photo existante choisie à l’avance par le photographe d’origine et validée par le relecteur et l’administrateur. |
+| Vote consultatif | Soutien à une photo proposée, une fois par photo, par exposition et par navigateur reconnu. Aucun nouvel objet photographique n’est créé. |
+| Bilan | Récit publié après clôture ; la sélection peut être vide. Un bilan publié ne se modifie pas. |
+| Bilan rectificatif | Nouveau bilan qui indique ce qu’il rectifie et renvoie au précédent. Il ne l’efface pas. |
+| Prolongement / collection | Ensemble éditorial propre, présenté avec le soin et les éléments d’une nouvelle exposition ; sa filiation avec la saison reste lisible. |
 
-Le bénéfice recherché est une continuité entre découverte, rendez-vous et mémoire : voir une exposition aujourd’hui, éventuellement lui répondre, puis retrouver ce que les photographes ont choisi d’en conserver.
+Les associations portent sur les identifiants existants des photos ; aucune copie d’original n’est produite. L’autorisation courante d’une photo prime toujours sur son appartenance passée à une saison, à un bilan ou à une collection. Une photo dépubliée ou retirée n’est pas rétablie par une archive, une couverture, un résultat de vote ou une filiation.
 
-## 2. Vocabulaire et relations
-
-| Terme | Définition fonctionnelle |
-|---|---|
-| Série | Classement photographique existant. Une photo conserve sa série lorsqu’elle rejoint une saison ou une collection. |
-| Saison | Exposition éditoriale datée, indépendante du classement en séries. Plusieurs saisons peuvent réutiliser une photo autorisée. |
-| Accrochage de la saison | Ensemble ordonné de référence choisi pour l’exposition ; sa taille est indépendante de celle du pilote Après-image. |
-| Triptyque parent | Trois photographies de référence de l’atelier Après-image ; ce sous-ensemble reste identifiable lorsque des branches sont créées. |
-| Après-image | Réponse du visiteur à l’accrochage, dans un atelier borné ; elle ne modifie pas la photothèque. |
-| Branche | Accrochage dérivé qui garde la référence et la version de son parent, avec les remplacements explicités. |
-| Trace | Confirmation de l’enregistrement d’une contribution. Ses conditions de consultation et de conservation restent à arbitrer. |
-| Mise en avant | Choix éditorial de montrer une contribution ; ce n’est ni son enregistrement ni son entrée dans les collections. |
-| Bilan | Page de la saison close : intention rétrospective, choix et éventuels prolongements. Un bilan vide de sélection reste un bilan valide. |
-| Collection | Ensemble permanent éditorialisé, accessible sans traverser une saison ni participer. |
-| Filiation | Lien lisible entre saison, accrochage parent, branche éventuellement retenue et accrochage permanent. |
-
-**Proposé** : une photographie est référencée par son identifiant existant ; les saisons et collections portent leurs propres associations et ordres. Aucun déplacement de série, nouvelle copie d’original ni modification de l’inventaire ne résulte de ces associations.
-
-Une photographie peut rester visible dans sa série sans être retenue après une saison. « Non retenue » ne veut dire ni « supprimée », ni « dépubliée », ni « refusée artistiquement pour toujours ».
-
-## 3. Hiérarchie publique et neuf écrans
-
-La navigation cible de la maquette emploie **Expositions** et **Collections** ; **Les saisons** en est la signature éditoriale. Cette cible ne remplace pas automatiquement le menu existant. L’intégration conserve les accès utiles aux séries, photographes et à la galerie et s’accorde avec les thèmes déjà proposés ; aucune composition n’est activée silencieusement.
+## 3. Parcours du visiteur, ordinateur et téléphone
 
 | Écran | Contenu et résultat attendu | Ordinateur | Téléphone |
 |---|---|---|---|
-| E1 — Accueil | Saison du moment, photographie d’ouverture, intention brève, dates, « Visiter l’exposition » et accès direct aux collections. | Photographie dominante et texte bref ; une seule invitation principale. | Titre, dates et action lisibles sans recouvrir l’image ; collections accessibles immédiatement. |
-| E2 — Entrée d’exposition | Propos, photographes, dates, taille de l’accrochage ; « Commencer la visite » et accès direct aux images. | Prologue court et aperçu de l’accrochage. | Prologue resserré, sommaire accessible ; pas de longue introduction obligatoire. |
-| E3 — Photographie | Œuvre entière, cartel, position, précédente/suivante, retour au sommaire et à la saison. | Image préservée et commandes proches ; clavier en amélioration facultative. | Image adaptée au format et commandes visibles ; aucun geste horizontal imposé. |
-| E4 — Conclusion | Fin de visite, intention rappelée, collections et invitation facultative à l’Après-image. | Suites possibles regroupées sans classement social. | Actions successives lisibles : poursuivre librement ou contribuer. |
-| E5 — Atelier Après-image | Triptyque parent rappelé, deux images conservées, une remplacée parmi les choix autorisés, relation Écho/Contraste/Déplacement, aperçu et validation. | Triptyque parent et résultat comparables ; remplacement repérable. | Trois emplacements, compteur textuel et aperçu final ; sélection possible sans glisser. |
-| E6 — Confirmation et trace | Enregistrement confirmé, portée de la contribution expliquée, retour à la conclusion ou à la visite. | Accrochage obtenu et liens de sortie. | Confirmation courte avant les liens ; aucune inscription imposée ensuite. |
-| E7 — Saison close | Archive avec dates réelles ; « Bilan en préparation », puis bilan publié et éventuels liens vers les collections. | Récit et choix éditoriaux, sans fausse galerie encore ouverte à contribution. | Même contenu et mêmes états, en lecture verticale. |
-| E8 — Index des collections | Ensembles permanents, intention, couverture et accès à chaque accrochage. | Vue d’ensemble éditoriale, sans classement par popularité. | Liste lisible et liens nommés ; images sans recadrage destructeur. |
-| E9 — Accrochage permanent et filiation | Œuvres retenues, intention propre, origine et lien vers la saison et son bilan quand ils sont publics. | Accrochage puis filiation lisible ; l’origine ne prend pas la place des œuvres. | Filiation en texte après l’accrochage, sans graphe indispensable. |
+| E1 — Accueil | Mise en avant choisie par l’admin, intention courte, dates et visite ; accès direct aux collections. | Une invitation principale, photographie dominante. | Titre et actions lisibles sans recouvrir l’image. |
+| E2 — Entrée | Prologue, photographes, dates, accrochage et entrée dans la visite. Avant ouverture : annonce avec couverture, sans accès anticipé aux photos. | Prologue et aperçu lorsque l’exposition est ouverte. | Introduction resserrée, accès direct aux images. |
+| E3 — Photographie | Image entière, cartel contextuel, position, précédente/suivante et retour à l’exposition. Si cette photo est proposée au vote, action consultative selon le calendrier décidé. | Clavier en amélioration facultative ; commande de vote explicite. | Commandes visibles ; aucun geste de glisser indispensable. |
+| E4 — Conclusion | Conclusion éditoriale, collections et invitation facultative au vote. | Suites lisibles sans classement imposé. | Actions successives simples. |
+| E5 — Photos proposées au vote | Choix prévalidé ; vote possible sur chaque photo. Pas d’upload, de triptyque à composer ou de texte libre. | Images et cartels comparables, état par photo. | Liste lisible, action de 44 px au moins, état textuel. |
+| E6 — Confirmation | Vote effectivement enregistré, photo concernée et état déjà voté ; retour à la visite ou aux propositions. | Confirmation fidèle à la persistance. | Message bref, aucune inscription demandée. |
+| E7 — Archive | Exposition complète conservée pendant 12 mois ; bilan en préparation, puis bilan et éventuels rectificatifs. Le vote n’est pas présenté ouvert après sa clôture. | Archive et récit éditorial. | Même contenu, lecture verticale. |
+| E8 — Collections | Ensembles permanents accessibles directement. | Vue d’ensemble éditoriale. | Liste et liens nommés. |
+| E9 — Prolongement | Présentation comme une nouvelle exposition : couverture, intention, accrochage, textes et origine. | Les œuvres puis la filiation. | Filiation textuelle, sans graphe nécessaire. |
 
-La liste des saisons et les liens d’archives conduisent à E2 ou E7 selon l’état. Le bilan se consulte dans la saison close ; il n’impose pas un dixième écran.
+La visite libre E1 → E2 → E3 → E4 reste complète sans vote. Le visiteur peut aussi accéder directement aux collections. L’atelier de vote E5 est facultatif ; les emplacements exacts des invitations sur E3/E4 seront vérifiés à la réalisation, sans interrompre la première découverte d’une image.
 
-### Parcours et sorties
+**Ouvert avant S2** : contenu de l’accueil entre deux saisons, date de début de l’annonce, informations publiques accompagnant sa couverture, saison principale en cas de chevauchement et adaptation des thèmes. Le choix effectif de la mise en avant appartient déjà exclusivement à l’admin.
 
-- **Visite libre prioritaire** : E1 → E2 → E3, avec navigation libre → E4 → E8 ou une autre visite.
-- **Participation facultative** : E4 → E5 → E6 → E4 ; quitter l’atelier permet aussi de revenir à E4 sans contribution.
-- **Mémoire** : archive → E7 → E9, si un accrochage permanent a été publié ; E7 peut ne présenter que le bilan.
-- **Accès direct** : navigation → E8 → E9, sans exposition préalable, compte ni vote.
+## 4. Cycle éditorial, dates et archive
 
-L’Après-image n’interrompt pas la première consultation d’une photographie. Les liens directs vers une œuvre et les retours de visionneuse conservent le contexte de la saison ; ils ne déplacent pas l’utilisateur dans la galerie générale par surprise.
-
-Entre deux saisons, l’accueil peut présenter les collections, une saison annoncée ou la dernière archive. **Proposé** : une saison principale mise en avant à la fois ; les éventuels chevauchements et le choix de cette saison restent explicites dans l’admin.
-
-## 4. Calendrier, états et retrait
-
-| État fonctionnel | Visibilité et actions attendues |
+| Phase | Effet attendu |
 |---|---|
-| Brouillon | Préparation privée ; aucune présence publique ni accès par adresse devinée. |
-| Programmée | Dates et accrochage prêts ; annonce publique éventuelle distincte de la préparation privée. L’accès avant ouverture est cadré au lot S2. |
-| Ouverte | Visite disponible dans la fenêtre prévue. La participation ne l’est que si A1 est livré et activé pour cette saison. |
-| Close | Visite en archive selon le choix éditorial ; atelier fermé ; « Bilan en préparation » si aucun bilan n’est publié. |
-| Bilan publié | Saison close avec récit validé ; sélection éventuellement vide et liens vers les prolongements réellement publiés. |
-| Retirée | Retrait prioritaire sur le calendrier et le bilan : aucune œuvre ni contribution de la saison n’est rendue par son ancien accès public. |
+| Brouillon | Préparation privée, textes et accrochage modifiables par les personnes habilitées. |
+| Programmée / annoncée | Programmation validée ; couverture publique selon le début d’annonce encore à préciser. L’accrochage complet reste fermé avant ouverture. |
+| Ouverte | Visite disponible. Vote seulement si le lot V1 est livré et activé pour l’exposition selon son calendrier. |
+| Close | Exposition en archive complète pendant 12 mois ; vote fermé ; bilan en préparation si nécessaire. |
+| Bilan publié | Archive avec bilan immuable ; un rectificatif se publie séparément et reste lié au bilan qu’il corrige. |
+| Retirée | Retrait prioritaire : couverture, exposition, archive et accès au vote indisponibles publiquement par ce circuit. |
+| Échéance d’archive | Comportement à définir avant S2 ; aucune suppression de photothèque ou de collection ne découle automatiquement de la durée de 12 mois. |
 
-Le calendrier doit afficher une zone explicite dans l’admin. **À arbitrer avant S1/S2** : fuseau éditorial, saisie à l’heure ou à la journée, traitement des changements d’heure et possibilité de déplacer une clôture après ouverture. `Europe/Paris` est une proposition cohérente avec l’usage existant de l’inventaire, pas une décision acquise pour les saisons.
+Le socle S0 enregistre des instants et calcule la visibilité à la lecture : ouverture incluse, clôture exclue. Il permet déjà les chevauchements, fige textes et ordre dès programmation, autorise l’annulation d’une programmation avant ouverture et ne propose pas de réouverture après retrait. Ces comportements existants restent distingués des réponses encore manquantes aux points 1 à 7.
 
-**Proposé** : instants enregistrés sans ambiguïté ; ouverture incluse, clôture exclue. À l’instant exact de clôture, une nouvelle contribution n’est plus acceptée, même si son formulaire était déjà ouvert. Les dates publiques doivent permettre de comprendre la dernière période de visite sans compter sur un compte à rebours.
+**Ouvert** : fuseau éditorial et précision jour/heure ; modifications après programmation ou ouverture ; réversibilité du retrait, réouverture exceptionnelle, anciennes adresses et suppression/restauration. Le préparateur de formulaire S1a impose un fuseau fourni, sans défaut, et refuse les nouvelles heures locales ambiguës ou inexistantes.
 
-Le retrait est distinct d’une clôture normale et d’une suppression. Son motif est explicite dans l’admin ; le texte rendu au public ne révèle pas un motif sensible. **À arbitrer** : retrait réversible, réouverture exceptionnelle et devenir des adresses déjà partagées. Une remise en ligne ne doit jamais republier automatiquement une photographie devenue indisponible.
+La durée **12 mois** est décidée pour l’archive de l’exposition complète. **À préciser** : son point de départ exact et le sort public de la page à échéance — retrait de la visite complète, page de bilan conservée, redirection ou autre choix. Cette durée ne fixe ni la conservation des votes individuels ni celle du cookie de navigateur.
 
-## 5. Atelier Après-image et intégrité d’une branche
+## 5. Vote consultatif et circuit de validation
 
-L’atelier rappelle l’intention de la saison et le contrat du pilote : « Gardez deux images de ce triptyque et remplacez la troisième pour proposer un autre regard. » Le triptyque n’est pas l’accrochage complet de l’exposition. L’atelier ne demande pas d’évaluer les photographes ni de désigner un vainqueur.
+### 5.1 Choix et ordre des photos
 
-### Contrat de composition
+Le photographe d’origine propose les photos soumises au vote. La liste requiert deux validations, celle du relecteur et celle de l’administrateur. Une photo doit être existante, publiée et encore autorisée au moment de l’exposition et du vote. Le pilote n’a aucun dépôt externe.
 
-1. Le triptyque parent et sa version sont identifiés au début de l’atelier et revérifiés à l’enregistrement.
-2. La branche finale contient **exactement trois photographies** : deux du triptyque parent conservées et exactement une remplacée.
-3. Chaque photographie est présente au plus une fois dans la branche. Remettre la même photographie dans le même emplacement ne compte pas comme un remplacement.
-4. Les remplacements viennent uniquement du choix autorisé pour cette saison et encore disponible à la validation ; aucun identifiant fourni par le navigateur n’est accepté sur la seule foi du formulaire.
-5. La branche reçoit un identifiant distinct et garde la filiation ; le triptyque parent et l’accrochage complet de la saison ne sont jamais écrasés.
-6. Créer une branche ne change ni la série, ni le statut de publication, ni le cartel global des photographies.
-7. La relation est choisie dans la liste fermée **Écho / Contraste / Déplacement** ; une valeur différente est refusée. Aucun commentaire libre n’est recueilli dans le pilote.
+La direction de publication peut réordonner ces propositions. Le propriétaire a demandé une responsabilité distincte de l’administration : son rattachement à un rôle, ses autres droits et les cumuls éventuels restent à définir avant toute permission technique. Les validations doivent porter sur une version identifiable ; **proposé** : une modification des photos ou de leur ordre requiert une nouvelle validation pour éviter qu’un ordre approuvé soit remplacé silencieusement.
 
-La saison peut contenir un nombre de photographies quelconque dans les bornes du socle : **aucune contrainte de multiple de trois** ne s’applique à l’exposition. Un atelier sur un format plus grand demeure une idée ultérieure, hors du pilote et des critères A1.
+Ce circuit ne vaut pas définition de tous les droits de rédaction, traduction, programmation, retrait, bilan et collection. Le choix de l’accueil reste réservé à l’administrateur, indépendamment de la direction de publication.
 
-**À arbitrer avant A1** : désignation du triptyque parent, conservation des emplacements ou réordonnancement autorisé et constitution du choix de remplacement. La possibilité de repartir d’une branche et la profondeur maximale de filiation relèvent d’une extension A2 explicitement cadrée.
+### 5.2 Contrat de vote du pilote
 
-Un échec de formulaire conserve les sélections encore valides et explique les changements nécessaires sans prétendre que l’enregistrement a réussi. Un commentaire libre, même facultatif, demanderait un cadrage ultérieur de sa visibilité, de sa modération et de sa conservation avant tout ajout à l’atelier.
+1. Le visiteur peut voter sur **chaque photo du choix prévalidé**, sans compte ni identité déclarée.
+2. Une même photo reçoit **au plus une voix de ce navigateur dans cette exposition**. Un vote sur une autre photo du même choix est autorisé.
+3. Le cookie accepté sert à retrouver le périmètre du navigateur. Aucune empreinte d’adresse IP, adresse e-mail ou base de comptes ne découle de cette décision.
+4. L’écriture revérifie l’exposition, sa phase, la proposition validée et la disponibilité de la photo. Un identifiant fourni par le navigateur n’est pas une autorisation.
+5. Un double clic, un renvoi du formulaire ou des requêtes simultanées n’ajoutent pas plusieurs voix. La contrainte métier et la confirmation doivent rester vraies après redémarrage.
+6. Le résultat est **consultatif** ; il ne publie ni ne promeut automatiquement une photo dans une collection.
+7. Le vote n’écrit ni texte libre ni nouvelle composition, et ne modifie ni l’ordre des œuvres ni leur série.
+8. La confirmation suit la persistance effective. Un échec n’affiche pas « vote enregistré » et une répétition dit que le vote existe déjà.
 
-### Enregistrement, exposition et permanence
+**À préciser avant V1** : durée et portée exacte du cookie, données minimales du vote et leur durée, vote annulable ou définitif, affichage des résultats à l’équipe ou au public et moment de cette restitution, calendrier exact du vote dans la fenêtre d’exposition. La limitation par navigateur est acceptée ; elle ne devient pas une garantie de personne unique sur tous ses appareils.
 
-| Étape | Effet | Ce qu’elle ne garantit pas |
+Le « J’aime » actuel de la galerie n’est pas déclaré conforme à ce contrat : il faut vérifier la portée par exposition, la persistance et l’unicité après redémarrage. Réutiliser une même photo dans deux saisons exige deux périmètres de vote distincts.
+
+### 5.3 Informations et conservation
+
+L’absence de compte ne supprime pas le stockage nécessaire au vote et au cookie. Avant activation, documenter finalité, contenu, durée, purge et information visible ; mettre à jour les documents de confidentialité et le registre du projet en fonction des données réellement retenues. Appliquer les règles de `server/vault.js` aux champs personnels concernés, sans inventer de dispense.
+
+Les points 18/19 mis en attente par le propriétaire concernent les **anciennes contributions photographiques**, pas une autorisation de conserver indéfiniment les données du vote. Les décisions minimales de V1 restent explicites et ne provoquent aucune collecte dans S1a.
+
+### 5.4 Piste retenue pour l’étude : identifiant minimal au premier vote
+
+Le 24 octobre, après examen de Glassbox et des règles de la CNIL, le propriétaire a accepté d’examiner d’abord un identifiant aléatoire minimal dans un cookie créé au premier vote. **L’accord porte sur cette piste d’étude ; il n’autorise ni une activation immédiate ni une déclaration de dispense de consentement.** L’objectif est un parcours de vote simple, avec la collecte minimale utile.
+
+Contrat à instruire avant V1 : aucun cookie de vote à la simple visite ; identifiant aléatoire sans empreinte Canvas, audio, polices ou matériel ; usage limité à la reconnaissance des votes dans l’exposition, sans profil de navigation ni rapprochement entre expositions. La visite libre reste indépendante du vote. Durée du cookie, durée des données serveur, purge et information restent à décider ; les 12 mois de l’archive ne les déterminent pas.
+
+La [CNIL inclut le fingerprinting parmi les traceurs](https://www.cnil.fr/fr/cookies-et-autres-traceurs/que-dit-la-loi). Remplacer le cookie par une empreinte, du stockage local ou un identifiant haché ne crée donc pas, à lui seul, une exemption. Glassbox est un [banc de diagnostic du navigateur](https://github.com/HotStartLabs/glassbox), pas un mécanisme d’unicité de vote prêt à intégrer ; il n’est pas retenu dans la piste du pilote.
+
+Un traceur strictement nécessaire peut bénéficier d’une exemption, mais [la CNIL précise que la lutte contre la fraude n’en bénéficie pas en général](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ), hors cas particuliers. **L’application de l’exemption à notre anti-doublon est à justifier pour son usage réel**. La documentation doit distinguer les règles d’accès au terminal et les obligations applicables aux données traitées. L’information requise ne disparaît pas au seul motif d’une éventuelle exemption de consentement.
+
+Le lot V1 inclut donc la qualification documentée du traceur et le dispositif d’information ou de consentement qui en découle, avant toute collecte. Si l’exemption ne peut pas être justifiée, la décision doit revenir au propriétaire : recueil adapté du consentement ou mécanisme sans identifiant persistant avec une garantie d’unicité réduite. Aucune de ces solutions de repli n’est sélectionnée silencieusement. Aucun cookie ou fingerprinting n’est mis en œuvre dans S1a.
+
+## 6. Textes, bilans et prolongements
+
+| Objet | Cible fonctionnelle | Limites et état actuel |
 |---|---|---|
-| Contribution enregistrée | La réponse est persistée et une confirmation fidèle est rendue. | Publication, validation éditoriale, affichage du texte ou sélection permanente. |
-| Contribution mise en avant | Une décision éditoriale permet sa présentation selon le cadre accepté. | Entrée des photographies ou du montage dans une collection permanente. |
-| Accrochage permanent publié | Une curation explicite crée ou enrichit une collection et explique sa filiation. | Conservation de toutes les contributions ou de tous les commentaires. |
+| Exposition | Titre, sous-titre, intention, prologue, conclusion, couverture et dates ; textes FR/EN/DE. | S0 porte titre 120 signes et intention 4 000. Conseils proposés pour nouveaux champs : sous-titre 180, prologue/conclusion 2 000 chacun ; à aligner dans une migration et les formulaires. |
+| Accrochage | Ordre, photos et cartels propres à l’exposition, sans écraser le cartel global. | S0 limite à 500 photos uniques. Cartel contextuel proposé : 500 signes. Couverture rattachée à une photo autorisée de l’accrochage. |
+| Bilan | Récit et sélection éventuellement vide, titre et liens d’origine ; trois langues avant publication. | S0 porte un seul récit de 12 000 signes. S3 ajoutera les bilans rectificatifs comme nouveaux objets liés, sans modifier le récit publié. |
+| Prolongement / collection | Présentation comme une nouvelle exposition : titre, intention, couverture, accrochage et textes propres, filiation explicite. | Titre 120 et intention 1 200 proposés. Les autres champs suivent le choix 12 selon leur usage ; aucune nouvelle durée temporaire n’est déduite de cette présentation. |
 
-Texte public proposé : « Vos choix nourrissent notre réflexion pour les prochaines collections. La sélection finale appartient aux photographes. » La confirmation dit « Votre après-image a été enregistrée », sans promettre publication ni permanence.
+**Trois langues requises** : les brouillons peuvent être incomplets ; la publication des nouveaux contenus bloque si une version FR/EN/DE nécessaire manque. Les champs éditoriaux facultatifs, lorsqu’ils sont utilisés, ont leurs trois versions. Les replis de traduction actuellement présents dans S0 ne constituent plus le contrat cible de publication.
 
-Les modalités permettant de retrouver sa trace, de la retirer ou de demander un effacement dépendent du choix d’identité et de conservation. Aucun lien privé, cookie, compte visiteur, pseudonyme ou jeton durable n’est décidé par cette note.
+Un bilan publié ne se corrige jamais en place. Le rectificatif indique son lien avec le précédent et ce qu’il rectifie ; les liens entre les deux restent lisibles. Le retrait d’une photo prime sur l’immutabilité du texte et sur l’historique des choix. Le détail de présentation d’une succession de rectificatifs sera défini au lot S3, sans écraser le bilan initial.
 
-## 6. Bilan, collections et filiation
+Le prolongement dispose de sa propre présentation et de son ordre, comme une nouvelle exposition. Il reste distinct du score du vote et garde la filiation éditoriale. **Ouvert** : créer un nouvel ensemble ou enrichir une collection existante, et préciser les droits correspondants.
 
-Le bilan raconte ce qui s’est passé et ce qui a été choisi : intention initiale, regard rétrospectif, éventuelles branches mises en avant et prolongements permanents. Les chiffres éventuels décrivent leur périmètre ; une création n’est pas comptée comme une mise en avant ou une acquisition.
+## 7. Erreurs et accessibilité
 
-**Proposé** : une publication de bilan est un geste distinct de la clôture. Elle montre aussi les cas « aucune contribution retenue » ou « aucun accrochage permanent », dans un texte respectueux, sans classement des personnes ni liste publique des refus. Le socle S0 prévoit un bilan publié unique, non réécrivable ; une correction ultérieure nécessiterait un contrat explicite dans un autre lot.
-
-Les photographies non retenues suivent leur publication habituelle, notamment dans leurs séries. Les branches non retenues suivent la durée et la visibilité qui seront décidées avant A1 ; elles ne deviennent pas une archive publique perpétuelle par défaut. La conservation du bilan éditorial ne justifie pas celle de toutes les données de participation.
-
-Une collection a sa propre intention et son ordre. Les liens de filiation indiquent l’origine éditoriale disponible ; ils ne ressuscitent pas une photographie retirée, un texte effacé ou une contribution devenue privée. La possibilité de nommer un contributeur dans une filiation est un arbitrage de droits et de données personnelles préalable à A2.
-
-## 7. Gestion dans l’admin et rôles fonctionnels
-
-Les fonctions suivantes décrivent des responsabilités, **pas de nouveaux rôles techniques** ni une extension de droits existants.
-
-| Responsabilité fonctionnelle | Gestes à prévoir |
+| Situation | Résultat attendu |
 |---|---|
-| Préparer une saison | Créer le brouillon, rédiger les trois langues, choisir les photographies disponibles, leur ordre et les dates ; consulter l’aperçu. |
-| Valider et programmer | Vérifier droits des images, complétude et calendrier ; programmer ou publier selon la décision de l’équipe. |
-| Suivre et retirer | Comprendre l’état courant, les photos indisponibles et les anomalies ; clôturer ou retirer par un geste explicite. |
-| Rédiger le bilan et composer les collections | Sélectionner sans obligation de résultat, expliquer les choix, conserver la filiation puis publier séparément. |
-| Examiner les contributions | Lire dans le périmètre autorisé, décider d’une mise en avant et traiter un retrait ; seulement après A1/A2. |
-| Visiter et contribuer | Lire sans compte ; utiliser éventuellement l’atelier lorsqu’il est ouvert, selon le cadre arrêté. |
+| Brouillon, accrochage avant ouverture ou exposition retirée demandés publiquement | Aucun contenu privé ou accès anticipé aux photos ; couverture d’annonce seule selon les règles S2. |
+| Traduction nécessaire absente | Publication refusée avec les langues et champs à compléter ; aucune publication partielle. |
+| Version concurrente ou proposition changée après validation | Conflit explicite, sans écrasement ni utilisation silencieuse d’un choix non validé. |
+| Vote répété, double clic ou concurrence | Une seule voix par photo/exposition/navigateur ; message fidèle, aucun compteur doublé. |
+| Exposition close, proposition absente ou photo retirée pendant l’envoi | Refus expliqué, aucune voix persistée pour une cible devenue interdite. |
+| Tentative de modifier un bilan publié | Refus ; proposer le parcours de rédaction d’un nouveau rectificatif. |
+| Dépublication, suppression ou retrait d’accord d’une photo | La photo cesse d’être servie par ce circuit dans couverture, visite, archive, vote, résultat, bilan, collection et aperçu. |
+| Échec serveur | Aucun faux succès ; état précédemment validé intact. |
 
-**À arbitrer avant S1** : qui voit, prépare, programme, publie, retire et sélectionne ; portée « les miennes » ou commune ; traitement des saisons réunissant les deux photographes ; droit de composer un accrochage avec leurs photos. Aucun droit existant de lecture d’une photo ne suffit à autoriser son exposition.
+Les pages et formulaires sont rendus sur le serveur ; visite, vote, erreurs et retours ne nécessitent pas de script. Cibles de 44 px au téléphone, focus visible, champs étiquetés, erreurs associées, état textuel et images entières suivent les règles du projet. L’ordre se modifie sans glisser. Aucun texte indispensable n’est incrusté dans une photo, aucune information ne dépend de la couleur seule.
 
-L’admin doit proposer une liste filtrée par état, une fiche structurée en intention, calendrier, accrochage et publication, un aperçu privé et une validation récapitulative avant mise en ligne. L’atelier de sélection des photos est utilisable sans glisser, avec les refus expliqués. Les actions sensibles et leurs confirmations suivent les conventions existantes des deux administrations.
+## 8. Évolutions différées : Après-image et invités
 
-### Champs et limites éditoriales proposées
+Cette section documente la seconde approche demandée par le propriétaire, **sans la lancer**. Les anciens lots A1/A2 quittent la séquence de livraison du pilote.
 
-Ces valeurs sont des propositions bornées, à aligner sur le code et les maquettes au jalon concerné ; elles ne constituent pas des exigences déjà acceptées.
-
-| Objet | Champs | Bornes proposées |
+| Évolution | Conception conservée pour plus tard | Préalables avant réalisation |
 |---|---|---|
-| Saison | Titre, intention, adresse, dates et ordre des photos ; sous-titre, prologue, conclusion et couverture à préciser dans l’interface. | Plafonds techniques S0 : titre 120 signes, intention (`intro`) 4 000, adresse 160, accrochage 500 photos. Conseils éditoriaux proposés : sous-titre 180 ; intention 800 ; prologue et conclusion 2 000 chacun. |
-| Accrochage | Références des photos et ordre ; version du triptyque parent et éventuels cartels contextuels à cadrer aux lots suivants. | Photos uniques, 500 au plus dans S0 ; une couverture appartient à l’accrochage et reste disponible. Conseil éditorial proposé : cartel contextuel 500 signes. |
-| Après-image | Triptyque parent et version, trois photos finales et relation prédéfinie. | Exactement deux photos conservées et une remplacée, sans doublon ; Écho/Contraste/Déplacement seulement. Aucun champ d’identité ni commentaire libre dans le pilote. |
-| Bilan | Récit et sélection dans S0 ; titre et liens vers les accrochages permanents à préciser pour S3. | Plafond technique S0 : récit (`report`) 12 000 signes. Conseils éditoriaux proposés : titre 120 signes ; récit 4 000. Sélection vide autorisée. |
-| Collection | Titre, intention, couverture, ordre et origine éditoriale. | Titre 120 signes ; intention 1 200 ; références uniques par accrochage. |
+| Après-image composé | Ancien pilote SA-D5 : triptyque de trois photos, deux conservées et une remplacée, sans doublon ; relation Écho/Contraste/Déplacement de SA-D10. | Confirmer l’intérêt après le vote simple ; définir trace, identité éventuelle, récupération et maîtrise de la contribution. |
+| Suggestions et dépôts de photos | Proposition d’image par un visiteur, éventuellement au-delà de la photothèque existante. | Cadrer comptes si retenus, upload, stockage, droits d’auteur, accords des personnes, retrait, publication, modération et sécurité avant tout développement. Aucune base d’utilisateurs n’est créée par le pilote. |
+| Visibilité et conservation des contributions | Ancien point 18, en attente. | Décider données, finalités, visibilité, durées et purge ; pas d’archive perpétuelle implicite. |
+| Publication, nom et filiation | Ancien point 19, en attente. Une création reste distincte d’une mise en avant et d’une sélection permanente. | Accord de publication, attribution éventuelle, correction, retrait et devenir des liens après effacement. |
+| Branches successives | Ancien point 21, en attente. | Dérivation autorisée ou non, ordre et profondeur maximale. |
+| Photographes invités | Ancien point 22, en attente. | Invitation/dépôt, droits, accords, validation et retrait. |
+| Autres participations | Commentaire libre, formats plus grands, autre mécanisme de vote. | Nouvelle décision après observation du vote consultatif ; aucun commentaire libre dans le pilote. |
 
-Les contenus éditoriaux publics ont leurs versions française, anglaise et allemande. **Proposé** : reprendre les replis de traduction existants et signaler les manques dans l’admin ; décider avant publication si certaines rubriques exigent les trois versions complètes. Les relations du pilote ont trois libellés traduits prédéfinis ; aucun texte libre de visiteur n’est traduit ni transmis à un service par ce lot.
+## 9. Arbitrages encore ouverts
 
-## 8. Erreurs, concurrence et photographies retirées
-
-| Situation | Comportement attendu |
-|---|---|
-| Date illisible, fin avant le début, heure ambiguë | Refus expliqué auprès du champ ; aucune programmation partielle. |
-| Brouillon ou objet privé demandé publiquement | Aucune donnée éditoriale privée ni photographie révélée ; comportement d’absence cohérent avec le site. |
-| Saison close pendant l’atelier | Refus d’enregistrer après la clôture ; retour vers E7 et explication ; aucun faux succès. |
-| Parent modifié pendant l’atelier | Détection de version ; la réponse n’est pas silencieusement rattachée à un nouveau parent. Révision proposée avant nouvel enregistrement. |
-| Deux membres de l’équipe enregistrent la même version | Conflit explicite, sans écraser une modification plus récente. |
-| Double clic, rechargement ou renvoi du même formulaire | Une validation ne crée pas plusieurs branches. Le mécanisme de rejeu est choisi avec le cadre de participation. |
-| Triptyque invalide, nombre de remplacements différent d’un, doublon, photo absente du choix ou relation inconnue | Refus atomique ; indication des éléments à corriger ; aucune branche partiellement persistée. |
-| Photo dépubliée, supprimée, bloquée ou retirée pour un accord | Le retrait prime sur saison, archive, branche, bilan, collection, aperçu et cache ; aucune variante ne reste exposée par ce circuit. |
-| Retrait d’une photo en cours de validation | Disponibilité revérifiée dans l’opération d’écriture ; refus si la composition n’est plus autorisée. |
-| Exposition devenue incomplète | Information discrète et accès aux œuvres restantes ; pas de remplacement créatif automatique. Participation suspendue si son contrat ne peut plus être respecté. |
-| Référence d’origine retirée | Filiation textuelle ajustée ; aucun lien ne révèle une page devenue privée ou un contenu effacé. |
-| Échec serveur ou persistance indisponible | Échec annoncé, sans confirmation ; les données précédemment publiées ne sont pas écrasées. |
-
-La suppression physique d’un élément éditorial et son éventuelle restauration restent à définir ; le retrait public ne dépend pas d’une suppression. L’état courant d’autorisation des photographies est revérifié à chaque lecture publique, même pour un accrochage historiquement figé.
-
-## 9. Accessibilité et fonctionnement sans script
-
-- Les neuf écrans existent en rendu serveur ; lire, naviguer, sélectionner, corriger et envoyer un formulaire ne nécessitent pas JavaScript.
-- Images entières, textes de remplacement et cartels conservent leur rôle ; aucun texte essentiel n’est incrusté dans une photographie.
-- Hiérarchie des titres, navigation nommée, focus visible, état textuel et cibles de 44 px sur téléphone suivent les règles du projet.
-- Aucun état ne dépend de la couleur seule ; les remplacements sont indiqués par leur emplacement et un libellé.
-- Les erreurs sont liées aux champs et résumées ; sélection et erreurs utiles sont conservées après refus sans exposer de données privées.
-- Aucun défilement horizontal obligatoire, glisser indispensable, son automatique ou animation nécessaire à la compréhension.
-- Les améliorations avec script respectent le mode de mouvement réduit et n’ajoutent pas de styles ou scripts en ligne interdits par la CSP.
-
-## 10. Arbitrages de sécurité, de données personnelles et de droits
-
-| Id | Décision encore ouverte | Jalon dépendant |
+| Repère | Décision restante | Dépendance |
 |---|---|---|
-| SA-Q1 | Matrice des droits et portées pour saisons, photos communes, publication, retrait, bilan et collections. | S1 et suites exposées à l’équipe. **Ne bloque pas S0**, qui n’expose aucune route ni droit. |
-| SA-Q2 | Fuseau, précision du calendrier, chevauchements et modification des dates après publication. | S1/S2. |
-| SA-Q3 | Identité éventuelle du contributeur, preuve de maîtrise d’une trace, retrait et exercice des droits. | A1. |
-| SA-Q4 | Données collectées, finalité, visibilité privée ou publique, durée de conservation et purge. Aucun texte libre dans le pilote ; son éventuel ajout exige un arbitrage ultérieur. | A1 ; texte libre dans une évolution séparée. |
-| SA-Q5 | Protection contre l’abus, rejeu, automatisation et surcharge ; éventuel stockage navigateur et information associée. | A1. |
-| SA-Q6 | Autorisation de publier une contribution, son texte et un éventuel nom ; correction, retrait et conservation de la filiation. | A2. |
-| SA-Q7 | Désignation du triptyque parent, choix de remplacement et ordre. La taille du pilote est fixée à trois images ; dérivation d’une branche à cadrer séparément. | A1, puis A2 si dérivation étendue. |
-| SA-Q8 | Photographies d’hôtes, dépôt, droit d’auteur, accords des personnes et circuit éditorial. | Évolution future séparée. |
+| SA-Q1 | Points 1/2 : droits complets des saisons, portées communes/individuelles et photos des deux photographes. Les décisions accueil admin seul, double validation et direction de publication distincte sont acquises ; leur traduction en rôles/permissions reste à définir. | S1b et circuit V0. |
+| SA-Q2 | Points 3 à 7 : fuseau, précision, chevauchement, modification après validation, retrait/réouverture et anciennes adresses. | S1b/S2. |
+| SA-Q9 | Annonce : couverture publique décidée, début d’affichage et autres informations à préciser. Accueil choisi par admin, contenu entre saisons à préciser. | S2. |
+| SA-Q10 | Archive complète de 12 mois : point de départ et effet à échéance. | S2. |
+| SA-Q11 | Direction de publication : responsabilités, rattachement technique, cumuls et effet d’une modification sur les validations. | V0. |
+| SA-Q12 | Vote : qualification de l’exemption éventuelle et dispositif d’information/consentement, durée/contenu du cookie, données minimales/durée/purge, annulation éventuelle, restitution des résultats et calendrier exact. Un vote par photo et navigateur dans l’exposition, sans compte, est décidé. | V1. |
+| SA-Q13 | Présentation des rectificatifs et structure des prolongements/collections, sans modification d’un bilan déjà publié. | S3. |
+| SA-Q3/SA-Q4/SA-Q6/SA-Q7 | Trace, identité et données des anciennes contributions, publication/attribution et branches. Désormais différés au § 8 ; ils ne bloquent pas le vote simple. | Futur Après-image. |
+| SA-Q5 | Abus : volet vote traité au contrat V1 ; volet dépôts et contributions différé. | V1, puis évolution future. |
+| SA-Q8 | Invités et dépôts externes. | Évolution future séparée. |
 
-Aucune durée, nouvelle permission, empreinte visiteur ou réutilisation d’identité n’est fixée implicitement. Tout nouveau champ personnel passe par `server/vault.js`, dispose d’une durée, figure dans l’export et dans la notice Confidentialité, et actualise le registre RGPD avant sa collecte.
+Les réponses sur les points 8 à 23 ne valent pas réponse aux points 1 à 7. Une durée d’archive décidée ne fixe pas celle d’un cookie, d’un vote ou d’une future contribution.
+
+## 10. Réalisation : une PR par jalon
+
+| Lot | Livrable et dépendances | Acceptation attendue |
+|---|---|---|
+| **S0 — Socle, PR #218** | Migration 065 et modèle interne existants, sans route ni nouveau droit. | Règles de dates/états et références atomiques ; projection publique refiltrée. Trois langues obligatoires, annonce, limite d’archive et rectificatifs sont encore des écarts à la nouvelle cible, pas des fonctionnalités annoncées livrées. |
+| **S1a — Préparation, PR #219** | Migration 066/version, formulaire transactionnel, conversion de dates à fuseau fourni, quatre gabarits trilingues inactifs et ce plan. | Concurrence/rollback et rendu isolé vérifiés. Aucun choix de droits ou fuseau ajouté en silence ; pas de vote collecté. Les nouvelles décisions sont documentées, pas annoncées implémentées. |
+| **S1b — Atelier raccordé** | Après SA-Q1/SA-Q2 : droits et portées, menus v1/v2, routes/CSRF/identité, aide, journal ; ajout des contenus du choix 12 et contrôle des trois langues avant publication. | Préparer, traduire, ordonner et programmer ; persistance réelle et refus sans droit, traduction manquante, photo interdite, conflit et date invalide. Mise en avant réservée à admin. |
+| **S2 — Visite, annonce et archive** | Après S1b et SA-Q9/SA-Q10 : E1 à E4/E7, rubrique Expositions, couverture publique avant ouverture, archive complète 12 mois et accueil sous contrôle admin. | Ouverture/clôture/échéance, aperçu/annonce distincts, trois langues sans repli public manquant ; couverture/photo retirée cachée partout. Aucun faux bouton de vote avant V1. |
+| **S3 — Bilans et prolongements** | Après S1/S2 et SA-Q13 : bilans immuables, rectificatif comme nouveau bilan lié, E8/E9 et présentation du prolongement comme nouvelle exposition. | Bilan vide ou avec choix ; modification en place refusée ; rectificatif distinct sans écrasement ; filiation lisible et photos encore autorisées. |
+| **V0 — Propositions validées** | Après SA-Q1/SA-Q11 : proposition par photographe d’origine, validations du relecteur et de l’admin, ordre par direction de publication distincte. | Liste et version approuvées ; refus d’auto-attribution de droits ou d’ordre modifié sans validation du circuit retenu. |
+| **V1 — Vote consultatif** | Après S2/V0 et SA-Q12 : E5/E6, identifiant minimal au premier vote après qualification des traceurs (§ 5.4), une voix par photo/exposition/navigateur, confirmation, information et purge. | Vote sur plusieurs photos possible, doublon sur la même refusé, concurrence/rejeu/redémarrage, clôture et photo retirée ; aucun cookie de vote à la simple visite, information/consentement conforme à la qualification retenue ; résultat consultatif sans publication automatique. |
+| **Différé — Après-image, invités et autres formats** | Études et PR séparées après nouvelle demande et décisions du § 8. | Aucune collecte ou interface de dépôt, de commentaire, de composition ou de branche dans les lots précédents. |
+
+S3 peut être livré sans vote : une première exposition et son bilan restent complets sans participation. V0/V1 remplacent A1/A2 dans la séquence prioritaire ; le statut de collections permanentes n’est jamais obtenu automatiquement par un score.
 
 ### 10.1 Besoins de la Vigie et preuves attendues par lot
 
-Cette matrice fait partie du plan de livraison. **État courant : seul S0 est implémenté dans la branche ; aucun raccordement spécifique aux saisons n’est encore branché.** Les protections communes existent déjà, mais elles ne prouvent pas le comportement de futures routes. Chaque PR distingue ce qu’elle raccorde, ce qu’elle vérifie et ce qui reste prévu. Les cas DS sont définis dans la [conception du journal de sécurité](journalisation-securite.md#3-cas-de-détection) ; les besoins et leur état figurent dans le [registre des briques](vigie-besoins-des-briques.md).
+**État courant** : S0/S1a seulement, sans parcours HTTP de saison ni vote branché. Les cas DS viennent de la [conception du journal](journalisation-securite.md#3-cas-de-détection), les besoins de la Vigie du [registre des briques](vigie-besoins-des-briques.md). Les protections communes existantes ne prouvent pas les routes à venir.
 
-| Lot et surface | Besoin et raccordement prévu | Acceptation et limites |
+| Lot / surface | Raccordement prévu | Preuves et limites |
 |---|---|---|
-| **S0 — Tables et modèle interne** | Aucune route, permission, session, contribution ou donnée personnelle nouvelle ; aucune émission à ajouter. Les références n’altèrent ni le statut ni les protections des photos. | Migration et règles sur base synthétique ; projection publique excluant brouillons et bilans préparés. Aucun nouveau BV, changement de règle, de seuil ou de moteur déclaré livré. |
-| **S1 — Routes, droits, aperçu et décisions de l’équipe** | Déclarer `config.perm` sur chaque route et la permission précise de chaque action après SA-Q1 ; reprendre les gardes d’authentification, de confirmation d’identité et de CSRF du plugin admin. `authz_fail` couvre DS10 ; `authz_csrf_fail` couvre DS14. Si une portée est retenue, la vérifier sur les objets et identifiants soumis ; une absence réelle ne doit pas être confondue avec un objet existant hors portée. | Vérifier refus sans session, sans permission, hors portée si applicable et sans CSRF, y compris aperçu et identifiants de photos falsifiés ; aucune écriture sur refus. Vérifier les décisions de gel, verrouillage et confirmation d’identité via les gardes existantes. L’aperçu reste `private, no-store`, `noindex`, sans se déclarer export sensible. |
-| **S1 — Saisies et journal des gestes** | Crochet commun `malicious_input` pour DS11 ; `input_validation_fail` pour les valeurs impossibles du formulaire (DS12 : types, listes, bornes ou identifiants forgés), avec champ, raison et longueur seulement. Compléter `request.auditChanges` pour le journal d’audit avec les noms des champs et références numériques, jamais leur valeur. Les conflits d’édition, dates simplement incorrectes et changements ordinaires d’état sont des refus métier ; ils ne deviennent pas automatiquement des signaux d’attaque. | Vérifier persistance et journal après un geste réussi ; statut fidèle après refus ; aucune valeur éditoriale ou personnelle dans le détail des événements. Vérifier le signalement d’une requête forgée sans ajouter de doublon au crochet commun. Le journal d’audit **n’est pas lu par la Vigie** : sa présence ne remplace pas une émission requise. |
-| **S2 — Textes effectivement publics, accueil et exposition** | Étendre [`server/securite/textes-publics.js`](../../server/securite/textes-publics.js) aux seuls textes rendus publics des saisons : titres et intentions visibles, puis bilan uniquement après sa publication. Réutiliser BV-20/BV-21 (DS9), `config_public_changed`, objets `texte_public` et `textes_publics`, via la comparaison commune après écriture. Un futur réglage de saison mise en avant ou de composition de l’accueil est évalué sous BV-1/DS9 et DS23 ; ajouter sa clé surveillée si nécessaire. | Tester un contact ajouté au texte public et le nombre de champs changés, sans texte, adresse e-mail ou téléphone dans l’événement. Un brouillon, une annonce privée et un bilan seulement préparé restent absents de l’instantané. Un aperçu et un enregistrement identique ne signalent pas un changement public. Ne pas réutiliser l’instantané public brut de toute la ligne `saisons` si des colonnes restent privées. |
-| **S2 — Ouverture programmée et retrait** | Réutiliser `watchPublication` pour BV-20/BV-21 avec `sub = null`, émetteur « publication programmée », au changement réel de visibilité. **Adapter aussi l’optimisation fondée sur `total_changes()`** : en S0, la phase change avec l’horloge sans écriture SQL ; le contrôle actuel peut donc ignorer une ouverture. Prévoir une comparaison de calendrier indépendante des seuls résultats `review.runDue()` / `carnet.runDue()`. Le retrait manuel passe par la comparaison commune après écriture. | Avec horloge contrôlée et sans autre écriture, vérifier une ouverture détectée, une seule fois, sans attribution au prochain compte qui écrit. Vérifier exclusion des saisons retirées et des bilans privés, redémarrage propre et absence de doublon sur passage suivant. Une clôture qui conserve une archive ne retire pas artificiellement les textes encore publics. La minuterie de surveillance ne conditionne pas le droit de lecture, qui reste vérifié à chaque requête. |
-| **S2 — Visite et images** | Conserver les protections communes contre les injections, les pièges et les rafales de 404 ; elles couvrent DS11/DS12/DS15. Évaluer le nombre réel d’images chargées par le parcours pour éviter les faux positifs d’aspiration (BV-4). Réutiliser les routes de variantes et leur contrôle de disponibilité ; ne créer aucun chemin d’original. | Parcours libre nominal sans événement anormal dû aux liens internes ou aux images attendues. Retrait d’une photo effectif côté serveur dans exposition, archive et aperçu. Le cache partagé et les copies déjà reçues gardent leurs limites existantes : ne pas promettre l’effacement à distance d’un navigateur. Aucun recalage de seuil sans observation ou risque concret. |
-| **S3 — Bilan, collections et filiation** | Étendre la source BV-20/BV-21 aux nouveaux textes de collections réellement publics ; le bilan rejoint l’instantané seulement au geste de publication. Droits, CSRF et journal comme S1. Des choix exclusivement photographiques et éditoriaux ne sont pas une lecture personnelle : aucun `sensitive_read` artificiel. La filiation ne recopie pas de contribution privée. | Tester bilan avec sélection vide et non vide sur deux saisons distinctes, publication et retrait de collection, photo retirée et origine privée. Vérifier comparaison des textes à leur publication, jamais pendant leur préparation ; références interdites refusées sans fuite. |
-| **A1 — Enregistrement public et trace** | Après SA-Q3 à SA-Q5 et SA-Q7, reprendre les protections publiques adaptées : provenance, contrôle CSRF si session, piège si retenu, limites bornées et rejouabilité. Réutiliser `input_validation_fail` (DS12), `malicious_input` (DS11), `malicious_honeypot`, `excess_rate_limit_exceeded` et, **seulement si une trace secrète est retenue**, `token_guess` (DS16). Aucun cookie ni identifiant visiteur n’est décidé par cette matrice. | Tester nominal, rejeu, rafale, provenance étrangère et triptyque forgé ; aucune confirmation avant persistance. Les refus normaux de clôture, de version ou de photo retirée ne deviennent pas automatiquement des alertes. Ne journaliser ni composition complète, ni jeton de trace, ni texte ou identité de visiteur. Vérifier notice, export, retrait et purge selon les arbitrages avant collecte. |
-| **A2 — Examen éditorial, mise en avant et retrait** | Après SA-Q6, séparer autorisation de lecture et de publication. Si la contribution comporte des données personnelles, appliquer DS18/BV-33 aux lectures, listes et exports réels : `sensitive_read` / `sensitive_export`, catégories et effectifs fermés, volumes par les outils existants ; effacement effectif via `sensitive_delete` si pertinent. Réévaluer BV-20/BV-21 pour les seuls textes rendus publics. | Vérifier refus hors droit, exposition volontaire distincte de la création, retrait et effacement propagés. Les listes et aperçus ne révèlent pas de donnée d’une autre portée ; une filiation ne rétablit pas une contribution privée. Les catégories ne sont pas inventées et aucun contenu de fiche n’entre dans le journal. |
+| **S0/S1a — Interne** | Aucune émission HTTP nouvelle, permission, cookie ou collecte visiteur activée. Modèle et gabarits seuls. | Tests synthétiques et rendu isolé ; aucun nouveau BV réservé ni contrôle de route déclaré livré. |
+| **S1b/V0 — Droits et décisions** | `config.perm` sur chaque route ; gardes admin, identité et CSRF. `authz_fail` pour DS10 et `authz_csrf_fail` pour DS14. Respecter les responsabilités distinctes du photographe, relecteur, admin et direction de publication, après définition des permissions. | Refus sans session/droit/CSRF, hors portée si applicable, auteur ou photo falsifiés ; vérification des gels et confirmations d’identité existants ; aucune mutation ni validation partielle sur refus. La mise en avant est refusée au photographe et au relecteur. |
+| **S1b/V0 — Saisie et journal** | Crochet commun `malicious_input` (DS11), `input_validation_fail` pour les formes/identifiants forgés (DS12), journal des noms de champs et références numériques via `request.auditChanges`. Les refus métier ordinaires ne deviennent pas des alertes. | Acteurs et décisions réellement persistés selon le modèle approuvé ; valeurs éditoriales, motif sensible ou contenu de fiche absents des événements. Le journal d’audit n’est pas lu par la Vigie. |
+| **S2 — Textes publics et annonce** | Adapter [`textes-publics`](../../server/securite/textes-publics.js) aux champs réellement visibles, selon annonce, ouverture et archive ; BV-20/BV-21, DS9, `config_public_changed`. La mise en avant admin et sa clé de réglage relèvent aussi de BV-1/DS23. | Contacts ajoutés et nombre de textes modifiés détectés sans recopier texte/e-mail/téléphone. Pas d’intention privée, de bilan préparé ou de texte d’accrochage prématuré sous prétexte que la couverture est publique. |
+| **S2 — Calendrier et échéance** | `watchPublication` avec acteur `sub = null` au changement temporel de visibilité. Adapter l’optimisation `total_changes()` : ouverture et future échéance d’archive peuvent survenir sans écriture SQL. Initialiser l’instantané avant le franchissement. | Horloge contrôlée, aucune autre écriture, détection une fois sans attribution au prochain admin ; redémarrage et passage suivant sans doublon. La clôture conserve les textes de l’archive ; l’échéance suit SA-Q10. La lecture reste autorisée par l’état courant, indépendamment de la minuterie de surveillance. |
+| **S2 — Photos et parcours** | Protections communes injections/pièges/404 (DS11/DS12/DS15), examen du chargement d’images pour BV-4 ; variantes existantes uniquement. | Couverture, exposition et archive respectent les retraits. Parcours nominal sans faux positif d’aspiration ; aucun seuil recalé sans risque concret ou observation. Limites existantes des caches déjà reçus explicites. |
+| **S3 — Bilan, rectificatif et prolongement** | Étendre BV-20/BV-21 aux seuls nouveaux textes effectivement publiés. Publication du rectificatif observée comme nouveau contenu ; bilan précédent non réécrit. Gardes et journal comme S1b. | Refus d’édition en place, création et liens du rectificatif, absence de textes préparés dans l’instantané ; retrait/photo indisponible propagés. Aucun `sensitive_read` artificiel pour une simple sélection éditoriale. |
+| **V1 — Vote et compteurs** | Évaluer BV-6/DS22 (statistiques gonflées), DS12 et DS15, ainsi que les limites/provenance/CSRF adaptées au cookie retenu. Réutiliser les types du [`vocabulaire fermé`](../../server/securite/vocabulaire.js), notamment `input_validation_fail`, `malicious_input`, `excess_rate_limit_exceeded` et les signaux existants de rafale si applicables. | Unicité et compteurs prouvés par persistance, concurrence et redémarrage ; abus et votes sur propositions interdites vérifiés. Un doublon normal ne devient pas une attaque. Ne pas envoyer cookie, jeton, identité ou bulletin complet à la Vigie. Pas d’empreinte IP créée pour contourner la limite acceptée du navigateur. |
+| **Évolutions différées** | Réévaluer identité, uploads, lectures/export/effacement sensibles et publication lors d’une future décision. DS18/BV-33 seulement si de vraies données personnelles sont concernées. | Aucun signal, champ de visiteur ou nouvelle collecte implémenté sous couvert de documenter l’Après-image futur. |
 
-Les événements disponibles sont ceux du [`vocabulaire fermé`](../../server/securite/vocabulaire.js). Les gardes et la comparaison commune sont dans [`server/securite/site.js`](../../server/securite/site.js), les gardes et le journal du plugin dans [`server/routes/admin.js`](../../server/routes/admin.js), et le passage actuel des publications programmées dans [`server/app.js`](../../server/app.js). Ne pas déclarer une future route `config.audit` pour simplement « avoir une trace » : cette option classe une lecture réussie comme **export sensible**. Le journal et l’observation d’une donnée personnelle ont des finalités distinctes.
+Les branchements communs sont dans [`server/securite/site.js`](../../server/securite/site.js), les gardes et le journal dans [`server/routes/admin.js`](../../server/routes/admin.js), les publications programmées dans [`server/app.js`](../../server/app.js). Un aperçu n’est pas un export sensible : ne pas ajouter `config.audit` pour simplement tracer une lecture.
 
-Un raccordement à BV-20/BV-21 complète leur couverture existante ; il n’exige pas un nouveau numéro par écran. Un manque réellement constaté se documente dans le registre avec son abus, son cas DS, l’émission minimale manquante et son lot de résolution ; attribuer alors le prochain BV libre, après relecture du registre. **Aucun nouveau BV n’est réservé ici.** La vérification reste ciblée sur la brique : pas de nouvelle règle, de changement de moteur ni de campagne d’attaque complète sans besoin concret.
+Un manque réellement constaté doit être décrit dans le registre avec son abus, son DS, l’émission minimale manquante et le lot de résolution ; attribuer alors le prochain BV libre. Cette note n’invente aucun type d’événement, ne réserve aucun BV et ne modifie ni moteur ni seuil.
 
-## 11. Livraison : une PR par jalon
+### Définition de « terminé »
 
-| Lot | Livrable et dépendances | Acceptation nominale | Acceptation des erreurs |
-|---|---|---|---|
-| **S0 — Modèle métier, implémenté dans la branche** | Migration additive, accès aux objets et règles pures d’état/composition. Pas de route publique, d’interface, de minuterie branchée ni de nouveau droit. Aucune collecte de contribution. | Créer/lire un brouillon synthétique ; ordre et références persistés ; phases calculées aux bornes ; photos et séries existantes intactes. | Transitions hors cycle, dates invalides, doublons et composition invalide refusés ; écritures atomiques ; retrait prioritaire ; migration sur une base jetable. |
-| **S1 — Atelier des saisons** | Après S0 et SA-Q1/SA-Q2 : administration de préparation, aperçu, calendrier, accrochage et décisions de publication/retrait. | Un membre habilité prépare une saison, traduit ses textes, ordonne les images et programme ; persistance vérifiée après relecture. | Refus hors portée, photo non autorisée, conflit concurrent et calendrier invalide ; aperçu inaccessible sans droit ; aucun brouillon public. |
-| **S2 — Visite publique, accueil et archives** | Après S1 : E1 à E4 et E7, index des saisons, liens et adaptations des thèmes ; aucune participation tant que A1 manque. | Visite libre complète, accès existants aux séries conservés, ouverture et clôture à l’heure, archive lisible ; trois langues et sans script. L’accès « Collections » rejoint S3 dès sa livraison, sans lien mort avant. | Saison retirée/brouillon absents ; photo retirée cachée partout ; état changé pendant la visite expliqué ; aucun bouton d’atelier inactif présenté comme disponible. |
-| **S3 — Bilans et collections** | Après S1/S2 : bilan éditorial, E8/E9, sélection éventuellement vide, filiation saison/collection ; l’index reste accessible directement. | Publier un bilan vide et un bilan avec choix sur **deux saisons distinctes**, chacun unique et non réécrivable dans S0 ; consulter l’accrochage permanent et son origine ; série des photos inchangée. | Refus de publier une référence interdite, conflit de version et filiation privée ; retrait répercuté sans restaurer une photo. |
-| **A1 — Après-image** | Après S2 et SA-Q3/SA-Q4/SA-Q5/SA-Q7 : E5/E6, collecte minimale, confirmation, retrait et purge conformes aux décisions. | Créer un triptyque persisté avec deux images conservées, une remplacée et une relation Écho/Contraste/Déplacement ; parent intact ; retour à la conclusion sans compte imposé à la visite. Aucun commentaire libre. | Clôture, parent modifié, remplacement incorrect, doublon, relation inconnue, rejeu, dépassement et photo retirée ; aucune confirmation avant écriture ; purge et droits vérifiés. |
-| **A2 — Mise en avant et filiation** | Après A1, S3 et SA-Q6 : examen éditorial, publication distincte, liens vers bilan/collections selon autorisations. | Une contribution enregistrée reste distincte de sa mise en avant et d’une sélection permanente ; un bilan peut tout écarter. | Pas de publication sans décision ; retrait/effacement répercuté ; une filiation ne révèle pas une contribution privée. |
-| **Plus tard — Invités et vote** | Études et PR séparées après les arbitrages correspondants. | Critères à établir avec un besoin précis. | Aucun dépôt externe, classement, promotion automatique ou collecte supplémentaire ajouté aux lots précédents. |
+Chaque lot livre son code, ses migrations additives, sa documentation et des vérifications proportionnées des effets métier et erreurs. Une interface raccordée s’essaie dans un vrai navigateur sur ordinateur et téléphone, avec persistance et refus, trois langues et sans script. Les données et images sont synthétiques ; aucune base réelle, sauvegarde ou production n’est utilisée.
 
-S3 peut être livré sans A1 : la première saison peut donc être une exposition complète et son bilan une décision des photographes. A1 n’oblige pas à livrer immédiatement A2 ; le visiteur est informé du devenir réel de sa contribution.
+Chaque PR reste en brouillon, avec contexte, résultats réels, « Sécurité » et « Impact sur la Vigie ». **Chaque PR, y compris interne, porte sa note FR/EN/DE et sa version `1.<numéro de PR>.0`.** La note décrit ce qui est réellement disponible ; une interface activée actualise aussi l’aide. Vérifier les liens documentaires avec `node --test test/liens-internes.test.js`. La fusion appartient au propriétaire.
 
-### Définition de « terminé » pour chaque lot
+## 11. État du code et écarts à réaliser
 
-Le code et les migrations du lot sont livrés, ses règles nominales et d’erreur sont vérifiées, et sa documentation décrit le comportement réel. Un lot dépendant d’un arbitrage reste incomplet tant que cet arbitrage manque ; le développement indépendant peut continuer.
-
-La validation réutilise les tests pertinents et ajoute des régressions ciblées pour les invariants métier. Une interface est essayée dans un vrai navigateur, sur ordinateur et téléphone, avec vérification des résultats persistés et des refus, en trois langues et sans script pour les parcours concernés. Les contrôles utilisent un serveur jetable et des images neutres ou générées, jamais les données réelles.
-
-Chaque PR rapporte les cas exécutés, les nombres réels, les preuves utiles et les limites ; aucune suite non lancée n’est déclarée réussie. La portée suit la politique proportionnée du dépôt, sans harnais générique ni CI complète imposés à chaque écran. Les liens documentaires se vérifient avec `node --test test/liens-internes.test.js`.
-
-Une PR reste en brouillon pour revue, avec « Sécurité » et « Impact sur la Vigie ». **Chaque PR de ce chantier, y compris S0, ajoute sa note de version en français, anglais et allemand dans `server/nouveautes.json` et passe `package.json` et `package-lock.json` à `1.<numéro de la PR>.0`**, conformément au rappel du propriétaire. Une note décrit ce qui est effectivement livré : une étape interne n’annonce pas un écran disponible. Les notes destinées à un droit particulier restent filtrées par leur permission, et celles qui concernent la Vigie portent `perm: "securite.voir"`. Une interface nouvelle actualise aussi l’aide. L’historique de `PLAN.md` n’inscrit « fait » qu’après livraison effective ; la fusion appartient au propriétaire.
-
-## 12. Annexe technique du socle S0
-
-Le modèle distingue une **décision persistée** (`brouillon`, `programme`, `publie`, `retire`) d’une **phase dérivée de l’horloge**. Cette séparation évite de transformer le passage du temps en une série d’écritures ou de considérer une minuterie comme preuve d’ouverture effective.
-
-- Les instants d’ouverture et de clôture bornent une fenêtre **[ouverture, clôture[** : ouverture incluse, clôture exclue.
-- Le retrait l’emporte sur les dates ; le brouillon reste privé. Une décision de programmation ou de publication ne dispense jamais des vérifications de visibilité et d’autorisation lors d’une future exposition par S1/S2.
-- La phase décrit l’avant-ouverture, l’ouverture ou la clôture selon l’instant de référence. « Bilan publié » appartient au cycle éditorial du bilan ; il ne remplace pas l’autorisation des photos.
-- S0 ne branche aucune minuterie, route, tâche de collecte ou nouveau droit. Il permet de tester les bornes avec une horloge fournie, sans attente réelle ni dépendance à l’heure du test.
-- S0 n’ajoute ni visiteur, ni acteur, ni auteur personnel aux objets. **Proposé** : figer l’accrochage dès sa programmation ; S1 devra expliciter les corrections et les versions concurrentes, plutôt que modifier silencieusement une référence déjà partagée.
-- La prochaine migration libre à la base de départ est **065** ; son numéro doit être revérifié avant livraison. Les migrations 063 et 064 existent déjà et ne sont pas modifiées.
-- Les plafonds techniques de `server/saisons.js` sont : `title` 120 signes, `intro` 4 000, `report` 12 000, `slug` 160 et `photos` 500. Ils bornent le stockage ; les conseils de rédaction plus courts du § 7 ne changent pas ces constantes. La borne de 500 ne contraint pas la saison à un multiple de trois : le triptyque Après-image est un objet distinct, à livrer en A1.
-- Les invariants relationnels protègent l’unicité des références et l’ordre ; les écritures qui doivent réussir ensemble sont atomiques. Les choix de calendrier visibles et la matrice de droits restent réservés aux jalons correspondants.
-
-**État courant** : note rédigée ; S0 implémenté dans la branche de travail et soumis à vérification avant revue ; S1, S2, S3, A1 et A2 à réaliser. Le socle se trouve dans [`server/saisons.js`](../../server/saisons.js), la [migration 065](../../server/db/migrations/065_saisons.sql) et ses [tests métier](../../test/saisons-modele.test.js). Aucun parcours public ou administratif nouveau n’est déclaré disponible par cette annexe.
+- **PR #218 / S0** : [`server/saisons.js`](../../server/saisons.js), [migration 065](../../server/db/migrations/065_saisons.sql) et [tests modèle](../../test/saisons-modele.test.js). Phases dérivées de l’horloge, photos refiltrées à la lecture, bilan unique actuel. Aucun branchement serveur.
+- **PR #219 / S1a** : [migration 066](../../server/db/migrations/066_saisons_versions.sql), versions concurrentes, [contrat de formulaire](../../server/saisons-atelier.js), [calendrier](../../server/saisons-calendrier.js), quatre gabarits et leurs enveloppes v2. Le fuseau doit être fourni explicitement. Les formulaires et les vues restent inactifs.
+- **Écarts connus avec les nouvelles décisions** : S0 autorise encore les replis FR pour traductions manquantes ; le modèle ne porte pas encore les nouveaux textes/couverture, les annonces, les 12 mois d’archive, les bilans rectificatifs, la direction de publication, la double validation ou les votes. Ils doivent être livrés dans les lots prévus, pas annoncés comme déjà implémentés par cette révision du plan.
+- S1b attend les droits complets et le calendrier. V0 attend la définition de la direction de publication. V1 attend la qualification des traceurs et les paramètres minimaux du cookie, des votes et de leur restitution. Ces arbitrages ne sont pas remplacés par une hypothèse technique.

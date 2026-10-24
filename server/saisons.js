@@ -92,7 +92,7 @@ export function createSaisons({ db, now = Date.now }) {
   };
   const write = (id, values, t) => {
     const names = Object.keys(values);
-    db.prepare(`UPDATE saisons SET ${names.map(f => `${f} = ?`).join(', ')}, updated_at = ? WHERE id = ?`).run(...Object.values(values), t, id);
+    db.prepare(`UPDATE saisons SET ${names.map(f => `${f} = ?`).join(', ')}, updated_at = ?, version = version + 1 WHERE id = ?`).run(...Object.values(values), t, id);
   };
 
   function create(input) {
@@ -171,6 +171,25 @@ export function createSaisons({ db, now = Date.now }) {
     })();
   }
 
+  // Une validation de l’atelier porte sur la version lue, puis enregistre textes, ordre et décision ensemble.
+  // Chaque écriture interne avance le compteur : sa monotonie, indépendante de l’horloge, évite les écrasements.
+  function revise(id, revision) {
+    if (!revision || typeof revision !== 'object' || Array.isArray(revision) || !identifier(revision.version))
+      throw new SaisonError('Version entière positive attendue.', { field: 'version' });
+    const actions = { schedule: () => decide(id, 'programme'), open: () => decide(id, 'publie'), cancelSchedule: () => cancelSchedule(id), withdraw: () => withdraw(id) };
+    if (revision.action != null && (typeof revision.action !== 'string' || !Object.hasOwn(actions, revision.action)))
+      throw new SaisonError('Action de saison inconnue.', { field: 'action' });
+    return db.transaction(() => {
+      const s = requireSaison(id);
+      if (revision.version !== s.version)
+        throw new SaisonError('Modifié entre-temps : rechargez la page pour voir la dernière version.', { field: 'version', status: 409 });
+      if (revision.input !== undefined) update(id, revision.input);
+      if (revision.photo_ids !== undefined) setPhotos(id, revision.photo_ids);
+      if (revision.action != null) actions[revision.action]();
+      return get(id);
+    })();
+  }
+
   function publicData(s, lang, t) {
     if (!s || !published(s) || !instant(s.opens_at) || !instant(s.closes_at) || s.closes_at <= s.opens_at || t < s.opens_at) return null;
     const language = LANGS.includes(lang) ? lang : 'fr';
@@ -185,5 +204,5 @@ export function createSaisons({ db, now = Date.now }) {
   const publicList = ({ lang = 'fr' } = {}) => { const t = time(); return q.public.all(t).map(s => publicData(s, lang, t)).filter(Boolean); };
   const list = () => { const t = time(); return q.all.all().map(s => internal(s, t)); };
   return { create, update, setPhotos, schedule: id => decide(id, 'programme'), open: id => decide(id, 'publie'), cancelSchedule,
-    withdraw, publishReport, get, list, publicBySlug, publicList };
+    withdraw, publishReport, revise, get, list, publicBySlug, publicList };
 }

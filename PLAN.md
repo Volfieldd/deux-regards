@@ -11,13 +11,25 @@ Références de design (artefacts claude.ai) :
 
 ## Étude et démarrage — Les saisons de Nicephos (23 octobre 2026)
 
-La [spécification fonctionnelle et le plan détaillé](docs/etudes/saisons-apres-image.md) cadrent les expositions temporaires, leur visite, les archives et le passage éditorial vers les collections permanentes. **Les saisons** portent la programmation du site ; **Après-image** est une participation facultative en fin de visite. Les séries existantes sont conservées et une photo peut figurer dans plusieurs accrochages sans changer de série. Créer une suite, la mettre en avant et retenir un accrochage dans les collections sont trois décisions distinctes.
+La [spécification fonctionnelle et le plan détaillé](docs/etudes/saisons-apres-image.md) cadrent les expositions temporaires, leur visite, les archives et le passage éditorial vers les collections permanentes. **Les saisons** portent la programmation et la rubrique publique s’appelle **Expositions**. Après arbitrage du propriétaire, le pilote participatif est un **vote consultatif sur des photos proposées à l’avance**, sans compte ni dépôt. Les séries sont conservées ; l’Après-image avec compositions, suggestions ou uploads est documenté comme évolution différée.
 
 **S0 implémenté dans la PR #218, en brouillon et en attente de revue** : socle métier et migration `065_saisons.sql`, avec tests sur bases jetables ; saisons préparées, accrochages ordonnés, calendrier, programmation, ouverture, clôture, retrait et publication explicite d’un bilan avec ou sans sélection. Le modèle reste interne : aucun écran, route, cookie, droit ou événement nouveau n’est branché au serveur ; le site publié ne présente pas encore de saison. Les méthodes de lecture destinées au public écartent à chaque lecture une photo qui n’est plus publiée, y compris dans la sélection du bilan.
 
 Chaque PR comporte sa note de version en français, anglais et allemand, même pour un socle interne, ainsi qu’une version `1.<numéro de PR>.0`. La PR #218 porte la version `1.218.0` et annonce explicitement que les interfaces ne sont pas encore disponibles. Les besoins de la Vigie et leurs preuves attendues sont détaillés par lot dans le plan fonctionnel.
 
-**À suivre, une PR par jalon** : S1, atelier des saisons après arbitrage des droits et de la portée ; S2, visite publique, accueil et archives ; S3, bilans et collections ; A1, participation Après-image après décisions sur les données, la conservation, la reprise et les abus ; A2, mise en avant et filiation des chemins. Les invités et le vote attribuant une place au public constituent des extensions séparées. Les autorisations, le fuseau de présentation des dates et la politique de visibilité des contributions restent explicitement à trancher dans la note ; aucun rôle ni durée de conservation ne sont décidés par ce premier socle.
+**À suivre, une PR par jalon** : S1b, raccordement de l’atelier après définition complète des droits et du calendrier ; S2, visite, couverture publique avant ouverture et archive complète de 12 mois ; S3, bilans immuables, rectificatifs distincts et prolongements présentés comme de nouvelles expositions ; V0, propositions et validations ; V1, vote consultatif. Les anciens lots A1/A2 (contributions Après-image) et les invités restent différés. Aucun nouveau droit ni durée de cookie ne sont décidés implicitement.
+
+## Arbitrages — Expositions et vote consultatif (23 octobre 2026)
+
+Le propriétaire a décidé : choix de l’accueil réservé à l’administrateur, couverture publique avant ouverture, conservation de l’exposition complète pendant 12 mois, ajout du sous-titre/prologue/conclusion/couverture/cartels et trois langues requises pour publier. Le bilan publié est immuable ; un rectificatif est un **nouveau bilan lié**. Le prolongement se présente comme une nouvelle exposition, sans changement implicite du statut permanent des collections.
+
+Le photographe d’origine propose les photos au vote ; relecteur et administrateur les valident. La direction de publication peut réordonner les propositions et constitue une responsabilité **distincte de l’administration, encore à définir**. Le visiteur peut voter sur chaque photo proposée, au plus une fois sur chacune pour ce navigateur dans l’exposition ; le cookie sans compte est accepté, avec sa limite entre appareils ou après effacement. Le vote demeure consultatif. Les détails de conservation, de restitution des résultats et du calendrier de vote restent à fixer avant V1.
+
+La conception des compositions Après-image, suggestions, uploads, identités de contributeurs, publication/attribution et branches successives est gardée pour plus tard ; elle ne fait plus partie du pilote. Les points 1 à 7 non répondus restent ouverts, hors responsabilités explicitement décidées. Point de départ/échéance des 12 mois et paramètres du cookie restent distincts. Le plan détaille les [besoins de la Vigie par lot](docs/etudes/saisons-apres-image.md#101-besoins-de-la-vigie-et-preuves-attendues-par-lot), notamment BV-6/DS22 pour les compteurs de vote. **Cette actualisation est documentaire : ces nouvelles règles ne sont pas encore activées dans le code.**
+
+## Précision — Mécanisme du vote et traceurs (24 octobre 2026)
+
+Accord pour instruire d’abord un identifiant aléatoire minimal dans un cookie créé au premier vote, sans fingerprinting. L’objectif est de simplifier le parcours ; **l’exemption de consentement reste à justifier pour le mécanisme réel**, sans l’assimiler automatiquement à une protection anti-fraude exemptée. Le [plan, § 5.4](docs/etudes/saisons-apres-image.md#54-piste-retenue-pour-létude--identifiant-minimal-au-premier-vote) documente les sources CNIL, la qualification et l’information/consentement à prévoir dans V1, les durées encore ouvertes et les solutions de repli à rediscuter si nécessaire. Aucun cookie de vote ni fingerprinting activé par cette précision documentaire.
 
 ## Correction — Échéances, purges et stockages refusés, PR #225, version 1.225.0 (24 octobre 2026)
 
@@ -54,6 +66,14 @@ Exemptions des blocages automatiques vérifiées sur le réseau réel, /64 IPv6 
 ## Correction — Édition des photos et aperçus, PR #209, version 1.209.0 (21 octobre 2026)
 
 Demande de description sans rechargement de la fiche, confirmation avant de remplacer un texte déjà saisi, Défaire des langues ajoutées dans l’admin v2. Aperçu du filigrane actualisable sur place sans enregistrer, respect de sa case d’activation. Bandeau de prévisualisation étendu aux neuf compositions, toujours réservé au droit `site.apparence` ; visionneuse publique inchangée. Tests ciblés du serveur et parcours navigateur dans les deux admins.
+
+## Préparation — Atelier des saisons, S1a, PR #219, version 1.219.0 (23 octobre 2026)
+
+La branche `feat/saisons-atelier` prépare l’atelier indépendamment des décisions encore ouvertes : compteur de version, enregistrement transactionnel des textes et de l’ordre, contrat de formulaire, calendrier à fuseau explicitement fourni et quatre gabarits communs aux administrations v1/v2. La sélection de photos est bornée et paginée ; une modification concurrente n’est pas écrasée. Les gabarits sont traduits et conçus sans script obligatoire.
+
+**Aucune route ni permission de saison n’est encore activée** : S1b raccordera l’atelier après les réponses du propriétaire sur les droits et le fuseau. La [section 10.1 du plan](docs/etudes/saisons-apres-image.md#101-besoins-de-la-vigie-et-preuves-attendues-par-lot) donne les raccordements Vigie de chaque lot ; S1a ne déclare aucune émission HTTP livrée. La note de version de cette PR décrit cette limite. Le socle #218 n’est pas fusionné ; le lot suivant reste dépendant de sa revue.
+
+Vérifications de S1a : 1 350 tests réussis sans Vigie et 1 350 avec, dont 27 tests du modèle, du calendrier et du formulaire ; 9 tests ciblés de notes, liens et langues. Aperçu isolé : 72 états de rendu et 12 HTML valides, sans défaut relevé ; sélection et ordre transmis sans JavaScript. Le parcours authentifié dans l’admin réel et la persistance HTTP restent à vérifier en S1b.
 
 ## Livraison — Vigie en dossiers, PR E #202, version 1.202.0 (21 octobre 2026)
 
