@@ -16,7 +16,7 @@ export function createSessionStore(db, { now = Date.now } = {}) {
     get: db.prepare('SELECT * FROM sessions WHERE id = ?'),
     touch: db.prepare('UPDATE sessions SET expires_at = ? WHERE id = ?'),
     delete: db.prepare('DELETE FROM sessions WHERE id = ?'),
-    purge: db.prepare('DELETE FROM sessions WHERE expires_at <= ?'),
+    purge: db.prepare('DELETE FROM sessions WHERE expires_at <= ? OR created_at <= ?'),
   };
 
   return {
@@ -25,7 +25,7 @@ export function createSessionStore(db, { now = Date.now } = {}) {
     create({ sub, name = '', email = '', roles = [], idToken = null, ctx = null, authTime = null }) {
       const token = crypto.randomBytes(32).toString('base64url');
       const t = now();
-      q.purge.run(t);
+      q.purge.run(t, t - ABSOLUTE_TTL);
       q.insert.run({
         id: hash(token), sub, name, email, roles: JSON.stringify(roles), id_token: idToken,
         csrf: crypto.randomBytes(32).toString('base64url'),
@@ -59,5 +59,8 @@ export function createSessionStore(db, { now = Date.now } = {}) {
     destroy(token) {
       if (token) q.delete.run(hash(token));
     },
+
+    // Effacement indépendant du retour d'un cookie : l'expiration d'accès ne suffit pas à retirer les données.
+    purge() { const t = now(); return q.purge.run(t, t - ABSOLUTE_TTL).changes; },
   };
 }

@@ -13,6 +13,8 @@ Internet ──HTTPS──► Cloudflare ──tunnel──► cloudflared ─�
                                        backup (chaque jour) ──► dossier de l'hôte (BACKUP_DIR)
 ```
 
+**Le HTTPS entre `cloudflared` et Nicephos est facultatif.** L’adresse publique `PUBLIC_URL=https://…` reste celle des visiteurs ; le service du tunnel peut être `http://site:3000`, sans certificat sur le serveur Nicephos. Le refus d’une `PUBLIC_URL` HTTP en production ne refuse pas cette liaison interne HTTP. Ce fonctionnement est décrit dans la [documentation Cloudflare des services publiés](https://developers.cloudflare.com/tunnel/concepts/routing/). Sans Cloudflare, prévoir une autre terminaison HTTPS pour l’accès public ; le serveur Node écoute en HTTP.
+
 ## Les données : où elles sont, et pourquoi elles ne peuvent pas se perdre
 
 Tout l'état du site (base, originaux, preuves, logos, images servies) est dans **un dossier de l'hôte**, `DATA_DIR`, monté dans le conteneur sous `/data`. Plusieurs protections empêchent de le perdre :

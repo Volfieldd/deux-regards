@@ -9,8 +9,9 @@ Cette page résume les protections en place. Chacune est couverte par des tests 
 - **Sessions côté serveur :**
   - seule l'empreinte du jeton est en base ;
   - 8 h sans activité, 24 h au plus ;
+  - lignes expirées effacées au démarrage puis à chaque passage horaire, sans attendre une autre connexion ; les empreintes de révocation de la Vigie suivent leur durée propre de 48 h ;
   - régénérées à chaque connexion.
-- **Cookies :** `httpOnly`, `SameSite=Lax`, et en HTTPS `Secure` avec le préfixe `__Host-`. Quatre cookies de transaction OIDC au plus, et la page demandée n'y est gardée que si elle est courte : une page tierce ne peut pas gonfler l'en-tête `Cookie` jusqu'au refus (431) du site.
+- **Cookies d’authentification :** `httpOnly`, `SameSite=Lax`, et en HTTPS `Secure` avec le préfixe `__Host-`. Trois cookies de transaction OIDC au plus, et la page demandée n'y est gardée que si elle est courte : une page tierce ne peut pas gonfler l'en-tête `Cookie` jusqu'au refus (431) du site. La date signée est vérifiée côté serveur avant tout échange du code : après dix minutes, même une copie du cookie est refusée. Ce contrôle vaut aussi pour la vérification d’identité. Une tentative antérieure à l’ajout de cette date doit être recommencée ; une session déjà ouverte reste valide selon ses bornes habituelles.
 - **Cache :** aucune réponse de l'admin n'est gardée en cache (`no-store`, fichiers compris).
 - **CSRF :** jeton synchronisé sur toute écriture (champ `_csrf` ou en-tête `x-csrf-token` pour les appels JSON de l'admin : envoi photo par photo, actions groupées, enregistrement champ par champ, ordre des séries). Pour un import, il doit précéder le premier fichier : aucun fichier n'est lu avant sa vérification.
 - **Suppressions groupées :** jamais sans confirmation explicite (`confirm`) ; sans elle, l'admin affiche une page de confirmation.
@@ -88,7 +89,7 @@ Dès que `PUBLIC_URL` est en HTTPS ou que `NODE_ENV=production`, le serveur refu
 - avec un émetteur OIDC en HTTP ;
 - avec la connexion locale de test (`LOCAL_AUTH_TOKEN`) ;
 - avec une autorité d'horodatage en HTTP (`TSA_URL`) ;
-- en production (`NODE_ENV=production`) sans `PUBLIC_URL`.
+- en production (`NODE_ENV=production`) sans `PUBLIC_URL`, ou avec une URL publique en HTTP. Ce contrôle porte sur l’adresse des visiteurs : derrière Cloudflare Tunnel, le service interne peut rester en HTTP sans certificat local, avec `PUBLIC_URL=https://…`.
 
 En conteneur (`REQUIRE_PERSISTENT_STORAGE=1`), il refuse aussi une base (`DATABASE_PATH`) hors du dossier des données. Avec `TRUST_PROXY` laissé par défaut sur un serveur joignable du réseau, il l'écrit dans ses journaux au démarrage.
 

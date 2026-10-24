@@ -73,17 +73,26 @@ export default async function publicRoutes(app) {
   // part le premier (des envois répartis sur de nombreuses adresses ne font pas grossir la mémoire).
   const RECAP_TTL = 15 * 60 * 1000, RECAP_MAX = 500;
   const recaps = new Map();
+  let recapTimer = null;
   const recapStore = {
     // Entrées expirées retirées (dans l'ordre d'arrivée), puis les plus anciennes au-delà de 500.
     purge() {
       const t = Date.now();
-      for (const [k, v] of recaps) { if (t - v.at <= RECAP_TTL && recaps.size < RECAP_MAX) break; recaps.delete(k); }
+      for (const [k, v] of recaps) { if (t - v.at < RECAP_TTL && recaps.size < RECAP_MAX) break; recaps.delete(k); }
+    },
+    // Une seule échéance, celle du plus ancien : effacer les choix même si aucun navigateur ne revient (audit cookies).
+    schedule() {
+      if (recapTimer) clearTimeout(recapTimer);
+      const first = recaps.values().next().value;
+      recapTimer = first ? setTimeout(() => { recapStore.purge(); recapStore.schedule(); }, Math.max(0, first.at + RECAP_TTL - Date.now())) : null;
+      recapTimer?.unref();
     },
     keep(data) {
       recapStore.purge();
       const t = Date.now();
       const token = crypto.randomBytes(16).toString('base64url');
       recaps.set(token, { at: t, data });
+      recapStore.schedule();
       return token;
     },
     read(token) {
@@ -91,10 +100,12 @@ export default async function publicRoutes(app) {
       const r = recaps.get(token);
       recaps.delete(token);
       recapStore.purge();
-      return r && Date.now() - r.at <= RECAP_TTL ? r.data : null;
+      recapStore.schedule();
+      return r && Date.now() - r.at < RECAP_TTL ? r.data : null;
     },
     ttl: RECAP_TTL / 1000,
   };
+  app.addHook('onClose', async () => { if (recapTimer) clearTimeout(recapTimer); recapTimer = null; recaps.clear(); });
   // Mêmes pages en français (racine), en anglais (/en) et en allemand (/de).
   for (const lang of LANGS) await app.register(pages, { prefix: PREFIX[lang], lang, repo, mapEnabled, helloLimit, likeLimit, reportLimit, shareLimit, searchLimit, messageLimit, codeGuard, recapStore });
 
