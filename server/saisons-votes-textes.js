@@ -2,6 +2,7 @@
 export const VOTE_UI = {
   fr: {
     title: 'Voter pour cette photographie', manage: 'Mes votes dans cette exposition',
+    proposals: 'Photos proposées au vote', seeProposals: 'Découvrir les photos proposées au vote', seePhoto: 'Voir la photographie',
     lead: 'Votre avis aide l’équipe à préparer la collection permanente. Le vote est consultatif : l’équipe décide des œuvres retenues.',
     choice: 'Vous pouvez voter une fois pour chaque photographie proposée dans cette exposition, avec ce navigateur.',
     consent: 'J’accepte le cookie et le traitement de mes votes pour cette exposition.',
@@ -22,6 +23,7 @@ export const VOTE_UI = {
   },
   en: {
     title: 'Vote for this photograph', manage: 'My votes in this exhibition',
+    proposals: 'Photographs offered for voting', seeProposals: 'Discover the photographs offered for voting', seePhoto: 'View the photograph',
     lead: 'Your opinion helps the team prepare the permanent collection. Voting is advisory: the team decides which works are retained.',
     choice: 'You can vote once for each photograph offered in this exhibition, using this browser.',
     consent: 'I agree to the cookie and the processing of my votes for this exhibition.',
@@ -42,6 +44,7 @@ export const VOTE_UI = {
   },
   de: {
     title: 'Für diese Fotografie stimmen', manage: 'Meine Stimmen in dieser Ausstellung',
+    proposals: 'Fotografien zur Abstimmung', seeProposals: 'Fotografien zur Abstimmung entdecken', seePhoto: 'Fotografie ansehen',
     lead: 'Ihre Meinung hilft dem Team bei der Vorbereitung der ständigen Sammlung. Die Abstimmung ist beratend: Das Team entscheidet über die aufgenommenen Werke.',
     choice: 'Sie können mit diesem Browser einmal für jede vorgeschlagene Fotografie dieser Ausstellung stimmen.',
     consent: 'Ich stimme dem Cookie und der Verarbeitung meiner Stimmen für diese Ausstellung zu.',

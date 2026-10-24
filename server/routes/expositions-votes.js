@@ -45,9 +45,18 @@ export function installExpositionVotes(app, { now = Date.now, approvedIds = id =
 export function expositionVoteLinks(app, { request, reply, lang, exposition, photo = null }) {
   app.saisonsVotes.purgeDue();
   const raw = rawToken(app, request, exposition.id), root = `/exposition/${exposition.slug}`;
-  const closed = exposition.phase !== 'ouverte';
+  const t = app.expositionVoteForms.now();
+  const closed = exposition.phase !== 'ouverte' || t < exposition.opens_at || t >= exposition.closes_at;
+  const values = !closed && app.expositionVoteForms.enabled ? app.expositionVoteForms.approvedIds(exposition.id) : [];
+  const approved = Array.isArray(values) && values.length <= 500 && new Set(values).size === values.length ? values : [];
+  const visible = new Map((exposition.photos || []).map(p => [p.id, p]));
+  // L’ordre public est exactement celui de la liste doublement validée, filtrée par la projection S2. Il ne
+  // réordonne jamais l’accrochage et ne révèle ni proposition privée, ni compteur, ni classement des visiteurs.
+  const proposals = approved.map(id => visible.get(id)).filter(Boolean).map(p => ({ id: p.id, title: p.title,
+    photoHref: localize(`${root}/photo/${p.slug}`, lang), voteHref: localize(`${root}/photo/${p.slug}/voter`, lang) }));
   if (closed && raw) reply.clearCookie(voteCookieName(app, exposition.id), cookieOptions(app));
-  return { v: VOTE_UI[lang], voteHref: !closed && app.expositionVoteForms.enabled && photo && app.expositionVoteForms.approvedIds(exposition.id).includes(photo.id)
+  return { v: VOTE_UI[lang], proposals, entryHref: !photo && proposals.length ? '#vote-consultatif' : null,
+  voteHref: photo && approved.includes(photo.id)
     ? localize(`${root}/photo/${photo.slug}/voter`, lang) : null,
   manageHref: raw && !closed ? localize(`${root}/participation`, lang) : null };
 }

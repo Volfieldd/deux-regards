@@ -16,6 +16,7 @@ import { NOTICE_VERSION, createVoteToken } from '../server/saisons-votes.js';
 const START = Math.floor((Date.now() - 60000) / 60000) * 60000, END = START + 7 * 86400000;
 const proof = html => /name="_csrf" value="([^"]+)"/.exec(html)?.[1];
 const formProof = (html, action) => proof(html.slice(html.indexOf(`action="${action}"`)));
+const voteSection = html => /<section[^>]*id="vote-consultatif"[^>]*>[\s\S]*?<\/section>/.exec(html)?.[0] || null;
 const count = c => c.db.prepare('SELECT photo_id, total FROM saison_vote_totaux ORDER BY photo_id').all();
 async function context(t, { encrypted = true, secure = false, realProposals = false, logger = false } = {}) {
   let clock = START - 1000, approved = [1, 2];
@@ -212,15 +213,31 @@ test('V1 HTTP : liens S2 limités aux propositions approuvées et pages refusée
 test('V1 HTTP : circuit V0 réel, invalidation des validations et compteurs privés dans l’atelier', async t => {
   const c = await context(t, { realProposals: true }), proposals = c.app.saisonsPropositions, url = `${c.root}/photo/photo-1/voter`;
   assert.equal((await c.get(url)).statusCode, 404);
+  assert.equal(voteSection((await c.get(c.root)).body), null);
   let p = proposals.propose(c.sid, { version: proposals.get(c.sid).version, photo_ids: [1, 2] });
   p = proposals.review(c.sid, { version: p.version });
   assert.equal((await c.get(url)).statusCode, 404);
+  assert.equal(voteSection((await c.get(c.root)).body), null);
   proposals.validate(c.sid, { version: p.version });
+  const approved = await c.get(c.root), initialOrder = voteSection(approved.body);
+  assert.ok(initialOrder.indexOf('Photo 1 FR') < initialOrder.indexOf('Photo 2 FR'));
+  assert.ok(approved.body.includes('href="#vote-consultatif"'));
+  assert.equal(approved.cookies.length, 0);
   const cookies = await voted(c), secondUrl = `${c.root}/photo/photo-2/voter`, secondPage = await c.get(secondUrl, cookies);
-  p = proposals.reorder(c.sid, { version: proposals.get(c.sid).version, photo_ids: [2, 1] });
+  const director = as(c, { sub: 'direction-ordre-public-vote', roles: ['directeur_publication'] });
+  const reordered = await director.post(`/admin/saisons/${c.sid}/vote/ordonner`, { version: String(proposals.get(c.sid).version), 'photo_ids[]': ['1', '2'], position_1: '2', position_2: '1' });
+  assert.equal(reordered.statusCode, 303);
+  p = proposals.get(c.sid);
   assert.equal((await c.get(secondUrl, cookies)).statusCode, 404);
+  assert.equal(voteSection((await c.get(c.root)).body), null);
   assert.equal((await c.post(secondUrl, { _csrf: proof(secondPage.body), notice_version: NOTICE_VERSION }, cookies)).statusCode, 409);
   proposals.review(c.sid, { version: p.version }); proposals.validate(c.sid, { version: p.version });
+  const ordered = await c.get(c.root), publicOrder = voteSection(ordered.body);
+  assert.ok(publicOrder.indexOf('Photo 2 FR') < publicOrder.indexOf('Photo 1 FR'));
+  assert.ok(publicOrder.includes(`${c.root}/photo/photo-2/voter`));
+  const accrochage = /<section[^>]*id="accrochage"[^>]*>[\s\S]*?<\/section>/.exec(ordered.body)[0];
+  assert.ok(accrochage.indexOf('Photo 1 FR') < accrochage.indexOf('Photo 2 FR'));
+  assert.equal(ordered.cookies.length, 0);
   assert.equal((await c.post(secondUrl, { _csrf: proof(secondPage.body), notice_version: NOTICE_VERSION }, cookies)).statusCode, 303);
   const admin = as(c, { sub: 'admin-compteurs-vote', roles: ['admin'] }), privatePage = await admin.get(`/admin/saisons/${c.sid}/vote`);
   assert.equal(privatePage.statusCode, 200);
@@ -231,6 +248,26 @@ test('V1 HTTP : circuit V0 réel, invalidation des validations et compteurs priv
   assert.equal(publicPage.statusCode, 200);
   assert.ok(!publicPage.body.includes('Votes consultatifs'));
   assert.ok(publicPage.body.includes('Mes votes dans cette exposition'));
+});
+
+test('V1 HTTP : propositions publiques filtrées, traduites et retirées sans consentement ni cookie', async t => {
+  const c = await context(t);
+  for (const [prefix, heading] of [['', 'Photos proposées au vote'], ['/en', 'Photographs offered for voting'], ['/de', 'Fotografien zur Abstimmung']]) {
+    const response = await c.get(`${prefix}${c.root}`);
+    assert.equal(response.statusCode, 200);
+    assert.ok(voteSection(response.body).includes(heading));
+    assert.equal(response.cookies.length, 0);
+    assert.doesNotMatch(response.body, /name="consent"/);
+  }
+  fs.unlinkSync(path.join(c.dir, 'variants', variantName('neutre-2.jpg', widthsFor(1200).at(-1), 'webp', '')));
+  const filtered = voteSection((await c.get(c.root)).body);
+  assert.ok(filtered.includes('Photo 1 FR')); assert.ok(!filtered.includes('Photo 2 FR'));
+  c.approve([]);
+  assert.equal(voteSection((await c.get(c.root)).body), null);
+  c.approve([1]); c.app.expositionVoteForms.enabled = false;
+  assert.equal(voteSection((await c.get(c.root)).body), null);
+  c.app.expositionVoteForms.enabled = true; c.at(END);
+  assert.equal(voteSection((await c.get(c.root)).body), null);
 });
 
 test('V1 HTTP : après clôture, aucun export ne restitue les anciens votes ou leur preuve', async t => {

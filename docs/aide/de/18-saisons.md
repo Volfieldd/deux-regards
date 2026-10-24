@@ -93,6 +93,8 @@ Ein nicht zugelassenes Foto, eine fehlende Übersetzung, ein Titelbild außerhal
 
 ## Beratende Abstimmung und Rechte der Besucher
 
+In einer offenen Ausstellung führt **Fotografien zur Abstimmung entdecken** zu einem eigenen Abschnitt. Er zeigt die Vorschläge in der bestätigten, von der Publikationsleitung gewählten Reihenfolge mit Links zu jedem Foto und seinem Abstimmungsformular. Die Reihenfolge der Hängung bleibt unverändert. Ohne aktuelle Bestätigungen oder verfügbare Fotos sowie nach dem Ende verschwindet diese Einladung.
+
 Bei einer vorgeschlagenen Fotografie einer geöffneten Ausstellung öffnet **Für diese Fotografie stimmen** ein Formular. Bei der ersten Stimme liest der Besucher die Information und kreuzt selbst die Zustimmung zum Cookie und zur Verarbeitung der Stimmen an. Das Feld ist zunächst leer. Ohne Zustimmung bleibt der Besuch möglich und es wird kein Abstimmungs-Cookie gesetzt.
 
 Besucher können mit diesem Browser einmal für jede vorgeschlagene Fotografie dieser Ausstellung stimmen. Weitere Fotografien nutzen die bestehende Einwilligung. Eine Wiederholung zeigt die gespeicherte Stimme, ohne eine weitere hinzuzufügen. Das Cookie endet mit der Ausstellung; ein Wechsel von Browser oder Gerät oder das Löschen des Cookies kann erneutes Abstimmen ermöglichen. Es gibt weder Konto noch Identitätsprüfung.

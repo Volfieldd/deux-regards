@@ -1,0 +1,15 @@
+<% if (it.voteLinks?.proposals?.length) { const vote = it.voteLinks; %>
+<section class="expo-conclusion" id="vote-consultatif" aria-labelledby="vote-consultatif-titre">
+  <h2 class="titre-2" id="vote-consultatif-titre"><%= vote.v.proposals %></h2>
+  <p class="expo-prose"><%= vote.v.lead %></p>
+  <p class="expo-prose"><%= vote.v.choice %></p>
+  <ol class="expo-photos">
+  <% vote.proposals.forEach(p => { %>
+    <li><h3 class="titre-3"><%= p.title %></h3><div class="expo-actions">
+      <a class="lien" href="<%= p.photoHref %>"><%= vote.v.seePhoto %><span class="sr-only"> · <%= p.title %></span></a>
+      <a class="lien" href="<%= p.voteHref %>"><%= vote.v.title %><span class="sr-only"> · <%= p.title %></span></a>
+    </div></li>
+  <% }) %>
+  </ol>
+</section>
+<% } %>

@@ -93,6 +93,8 @@ Une photo non autorisée, une traduction manquante, une couverture absente de l�
 
 ## Vote consultatif et droits des visiteurs
 
+Sur une exposition ouverte, **Découvrir les photos proposées au vote** mène à une section dédiée. Elle présente les propositions dans l’ordre doublement validé, choisi par la direction de publication, avec un lien vers chaque photographie et son formulaire de vote. Elle ne change pas l’ordre de l’accrochage. Sans validations courantes, sans photo disponible ou après la clôture, cette invitation disparaît.
+
 Depuis une photographie proposée au vote dans une exposition ouverte, **Voter pour cette photographie** ouvre un formulaire. Au premier vote, le visiteur lit l’information et coche lui-même son accord au cookie et au traitement des votes. La case est vide à l’arrivée. Sans accord, la visite continue librement et aucun cookie de vote n’est posé.
 
 Le visiteur peut voter sur chaque photographie proposée, une fois sur chacune avec ce navigateur dans cette exposition. Les photos suivantes réutilisent cet accord. Un doublon affiche le vote déjà enregistré sans ajouter de voix. Le cookie expire à la clôture ; changer de navigateur, d’appareil ou effacer ce cookie peut permettre de revoter. Il n’y a ni compte ni vérification d’identité.

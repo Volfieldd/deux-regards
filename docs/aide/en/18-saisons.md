@@ -93,6 +93,8 @@ An unauthorised photograph, a missing translation, a cover outside the display, 
 
 ## Advisory voting and visitor rights
 
+In an open exhibition, **Discover the photographs offered for voting** leads to a dedicated section. It presents proposals in their approved order, chosen by publishing direction, with a link to each photograph and its voting form. It does not change the display order. Without current approvals or an available photograph, or after closing, this invitation disappears.
+
 From an eligible photograph in an open exhibition, **Vote for this photograph** opens a form. At the first vote, the visitor reads the information and ticks their agreement to the cookie and processing of votes. The box starts unchecked. Without agreement, visitors remain free to browse and no voting cookie is set.
 
 Visitors can vote once on each proposed photograph using this browser in this exhibition. Further photographs reuse that agreement. A duplicate shows the recorded vote without adding another. The cookie expires when the exhibition closes; changing browser or device or deleting the cookie may allow another vote. There is no account or identity check.
