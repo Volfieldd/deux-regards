@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Mise en œuvre dans les PR #218 à #223 : socle, atelier, visite publique, bilans/collections et propositions validées. V1 termine le vote consultatif et ses vérifications. Toutes les PR restent en brouillon ; aucune fusion ni mise en ligne effectuée. |
+| Statut | Mise en œuvre dans les PR #218 à #224 : socle, atelier, visite publique, bilans/collections, propositions validées et vote consultatif consenti, avec vérifications métier et navigateur. Toutes les PR restent en brouillon ; aucune fusion ni mise en ligne effectuée. |
 | Date | 23 octobre 2026 ; précision du mécanisme de vote le 24 octobre 2026. |
 | Objet | Expositions photographiques datées, couverture publique avant ouverture, archive complète pendant 12 mois et prolongements éditoriaux vers les collections. Le pilote participatif est un vote consultatif sur des photos proposées à l’avance. |
 | Références | [Développer](../wiki/Développer.md), [Spécifications](../wiki/Spécifications.md), [Tests](../wiki/Tests.md), [Sécurité](../wiki/Sécurité.md), [RGPD](../wiki/RGPD.md), [besoins de la Vigie](vigie-besoins-des-briques.md). |
@@ -214,7 +214,7 @@ S3 peut être livré sans vote : une première exposition et son bilan restent c
 
 ### 10.1 Besoins de la Vigie et preuves attendues par lot
 
-**État courant** : S1b, S2, S3 et V0 raccordent les routes, permissions, textes publics et décisions. Les tests prouvent les transitions de calendrier sans SQL ni attribution au prochain admin, et les publications explicites des bilans/collections attribuées à leur compte. V1 termine les formulaires, le consentement et la purge du vote. Les PR restent en brouillon, sans déploiement. Les cas DS viennent de la [conception du journal](journalisation-securite.md#3-cas-de-détection), les besoins de la Vigie du [registre des briques](vigie-besoins-des-briques.md). Les protections communes existantes ne prouvent pas les routes à venir.
+**État courant** : S1b, S2, S3 et V0 raccordent les routes, permissions, textes publics et décisions. Les tests prouvent les transitions de calendrier sans SQL ni attribution au prochain admin, et les publications explicites des bilans/collections attribuées à leur compte. V1 raccorde les formulaires, le consentement, l’export/retrait et la purge du vote ; les deux suites complètes passent 1 446/1 446. Les PR restent en brouillon, sans déploiement. Les cas DS viennent de la [conception du journal](journalisation-securite.md#3-cas-de-détection), les besoins de la Vigie du [registre des briques](vigie-besoins-des-briques.md). Les protections communes existantes ne prouvent pas les routes à venir.
 
 | Lot / surface | Raccordement prévu | Preuves et limites |
 |---|---|---|
@@ -247,7 +247,9 @@ Chaque PR reste en brouillon, avec contexte, résultats réels, « Sécurité »
 | #220 / S1b | Migration 067, atelier raccordé v1/v2, portées et droits, textes/couverture/cartels trilingues, accueil réservé à admin. | Brouillon ; 1 365 tests dans chaque mode et parcours navigateur réel vérifiés. |
 | #221 / S2 | Annonce, visite, archive 12 mois UTC, accueil choisi et surveillance temporelle des textes publics. | Brouillon ; 1 376 tests dans chaque mode, Chromium/WebKit ordinateur/mobile vérifiés. |
 | #222 / S3 | Migration 068, bilans immuables, rectificatifs, collections autonomes, parcours public et Vigie. | Brouillon ; parcours métier/public et navigateur vérifiés, 1 397 tests dans chaque mode réussis. |
-| #223 / V0 | Migration 069, propositions versionnées, double validation et rôle distinct de direction de publication. | Brouillon ; quatre acteurs vérifiés dans le navigateur, 1 407 tests dans chaque mode réussis ; comparaison de banc documentée. |
-| #224 / V1 | Migration 070, vote consultatif, consentement, export/retrait et purge ; invitation publique et ordre prévalidé. | Finition et QA en cours, pas de déploiement. |
+| #223 / V0 | Migration 069, propositions versionnées, double validation et rôle distinct de direction de publication. | Brouillon ; quatre acteurs vérifiés dans le navigateur, 1 407 tests dans chaque mode réussis ; mesures de banc variables, même à code identique : validation de performance sur cible encore à confirmer. |
+| #224 / V1 | Migration 070, vote consultatif, consentement, export/retrait et purge ; invitation publique et ordre prévalidé. | Brouillon ; 1 446 tests dans chaque mode et quatre parcours Chromium/WebKit ordinateur/mobile réussis, export réel et effacement persistant vérifiés. |
 
 Les sources de vérité opérationnelles sont les [Spécifications](../wiki/Spécifications.md), l’aide Expositions et les tests de chaque lot. Les scores ne publient jamais automatiquement une œuvre. La fusion de chaque PR reste une décision du propriétaire ; la pile ne vaut pas mise en ligne. Les seuls formats fonctionnels différés sont ceux du § 8, l’enrichissement d’une collection publiée, et les besoins Vigie explicitement encore proposés.
+
+Limites de validation : bases et images synthétiques, aucun service OIDC, installateur ou Cloudflare réel essayé. Le banc de la Vigie a été exécuté avant/après et contrôlé à code identique ; les variations de la machine partagée ne permettent pas d’attester une absence de ralentissement sur cible. Les chiffres et cette limite figurent dans la PR #223.
