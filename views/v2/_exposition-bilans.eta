@@ -1,0 +1,24 @@
+<% const e = it.exposition, reports = Array.isArray(it.bilans) ? it.bilans : null;
+   const texts = {
+     fr: { initial: 'Bilan initial', correction: 'Bilan rectificatif', corrects: 'Rectifie le bilan', correctedBy: 'Complété ou rectifié par', published: 'Publié le', collections: 'Ce regard se poursuit', all: 'Toutes les collections permanentes' },
+     en: { initial: 'Initial retrospective', correction: 'Corrective retrospective', corrects: 'Corrects the retrospective', correctedBy: 'Supplemented or corrected by', published: 'Published on', collections: 'This perspective continues', all: 'All permanent collections' },
+     de: { initial: 'Erster Rückblick', correction: 'Berichtigender Rückblick', corrects: 'Berichtigt den Rückblick', correctedBy: 'Ergänzt oder berichtigt durch', published: 'Veröffentlicht am', collections: 'Diese Sichtweise geht weiter', all: 'Alle dauerhaften Sammlungen' }
+   }, b = texts[it.lang] || texts.fr; %>
+<section class="expo-bilan" id="bilan" aria-labelledby="bilan-t">
+  <h2 class="titre-2" id="bilan-t"><%= it.x.report %></h2>
+<% if (reports?.length) { %>
+<% reports.forEach(r => { const parent = reports.find(p => p.id === r.rectifies_id), children = reports.filter(child => child.rectifies_id === r.id); %>
+  <article class="expo-carte" id="bilan-<%= r.id %>" aria-labelledby="bilan-t-<%= r.id %>">
+    <p class="etiquette"><%= r.rectificatif ? b.correction : b.initial %></p><h3 class="titre-3" id="bilan-t-<%= r.id %>"><%= r.title %></h3>
+    <p class="expo-dates"><%= b.published %> <time datetime="<%= new Date(r.published_at).toISOString() %>"><%= it.date(r.published_at) %></time></p>
+<% if (parent) { %>    <p class="expo-actions"><a class="lien" href="#bilan-<%= parent.id %>"><%= b.corrects %> : <%= parent.title %></a></p>
+<% } %>    <p class="expo-prose"><%= r.body %></p>
+<% if (children.length) { %>    <div><p><%= b.correctedBy %></p><ul><% children.forEach(child => { %><li class="expo-actions"><a class="lien" href="#bilan-<%= child.id %>"><%= child.title %></a></li><% }) %></ul></div>
+<% } %><% if (r.collections.length) { %>    <div><h4 class="titre-3"><%= b.collections %></h4><ul><% r.collections.forEach(c => { %><li class="expo-actions"><a class="lien" href="<%= it.u(`/collection/${c.slug}`) %>"><%= c.title %></a></li><% }) %></ul></div>
+<% } %>  </article>
+<% }) %>
+<% } else if (reports === null && e.report) { %>  <p class="expo-prose"><%= e.report %></p>
+<% } else { %>  <p><%= it.x.pending %></p>
+<% } %>
+  <div class="expo-actions"><a class="lien" href="<%= it.u('/collections') %>"><%= b.all %></a></div>
+</section>

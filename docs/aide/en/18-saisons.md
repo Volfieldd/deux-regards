@@ -69,3 +69,25 @@ A message at the top and, where possible, next to the field explains a refusal. 
 If someone saved another version in the meantime, the change is refused without overwriting their work. Reload the record, compare it with your input and apply the changes you want again.
 
 An unauthorised photograph, a missing translation, a cover outside the display, repeated positions or invalid dates prevent approval. A refusal does not partially publish an exhibition. Advisory voting is not managed by this screen.
+
+## Retrospectives and corrections
+
+In the exhibition record, **Retrospectives and permanent exhibitions** opens a separate space. A photographer prepares retrospectives for their own exhibitions; the reviewer can read them. The administrator decides when to publish or withdraw them.
+
+Create the draft with a French title, then complete the **Title** and **Account** in French, English and German. Prepare the draft before closing if needed, including while the exhibition itself is still a draft. Publishing requires an approved, visible and closed exhibition, with all three languages complete.
+
+The retrospective may select **zero, one or several photographs** from the original display. Select the chosen photographs and assign distinct positions before saving. A photograph must remain published and authorised; selecting it does not republish it.
+
+**Publish…** opens a confirmation. Once published, the title, account and selection cannot change. Use **Prepare a correction** to add a clarification or correct a mistake: this creates a new retrospective linked to the previous one and subject to the same approval. The public page retains both accounts and their links. A further correction may clarify a published corrective retrospective.
+
+**Withdraw…** hides a retrospective without rewriting it. Corrections no longer display links to a withdrawn retrospective. A withdrawn retrospective cannot become the new origin of a collection.
+
+## Permanent collections
+
+From a published retrospective, **Prepare a collection** creates an independent continuation, presented as a new exhibition. Its **Title**, **Artistic intention**, optional texts, **Cover**, **Exhibition captions** and order belong to the collection. Photographs keep their original series.
+
+Choose photographs from that retrospective’s selection. A published collection requires at least one photograph, an explicitly chosen cover from its display, and the title and artistic intention in all three languages. Complete all three versions of each optional text used, including captions. **Save the collection** saves the texts, cover, captions and order together; save before leaving the page.
+
+After confirming **Publish…**, the presentation and display are locked. **Withdraw…** removes the collection from the public site. Each photograph’s current permissions still apply: unpublishing or a missing agreement removes it from the visit, even when it belonged to the published collection. An unavailable cover is not automatically replaced.
+
+On the v2 or v3 public site, reach **Permanent collections** from exhibitions, their home page invitation and the site footer when a collection is published. Each collection has its own entrance, photographic visit, conclusion and links to its original exhibition and retrospective. After the exhibition’s twelve-month archive, its retrospectives and links remain without displaying its former photographs again. The collection keeps its own visit without a closing date. Withdrawing its origin hides that lineage; the collection remains accessible until its own withdrawal.

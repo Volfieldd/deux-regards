@@ -1,0 +1,21 @@
+<% layout('./layout') %>
+<% const c = it.collection, x = it.x; %>
+<%~ include('./_entete', { ...it, courant: 'expositions', courantSous: true }) %>
+<main id="contenu" class="wrap expo">
+  <p class="expo-retour"><a class="lien" href="<%= it.u('/collections') %>">← <%= x.back %></a></p>
+  <header class="expo-ouverture<%= c.cover ? '' : ' expo-ouverture--texte' %>"><div class="expo-ouverture-texte"><p class="etiquette"><%= x.permanent %></p><h1 class="titre-page"><%= c.title %></h1><% if (c.subtitle) { %><p class="chapo"><%= c.subtitle %></p><% } %><p class="expo-prose"><%= c.intro %></p>
+<% if (c.photos.length) { %>    <div class="expo-actions"><a class="btn" href="<%= it.u(`/collection/${c.slug}/photo/${c.photos[0].slug}`) %>"><%= x.start %></a><a class="lien" href="#accrochage"><%= x.images %></a></div>
+<% } %>  </div><% if (c.cover) { %><figure class="expo-couverture"><%~ it.picture(c.cover, { sizes: '(min-width: 900px) calc((100vw - 192px) / 2), calc(100vw - 48px)', eager: true, alt: c.cover.alt || c.cover.title }) %></figure><% } %></header>
+<% if (c.prologue) { %>  <section class="expo-prologue" aria-labelledby="prologue-t"><h2 class="sr-only" id="prologue-t"><%= c.title %></h2><p class="expo-prose"><%= c.prologue %></p></section>
+<% } %>
+  <section class="expo-accrochage" id="accrochage" aria-labelledby="accrochage-t"><div class="expo-section-titre"><h2 class="titre-2" id="accrochage-t"><%= x.images %></h2><p class="donnee"><%= x.photographs(c.photos.length) %></p></div>
+<% if (!c.photos.length) { %>    <p class="expo-note"><%= x.noPhotos %></p>
+<% } else { %>    <ol class="expo-photos">
+<% c.photos.forEach((p, i) => { %>      <li><figure><a class="expo-oeuvre" href="<%= it.u(`/collection/${c.slug}/photo/${p.slug}`) %>" aria-labelledby="photo-t-<%= p.id %>"><%~ it.picture(p, { sizes: '(min-width: 900px) calc((100vw - 192px) / 2), calc(100vw - 48px)', alt: p.alt || '' }) %><span class="expo-photo-numero donnee"><%= i + 1 %> / <%= c.photos.length %></span></a><figcaption><h3 class="titre-3" id="photo-t-<%= p.id %>"><%= p.title %></h3><p class="expo-photo-auteur"><%= p.author %></p><% if (p.cartel) { %><p class="expo-prose"><%= p.cartel %></p><% } %></figcaption></figure></li>
+<% }) %>    </ol>
+<% } %>  </section>
+  <section class="expo-conclusion" id="conclusion" aria-labelledby="conclusion-t"><h2 class="titre-2" id="conclusion-t"><%= x.conclusion %></h2><% if (c.conclusion) { %><p class="expo-prose"><%= c.conclusion %></p><% } %><div class="expo-actions"><a class="lien" href="#accrochage"><%= x.returnToPhotos %></a><a class="lien" href="<%= it.u('/collections') %>"><%= x.back %></a></div></section>
+<% if (c.origin) { %>  <section class="expo-bilan" aria-labelledby="origine-t"><h2 class="titre-2" id="origine-t"><%= x.origin %></h2><p><%= c.origin.saison_title %> · <%= c.origin.bilan_title %></p><div class="expo-actions"><a class="lien" href="<%= it.u(`/exposition/${c.origin.saison_slug}`) %>"><%= x.fromExhibition %></a><a class="lien" href="<%= it.u(`/exposition/${c.origin.saison_slug}#bilan-${c.origin.bilan_id}`) %>"><%= x.fromReport %></a></div></section>
+<% } %>
+</main>
+<%~ include('./_pied', it) %>

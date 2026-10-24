@@ -69,3 +69,25 @@ Eine Meldung am Anfang und, soweit möglich, am Feld erläutert eine Ablehnung. 
 Hat inzwischen jemand eine andere Fassung gespeichert, wird die Änderung abgelehnt, ohne dessen Arbeit zu überschreiben. Laden Sie die Seite neu, vergleichen Sie sie mit Ihrer Eingabe und übernehmen Sie die gewünschten Änderungen erneut.
 
 Ein nicht zugelassenes Foto, eine fehlende Übersetzung, ein Titelbild außerhalb der Hängung, wiederholte Positionen oder ungültige Termine verhindern die Freigabe. Eine Ablehnung veröffentlicht keine Teile der Ausstellung. Beratende Abstimmungen werden auf dieser Seite nicht verwaltet.
+
+## Rückblicke und Berichtigungen
+
+In der Ausstellung öffnet **Rückblicke und dauerhafte Ausstellungen** einen eigenen Bereich. Fotografen bereiten Rückblicke für ihre eigenen Ausstellungen vor; der Reviewer kann sie lesen. Der Administrator entscheidet über Veröffentlichung und Rücknahme.
+
+Erstellen Sie den Entwurf mit einem französischen Titel. Ergänzen Sie **Titel** und **Bericht** auf Französisch, Englisch und Deutsch. Der Entwurf kann vor dem Ende vorbereitet werden, auch wenn die Ausstellung selbst noch ein Entwurf ist. Die Veröffentlichung erfordert eine freigegebene, sichtbare und abgeschlossene Ausstellung sowie alle drei vollständigen Sprachfassungen.
+
+Die Auswahl des Rückblicks darf **kein Foto, ein Foto oder mehrere Fotos** der ursprünglichen Hängung enthalten. Markieren Sie die ausgewählten Fotos und vergeben Sie vor dem Speichern unterschiedliche Positionen. Ein Foto muss weiterhin veröffentlicht und freigegeben sein; seine Auswahl veröffentlicht es nicht erneut.
+
+**Veröffentlichen…** öffnet eine Bestätigung. Danach bleiben Titel, Bericht und Auswahl unverändert. Wählen Sie **Berichtigung vorbereiten**, um etwas zu ergänzen oder zu korrigieren: Ein neuer Rückblick verweist auf den vorherigen und unterliegt derselben Freigabe. Die öffentliche Seite bewahrt beide Berichte und ihre Verknüpfungen. Eine weitere Berichtigung darf auch einen veröffentlichten berichtigenden Rückblick ergänzen.
+
+**Zurückziehen…** blendet einen Rückblick aus, ohne ihn umzuschreiben. Berichtigungen zeigen keine Links mehr zu einem zurückgezogenen Rückblick. Aus einem zurückgezogenen Rückblick lässt sich keine neue Sammlung anlegen.
+
+## Dauerhafte Sammlungen
+
+Aus einem veröffentlichten Rückblick erstellt **Sammlung vorbereiten** eine eigenständige Fortsetzung, die wie eine neue Ausstellung präsentiert wird. **Titel**, **Künstlerische Absicht**, optionale Texte, **Titelbild**, **Ausstellungsbeschriftungen** und Reihenfolge gehören zur Sammlung. Die Fotos behalten ihre ursprüngliche Serie.
+
+Wählen Sie Fotos aus der Auswahl dieses Rückblicks. Eine veröffentlichte Sammlung erfordert mindestens ein Foto, ein ausdrücklich gewähltes Titelbild aus ihrer Hängung sowie Titel und künstlerische Absicht in allen drei Sprachen. Jeder verwendete optionale Text, auch eine Beschriftung, muss in allen drei Sprachen vollständig sein. **Sammlung speichern** speichert Texte, Titelbild, Beschriftungen und Reihenfolge zusammen; speichern Sie vor dem Verlassen der Seite.
+
+Nach der Bestätigung von **Veröffentlichen…** sind Präsentation und Hängung gesperrt. **Zurückziehen…** entfernt die Sammlung vom öffentlichen Auftritt. Die aktuellen Rechte jedes Fotos gelten weiter: Eine zurückgenommene Veröffentlichung oder fehlende Einwilligung entfernt es aus dem Besuch, auch wenn es zur veröffentlichten Sammlung gehörte. Ein nicht verfügbares Titelbild wird nicht automatisch ersetzt.
+
+Auf der öffentlichen Website in v2 oder v3 erreichen Sie **Dauerhafte Sammlungen** über die Ausstellungen, deren Einladung auf der Startseite und den Seitenfuß, sobald eine Sammlung veröffentlicht ist. Jede Sammlung besitzt einen eigenen Einstieg, Fotorundgang, Schlusswort und Links zur ursprünglichen Ausstellung und zum Rückblick. Nach den zwölf Archivmonaten bleiben Rückblicke und Links erhalten, ohne die ehemaligen Ausstellungsfotos erneut anzuzeigen. Die Sammlung behält ihren eigenen Besuch ohne Enddatum. Wird der Ursprung zurückgezogen, wird die Herkunft ausgeblendet; die Sammlung bleibt bis zu ihrer eigenen Rücknahme erreichbar.
