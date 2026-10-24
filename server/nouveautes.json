@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.220.0",
+    "date": "2026-10-24",
+    "pr": 220,
+    "title": {
+      "fr": "L’atelier des expositions devient accessible",
+      "en": "The exhibition workshop is now available",
+      "de": "Die Ausstellungsverwaltung ist jetzt zugänglich"
+    },
+    "items": [
+      {
+        "perm": "saisons.voir",
+        "fr": "Préparez une exposition avec ses textes en trois langues, sa couverture, son calendrier UTC et ses cartels. L’accrochage s’ordonne sans glisser et l’aperçu reste privé. Les photographes préparent leurs expositions ; l’administration valide les dates, retire une exposition et choisit sa mise en avant. Les pages publiques et le vote seront raccordés dans les étapes suivantes.",
+        "en": "Prepare an exhibition with texts in three languages, a cover, a UTC schedule and captions. Reorder photographs without dragging and check a private preview. Photographers prepare their own exhibitions; administrators approve the schedule, withdraw exhibitions and choose the featured one. Public pages and voting will be connected in later stages.",
+        "de": "Bereiten Sie eine Ausstellung mit Texten in drei Sprachen, einem Titelbild, einem UTC-Zeitplan und Bildbeschriftungen vor. Die Bildreihenfolge lässt sich ohne Ziehen ändern; die Vorschau bleibt privat. Fotografen bereiten ihre eigenen Ausstellungen vor; Administratoren bestätigen Termine, ziehen Ausstellungen zurück und wählen die hervorgehobene Ausstellung. Öffentliche Seiten und Abstimmung werden später angebunden."
+      }
+    ]
+  },
+  {
     "version": "1.219.0",
     "date": "2026-10-24",
     "pr": 219,

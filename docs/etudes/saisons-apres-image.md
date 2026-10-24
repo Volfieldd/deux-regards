@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Statut | Cadrage actualisé après les arbitrages du propriétaire. S0 est en PR #218 et la préparation S1a en PR #219, en brouillon. Aucun parcours de saison ni vote n’est activé. |
+| Statut | Cadrage actualisé après les arbitrages du propriétaire. S0 est en PR #218, la préparation S1a en PR #219 et l’atelier raccordé S1b en PR #220, en brouillon. Les routes publiques et le vote arrivent dans les lots suivants ; aucune fusion ni mise en ligne effectuée. |
 | Date | 23 octobre 2026 ; précision du mécanisme de vote le 24 octobre 2026. |
 | Objet | Expositions photographiques datées, couverture publique avant ouverture, archive complète pendant 12 mois et prolongements éditoriaux vers les collections. Le pilote participatif est un vote consultatif sur des photos proposées à l’avance. |
 | Références | [Développer](../wiki/Développer.md), [Spécifications](../wiki/Spécifications.md), [Tests](../wiki/Tests.md), [Sécurité](../wiki/Sécurité.md), [RGPD](../wiki/RGPD.md), [besoins de la Vigie](vigie-besoins-des-briques.md). |
@@ -33,10 +33,13 @@ Les anciennes SA-D5 (triptyque composé par le visiteur) et SA-D10 (Écho/Contra
 | SA-D23 | 18/19/21/22 — Reports | Mettre en attente visibilité/conservation des anciennes contributions, publication/attribution de ces contributions, branches successives et photographes invités. Ces points ne sont pas des dépendances du vote simple. |
 | SA-D24 | 23 — Portée du vote | **Consultatif**. Aucun classement ne publie automatiquement une photo dans les collections et aucun engagement de permanence n’est promis. Les autres formats se décideront plus tard. |
 | SA-D25 | 24 octobre — Limitation et traceurs | Accord pour **instruire un identifiant aléatoire minimal dans un cookie créé au premier vote**, sans fingerprinting. La possibilité d’éviter un bandeau global reste soumise à la justification d’une exemption applicable ; aucune exemption ni activation n’est acquise. |
+| SA-D26 | 24 octobre — Matrice de droits | Le propriétaire valide : **photographe prépare ses expositions et propose ses photos ; relecteur valide les propositions ; administrateur programme, publie, retire et choisit l’accueil ; permission distincte de direction de publication pour réordonner, sans attribution automatique**. S1b raccorde préparation/lecture/publication/accueil ; V0 raccorde les propositions et la direction de publication. |
+| SA-D27 | 24 octobre — Calendrier et archive | **UTC, saisie à la minute ; archive complète pendant 12 mois calendaires depuis la clôture, puis page de bilan et liens vers les collections**. |
+| SA-D28 | 24 octobre — Premier vote et conservation | **Consentement explicite au premier vote, intégré au formulaire sans bandeau global ; suppression du cookie et des identifiants de vote à la clôture ; seuls les totaux sont conservés**. Cette voie est validée pour avancer sans déclarer une exemption juridique acquise. |
 
 La réponse initiale « un seul vote par visiteur » est précisée par la réponse complémentaire « un vote possible sur chaque photo ». Le cookie accepté repère le navigateur dans le périmètre de l’exposition ; il ne représente pas une personne vérifiée. Effacer ses cookies ou changer d’appareil peut permettre un nouveau vote : cette limite est acceptée pour le pilote et doit être annoncée fidèlement.
 
-Les points **1 à 7** de la liste restent ouverts, sauf les responsabilités expressément décidées ci-dessus.
+Les réponses complémentaires SA-D26 à SA-D28 tranchent les droits de départ, le calendrier et le parcours de consentement. Le gel après programmation et le retrait sans réouverture restent les comportements du socle ; une évolution ultérieure devra être explicite.
 
 ## 2. Objets et règles communes
 
@@ -86,9 +89,9 @@ La visite libre E1 → E2 → E3 → E4 reste complète sans vote. Le visiteur p
 
 Le socle S0 enregistre des instants et calcule la visibilité à la lecture : ouverture incluse, clôture exclue. Il permet déjà les chevauchements, fige textes et ordre dès programmation, autorise l’annulation d’une programmation avant ouverture et ne propose pas de réouverture après retrait. Ces comportements existants restent distingués des réponses encore manquantes aux points 1 à 7.
 
-**Ouvert** : fuseau éditorial et précision jour/heure ; modifications après programmation ou ouverture ; réversibilité du retrait, réouverture exceptionnelle, anciennes adresses et suppression/restauration. Le préparateur de formulaire S1a impose un fuseau fourni, sans défaut, et refuse les nouvelles heures locales ambiguës ou inexistantes.
+**Décidé** : UTC et minute. S1b conserve le gel après programmation, l’annulation avant ouverture et le retrait sans restauration du socle. Réouverture, suppression physique et restauration restent des évolutions à cadrer ; elles ne sont pas annoncées disponibles dans ce pilote.
 
-La durée **12 mois** est décidée pour l’archive de l’exposition complète. **À préciser** : son point de départ exact et le sort public de la page à échéance — retrait de la visite complète, page de bilan conservée, redirection ou autre choix. Cette durée ne fixe ni la conservation des votes individuels ni celle du cookie de navigateur.
+L’exposition complète reste consultable **12 mois calendaires UTC après sa clôture**, puis son adresse conserve les bilans et les liens vers les collections. Le parcours photographique de l’exposition cesse à cette échéance ; la photothèque et les collections permanentes gardent leurs règles propres. Les identifiants et cookies de vote expirent à la clôture, selon SA-D28.
 
 ## 5. Vote consultatif et circuit de validation
 
@@ -111,7 +114,7 @@ Ce circuit ne vaut pas définition de tous les droits de rédaction, traduction,
 7. Le vote n’écrit ni texte libre ni nouvelle composition, et ne modifie ni l’ordre des œuvres ni leur série.
 8. La confirmation suit la persistance effective. Un échec n’affiche pas « vote enregistré » et une répétition dit que le vote existe déjà.
 
-**À préciser avant V1** : durée et portée exacte du cookie, données minimales du vote et leur durée, vote annulable ou définitif, affichage des résultats à l’équipe ou au public et moment de cette restitution, calendrier exact du vote dans la fenêtre d’exposition. La limitation par navigateur est acceptée ; elle ne devient pas une garantie de personne unique sur tous ses appareils.
+**Décidé avant V1** : consentement explicite au premier vote et expiration du cookie et des identifiants à la clôture. **Réalisation** : données minimales du vote et retrait du consentement ; les compteurs seuls restent après purge. **Proposé pour le pilote** : résultats détaillés réservés à l’équipe dans son périmètre et restitution publique par le bilan éditorial ; vote dans la fenêtre d’ouverture de l’exposition. La limitation par navigateur est acceptée ; elle ne devient pas une garantie de personne unique sur tous ses appareils.
 
 Le « J’aime » actuel de la galerie n’est pas déclaré conforme à ce contrat : il faut vérifier la portée par exposition, la persistance et l’unicité après redémarrage. Réutiliser une même photo dans deux saisons exige deux périmètres de vote distincts.
 
@@ -125,13 +128,13 @@ Les points 18/19 mis en attente par le propriétaire concernent les **anciennes 
 
 Le 24 octobre, après examen de Glassbox et des règles de la CNIL, le propriétaire a accepté d’examiner d’abord un identifiant aléatoire minimal dans un cookie créé au premier vote. **L’accord porte sur cette piste d’étude ; il n’autorise ni une activation immédiate ni une déclaration de dispense de consentement.** L’objectif est un parcours de vote simple, avec la collecte minimale utile.
 
-Contrat à instruire avant V1 : aucun cookie de vote à la simple visite ; identifiant aléatoire sans empreinte Canvas, audio, polices ou matériel ; usage limité à la reconnaissance des votes dans l’exposition, sans profil de navigation ni rapprochement entre expositions. La visite libre reste indépendante du vote. Durée du cookie, durée des données serveur, purge et information restent à décider ; les 12 mois de l’archive ne les déterminent pas.
+Contrat à instruire avant V1 : aucun cookie de vote à la simple visite ; identifiant aléatoire sans empreinte Canvas, audio, polices ou matériel ; usage limité à la reconnaissance des votes dans l’exposition, sans profil de navigation ni rapprochement entre expositions. La visite libre reste indépendante du vote. Le consentement au premier vote et la fin du cookie/des identifiants à la clôture sont désormais décidés (SA-D28) ; l’information et les droits doivent accompagner leur réalisation. Les 12 mois de l’archive ne prolongent pas cette conservation.
 
 La [CNIL inclut le fingerprinting parmi les traceurs](https://www.cnil.fr/fr/cookies-et-autres-traceurs/que-dit-la-loi). Remplacer le cookie par une empreinte, du stockage local ou un identifiant haché ne crée donc pas, à lui seul, une exemption. Glassbox est un [banc de diagnostic du navigateur](https://github.com/HotStartLabs/glassbox), pas un mécanisme d’unicité de vote prêt à intégrer ; il n’est pas retenu dans la piste du pilote.
 
 Un traceur strictement nécessaire peut bénéficier d’une exemption, mais [la CNIL précise que la lutte contre la fraude n’en bénéficie pas en général](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ), hors cas particuliers. **L’application de l’exemption à notre anti-doublon est à justifier pour son usage réel**. La documentation doit distinguer les règles d’accès au terminal et les obligations applicables aux données traitées. L’information requise ne disparaît pas au seul motif d’une éventuelle exemption de consentement.
 
-Le lot V1 inclut donc la qualification documentée du traceur et le dispositif d’information ou de consentement qui en découle, avant toute collecte. Si l’exemption ne peut pas être justifiée, la décision doit revenir au propriétaire : recueil adapté du consentement ou mécanisme sans identifiant persistant avec une garantie d’unicité réduite. Aucune de ces solutions de repli n’est sélectionnée silencieusement. Aucun cookie ou fingerprinting n’est mis en œuvre dans S1a.
+Après cette étude, le propriétaire a choisi le **consentement explicite au premier vote dans le formulaire** (SA-D28). V1 implémentera cette voie avec une case non précochée, une information précise et un retrait accessible, sans bandeau global ni exemption revendiquée. À la clôture, les identifiants et preuves de vote sont purgés ; les compteurs agrégés restent. Aucun cookie ou fingerprinting n’est mis en œuvre dans S1a/S1b.
 
 ## 6. Textes, bilans et prolongements
 
@@ -181,18 +184,18 @@ Cette section documente la seconde approche demandée par le propriétaire, **sa
 
 | Repère | Décision restante | Dépendance |
 |---|---|---|
-| SA-Q1 | Points 1/2 : droits complets des saisons, portées communes/individuelles et photos des deux photographes. Les décisions accueil admin seul, double validation et direction de publication distincte sont acquises ; leur traduction en rôles/permissions reste à définir. | S1b et circuit V0. |
-| SA-Q2 | Points 3 à 7 : fuseau, précision, chevauchement, modification après validation, retrait/réouverture et anciennes adresses. | S1b/S2. |
+| SA-Q1 — Résolu pour le pilote | Matrice SA-D26 : préparation propre au photographe, lecture pour le relecteur, administration en portée commune ; propositions/validations et direction distincte dans V0. | S1b / V0. |
+| SA-Q2 — Résolu pour le pilote | UTC/minute ; chevauchements possibles, gel/annulation/retrait du socle conservés ; réouverture et suppression physique hors pilote. | S1b/S2. |
 | SA-Q9 | Annonce : couverture publique décidée, début d’affichage et autres informations à préciser. Accueil choisi par admin, contenu entre saisons à préciser. | S2. |
-| SA-Q10 | Archive complète de 12 mois : point de départ et effet à échéance. | S2. |
+| SA-Q10 — Résolu | 12 mois calendaires UTC après clôture, puis page de bilan et liens vers les collections. | S2. |
 | SA-Q11 | Direction de publication : responsabilités, rattachement technique, cumuls et effet d’une modification sur les validations. | V0. |
-| SA-Q12 | Vote : qualification de l’exemption éventuelle et dispositif d’information/consentement, durée/contenu du cookie, données minimales/durée/purge, annulation éventuelle, restitution des résultats et calendrier exact. Un vote par photo et navigateur dans l’exposition, sans compte, est décidé. | V1. |
+| SA-Q12 — Parcours décidé | Consentement explicite au premier vote ; cookie/identifiants supprimés à la clôture, compteurs conservés ; mise en œuvre de l’information, du retrait et de l’export. Une voix par photo/exposition/navigateur, sans compte. | V1. |
 | SA-Q13 | Présentation des rectificatifs et structure des prolongements/collections, sans modification d’un bilan déjà publié. | S3. |
 | SA-Q3/SA-Q4/SA-Q6/SA-Q7 | Trace, identité et données des anciennes contributions, publication/attribution et branches. Désormais différés au § 8 ; ils ne bloquent pas le vote simple. | Futur Après-image. |
 | SA-Q5 | Abus : volet vote traité au contrat V1 ; volet dépôts et contributions différé. | V1, puis évolution future. |
 | SA-Q8 | Invités et dépôts externes. | Évolution future séparée. |
 
-Les réponses sur les points 8 à 23 ne valent pas réponse aux points 1 à 7. Une durée d’archive décidée ne fixe pas celle d’un cookie, d’un vote ou d’une future contribution.
+Les réponses complémentaires SA-D26 à SA-D28 complètent les arbitrages initiaux. La durée d’archive et la conservation du vote sont distinctes et toutes deux précisées.
 
 ## 10. Réalisation : une PR par jalon
 
@@ -200,7 +203,7 @@ Les réponses sur les points 8 à 23 ne valent pas réponse aux points 1 à 7. U
 |---|---|---|
 | **S0 — Socle, PR #218** | Migration 065 et modèle interne existants, sans route ni nouveau droit. | Règles de dates/états et références atomiques ; projection publique refiltrée. Trois langues obligatoires, annonce, limite d’archive et rectificatifs sont encore des écarts à la nouvelle cible, pas des fonctionnalités annoncées livrées. |
 | **S1a — Préparation, PR #219** | Migration 066/version, formulaire transactionnel, conversion de dates à fuseau fourni, quatre gabarits trilingues inactifs et ce plan. | Concurrence/rollback et rendu isolé vérifiés. Aucun choix de droits ou fuseau ajouté en silence ; pas de vote collecté. Les nouvelles décisions sont documentées, pas annoncées implémentées. |
-| **S1b — Atelier raccordé** | Après SA-Q1/SA-Q2 : droits et portées, menus v1/v2, routes/CSRF/identité, aide, journal ; ajout des contenus du choix 12 et contrôle des trois langues avant publication. | Préparer, traduire, ordonner et programmer ; persistance réelle et refus sans droit, traduction manquante, photo interdite, conflit et date invalide. Mise en avant réservée à admin. |
+| **S1b — Atelier raccordé, PR #220** | SA-Q1/SA-Q2 validés : droits et portées, menus v1/v2, routes/CSRF/identité, aide, journal ; ajout des contenus du choix 12 et contrôle des trois langues avant publication. | Préparer, traduire, ordonner et programmer ; persistance réelle et refus sans droit, traduction manquante, photo interdite, conflit et date invalide. Mise en avant réservée à admin. |
 | **S2 — Visite, annonce et archive** | Après S1b et SA-Q9/SA-Q10 : E1 à E4/E7, rubrique Expositions, couverture publique avant ouverture, archive complète 12 mois et accueil sous contrôle admin. | Ouverture/clôture/échéance, aperçu/annonce distincts, trois langues sans repli public manquant ; couverture/photo retirée cachée partout. Aucun faux bouton de vote avant V1. |
 | **S3 — Bilans et prolongements** | Après S1/S2 et SA-Q13 : bilans immuables, rectificatif comme nouveau bilan lié, E8/E9 et présentation du prolongement comme nouvelle exposition. | Bilan vide ou avec choix ; modification en place refusée ; rectificatif distinct sans écrasement ; filiation lisible et photos encore autorisées. |
 | **V0 — Propositions validées** | Après SA-Q1/SA-Q11 : proposition par photographe d’origine, validations du relecteur et de l’admin, ordre par direction de publication distincte. | Liste et version approuvées ; refus d’auto-attribution de droits ou d’ordre modifié sans validation du circuit retenu. |
@@ -211,7 +214,7 @@ S3 peut être livré sans vote : une première exposition et son bilan restent c
 
 ### 10.1 Besoins de la Vigie et preuves attendues par lot
 
-**État courant** : S0/S1a seulement, sans parcours HTTP de saison ni vote branché. Les cas DS viennent de la [conception du journal](journalisation-securite.md#3-cas-de-détection), les besoins de la Vigie du [registre des briques](vigie-besoins-des-briques.md). Les protections communes existantes ne prouvent pas les routes à venir.
+**État courant** : S1b raccorde les routes admin, leurs permissions et le choix d’accueil ; S2 et V0/V1 sont en cours de réalisation, sans exposition publique ni vote déclarés livrés ici. Les cas DS viennent de la [conception du journal](journalisation-securite.md#3-cas-de-détection), les besoins de la Vigie du [registre des briques](vigie-besoins-des-briques.md). Les protections communes existantes ne prouvent pas les routes à venir.
 
 | Lot / surface | Raccordement prévu | Preuves et limites |
 |---|---|---|
@@ -240,4 +243,4 @@ Chaque PR reste en brouillon, avec contexte, résultats réels, « Sécurité »
 - **PR #218 / S0** : [`server/saisons.js`](../../server/saisons.js), [migration 065](../../server/db/migrations/065_saisons.sql) et [tests modèle](../../test/saisons-modele.test.js). Phases dérivées de l’horloge, photos refiltrées à la lecture, bilan unique actuel. Aucun branchement serveur.
 - **PR #219 / S1a** : [migration 066](../../server/db/migrations/066_saisons_versions.sql), versions concurrentes, [contrat de formulaire](../../server/saisons-atelier.js), [calendrier](../../server/saisons-calendrier.js), quatre gabarits et leurs enveloppes v2. Le fuseau doit être fourni explicitement. Les formulaires et les vues restent inactifs.
 - **Écarts connus avec les nouvelles décisions** : S0 autorise encore les replis FR pour traductions manquantes ; le modèle ne porte pas encore les nouveaux textes/couverture, les annonces, les 12 mois d’archive, les bilans rectificatifs, la direction de publication, la double validation ou les votes. Ils doivent être livrés dans les lots prévus, pas annoncés comme déjà implémentés par cette révision du plan.
-- S1b attend les droits complets et le calendrier. V0 attend la définition de la direction de publication. V1 attend la qualification des traceurs et les paramètres minimaux du cookie, des votes et de leur restitution. Ces arbitrages ne sont pas remplacés par une hypothèse technique.
+- **PR #220 / S1b** : atelier admin raccordé, droits validés, calendrier UTC, contenus/couverture/cartels trilingues et choix d’accueil observé par la Vigie. V0 raccordera les validations et la direction distincte ; V1 réalisera le consentement contextuel et la purge à la clôture décidés par le propriétaire.

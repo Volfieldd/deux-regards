@@ -27,7 +27,7 @@ test('aide : réservée à l’admin, toutes les sections, aucun lien interne ca
   const res = await c.as('/admin/aide');
   assert.equal(res.statusCode, 200);
   const help = loadHelp();
-  assert.equal(help.sections.length, 17);
+  assert.equal(help.sections.length, 18);
   const present = ids(res.body);
   for (const s of help.sections) assert.ok(present.has(s.id), s.id);
   for (const h of hrefs(res.body)) assert.ok(present.has(h), `lien vers #${h} sans cible`);
@@ -39,8 +39,11 @@ test('aide : réservée à l’admin, toutes les sections, aucun lien interne ca
 test('chaque écran de l’admin mène à sa section d’aide', async t => {
   const c = await admin(t);
   const help = ids((await c.as('/admin/aide')).body);
-  for (const url of ['/admin', '/admin/photos', '/admin/photos/1', '/admin/series', '/admin/statistiques', '/admin/instagram', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/site', '/admin/droits', '/admin/terrain', '/admin/sorties', '/admin/personnes', '/admin/carnet']) {
-    const body = (await c.as(url)).body;
+  const saison = c.app.saisons.create({ title: 'Exposition neutre pour l’aide' });
+  for (const url of ['/admin', '/admin/photos', '/admin/photos/1', '/admin/series', '/admin/statistiques', '/admin/instagram', '/admin/auteurs', '/admin/images', '/admin/apparence', '/admin/site', '/admin/droits', '/admin/terrain', '/admin/sorties', '/admin/personnes', '/admin/carnet', '/admin/saisons', `/admin/saisons/${saison}`, `/admin/saisons/${saison}/apercu`, `/admin/saisons/${saison}/confirmer?action=programmer`]) {
+    const res = await c.as(url);
+    assert.equal(res.statusCode, 200, url);
+    const body = res.body;
     const m = /<p class="help-link"><a href="\/admin\/aide#([^"]+)">Aide sur cette page<\/a><\/p>/.exec(body);
     assert.ok(m, `${url} : lien d’aide absent`);
     assert.ok(help.has(m[1]), `${url} : #${m[1]} absent de l’aide`);
