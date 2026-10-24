@@ -332,10 +332,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     if (dueRunning) return;
     dueRunning = true;
     try {
-      const photos = await app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'));
-      const billets = await app.carnet.runDue().catch(err => app.log.error({ err }, 'carnets : publication programmée'));
-      // Textes mis en ligne sans écriture de l'admin : comparés par la Vigie (BV-20, BV-21 ; sub nul).
-      if (photos || billets) app.securite?.watchPublication?.();
+      await app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'));
+      await app.carnet.runDue().catch(err => app.log.error({ err }, 'carnets : publication programmée'));
+      // Les expositions changent aussi de visibilité par le calendrier, sans écriture SQL : comparaison à chaque
+      // passage, même si aucune photo ni aucun billet n’a été publié (BV-20, BV-21 ; sub nul).
+      app.securite?.watchPublication?.();
     } finally { dueRunning = false; }
   };
   app.addHook('onReady', async () => { reviewTimer = setInterval(runDue, 60 * 1000); reviewTimer.unref(); });
@@ -372,7 +373,9 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // avait laissé est effacé et app.securite ne fait rien.
   if (config.vigie) {
     const { installVigie } = await import('./securite/site.js');
-    installVigie(app, { config, db, ...vigieOptions });
+    installVigie(app, { config, db,
+      externalSources: ({ now }) => usesV2(app.publicVersion.versionForSection('expositions')) ? app.expositions.textRows({ now }) : [],
+      ...vigieOptions });
   } else {
     const { retireVigie } = await import('./securite/retrait.js');
     retireVigie({ db, storageDir: config.storageDir });

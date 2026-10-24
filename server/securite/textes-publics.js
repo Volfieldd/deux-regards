@@ -62,8 +62,9 @@ export function contactsOf(text, { ownHosts = [] } = {}) {
 }
 
 const SEP = '\u001f';
+const EXTERNAL = Symbol('sources externes des textes publics');
 
-export function createPublicTexts({ db, ownHosts = [] }) {
+export function createPublicTexts({ db, ownHosts = [], externalSources = () => [] }) {
   // Une chaîne par ligne, assemblée par SQLite (champs séparés par U+001F) : instantané et comparaison restent de
   // l'ordre de 20 ms pour 10 000 photos (une chaîne par champ en coûtait 150). Seules les lignes changées sont détaillées.
   const stmts = SOURCES.map(src => {
@@ -80,32 +81,63 @@ export function createPublicTexts({ db, ownHosts = [] }) {
   } catch { /* base sans réglages */ }
   const byTable = new Map(stmts.map(x => [x.src.table, x.champs]));
   // Instantané : « table#id » → champs assemblés.
-  function snapshot() {
+  function snapshot({ now = Date.now() } = {}) {
     const m = new Map();
     for (const { src, stmt } of stmts) for (const [id, txt] of stmt.iterate()) m.set(`${src.table}#${id}`, txt);
+    return refreshExternal(m, { now });
+  }
+  // Les projections éditoriales portent leur visibilité temporelle : pas de lecture SQL directe qui rendrait un
+  // brouillon public. Les métadonnées restent dans cet instantané ; seul le diff minimal sort vers la Vigie.
+  function refreshExternal(previous, { now = Date.now() } = {}) {
+    const m = new Map(previous), metadata = new Map();
+    for (const key of previous[EXTERNAL]?.keys() || []) m.delete(key);
+    for (const row of externalSources({ now })) {
+      if (!/^[a-z][a-z_]*$/.test(row.source) || !Number.isSafeInteger(row.id) || row.id <= 0
+        || typeof row.key !== 'string' || !row.key.startsWith(`${row.source}#`) || row.key.length > 100 || m.has(row.key)
+        || (row.photo_id != null && (!Number.isSafeInteger(row.photo_id) || row.photo_id <= 0))) throw new TypeError('Source de textes publics invalide.');
+      const champs = Object.fromEntries(Object.keys(row.champs).sort().map(champ => {
+        if (!/^[a-z][a-z_]*$/.test(champ) || typeof row.champs[champ] !== 'string') throw new TypeError('Champ de texte public invalide.');
+        return [champ, row.champs[champ]];
+      }));
+      m.set(row.key, JSON.stringify(champs));
+      metadata.set(row.key, { source: row.source, id: row.id, ...(row.photo_id != null ? { photo_id: row.photo_id } : {}),
+        ...(['annonce', 'ouverte', 'archive', 'bilan'].includes(row.phase) ? { phase: row.phase } : {}) });
+    }
+    m[EXTERNAL] = metadata;
     return m;
   }
   // Différence : textes changés (« table.champ#id » : ajoutés, modifiés ou retirés) et contacts gagnés.
   function diff(before, after) {
     const changes = [];
     const ajouts = [];
+    const phases = [];
     const compare = (key, oldRow, newRow) => {
       const [table, id] = key.split('#');
-      const champs = byTable.get(table) || [];
-      const o = oldRow ? oldRow.split(SEP) : [];
-      const n = newRow ? newRow.split(SEP) : [];
-      champs.forEach((c, i) => {
-        const was = o[i] || '', now = n[i] || '';
-        if (was === now) return;
+      const oldMeta = before[EXTERNAL]?.get(key), newMeta = after[EXTERNAL]?.get(key), meta = newMeta || oldMeta;
+      const values = (row, external) => {
+        if (!row) return {};
+        if (external) return JSON.parse(row);
+        const parts = row.split(SEP);
+        return Object.fromEntries((byTable.get(table) || []).map((c, i) => [c, parts[i] || '']));
+      };
+      const o = values(oldRow, oldMeta), n = values(newRow, newMeta);
+      const champs = new Set([...Object.keys(o), ...Object.keys(n)]);
+      for (const c of champs) {
+        const was = o[c] || '', now = n[c] || '';
+        if (was === now) continue;
         changes.push(`${table}.${c}#${id}`);
-        if (!now) return;
+        if (!now) continue;
         const avant = contactsOf(was, { ownHosts });
-        for (const [k, x] of contactsOf(now, { ownHosts })) if (!avant.has(k)) ajouts.push({ champ: `${table}.${c}`, id: Number(id), ...x });
-      });
+        for (const [k, x] of contactsOf(now, { ownHosts })) if (!avant.has(k)) ajouts.push({ champ: `${table}.${c}`, id: meta?.id ?? Number(id), ...(meta?.photo_id != null ? { photo_id: meta.photo_id } : {}), ...x });
+      }
     };
     for (const [k, row] of after) { const old = before.get(k); if (old !== row) compare(k, old, row); }
     for (const [k, row] of before) if (!after.has(k)) compare(k, row, null);
-    return { changes, ajouts };
+    for (const key of new Set([...(before[EXTERNAL]?.keys() || []), ...(after[EXTERNAL]?.keys() || [])])) {
+      const was = before[EXTERNAL]?.get(key), now = after[EXTERNAL]?.get(key);
+      if ((was?.phase || null) !== (now?.phase || null)) phases.push({ id: (now || was).id, phase_avant: was?.phase || null, phase: now?.phase || null });
+    }
+    return { changes, ajouts, phases };
   }
-  return { snapshot, diff };
+  return { snapshot, refreshExternal, diff };
 }

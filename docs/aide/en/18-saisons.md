@@ -2,7 +2,7 @@
 
 **Exhibitions** is the workspace for Nicephos photographic seasons. An exhibition combines an artistic intention, dates and an ordered display. Photographs keep their series and publication status in the photo library.
 
-This chapter covers management in the administration. Public pages, the announcement before opening, archives, retrospectives and advisory voting follow in later stages. A decision in this workspace prepares the exhibition; it does not yet mean that a new page is available to website visitors.
+This chapter covers the workspace and public visit. The **Exhibitions** section must be published in v2 or v3 for visitors to access it. Managing retrospectives and their continuations is separate from this workspace; advisory voting will follow in a dedicated stage.
 
 The list shows the exhibitions you can access, newest first. The **State** filter distinguishes drafts, scheduled, open, closed and withdrawn exhibitions. A photographer prepares their own exhibitions; the reviewer can read them. The administrator prepares, schedules, approves opening and withdraws exhibitions. Choosing what is featured on the home page is reserved for the administrator. Approval of voting proposals will be added with that format.
 
@@ -46,11 +46,21 @@ Save your changes first. Each decision opens a summary: review the title, artist
 
 Scheduling, opening and withdrawal are separate decisions from saving a draft. An approved exhibition cannot be silently edited; a scheduled opening may be cancelled before it begins to resume the draft. This workspace does not offer reopening after withdrawal.
 
+## Public visit and home page
+
+Before opening, a scheduled exhibition announces only its cover, title and UTC dates. Its other texts, captions and display photographs remain private until opening. Drafts and withdrawn exhibitions have no public page.
+
+At the opening time, visitors can read the subtitle, artistic intention and prologue, and explore the ordered display. Each photograph opens with its exhibition caption. **Previous photograph**, **Next photograph** and **Finish the visit** lead to the conclusion. The same journey works on computers and phones without JavaScript.
+
+Closing ends the exhibition. The full display remains available for **twelve UTC calendar months after closing**. At that deadline, the same address retains the retrospective; the exhibition’s photographs and cover are no longer shown on that page. Photographs may remain published elsewhere on the site under their own permissions.
+
+The administrator explicitly chooses the exhibition featured on the home page. Its announcement, open visit or archive then replaces the usual opening; the photographers, series and gallery remain available below. No exhibition is selected automatically. A withdrawn, invalid or expired choice restores the usual opening. The feature does not appear in filtered views or private galleries.
+
 ## Private preview
 
 **View the private preview** shows saved texts and photographs in their order. The language selector lets you check all three versions. The preview is reserved for authorised team members; its address is not a public sharing link.
 
-Check the full image, texts and captions. An unavailable photograph is marked in its place. The preview checks content; it does not yet represent the final public presentation.
+Check the full image, texts and captions. An unavailable photograph is marked in its place. The preview checks content before publication; it does not publish anything by itself.
 
 ## Errors and limitations
 
@@ -58,7 +68,7 @@ A message at the top and, where possible, next to the field explains a refusal. 
 
 If someone saved another version in the meantime, the change is refused without overwriting their work. Reload the record, compare it with your input and apply the changes you want again.
 
-An unauthorised photograph, a missing translation, a cover outside the display, repeated positions or invalid dates prevent approval. A refusal does not partially publish an exhibition. Voting, retrospectives and their corrections are not managed by this screen at this stage.
+An unauthorised photograph, a missing translation, a cover outside the display, repeated positions or invalid dates prevent approval. A refusal does not partially publish an exhibition. Advisory voting is not managed by this screen.
 
 ## Retrospectives and corrections
 
