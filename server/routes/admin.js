@@ -40,6 +40,7 @@ import { registerOutings } from './sorties.js';
 import { registerTrips } from './voyages.js';
 import { registerGaleries } from './galeries.js';
 import { registerCarnet } from './carnet.js';
+import { registerSaisons } from './saisons.js';
 import { registerMessages } from './messages.js';
 import { ADMIN_LANGS, ADMIN_LANG_NAMES, translator } from '../admin-i18n.js';
 import { monthYear } from '../format.js';
@@ -2462,7 +2463,7 @@ export default async function adminRoutes(app) {
   const helpIn = lang => (app.config.production ? (helpCache[lang] ??= loadHelp(lang)) : loadHelp(lang));
   // Chapitres de l'aide réservés : ils n'apparaissent qu'à qui peut ouvrir l'une des pages qu'ils décrivent.
   const HELP_PERMS = { preuves: ['photos.voir'], series: ['series.gerer'], auteurs: ['photographes.gerer'], 'filigrane-exif': ['site.filigrane'], apparence: ['site.apparence'],
-    reglages: ['site.textes', 'reglages.droits', 'comptes.gerer', 'journal.voir'], statistiques: ['statistiques.voir'], instagram: ['instagram.voir'], rencontres: ['personnes.voir', 'terrain.app'], 'galeries-privees': ['galeries.voir'] };
+    reglages: ['site.textes', 'reglages.droits', 'comptes.gerer', 'journal.voir'], statistiques: ['statistiques.voir'], instagram: ['instagram.voir'], rencontres: ['personnes.voir', 'terrain.app'], 'galeries-privees': ['galeries.voir'], saisons: ['saisons.voir'] };
   const helpAllowed = (request, id) => !HELP_PERMS[id] || HELP_PERMS[id].some(perm => request.can(perm));
   app.get('/admin/aide', P('admin.acceder'), async (request, reply) => {
     const help = helpIn(request.t.lang);
@@ -2490,6 +2491,7 @@ export default async function adminRoutes(app) {
   registerTrips(app, { repo, render, P, W, done, failed, withReady, noteChanges });
   registerGaleries(app, { repo, render, P, W, done, failed });
   registerCarnet(app, { repo, render, P, W, done, failed, withReady });
+  registerSaisons(app, { repo, render, P, W, done, failed, withReady, zone: 'UTC' });
   registerMessages(app, { render, P, W, done, withReady });
 
   // ---------- traductions ----------

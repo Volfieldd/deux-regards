@@ -72,6 +72,14 @@ Des planches de trois photos : créer (en tête), renommer, ordonner par glisser
 
 ![Suppression d'une série](captures/admin/04b-series-suppression-bureau.webp)
 
+## Expositions
+
+L’entrée **Expositions** ouvre l’atelier des saisons, avec les expositions accessibles au compte et un filtre par état. La fiche réunit les textes en français, anglais et allemand, le calendrier en UTC affiché, la couverture et l’accrochage ordonné. On ajoute des photos déjà publiées depuis un choix paginé ; les positions se modifient au clavier, sans glisser. Les cartels restent propres à l’exposition et les photos gardent leur série.
+
+**Voir l’aperçu privé** permet de relire chaque langue et l’ordre enregistré. **Programmer**, **Valider l’ouverture**, **Annuler la programmation** et **Retirer** présentent un récapitulatif avant confirmation, selon les droits et l’état. Le photographe prépare ses expositions, le relecteur consulte et l’administrateur prend les décisions de programmation, d’ouverture et de retrait. Une traduction nécessaire manquante ou une photo indisponible empêche la validation. Deux modifications concurrentes ne s’écrasent pas.
+
+Ce lot ouvre l’atelier de gestion ; la visite publique des expositions, les archives, les bilans et le vote arrivent aux lots suivants. Les captures historiques ci-dessus ne montrent pas cet atelier. Voir [Aide → Expositions](Aide-Expositions).
+
 ## Photographes
 
 Nom, adresse, biographie et lien avec le compte de connexion.

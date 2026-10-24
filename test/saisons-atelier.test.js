@@ -11,7 +11,7 @@ function setup(t) {
   const add = db.prepare("INSERT INTO photos (id, slug, title, category_id, author_id, file, width, height, status) VALUES (?, ?, ?, 1, 1, ?, 1200, 800, ?)");
   for (let id = 1; id <= 30; id++) add.run(id, `photo-${id}`, id === 1 ? '100% neutre' : `Photographie ${id}`, `neutre-${id}.jpg`, id === 30 ? 'draft' : 'published');
   const saisons = createSaisons({ db, now: () => Date.parse('2026-10-23T10:00:00Z') });
-  const id = saisons.create({ title: 'Saison de test', intro: 'Une intention.' });
+  const id = saisons.create({ author_id: 1, title: 'Saison de test', title_en: 'A test season', title_de: 'Eine Testsaison', intro: 'Une intention.', intro_en: 'An intention.', intro_de: 'Eine Absicht.', cover_id: 1 });
   saisons.setPhotos(id, [1, 2]);
   const atelier = createSaisonsAtelier({ db, saisons, zone: 'Europe/Paris' });
   const form = () => ({ ...atelier.fields(saisons.get(id)), version: String(saisons.get(id).version), 'photo_ids[]': ['1', '2'], position_1: '1', position_2: '2' });
@@ -78,4 +78,38 @@ test('atelier saisons : choix publiés paginés et recherche littérale, sans ch
   for (const input of [{ search: [] }, { search: 'x'.repeat(121) }, { page: 0 }, { page: 1.2 }])
     assert.throws(() => c.atelier.candidates(input), SaisonError);
   assert.throws(() => createSaisonsAtelier({ db: c.db, saisons: c.saisons }), /Fuseau/);
+});
+
+test('atelier expositions : contenus, couverture et cartels enregistrés ensemble puis restitués', t => {
+  const c = setup(t), body = { ...c.form(), subtitle: 'Une autre entrée', subtitle_en: 'Another opening', subtitle_de: 'Ein anderer Einstieg', prologue: 'Au début.', conclusion_de: 'Am Ende.', cover_id: '2', cartel_1: 'Une image ici.', cartel_1_en: 'An image here.', cartel_1_de: 'Ein Bild hier.', position_1: '2', position_2: '1' };
+  const result = c.atelier.save(c.id, body);
+  assert.equal(result.author_id, 1); assert.equal(result.cover_id, 2);
+  assert.equal(result.subtitle_en, 'Another opening'); assert.equal(result.prologue, 'Au début.'); assert.equal(result.conclusion_de, 'Am Ende.');
+  assert.deepEqual(result.photo_ids, [2, 1]);
+  assert.deepEqual(result.cartels[1], { photo_id: 1, cartel: 'Une image ici.', cartel_en: 'An image here.', cartel_de: 'Ein Bild hier.' });
+  const fields = c.atelier.fields(result);
+  assert.equal(fields.cover_id, '2'); assert.equal(fields.cartel_1_de, 'Ein Bild hier.');
+  const remove = { ...fields, version: String(result.version), 'photo_ids[]': ['2', '1'], position_2: '1', position_1: '2', retirer_photo: '2' };
+  const withoutCover = c.atelier.save(c.id, remove);
+  assert.equal(withoutCover.cover_id, null); assert.equal(withoutCover.cartels[0].cartel, 'Une image ici.');
+});
+
+test('atelier expositions : défaut de cartel ou de couverture annule la sauvegarde complète', t => {
+  const c = setup(t), before = c.saisons.get(c.id);
+  for (const patch of [{ cartel_1_en: [] }, { cartel_1: 'x'.repeat(501) }, { cover_id: '999' }, { cover_id: '3' }, { author_id: '999' }, { subtitle_de: {} }]) {
+    assert.throws(() => c.atelier.save(c.id, { ...c.form(), title: 'Ne pas garder', position_1: '2', position_2: '1', ...patch }), SaisonError);
+    assert.deepEqual(c.saisons.get(c.id), before);
+  }
+});
+
+test('atelier expositions : les choix du photographe sont filtrés avant pagination', t => {
+  const c = setup(t);
+  c.db.prepare("INSERT INTO authors (id, slug, name) VALUES (2, 'autre', 'Autre photographe')").run();
+  c.db.prepare('UPDATE photos SET author_id = 2 WHERE id >= 20').run();
+  const own = c.atelier.candidates({ author_id: 1 }), other = c.atelier.candidates({ author_id: 2 });
+  assert.equal(own.total, 19); assert.equal(own.pages, 1); assert.equal(own.photos.length, 19);
+  assert.ok(own.photos.every(p => p.id < 20));
+  assert.equal(other.total, 10); assert.equal(other.photos.length, 10);
+  assert.ok(other.photos.every(p => p.id >= 20 && p.id < 30));
+  for (const author_id of ['1', 0, -1, [], NaN]) assert.throws(() => c.atelier.candidates({ author_id }), SaisonError);
 });

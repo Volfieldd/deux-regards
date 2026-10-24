@@ -7,26 +7,32 @@
    const actionLabels = { programmer: 'Programmer…', ouvrir: 'Valider l’ouverture…', annuler: 'Annuler la programmation…', retirer: 'Retirer la saison…' }; %>
 <div class="saisons">
 <header class="saisons-entete">
-  <a class="saisons-retour" href="/admin/saisons">← <%= t('Les saisons') %></a>
+  <a class="saisons-retour" href="/admin/saisons">← <%= t('Expositions') %></a>
   <div class="saisons-titre"><h1><%= s.title %></h1><span class="saisons-etat saisons-etat--<%= s.phase %>"><%= t(it.phaseLabels[s.phase]) %></span></div>
   <div class="actions"><a class="btn ghost" href="/admin/saisons/<%= s.id %>/apercu"><%= t('Voir l’aperçu privé') %></a></div>
 </header>
 <p class="saisons-note"><%= t('Les décisions prises ici préparent la saison. Ses pages publiques seront disponibles dans une étape suivante.') %></p>
-<% if (it.error) { %><section class="saisons-erreur" role="alert" aria-labelledby="saison-erreur-t"><h2 id="saison-erreur-t"><%= t('Les modifications n’ont pas été enregistrées.') %></h2><p><%= it.error %></p><p><%= t('Vérifiez les champs ci-dessous avant de réessayer.') %></p></section><% } %>
+<% if (it.error) { %><section class="saisons-erreur" role="alert" aria-labelledby="saison-erreur-t"><h2 id="saison-erreur-t"><%= t('Les modifications n’ont pas été enregistrées.') %></h2><p><%= it.error %></p><p><%= t('Vérifiez les champs ci-dessous avant de réessayer.') %></p><% if (it.errorField === 'version') { %><a class="btn ghost" href="/admin/saisons/<%= s.id %>"><%= t('Recharger la dernière version') %></a><% } %></section><% } %>
 <% if (!editable) { %><p class="saisons-note"><%= t('Les textes, le calendrier et l’accrochage sont figés après validation. Une programmation peut être annulée avant son ouverture pour reprendre le brouillon.') %></p><% } %>
 <form class="form" id="saison-form" method="post" action="/admin/saisons/<%= s.id %>">
-  <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="version" value="<%= s.version %>">
+  <input type="hidden" name="_csrf" value="<%= it.csrf %>"><input type="hidden" name="version" value="<%= it.formVersion %>">
   <section class="panel form" aria-labelledby="intention-t">
     <h2 id="intention-t"><%= t('Intention de la saison') %></h2>
-    <p class="hint"><%= t('Le français est la langue d’origine. Une traduction laissée vide reprend le français.') %></p>
-<% langs.forEach(lang => { const title = field('title', lang.code), intro = field('intro', lang.code); %>
+    <p class="hint"><%= t('Le français, l’anglais et l’allemand sont nécessaires à la publication. Le brouillon peut rester incomplet.') %></p>
+<% if (it.canAssign) { %>
+    <div class="saisons-champ"><label for="author_id"><%= t('Photographe d’origine') %></label><select id="author_id" name="author_id"<%~ invalid('author_id') ? ' aria-invalid="true" aria-describedby="author_id-erreur"' : '' %><%~ editable ? '' : ' disabled' %>><option value=""><%= t('Exposition commune') %></option><% it.authors.forEach(a => { %><option value="<%= a.id %>"<%~ String(f.author_id) === String(a.id) ? ' selected' : '' %>><%= a.name %></option><% }) %></select><% if (invalid('author_id')) { %><p class="err" id="author_id-erreur"><%= it.error %></p><% } %></div>
+<% } else { %>    <input type="hidden" name="author_id" value="<%= f.author_id %>">
+<% } %>
+<% langs.forEach(lang => { %>
     <fieldset class="saisons-langue"><legend lang="<%= lang.code %>"><%= lang.name %></legend>
-      <div class="saisons-champ"><label for="<%= title %>"><%= t('Titre') %></label><input id="<%= title %>" name="<%= title %>" value="<%= f[title] || '' %>" maxlength="120" lang="<%= lang.code %>"<%~ lang.code === 'fr' ? ' required' : '' %><%~ editable ? '' : ' readonly' %><%~ invalid(title) ? ` aria-invalid="true" aria-describedby="${title}-erreur"` : '' %>>
-<% if (invalid(title)) { %>        <p class="err" id="<%= title %>-erreur"><%= it.error %></p>
+<% [{ base: 'title', label: 'Titre', max: 120 }, { base: 'subtitle', label: 'Sous-titre', max: 180 }, { base: 'intro', label: 'Intention', max: 4000, rows: 4 }, { base: 'prologue', label: 'Prologue', max: 2000, rows: 4 }, { base: 'conclusion', label: 'Conclusion', max: 2000, rows: 4 }].forEach(def => { const name = field(def.base, lang.code); %>
+      <div class="saisons-champ"><label for="<%= name %>"><%= t(def.label) %></label>
+<% if (def.rows) { %>        <textarea id="<%= name %>" name="<%= name %>" rows="<%= def.rows %>" maxlength="<%= def.max %>" lang="<%= lang.code %>"<%~ editable ? '' : ' readonly' %><%~ invalid(name) ? ` aria-invalid="true" aria-describedby="${name}-erreur"` : '' %>><%= f[name] || '' %></textarea>
+<% } else { %>        <input id="<%= name %>" name="<%= name %>" value="<%= f[name] || '' %>" maxlength="<%= def.max %>" lang="<%= lang.code %>"<%~ def.base === 'title' && lang.code === 'fr' ? ' required' : '' %><%~ editable ? '' : ' readonly' %><%~ invalid(name) ? ` aria-invalid="true" aria-describedby="${name}-erreur"` : '' %>>
+<% } %>
+<% if (invalid(name)) { %>        <p class="err" id="<%= name %>-erreur"><%= it.error %></p>
 <% } %>      </div>
-      <div class="saisons-champ"><label for="<%= intro %>"><%= t('Intention') %></label><textarea id="<%= intro %>" name="<%= intro %>" rows="5" maxlength="4000" lang="<%= lang.code %>"<%~ editable ? '' : ' readonly' %><%~ invalid(intro) ? ` aria-invalid="true" aria-describedby="${intro}-erreur"` : '' %>><%= f[intro] || '' %></textarea>
-<% if (invalid(intro)) { %>        <p class="err" id="<%= intro %>-erreur"><%= it.error %></p>
-<% } %>      </div>
+<% }) %>
     </fieldset>
 <% }) %>
   </section>
@@ -40,6 +46,13 @@
 <% } %>      </div>
 <% }) %>
     </div>
+  </section>
+  <section class="panel form" aria-labelledby="couverture-t">
+    <h2 id="couverture-t"><%= t('Couverture de l’exposition') %></h2>
+    <p class="hint" id="couverture-aide"><%= t('Choisissez une photographie publiée de cet accrochage. La couverture est nécessaire avant validation.') %></p>
+    <div class="saisons-champ"><label for="cover_id"><%= t('Photographie de couverture') %></label><select id="cover_id" name="cover_id" aria-describedby="couverture-aide<%= invalid('cover_id') ? ' cover_id-erreur' : '' %>"<%~ editable ? '' : ' disabled' %><%~ invalid('cover_id') ? ' aria-invalid="true"' : '' %>><option value=""><%= t('Choisir une couverture') %></option><% it.photos.forEach(ph => { %><option value="<%= ph.id %>"<%~ String(f.cover_id) === String(ph.id) ? ' selected' : '' %>><%= ph.title %><%= ph.available ? '' : ` · ${t('Photo indisponible')}` %></option><% }) %></select>
+<% if (invalid('cover_id')) { %>      <p class="err" id="cover_id-erreur"><%= it.error %></p>
+<% } %>    </div>
   </section>
   <section class="panel form" aria-labelledby="accrochage-t">
     <h2 id="accrochage-t"><%= t('Accrochage · {n} photos', { n: it.photos.length }) %></h2>
@@ -56,7 +69,13 @@
 <% } %>        <div class="saisons-photo-texte"><h3><%= ph.title %></h3><p class="hint"><%= ph.author || '' %></p><% if (!ph.available) { %><p class="err"><%= t('Photo indisponible : retirez-la avant de valider la saison.') %></p><% } %></div>
         <div class="saisons-position"><label for="position-<%= ph.id %>"><%= t('Position de « {title} »', { title: ph.title }) %></label><input id="position-<%= ph.id %>" name="position_<%= ph.id %>" type="number" min="1" max="500" value="<%= ph.position || i + 1 %>" aria-describedby="accrochage-aide"<%~ editable ? '' : ' readonly' %> required></div>
 <% if (editable) { %>        <button class="btn ghost" type="submit" name="retirer_photo" value="<%= ph.id %>" formnovalidate aria-label="<%= t('Retirer « {title} » de la saison', { title: ph.title }) %>"><%= t('Retirer') %></button>
-<% } %>      </li>
+<% } %>        <details class="saisons-cartels"<%~ invalid('cartels') || ['', '_en', '_de'].some(suffix => invalid(`cartel_${ph.id}${suffix}`)) ? ' open' : '' %>><summary><%= t('Cartels de « {title} »', { title: ph.title }) %></summary><p class="hint"><%= t('Ces textes appartiennent à l’exposition et ne changent pas le cartel de la photo dans sa série.') %></p>
+<% langs.forEach(lang => { const name = `cartel_${ph.id}${lang.code === 'fr' ? '' : `_${lang.code}`}`; %>
+          <div class="saisons-champ"><label for="<%= name %>" lang="<%= lang.code %>"><%= lang.name %></label><textarea id="<%= name %>" name="<%= name %>" rows="3" maxlength="500" lang="<%= lang.code %>"<%~ editable ? '' : ' readonly' %><%~ invalid(name) || invalid('cartels') ? ` aria-invalid="true" aria-describedby="${name}-erreur"` : '' %>><%= f[name] || '' %></textarea>
+<% if (invalid(name) || invalid('cartels')) { %>            <p class="err" id="<%= name %>-erreur"><%= it.error %></p>
+<% } %>          </div>
+<% }) %>        </details>
+      </li>
 <% }) %>
     </ol>
 <% } %>
@@ -74,7 +93,7 @@
 <% if (!it.candidates.length) { %>  <p><%= t('Aucune photo publiée disponible dans cette recherche.') %></p>
 <% } else { %>
   <fieldset class="saisons-choix"><legend><%= t('Photos à ajouter') %></legend>
-<% it.candidates.forEach(ph => { %>    <label><input type="checkbox" name="ajouter[]" value="<%= ph.id %>" form="saison-form"><% if (ph.ready && ph.thumb) { %><img class="saisons-vignette" src="<%= ph.thumb %>" width="80" height="<%= Math.round(80 * ph.height / ph.width) %>" alt="" loading="lazy" decoding="async"><% } %><span><%= ph.title %><span class="hint"><%= ph.author || '' %></span></span></label>
+<% it.candidates.forEach(ph => { %>    <label><input type="checkbox" name="ajouter[]" value="<%= ph.id %>" form="saison-form"<%~ ph.selected ? ' checked' : '' %>><% if (ph.ready && ph.thumb) { %><img class="saisons-vignette" src="<%= ph.thumb %>" width="80" height="<%= Math.round(80 * ph.height / ph.width) %>" alt="" loading="lazy" decoding="async"><% } %><span><%= ph.title %><span class="hint"><%= ph.author || '' %></span></span></label>
 <% }) %>  </fieldset>
   <div class="actions"><button class="btn ghost" type="submit" form="saison-form" name="faire" value="enregistrer"><%= t('Ajouter les photos cochées et enregistrer') %></button></div>
 <% } %>

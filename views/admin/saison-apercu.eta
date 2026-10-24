@@ -7,12 +7,15 @@
   <p class="saisons-etat saisons-etat--<%= s.phase %>"><%= t(it.phaseLabels[s.phase]) %></p>
   <h2 id="apercu-titre"><%= it.previewTitle %></h2>
   <p class="saisons-dates"><%= it.datesLabel.opens_at || t('Ouverture à définir') %> → <%= it.datesLabel.closes_at || t('Clôture à définir') %> · <%= it.zoneLabel %></p>
+<% if (it.previewSubtitle) { %>  <p class="sub"><%= it.previewSubtitle %></p><% } %>
   <p class="saisons-intention"><%= it.previewIntro %></p>
+<% if (it.previewPrologue) { %>  <p class="saisons-intention"><%= it.previewPrologue %></p><% } %>
 <% if (!it.photos.length) { %><p class="hint"><%= t('Aucune photo dans cet accrochage.') %></p><% } else { %>
   <ol class="saisons-galerie" aria-label="<%= t('Accrochage de la saison, dans l’ordre') %>">
 <% it.photos.forEach((ph, i) => { %>
-    <li><figure><% if (ph.ready && ph.thumb && ph.available) { %><img src="<%= ph.preview || ph.thumb %>" width="<%= ph.width %>" height="<%= ph.height %>" alt="<%= ph.alt || '' %>" loading="lazy" decoding="async"><% } else { %><p class="saisons-photo-absente"><%= t('Photo indisponible') %></p><% } %><figcaption><span class="mono"><%= i + 1 %> / <%= it.photos.length %></span><h3><%= ph.title %></h3><p class="hint"><%= ph.author || '' %></p></figcaption></figure></li>
+    <li><figure><% if (ph.ready && ph.thumb && ph.available) { %><img src="<%= ph.preview || ph.thumb %>" width="<%= ph.width %>" height="<%= ph.height %>" alt="<%= ph.alt || '' %>" loading="lazy" decoding="async"><% } else { %><p class="saisons-photo-absente"><%= t('Photo indisponible') %></p><% } %><figcaption><span class="mono"><%= i + 1 %> / <%= it.photos.length %></span><h3><%= ph.title %></h3><% if (ph.cartel) { %><p class="saisons-intention"><%= ph.cartel %></p><% } %><p class="hint"><%= ph.author || '' %></p></figcaption></figure></li>
 <% }) %>  </ol>
 <% } %>
+<% if (it.previewConclusion) { %>  <p class="saisons-intention"><%= it.previewConclusion %></p><% } %>
 </article>
 </div>

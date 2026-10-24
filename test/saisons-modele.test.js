@@ -4,11 +4,11 @@ import fs from 'node:fs';
 import { openDb, migrate } from '../server/db/index.js';
 import { createSaisons, SaisonError, LIMITS } from '../server/saisons.js';
 
-// Le jalon S0 n'est pas branché au serveur : une base en mémoire et des fiches neutres suffisent aux effets métier.
+// Tests du modèle : une base en mémoire et des fiches neutres suffisent aux effets métier.
 // L'horloge est contrôlée sans attente ; aucun original, compte, dossier de stockage ni service externe n'est utilisé.
 const START = Date.parse('2026-11-01T10:00:00Z');
 const END = START + 7 * 86400000;
-function setup(t) {
+function setup(t, { readiness = null } = {}) {
   const db = openDb(':memory:');
   migrate(db);
   t.after(() => db.close());
@@ -18,10 +18,10 @@ function setup(t) {
   for (let id = 1; id <= 4; id++) insert.run(id, `photo-${id}`, `Photographie ${id}`, id % 2 + 1, `neutre-${id}.jpg`, id === 4 ? 'draft' : 'published', id * 10);
   let clock = START - 1000;
   const now = () => clock;
-  return { db, saisons: createSaisons({ db, now }), now, at: t => { clock = t; } };
+  return { db, saisons: createSaisons({ db, now, readiness }), now, at: t => { clock = t; } };
 }
 function draft(ctx, extra = {}, photos = [1, 2, 3]) {
-  const id = ctx.saisons.create({ title: 'Une couleur qui insiste', intro: 'Une intention photographique.', opens_at: START, closes_at: END, ...extra });
+  const id = ctx.saisons.create({ author_id: 1, title: 'Une couleur qui insiste', title_en: 'A lingering colour', title_de: 'Eine bleibende Farbe', intro: 'Une intention photographique.', intro_en: 'A photographic intention.', intro_de: 'Eine fotografische Absicht.', cover_id: photos[0] ?? null, opens_at: START, closes_at: END, ...extra });
   ctx.saisons.setPhotos(id, photos);
   return id;
 }
@@ -170,7 +170,7 @@ test('Bilan et sélection : décision unique, ordre propre et langues, sans modi
   const result = s.publicBySlug(s.get(id).slug, { lang: 'de' });
   assert.equal(result.phase, 'bilan');
   assert.equal(result.report, 'Unsere Auswahl.');
-  assert.equal(result.title, 'Une couleur qui insiste', 'traduction absente : repli français');
+  assert.equal(result.title, 'Eine bleibende Farbe', 'la version demandée est rendue sans repli français');
   assert.deepEqual(result.selection_ids, [3, 1]);
   assert.deepEqual(result.photo_ids, [1, 2, 3]);
   assert.equal(s.publicList({ lang: 'en' })[0].title, 'A lingering colour');
@@ -307,7 +307,7 @@ test('Atelier : textes, ordre et programmation réussissent ou sont annulés ens
     assert.throws(() => s.revise(id, { version: before.version, input: { title: 'Ne pas garder' }, photo_ids: [2, 1], ...extra }), domain());
     assert.deepEqual(s.get(id), before, 'aucun texte, ordre ni compteur conservé après refus');
   }
-  const saved = s.revise(id, { version: before.version, input: { title: 'Saison validée', intro_en: 'A shared intention.' }, photo_ids: [3, 2], action: 'schedule' });
+  const saved = s.revise(id, { version: before.version, input: { title: 'Saison validée', intro_en: 'A shared intention.', cover_id: 3 }, photo_ids: [3, 2], action: 'schedule' });
   assert.equal(saved.state, 'programme');
   assert.equal(saved.title, 'Saison validée');
   assert.equal(saved.intro_en, 'A shared intention.');
@@ -348,4 +348,90 @@ test('Atelier : les décisions seules vérifient leur version et avancent le com
   const beforeReport = s.get(other).version;
   s.publishReport(other, { report: 'Bilan unique.' });
   assert.ok(s.get(other).version > beforeReport, 'le bilan interne ne contourne pas le compteur');
+});
+
+test('Expositions : migration des contenus sur une saison existante sans perte des références', t => {
+  const db = openDb(':memory:'); t.after(() => db.close());
+  db.exec('CREATE TABLE authors (id INTEGER PRIMARY KEY); CREATE TABLE photos (id INTEGER PRIMARY KEY)');
+  const sql = name => fs.readFileSync(new URL(`../server/db/migrations/${name}`, import.meta.url), 'utf8');
+  db.exec(sql('065_saisons.sql')); db.exec(sql('066_saisons_versions.sql'));
+  db.prepare('INSERT INTO saisons (id, slug, title, created_at, updated_at) VALUES (1, ?, ?, ?, ?)').run('ancienne-saison', 'Ancienne saison', START, START);
+  db.exec('INSERT INTO photos (id) VALUES (1), (2); INSERT INTO saison_photos (saison_id, photo_id, position) VALUES (1, 2, 0), (1, 1, 1)');
+  db.exec(sql('067_expositions_contenus.sql'));
+  const row = db.prepare('SELECT * FROM saisons').get();
+  assert.equal(row.title, 'Ancienne saison'); assert.equal(row.author_id, null); assert.equal(row.cover_id, null);
+  assert.equal(row.subtitle, ''); assert.equal(row.prologue_en, ''); assert.equal(row.conclusion_de, '');
+  assert.equal(row.version, 1);
+  assert.deepEqual(db.prepare('SELECT photo_id, cartel, cartel_en, cartel_de FROM saison_photos ORDER BY position').all(), [
+    { photo_id: 2, cartel: '', cartel_en: '', cartel_de: '' }, { photo_id: 1, cartel: '', cartel_en: '', cartel_de: '' },
+  ]);
+  assert.throws(() => db.exec('UPDATE saisons SET cover_id = 999'), /FOREIGN KEY/);
+  assert.deepEqual(db.pragma('foreign_key_check'), []);
+});
+
+test('Expositions : trois langues obligatoires et couverture choisie avant toute publication', t => {
+  const c = setup(t), s = c.saisons;
+  for (const [patch, field] of [
+    [{ title_en: '' }, 'title_en'], [{ intro_de: '' }, 'intro_de'],
+    [{ subtitle: 'Un sous-titre' }, 'subtitle_en'], [{ prologue_en: 'A prologue.' }, 'prologue'],
+    [{ conclusion_de: 'Ein Schluss.' }, 'conclusion'], [{ cover_id: null }, 'cover_id'],
+    [{ cover_id: 4 }, 'cover_id'],
+  ]) {
+    const id = draft(c, patch), before = s.get(id);
+    assert.throws(() => s.schedule(id), domain(422, field));
+    assert.deepEqual(s.get(id), before);
+  }
+  const id = draft(c);
+  s.setCartels(id, [{ photo_id: 2, cartel: 'Une lumière.' }]);
+  assert.throws(() => s.schedule(id), domain(422, 'cartel_2_en'));
+  s.setCartels(id, [{ photo_id: 2, cartel_en: 'A light.', cartel_de: 'Ein Licht.' }]);
+  s.schedule(id);
+  c.at(START);
+  assert.equal(s.publicList({ lang: 'en' })[0].cartels.find(p => p.photo_id === 2).cartel, 'A light.');
+});
+
+test('Expositions : cartels contextuels conservés au réordonnancement, sans écraser la photothèque', t => {
+  const c = setup(t), s = c.saisons, id = draft(c), originals = c.db.prepare('SELECT id, title, legend, category_id FROM photos ORDER BY id').all();
+  s.update(id, { subtitle: 'Sous-titre', subtitle_en: 'Subtitle', subtitle_de: 'Untertitel', prologue: 'Prologue.', prologue_en: 'Opening.', prologue_de: 'Auftakt.', conclusion: 'Conclusion.', conclusion_en: 'Closing.', conclusion_de: 'Abschluss.' });
+  s.setCartels(id, [{ photo_id: 1, cartel: 'Un autre contexte.', cartel_en: 'Another context.', cartel_de: 'Ein anderer Kontext.' }]);
+  const first = s.get(id).cartels.find(c => c.photo_id === 1);
+  s.setPhotos(id, [3, 1, 2]);
+  assert.deepEqual(s.get(id).cartels[1], first);
+  assert.equal(s.get(id).cover_id, 1);
+  s.schedule(id); c.at(START);
+  const published = s.publicList({ lang: 'de' })[0];
+  assert.equal(published.subtitle, 'Untertitel'); assert.equal(published.prologue, 'Auftakt.'); assert.equal(published.conclusion, 'Abschluss.');
+  assert.equal(published.cartels[1].cartel, 'Ein anderer Kontext.');
+  assert.deepEqual(c.db.prepare('SELECT id, title, legend, category_id FROM photos ORDER BY id').all(), originals);
+  assert.throws(() => s.setCartels(id, [{ photo_id: 1, cartel: 'Écrasement interdit' }]), domain(409));
+});
+
+test('Expositions : une révision invalide des cartels annule textes, couverture, ordre et version', t => {
+  const c = setup(t), s = c.saisons, id = draft(c), before = s.get(id);
+  for (const cartels of [null, [{ photo_id: 999, cartel: 'Intrus' }], [{ photo_id: 2, cartel: [] }], [{ photo_id: 2 }, { photo_id: 2 }], [{ photo_id: 2, cartel: 'x'.repeat(LIMITS.cartel + 1) }]]) {
+    assert.throws(() => s.revise(id, { version: before.version, input: { title: 'Ne pas conserver', cover_id: 2 }, photo_ids: [2, 1], cartels }), domain());
+    assert.deepEqual(s.get(id), before);
+  }
+  for (const input of [{ author_id: '1' }, { author_id: 999 }, { cover_id: '1' }, { cover_id: 999 }]) {
+    assert.throws(() => s.update(id, input), domain());
+    assert.deepEqual(s.get(id), before);
+  }
+  s.setPhotos(id, [3, 2]);
+  assert.equal(s.get(id).cover_id, null, 'retirer la couverture ne choisit pas une image à la place');
+});
+
+test('Expositions : accords courants contrôlés avant publication puis à chaque lecture publique', t => {
+  const permitted = new Set([1, 2, 3]);
+  const readiness = { gate: ids => ({ ok: ids.filter(id => permitted.has(id)), verify: [], blocked: ids.filter(id => !permitted.has(id)).map(id => ({ id, reasons: ['Raison privée'] })) }) };
+  const c = setup(t, { readiness }), s = c.saisons, id = draft(c);
+  permitted.delete(2);
+  assert.throws(() => s.schedule(id), domain(422, 'photo_ids'));
+  permitted.add(2); s.schedule(id); c.at(START);
+  permitted.delete(1);
+  const result = s.publicList()[0];
+  assert.deepEqual(result.photo_ids, [2, 3]); assert.equal(result.cover_id, null);
+  assert.deepEqual(result.cartels.map(c => c.photo_id), [2, 3]);
+  assert.ok(!JSON.stringify(result).includes('Raison privée'));
+  c.at(END);
+  assert.throws(() => s.publishReport(id, { report: 'Un bilan.', selection_ids: [1] }), domain(422, 'selection_ids'));
 });

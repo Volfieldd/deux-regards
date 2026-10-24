@@ -390,5 +390,245 @@
   "Recherche ou page invalide.": {
     "en": "Invalid search or page.",
     "de": "Ungültige Suche oder Seite."
+  },
+  "Expositions": {
+    "en": "Exhibitions",
+    "de": "Ausstellungen"
+  },
+  "Prologue": {
+    "en": "Prologue",
+    "de": "Prolog"
+  },
+  "Conclusion": {
+    "en": "Conclusion",
+    "de": "Schlusswort"
+  },
+  "Cartel de l’exposition": {
+    "en": "Exhibition caption",
+    "de": "Ausstellungslegende"
+  },
+  "Cartel": {
+    "en": "Exhibition caption",
+    "de": "Ausstellungslegende"
+  },
+  "Photographe d’origine": {
+    "en": "Original photographer",
+    "de": "Ursprünglicher Fotograf"
+  },
+  "Photographe de l’exposition": {
+    "en": "Exhibition photographer",
+    "de": "Fotograf der Ausstellung"
+  },
+  "Les trois langues sont nécessaires pour valider la publication.": {
+    "en": "All three languages are required to approve publication.",
+    "de": "Für die Freigabe der Veröffentlichung sind alle drei Sprachen erforderlich."
+  },
+  "Photographe inconnu.": {
+    "en": "Unknown photographer.",
+    "de": "Unbekannter Fotograf."
+  },
+  "Complétez ce contenu en français, anglais et allemand.": {
+    "en": "Complete this content in French, English and German.",
+    "de": "Vervollständigen Sie diesen Inhalt auf Französisch, Englisch und Deutsch."
+  },
+  "Une photographie de l’accrochage n’est plus autorisée pour le site.": {
+    "en": "A photograph in the exhibition display is no longer authorised for the website.",
+    "de": "Ein Foto der Hängung ist für die Website nicht mehr zugelassen."
+  },
+  "Choisissez une couverture publiée dans l’accrochage.": {
+    "en": "Choose a published cover photograph from the exhibition display.",
+    "de": "Wählen Sie ein veröffentlichtes Titelbild aus der Hängung."
+  },
+  "Liste de cartels attendue.": {
+    "en": "A list of exhibition captions is expected.",
+    "de": "Eine Liste der Ausstellungslegenden wird erwartet."
+  },
+  "Chaque cartel doit concerner une photo distincte de l’accrochage.": {
+    "en": "Each exhibition caption must refer to a distinct photograph in the display.",
+    "de": "Jede Ausstellungslegende muss sich auf ein anderes Foto der Hängung beziehen."
+  },
+  "Une photographie de la sélection n’est plus autorisée pour le site.": {
+    "en": "A photograph in the selection is no longer authorised for the website.",
+    "de": "Ein Foto der Auswahl ist für die Website nicht mehr zugelassen."
+  },
+  "Modifié entre-temps : rechargez la page pour voir la dernière version.": {
+    "en": "Changed in the meantime: reload the page to see the latest version.",
+    "de": "Zwischenzeitlich geändert: Laden Sie die Seite neu, um die aktuelle Fassung zu sehen."
+  },
+  "Recharger la dernière version": {
+    "en": "Reload the latest version",
+    "de": "Aktuelle Fassung neu laden"
+  },
+  "Le français, l’anglais et l’allemand sont nécessaires à la publication. Le brouillon peut rester incomplet.": {
+    "en": "French, English and German are required for publication. The draft may remain incomplete.",
+    "de": "Für die Veröffentlichung sind Französisch, Englisch und Deutsch erforderlich. Der Entwurf darf unvollständig bleiben."
+  },
+  "Exposition commune": {
+    "en": "Shared exhibition",
+    "de": "Gemeinsame Ausstellung"
+  },
+  "Couverture de l’exposition": {
+    "en": "Exhibition cover",
+    "de": "Titelbild der Ausstellung"
+  },
+  "Choisissez une photographie publiée de cet accrochage. La couverture est nécessaire avant validation.": {
+    "en": "Choose a published photograph from this display. A cover is required before approval.",
+    "de": "Wählen Sie ein veröffentlichtes Foto aus dieser Hängung. Vor der Freigabe ist ein Titelbild erforderlich."
+  },
+  "Photographie de couverture": {
+    "en": "Cover photograph",
+    "de": "Titelfoto"
+  },
+  "Choisir une couverture": {
+    "en": "Choose a cover",
+    "de": "Titelbild auswählen"
+  },
+  "Cartels de « {title} »": {
+    "en": "Exhibition captions for “{title}”",
+    "de": "Ausstellungslegenden zu „{title}“"
+  },
+  "Ces textes appartiennent à l’exposition et ne changent pas le cartel de la photo dans sa série.": {
+    "en": "These texts belong to the exhibition and do not change the photograph’s caption in its series.",
+    "de": "Diese Texte gehören zur Ausstellung und ändern die Bildlegende des Fotos in seiner Serie nicht."
+  },
+  "Exposition mise en avant à l’accueil": {
+    "en": "Exhibition featured on the homepage",
+    "de": "Auf der Startseite hervorgehobene Ausstellung"
+  },
+  "Ce choix est réservé à l’administration. Il sera utilisé par les pages publiques des expositions.": {
+    "en": "Only administrators can make this choice. It will be used by the public exhibition pages.",
+    "de": "Diese Auswahl ist der Administration vorbehalten. Sie wird von den öffentlichen Ausstellungsseiten verwendet werden."
+  },
+  "Exposition à mettre en avant": {
+    "en": "Exhibition to feature",
+    "de": "Hervorzuhebende Ausstellung"
+  },
+  "Aucune mise en avant": {
+    "en": "No featured exhibition",
+    "de": "Keine hervorgehobene Ausstellung"
+  },
+  "Enregistrer le choix de l’accueil": {
+    "en": "Save the homepage selection",
+    "de": "Auswahl für die Startseite speichern"
+  },
+  "Choix de l’accueil enregistré.": {
+    "en": "Homepage selection saved.",
+    "de": "Auswahl für die Startseite gespeichert."
+  },
+  "Brouillon d’exposition créé.": {
+    "en": "Exhibition draft created.",
+    "de": "Ausstellungsentwurf erstellt."
+  },
+  "Exposition enregistrée.": {
+    "en": "Exhibition saved.",
+    "de": "Ausstellung gespeichert."
+  },
+  "Programmer la saison": {
+    "en": "Schedule the season",
+    "de": "Saison planen"
+  },
+  "La saison s’ouvrira aux dates indiquées. Ses textes et son accrochage seront figés.": {
+    "en": "The season will open on the dates shown. Its texts and display will be locked.",
+    "de": "Die Saison wird zu den angegebenen Zeiten geöffnet. Ihre Texte und Hängung werden gesperrt."
+  },
+  "Saison programmée.": {
+    "en": "Season scheduled.",
+    "de": "Saison geplant."
+  },
+  "Valider l’ouverture": {
+    "en": "Approve opening",
+    "de": "Eröffnung freigeben"
+  },
+  "Validez l’ouverture pendant la période indiquée. Les textes et l’accrochage seront figés.": {
+    "en": "Approve opening during the period shown. Texts and the display will be locked.",
+    "de": "Geben Sie die Eröffnung während des angegebenen Zeitraums frei. Texte und Hängung werden gesperrt."
+  },
+  "Ouverture validée.": {
+    "en": "Opening approved.",
+    "de": "Eröffnung freigegeben."
+  },
+  "La saison redevient un brouillon. Vous pourrez reprendre ses textes, son calendrier et son accrochage.": {
+    "en": "The season returns to a draft. You can edit its texts, dates and display again.",
+    "de": "Die Saison wird wieder zum Entwurf. Sie können ihre Texte, ihren Zeitplan und ihre Hängung erneut bearbeiten."
+  },
+  "Retirer la saison": {
+    "en": "Withdraw the season",
+    "de": "Saison zurückziehen"
+  },
+  "La saison sera retirée de ses accès publics. Ses photographies garderont leur publication et leur série habituelles.": {
+    "en": "The season will be removed from public access. Its photographs will remain published in their usual series.",
+    "de": "Die Saison wird aus dem öffentlichen Zugang zurückgezogen. Ihre Fotos bleiben in ihren gewohnten Serien veröffentlicht."
+  },
+  "Saison retirée.": {
+    "en": "Season withdrawn.",
+    "de": "Saison zurückgezogen."
+  },
+  "Décision éditoriale": {
+    "en": "Editorial decision",
+    "de": "Redaktionelle Entscheidung"
+  },
+  "Changement de calendrier": {
+    "en": "Schedule change",
+    "de": "Zeitplanänderung"
+  },
+  "Photographie indisponible": {
+    "en": "Photograph unavailable",
+    "de": "Foto nicht verfügbar"
+  },
+  "Champ de saison inconnu.": {
+    "en": "Unknown season field.",
+    "de": "Unbekanntes Feld der Saison."
+  },
+  "Liste de photographies invalide.": {
+    "en": "Invalid photograph list.",
+    "de": "Ungültige Fotoliste."
+  },
+  "Choix de saison invalide.": {
+    "en": "Invalid season selection.",
+    "de": "Ungültige Saisonauswahl."
+  },
+  "Choisissez une saison validée pour l’accueil.": {
+    "en": "Choose an approved season for the homepage.",
+    "de": "Wählen Sie eine freigegebene Saison für die Startseite."
+  },
+  "Choisissez un motif de retrait.": {
+    "en": "Choose a reason for withdrawal.",
+    "de": "Wählen Sie einen Grund für die Rücknahme."
+  },
+  "Choisissez une couverture dans l’accrochage.": {
+    "en": "Choose a cover photograph from the display.",
+    "de": "Wählen Sie ein Titelbild aus der Hängung."
+  },
+  "Exposition créée": {
+    "en": "Exhibition created",
+    "de": "Ausstellung erstellt"
+  },
+  "Exposition de l’accueil choisie": {
+    "en": "Homepage exhibition selected",
+    "de": "Ausstellung für die Startseite ausgewählt"
+  },
+  "Exposition enregistrée": {
+    "en": "Exhibition saved",
+    "de": "Ausstellung gespeichert"
+  },
+  "Exposition programmée": {
+    "en": "Exhibition scheduled",
+    "de": "Ausstellung geplant"
+  },
+  "Ouverture de l’exposition validée": {
+    "en": "Exhibition opening approved",
+    "de": "Ausstellungseröffnung freigegeben"
+  },
+  "Programmation de l’exposition annulée": {
+    "en": "Scheduled exhibition cancelled",
+    "de": "Ausstellungsplanung abgesagt"
+  },
+  "Exposition retirée": {
+    "en": "Exhibition withdrawn",
+    "de": "Ausstellung zurückgezogen"
+  },
+  "Exposition n° {id}": {
+    "en": "Exhibition no. {id}",
+    "de": "Ausstellung Nr. {id}"
   }
 }
