@@ -27,6 +27,7 @@ import { EncounterError, ADULT } from '../encounters.js';
 import { MAX_DATE } from '../date-libre.js';
 import { safeNext } from '../auth.js';
 import { registerCarnetPages, registerCarnetFeeds, carnetContext, carnetSitemap } from './carnet-public.js';
+import { registerExpositionPages } from './expositions.js';
 import { registerContactPages } from './contact-public.js';
 
 const HERO_COUNT = 5;
@@ -686,6 +687,7 @@ async function pages(app, { lang, repo, mapEnabled, helloLimit, likeLimit, repor
 
   // ---------- Carnets (v2 seulement, server/routes/carnet-public.js) ----------
   registerCarnetPages(app, { lang, repo, base, ignored, gate, shareLimit });
+  registerExpositionPages(app, { lang, repo, base });
 
   // ---------- Contact et demande de licence (server/routes/contact-public.js) ----------
   registerContactPages(app, { lang, repo, base, gate, trapped, sameSite, limit: messageLimit });
