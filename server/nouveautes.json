@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.230.0",
+    "date": "2026-10-24",
+    "pr": 230,
+    "title": {
+      "fr": "Des provenances moins coûteuses pour la Vigie",
+      "en": "More efficient provenance summaries in the Vigie",
+      "de": "Effizientere Herkunftsübersichten in der Vigie"
+    },
+    "items": [
+      {
+        "perm": "securite.voir",
+        "fr": "La page Flux et provenance des alertes limite le travail nécessaire pour afficher les adresses, opérateurs et pays les plus actifs. Les comptes, exclusions du trafic des administrateurs et adresses tronquées des lecteurs sont conservés.",
+        "en": "The Alert flows and provenance page reduces the work needed to show the most active addresses, operators and countries. Counts, administrator traffic exclusions and truncated addresses for readers are preserved.",
+        "de": "Die Seite für Alarmflüsse und Herkunft reduziert den Aufwand zur Anzeige der aktivsten Adressen, Betreiber und Länder. Zähler, Ausschlüsse des Administratorverkehrs und gekürzte Adressen für Leser bleiben erhalten."
+      }
+    ]
+  },
+  {
     "version": "1.228.0",
     "date": "2026-10-24",
     "pr": 228,
