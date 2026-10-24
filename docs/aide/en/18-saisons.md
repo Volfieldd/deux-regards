@@ -2,7 +2,7 @@
 
 **Exhibitions** is the workspace for Nicephos photographic seasons. An exhibition combines an artistic intention, dates and an ordered display. Photographs keep their series and publication status in the photo library.
 
-This chapter covers exhibition preparation, voting proposals and their approvals, retrospectives and permanent collections. Public presentations v2 and v3 show these contents according to their dates and publication decisions.
+This chapter covers exhibition preparation, voting proposals and their approvals, retrospectives and permanent collections. Public presentations v2 and v3 show these contents according to their dates and publication decisions. The **Exhibitions** section must be published in v2 or v3 for visitors to access it.
 
 The list shows the exhibitions you can access, newest first. The **State** filter distinguishes drafts, scheduled, open, closed and withdrawn exhibitions. A photographer prepares their own exhibitions; the reviewer can read them. The administrator prepares, schedules, approves opening and withdraws exhibitions. Choosing what is featured on the home page is reserved for the administrator.
 
@@ -46,6 +46,16 @@ Save your changes first. Each decision opens a summary: review the title, artist
 
 Scheduling, opening and withdrawal are separate decisions from saving a draft. An approved exhibition cannot be silently edited; a scheduled opening may be cancelled before it begins to resume the draft. This workspace does not offer reopening after withdrawal.
 
+## Public visit and home page
+
+Before opening, a scheduled exhibition announces only its cover, title and UTC dates. Its other texts, captions and display photographs remain private until opening. Drafts and withdrawn exhibitions have no public page.
+
+At the opening time, visitors can read the subtitle, artistic intention and prologue, and explore the ordered display. Each photograph opens with its exhibition caption. **Previous photograph**, **Next photograph** and **Finish the visit** lead to the conclusion. The same journey works on computers and phones without JavaScript.
+
+Closing ends the exhibition. The full display remains available for **twelve UTC calendar months after closing**. At that deadline, the same address retains the retrospective; the exhibition’s photographs and cover are no longer shown on that page. Photographs may remain published elsewhere on the site under their own permissions.
+
+The administrator explicitly chooses the exhibition featured on the home page. Its announcement, open visit or archive then replaces the usual opening; the photographers, series and gallery remain available below. No exhibition is selected automatically. A withdrawn, invalid or expired choice restores the usual opening. The feature does not appear in filtered views or private galleries.
+
 ## Propose photographs for voting
 
 From the exhibition record, **Photos proposed for voting** opens the advisory selection. This selection is separate from the exhibition display and does not publish photographs in a permanent collection.
@@ -71,7 +81,7 @@ A photograph that is unpublished, removed from the display or no longer authoris
 
 **View the private preview** shows saved texts and photographs in their order. The language selector lets you check all three versions. The preview is reserved for authorised team members; its address is not a public sharing link.
 
-Check the full image, texts and captions. An unavailable photograph is marked in its place. The preview checks content; it does not yet represent the final public presentation.
+Check the full image, texts and captions. An unavailable photograph is marked in its place. The preview checks content before publication; it does not publish anything by itself.
 
 ## Errors and limitations
 

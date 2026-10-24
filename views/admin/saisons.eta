@@ -5,7 +5,7 @@
   <h1><%= t('Expositions') %></h1>
   <p class="sub"><%= t('Préparer une exposition, choisir son accrochage et fixer son calendrier.') %></p>
 </header>
-<p class="saisons-note"><%= t('L’atelier prépare les décisions éditoriales. Les pages publiques des saisons seront livrées dans une étape suivante.') %></p>
+<p class="saisons-note"><%= t('Les expositions programmées annoncent leur couverture avant ouverture. Leur visite suit le calendrier lorsque la rubrique Expositions est publiée en v2 ou v3.') %></p>
 <% if (it.error) { %><div class="saisons-erreur" role="alert"><p><%= it.error %></p></div><% } %>
 <% if (it.canWrite) { %>
 <form class="panel form" method="post" action="/admin/saisons" aria-labelledby="nouvelle-saison-t">

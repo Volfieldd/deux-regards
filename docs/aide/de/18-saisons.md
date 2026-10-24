@@ -2,7 +2,7 @@
 
 **Ausstellungen** ist die Werkstatt für fotografische Saisons von Nicephos. Eine Ausstellung verbindet eine künstlerische Absicht, einen Zeitplan und eine geordnete Hängung. Die Fotos behalten ihre Serie und ihren Veröffentlichungsstatus in der Fotothek.
 
-Dieses Kapitel beschreibt die Vorbereitung von Ausstellungen, Abstimmungsvorschläge und ihre Bestätigungen, Rückblicke und dauerhafte Sammlungen. Die öffentlichen Darstellungen v2 und v3 zeigen diese Inhalte entsprechend dem Kalender und den Veröffentlichungsentscheidungen.
+Dieses Kapitel beschreibt die Vorbereitung von Ausstellungen, Abstimmungsvorschläge und ihre Bestätigungen, Rückblicke und dauerhafte Sammlungen. Die öffentlichen Darstellungen v2 und v3 zeigen diese Inhalte entsprechend dem Kalender und den Veröffentlichungsentscheidungen. Der Bereich **Ausstellungen** muss in v2 oder v3 veröffentlicht sein, damit Besucher ihn öffnen können.
 
 Die Liste zeigt die Ausstellungen, auf die Sie Zugriff haben, von der neuesten zur ältesten. Der Filter **Status** unterscheidet Entwürfe, geplante, offene, abgeschlossene und zurückgezogene Ausstellungen. Fotografen bereiten ihre eigenen Ausstellungen vor; der Lektor kann sie lesen. Der Administrator bereitet vor, plant, bestätigt die Eröffnung und zieht Ausstellungen zurück. Nur er wählt die hervorgehobene Ausstellung auf der Startseite.
 
@@ -46,6 +46,16 @@ Speichern Sie zuerst Ihre Änderungen. Jede Entscheidung öffnet eine Zusammenfa
 
 Planung, Eröffnung und Rücknahme sind vom Speichern eines Entwurfs getrennte Entscheidungen. Eine freigegebene Ausstellung lässt sich nicht stillschweigend ändern; vor der Eröffnung kann die Planung abgesagt werden, um am Entwurf weiterzuarbeiten. Diese Werkstatt bietet keine Wiedereröffnung nach einer Rücknahme an.
 
+## Öffentlicher Besuch und Startseite
+
+Vor der Eröffnung kündigt eine geplante Ausstellung nur ihr Titelbild, ihren Titel und ihre UTC-Zeiten an. Ihre anderen Texte, Bildtexte und Fotos der Hängung bleiben bis zur Eröffnung privat. Entwürfe und zurückgezogene Ausstellungen haben keine öffentliche Seite.
+
+Zum Eröffnungszeitpunkt werden Untertitel, künstlerische Absicht, Prolog und die geordnete Hängung zugänglich. Jedes Foto öffnet sich mit seinem Bildtext im Kontext der Ausstellung. **Vorherige Fotografie**, **Nächste Fotografie** und **Besuch beenden** führen bis zum Schlusswort. Derselbe Weg funktioniert auf Computern und Telefonen ohne JavaScript.
+
+Mit dem Ende schließt die Ausstellung. Die vollständige Hängung bleibt für **zwölf UTC-Kalendermonate nach dem Ende** zugänglich. Danach bewahrt dieselbe Adresse den Rückblick; die Fotos und das Titelbild der Ausstellung erscheinen dort nicht mehr. Fotos können entsprechend ihren eigenen Rechten an anderen Stellen der Website veröffentlicht bleiben.
+
+Der Administrator wählt ausdrücklich die Ausstellung für die Startseite aus. Ihre Ankündigung, ihr geöffneter Besuch oder ihr Archiv ersetzt dann die übliche Eröffnung; Fotografen, Serien und Galerie bleiben darunter erreichbar. Keine Ausstellung wird automatisch ausgewählt. Eine zurückgezogene, ungültige oder abgelaufene Auswahl stellt die übliche Eröffnung wieder her. Die Hervorhebung erscheint weder in gefilterten Ansichten noch in privaten Galerien.
+
 ## Fotos zur Abstimmung vorschlagen
 
 In der Ausstellung öffnet **Zum Abstimmen vorgeschlagene Fotos** die beratende Auswahl. Diese Auswahl ist von der Hängung getrennt und veröffentlicht keine Fotos in einer dauerhaften Sammlung.
@@ -71,7 +81,7 @@ Ein Foto, das nicht mehr veröffentlicht ist, aus der Hängung entfernt wurde od
 
 **Private Vorschau ansehen** zeigt die gespeicherten Texte und Fotos in ihrer Reihenfolge. Mit der Sprachauswahl können Sie alle drei Fassungen prüfen. Die Vorschau ist berechtigten Teammitgliedern vorbehalten; ihre Adresse ist kein öffentlicher Freigabelink.
 
-Prüfen Sie das vollständige Bild, die Texte und die Legenden. Ein nicht verfügbares Foto wird an seiner Stelle gekennzeichnet. Die Vorschau dient der Inhaltsprüfung; sie stellt noch nicht die endgültige öffentliche Gestaltung dar.
+Prüfen Sie das vollständige Bild, die Texte und die Legenden. Ein nicht verfügbares Foto wird an seiner Stelle gekennzeichnet. Die Vorschau dient der Prüfung vor der Veröffentlichung; sie macht selbst nichts öffentlich.
 
 ## Fehler und Grenzen
 

@@ -109,6 +109,28 @@ publication**, dans `runDue` ou son équivalent pour les billets, avec `sub = nu
 programmée » : l'écart ne doit pas être attribué au prochain compte qui écrit dans l'admin. Pris par la Vigie, à
 l'implémentation de la brique (précision de la session de la Vigie, 18 octobre 2026).
 
+**Expositions S2 (24 octobre 2026, BV-1, BV-20, BV-21 ; DS9 et DS23).** Le choix explicite de l’accueil
+(`saison_accueil`, identifiant seul) est un réglage surveillé par BV-1. Les textes effectivement publiés des expositions
+et de leurs cartels entrent dans `createPublicTexts` par le fournisseur `externalSources`, qui appelle la projection
+publique avec une heure explicite : aucune lecture brute de ces tables par le capteur. La rubrique doit être publiée
+en v2/v3 pour les visiteurs ; une vue privée de l’administration ne suffit pas. Une annonce ne fournit que ses titres ;
+ses textes de visite, ses cartels, les brouillons, les retraits et les bilans non publiés restent exclus. Les cartels
+suivent les droits, l’état publié et la disponibilité des variantes de leurs photos. Après les douze mois calendaires
+UTC, les textes et cartels de l’accrochage sortent de l’instantané.
+
+Les contacts gagnés sont émis sous `config_public_changed`, `objet: texte_public`, champ, identifiant numérique de
+l’exposition, `photo_id` pour un cartel, nature et domaine seulement ; jamais le texte, le nom de boîte e-mail ni le
+numéro de téléphone. BV-21 conserve son résumé par champ modifié. Les changements de phase ont un événement minimal
+du même type, `objet: exposition`, identifiant, `phase_avant` et `phase` : la clôture est ainsi visible même lorsque
+l’accrochage reste inchangé.
+
+La minuterie compare ces projections même sans écriture SQL. Avant une écriture authentifiée, elle rattrape les
+échéances ; après le geste, un premier diff à l’heure de l’instantané précédent distingue les modifications réelles,
+puis un second diff à l’heure courante distingue le calendrier. Ouverture, clôture et échéance sont attribuées à
+« publication programmée », sans sujet, et ne sont jamais imputées au prochain administrateur. Un passage identique
+n’émet rien. Les GET et les fichiers statiques ne déclenchent pas ce scan. Aucune règle ni réponse automatique nouvelle
+n’est ajoutée au moteur : les BV-20/21 existants consomment les textes ; le signal de phase reste un contexte.
+
 ---
 
 ## Par brique

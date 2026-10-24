@@ -11,9 +11,9 @@
     "en": "View the private preview",
     "de": "Private Vorschau ansehen"
   },
-  "Les décisions prises ici préparent la saison. Ses pages publiques seront disponibles dans une étape suivante.": {
-    "en": "Decisions made here prepare the season. Its public pages will be available in a later stage.",
-    "de": "Die hier getroffenen Entscheidungen bereiten die Saison vor. Ihre öffentlichen Seiten werden in einem späteren Schritt verfügbar sein."
+  "Lorsqu’Expositions est publiée en v2 ou v3, une programmation rend l’annonce publique, puis la visite s’ouvre aux dates prévues.": {
+    "en": "When Exhibitions is published in v2 or v3, scheduling makes the announcement public, then the visit opens at the planned dates.",
+    "de": "Wenn Ausstellungen in v2 oder v3 veröffentlicht ist, macht die Planung die Ankündigung öffentlich. Der Besuch beginnt dann zu den vorgesehenen Zeiten."
   },
   "Les modifications n’ont pas été enregistrées.": {
     "en": "The changes were not saved.",
@@ -123,9 +123,9 @@
     "en": "Prepare an exhibition, choose its display and set its dates.",
     "de": "Eine Ausstellung vorbereiten, ihre Hängung auswählen und ihren Zeitplan festlegen."
   },
-  "L’atelier prépare les décisions éditoriales. Les pages publiques des saisons seront livrées dans une étape suivante.": {
-    "en": "The workshop prepares editorial decisions. Public season pages will be delivered in a later stage.",
-    "de": "Die Werkstatt bereitet redaktionelle Entscheidungen vor. Die öffentlichen Seiten der Saisons werden in einem späteren Schritt bereitgestellt."
+  "Les expositions programmées annoncent leur couverture avant ouverture. Leur visite suit le calendrier lorsque la rubrique Expositions est publiée en v2 ou v3.": {
+    "en": "Scheduled exhibitions announce their cover before opening. Visits follow the planned dates when the Exhibitions section is published in v2 or v3.",
+    "de": "Geplante Ausstellungen zeigen ihr Titelbild vor der Eröffnung. Der Besuch folgt dem Zeitplan, wenn die Rubrik Ausstellungen in v2 oder v3 veröffentlicht ist."
   },
   "Nouvelle saison": {
     "en": "New season",
@@ -331,9 +331,9 @@
     "en": "Exhibition display to confirm, in order",
     "de": "Zu bestätigende Hängung, in ihrer Reihenfolge"
   },
-  "Cette décision prépare la saison. Les pages publiques seront livrées dans une étape suivante.": {
-    "en": "This decision prepares the season. Public pages will be delivered in a later stage.",
-    "de": "Diese Entscheidung bereitet die Saison vor. Die öffentlichen Seiten werden in einem späteren Schritt bereitgestellt."
+  "Cette décision s’applique à la présentation publique lorsque la rubrique Expositions est publiée en v2 ou v3.": {
+    "en": "This decision applies to the public presentation when the Exhibitions section is published in v2 or v3.",
+    "de": "Diese Entscheidung gilt für die öffentliche Präsentation, wenn die Rubrik Ausstellungen in v2 oder v3 veröffentlicht ist."
   },
   "Motif du retrait": {
     "en": "Reason for withdrawal",

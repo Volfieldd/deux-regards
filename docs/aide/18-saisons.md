@@ -2,7 +2,7 @@
 
 **Expositions** est l’atelier des saisons photographiques de Nicephos. Une exposition réunit un texte d’intention, un calendrier et un accrochage ordonné. Les photos gardent leur série et leur statut dans la photothèque.
 
-Ce chapitre décrit la préparation des expositions, les propositions au vote et leurs validations, les bilans et leurs prolongements dans des collections permanentes. Les présentations publiques v2 et v3 reprennent ces contenus selon leur calendrier et leurs décisions de publication.
+Ce chapitre décrit la préparation des expositions, les propositions au vote et leurs validations, les bilans et leurs prolongements dans des collections permanentes. Les présentations publiques v2 et v3 reprennent ces contenus selon leur calendrier et leurs décisions de publication. La rubrique **Expositions** doit être publiée en v2 ou v3 pour que les visiteurs y accèdent.
 
 La liste affiche les expositions auxquelles vous avez accès, de la plus récente à la plus ancienne. Le filtre **État** distingue les brouillons, les expositions programmées, ouvertes, closes et retirées. Un photographe prépare ses propres expositions ; le relecteur peut les consulter. L’administrateur prépare, programme, valide l’ouverture et retire les expositions. Le choix de la mise en avant sur l’accueil lui est réservé.
 
@@ -46,6 +46,16 @@ Enregistrez d’abord vos modifications. Une décision ouvre un récapitulatif :
 
 Les décisions de programmation, d’ouverture et de retrait sont distinctes de l’enregistrement du brouillon. Une exposition déjà validée ne se modifie pas silencieusement ; une programmation peut être annulée avant l’ouverture pour reprendre le brouillon. Cet atelier ne propose pas de réouverture après retrait.
 
+## Visite publique et accueil
+
+Avant l’ouverture, une exposition programmée annonce seulement sa couverture, son titre et ses dates UTC. Ses autres textes, ses cartels et ses photos d’accrochage restent privés jusqu’à l’ouverture. Un brouillon ou une exposition retirée n’a pas de page publique.
+
+À l’heure d’ouverture, la visite donne accès au sous-titre, à l’intention, au prologue et à l’accrochage ordonné. Chaque photo s’ouvre avec son cartel dans le contexte de l’exposition. Les liens **Photo précédente**, **Photo suivante** et **Terminer la visite** conduisent jusqu’à la conclusion. Le même parcours fonctionne sur ordinateur et téléphone, sans JavaScript.
+
+La clôture termine l’exposition. L’accrochage complet reste accessible pendant **douze mois calendaires UTC après la clôture**. À l’échéance, la même adresse conserve le bilan ; les photos et la couverture de l’exposition ne sont plus affichées sur cette page. Les photos peuvent rester publiées ailleurs sur le site selon leurs propres droits.
+
+L’administrateur choisit explicitement l’exposition mise en avant sur l’accueil. Son annonce, sa visite ouverte ou son archive remplace alors l’ouverture habituelle ; les regards, les séries et la galerie restent accessibles dessous. Aucune exposition n’est choisie automatiquement. Un choix retiré, invalide ou arrivé à échéance rend la place à l’ouverture habituelle. La mise en avant ne s’applique ni aux vues filtrées ni aux galeries privées.
+
 ## Proposer des photos au vote
 
 Depuis la fiche, **Photos proposées au vote** ouvre le choix consultatif. Ce choix reste distinct de l’accrochage de l’exposition et ne publie aucune photo dans une collection permanente.
@@ -71,7 +81,7 @@ Une photo dépubliée, retirée de l’accrochage ou devenue non autorisée disp
 
 **Voir l’aperçu privé** montre les textes enregistrés et les photos dans leur ordre. Le sélecteur de langue permet de vérifier les trois versions. L’aperçu est réservé à l’équipe autorisée ; son adresse ne constitue pas un lien de partage public.
 
-Vérifiez l’image entière, les textes et les cartels. Une photo indisponible est indiquée à sa place. L’aperçu sert à vérifier le contenu ; il ne représente pas encore la présentation publique définitive.
+Vérifiez l’image entière, les textes et les cartels. Une photo indisponible est indiquée à sa place. L’aperçu sert à vérifier les contenus avant leur mise en ligne ; il ne rend rien public par lui-même.
 
 ## Erreurs et limites
 
