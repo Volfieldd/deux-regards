@@ -9,6 +9,10 @@ Références de design (artefacts claude.ai) :
 - Prototype des 4 directions : https://claude.ai/artifact/WAfffW6sWdDvLWLDPRPAq5
 - Maquettes (pages photo, mobile, admin) : https://claude.ai/artifact/WDgwfg3Nn9GYXnaQszKnKc
 
+## Étude — Suivi CNIL et application des exigences cookies (24 octobre 2026)
+
+Le [dossier CNIL](docs/cnil-cookies-2026-10/README.md) est actualisé sur `994a899`/1.226.0 après le diagnostic de 1.217.0. Il conserve les dix-huit fiches initiales, ajoute le vote consenti, les contrats publics des offres gratuites Cloudflare/Zitadel déclarées, un mode d’emploi des décisions et le contrôle T01–T15. Les cinq correctifs du premier lot sont présents ; le chiffrement général et les migrations restent à livrer, sans suppression de fonction ni arbitrage implicite sur D38/NC2. Vérifications ciblées : 101/101, puis 66/66 avec Vigie simulée ; sept cas Chromium et quatre tests de liens applicatifs réussis, aucun accès de production. Le [suivi](docs/cnil-cookies-2026-10/suivi-exigences.md) distingue preuves actuelles, configuration réelle non vérifiée et travaux restant à faire. Aucune modification du produit par cette étude.
+
 ## Correction — Relecture des expositions et attribution Vigie, PR #228, version 1.228.0 (24 octobre 2026)
 
 Les quatre constats de la relecture de `994a899` sont corrigés ensemble. Photos et Carnets observent leurs changements persistés avant toute attente de notification, sous le compte de la requête ; la publication programmée impose un contexte sans sujet. Un POST concurrent ne prive plus DS23 de son acteur. Audit, DS9, déduplication et chaîne restent vérifiés par les lots signés jusqu’au moteur ; aucun type ni règle de détection nouveau.

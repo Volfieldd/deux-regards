@@ -1,0 +1,410 @@
+TAP version 13
+# Subtest: la connexion envoie vers l’IdP avec PKCE, state, nonce et les scopes Zitadel
+ok 1 - la connexion envoie vers l’IdP avec PKCE, state, nonce et les scopes Zitadel
+  ---
+  duration_ms: 836.500686
+  type: 'test'
+  ...
+# Subtest: un admin se connecte, accède à /admin et revient à la page demandée
+ok 2 - un admin se connecte, accède à /admin et revient à la page demandée
+  ---
+  duration_ms: 527.651105
+  type: 'test'
+  ...
+# Subtest: les rôles absents de l’ID token sont lus dans userinfo
+ok 3 - les rôles absents de l’ID token sont lus dans userinfo
+  ---
+  duration_ms: 496.691495
+  type: 'test'
+  ...
+# Subtest: sans le rôle admin : 403 et aucune session
+ok 4 - sans le rôle admin : 403 et aucune session
+  ---
+  duration_ms: 388.206222
+  type: 'test'
+  ...
+# Subtest: repli sans Zitadel : sub en liste blanche avec e-mail vérifié
+ok 5 - repli sans Zitadel : sub en liste blanche avec e-mail vérifié
+  ---
+  duration_ms: 476.044373
+  type: 'test'
+  ...
+# Subtest: un state invalide ou un cookie de transaction absent est refusé sans appel à l’IdP
+ok 6 - un state invalide ou un cookie de transaction absent est refusé sans appel à l’IdP
+  ---
+  duration_ms: 364.962312
+  type: 'test'
+  ...
+# Subtest: un code déjà utilisé est refusé
+ok 7 - un code déjà utilisé est refusé
+  ---
+  duration_ms: 419.879744
+  type: 'test'
+  ...
+# Subtest: l’IdP renvoie une erreur (connexion annulée)
+ok 8 - l’IdP renvoie une erreur (connexion annulée)
+  ---
+  duration_ms: 355.854133
+  type: 'test'
+  ...
+# Subtest: sans session : redirection vers la connexion, en gardant la page demandée
+ok 9 - sans session : redirection vers la connexion, en gardant la page demandée
+  ---
+  duration_ms: 341.52241
+  type: 'test'
+  ...
+# Subtest: session expirée : supprimée, cookie effacé, redirection
+ok 10 - session expirée : supprimée, cookie effacé, redirection
+  ---
+  duration_ms: 435.654516
+  type: 'test'
+  ...
+# Subtest: session trop ancienne : expiration absolue même si active
+ok 11 - session trop ancienne : expiration absolue même si active
+  ---
+  duration_ms: 462.567653
+  type: 'test'
+  ...
+# Subtest: déjà connecté, /auth/login renvoie directement à la page demandée
+ok 12 - déjà connecté, /auth/login renvoie directement à la page demandée
+  ---
+  duration_ms: 617.820135
+  type: 'test'
+  ...
+# Subtest: une nouvelle connexion régénère la session et détruit l’ancienne
+ok 13 - une nouvelle connexion régénère la session et détruit l’ancienne
+  ---
+  duration_ms: 449.858906
+  type: 'test'
+  ...
+# Subtest: déconnexion : POST avec CSRF, session détruite, retour par l’IdP
+ok 14 - déconnexion : POST avec CSRF, session détruite, retour par l’IdP
+  ---
+  duration_ms: 487.829806
+  type: 'test'
+  ...
+# Subtest: la CSP autorise l’IdP comme cible de formulaire, et rien d’autre
+ok 15 - la CSP autorise l’IdP comme cible de formulaire, et rien d’autre
+  ---
+  duration_ms: 430.879044
+  type: 'test'
+  ...
+# Subtest: sans configuration OIDC : 503 sur la connexion, le site reste servi
+ok 16 - sans configuration OIDC : 503 sur la connexion, le site reste servi
+  ---
+  duration_ms: 346.763345
+  type: 'test'
+  ...
+# Subtest: en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé
+ok 17 - en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé
+  ---
+  duration_ms: 265.47542
+  type: 'test'
+  ...
+# Subtest: Cloudflare Tunnel : origine HTTP sans certificat, adresse publique HTTPS et cookies sécurisés
+ok 18 - Cloudflare Tunnel : origine HTTP sans certificat, adresse publique HTTPS et cookies sécurisés
+  ---
+  duration_ms: 290.346985
+  type: 'test'
+  ...
+# Subtest: transaction OIDC : dix minutes vérifiées au serveur, même avec une copie du cookie signé
+ok 19 - transaction OIDC : dix minutes vérifiées au serveur, même avec une copie du cookie signé
+  ---
+  duration_ms: 358.28678
+  type: 'test'
+  ...
+# Subtest: transaction OIDC : date absente, invalide ou future refusée avant tout appel au fournisseur
+ok 20 - transaction OIDC : date absente, invalide ou future refusée avant tout appel au fournisseur
+  ---
+  duration_ms: 359.725289
+  type: 'test'
+  ...
+# Subtest: safeNext refuse les redirections hors du site, y compris par caractères de contrôle
+ok 21 - safeNext refuse les redirections hors du site, y compris par caractères de contrôle
+  ---
+  duration_ms: 0.436058
+  type: 'test'
+  ...
+# Subtest: redirection ouverte : un admin connecté n’est jamais renvoyé hors du site
+ok 22 - redirection ouverte : un admin connecté n’est jamais renvoyé hors du site
+  ---
+  duration_ms: 665.929326
+  type: 'test'
+  ...
+# Subtest: rolesFrom préfère le claim du projet et filtre par organisation
+ok 23 - rolesFrom préfère le claim du projet et filtre par organisation
+  ---
+  duration_ms: 0.591817
+  type: 'test'
+  ...
+# Subtest: un rôle admin donné dans une autre organisation est refusé
+ok 24 - un rôle admin donné dans une autre organisation est refusé
+  ---
+  duration_ms: 625.137915
+  type: 'test'
+  ...
+# Subtest: deux connexions lancées dans deux onglets aboutissent toutes les deux
+ok 25 - deux connexions lancées dans deux onglets aboutissent toutes les deux
+  ---
+  duration_ms: 617.293137
+  type: 'test'
+  ...
+# Subtest: déconnexion avec un jeton périmé : page d’erreur lisible, session conservée
+ok 26 - déconnexion avec un jeton périmé : page d’erreur lisible, session conservée
+  ---
+  duration_ms: 591.165225
+  type: 'test'
+  ...
+# Subtest: limite de débit sur les tentatives de connexion : 429 au-delà de 30
+ok 27 - limite de débit sur les tentatives de connexion : 429 au-delà de 30
+  ---
+  duration_ms: 347.574554
+  type: 'test'
+  ...
+# Subtest: limiteur : IPv6 regroupé par /64, mémoire bornée
+ok 28 - limiteur : IPv6 regroupé par /64, mémoire bornée
+  ---
+  duration_ms: 1.162052
+  type: 'test'
+  ...
+# Subtest: le code et le state OIDC sont masqués dans les journaux
+ok 29 - le code et le state OIDC sont masqués dans les journaux
+  ---
+  duration_ms: 342.567956
+  type: 'test'
+  ...
+# Subtest: redactUrl ne touche qu’aux paramètres code et state
+ok 30 - redactUrl ne touche qu’aux paramètres code et state
+  ---
+  duration_ms: 0.506115
+  type: 'test'
+  ...
+# Subtest: comptes : inconnu en attente sans session, rôle donné dans l’admin, désactivé refusé, garde-fou ADMIN_SUBS
+ok 31 - comptes : inconnu en attente sans session, rôle donné dans l’admin, désactivé refusé, garde-fou ADMIN_SUBS
+  ---
+  duration_ms: 991.575336
+  type: 'test'
+  ...
+# (node:1943320) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: récapitulatifs : effacement réel à leur échéance, sans nouvelle lecture ni nouvel envoi
+ok 32 - récapitulatifs : effacement réel à leur échéance, sans nouvelle lecture ni nouvel envoi
+  ---
+  duration_ms: 720.817212
+  type: 'test'
+  ...
+# Subtest: purge des sessions : échéances glissante et absolue, session active intacte, passage idempotent
+ok 33 - purge des sessions : échéances glissante et absolue, session active intacte, passage idempotent
+  ---
+  duration_ms: 644.686266
+  type: 'test'
+  ...
+# (node:1944156) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: au démarrage : sessions échues effacées sans connexion, empreintes conservées par le déclencheur Vigie
+ok 34 - au démarrage : sessions échues effacées sans connexion, empreintes conservées par le déclencheur Vigie
+  ---
+  duration_ms: 358.962974
+  type: 'test'
+  ...
+# Subtest: sans nouvelle requête : passage horaire, session active préservée, minuteries libérées et annulées à l’arrêt
+ok 35 - sans nouvelle requête : passage horaire, session active préservée, minuteries libérées et annulées à l’arrêt
+  ---
+  duration_ms: 330.772396
+  type: 'test'
+  ...
+# Subtest: toast : un refus de lecture ou de suppression ne bloque pas les messages de la page
+ok 36 - toast : un refus de lecture ou de suppression ne bloque pas les messages de la page
+  ---
+  duration_ms: 13.152697
+  type: 'test'
+  ...
+# Subtest: toast : un refus d’écriture n’interrompt pas la suite d’une action
+ok 37 - toast : un refus d’écriture n’interrompt pas la suite d’une action
+  ---
+  duration_ms: 3.627179
+  type: 'test'
+  ...
+# Subtest: toast : la reprise, l’annulation et la mémorisation fonctionnent quand le stockage est disponible
+ok 38 - toast : la reprise, l’annulation et la mémorisation fonctionnent quand le stockage est disponible
+  ---
+  duration_ms: 3.239316
+  type: 'test'
+  ...
+# Subtest: admin.js : le curseur et les images restent utilisables quand l’accès au stockage est refusé
+ok 39 - admin.js : le curseur et les images restent utilisables quand l’accès au stockage est refusé
+  ---
+  duration_ms: 5.863556
+  type: 'test'
+  ...
+# Subtest: admin.js : une écriture refusée ne bloque pas l’application de la taille
+ok 40 - admin.js : une écriture refusée ne bloque pas l’application de la taille
+  ---
+  duration_ms: 2.712177
+  type: 'test'
+  ...
+# Subtest: admin.js : la taille mémorisée est reprise puis actualisée quand le stockage est disponible
+ok 41 - admin.js : la taille mémorisée est reprise puis actualisée quand le stockage est disponible
+  ---
+  duration_ms: 2.516884
+  type: 'test'
+  ...
+# Subtest: v2/photos-v2.js : le curseur et les images restent utilisables quand l’accès au stockage est refusé
+ok 42 - v2/photos-v2.js : le curseur et les images restent utilisables quand l’accès au stockage est refusé
+  ---
+  duration_ms: 2.320612
+  type: 'test'
+  ...
+# Subtest: v2/photos-v2.js : une écriture refusée ne bloque pas l’application de la taille
+ok 43 - v2/photos-v2.js : une écriture refusée ne bloque pas l’application de la taille
+  ---
+  duration_ms: 1.492571
+  type: 'test'
+  ...
+# Subtest: v2/photos-v2.js : la taille mémorisée est reprise puis actualisée quand le stockage est disponible
+ok 44 - v2/photos-v2.js : la taille mémorisée est reprise puis actualisée quand le stockage est disponible
+  ---
+  duration_ms: 2.005041
+  type: 'test'
+  ...
+# Subtest: jeton Cloudflare Access : signature, émetteur, audience, dates, algorithme ; clés relues sur clé inconnue, une fois par minute au plus
+ok 45 - jeton Cloudflare Access : signature, émetteur, audience, dates, algorithme ; clés relues sur clé inconnue, une fois par minute au plus
+  ---
+  duration_ms: 37.058203
+  type: 'test'
+  ...
+# Subtest: sans jeton Access : 403 sobre partout (fichiers statiques et connexion compris), DS30 noté une fois par adresse et par 10 minutes
+ok 46 - sans jeton Access : 403 sobre partout (fichiers statiques et connexion compris), DS30 noté une fois par adresse et par 10 minutes
+  ---
+  duration_ms: 599.352884
+  type: 'test'
+  ...
+# Subtest: connexion : PKCE chez Zitadel, session ouverte (cookie __Host-, HttpOnly, Secure, Lax), retour local, en-têtes stricts
+ok 47 - connexion : PKCE chez Zitadel, session ouverte (cookie __Host-, HttpOnly, Secure, Lax), retour local, en-têtes stricts
+  ---
+  duration_ms: 267.214272
+  type: 'test'
+  ...
+# Subtest: connexion refusée (DS30) : sans second facteur, sans rôle vigie.*, rôle d’une autre organisation, erreur de Zitadel, state faux
+ok 48 - connexion refusée (DS30) : sans second facteur, sans rôle vigie.*, rôle d’une autre organisation, erreur de Zitadel, state faux
+  ---
+  duration_ms: 226.3322
+  type: 'test'
+  ...
+# Subtest: ancien retour OIDC : la nouvelle tentative survit et recharger la page de reprise ne rejoue pas le refus
+ok 49 - ancien retour OIDC : la nouvelle tentative survit et recharger la page de reprise ne rejoue pas le refus
+  ---
+  duration_ms: 216.509341
+  type: 'test'
+  ...
+# Subtest: retour OIDC expiré : cookie effacé, aucune session ouverte, puis reconnexion ; les rejets directs répétés alertent toujours
+ok 50 - retour OIDC expiré : cookie effacé, aucune session ouverte, puis reconnexion ; les rejets directs répétés alertent toujours
+  ---
+  duration_ms: 218.574033
+  type: 'test'
+  ...
+# Subtest: session : liée à l’identité Access de son ouverture, 15 min sans activité, 1 h au plus ; le rafraîchissement ne la prolonge pas
+ok 51 - session : liée à l’identité Access de son ouverture, 15 min sans activité, 1 h au plus ; le rafraîchissement ne la prolonge pas
+  ---
+  duration_ms: 270.247049
+  type: 'test'
+  ...
+# Subtest: reconnexion après inactivité : nouvelle transaction, second facteur toujours exigé, puis session neuve
+ok 52 - reconnexion après inactivité : nouvelle transaction, second facteur toujours exigé, puis session neuve
+  ---
+  duration_ms: 210.968202
+  type: 'test'
+  ...
+# Subtest: plafond relu chez Zitadel toutes les 5 minutes : rôle retiré → session fermée et DS29 ; Zitadel injoignable : 15 min de grâce
+ok 53 - plafond relu chez Zitadel toutes les 5 minutes : rôle retiré → session fermée et DS29 ; Zitadel injoignable : 15 min de grâce
+  ---
+  duration_ms: 212.425569
+  type: 'test'
+  ...
+# Subtest: deux clés : arrivée sans attribution → Lectrice (DS29) ; attribution par un Administrateur, garde-fous ; amorce ; une seule clé
+ok 54 - deux clés : arrivée sans attribution → Lectrice (DS29) ; attribution par un Administrateur, garde-fous ; amorce ; une seule clé
+  ---
+  duration_ms: 180.91095
+  type: 'test'
+  ...
+# Subtest: une seule clé (VIGIE_ROLES=zitadel) : l’attribution suit le plafond, pas d’arrivée signalée, attribution refusée
+ok 55 - une seule clé (VIGIE_ROLES=zitadel) : l’attribution suit le plafond, pas d’arrivée signalée, attribution refusée
+  ---
+  duration_ms: 159.970051
+  type: 'test'
+  ...
+# Subtest: formulaires : jeton CSRF de la session et même origine ; sortie : session fermée, Zitadel déconnecté
+ok 56 - formulaires : jeton CSRF de la session et même origine ; sortie : session fermée, Zitadel déconnecté
+  ---
+  duration_ms: 205.189091
+  type: 'test'
+  ...
+# Subtest: actions : droit de l’action, plafond relu à l’instant, ré-authentification de moins de 5 minutes, par le même compte
+ok 57 - actions : droit de l’action, plafond relu à l’instant, ré-authentification de moins de 5 minutes, par le même compte
+  ---
+  duration_ms: 177.172853
+  type: 'test'
+  ...
+# Subtest: action interdite localement : refus sans déclencher de relecture Zitadel propre à l’action
+ok 58 - action interdite localement : refus sans déclencher de relecture Zitadel propre à l’action
+  ---
+  duration_ms: 143.974421
+  type: 'test'
+  ...
+# Subtest: droits : actions par rôle (annexe § 5.4), plafond tiré des rôles, relecture par l’API de gestion de Zitadel
+ok 59 - droits : actions par rôle (annexe § 5.4), plafond tiré des rôles, relecture par l’API de gestion de Zitadel
+  ---
+  duration_ms: 1.336672
+  type: 'test'
+  ...
+# Subtest: retour après connexion : chemin local seulement
+ok 60 - retour après connexion : chemin local seulement
+  ---
+  duration_ms: 0.33904
+  type: 'test'
+  ...
+# Subtest: configuration : console facultative, exigences complètes quand elle est ouverte
+ok 61 - configuration : console facultative, exigences complètes quand elle est ouverte
+  ---
+  duration_ms: 5.049134
+  type: 'test'
+  ...
+# Subtest: bandeau des critiques : en tête des pages en session (pas sur la vue d’ensemble), sans intervenant seulement
+ok 62 - bandeau des critiques : en tête des pages en session (pas sur la vue d’ensemble), sans intervenant seulement
+  ---
+  duration_ms: 199.452938
+  type: 'test'
+  ...
+# Subtest: provenance (audit D3-A1) : une image ou une feuille chargée depuis le site frère est refusée, sans prolonger la session ; l’export seulement depuis la console
+ok 63 - provenance (audit D3-A1) : une image ou une feuille chargée depuis le site frère est refusée, sans prolonger la session ; l’export seulement depuis la console
+  ---
+  duration_ms: 156.971778
+  type: 'test'
+  ...
+# Subtest: clés Access (audit D3-A2/D3-D1) : une lecture à la fois, en tâche de fond après une heure ; relecture en échec : clés connues gardées 24 h
+ok 64 - clés Access (audit D3-A2/D3-D1) : une lecture à la fois, en tâche de fond après une heure ; relecture en échec : clés connues gardées 24 h
+  ---
+  duration_ms: 51.426805
+  type: 'test'
+  ...
+# Subtest: Zitadel en échec (audit D3-D6) : pas de nouvel essai avant une minute, la lecture continue sur le dernier plafond, aucune action
+ok 65 - Zitadel en échec (audit D3-D6) : pas de nouvel essai avant une minute, la lecture continue sur le dernier plafond, aucune action
+  ---
+  duration_ms: 143.326097
+  type: 'test'
+  ...
+# Subtest: session (audit D3-A3 à A6) : jeton CSRF multi-octets refusé et noté, cookies effacés avec Secure, ré-authentification sans auth_time refusée, compte supprimé chez Zitadel
+ok 66 - session (audit D3-A3 à A6) : jeton CSRF multi-octets refusé et noté, cookies effacés avec Secure, ré-authentification sans auth_time refusée, compte supprimé chez Zitadel
+  ---
+  duration_ms: 143.898287
+  type: 'test'
+  ...
+1..66
+# tests 66
+# suites 0
+# pass 66
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 14395.393017

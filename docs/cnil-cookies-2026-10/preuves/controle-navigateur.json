@@ -1,0 +1,36 @@
+{
+  "version": "1.226.0",
+  "revision": "994a899c8fe1ac663f90671894e5d843d847eb48",
+  "perimetre": "Chromium, serveur jetable, données fictives, aucun accès prestataire réel",
+  "cas": [
+    {
+      "cas": "Accueil neuf",
+      "obtenu": "Aucun cookie applicatif ni requête extérieure"
+    },
+    {
+      "cas": "Langue",
+      "obtenu": "Choix allemand conservé après rechargement"
+    },
+    {
+      "cas": "J’aime",
+      "obtenu": "État visible conservé après rechargement ; durée et qualification encore ouvertes"
+    },
+    {
+      "cas": "Admin v1, stockage autorisé",
+      "obtenu": "Taille appliquée et mémorisée après rechargement"
+    },
+    {
+      "cas": "Admin v1, stockage refusé",
+      "obtenu": "Curseur utilisable ; taille par défaut retrouvée au rechargement"
+    },
+    {
+      "cas": "Admin v2, stockage autorisé",
+      "obtenu": "Taille appliquée et mémorisée après rechargement"
+    },
+    {
+      "cas": "Admin v2, stockage refusé",
+      "obtenu": "Curseur utilisable ; taille par défaut retrouvée au rechargement"
+    }
+  ],
+  "erreurs": []
+}

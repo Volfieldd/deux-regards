@@ -1,0 +1,820 @@
+TAP version 13
+# Subtest: emblème : masque identique quel que soit le sens du contraste, recadré au dessin
+ok 1 - emblème : masque identique quel que soit le sens du contraste, recadré au dessin
+  ---
+  duration_ms: 458.497558
+  type: 'test'
+  ...
+# Subtest: thème par défaut « Atelier » : aucune feuille ni classe supplémentaire
+ok 2 - thème par défaut « Atelier » : aucune feuille ni classe supplémentaire
+  ---
+  duration_ms: 2505.355566
+  type: 'test'
+  ...
+# Subtest: appliquer un thème : classe, feuille versionnée et schéma de couleurs sur tout le site public
+ok 3 - appliquer un thème : classe, feuille versionnée et schéma de couleurs sur tout le site public
+  ---
+  duration_ms: 424.152592
+  type: 'test'
+  ...
+# Subtest: aperçu d’un thème : réservé aux admins, mémorisé, quittable
+ok 4 - aperçu d’un thème : réservé aux admins, mémorisé, quittable
+  ---
+  duration_ms: 234.656124
+  type: 'test'
+  ...
+# Subtest: emblème : envoi, en-tête avec nom et sous-titre, feuille de masque, favicon, retrait
+ok 5 - emblème : envoi, en-tête avec nom et sous-titre, feuille de masque, favicon, retrait
+  ---
+  duration_ms: 891.203599
+  type: 'test'
+  ...
+# Subtest: emblème invalide refusé avec un message ; jeton CSRF exigé
+ok 6 - emblème invalide refusé avec un message ; jeton CSRF exigé
+  ---
+  duration_ms: 222.409911
+  type: 'test'
+  ...
+# Subtest: chaque thème déclaré a sa feuille et un libellé
+ok 7 - chaque thème déclaré a sa feuille et un libellé
+  ---
+  duration_ms: 0.625345
+  type: 'test'
+  ...
+# Subtest: icône, logo complet, image de partage : chacun à sa place
+ok 8 - icône, logo complet, image de partage : chacun à sa place
+  ---
+  duration_ms: 1267.197566
+  type: 'test'
+  ...
+# Subtest: la connexion envoie vers l’IdP avec PKCE, state, nonce et les scopes Zitadel
+ok 9 - la connexion envoie vers l’IdP avec PKCE, state, nonce et les scopes Zitadel
+  ---
+  duration_ms: 1021.97017
+  type: 'test'
+  ...
+# Subtest: un admin se connecte, accède à /admin et revient à la page demandée
+ok 10 - un admin se connecte, accède à /admin et revient à la page demandée
+  ---
+  duration_ms: 561.891474
+  type: 'test'
+  ...
+# Subtest: les rôles absents de l’ID token sont lus dans userinfo
+ok 11 - les rôles absents de l’ID token sont lus dans userinfo
+  ---
+  duration_ms: 411.556514
+  type: 'test'
+  ...
+# Subtest: sans le rôle admin : 403 et aucune session
+ok 12 - sans le rôle admin : 403 et aucune session
+  ---
+  duration_ms: 465.90502
+  type: 'test'
+  ...
+# Subtest: repli sans Zitadel : sub en liste blanche avec e-mail vérifié
+ok 13 - repli sans Zitadel : sub en liste blanche avec e-mail vérifié
+  ---
+  duration_ms: 444.927597
+  type: 'test'
+  ...
+# Subtest: un state invalide ou un cookie de transaction absent est refusé sans appel à l’IdP
+ok 14 - un state invalide ou un cookie de transaction absent est refusé sans appel à l’IdP
+  ---
+  duration_ms: 390.623863
+  type: 'test'
+  ...
+# Subtest: un code déjà utilisé est refusé
+ok 15 - un code déjà utilisé est refusé
+  ---
+  duration_ms: 428.781103
+  type: 'test'
+  ...
+# Subtest: l’IdP renvoie une erreur (connexion annulée)
+ok 16 - l’IdP renvoie une erreur (connexion annulée)
+  ---
+  duration_ms: 352.813345
+  type: 'test'
+  ...
+# Subtest: sans session : redirection vers la connexion, en gardant la page demandée
+ok 17 - sans session : redirection vers la connexion, en gardant la page demandée
+  ---
+  duration_ms: 384.123929
+  type: 'test'
+  ...
+# Subtest: session expirée : supprimée, cookie effacé, redirection
+ok 18 - session expirée : supprimée, cookie effacé, redirection
+  ---
+  duration_ms: 416.835583
+  type: 'test'
+  ...
+# Subtest: session trop ancienne : expiration absolue même si active
+ok 19 - session trop ancienne : expiration absolue même si active
+  ---
+  duration_ms: 444.00603
+  type: 'test'
+  ...
+# Subtest: déjà connecté, /auth/login renvoie directement à la page demandée
+ok 20 - déjà connecté, /auth/login renvoie directement à la page demandée
+  ---
+  duration_ms: 378.204917
+  type: 'test'
+  ...
+# Subtest: une nouvelle connexion régénère la session et détruit l’ancienne
+ok 21 - une nouvelle connexion régénère la session et détruit l’ancienne
+  ---
+  duration_ms: 523.660126
+  type: 'test'
+  ...
+# Subtest: déconnexion : POST avec CSRF, session détruite, retour par l’IdP
+ok 22 - déconnexion : POST avec CSRF, session détruite, retour par l’IdP
+  ---
+  duration_ms: 367.410693
+  type: 'test'
+  ...
+# Subtest: la CSP autorise l’IdP comme cible de formulaire, et rien d’autre
+ok 23 - la CSP autorise l’IdP comme cible de formulaire, et rien d’autre
+  ---
+  duration_ms: 339.031886
+  type: 'test'
+  ...
+# Subtest: sans configuration OIDC : 503 sur la connexion, le site reste servi
+ok 24 - sans configuration OIDC : 503 sur la connexion, le site reste servi
+  ---
+  duration_ms: 236.852128
+  type: 'test'
+  ...
+# Subtest: en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé
+ok 25 - en HTTPS les cookies sont Secure et préfixés __Host-, HSTS est posé
+  ---
+  duration_ms: 245.837653
+  type: 'test'
+  ...
+# Subtest: safeNext refuse les redirections hors du site, y compris par caractères de contrôle
+ok 26 - safeNext refuse les redirections hors du site, y compris par caractères de contrôle
+  ---
+  duration_ms: 0.534822
+  type: 'test'
+  ...
+# Subtest: redirection ouverte : un admin connecté n’est jamais renvoyé hors du site
+ok 27 - redirection ouverte : un admin connecté n’est jamais renvoyé hors du site
+  ---
+  duration_ms: 326.803554
+  type: 'test'
+  ...
+# Subtest: rolesFrom préfère le claim du projet et filtre par organisation
+ok 28 - rolesFrom préfère le claim du projet et filtre par organisation
+  ---
+  duration_ms: 1.921992
+  type: 'test'
+  ...
+# Subtest: un rôle admin donné dans une autre organisation est refusé
+ok 29 - un rôle admin donné dans une autre organisation est refusé
+  ---
+  duration_ms: 522.61004
+  type: 'test'
+  ...
+# Subtest: deux connexions lancées dans deux onglets aboutissent toutes les deux
+ok 30 - deux connexions lancées dans deux onglets aboutissent toutes les deux
+  ---
+  duration_ms: 423.996483
+  type: 'test'
+  ...
+# Subtest: déconnexion avec un jeton périmé : page d’erreur lisible, session conservée
+ok 31 - déconnexion avec un jeton périmé : page d’erreur lisible, session conservée
+  ---
+  duration_ms: 345.412171
+  type: 'test'
+  ...
+# Subtest: limite de débit sur les tentatives de connexion : 429 au-delà de 30
+ok 32 - limite de débit sur les tentatives de connexion : 429 au-delà de 30
+  ---
+  duration_ms: 286.870512
+  type: 'test'
+  ...
+# Subtest: limiteur : IPv6 regroupé par /64, mémoire bornée
+ok 33 - limiteur : IPv6 regroupé par /64, mémoire bornée
+  ---
+  duration_ms: 1.074673
+  type: 'test'
+  ...
+# Subtest: le code et le state OIDC sont masqués dans les journaux
+ok 34 - le code et le state OIDC sont masqués dans les journaux
+  ---
+  duration_ms: 265.795652
+  type: 'test'
+  ...
+# Subtest: redactUrl ne touche qu’aux paramètres code et state
+ok 35 - redactUrl ne touche qu’aux paramètres code et state
+  ---
+  duration_ms: 0.376408
+  type: 'test'
+  ...
+# Subtest: comptes : inconnu en attente sans session, rôle donné dans l’admin, désactivé refusé, garde-fou ADMIN_SUBS
+ok 36 - comptes : inconnu en attente sans session, rôle donné dans l’admin, désactivé refusé, garde-fou ADMIN_SUBS
+  ---
+  duration_ms: 570.91821
+  type: 'test'
+  ...
+# Subtest: date libre : formats français, anglais et allemand, lus en AAAA-MM-JJ
+ok 37 - date libre : formats français, anglais et allemand, lus en AAAA-MM-JJ
+  ---
+  duration_ms: 7.100342
+  type: 'test'
+  ...
+# Subtest: date libre : ambiguïtés, dates impossibles, à venir, illisibles, trop longues
+ok 38 - date libre : ambiguïtés, dates impossibles, à venir, illisibles, trop longues
+  ---
+  duration_ms: 0.97514
+  type: 'test'
+  ...
+# Subtest: date libre : temps borné face aux saisies hostiles (retour arrière, longueur)
+ok 39 - date libre : temps borné face aux saisies hostiles (retour arrière, longueur)
+  ---
+  duration_ms: 221.07324
+  type: 'test'
+  ...
+# Subtest: accord : âge exigé ; avant 18 ans, le nom du parent ; un mineur n’accepte pas seul, un refus si
+ok 40 - accord : âge exigé ; avant 18 ans, le nom du parent ; un mineur n’accepte pas seul, un refus si
+  ---
+  duration_ms: 2207.758374
+  type: 'test'
+  ...
+# Subtest: âge et parent chiffrés au repos (DATA_KEY), comme l’app ; rattrapés au démarrage ; effacés avec la rencontre
+ok 41 - âge et parent chiffrés au repos (DATA_KEY), comme l’app ; rattrapés au démarrage ; effacés avec la rencontre
+  ---
+  duration_ms: 220.242336
+  type: 'test'
+  ...
+# Subtest: sans le code de la carte : l’âge et le parent d’une rencontre établie ne changent pas
+ok 42 - sans le code de la carte : l’âge et le parent d’une rencontre établie ne changent pas
+  ---
+  duration_ms: 196.649196
+  type: 'test'
+  ...
+# Subtest: date libre sur la page : lue, enregistrée en AAAA-MM-JJ, erreurs sous le champ
+ok 43 - date libre sur la page : lue, enregistrée en AAAA-MM-JJ, erreurs sous le champ
+  ---
+  duration_ms: 178.972275
+  type: 'test'
+  ...
+# Subtest: récapitulatif après l’envoi : rien dans l’adresse, un cookie de 15 minutes, ni nom, ni adresse, ni parent
+ok 44 - récapitulatif après l’envoi : rien dans l’adresse, un cookie de 15 minutes, ni nom, ni adresse, ni parent
+  ---
+  duration_ms: 249.444365
+  type: 'test'
+  ...
+# Subtest: récapitulatif : jamais au piège ni à l’autre site ; mémoire bornée
+ok 45 - récapitulatif : jamais au piège ni à l’autre site ; mémoire bornée
+  ---
+  duration_ms: 2758.923518
+  type: 'test'
+  ...
+# Subtest: Vigie : âge hors liste et saisies plus longues que la page (BV-31, DS12), sans la valeur ; noms et dates ordinaires n’émettent rien
+ok 46 - Vigie : âge hors liste et saisies plus longues que la page (BV-31, DS12), sans la valeur ; noms et dates ordinaires n’émettent rien
+  ---
+  duration_ms: 294.93419
+  type: 'test'
+  ...
+# Subtest: Vigie : les accroches de /bonjour restent les mêmes, dans le même ordre, avec les nouveaux champs
+ok 47 - Vigie : les accroches de /bonjour restent les mêmes, dans le même ordre, avec les nouveaux champs
+  ---
+  duration_ms: 216.186923
+  type: 'test'
+  ...
+# Subtest: la page en v1, v2 et v3, en trois langues : âge, parent, date libre, mêmes champs
+ok 48 - la page en v1, v2 et v3, en trois langues : âge, parent, date libre, mêmes champs
+  ---
+  duration_ms: 169.292675
+  type: 'test'
+  ...
+# Subtest: fiche d’une rencontre (v1 et v2) : l’âge et le parent venus de la page, comme ceux de l’app ; mêmes lectures sensibles
+ok 49 - fiche d’une rencontre (v1 et v2) : l’âge et le parent venus de la page, comme ceux de l’app ; mêmes lectures sensibles
+  ---
+  duration_ms: 583.886715
+  type: 'test'
+  ...
+# Subtest: revue : une personne notée mineure ne passe jamais à 18 ans ou plus par la page, même avec le code (app, carte, page)
+ok 50 - revue : une personne notée mineure ne passe jamais à 18 ans ou plus par la page, même avec le code (app, carte, page)
+  ---
+  duration_ms: 187.459786
+  type: 'test'
+  ...
+# Subtest: revue : sans le code, âge ou parent qui contredisent la fiche, ou accord élargi d’un mineur : rien n’est appliqué
+ok 51 - revue : sans le code, âge ou parent qui contredisent la fiche, ou accord élargi d’un mineur : rien n’est appliqué
+  ---
+  duration_ms: 170.542596
+  type: 'test'
+  ...
+# Subtest: revue : seulement des textes dans le formulaire (JSON forgé) : 422 et DS12, jamais d’erreur 500
+ok 52 - revue : seulement des textes dans le formulaire (JSON forgé) : 422 et DS12, jamais d’erreur 500
+  ---
+  duration_ms: 195.089083
+  type: 'test'
+  ...
+# Subtest: recevoir la photo : l’âge est demandé ; avant 15 ans, l’adresse d’un parent remplace la sienne, qui n’est jamais gardée
+ok 53 - recevoir la photo : l’âge est demandé ; avant 15 ans, l’adresse d’un parent remplace la sienne, qui n’est jamais gardée
+  ---
+  duration_ms: 249.032964
+  type: 'test'
+  ...
+# Subtest: moins de 15 ans : proposé avec « Recevoir la photo » ou « J’accepte » (sans script) ; phrase des deux parents sous le nom du parent (fr, en, de)
+ok 54 - moins de 15 ans : proposé avec « Recevoir la photo » ou « J’accepte » (sans script) ; phrase des deux parents sous le nom du parent (fr, en, de)
+  ---
+  duration_ms: 209.975809
+  type: 'test'
+  ...
+# Subtest: page Confidentialité : trois langues, responsables conjoints et contact, durées, droits ; liens depuis tout le site
+ok 55 - page Confidentialité : trois langues, responsables conjoints et contact, durées, droits ; liens depuis tout le site
+  ---
+  duration_ms: 2485.515682
+  type: 'test'
+  ...
+# Subtest: réglages : contact et cases de sécurité ; l’app montre l’information dans la langue de la personne
+ok 56 - réglages : contact et cases de sécurité ; l’app montre l’information dans la langue de la personne
+  ---
+  duration_ms: 251.303565
+  type: 'test'
+  ...
+# Subtest: durées de conservation : visage gardé avec l’accord (6 mois sans accord), accord gardé tant qu’une photo liée existe, puis 5 ans
+ok 57 - durées de conservation : visage gardé avec l’accord (6 mois sans accord), accord gardé tant qu’une photo liée existe, puis 5 ans
+  ---
+  duration_ms: 147.568234
+  type: 'test'
+  ...
+# Subtest: mentions légales / Impressum : en pied de chaque page, remplies depuis l’admin, signalées tant qu’incomplètes
+ok 58 - mentions légales / Impressum : en pied de chaque page, remplies depuis l’admin, signalées tant qu’incomplètes
+  ---
+  duration_ms: 291.33572
+  type: 'test'
+  ...
+# Subtest: mentions légales : hébergement par les éditeurs (page inchangée) ou chez un hébergeur nommé, en trois langues
+ok 59 - mentions légales : hébergement par les éditeurs (page inchangée) ou chez un hébergeur nommé, en trois langues
+  ---
+  duration_ms: 274.625696
+  type: 'test'
+  ...
+# Subtest: mentions légales : l’e-mail est dû, et le contact de la confidentialité ne le remplace que s’il est une adresse e-mail
+ok 60 - mentions légales : l’e-mail est dû, et le contact de la confidentialité ne le remplace que s’il est une adresse e-mail
+  ---
+  duration_ms: 0.939867
+  type: 'test'
+  ...
+# Subtest: chaque texte traduisible de l’admin a sa version anglaise et allemande
+ok 61 - chaque texte traduisible de l’admin a sa version anglaise et allemande
+  ---
+  duration_ms: 58.364735
+  type: 'test'
+  ...
+# Subtest: sélecteur de langue : préférence gardée sur le photographe, pages et messages dans sa langue
+ok 62 - sélecteur de langue : préférence gardée sur le photographe, pages et messages dans sa langue
+  ---
+  duration_ms: 2653.101985
+  type: 'test'
+  ...
+# Subtest: messages d’erreur dans la langue de l’admin : validations, refus, messages composés ; l’identifiant du compte
+ok 63 - messages d’erreur dans la langue de l’admin : validations, refus, messages composés ; l’identifiant du compte
+  ---
+  duration_ms: 373.570819
+  type: 'test'
+  ...
+# Subtest: langue d’un visiteur : pays francophone, germanophone, sinon anglais ; pays à plusieurs langues départagés par le navigateur
+ok 64 - langue d’un visiteur : pays francophone, germanophone, sinon anglais ; pays à plusieurs langues départagés par le navigateur
+  ---
+  duration_ms: 3.832111
+  type: 'test'
+  ...
+# Subtest: textes des auteurs : langue de la page, sinon repli (allemand → français → anglais ; anglais → français ; français → anglais)
+ok 65 - textes des auteurs : langue de la page, sinon repli (allemand → français → anglais ; anglais → français ; français → anglais)
+  ---
+  duration_ms: 0.859753
+  type: 'test'
+  ...
+# Subtest: pages en anglais et en allemand : langue déclarée, menu et textes traduits, liens dans la même langue, hreflang
+ok 66 - pages en anglais et en allemand : langue déclarée, menu et textes traduits, liens dans la même langue, hreflang
+  ---
+  duration_ms: 2696.15197
+  type: 'test'
+  ...
+# Subtest: arrivée sur une page française : choix mémorisé, sinon pays puis navigateur ; jamais pour les robots ni sur /en, /de
+ok 67 - arrivée sur une page française : choix mémorisé, sinon pays puis navigateur ; jamais pour les robots ni sur /en, /de
+  ---
+  duration_ms: 238.522111
+  type: 'test'
+  ...
+# Subtest: sélecteur de langue : retient le choix (cookie) et ouvre la même page dans la langue choisie
+ok 68 - sélecteur de langue : retient le choix (cookie) et ouvre la même page dans la langue choisie
+  ---
+  duration_ms: 177.672414
+  type: 'test'
+  ...
+# Subtest: admin : traductions des photos, séries, biographies et textes du site ; vides, repli sur le français
+ok 69 - admin : traductions des photos, séries, biographies et textes du site ; vides, repli sur le français
+  ---
+  duration_ms: 309.440666
+  type: 'test'
+  ...
+# Subtest: lien : jeton mal formé ou inconnu, 404 ordinaire ; fini, révoqué, galerie fermée : 410 sans le titre (T1 à T3, G11)
+ok 70 - lien : jeton mal formé ou inconnu, 404 ordinaire ; fini, révoqué, galerie fermée : 410 sans le titre (T1 à T3, G11)
+  ---
+  duration_ms: 3918.594439
+  type: 'test'
+  ...
+# Subtest: lien : le GET ne consomme rien (« lien consulté », une fois par adresse et par jour, sans « ouvert ») ; page neutre (T4, T35, G12, G33)
+ok 71 - lien : le GET ne consomme rien (« lien consulté », une fois par adresse et par jour, sans « ouvert ») ; page neutre (T4, T35, G12, G33)
+  ---
+  duration_ms: 792.966802
+  type: 'test'
+  ...
+# Subtest: mot de passe : refusé (403, essais restants), accepté avec une saisie tolérante, 303 vers /prive/<id> ; empreintes seules en base (T5, T8, G15)
+ok 72 - mot de passe : refusé (403, essais restants), accepté avec une saisie tolérante, 303 vers /prive/<id> ; empreintes seules en base (T5, T8, G15)
+  ---
+  duration_ms: 2021.959285
+  type: 'test'
+  ...
+# Subtest: essais : 5 refus → pause d’une minute, 10 → 15 min (le bon mot de passe refusé pendant la pause), 30 → suspension ; débloquer rétablit (T6, G19, Tranché 3)
+ok 73 - essais : 5 refus → pause d’une minute, 10 → 15 min (le bon mot de passe refusé pendant la pause), 30 → suspension ; débloquer rétablit (T6, G19, Tranché 3)
+  ---
+  duration_ms: 5842.217955
+  type: 'test'
+  ...
+# Subtest: essais en parallèle : un seul calcul à la fois par accès, les seuils ne sont jamais dépassés (T6, G18, G19)
+ok 74 - essais en parallèle : un seul calcul à la fois par accès, les seuils ne sont jamais dépassés (T6, G18, G19)
+  ---
+  duration_ms: 975.704343
+  type: 'test'
+  ...
+# Subtest: limites par adresse : 21e essai en 15 min, 61e ouverture de /g/ en 1 h : 429 (T7, G20)
+ok 75 - limites par adresse : 21e essai en 15 min, 61e ouverture de /g/ en 1 h : 429 (T7, G20)
+  ---
+  duration_ms: 2981.754687
+  type: 'test'
+  ...
+# Subtest: galerie : 404 identique sans autorisation, pour une galerie qui existe ou non ; une session de A ne voit ni la page ni les images de B (T10, T11)
+ok 76 - galerie : 404 identique sans autorisation, pour une galerie qui existe ou non ; une session de A ne voit ni la page ni les images de B (T10, T11)
+  ---
+  duration_ms: 1421.57642
+  type: 'test'
+  ...
+# Subtest: révocation : la requête suivante de la même session répond 404, l’accès retiré est dit ; le rejeu est signalé à la Vigie (T12, G9, BV-22)
+ok 77 - révocation : la requête suivante de la même session répond 404, l’accès retiré est dit ; le rejeu est signalé à la Vigie (T12, G9, BV-22)
+  ---
+  duration_ms: 1094.952024
+  type: 'test'
+  ...
+# Subtest: prolonger garde le lien ; « Nouveau lien » invalide l’ancien (410, rejeu signalé) ; « Nouveau mot de passe » garde le lien (T13, G10)
+ok 78 - prolonger garde le lien ; « Nouveau lien » invalide l’ancien (410, rejeu signalé) ; « Nouveau mot de passe » garde le lien (T13, G10)
+  ---
+  duration_ms: 1840.145899
+  type: 'test'
+  ...
+# Subtest: en-têtes : pages en no-store, noindex, no-referrer réellement envoyé ; images en private, no-cache, ETag, CORP, 304 ; robots.txt (T14, T15, T18, G32, G36, G39, G40)
+ok 79 - en-têtes : pages en no-store, noindex, no-referrer réellement envoyé ; images en private, no-cache, ETag, CORP, 304 ; robots.txt (T14, T15, T18, G32, G36, G39, G40)
+  ---
+  duration_ms: 1365.886982
+  type: 'test'
+  ...
+# Subtest: journaux : le jeton du lien masqué partout (adresse, « vers= », /en/g/…), ni mot de passe ni cookie (T16, G13, M14)
+ok 80 - journaux : le jeton du lien masqué partout (adresse, « vers= », /en/g/…), ni mot de passe ni cookie (T16, G13, M14)
+  ---
+  duration_ms: 990.044583
+  type: 'test'
+  ...
+# Subtest: durées : 12 h sans visite, 7 jours au plus, 30 jours avec « se souvenir », jamais au-delà de l’accès (T17, G26)
+ok 81 - durées : 12 h sans visite, 7 jours au plus, 30 jours avec « se souvenir », jamais au-delà de l’accès (T17, G26)
+  ---
+  duration_ms: 1370.246581
+  type: 'test'
+  ...
+# Subtest: session : un mot de passe accepté change le jeton, garde la session et ses autres autorisations (T9, G24, G30)
+ok 82 - session : un mot de passe accepté change le jeton, garde la session et ses autres autorisations (T9, G24, G30)
+  ---
+  duration_ms: 1765.049977
+  type: 'test'
+  ...
+# Subtest: images : photo hors de la galerie (même publiée), ancienne clé, /media/ d’une photo privée seulement, « Tout l’EXIF » : 404 (T19, T20, G38, M19)
+ok 83 - images : photo hors de la galerie (même publiée), ancienne clé, /media/ d’une photo privée seulement, « Tout l’EXIF » : 404 (T19, T20, G38, M19)
+  ---
+  duration_ms: 998.819379
+  type: 'test'
+  ...
+# Subtest: téléchargements : refusés sans le droit ou hors liste (signalés) ; JPEG sans GPS, auteur, rendu une fois, compteur ; HEAD non compté (T21, G44, Tranché 7, BV-25)
+ok 84 - téléchargements : refusés sans le droit ou hors liste (signalés) ; JPEG sans GPS, auteur, rendu une fois, compteur ; HEAD non compté (T21, G44, Tranché 7, BV-25)
+  ---
+  duration_ms: 1974.626121
+  type: 'test'
+  ...
+# Subtest: rendus privés : deux calculs distincts au plus, cache et déduplication disponibles, refus sans compteur ni archive partielle (BV-19)
+ok 85 - rendus privés : deux calculs distincts au plus, cache et déduplication disponibles, refus sans compteur ni archive partielle (BV-19)
+  ---
+  duration_ms: 1180.211519
+  type: 'test'
+  ...
+# Subtest: archive : ZIP de la galerie, 3 par jour et par accès au plus, export signalé à la Vigie, effacée après 24 h (T22, G46, BV-19)
+ok 86 - archive : ZIP de la galerie, 3 par jour et par accès au plus, export signalé à la Vigie, effacée après 24 h (T22, G46, BV-19)
+  ---
+  duration_ms: 1152.994414
+  type: 'test'
+  ...
+# Subtest: archive historique : droits, résolution et photos visibles sont revérifiés à chaque téléchargement
+ok 87 - archive historique : droits, résolution et photos visibles sont revérifiés à chaque téléchargement
+  ---
+  duration_ms: 1253.490361
+  type: 'test'
+  ...
+# Subtest: écritures de l’invité : Origin du site (ou Sec-Fetch-Site) et jeton CSRF exigés ; favori, sélection envoyée puis reprise, figée une fois vue (T32, G28, G48, G50, BV-25)
+ok 88 - écritures de l’invité : Origin du site (ou Sec-Fetch-Site) et jeton CSRF exigés ; favori, sélection envoyée puis reprise, figée une fois vue (T32, G28, G48, G50, BV-25)
+  ---
+  duration_ms: 1036.553344
+  type: 'test'
+  ...
+# Subtest: langue et départ : POST /prive/<id>/langue ; « Quitter » retire les autorisations, change le jeton, vide le cache ; l’ancien cookie rejoué est signalé (T34, T35, G29, G37)
+ok 89 - langue et départ : POST /prive/<id>/langue ; « Quitter » retire les autorisations, change le jeton, vide le cache ; l’ancien cookie rejoué est signalé (T34, T35, G29, G37)
+  ---
+  duration_ms: 1038.952116
+  type: 'test'
+  ...
+# Subtest: vue équipe : sans mot de passe pour qui voit la galerie, aucun événement d’invité ; hors portée : 404 et signalé (T26, G55, G60, BV-14)
+ok 90 - vue équipe : sans mot de passe pour qui voit la galerie, aucun événement d’invité ; hors portée : 404 et signalé (T26, G55, G60, BV-14)
+  ---
+  duration_ms: 614.347747
+  type: 'test'
+  ...
+# Subtest: Vigie : émissions des invités, types du vocabulaire, composant public, jamais de jeton, de mot de passe ni d’étiquette (BV-16 à BV-18)
+ok 91 - Vigie : émissions des invités, types du vocabulaire, composant public, jamais de jeton, de mot de passe ni d’étiquette (BV-16 à BV-18)
+  ---
+  duration_ms: 3136.827758
+  type: 'test'
+  ...
+# Subtest: images : une taille de 160 ou 480 px pas encore créée (photo d’avant leur ajout) est servie par une plus grande, sans rien ouvrir d’autre
+ok 92 - images : une taille de 160 ou 480 px pas encore créée (photo d’avant leur ajout) est servie par une plus grande, sans rien ouvrir d’autre
+  ---
+  duration_ms: 1033.173707
+  type: 'test'
+  ...
+# Subtest: A001 : un compte supprimé qui se reconnecte avec le rôle « admin » de l’IdP revient en attente, sans rôle
+ok 93 - A001 : un compte supprimé qui se reconnecte avec le rôle « admin » de l’IdP revient en attente, sans rôle
+  ---
+  duration_ms: 905.780833
+  type: 'test'
+  ...
+# Subtest: A001 : même chose pour une identité de OIDC_ALLOWED_SUBS (repli sans Zitadel)
+ok 94 - A001 : même chose pour une identité de OIDC_ALLOWED_SUBS (repli sans Zitadel)
+  ---
+  duration_ms: 426.370668
+  type: 'test'
+  ...
+# Subtest: A055 : une identité ajoutée à ADMIN_SUBS après une désactivation reprend la main, et la base suit
+ok 95 - A055 : une identité ajoutée à ADMIN_SUBS après une désactivation reprend la main, et la base suit
+  ---
+  duration_ms: 423.211049
+  type: 'test'
+  ...
+# Subtest: A058 : une connexion refusée (compte désactivé) ne change pas « dernière connexion »
+ok 96 - A058 : une connexion refusée (compte désactivé) ne change pas « dernière connexion »
+  ---
+  duration_ms: 362.988582
+  type: 'test'
+  ...
+# Subtest: A005 : l’adresse non vérifiée par l’IdP n’est pas retenue ; un compte en attente montre sa date et son sub
+ok 97 - A005 : l’adresse non vérifiée par l’IdP n’est pas retenue ; un compte en attente montre sa date et son sub
+  ---
+  duration_ms: 474.485081
+  type: 'test'
+  ...
+# Subtest: A056 : la connexion de test ne réécrit plus les rôles, et n’ouvre pas de session pour un compte désactivé
+ok 98 - A056 : la connexion de test ne réécrit plus les rôles, et n’ouvre pas de session pour un compte désactivé
+  ---
+  duration_ms: 2077.383791
+  type: 'test'
+  ...
+# Subtest: A008 : pages 403 et CSRF dans la langue de l’admin, liens compris ; une session sans rôle a une sortie
+ok 99 - A008 : pages 403 et CSRF dans la langue de l’admin, liens compris ; une session sans rôle a une sortie
+  ---
+  duration_ms: 194.033968
+  type: 'test'
+  ...
+# Subtest: A052 : les connexions en cours sont bornées, la page demandée trop longue n’est pas gardée
+ok 100 - A052 : les connexions en cours sont bornées, la page demandée trop longue n’est pas gardée
+  ---
+  duration_ms: 341.232151
+  type: 'test'
+  ...
+# Subtest: A054 : en ligne sans OIDC_ORG_ID, le rôle « admin » de l’IdP ne crée pas d’administrateur
+ok 101 - A054 : en ligne sans OIDC_ORG_ID, le rôle « admin » de l’IdP ne crée pas d’administrateur
+  ---
+  duration_ms: 615.914704
+  type: 'test'
+  ...
+# Subtest: A002 : le modérateur lit un signalement sans voir l’adresse laissée ; l’administrateur la voit
+ok 102 - A002 : le modérateur lit un signalement sans voir l’adresse laissée ; l’administrateur la voit
+  ---
+  duration_ms: 216.909006
+  type: 'test'
+  ...
+# Subtest: A050 : le modérateur ne vide pas une série qui a des photos (il supprime une série vide)
+ok 103 - A050 : le modérateur ne vide pas une série qui a des photos (il supprime une série vide)
+  ---
+  duration_ms: 155.477898
+  type: 'test'
+  ...
+# Subtest: A051 et A057 : les réglages du circuit ne valent que pour le rôle Photographe, sans ôter ce qu’un autre rôle donne
+ok 104 - A051 et A057 : les réglages du circuit ne valent que pour le rôle Photographe, sans ôter ce qu’un autre rôle donne
+  ---
+  duration_ms: 142.996579
+  type: 'test'
+  ...
+# Subtest: A004 : exports RGPD et originaux téléchargés vont au Journal, avec le compte
+ok 105 - A004 : exports RGPD et originaux téléchargés vont au Journal, avec le compte
+  ---
+  duration_ms: 187.734078
+  type: 'test'
+  ...
+# Subtest: A003 : le jeton d’une photo offerte et le code de contrôle d’une carte sont masqués dans les journaux
+ok 106 - A003 : le jeton d’une photo offerte et le code de contrôle d’une carte sont masqués dans les journaux
+  ---
+  duration_ms: 282.180396
+  type: 'test'
+  ...
+# Subtest: A009 : une photo absente donne 404, jamais 500, sur toutes les routes /admin/photos/:id
+ok 107 - A009 : une photo absente donne 404, jamais 500, sur toutes les routes /admin/photos/:id
+  ---
+  duration_ms: 292.208813
+  type: 'test'
+  ...
+# Subtest: A053 : en production, aucune réponse de l’admin n’est cacheable (logo du filigrane compris)
+ok 108 - A053 : en production, aucune réponse de l’admin n’est cacheable (logo du filigrane compris)
+  ---
+  duration_ms: 155.661528
+  type: 'test'
+  ...
+# Subtest: A060 : PUBLIC_URL analysée, et obligatoire en production
+ok 109 - A060 : PUBLIC_URL analysée, et obligatoire en production
+  ---
+  duration_ms: 1.731658
+  type: 'test'
+  ...
+# Subtest: A006 : TRUST_PROXY laissé par défaut sur un serveur joignable du réseau : avertissement au démarrage
+ok 110 - A006 : TRUST_PROXY laissé par défaut sur un serveur joignable du réseau : avertissement au démarrage
+  ---
+  duration_ms: 470.345433
+  type: 'test'
+  ...
+# Subtest: A059 : en conteneur, la base doit être dans le dossier des données
+ok 111 - A059 : en conteneur, la base doit être dans le dossier des données
+  ---
+  duration_ms: 1.227499
+  type: 'test'
+  ...
+# Subtest: A061 : publication groupée, l’état d’une photo à vérifier n’est calculé qu’une fois
+ok 112 - A061 : publication groupée, l’état d’une photo à vérifier n’est calculé qu’une fois
+  ---
+  duration_ms: 110.982562
+  type: 'test'
+  ...
+# Subtest: A062 : une session ne porte pas de rôles (ceux du compte font foi)
+ok 113 - A062 : une session ne porte pas de rôles (ceux du compte font foi)
+  ---
+  duration_ms: 300.321315
+  type: 'test'
+  ...
+# Subtest: jeton Cloudflare Access : signature, émetteur, audience, dates, algorithme ; clés relues sur clé inconnue, une fois par minute au plus
+ok 114 - jeton Cloudflare Access : signature, émetteur, audience, dates, algorithme ; clés relues sur clé inconnue, une fois par minute au plus
+  ---
+  duration_ms: 34.338401
+  type: 'test'
+  ...
+# Subtest: sans jeton Access : 403 sobre partout (fichiers statiques et connexion compris), DS30 noté une fois par adresse et par 10 minutes
+ok 115 - sans jeton Access : 403 sobre partout (fichiers statiques et connexion compris), DS30 noté une fois par adresse et par 10 minutes
+  ---
+  duration_ms: 529.147693
+  type: 'test'
+  ...
+# Subtest: connexion : PKCE chez Zitadel, session ouverte (cookie __Host-, HttpOnly, Secure, Lax), retour local, en-têtes stricts
+ok 116 - connexion : PKCE chez Zitadel, session ouverte (cookie __Host-, HttpOnly, Secure, Lax), retour local, en-têtes stricts
+  ---
+  duration_ms: 231.535411
+  type: 'test'
+  ...
+# Subtest: connexion refusée (DS30) : sans second facteur, sans rôle vigie.*, rôle d’une autre organisation, erreur de Zitadel, state faux
+ok 117 - connexion refusée (DS30) : sans second facteur, sans rôle vigie.*, rôle d’une autre organisation, erreur de Zitadel, state faux
+  ---
+  duration_ms: 211.649774
+  type: 'test'
+  ...
+# Subtest: ancien retour OIDC : la nouvelle tentative survit et recharger la page de reprise ne rejoue pas le refus
+ok 118 - ancien retour OIDC : la nouvelle tentative survit et recharger la page de reprise ne rejoue pas le refus
+  ---
+  duration_ms: 178.947618
+  type: 'test'
+  ...
+# Subtest: retour OIDC expiré : cookie effacé, aucune session ouverte, puis reconnexion ; les rejets directs répétés alertent toujours
+ok 119 - retour OIDC expiré : cookie effacé, aucune session ouverte, puis reconnexion ; les rejets directs répétés alertent toujours
+  ---
+  duration_ms: 172.464308
+  type: 'test'
+  ...
+# Subtest: session : liée à l’identité Access de son ouverture, 15 min sans activité, 1 h au plus ; le rafraîchissement ne la prolonge pas
+ok 120 - session : liée à l’identité Access de son ouverture, 15 min sans activité, 1 h au plus ; le rafraîchissement ne la prolonge pas
+  ---
+  duration_ms: 237.670531
+  type: 'test'
+  ...
+# Subtest: reconnexion après inactivité : nouvelle transaction, second facteur toujours exigé, puis session neuve
+ok 121 - reconnexion après inactivité : nouvelle transaction, second facteur toujours exigé, puis session neuve
+  ---
+  duration_ms: 191.605442
+  type: 'test'
+  ...
+# Subtest: plafond relu chez Zitadel toutes les 5 minutes : rôle retiré → session fermée et DS29 ; Zitadel injoignable : 15 min de grâce
+ok 122 - plafond relu chez Zitadel toutes les 5 minutes : rôle retiré → session fermée et DS29 ; Zitadel injoignable : 15 min de grâce
+  ---
+  duration_ms: 204.864024
+  type: 'test'
+  ...
+# Subtest: deux clés : arrivée sans attribution → Lectrice (DS29) ; attribution par un Administrateur, garde-fous ; amorce ; une seule clé
+ok 123 - deux clés : arrivée sans attribution → Lectrice (DS29) ; attribution par un Administrateur, garde-fous ; amorce ; une seule clé
+  ---
+  duration_ms: 167.79843
+  type: 'test'
+  ...
+# Subtest: une seule clé (VIGIE_ROLES=zitadel) : l’attribution suit le plafond, pas d’arrivée signalée, attribution refusée
+ok 124 - une seule clé (VIGIE_ROLES=zitadel) : l’attribution suit le plafond, pas d’arrivée signalée, attribution refusée
+  ---
+  duration_ms: 144.159261
+  type: 'test'
+  ...
+# Subtest: formulaires : jeton CSRF de la session et même origine ; sortie : session fermée, Zitadel déconnecté
+ok 125 - formulaires : jeton CSRF de la session et même origine ; sortie : session fermée, Zitadel déconnecté
+  ---
+  duration_ms: 179.426493
+  type: 'test'
+  ...
+# Subtest: actions : droit de l’action, plafond relu à l’instant, ré-authentification de moins de 5 minutes, par le même compte
+ok 126 - actions : droit de l’action, plafond relu à l’instant, ré-authentification de moins de 5 minutes, par le même compte
+  ---
+  duration_ms: 171.744671
+  type: 'test'
+  ...
+# Subtest: action interdite localement : refus sans déclencher de relecture Zitadel propre à l’action
+ok 127 - action interdite localement : refus sans déclencher de relecture Zitadel propre à l’action
+  ---
+  duration_ms: 138.851064
+  type: 'test'
+  ...
+# Subtest: droits : actions par rôle (annexe § 5.4), plafond tiré des rôles, relecture par l’API de gestion de Zitadel
+ok 128 - droits : actions par rôle (annexe § 5.4), plafond tiré des rôles, relecture par l’API de gestion de Zitadel
+  ---
+  duration_ms: 1.550264
+  type: 'test'
+  ...
+# Subtest: retour après connexion : chemin local seulement
+ok 129 - retour après connexion : chemin local seulement
+  ---
+  duration_ms: 0.300973
+  type: 'test'
+  ...
+# Subtest: configuration : console facultative, exigences complètes quand elle est ouverte
+ok 130 - configuration : console facultative, exigences complètes quand elle est ouverte
+  ---
+  duration_ms: 4.181976
+  type: 'test'
+  ...
+# Subtest: bandeau des critiques : en tête des pages en session (pas sur la vue d’ensemble), sans intervenant seulement
+ok 131 - bandeau des critiques : en tête des pages en session (pas sur la vue d’ensemble), sans intervenant seulement
+  ---
+  duration_ms: 235.333715
+  type: 'test'
+  ...
+# Subtest: provenance (audit D3-A1) : une image ou une feuille chargée depuis le site frère est refusée, sans prolonger la session ; l’export seulement depuis la console
+ok 132 - provenance (audit D3-A1) : une image ou une feuille chargée depuis le site frère est refusée, sans prolonger la session ; l’export seulement depuis la console
+  ---
+  duration_ms: 174.627624
+  type: 'test'
+  ...
+# Subtest: clés Access (audit D3-A2/D3-D1) : une lecture à la fois, en tâche de fond après une heure ; relecture en échec : clés connues gardées 24 h
+ok 133 - clés Access (audit D3-A2/D3-D1) : une lecture à la fois, en tâche de fond après une heure ; relecture en échec : clés connues gardées 24 h
+  ---
+  duration_ms: 52.502578
+  type: 'test'
+  ...
+# Subtest: Zitadel en échec (audit D3-D6) : pas de nouvel essai avant une minute, la lecture continue sur le dernier plafond, aucune action
+ok 134 - Zitadel en échec (audit D3-D6) : pas de nouvel essai avant une minute, la lecture continue sur le dernier plafond, aucune action
+  ---
+  duration_ms: 162.10258
+  type: 'test'
+  ...
+# Subtest: session (audit D3-A3 à A6) : jeton CSRF multi-octets refusé et noté, cookies effacés avec Secure, ré-authentification sans auth_time refusée, compte supprimé chez Zitadel
+ok 135 - session (audit D3-A3 à A6) : jeton CSRF multi-octets refusé et noté, cookies effacés avec Secure, ré-authentification sans auth_time refusée, compte supprimé chez Zitadel
+  ---
+  duration_ms: 140.097003
+  type: 'test'
+  ...
+1..135
+# tests 135
+# suites 0
+# pass 135
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 60048.183232
