@@ -1,0 +1,17 @@
+<% if (!it.corps) layout('./layout') %>
+<% const t = it.t, s = it.saison, states = { brouillon: 'Brouillon', publie: 'Publié', retire: 'Retiré' }; %>
+<div class="saisons">
+<header class="saisons-entete"><a class="saisons-retour" href="/admin/saisons/<%= s.id %>">← <%= s.title %></a><h1><%= t('Bilans et prolongements') %></h1><p class="sub"><%= t('Un bilan publié reste intact. Une correction prend la forme d’un nouveau bilan rectificatif.') %></p></header>
+<% if (it.error) { %><section class="saisons-erreur" role="alert"><h2><%= t('Les modifications n’ont pas été enregistrées.') %></h2><p><%= it.error %></p></section><% } %>
+<% if (it.canWrite) { %>
+<form class="panel form" method="post" action="/admin/saisons/<%= s.id %>/bilans" aria-labelledby="nouveau-bilan-t"><input type="hidden" name="_csrf" value="<%= it.csrf %>">
+  <h2 id="nouveau-bilan-t"><%= t('Préparer un bilan') %></h2>
+  <div class="saisons-champ"><label for="nouveau-titre"><%= t('Titre en français') %></label><input id="nouveau-titre" name="title" maxlength="120" value="<%= it.createTitle || '' %>" required<%~ it.errorField === 'title' ? ' aria-invalid="true" aria-describedby="titre-erreur"' : '' %>><% if (it.errorField === 'title') { %><p class="err" id="titre-erreur"><%= it.error %></p><% } %></div>
+  <div class="saisons-champ"><label for="rectifies_id"><%= t('Bilan rectifié') %></label><select id="rectifies_id" name="rectifies_id"<%~ it.errorField === 'rectifies_id' ? ' aria-invalid="true" aria-describedby="rectificatif-erreur"' : '' %>><option value=""><%= t('Aucun : bilan initial') %></option><% it.reports.filter(r => r.state === 'publie').forEach(r => { %><option value="<%= r.id %>"><%= r.title %></option><% }) %></select><% if (it.errorField === 'rectifies_id') { %><p class="err" id="rectificatif-erreur"><%= it.error %></p><% } %></div>
+  <p class="hint"><%= t('Le brouillon peut être préparé avant la clôture. Sa publication exige les trois langues et une saison close.') %></p><div class="actions"><button class="btn" type="submit"><%= t('Créer le brouillon') %></button></div>
+</form>
+<% } %>
+<% if (!it.reports.length) { %><p class="empty"><%= t('Aucun bilan pour cette exposition.') %></p><% } else { %>
+<ul class="saisons-liste" aria-label="<%= t('Bilans de l’exposition') %>"><% it.reports.forEach(r => { %><li class="panel"><div><h2><a href="/admin/saisons/<%= s.id %>/bilans/<%= r.id %>"><%= r.title %></a></h2><p class="hint"><%= r.rectifies_id == null ? t('Bilan initial') : t('Rectificatif du bilan n° {id}', { id: r.rectifies_id }) %></p></div><span class="saisons-etat"><%= t(states[r.state]) %></span></li><% }) %></ul>
+<% } %>
+</div>
