@@ -13,3 +13,4 @@ CREATE TABLE saison_proposition_photos (
   PRIMARY KEY (saison_id, photo_id),
   UNIQUE (saison_id, position)
 );
+CREATE INDEX saison_proposition_photos_photo ON saison_proposition_photos (photo_id);
