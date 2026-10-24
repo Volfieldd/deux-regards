@@ -1,0 +1,6 @@
+<% if (it.voteLinks?.voteHref || it.voteLinks?.manageHref) { const vote = it.voteLinks; %>
+<div class="expo-actions">
+  <% if (vote.voteHref) { %><a class="btn" href="<%= vote.voteHref %>"><%= vote.v.title %></a><% } %>
+  <% if (vote.manageHref) { %><a class="lien" href="<%= vote.manageHref %>"><%= vote.v.manage %></a><% } %>
+</div>
+<% } %>

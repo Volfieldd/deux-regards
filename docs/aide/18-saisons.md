@@ -2,9 +2,9 @@
 
 **Expositions** est l’atelier des saisons photographiques de Nicephos. Une exposition réunit un texte d’intention, un calendrier et un accrochage ordonné. Les photos gardent leur série et leur statut dans la photothèque.
 
-Ce chapitre décrit la gestion dans l’administration. Les pages publiques, l’annonce avant ouverture, les archives, les bilans et le vote consultatif viennent dans les étapes suivantes. Une décision prise dans cet atelier prépare l’exposition ; elle ne signifie pas encore qu’une nouvelle page est accessible aux visiteurs du site.
+Ce chapitre décrit l’atelier et la participation des visiteurs. Pendant l’ouverture d’une exposition, le vote consultatif est disponible sur les photographies proposées et validées.
 
-La liste affiche les expositions auxquelles vous avez accès, de la plus récente à la plus ancienne. Le filtre **État** distingue les brouillons, les expositions programmées, ouvertes, closes et retirées. Un photographe prépare ses propres expositions ; le relecteur peut les consulter. L’administrateur prépare, programme, valide l’ouverture et retire les expositions. Le choix de la mise en avant sur l’accueil lui est réservé. Les validations des propositions de vote seront ajoutées avec ce format.
+La liste affiche les expositions auxquelles vous avez accès, de la plus récente à la plus ancienne. Le filtre **État** distingue les brouillons, les expositions programmées, ouvertes, closes et retirées. Un photographe prépare ses propres expositions ; le relecteur peut les consulter. L’administrateur prépare, programme, valide l’ouverture et retire les expositions. Le choix de la mise en avant sur l’accueil lui est réservé. Le photographe d’origine propose les photos au vote ; le relecteur puis l’administrateur valident cette liste. La direction de publication est une responsabilité distincte qui peut en réordonner les photos.
 
 ## Préparer une exposition
 
@@ -58,4 +58,16 @@ Un message en tête et, lorsque c’est possible, auprès du champ explique un r
 
 Si quelqu’un a enregistré une autre version entre-temps, la modification est refusée sans écraser son travail. Rechargez la fiche, comparez avec votre saisie et reprenez les changements voulus.
 
-Une photo non autorisée, une traduction manquante, une couverture absente de l’accrochage, des positions répétées ou un calendrier invalide empêchent la validation. Un refus ne publie pas partiellement l’exposition. Le vote, les bilans et leurs rectificatifs ne sont pas gérés par cet écran à cette étape.
+Une photo non autorisée, une traduction manquante, une couverture absente de l’accrochage, des positions répétées ou un calendrier invalide empêchent la validation. Un refus ne publie pas partiellement l’exposition.
+
+## Vote consultatif et droits des visiteurs
+
+Depuis une photographie proposée au vote dans une exposition ouverte, **Voter pour cette photographie** ouvre un formulaire. Au premier vote, le visiteur lit l’information et coche lui-même son accord au cookie et au traitement des votes. La case est vide à l’arrivée. Sans accord, la visite continue librement et aucun cookie de vote n’est posé.
+
+Le visiteur peut voter sur chaque photographie proposée, une fois sur chacune avec ce navigateur dans cette exposition. Les photos suivantes réutilisent cet accord. Un doublon affiche le vote déjà enregistré sans ajouter de voix. Le cookie expire à la clôture ; changer de navigateur, d’appareil ou effacer ce cookie peut permettre de revoter. Il n’y a ni compte ni vérification d’identité.
+
+**Mes votes dans cette exposition** présente les votes de ce navigateur. Avant la clôture, **Exporter mes votes (JSON)** télécharge leur copie et la date/version de l’accord. **Retirer mon accord et annuler mes votes**, après confirmation, efface ces votes et leur preuve, retire le cookie et décrémente les totaux correspondants. Les votes des autres navigateurs restent inchangés. Sans cookie, les votes individuels ne peuvent plus être retrouvés.
+
+Dans **Photos proposées au vote**, l’équipe autorisée voit les **Votes consultatifs** par photographie. Ces totaux sont privés ; aucun score ne publie automatiquement une photo dans la collection permanente. Les propositions et leur ordre restent soumis au circuit de validation.
+
+À la clôture UTC ou au retrait de l’exposition, la base active perd les identifiants et votes détaillés au prochain nettoyage (chaque minute, au démarrage et lors des consultations). Les totaux seuls restent et un export ne restitue plus de vote individuel. Les sauvegardes déjà réalisées suivent leur rotation normale de 14 jours. Une photo dépubliée, non autorisée ou retirée des propositions ne reçoit plus de vote. Si le vote est temporairement indisponible, le visiteur peut continuer à regarder l’exposition.

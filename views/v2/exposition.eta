@@ -42,6 +42,7 @@
   </section>
   <section class="expo-conclusion" id="conclusion" aria-labelledby="conclusion-t">
     <h2 class="titre-2" id="conclusion-t"><%= x.conclusion %></h2>
+    <%~ include('./_exposition-vote-liens', it) %>
 <% if (e.conclusion) { %>    <p class="expo-prose"><%= e.conclusion %></p>
 <% } %>
     <div class="expo-actions"><a class="lien" href="#accrochage"><%= x.returnToPhotos %></a><a class="lien" href="<%= it.u('/expositions') %>"><%= x.back %></a></div>

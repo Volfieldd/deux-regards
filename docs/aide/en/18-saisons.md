@@ -2,9 +2,9 @@
 
 **Exhibitions** is the workspace for Nicephos photographic seasons. An exhibition combines an artistic intention, dates and an ordered display. Photographs keep their series and publication status in the photo library.
 
-This chapter covers management in the administration. Public pages, the announcement before opening, archives, retrospectives and advisory voting follow in later stages. A decision in this workspace prepares the exhibition; it does not yet mean that a new page is available to website visitors.
+This chapter covers the workspace and visitor participation. Advisory voting is available on proposed and approved photographs while an exhibition is open.
 
-The list shows the exhibitions you can access, newest first. The **State** filter distinguishes drafts, scheduled, open, closed and withdrawn exhibitions. A photographer prepares their own exhibitions; the reviewer can read them. The administrator prepares, schedules, approves opening and withdraws exhibitions. Choosing what is featured on the home page is reserved for the administrator. Approval of voting proposals will be added with that format.
+The list shows the exhibitions you can access, newest first. The **State** filter distinguishes drafts, scheduled, open, closed and withdrawn exhibitions. A photographer prepares their own exhibitions; the reviewer can read them. The administrator prepares, schedules, approves opening and withdraws exhibitions. Choosing what is featured on the home page is reserved for the administrator. The original photographer proposes photographs for voting; the reviewer and then the administrator approve the list. Publishing direction is a separate responsibility that can reorder these photographs.
 
 ## Prepare an exhibition
 
@@ -58,4 +58,16 @@ A message at the top and, where possible, next to the field explains a refusal. 
 
 If someone saved another version in the meantime, the change is refused without overwriting their work. Reload the record, compare it with your input and apply the changes you want again.
 
-An unauthorised photograph, a missing translation, a cover outside the display, repeated positions or invalid dates prevent approval. A refusal does not partially publish an exhibition. Voting, retrospectives and their corrections are not managed by this screen at this stage.
+An unauthorised photograph, a missing translation, a cover outside the display, repeated positions or invalid dates prevent approval. A refusal does not partially publish an exhibition.
+
+## Advisory voting and visitor rights
+
+From an eligible photograph in an open exhibition, **Vote for this photograph** opens a form. At the first vote, the visitor reads the information and ticks their agreement to the cookie and processing of votes. The box starts unchecked. Without agreement, visitors remain free to browse and no voting cookie is set.
+
+Visitors can vote once on each proposed photograph using this browser in this exhibition. Further photographs reuse that agreement. A duplicate shows the recorded vote without adding another. The cookie expires when the exhibition closes; changing browser or device or deleting the cookie may allow another vote. There is no account or identity check.
+
+**My votes in this exhibition** shows this browser’s votes. Before closing, **Export my votes (JSON)** downloads a copy with the agreement date and information version. After confirmation, **Withdraw consent and cancel my votes** deletes these votes and their proof, removes the cookie and reduces the corresponding totals. Other browsers’ votes remain unchanged. Without the cookie, individual votes cannot be retrieved.
+
+In **Photos proposed for voting**, authorised team members see **Advisory votes** per photograph. These totals are private; no score automatically publishes a photograph in the permanent collection. Proposals and their order remain subject to the approval process.
+
+At closing in UTC or when the exhibition is withdrawn, identifiers and detailed votes are removed from the active database at the next cleanup (every minute, at startup and on visits). Only totals remain and exports no longer return individual votes. Existing backups follow their normal 14-day rotation. A photograph that is unpublished, unauthorised or removed from the proposals cannot receive further votes. Visitors can continue viewing the exhibition when voting is temporarily unavailable.

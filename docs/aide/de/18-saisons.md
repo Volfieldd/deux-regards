@@ -2,9 +2,9 @@
 
 **Ausstellungen** ist die Werkstatt für fotografische Saisons von Nicephos. Eine Ausstellung verbindet eine künstlerische Absicht, einen Zeitplan und eine geordnete Hängung. Die Fotos behalten ihre Serie und ihren Veröffentlichungsstatus in der Fotothek.
 
-Dieses Kapitel beschreibt die Verwaltung in der Administration. Öffentliche Seiten, die Ankündigung vor der Eröffnung, Archive, Rückblicke und beratende Abstimmungen folgen in späteren Schritten. Eine Entscheidung in dieser Werkstatt bereitet die Ausstellung vor; sie bedeutet noch nicht, dass eine neue Seite für die Besucher der Website verfügbar ist.
+Dieses Kapitel beschreibt die Werkstatt und die Teilnahme der Besucher. Während einer geöffneten Ausstellung ist die beratende Abstimmung für vorgeschlagene und bestätigte Fotografien verfügbar.
 
-Die Liste zeigt die Ausstellungen, auf die Sie zugreifen können, mit der neuesten zuerst. Der Filter **Zustand** unterscheidet Entwürfe, geplante, geöffnete, geschlossene und zurückgezogene Ausstellungen. Fotografen bereiten ihre eigenen Ausstellungen vor; der Lektor kann sie lesen. Der Administrator bereitet Ausstellungen vor, plant sie, gibt ihre Eröffnung frei und zieht sie zurück. Die Auswahl für die Startseite ist dem Administrator vorbehalten. Die Freigabe der Abstimmungsvorschläge wird mit diesem Format ergänzt.
+Die Liste zeigt die Ausstellungen, auf die Sie zugreifen können, mit der neuesten zuerst. Der Filter **Zustand** unterscheidet Entwürfe, geplante, geöffnete, geschlossene und zurückgezogene Ausstellungen. Fotografen bereiten ihre eigenen Ausstellungen vor; der Lektor kann sie lesen. Der Administrator bereitet Ausstellungen vor, plant sie, gibt ihre Eröffnung frei und zieht sie zurück. Die Auswahl für die Startseite ist dem Administrator vorbehalten. Der ursprüngliche Fotograf schlägt die Fotos zur Abstimmung vor; der Lektor und danach der Administrator bestätigen diese Liste. Die Publikationsleitung ist eine getrennte Verantwortung und kann die Reihenfolge ändern.
 
 ## Eine Ausstellung vorbereiten
 
@@ -58,4 +58,16 @@ Eine Meldung am Anfang und, soweit möglich, am Feld erläutert eine Ablehnung. 
 
 Hat inzwischen jemand eine andere Fassung gespeichert, wird die Änderung abgelehnt, ohne dessen Arbeit zu überschreiben. Laden Sie die Seite neu, vergleichen Sie sie mit Ihrer Eingabe und übernehmen Sie die gewünschten Änderungen erneut.
 
-Ein nicht zugelassenes Foto, eine fehlende Übersetzung, ein Titelbild außerhalb der Hängung, wiederholte Positionen oder ungültige Termine verhindern die Freigabe. Eine Ablehnung veröffentlicht keine Teile der Ausstellung. Abstimmungen, Rückblicke und ihre Berichtigungen werden in diesem Schritt noch nicht auf dieser Seite verwaltet.
+Ein nicht zugelassenes Foto, eine fehlende Übersetzung, ein Titelbild außerhalb der Hängung, wiederholte Positionen oder ungültige Termine verhindern die Freigabe. Eine Ablehnung veröffentlicht keine Teile der Ausstellung.
+
+## Beratende Abstimmung und Rechte der Besucher
+
+Bei einer vorgeschlagenen Fotografie einer geöffneten Ausstellung öffnet **Für diese Fotografie stimmen** ein Formular. Bei der ersten Stimme liest der Besucher die Information und kreuzt selbst die Zustimmung zum Cookie und zur Verarbeitung der Stimmen an. Das Feld ist zunächst leer. Ohne Zustimmung bleibt der Besuch möglich und es wird kein Abstimmungs-Cookie gesetzt.
+
+Besucher können mit diesem Browser einmal für jede vorgeschlagene Fotografie dieser Ausstellung stimmen. Weitere Fotografien nutzen die bestehende Einwilligung. Eine Wiederholung zeigt die gespeicherte Stimme, ohne eine weitere hinzuzufügen. Das Cookie endet mit der Ausstellung; ein Wechsel von Browser oder Gerät oder das Löschen des Cookies kann erneutes Abstimmen ermöglichen. Es gibt weder Konto noch Identitätsprüfung.
+
+**Meine Stimmen in dieser Ausstellung** zeigt die Stimmen dieses Browsers. Vor dem Ende lädt **Meine Stimmen exportieren (JSON)** eine Kopie mit Datum und Informationsversion der Einwilligung herunter. Nach Bestätigung löscht **Einwilligung widerrufen und Stimmen zurücknehmen** diese Stimmen und ihren Nachweis, entfernt das Cookie und verringert die entsprechenden Gesamtzahlen. Stimmen anderer Browser bleiben unverändert. Ohne Cookie können einzelne Stimmen nicht wiedergefunden werden.
+
+Unter **Zum Abstimmen vorgeschlagene Fotos** sehen berechtigte Teammitglieder **Beratende Stimmen** pro Fotografie. Diese Gesamtzahlen bleiben intern; kein Ergebnis veröffentlicht automatisch ein Foto in der ständigen Sammlung. Vorschläge und Reihenfolge bleiben dem Freigabeverfahren unterworfen.
+
+Am Ausstellungsende in UTC oder bei ihrem Rückzug werden Kennungen und einzelne Stimmen bei der nächsten Bereinigung aus der aktiven Datenbank entfernt (jede Minute, beim Start und bei Aufrufen). Nur Gesamtzahlen bleiben erhalten und Exporte enthalten keine einzelnen Stimmen mehr. Bestehende Sicherungen folgen ihrer üblichen Rotation von 14 Tagen. Ein zurückgezogenes, unzulässiges oder aus den Vorschlägen entferntes Foto erhält keine weiteren Stimmen. Ist die Abstimmung vorübergehend nicht verfügbar, kann der Besuch fortgesetzt werden.

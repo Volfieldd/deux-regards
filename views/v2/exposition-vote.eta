@@ -1,0 +1,53 @@
+<% layout('./layout', { formulaires: true }) %>
+<% const v = it.v, s = it.state, p = it.photo; %>
+<%~ include('./_entete', { ...it, courant: 'expositions', courantSous: true }) %>
+<main id="contenu" class="wrap">
+  <div class="pf pf--seul">
+    <div class="pf-intro">
+      <p class="etiquette"><%= it.expositionTitle %></p>
+      <h1 class="titre-page"><%= it.mode === 'manage' ? v.manage : v.title %></h1>
+      <p class="chapo"><%= v.lead %></p>
+      <% if (it.error) { %><div class="msg msg--erreur" role="alert" id="vote-error" tabindex="-1" autofocus><p><%= v.errors[it.error] %></p></div><% } %>
+      <% if (it.removed) { %><div class="msg msg--ok" role="status"><p><%= v.removed %></p></div><% } %>
+      <% if (s?.closed) { %><p role="status"><%= v.closed %></p>
+      <% } else if (!it.available) { %><p role="status"><%= v.errors.unavailable %></p>
+      <% } else if (it.mode === 'vote' && p) { %>
+        <h2 class="titre-2"><%= p.title %></h2>
+        <% if (it.recorded) { %><div class="msg msg--ok" role="status"><p><%= v.recorded %></p></div>
+        <% } else { %>
+        <form class="form" method="post" action="<%= it.action %>">
+          <input type="hidden" name="_csrf" value="<%= it.csrf %>">
+          <input type="hidden" name="notice_version" value="<%= it.noticeVersion %>">
+          <div class="piege" aria-hidden="true"><label for="vote-website">Website</label><input id="vote-website" name="website" type="text" autocomplete="off" tabindex="-1"></div>
+          <p><%= v.choice %></p>
+          <% if (!s?.consented) { %>
+          <p id="vote-notice"><%= v.notice %></p>
+          <p id="vote-retention"><%= v.retention %></p>
+          <p><%= v.rights %></p><p><%= v.limit %></p><p><%= v.free %></p>
+          <p><a class="lien" href="<%= it.u('/confidentialite') %>"><%= v.privacy %></a></p>
+          <p><%= v.version %> : <%= it.noticeVersion %></p>
+          <label class="choix"><input id="vote-consent" type="checkbox" name="consent" value="oui" required aria-describedby="vote-notice vote-retention<%= it.error === 'consent' ? ' vote-error' : '' %>"<% if (it.error === 'consent') { %> aria-invalid="true"<% } %>><span><%= v.consent %></span></label>
+          <% } %>
+          <p><%= v.closes %> : <time datetime="<%= new Date(it.exposition.closes_at).toISOString() %>"><%= it.date %> UTC</time></p>
+          <button class="btn" type="submit"><%= v.vote %></button>
+        </form>
+        <% } %>
+        <% if (s?.consented) { %><p><a class="lien" href="<%= it.manageHref %>"><%= v.manage %></a></p><% } %>
+        <p><a class="lien" href="<%= it.backHref %>"><%= v.back %></a></p>
+      <% } else if (it.mode === 'manage') { %>
+        <% if (s?.photo_ids?.length || it.recoverable) { %>
+          <% if (it.items.length) { %><ul><% it.items.forEach(item => { %><li><% if (item.href) { %><a class="lien" href="<%= item.href %>"><%= item.title %></a><% } else { %><%= item.title %><% } %></li><% }) %></ul><% } %>
+          <p><%= v.rights %></p><p><%= v.retention %></p>
+          <% if (!it.recoverable) { %><form class="form" method="post" action="<%= it.exportHref %>"><input type="hidden" name="_csrf" value="<%= it.exportCsrf %>"><button class="btn" type="submit"><%= v.export %></button></form><% } %>
+          <form class="form" method="post" action="<%= it.withdrawHref %>">
+            <input type="hidden" name="_csrf" value="<%= it.withdrawCsrf %>">
+            <label class="choix"><input type="checkbox" name="confirm" value="retirer" required><span><%= v.confirm %></span></label>
+            <button class="btn" type="submit"><%= v.withdraw %></button>
+          </form>
+        <% } else if (!it.removed) { %><p><%= v.empty %></p><% } %>
+      <% } %>
+      <p><a class="lien" href="<%= it.exhibitionHref %>"><%= v.exhibition %></a></p>
+    </div>
+  </div>
+</main>
+<%~ include('./_pied', it) %>
