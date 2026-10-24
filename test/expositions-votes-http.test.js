@@ -177,6 +177,7 @@ test('V1 HTTP : retrait confirmé et export limités aux votes du navigateur cou
   const exported = await c.post(exportUrl, { _csrf: formProof(page.body, exportUrl) }, a);
   assert.equal(exported.statusCode, 200);
   assert.deepEqual(exported.json(), { exposition_id: c.sid, photo_ids: [1, 2], consented: true, closes_at: END, closed: false, consent: { at: START, version: NOTICE_VERSION } });
+  assert.equal(exported.headers['content-type'], 'application/octet-stream');
   assert.equal(exported.headers['content-disposition'], 'attachment; filename="mes-votes.json"');
   assert.match(exported.headers['cache-control'], /no-store/);
   assert.ok(!exported.body.includes(a[c.name])); assert.ok(!exported.body.includes(b[c.name]));

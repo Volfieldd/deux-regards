@@ -196,8 +196,8 @@ export function registerExpositionVotes(app, { lang, base, repo }) {
     if (!guard(request, reply, s, `export:${s.id}`, { mode: 'manage' })) return reply;
     try {
       const own = votes.exportForBrowser(s.id, rawToken(app, request, s.id));
-      return noCache(reply).header('content-disposition', 'attachment; filename="mes-votes.json"').type('application/json; charset=utf-8')
-        .send({ exposition_id: s.id, ...own });
+      return noCache(reply).header('content-disposition', 'attachment; filename="mes-votes.json"').type('application/octet-stream')
+        .send(Buffer.from(JSON.stringify({ exposition_id: s.id, ...own }), 'utf8'));
     } catch (err) { return businessError(request, reply, s, { mode: 'manage' }, err); }
   });
 }
