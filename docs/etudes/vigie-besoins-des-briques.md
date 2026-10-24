@@ -56,6 +56,7 @@ Partage convenu le 18 octobre 2026 avec la session de la Vigie : elle prend BV-1
 | BV-30 Messages lus ou effacés en masse dans l'admin | DS18, DS10 | ✓ site (émission, journal) ; ✓ Vigie | site : `feat/page-contact` (#183), `sensitive_read` et `sensitive_delete` (`objet: message`, `id` numérique, la suppression seulement si elle a lieu), `authz_fail` hors portée, journal ; Vigie : #184 et #185, type `sensitive_delete`, corrélation `messages_effaces_en_masse` (10 messages distincts par compte en 1 h, DS18), `lectures_massives` par objet + id, `role_incoherent` qui exige `messages.traiter` pour supprimer, objets `personne` et `rencontre` sur les `sensitive_read` des fiches | fait |
 | BV-31 Formulaire /bonjour forgé : âge hors liste, date ou nom du parent au-delà de la page | DS12 | ✓ site | `feat/bonjour-mineurs` (#187) : `input_validation_fail` (émetteur `server/routes/public.js · bonjour`), **sans valeur** (longueur seule) pour `adult`, `met_on` et `guardian` ; noms propres ordinaires et dates courantes sans `malicious_input` (testé) ; règle `valeurs_impossibles_repetees` telle quelle | fait |
 | BV-32 Filtres hors liste : un signalement par requête (BV-3 précisé), pages `/galerie` et `/series` | DS12 | ✓ site | `feat/galerie-series-pages` : `input_validation_fail` (émetteur `server/routes/public.js · filtres`) **une fois par requête** sur `/`, `/galerie` et la visionneuse (le premier champ et sa valeur, `champs` quand il y en a plusieurs) ; `/series` ne lit aucun filtre ; exception des 30 jours inchangée ; rien en v1 (404 avant toute lecture) ; règle `valeurs_impossibles_repetees` telle quelle | fait côté site ; rien à changer côté Vigie |
+| BV-35 Circuit des propositions au vote après une session reprise | DS10, DS23 | site : gardes et journal ; corrélation : proposée à la Vigie | V0 : `authz_fail`, `authz_csrf_fail`, `input_validation_fail` ; liste, ordre et revalidations restent au journal, sans signal dédié | proposé |
 
 ---
 
@@ -107,6 +108,49 @@ texte publié peut l'être par programmation (un billet de Carnet programmé, pa
 publication**, dans `runDue` ou son équivalent pour les billets, avec `sub = null` et l'émetteur « publication
 programmée » : l'écart ne doit pas être attribué au prochain compte qui écrit dans l'admin. Pris par la Vigie, à
 l'implémentation de la brique (précision de la session de la Vigie, 18 octobre 2026).
+
+**Expositions S2 (24 octobre 2026, BV-1, BV-20, BV-21 ; DS9 et DS23).** Le choix explicite de l’accueil
+(`saison_accueil`, identifiant seul) est un réglage surveillé par BV-1. Les textes effectivement publiés des expositions
+et de leurs cartels entrent dans `createPublicTexts` par le fournisseur `externalSources`, qui appelle la projection
+publique avec une heure explicite : aucune lecture brute de ces tables par le capteur. La rubrique doit être publiée
+en v2/v3 pour les visiteurs ; une vue privée de l’administration ne suffit pas. Une annonce ne fournit que ses titres ;
+ses textes de visite, ses cartels, les brouillons, les retraits et les bilans non publiés restent exclus. Les cartels
+suivent les droits, l’état publié et la disponibilité des variantes de leurs photos. Après les douze mois calendaires
+UTC, les textes et cartels de l’accrochage sortent de l’instantané.
+
+Les contacts gagnés sont émis sous `config_public_changed`, `objet: texte_public`, champ, identifiant numérique de
+l’exposition, `photo_id` pour un cartel, nature et domaine seulement ; jamais le texte, le nom de boîte e-mail ni le
+numéro de téléphone. BV-21 conserve son résumé par champ modifié. Les changements de phase ont un événement minimal
+du même type, `objet: exposition`, identifiant, `phase_avant` et `phase` : la clôture est ainsi visible même lorsque
+l’accrochage reste inchangé.
+
+La minuterie compare ces projections même sans écriture SQL. Avant une écriture authentifiée, elle rattrape les
+échéances ; après le geste, un premier diff à l’heure de l’instantané précédent distingue les modifications réelles,
+puis un second diff à l’heure courante distingue le calendrier. Ouverture, clôture et échéance sont attribuées à
+« publication programmée », sans sujet, et ne sont jamais imputées au prochain administrateur. Un passage identique
+n’émet rien. Les GET et les fichiers statiques ne déclenchent pas ce scan. Aucune règle ni réponse automatique nouvelle
+n’est ajoutée au moteur : les BV-20/21 existants consomment les textes ; le signal de phase reste un contexte.
+
+**Bilans et collections S3 (24 octobre 2026, BV-20 et BV-21 ; DS9).** Le même fournisseur ajoute les lignes
+`saison_bilans#id`, `saison_collections#id` et `saison_collection_photos#id`. Les seules lignes retenues sont les
+bilans publiés d’une exposition visible et close, les collections publiées et les cartels de leurs photos encore
+publiées, autorisées et dotées d’une variante disponible. La rubrique Expositions doit être réellement publique ;
+un aperçu privé de l’administrateur ne suffit pas. Brouillons, retraits et références à une origine retirée restent
+exclus. Après douze mois, les bilans et les collections permanentes restent visibles, sans restituer les photos de
+l’exposition ; les cartels des collections suivent leur propre visite et les droits actuels de chaque photo.
+
+La clé numérique d’un cartel reste stable lorsqu’il change de position dans sa collection. BV-20 ne transmet que
+source/champ, identifiant, nature du contact gagné et domaine ; BV-21 dénombre les champs changés lors d’une
+publication ou d’un retrait. Ni récit, ni cartel, ni nom de boîte e-mail, ni chemin de lien, ni téléphone ne sortent
+dans ces événements. Les routes journalisent les noms des champs sans leurs valeurs ; leurs contrôles de session,
+CSRF, permission et portée sont ceux de l’atelier des expositions.
+
+S3 n’introduit aucun début de publication différé : publier un bilan, un rectificatif ou une collection reste un
+geste explicite de l’administrateur. Sa projection utilise l’heure courante, y compris lorsque le capteur rejoue
+l’ancien instantané pour séparer le calendrier S2. Un `published_at` postérieur au précédent relevé doit ainsi rester
+attribué au compte qui vient de publier, et ne pas réapparaître ensuite comme publication programmée sans sujet.
+Le test HTTP `saisons-bilans-vigie` vérifie publication, retrait, absence de brouillon et de texte brut, filtrage du
+cartel indisponible et absence de double émission. Aucune nouvelle règle ni réponse automatique n’est ajoutée.
 
 ---
 
@@ -1178,3 +1222,24 @@ La Vigie consomme les refus existants `authz_fail` (DS10) et `authz_csrf_fail` (
 ## Reconnexion à la console (22 octobre 2026)
 
 Un ancien retour OIDC ne supprime plus le cookie d’une tentative plus récente. La Vigie consomme toujours `vigie_console_refus` (`raison: etat`, DS30) pour chaque retour invalide, sans échange du code, et `vigie_console_connexion` après validation complète. Le refus redirige vers la nouvelle page GET `/auth/reprendre`, protégée par Cloudflare Access, sans session nécessaire, sans paramètres de connexion, sans cache ni effet d’authentification. Recharger cette page informative n’émet aucun refus ; appeler directement le retour invalide à répétition déclenche toujours DS30. Aucun nouveau champ personnel, événement, besoin BV ou changement de règle.
+
+## Expositions — propositions au vote et responsabilité distincte (V0)
+
+La préparation des propositions utilise [le circuit versionné](../../server/saisons-propositions.js), [ses routes](../../server/routes/saisons-propositions.js) et la migration 069. Il ne collecte ni vote, cookie, identifiant de navigateur ou identité de visiteur. Les tables gardent seulement l’exposition, les photos ordonnées, les versions et un instant de modification ; le compte agissant reste dans le journal d’audit existant.
+
+| Surface | Abus et garde | Ce que la Vigie consomme |
+|---|---|---|
+| Lecture et proposition `/admin/saisons/:id/vote` et `/proposer` | Lire une exposition ou proposer une photo d’un autre photographe ; identifiant forgé | `authz_fail`, `raison: hors portée`, permission, objet `saison` ou `photo`, identifiant interne et indicateur d’écriture ; DS10 et BV-14. L’objet hors portée reste introuvable ; aucun titre ni chemin d’original n’est transmis. |
+| Formulaires `/proposer`, `/ordonner`, `/relire`, `/valider` | Champ inconnu, liste répétée, type ou position forgés ; requête forcée depuis un autre site | `input_validation_fail` pour une forme impossible, objet `saison_propositions`, nom du champ et raison fixe, sans contenu ; DS12. `authz_csrf_fail` par la garde commune ; DS14. |
+| Permission du geste | Administrateur qui réordonne ou relit sans rôle explicite ; direction de publication qui valide ; modérateur qui entre | `authz_fail` par la garde fermée ; DS10. `saisons.vote_ordonner`, `saisons.vote_relecture` et `saisons.vote_valider` restent distinctes. |
+| Attribution de `directeur_publication` et cumuls | Compte volé qui élargit ses responsabilités | Circuit existant des comptes : déclencheurs, ticket et `privilege_permissions_changed`, rôles avant/après compris. Aucune attribution automatique. La comparaison des seuls administrateurs dans `vigie/controle-roles.js` ne devient pas une surveillance particulière de ce rôle. |
+| Liste et ordre approuvés | Compte autorisé qui change l’ordre pendant l’ouverture après une reprise de session | La version avance, les deux validations sont effacées et le choix approuvé est suspendu. Le journal garde le geste et les noms des champs, jamais les photos ni les titres. Signal dédié manquant : **BV-35**. |
+| Formulaire ancien, photo dépubliée, accord manquant | Écrasement concurrent ou réapparition d’une photo interdite | Conflit 409 sans écriture ; disponibilité relue à la validation et à chaque projection approuvée. Un conflit normal ne reçoit pas un signal de sondage. Aucun `sensitive_read` artificiel pour une sélection éditoriale. |
+
+### BV-35 — Circuit des propositions au vote après une session reprise
+
+**Manque constaté :** BV-20/BV-21 observent les textes publiés, mais une inversion de propositions déjà approuvées, leur remplacement ou leurs revalidations ne changent aucun texte. Ces gestes restent au journal d’audit, sans signal éditorial utilisable par une corrélation DS23.
+
+**Proposition à instruire avec la Vigie :** consommer les actions V0 réussies après persistance, avec le type existant `config_public_changed` et un objet fermé `propositions_vote`. Détail minimal : identifiant d’exposition, action fermée (`proposer`, `ordonner`, `relire`, `valider`), versions avant/après, nombres de photos et état des validations. Réutiliser le contexte de compte et de session existant ; ne transmettre ni liste complète, titre, cookie, bulletin ou identité de visiteur. Cela permettrait de rapprocher un changement d’ordre ou une succession de validations d’une reprise de session. Une activité éditoriale normale ne suffit pas à qualifier une attaque. Gravité et éventuel seuil restent à définir par la Vigie ; aucune règle, étiquette MITRE ni décision automatique n’est ajoutée par V0.
+
+Les [tests HTTP](../../test/saisons-propositions-routes.test.js) vérifient la matrice, la portée, le CSRF, les listes forgées, les conflits, les émissions et le journal sans valeurs ; les [tests modèle](../../test/saisons-propositions.test.js) prouvent l’invalidation des validations et le refiltrage des photos. Les contrôles communs restent ceux de l’admin, avec et sans Vigie.

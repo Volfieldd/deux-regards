@@ -63,5 +63,13 @@
   "Un bilan publié reste intact. Une correction prend la forme d’un nouveau bilan rectificatif.": { "en": "A published retrospective remains intact. A correction takes the form of a new corrective retrospective.", "de": "Ein veröffentlichter Rückblick bleibt unverändert. Eine Korrektur wird als neuer berichtigender Rückblick veröffentlicht." },
   "Un contenu publié ne se modifie pas : préparez un nouvel objet rectificatif.": { "en": "Published content cannot be edited: prepare a new corrective item.", "de": "Veröffentlichter Inhalt kann nicht bearbeitet werden: Erstellen Sie eine neue Berichtigung." },
   "Une saison retirée ne reçoit pas de nouveau bilan.": { "en": "A withdrawn season cannot receive a new retrospective.", "de": "Für eine zurückgezogene Saison kann kein neuer Rückblick erstellt werden." },
-  "Vous pouvez ne retenir aucune photo. Cochez les œuvres choisies et attribuez des positions distinctes pour leur ordre.": { "en": "You may select no photos. Select the chosen works and assign distinct positions to order them.", "de": "Sie dürfen keine Fotos auswählen. Markieren Sie die gewählten Werke und vergeben Sie unterschiedliche Positionen für ihre Reihenfolge." }
+  "Vous pouvez ne retenir aucune photo. Cochez les œuvres choisies et attribuez des positions distinctes pour leur ordre.": { "en": "You may select no photos. Select the chosen works and assign distinct positions to order them.", "de": "Sie dürfen keine Fotos auswählen. Markieren Sie die gewählten Werke und vergeben Sie unterschiedliche Positionen für ihre Reihenfolge." },
+  "Bilan créé": { "en": "Retrospective created", "de": "Rückblick erstellt" },
+  "Bilan enregistré": { "en": "Retrospective saved", "de": "Rückblick gespeichert" },
+  "Collection permanente créée": { "en": "Permanent collection created", "de": "Dauerhafte Sammlung erstellt" },
+  "Collection permanente enregistrée": { "en": "Permanent collection saved", "de": "Dauerhafte Sammlung gespeichert" },
+  "Bilan publié": { "en": "Retrospective published", "de": "Rückblick veröffentlicht" },
+  "Bilan retiré": { "en": "Retrospective withdrawn", "de": "Rückblick zurückgezogen" },
+  "Collection permanente publiée": { "en": "Permanent collection published", "de": "Dauerhafte Sammlung veröffentlicht" },
+  "Collection permanente retirée": { "en": "Permanent collection withdrawn", "de": "Dauerhafte Sammlung zurückgezogen" }
 }

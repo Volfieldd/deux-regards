@@ -13,7 +13,7 @@ const ACTIONS = {
 export function registerSaisonsPropositions(app, { repo, render, P, W, done, withReady }) {
   const c = app.saisonsPropositions, base = id => `/admin/saisons/${id}/vote`;
   const owns = (request, permission, s) => request.owns(permission, s.author_id);
-  const outside = (request, id, object = 'saison') => app.securite.emit('authz_fail', { request, emetteur: 'server/routes/saisons-propositions.js · portée', detail: {
+  const outside = (request, id, object = 'saison') => app.securite.emit('authz_fail', { request, composant: 'site · admin', emetteur: 'server/routes/saisons-propositions.js · portée', detail: {
     raison: 'hors portée', permission: request.routeOptions.config.perm, objet: object, id, ecriture: request.method === 'POST',
   } });
   const load = request => {
@@ -89,7 +89,7 @@ export function registerSaisonsPropositions(app, { repo, render, P, W, done, wit
       return done(reply, base(s.id), request.t(config.message));
     } catch (err) {
       if (!(err instanceof SaisonError)) throw err;
-      if (err.signal) app.securite.emit('input_validation_fail', { request, emetteur: 'server/routes/saisons-propositions.js · formulaire', detail: {
+      if (err.signal) app.securite.emit('input_validation_fail', { request, composant: 'site · admin', emetteur: 'server/routes/saisons-propositions.js · formulaire', detail: {
         objet: 'saison_propositions', champ: err.field || 'formulaire', raison: 'formulaire invalide',
       } });
       return page(request, reply, app.saisons.get(s.id), { error: err, status: err.status });

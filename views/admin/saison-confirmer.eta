@@ -14,7 +14,7 @@
 <% it.photos.forEach(ph => { %>    <li><% if (ph.ready && ph.thumb && ph.available) { %><img class="saisons-vignette" src="<%= ph.thumb %>" width="80" height="<%= Math.round(80 * ph.height / ph.width) %>" alt="" loading="lazy" decoding="async"><% } %><span><%= ph.title %><% if (!ph.available) { %><span class="err"><%= t('Photo indisponible') %></span><% } %></span></li>
 <% }) %>  </ol>
 <% } %>
-  <p class="hint"><%= t('Cette décision prépare la saison. Les pages publiques seront livrées dans une étape suivante.') %></p>
+  <p class="hint"><%= t('Cette décision s’applique à la présentation publique lorsque la rubrique Expositions est publiée en v2 ou v3.') %></p>
 <% if (it.action === 'retirer') { %>
   <div class="saisons-champ"><label for="reason"><%= t('Motif du retrait') %></label><p class="hint" id="motif-aide"><%= t('Choisissez le motif correspondant à cette décision.') %></p><select id="reason" name="reason" required aria-describedby="motif-aide<%= it.errorField === 'reason' ? ' motif-erreur' : '' %>"<%~ it.errorField === 'reason' ? ' aria-invalid="true"' : '' %>><option value=""><%= t('Choisir un motif') %></option><% (it.withdrawReasons || []).forEach(reason => { %><option value="<%= reason.value %>"<%~ it.reason === reason.value ? ' selected' : '' %>><%= t(reason.label) %></option><% }) %></select>
 <% if (it.errorField === 'reason') { %>    <p class="err" id="motif-erreur"><%= it.error %></p>

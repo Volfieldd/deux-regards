@@ -52,7 +52,7 @@ import { createCarnet } from './carnet.js';
 import { createSaisons } from './saisons.js';
 import { createSaisonsPropositions } from './saisons-propositions.js';
 import { createSaisonsBilans } from './saisons-bilans.js';
-import { createSaisonsPubliques } from './saisons-publiques.js';
+import { archiveEndsAt, createSaisonsPubliques } from './saisons-publiques.js';
 import { EXPOSITION_UI } from './routes/expositions.js';
 import { installExpositionVotes } from './routes/expositions-votes.js';
 import { createRepo } from './repo.js';
@@ -184,8 +184,10 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
       ...(galeriePage && typeof data?.galerieUrl === 'function' ? { galleryUrl: data.galerieUrl } : {}) };
     // S2 : un aperçu privé ne rend pas publique la rubrique. Le menu exige sa publication et sa disponibilité dans
     // la vue courante ; les galeries privées ne reprennent jamais les contenus éditoriaux de l’accueil.
-    const expositionsPage = Boolean(pv) && usesV2(app.publicVersion.versionForSection('expositions'))
-      && usesV2(app.publicVersion.forRequest(this.request, 'expositions').version) && app.expositions.list({ lang }).length > 0;
+    const expositionsOpen = Boolean(pv) && usesV2(app.publicVersion.versionForSection('expositions'))
+      && usesV2(app.publicVersion.forRequest(this.request, 'expositions').version);
+    const collectionsPage = expositionsOpen && app.saisonsBilans.publicCollections({ lang }).length > 0;
+    const expositionsPage = expositionsOpen && (app.expositions.list({ lang }).length > 0 || collectionsPage);
     let homeExposition = null;
     if (v2 && expositionsPage && template === 'home' && data?.page === 'accueil') {
       let featured = null;
@@ -197,7 +199,7 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
       if (homeExposition) this.header('cache-control', 'no-store');
     }
     const common = { trapLink: config.vigie ? TRAP_PATH : null, asset, theme, brand, isAdmin: hasRole(this.request.session?.roles), publicUrl: config.publicUrl, mapPage: mapSetting.get() === 'true', searchPage: searchSetting.get() !== 'false', tripsPage: Boolean(tripsOpen.get()),
-      expositionsPage, expositionUi: EXPOSITION_UI[lang], homeExposition, expositionsCss: Boolean(homeExposition),
+      expositionsPage, collectionsPage, expositionUi: EXPOSITION_UI[lang], homeExposition, expositionsCss: Boolean(homeExposition),
       expositionDate: at => `${new Intl.DateTimeFormat(LOCALES[lang].replace('_', '-'), { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(at)} UTC`,
       // Disponibilité des Carnets selon leur rubrique, y compris depuis un accueil V1 dans le système de thèmes.
       carnetPage: usesV2(app.publicVersion.forRequest(this.request, 'carnets').version) && app.carnet.publishedCount() > 0, v3, darkroom, designRowSizes, sectionThemes: Boolean(pv?.configured || pv?.darkroom), designSection: pv?.section,
@@ -322,7 +324,8 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   app.decorate('saisons', createSaisons({ db, readiness: app.readiness }));
   app.decorate('saisonsPropositions', createSaisonsPropositions({ db, saisons: app.saisons, readiness: app.readiness }));
   installExpositionVotes(app, votesOptions);
-  app.decorate('saisonsBilans', createSaisonsBilans({ db, readiness: app.readiness }));
+  app.decorate('saisonsBilans', createSaisonsBilans({ db, readiness: app.readiness, storageDir: config.storageDir,
+    archiveVisible: (s, at) => at >= s.opens_at && at < archiveEndsAt(s.closes_at) }));
   app.decorate('expositions', createSaisonsPubliques({ saisons: app.saisons, repo: app.publicRepo, readiness: app.readiness, storageDir: config.storageDir }));
   // Publications programmées : vérifiées chaque minute, photos d'abord (un billet programmé attend ses photos programmées
   // à la même heure), puis billets (app.carnet.runDue, seule à publier un billet programmé).
@@ -333,10 +336,11 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
     if (dueRunning) return;
     dueRunning = true;
     try {
-      const photos = await app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'));
-      const billets = await app.carnet.runDue().catch(err => app.log.error({ err }, 'carnets : publication programmée'));
-      // Textes mis en ligne sans écriture de l'admin : comparés par la Vigie (BV-20, BV-21 ; sub nul).
-      if (photos || billets) app.securite?.watchPublication?.();
+      await app.review.runDue().catch(err => app.log.error({ err }, 'circuit : publication programmée'));
+      await app.carnet.runDue().catch(err => app.log.error({ err }, 'carnets : publication programmée'));
+      // Les expositions changent aussi de visibilité par le calendrier, sans écriture SQL : comparaison à chaque
+      // passage, même si aucune photo ni aucun billet n’a été publié (BV-20, BV-21 ; sub nul).
+      app.securite?.watchPublication?.();
     } finally { dueRunning = false; }
   };
   app.addHook('onReady', async () => { reviewTimer = setInterval(runDue, 60 * 1000); reviewTimer.unref(); });
@@ -373,7 +377,12 @@ export async function buildApp({ config, db, logger = true, oidc, proofOptions =
   // avait laissé est effacé et app.securite ne fait rien.
   if (config.vigie) {
     const { installVigie } = await import('./securite/site.js');
-    installVigie(app, { config, db, ...vigieOptions });
+    installVigie(app, { config, db,
+      externalSources: ({ now }) => usesV2(app.publicVersion.versionForSection('expositions'))
+        // S2 rejoue le calendrier ; les publications S3 sont des gestes explicites, lus à l’heure courante pour
+        // qu’un published_at postérieur au précédent instantané reste attribué au compte qui vient de publier.
+        ? [...app.expositions.textRows({ now }), ...app.saisonsBilans.textRows()] : [],
+      ...vigieOptions });
   } else {
     const { retireVigie } = await import('./securite/retrait.js');
     retireVigie({ db, storageDir: config.storageDir });

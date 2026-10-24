@@ -1,5 +1,59 @@
 [
   {
+    "version": "1.223.0",
+    "date": "2026-10-24",
+    "pr": 223,
+    "title": {
+      "fr": "Les photos proposées passent par une double validation",
+      "en": "Proposed photographs receive two approvals",
+      "de": "Vorgeschlagene Fotos durchlaufen eine doppelte Freigabe"
+    },
+    "items": [
+      {
+        "perm": "saisons.voir",
+        "fr": "Le photographe prépare les photos proposées au vote, le relecteur les relit et l’administration les valide. La direction de publication peut réordonner les propositions avec un rôle distinct, attribué explicitement. Tout changement de liste ou d’ordre demande une nouvelle double validation. Le vote des visiteurs est raccordé au lot suivant.",
+        "en": "The photographer prepares photographs for voting, a reviewer checks them and the administrator approves them. Publication direction may reorder the proposals through a distinct, explicitly assigned role. Every change to the list or its order requires both approvals again. Visitor voting is connected in the next stage.",
+        "de": "Der Fotograf bereitet die Fotos für die Abstimmung vor, der Reviewer prüft sie und die Administration gibt sie frei. Die Publikationsleitung darf die Vorschläge mit einer eigenen, ausdrücklich zugewiesenen Rolle umordnen. Jede Änderung der Liste oder Reihenfolge erfordert beide Freigaben erneut. Die Besucherabstimmung wird im nächsten Schritt angebunden."
+      }
+    ]
+  },
+  {
+    "version": "1.222.0",
+    "date": "2026-10-24",
+    "pr": 222,
+    "title": {
+      "fr": "Le regard continue dans les collections",
+      "en": "The perspective continues in collections",
+      "de": "Die Sichtweise setzt sich in Sammlungen fort"
+    },
+    "items": [
+      {
+        "perm": "saisons.voir",
+        "fr": "Préparez un bilan dans les trois langues, puis publiez-le après la clôture. Un bilan publié reste intact : sa correction prend la forme d’un nouveau rectificatif lié. Les œuvres retenues peuvent rejoindre une collection permanente, présentée comme une nouvelle exposition avec ses textes, sa couverture, ses cartels et son ordre propres. Bilans et liens demeurent après les douze mois d’archive.",
+        "en": "Prepare a retrospective in three languages and publish it after the exhibition closes. A published retrospective stays unchanged; a correction becomes a new linked report. Selected works can join a permanent collection, presented as a new exhibition with its own texts, cover, captions and order. Retrospectives and links remain after the twelve-month archive.",
+        "de": "Bereiten Sie einen Rückblick in drei Sprachen vor und veröffentlichen Sie ihn nach Ausstellungsende. Ein veröffentlichter Rückblick bleibt unverändert; eine Berichtigung wird als neuer verknüpfter Bericht veröffentlicht. Ausgewählte Werke können in eine dauerhafte Sammlung mit eigenen Texten, Titelbild, Bildbeschriftungen und eigener Reihenfolge übergehen. Rückblicke und Links bleiben nach den zwölf Archivmonaten erhalten."
+      }
+    ]
+  },
+  {
+    "version": "1.221.0",
+    "date": "2026-10-24",
+    "pr": 221,
+    "title": {
+      "fr": "Les saisons ouvrent leurs portes",
+      "en": "The seasons open their doors",
+      "de": "Die Saisons öffnen ihre Türen"
+    },
+    "items": [
+      {
+        "perm": "saisons.voir",
+        "fr": "Les visiteurs découvrent les expositions depuis l’accueil choisi par l’administration : couverture avant ouverture, visite ordonnée avec cartels et conclusion, puis archive complète pendant douze mois après la clôture. Le parcours fonctionne sur ordinateur et téléphone, sans compte. Les bilans rectificatifs, collections et votes suivent dans les prochains lots.",
+        "en": "Visitors discover exhibitions from the homepage selected by the administrator: a cover before opening, an ordered visit with captions and a conclusion, then a full archive for twelve months after closing. The journey works on desktop and mobile without an account. Corrective reports, collections and voting follow in the next stages.",
+        "de": "Besucher entdecken Ausstellungen über die von der Administration gewählte Startseite: Titelbild vor der Eröffnung, geordneter Rundgang mit Bildtexten und Schlusswort, danach zwölf Monate vollständiges Archiv ab Ausstellungsende. Der Rundgang funktioniert am Computer und am Telefon ohne Konto. Berichtigte Rückblicke, Sammlungen und Abstimmungen folgen in den nächsten Schritten."
+      }
+    ]
+  },
+  {
     "version": "1.220.0",
     "date": "2026-10-24",
     "pr": 220,

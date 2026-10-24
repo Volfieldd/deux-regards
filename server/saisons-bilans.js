@@ -1,4 +1,5 @@
 import { slugify } from './slug.js';
+import { collectionPhotoVisible } from './collections-publiques.js';
 
 // S3 : bilans publiés immuables et prolongements permanents, séparés de la durée de visite de l’exposition.
 export const BILAN_LANGS = ['fr', 'en', 'de'];
@@ -15,7 +16,7 @@ export class SaisonBilanError extends Error {
   constructor(message, { field = null, status = 422 } = {}) { super(message); this.field = field; this.status = status; }
 }
 
-export function createSaisonsBilans({ db, readiness = null, now = Date.now, archiveVisible = null }) {
+export function createSaisonsBilans({ db, readiness = null, now = Date.now, archiveVisible = null, storageDir = null }) {
   const q = {
     saison: db.prepare('SELECT * FROM saisons WHERE id = ?'),
     saisonPhotos: db.prepare('SELECT photo_id FROM saison_photos WHERE saison_id = ? ORDER BY position').pluck(),
@@ -28,6 +29,7 @@ export function createSaisonsBilans({ db, readiness = null, now = Date.now, arch
     collections: db.prepare('SELECT c.*, b.saison_id FROM saison_collections c JOIN saison_bilans b ON b.id = c.bilan_id ORDER BY c.created_at DESC, c.id DESC'),
     collectionPhotos: db.prepare('SELECT * FROM saison_collection_photos WHERE collection_id = ? ORDER BY position'),
     photo: db.prepare('SELECT status FROM photos WHERE id = ?').pluck(),
+    publicPhoto: db.prepare('SELECT * FROM photos WHERE id = ?'),
     clearReport: db.prepare('DELETE FROM saison_bilan_photos WHERE bilan_id = ?'),
     addReport: db.prepare('INSERT INTO saison_bilan_photos (bilan_id, photo_id, position) VALUES (?, ?, ?)'),
     offsetCollection: db.prepare('UPDATE saison_collection_photos SET position = position + 1000 WHERE collection_id = ?'),
@@ -77,6 +79,7 @@ export function createSaisonsBilans({ db, readiness = null, now = Date.now, arch
       throw new SaisonBilanError('Choisissez des photos encore publiées et autorisées dans la sélection d’origine.', { field: 'photo_ids' });
     return values;
   };
+  const publicAllowed = ids => allowed(ids).filter(id => !storageDir || collectionPhotoVisible(q.publicPhoto.get(id), storageDir));
   const saison = id => {
     const row = positive(id) ? q.saison.get(id) : null;
     if (!row) throw new SaisonBilanError('Saison introuvable.', { status: 404 });
@@ -246,7 +249,7 @@ export function createSaisonsBilans({ db, readiness = null, now = Date.now, arch
   const publicReport = (r, s, t) => r.state === 'publie' && instant(r.published_at) && r.published_at <= t && publicSaison(s, t) && t >= s.closes_at;
   function publicCollection(c, lang, t) {
     if (!c || c.state !== 'publie' || !instant(c.published_at) || c.published_at > t) return null;
-    const language = languageOf(lang), photo_ids = allowed(q.collectionPhotos.all(c.id).map(p => p.photo_id)), visible = new Set(photo_ids);
+    const language = languageOf(lang), photo_ids = publicAllowed(q.collectionPhotos.all(c.id).map(p => p.photo_id)), visible = new Set(photo_ids);
     const r = q.report.get(c.bilan_id), s = r ? q.saison.get(r.saison_id) : null;
     const origin = r && publicReport(r, s, t) ? { saison_id: s.id, saison_slug: s.slug, saison_title: s[col('title', language)], bilan_id: r.id, bilan_title: r[col('title', language)] } : null;
     return { id: c.id, slug: c.slug, ...Object.fromEntries(COLLECTION_FIELDS.map(field => [field, c[col(field, language)]])), cover_id: visible.has(c.cover_id) ? c.cover_id : null,
@@ -256,8 +259,8 @@ export function createSaisonsBilans({ db, readiness = null, now = Date.now, arch
     if (!positive(saisonId)) return [];
     const s = q.saison.get(saisonId), t = time(), language = languageOf(lang);
     if (!publicSaison(s, t)) return [];
-    return q.reports.all(s.id).filter(r => publicReport(r, s, t)).map(r => ({ id: r.id, title: r[col('title', language)], body: r[col('body', language)], rectifies_id: r.rectifies_id != null && q.reports.all(s.id).some(parent => parent.id === r.rectifies_id && publicReport(parent, s, t)) ? r.rectifies_id : null,
-      published_at: r.published_at, photo_ids: archived(s, t) ? allowed(q.reportPhotos.all(r.id)) : [],
+    return q.reports.all(s.id).filter(r => publicReport(r, s, t)).map(r => ({ id: r.id, title: r[col('title', language)], body: r[col('body', language)], rectificatif: r.rectifies_id != null, rectifies_id: r.rectifies_id != null && q.reports.all(s.id).some(parent => parent.id === r.rectifies_id && publicReport(parent, s, t)) ? r.rectifies_id : null,
+      published_at: r.published_at, photo_ids: archived(s, t) ? publicAllowed(q.reportPhotos.all(r.id)) : [],
       collections: q.collections.all().filter(c => c.bilan_id === r.id).map(c => publicCollection(c, language, t)).filter(Boolean).map(c => ({ id: c.id, slug: c.slug, title: c.title })) }));
   }
   const publicCollections = ({ lang = 'fr' } = {}) => { const t = time(); return q.collections.all().map(c => publicCollection(c, lang, t)).filter(Boolean); };

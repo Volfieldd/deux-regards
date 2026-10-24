@@ -8,7 +8,7 @@ import { expositionVoteLinks } from './expositions-votes.js';
 // les présentations v2/v3 ; les liens d’une photographie conservent toujours leur exposition d’origine.
 export const EXPOSITION_UI = {
   fr: {
-    title: 'Expositions', signature: 'Les saisons', lead: 'Des photographies réunies autour d’un regard commun, le temps d’une exposition.',
+    title: 'Expositions', signature: 'Les saisons', lead: 'Des photographies réunies autour d’un regard commun, le temps d’une exposition.', collections: 'Collections permanentes',
     empty: 'Aucune exposition à découvrir pour le moment.', states: { annonce: 'À venir', ouverte: 'En cours', archive: 'Archive', bilan: 'Bilan' },
     dates: 'Dates de l’exposition', opens: 'Ouverture', closes: 'Clôture', archiveUntil: 'Archive complète jusqu’au',
     announcement: 'La couverture annonce la prochaine exposition. La visite ouvrira à la date indiquée.',
@@ -24,7 +24,7 @@ export const EXPOSITION_UI = {
     pages: (n, total) => `Page ${n} sur ${total}`, pagePrevious: 'Page précédente', pageNext: 'Page suivante', pageLabel: 'Pages des expositions',
   },
   en: {
-    title: 'Exhibitions', signature: 'The seasons', lead: 'Photographs brought together by a shared perspective for the duration of an exhibition.',
+    title: 'Exhibitions', signature: 'The seasons', lead: 'Photographs brought together by a shared perspective for the duration of an exhibition.', collections: 'Permanent collections',
     empty: 'There are no exhibitions to discover at the moment.', states: { annonce: 'Coming soon', ouverte: 'Now open', archive: 'Archive', bilan: 'Retrospective' },
     dates: 'Exhibition dates', opens: 'Opening', closes: 'Closing', archiveUntil: 'Full archive available until',
     announcement: 'The cover announces the next exhibition. The visit will open on the date shown.',
@@ -40,7 +40,7 @@ export const EXPOSITION_UI = {
     pages: (n, total) => `Page ${n} of ${total}`, pagePrevious: 'Previous page', pageNext: 'Next page', pageLabel: 'Exhibition pages',
   },
   de: {
-    title: 'Ausstellungen', signature: 'Die Saisons', lead: 'Fotografien, die für die Dauer einer Ausstellung eine gemeinsame Sichtweise verbindet.',
+    title: 'Ausstellungen', signature: 'Die Saisons', lead: 'Fotografien, die für die Dauer einer Ausstellung eine gemeinsame Sichtweise verbindet.', collections: 'Dauerhafte Sammlungen',
     empty: 'Zurzeit gibt es keine Ausstellung zu entdecken.', states: { annonce: 'Demnächst', ouverte: 'Geöffnet', archive: 'Archiv', bilan: 'Rückblick' },
     dates: 'Ausstellungszeiten', opens: 'Eröffnung', closes: 'Ende', archiveUntil: 'Vollständiges Archiv bis',
     announcement: 'Das Titelbild kündigt die nächste Ausstellung an. Der Besuch beginnt zum angegebenen Zeitpunkt.',
@@ -93,7 +93,8 @@ export function registerExpositionPages(app, { lang, repo, base, service = app.e
     const exposition = e.bySlug(request.params.slug, { lang });
     if (!exposition) return reply.callNotFound();
     app.stats.hit(request, { page: `exposition:${exposition.slug}` });
-    return render(request, reply, 'exposition', exposition, { voteLinks: expositionVoteLinks(app, { request, reply, lang, exposition }) });
+    return render(request, reply, 'exposition', exposition, { voteLinks: expositionVoteLinks(app, { request, reply, lang, exposition }),
+      bilans: app.saisonsBilans?.publicForSaison(exposition.id, { lang }) || [] });
   });
 
   app.get('/exposition/:slug/photo/:photoSlug', async (request, reply) => {

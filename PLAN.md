@@ -31,6 +31,24 @@ La conception des compositions Après-image, suggestions, uploads, identités de
 
 Accord pour instruire d’abord un identifiant aléatoire minimal dans un cookie créé au premier vote, sans fingerprinting. L’objectif est de simplifier le parcours ; **le propriétaire retient ensuite un consentement explicite dans le formulaire du premier vote**, sans bandeau global ni exemption revendiquée. Le [plan, § 5.4](docs/etudes/saisons-apres-image.md#54-piste-retenue-pour-létude--identifiant-minimal-au-premier-vote) documente les sources CNIL, la qualification et l’information/consentement à prévoir dans V1, la durée limitée à la clôture et les données nécessaires au consentement. Aucun cookie de vote ni fingerprinting activé par cette précision documentaire.
 
+## Mise en œuvre — Propositions consultatives, V0, PR #223, version 1.223.0 (24 octobre 2026)
+
+Les photos proposées à l’avance suivent un circuit versionné : photographe d’origine, relecture, puis validation administrative. Le rôle distinct **Direction de publication** peut seulement réordonner cette liste ; il n’est attribué automatiquement à aucun administrateur. L’administrateur seul ne relit pas et ne réordonne pas ; un cumul de rôles est explicite. Changer la liste ou son ordre invalide les deux validations, y compris pendant l’ouverture. Clôture et retrait figent le circuit. Les photos sont revérifiées dans l’accrochage et selon leurs droits avant chaque validation et lecture.
+
+Migration 069, écran des deux administrations, aide FR/EN/DE, droits et journal documentés. Le besoin Vigie BV-35 décrit la corrélation du circuit avec une session reprise, encore à compléter ; les refus et écritures sont déjà observables sans texte ni bulletin. PR en brouillon, dépendante de #222, sans fusion ni déploiement. Votes publics et consentement restent dans V1.
+
+## Mise en œuvre — Bilans et collections, S3, PR #222, version 1.222.0 (24 octobre 2026)
+
+L’exposition close peut publier un bilan en trois langues, avec une sélection éditoriale. Sa publication fige textes et sélection ; un rectificatif est un nouveau bilan lié. Les œuvres choisies peuvent former une collection permanente avec sa présentation, sa couverture, son ordre et ses cartels propres. La collection garde son parcours sans date de clôture ; les droits de chaque photo sont vérifiés à la lecture. L’exposition conserve ses bilans et les liens vers les collections après les douze mois d’archive, sans réafficher ses anciennes photos. Une origine retirée cesse d’être affichée sans retirer automatiquement sa collection.
+
+Administration et visite FR/EN/DE raccordées ; migration 068 reprend les bilans déjà publiés du socle. PR en brouillon, dépendante de #221, sans fusion ni déploiement. Les vérifications navigateur et Vigie finales sont complétées avant remise.
+
+## Mise en œuvre — Visite des expositions, S2, PR #221, version 1.221.0 (24 octobre 2026)
+
+Depuis l’accueil choisi explicitement par l’administration, le visiteur rejoint l’exposition, parcourt ses photos avec leurs cartels, puis sa conclusion. La rubrique Expositions et les pages FR/EN/DE suivent les présentations publiques v2/v3. Avant l’ouverture, seuls le titre, les dates et la couverture annoncent l’exposition. Après la clôture, l’accrochage reste accessible douze mois calendaires UTC ; son adresse garde ensuite le bilan sans restituer les photos. Une couverture ou une photo retirée disparaît à la lecture ; aucune exposition de remplacement n’est choisie automatiquement.
+
+PR en brouillon, dépendante de #220, sans fusion ni déploiement. La Vigie reçoit les textes effectivement publics et distingue les transitions de calendrier des gestes administratifs. Le lot ciblé passe 25/25 tests. Cinq parcours réels sans JavaScript passent dans Chromium et WebKit, sur ordinateur et formats mobiles ; huit contrôles Axe ne trouvent aucune violation. Les suites complètes passent : **1 376/1 376 sans Vigie et 1 376/1 376 avec Vigie**. Bilans rectificatifs, collections et vote restent dans leurs lots séparés.
+
 ## Mise en œuvre — Atelier des expositions, S1b, PR #220, version 1.220.0 (24 octobre 2026)
 
 Le propriétaire valide la matrice de droits : le photographe prépare ses expositions, le relecteur lit et validera les propositions au lot V0 ; l’administration programme, publie, retire et choisit l’accueil. La direction de publication garde une permission distincte, sans attribution automatique. Calendrier UTC à la minute ; archive complète pendant 12 mois depuis la clôture puis bilan et liens vers les collections. Pour le vote, consentement explicite au premier vote dans le formulaire, cookie et identifiants supprimés à la clôture, compteurs seuls conservés.

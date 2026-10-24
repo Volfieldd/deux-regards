@@ -79,7 +79,7 @@ function configDiff(before, after) {
 // Rôles d'une ligne du journal : une valeur écrite à la main peut être n'importe quoi.
 const parseRoles = v => { try { const r = JSON.parse(v || '[]'); return Array.isArray(r) ? r.map(String) : []; } catch { return []; } };
 
-export function installVigie(app, { config, db, send = null, timers = true, decisionsFetch, pollDecisions = true }) {
+export function installVigie(app, { config, db, send = null, timers = true, decisionsFetch, pollDecisions = true, externalSources = () => [], textesNow = Date.now }) {
   const settings = settingsOf(db);
   const sec = createSecurite({ url: config.vigie.url, key: config.vigie.ingestKey, storageDir: config.storageDir, log: app.log, send, timers });
   app.decorate('securite', sec);
@@ -338,25 +338,20 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
   let lastSnapshot = null;
   // Textes publiés (BV-20, BV-21) : instantané comparé comme les réglages. Liens vers le site lui-même exclus.
   const ownHosts = [...new Set(['nicephos.art', (() => { try { return new URL(config.publicUrl).hostname.replace(/^www\./, ''); } catch { return null; } })()].filter(Boolean))];
-  const textes = createPublicTexts({ db, ownHosts });
+  const textes = createPublicTexts({ db, ownHosts, externalSources });
   let lastTexts = null;
+  let lastTextsAt = null;
   // Rien d'écrit dans la base depuis l'instantané précédent (compteur de SQLite pour cette connexion) : rien à relire.
   const totalChanges = db.prepare('SELECT total_changes()').pluck();
   let lastChanges = -1;
-  const watchTexts = (request, emetteur) => {
-    const changesNow = totalChanges.get();
-    if (lastTexts && changesNow === lastChanges) return;
-    lastChanges = changesNow;
-    const now = textes.snapshot();
-    const before = lastTexts;
-    lastTexts = now;
-    if (!before) return;
-    const { changes, ajouts } = textes.diff(before, now);
+  const emitTextChanges = (before, after, request, emetteur) => {
+    const { changes, ajouts, phases } = textes.diff(before, after);
+    for (const phase of phases) sec.emit('config_public_changed', { request, emetteur: `${emetteur} · expositions`, detail: { objet: 'exposition', ...phase } });
     if (!changes.length) return;
     // BV-20 : un texte qui gagne un lien, un e-mail ou un téléphone ; ni le texte ni le contact, 10 au plus par geste.
     for (const a of ajouts.slice(0, 10)) {
       sec.emit('config_public_changed', { request, severity: 'moyen', emetteur: `${emetteur} · textes publiés`,
-        detail: { objet: 'texte_public', champ: a.champ, id: a.id, ajout: a.ajout, domaine: a.domaine || undefined } });
+        detail: { objet: 'texte_public', champ: a.champ, id: a.id, photo_id: a.photo_id, ajout: a.ajout, domaine: a.domaine || undefined } });
     }
     // BV-21 : combien de textes publiés ce geste a changés (défacement : beaucoup, d'un coup ou en série).
     sec.emit('config_public_changed', { request, emetteur: `${emetteur} · textes publiés`,
@@ -364,9 +359,30 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
       // geste qui traduit 4 textes compterait pour 5 (faux positif trouvé par le jeu d'attaques, E2).
       detail: { objet: 'textes_publics', textes: changes.length, champs: [...new Set(changes.map(k => k.split('#')[0]))].slice(0, 20), contacts_ajoutes: ajouts.length || undefined } });
   };
+  const watchTexts = (request, emetteur) => {
+    const changesNow = totalChanges.get(), at = textesNow();
+    if (!Number.isSafeInteger(at) || at < 0) throw new TypeError('Horloge des textes publics invalide.');
+    if (!lastTexts) { lastTexts = textes.snapshot({ now: at }); lastTextsAt = at; lastChanges = changesNow; return; }
+    if (changesNow !== lastChanges) {
+      // Rejouer la visibilité au dernier instant connu isole les vraies modifications du geste. Une clôture survenue
+      // pendant un traitement lent ne lui est pas imputée : le second diff appartient au calendrier, sans compte.
+      const after = textes.snapshot({ now: lastTextsAt });
+      emitTextChanges(lastTexts, after, request, emetteur);
+      lastTexts = after; lastChanges = changesNow;
+    }
+    const after = textes.refreshExternal(lastTexts, { now: at });
+    emitTextChanges(lastTexts, after, null, 'publication programmée');
+    lastTexts = after; lastTextsAt = at;
+  };
   // Aussi appelé par les publications programmées (sans compte : request null, sub null), qui mettent des textes en
   // ligne sans écriture de l'admin (photos du circuit ; billets des Carnets à leur arrivée).
   sec.watchPublication = (emetteur = 'publication programmée') => { try { watchTexts(null, emetteur); } catch (err) { app.log.error({ err: err.message }, 'Vigie : textes publiés'); } };
+  // Rattraper les échéances avant un geste authentifié, même entre deux passages de la minuterie. Ni les GET ni les
+  // fichiers statiques ne paient la projection et les vérifications de variantes des expositions.
+  app.addHook('preHandler', (request, reply, done) => {
+    if (request.session && !['GET', 'HEAD'].includes(request.method)) sec.watchPublication();
+    done();
+  });
 
   const watchWrites = request => {
     watchTexts(request, 'server/securite');
@@ -386,7 +402,7 @@ export function installVigie(app, { config, db, send = null, timers = true, deci
       sec.emit('privacy_exposure_changed', { request, severity: exifAll ? 'moyen' : undefined, emetteur: 'server/securite · données exposées', detail: { heure_visible_ajoutees: Math.max(more, 0), heure_visible_total: now.heure, exif_complet: exifAll || undefined } });
     }
   };
-  app.addHook('onReady', async () => { step('réglages publics', () => { lastSnapshot = snapshot(); lastTexts = textes.snapshot(); lastChanges = totalChanges.get(); }); });
+  app.addHook('onReady', async () => { step('réglages publics', () => { lastSnapshot = snapshot(); lastTextsAt = textesNow(); lastTexts = textes.snapshot({ now: lastTextsAt }); lastChanges = totalChanges.get(); }); });
 
   // Rafales de 404 par adresse (exploration), lectures sensibles de l'admin.
   const notFound = new Map();
